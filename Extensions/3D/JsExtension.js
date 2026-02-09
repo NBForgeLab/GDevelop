@@ -908,7 +908,7 @@ module.exports = {
 
       object
         .addExpression(
-          'MeshPositionX',
+          'MeshPartPositionX',
           _('Mesh part X position'),
           _('Return the X position of a mesh part.'),
           _('Mesh parts'),
@@ -920,7 +920,7 @@ module.exports = {
 
       object
         .addExpression(
-          'MeshPositionY',
+          'MeshPartPositionY',
           _('Mesh part Y position'),
           _('Return the Y position of a mesh part.'),
           _('Mesh parts'),
@@ -932,7 +932,7 @@ module.exports = {
 
       object
         .addExpression(
-          'MeshPositionZ',
+          'MeshPartPositionZ',
           _('Mesh part Z position'),
           _('Return the Z position of a mesh part.'),
           _('Mesh parts'),
@@ -962,7 +962,7 @@ module.exports = {
 
       object
         .addExpression(
-          'MeshRotationX',
+          'MeshPartRotationX',
           _('Mesh part X rotation'),
           _('Return the X rotation of a mesh part (in degrees).'),
           _('Mesh parts'),
@@ -974,7 +974,7 @@ module.exports = {
 
       object
         .addExpression(
-          'MeshRotationY',
+          'MeshPartRotationY',
           _('Mesh part Y rotation'),
           _('Return the Y rotation of a mesh part (in degrees).'),
           _('Mesh parts'),
@@ -986,7 +986,7 @@ module.exports = {
 
       object
         .addExpression(
-          'MeshRotationZ',
+          'MeshPartRotationZ',
           _('Mesh part Z rotation'),
           _('Return the Z rotation of a mesh part (in degrees).'),
           _('Mesh parts'),
@@ -1016,7 +1016,7 @@ module.exports = {
 
       object
         .addExpression(
-          'MeshScaleX',
+          'MeshPartScaleX',
           _('Mesh part X scale'),
           _('Return the X scale of a mesh part.'),
           _('Mesh parts'),
@@ -1028,7 +1028,7 @@ module.exports = {
 
       object
         .addExpression(
-          'MeshScaleY',
+          'MeshPartScaleY',
           _('Mesh part Y scale'),
           _('Return the Y scale of a mesh part.'),
           _('Mesh parts'),
@@ -1040,7 +1040,7 @@ module.exports = {
 
       object
         .addExpression(
-          'MeshScaleZ',
+          'MeshPartScaleZ',
           _('Mesh part Z scale'),
           _('Return the Z scale of a mesh part.'),
           _('Mesh parts'),
