@@ -205,6 +205,10 @@ namespace gdjs {
       threeObject.updateMatrix();
       threeObject.applyMatrix4(scaleMatrix);
 
+      // Store the normalization scale for mesh parts positioning
+      // Note: Y scale is negated in the matrix but we store the absolute value
+      this._model3DRuntimeObject._meshParts.setNormalizationScale(scaleX, scaleY, scaleZ);
+
       return boundingBox;
     }
 

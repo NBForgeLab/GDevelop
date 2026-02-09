@@ -8,11 +8,19 @@ namespace gdjs {
     private _meshesMap: Record<string, THREE.Object3D>;
     private _meshesNames: string[];
     private _runtimeObject: gdjs.Model3DRuntimeObject | null;
+    private _originalMeshPositions: Record<string, THREE.Vector3>;
+    private _originalMeshRotations: Record<string, THREE.Euler>;
+    private _originalMeshScales: Record<string, THREE.Vector3>;
+    private _normalizationScale: { x: number; y: number; z: number } | null;
 
     constructor() {
       this._meshesMap = {};
       this._meshesNames = [];
       this._runtimeObject = null;
+      this._originalMeshPositions = {};
+      this._originalMeshRotations = {};
+      this._originalMeshScales = {};
+      this._normalizationScale = null;
     }
 
     /**
@@ -25,22 +33,48 @@ namespace gdjs {
       this._runtimeObject = runtimeObject || null;
       this._meshesMap = {};
       this._meshesNames = [];
+      this._originalMeshPositions = {};
+      this._originalMeshRotations = {};
+      this._originalMeshScales = {};
 
       if (!threeObject) {
         return;
       }
 
-      // Traverse the object hierarchy to find all meshes
+      // Traverse the object hierarchy to find all meshes and groups
       threeObject.traverse((child: THREE.Object3D) => {
-        // Only add objects that have a name and are meshes or groups
+        // Only add objects that have a name
         if (child.name && child.name !== '') {
-          // Avoid duplicate names by using the first occurrence
-          if (!(child.name in this._meshesMap)) {
+          // Skip if already indexed (avoid duplicates)
+          if (child.name in this._meshesMap) {
+            return;
+          }
+          
+          // Only index Mesh and Group nodes, skip bones, lights, cameras, and other helper nodes
+          const isMesh = child instanceof THREE.Mesh;
+          const isGroup = child instanceof THREE.Group;
+          
+          if (isMesh || isGroup) {
             this._meshesMap[child.name] = child;
             this._meshesNames.push(child.name);
+            // Store the original local transformations of the mesh before any user modifications
+            this._originalMeshPositions[child.name] = child.position.clone();
+            this._originalMeshRotations[child.name] = child.rotation.clone();
+            this._originalMeshScales[child.name] = child.scale.clone();
           }
         }
       });
+    }
+
+    /**
+     * Set the normalization scale used when the model was stretched into a unit cube.
+     * This scale is needed to correctly convert between object space and mesh local space.
+     * @param scaleX The X normalization scale (1 / modelWidth)
+     * @param scaleY The Y normalization scale (1 / modelHeight)
+     * @param scaleZ The Z normalization scale (1 / modelDepth)
+     */
+    setNormalizationScale(scaleX: number, scaleY: number, scaleZ: number): void {
+      this._normalizationScale = { x: scaleX, y: scaleY, z: scaleZ };
     }
 
     /**
@@ -110,21 +144,32 @@ namespace gdjs {
      * @param z Z position
      */
     setMeshPosition(name: string, x: number, y: number, z: number): void {
-      if (this.hasMesh(name) && this._runtimeObject) {
-        // The model is stretched into a 1x1x1 cube internally,
-        // and then scaled by the object dimensions.
-        // To make the position values match the object coordinate system,
-        // we need to divide by the object dimensions.
-        const scaleX = this._runtimeObject.getWidth();
-        const scaleY = this._runtimeObject.getHeight();
-        const scaleZ = this._runtimeObject.getDepth();
-        
-        this._meshesMap[name].position.set(
-          scaleX !== 0 ? x / scaleX : x,
-          scaleY !== 0 ? y / scaleY : y,
-          scaleZ !== 0 ? z / scaleZ : z
-        );
+      if (!this.hasMesh(name) || !this._runtimeObject || !this._normalizationScale) {
+        return;
       }
+
+      const originalPos = this._originalMeshPositions[name];
+      if (!originalPos) {
+        return;
+      }
+
+      // Convert from object space to normalized space using the model's original normalization scale.
+      // The normalization scale represents how the model was stretched into a unit cube.
+      const objectWidth = this._runtimeObject.getWidth();
+      const objectHeight = this._runtimeObject.getHeight();
+      const objectDepth = this._runtimeObject.getDepth();
+
+      const normalizedX = objectWidth !== 0 ? (x * this._normalizationScale.x) / objectWidth : 0;
+      // Y axis is flipped in the renderer, so we need to negate it
+      const normalizedY = objectHeight !== 0 ? (-y * this._normalizationScale.y) / objectHeight : 0;
+      const normalizedZ = objectDepth !== 0 ? (z * this._normalizationScale.z) / objectDepth : 0;
+
+      // Add to the original local position to preserve the mesh's position in the model hierarchy
+      this._meshesMap[name].position.set(
+        originalPos.x + normalizedX,
+        originalPos.y + normalizedY,
+        originalPos.z + normalizedZ
+      );
     }
 
     /**
@@ -134,11 +179,23 @@ namespace gdjs {
      * @returns X position or 0 if mesh doesn't exist
      */
     getMeshPositionX(name: string): number {
-      if (!this.hasMesh(name) || !this._runtimeObject) {
+      if (!this.hasMesh(name) || !this._runtimeObject || !this._normalizationScale) {
         return 0;
       }
-      // Convert from internal coordinate system back to object coordinate system
-      return this._meshesMap[name].position.x * this._runtimeObject.getWidth();
+
+      const originalPos = this._originalMeshPositions[name];
+      if (!originalPos) {
+        return 0;
+      }
+
+      const currentPos = this._meshesMap[name].position;
+      const objectWidth = this._runtimeObject.getWidth();
+
+      // Subtract the original position and convert back to object space
+      const normalizedOffset = currentPos.x - originalPos.x;
+      return this._normalizationScale.x !== 0 
+        ? (normalizedOffset * objectWidth) / this._normalizationScale.x 
+        : 0;
     }
 
     /**
@@ -148,11 +205,24 @@ namespace gdjs {
      * @returns Y position or 0 if mesh doesn't exist
      */
     getMeshPositionY(name: string): number {
-      if (!this.hasMesh(name) || !this._runtimeObject) {
+      if (!this.hasMesh(name) || !this._runtimeObject || !this._normalizationScale) {
         return 0;
       }
-      // Convert from internal coordinate system back to object coordinate system
-      return this._meshesMap[name].position.y * this._runtimeObject.getHeight();
+
+      const originalPos = this._originalMeshPositions[name];
+      if (!originalPos) {
+        return 0;
+      }
+
+      const currentPos = this._meshesMap[name].position;
+      const objectHeight = this._runtimeObject.getHeight();
+
+      // Subtract the original position and convert back to object space
+      // Y axis is flipped in the renderer, so we need to negate it
+      const normalizedOffset = currentPos.y - originalPos.y;
+      return this._normalizationScale.y !== 0 
+        ? (-normalizedOffset * objectHeight) / this._normalizationScale.y 
+        : 0;
     }
 
     /**
@@ -162,15 +232,29 @@ namespace gdjs {
      * @returns Z position or 0 if mesh doesn't exist
      */
     getMeshPositionZ(name: string): number {
-      if (!this.hasMesh(name) || !this._runtimeObject) {
+      if (!this.hasMesh(name) || !this._runtimeObject || !this._normalizationScale) {
         return 0;
       }
-      // Convert from internal coordinate system back to object coordinate system
-      return this._meshesMap[name].position.z * this._runtimeObject.getDepth();
+
+      const originalPos = this._originalMeshPositions[name];
+      if (!originalPos) {
+        return 0;
+      }
+
+      const currentPos = this._meshesMap[name].position;
+      const objectDepth = this._runtimeObject.getDepth();
+
+      // Subtract the original position and convert back to object space
+      const normalizedOffset = currentPos.z - originalPos.z;
+      return this._normalizationScale.z !== 0 
+        ? (normalizedOffset * objectDepth) / this._normalizationScale.z 
+        : 0;
     }
 
     /**
      * Set the rotation of a mesh (in degrees).
+     * The rotation values are in the model's local space.
+     * Note: This sets absolute rotation values, not relative to the mesh's original rotation.
      * @param name The mesh name
      * @param rotationX Rotation around X axis in degrees
      * @param rotationY Rotation around Y axis in degrees
@@ -182,17 +266,21 @@ namespace gdjs {
       rotationY: number,
       rotationZ: number
     ): void {
-      if (this.hasMesh(name)) {
-        this._meshesMap[name].rotation.set(
-          gdjs.toRad(rotationX),
-          gdjs.toRad(rotationY),
-          gdjs.toRad(rotationZ)
-        );
+      if (!this.hasMesh(name)) {
+        return;
       }
+
+      // Set absolute rotation values (not relative to original rotation)
+      this._meshesMap[name].rotation.set(
+        gdjs.toRad(rotationX),
+        gdjs.toRad(rotationY),
+        gdjs.toRad(rotationZ)
+      );
     }
 
     /**
      * Get the X rotation of a mesh (in degrees).
+     * Returns the absolute rotation value in the model's local space.
      * @param name The mesh name
      * @returns X rotation in degrees or 0 if mesh doesn't exist
      */
@@ -204,6 +292,7 @@ namespace gdjs {
 
     /**
      * Get the Y rotation of a mesh (in degrees).
+     * Returns the absolute rotation value in the model's local space.
      * @param name The mesh name
      * @returns Y rotation in degrees or 0 if mesh doesn't exist
      */
@@ -215,6 +304,7 @@ namespace gdjs {
 
     /**
      * Get the Z rotation of a mesh (in degrees).
+     * Returns the absolute rotation value in the model's local space.
      * @param name The mesh name
      * @returns Z rotation in degrees or 0 if mesh doesn't exist
      */
@@ -226,6 +316,7 @@ namespace gdjs {
 
     /**
      * Set the scale of a mesh.
+     * The scale values are relative to the mesh's original scale in the model.
      * @param name The mesh name
      * @param scaleX Scale on X axis
      * @param scaleY Scale on Y axis
@@ -237,53 +328,120 @@ namespace gdjs {
       scaleY: number,
       scaleZ: number
     ): void {
-      if (this.hasMesh(name)) {
-        this._meshesMap[name].scale.set(scaleX, scaleY, scaleZ);
+      if (!this.hasMesh(name)) {
+        return;
       }
+
+      const originalScale = this._originalMeshScales[name];
+      if (!originalScale) {
+        return;
+      }
+
+      // Multiply the user-specified scale with the original scale
+      this._meshesMap[name].scale.set(
+        originalScale.x * scaleX,
+        originalScale.y * scaleY,
+        originalScale.z * scaleZ
+      );
     }
 
     /**
      * Get the X scale of a mesh.
+     * The returned value is relative to the mesh's original scale.
      * @param name The mesh name
      * @returns X scale or 1 if mesh doesn't exist
      */
     getMeshScaleX(name: string): number {
-      return this.hasMesh(name) ? this._meshesMap[name].scale.x : 1;
+      if (!this.hasMesh(name)) {
+        return 1;
+      }
+
+      const originalScale = this._originalMeshScales[name];
+      if (!originalScale || originalScale.x === 0) {
+        return 1;
+      }
+
+      return this._meshesMap[name].scale.x / originalScale.x;
     }
 
     /**
      * Get the Y scale of a mesh.
+     * The returned value is relative to the mesh's original scale.
      * @param name The mesh name
      * @returns Y scale or 1 if mesh doesn't exist
      */
     getMeshScaleY(name: string): number {
-      return this.hasMesh(name) ? this._meshesMap[name].scale.y : 1;
+      if (!this.hasMesh(name)) {
+        return 1;
+      }
+
+      const originalScale = this._originalMeshScales[name];
+      if (!originalScale || originalScale.y === 0) {
+        return 1;
+      }
+
+      return this._meshesMap[name].scale.y / originalScale.y;
     }
 
     /**
      * Get the Z scale of a mesh.
+     * The returned value is relative to the mesh's original scale.
      * @param name The mesh name
      * @returns Z scale or 1 if mesh doesn't exist
      */
     getMeshScaleZ(name: string): number {
-      return this.hasMesh(name) ? this._meshesMap[name].scale.z : 1;
+      if (!this.hasMesh(name)) {
+        return 1;
+      }
+
+      const originalScale = this._originalMeshScales[name];
+      if (!originalScale || originalScale.z === 0) {
+        return 1;
+      }
+
+      return this._meshesMap[name].scale.z / originalScale.z;
     }
 
     /**
      * Remove a mesh from the scene.
+     * This also removes all descendant meshes from the registry.
      * @param name The mesh name
      */
     removeMesh(name: string): void {
       if (this.hasMesh(name)) {
         const mesh = this._meshesMap[name];
-        // Remove from parent
+        
+        // Collect all descendant mesh names that need to be removed from the registry
+        const descendantNames: string[] = [];
+        mesh.traverse((child: THREE.Object3D) => {
+          if (child !== mesh && child.name && child.name in this._meshesMap) {
+            descendantNames.push(child.name);
+          }
+        });
+        
+        // Remove from parent (this detaches the entire subtree from the scene)
         if (mesh.parent) {
           mesh.parent.remove(mesh);
         }
-        // Clean up
+        
+        // Clean up the mesh itself
         delete this._meshesMap[name];
+        delete this._originalMeshPositions[name];
+        delete this._originalMeshRotations[name];
+        delete this._originalMeshScales[name];
+        
+        // Clean up all descendants
+        for (const descendantName of descendantNames) {
+          delete this._meshesMap[descendantName];
+          delete this._originalMeshPositions[descendantName];
+          delete this._originalMeshRotations[descendantName];
+          delete this._originalMeshScales[descendantName];
+        }
+        
+        // Update the names array to exclude the removed mesh and its descendants
+        const removedNames = new Set([name, ...descendantNames]);
         this._meshesNames = this._meshesNames.filter(
-          (meshName) => meshName !== name
+          (meshName) => !removedNames.has(meshName)
         );
       }
     }
@@ -295,6 +453,10 @@ namespace gdjs {
       this._meshesMap = {};
       this._meshesNames = [];
       this._runtimeObject = null;
+      this._originalMeshPositions = {};
+      this._originalMeshRotations = {};
+      this._originalMeshScales = {};
+      this._normalizationScale = null;
     }
   }
 }
