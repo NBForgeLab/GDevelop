@@ -253,8 +253,7 @@ namespace gdjs {
 
     /**
      * Set the rotation of a mesh (in degrees).
-     * The rotation values are in the model's local space.
-     * Note: This sets absolute rotation values, not relative to the mesh's original rotation.
+     * The rotation values are relative to the mesh's original rotation in the model.
      * @param name The mesh name
      * @param rotationX Rotation around X axis in degrees
      * @param rotationY Rotation around Y axis in degrees
@@ -270,53 +269,84 @@ namespace gdjs {
         return;
       }
 
-      // Set absolute rotation values (not relative to original rotation)
+      const originalRot = this._originalMeshRotations[name];
+      if (!originalRot) {
+        return;
+      }
+
+      // Add the user-specified rotation to the original rotation
       this._meshesMap[name].rotation.set(
-        gdjs.toRad(rotationX),
-        gdjs.toRad(rotationY),
-        gdjs.toRad(rotationZ)
+        originalRot.x + gdjs.toRad(rotationX),
+        originalRot.y + gdjs.toRad(rotationY),
+        originalRot.z + gdjs.toRad(rotationZ)
       );
     }
 
     /**
      * Get the X rotation of a mesh (in degrees).
-     * Returns the absolute rotation value in the model's local space.
+     * The returned value is relative to the mesh's original rotation.
      * @param name The mesh name
      * @returns X rotation in degrees or 0 if mesh doesn't exist
      */
     getMeshRotationX(name: string): number {
-      return this.hasMesh(name)
-        ? gdjs.toDegrees(this._meshesMap[name].rotation.x)
-        : 0;
+      if (!this.hasMesh(name)) {
+        return 0;
+      }
+
+      const originalRot = this._originalMeshRotations[name];
+      if (!originalRot) {
+        return 0;
+      }
+
+      const currentRot = this._meshesMap[name].rotation;
+      return gdjs.toDegrees(currentRot.x - originalRot.x);
     }
 
     /**
      * Get the Y rotation of a mesh (in degrees).
-     * Returns the absolute rotation value in the model's local space.
+     * The returned value is relative to the mesh's original rotation.
      * @param name The mesh name
      * @returns Y rotation in degrees or 0 if mesh doesn't exist
      */
     getMeshRotationY(name: string): number {
-      return this.hasMesh(name)
-        ? gdjs.toDegrees(this._meshesMap[name].rotation.y)
-        : 0;
+      if (!this.hasMesh(name)) {
+        return 0;
+      }
+
+      const originalRot = this._originalMeshRotations[name];
+      if (!originalRot) {
+        return 0;
+      }
+
+      const currentRot = this._meshesMap[name].rotation;
+      return gdjs.toDegrees(currentRot.y - originalRot.y);
     }
 
     /**
      * Get the Z rotation of a mesh (in degrees).
-     * Returns the absolute rotation value in the model's local space.
+     * The returned value is relative to the mesh's original rotation.
      * @param name The mesh name
      * @returns Z rotation in degrees or 0 if mesh doesn't exist
      */
     getMeshRotationZ(name: string): number {
-      return this.hasMesh(name)
-        ? gdjs.toDegrees(this._meshesMap[name].rotation.z)
-        : 0;
+      if (!this.hasMesh(name)) {
+        return 0;
+      }
+
+      const originalRot = this._originalMeshRotations[name];
+      if (!originalRot) {
+        return 0;
+      }
+
+      const currentRot = this._meshesMap[name].rotation;
+      return gdjs.toDegrees(currentRot.z - originalRot.z);
     }
 
     /**
      * Set the scale of a mesh.
      * The scale values are relative to the mesh's original scale in the model.
+     * Note: If the mesh has zero scale on any axis in the original model,
+     * the result will remain zero regardless of the input value.
      * @param name The mesh name
      * @param scaleX Scale on X axis
      * @param scaleY Scale on Y axis
