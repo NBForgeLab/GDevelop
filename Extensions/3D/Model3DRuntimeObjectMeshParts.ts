@@ -128,7 +128,7 @@ namespace gdjs {
     /**
      * Get the visibility of a mesh.
      * @param name The mesh name
-     * @returns True if visible, false if hidden, null if mesh doesn't exist
+     * @returns True if visible, false otherwise
      */
     isMeshVisible(name: string): boolean {
       return this.hasMesh(name) ? this._meshesMap[name].visible : false;
