@@ -9,7 +9,6 @@ namespace gdjs {
     private _meshesNames: string[];
     private _runtimeObject: gdjs.Model3DRuntimeObject | null;
     private _originalMeshPositions: Record<string, THREE.Vector3>;
-    private _originalMeshRotations: Record<string, THREE.Euler>;
     private _originalMeshScales: Record<string, THREE.Vector3>;
     private _normalizationScale: { x: number; y: number; z: number } | null;
 
@@ -18,7 +17,6 @@ namespace gdjs {
       this._meshesNames = [];
       this._runtimeObject = null;
       this._originalMeshPositions = {};
-      this._originalMeshRotations = {};
       this._originalMeshScales = {};
       this._normalizationScale = null;
     }
@@ -34,7 +32,6 @@ namespace gdjs {
       this._meshesMap = {};
       this._meshesNames = [];
       this._originalMeshPositions = {};
-      this._originalMeshRotations = {};
       this._originalMeshScales = {};
 
       if (!threeObject) {
@@ -59,7 +56,6 @@ namespace gdjs {
             this._meshesNames.push(child.name);
             // Store the original local transformations of the mesh before any user modifications
             this._originalMeshPositions[child.name] = child.position.clone();
-            this._originalMeshRotations[child.name] = child.rotation.clone();
             this._originalMeshScales[child.name] = child.scale.clone();
           }
         }
@@ -462,14 +458,12 @@ namespace gdjs {
         // Clean up the mesh itself
         delete this._meshesMap[name];
         delete this._originalMeshPositions[name];
-        delete this._originalMeshRotations[name];
         delete this._originalMeshScales[name];
         
         // Clean up all descendants
         for (const descendantName of descendantNames) {
           delete this._meshesMap[descendantName];
           delete this._originalMeshPositions[descendantName];
-          delete this._originalMeshRotations[descendantName];
           delete this._originalMeshScales[descendantName];
         }
         
@@ -489,7 +483,6 @@ namespace gdjs {
       this._meshesNames = [];
       this._runtimeObject = null;
       this._originalMeshPositions = {};
-      this._originalMeshRotations = {};
       this._originalMeshScales = {};
       this._normalizationScale = null;
     }
