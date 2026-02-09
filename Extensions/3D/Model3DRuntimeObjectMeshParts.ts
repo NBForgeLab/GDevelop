@@ -283,7 +283,8 @@ namespace gdjs {
       this._meshesMap[name].rotation.set(
         originalRot.x + gdjs.toRad(rotationX),
         originalRot.y + gdjs.toRad(rotationY),
-        originalRot.z + gdjs.toRad(rotationZ)
+        originalRot.z + gdjs.toRad(rotationZ),
+        originalRot.order
       );
     }
 
