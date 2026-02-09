@@ -143,7 +143,7 @@ namespace gdjs {
      * When the object change of size, rotation or position,
      * the transformation is done on the parent of `threeObject`.
      *
-     * This function doesn't mutate anything outside of `threeObject`.
+     * This function mutates `threeObject` and stores normalization scale in mesh parts.
      */
     stretchModelIntoUnitaryCube(
       threeObject: THREE.Object3D,
