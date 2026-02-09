@@ -143,7 +143,7 @@ namespace gdjs {
      * When the object change of size, rotation or position,
      * the transformation is done on the parent of `threeObject`.
      *
-     * This function doesn't mutate anything outside of `threeObject`.
+     * This function mutates `threeObject` and stores normalization scale in mesh parts.
      */
     stretchModelIntoUnitaryCube(
       threeObject: THREE.Object3D,
@@ -205,6 +205,10 @@ namespace gdjs {
       threeObject.updateMatrix();
       threeObject.applyMatrix4(scaleMatrix);
 
+      // Store the normalization scale for mesh parts positioning
+      // Note: Y scale is negated in the matrix but we store the absolute value
+      this._model3DRuntimeObject._meshParts.setNormalizationScale(scaleX, scaleY, scaleZ);
+
       return boundingBox;
     }
 
@@ -227,13 +231,6 @@ namespace gdjs {
       const modelWidth = boundingBox.max.x - boundingBox.min.x;
       const modelHeight = boundingBox.max.y - boundingBox.min.y;
       const modelDepth = boundingBox.max.z - boundingBox.min.z;
-
-      // Store the normalization scale for mesh parts positioning
-      // Note: Y scale is negated in the matrix but we store the absolute value
-      const scaleX = modelWidth < epsilon ? 1 : 1 / modelWidth;
-      const scaleY = modelHeight < epsilon ? 1 : 1 / modelHeight;
-      const scaleZ = modelDepth < epsilon ? 1 : 1 / modelDepth;
-      this._model3DRuntimeObject._meshParts.setNormalizationScale(scaleX, scaleY, scaleZ);
 
       this._modelOriginPoint[0] =
         modelWidth < epsilon ? 0 : -boundingBox.min.x / modelWidth;
