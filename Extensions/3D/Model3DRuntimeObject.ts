@@ -115,9 +115,10 @@ namespace gdjs {
 
     constructor(
       instanceContainer: gdjs.RuntimeInstanceContainer,
-      objectData: Model3DObjectData
+      objectData: Model3DObjectData,
+      instanceData?: InstanceData
     ) {
-      super(instanceContainer, objectData);
+      super(instanceContainer, objectData, instanceData);
       this._data = objectData;
       this._modelResourceName = objectData.content.modelResourceName;
       this._animations = objectData.content.animations;
