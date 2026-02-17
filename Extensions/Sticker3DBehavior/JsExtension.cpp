@@ -30,7 +30,7 @@ class Sticker3DBehaviorJsExtension : public gd::PlatformExtension {
 
     behavior
         .AddScopedAction(
-            "LinkToObject",
+            "StickTo3DObject",
             _("Stick to a 3D object"),
             _("Stick this 3D object to another 3D object. It will follow the position of the 3D object it is stuck to."),
             _("Stick _PARAM0_ to _PARAM2_"),
@@ -40,7 +40,7 @@ class Sticker3DBehaviorJsExtension : public gd::PlatformExtension {
         .AddParameter("object", _("Object"), "", false)
         .AddParameter("behavior", _("Behavior"), "Sticker3DBehavior")
         .AddParameter("objectPtr", _("3D object to stick to"), "", false)
-        .SetFunctionName("stickToObject");
+        .SetFunctionName("stickTo3DObject");
 
     behavior
         .AddScopedAction(

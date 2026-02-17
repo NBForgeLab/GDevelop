@@ -151,7 +151,7 @@ namespace gdjs {
      * Stick this 3D object to another 3D object.
      * @param targetObject The 3D object to stick to
      */
-    stickToObject(targetObject: gdjs.RuntimeObject): void {
+    stickTo3DObject(targetObject: gdjs.RuntimeObject): void {
       if (!targetObject) {
         return;
       }
