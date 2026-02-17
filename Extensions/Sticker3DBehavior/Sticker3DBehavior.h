@@ -20,7 +20,10 @@ class Project;
 class GD_EXTENSION_API Sticker3DBehavior : public gd::Behavior {
  public:
   Sticker3DBehavior() {};
-  virtual ~Sticker3DBehavior(){};
+  /**
+ * Clean up any resources owned by the Sticker3DBehavior.
+ */
+virtual ~Sticker3DBehavior(){};
   
   virtual std::unique_ptr<gd::Behavior> Clone() const override {
     return gd::make_unique<Sticker3DBehavior>(*this);

@@ -9,6 +9,14 @@ This project is released under the MIT License.
 #include "GDCore/Project/BehaviorsSharedData.h"
 #include "GDCore/Tools/Localization.h"
 
+/**
+ * @brief Register the Sticker3D behavior and its metadata with a platform extension.
+ *
+ * Sets the extension's identifier, name, description, author, license, category, tags and help path,
+ * then declares the Sticker3DBehavior with its display name, tooltip, icon, implementation factory and shared data.
+ *
+ * @param extension The platform extension to register the Sticker3DBehavior into.
+ */
 void DeclareSticker3DBehaviorExtension(gd::PlatformExtension& extension) {
   extension
       .SetExtensionInformation("Sticker3DBehavior",

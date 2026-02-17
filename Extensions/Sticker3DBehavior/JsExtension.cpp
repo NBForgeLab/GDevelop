@@ -175,7 +175,12 @@ class Sticker3DBehaviorJsExtension : public gd::PlatformExtension {
 };
 
 #if defined(EMSCRIPTEN)
-extern "C" gd::PlatformExtension* CreateGDJSSticker3DBehaviorExtension() {
+extern "C" /**
+ * @brief Create a new Sticker3D behavior extension for the JavaScript runtime.
+ *
+ * @return gd::PlatformExtension* Pointer to a newly allocated Sticker3DBehaviorJsExtension. The caller is responsible for managing and deleting the returned object.
+ */
+gd::PlatformExtension* CreateGDJSSticker3DBehaviorExtension() {
   return new Sticker3DBehaviorJsExtension;
 }
 #else
@@ -183,7 +188,12 @@ extern "C" gd::PlatformExtension* CreateGDJSSticker3DBehaviorExtension() {
  * Used by GDevelop to create the extension class
  * -- Do not need to be modified. --
  */
-extern "C" gd::PlatformExtension* GD_EXTENSION_API CreateGDJSExtension() {
+extern "C" /**
+ * @brief Instantiate the Sticker3D behavior extension for the JavaScript runtime.
+ *
+ * @return gd::PlatformExtension* Pointer to a newly allocated Sticker3DBehaviorJsExtension instance.
+ */
+gd::PlatformExtension* GD_EXTENSION_API CreateGDJSExtension() {
   return new Sticker3DBehaviorJsExtension;
 }
 #endif

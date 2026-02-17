@@ -68,6 +68,13 @@ gd::PlatformExtension *CreateGDJSParticleSystemExtension();
 }
 #endif
 
+/**
+ * @brief Register built-in and platform-specific extensions with the JsPlatform.
+ *
+ * Adds all core GDJS extensions to this platform instance. When compiled with
+ * EMSCRIPTEN, also loads additional extensions exposed through C factory
+ * functions.
+ */
 void JsPlatform::ReloadBuiltinExtensions() {
   // Adding built-in extensions.
   std::cout << "* Loading builtin extensions... ";
