@@ -17,6 +17,7 @@ namespace gdjs {
     private _offsetZ: float = 0;
     private _followRotation: boolean = true;
     private _destroyWithStuckToObject: boolean = false;
+    private _offsetMode: string = "world"; // "world" or "local"
 
     // State
     private _stuckToObject: gdjs.RuntimeObject | null = null;
@@ -40,6 +41,9 @@ namespace gdjs {
       this._destroyWithStuckToObject = behaviorData.destroyWithStuckToObject !== undefined
         ? behaviorData.destroyWithStuckToObject
         : false;
+      this._offsetMode = behaviorData.offsetMode !== undefined
+        ? behaviorData.offsetMode
+        : "world";
     }
 
     override applyBehaviorOverriding(behaviorData: any): boolean {
@@ -48,6 +52,9 @@ namespace gdjs {
       }
       if (behaviorData.destroyWithStuckToObject !== undefined) {
         this._destroyWithStuckToObject = behaviorData.destroyWithStuckToObject;
+      }
+      if (behaviorData.offsetMode !== undefined) {
+        this._offsetMode = behaviorData.offsetMode;
       }
       return true;
     }
@@ -66,7 +73,7 @@ namespace gdjs {
         if (this._isStuck) {
           if (this._destroyWithStuckToObject) {
             // Destroy this 3D object when the stuck-to 3D object is destroyed
-            this.owner.deleteFromScene(instanceContainer);
+            this.owner.deleteFromScene();
             return;
           }
           this.unstick();
@@ -93,11 +100,28 @@ namespace gdjs {
         stuckToRotationY = stuckToObject.getRotationY();
       }
 
-      // Calculate absolute target position based on stuck-to 3D object position + offset
-      // This approach eliminates floating-point drift and ensures offsets are always applied
-      const targetX = stuckToX + this._offsetX;
-      const targetY = stuckToY + this._offsetY;
-      const targetZ = stuckToZ + this._offsetZ;
+      // Calculate target position based on offset mode
+      let targetX: float, targetY: float, targetZ: float;
+      
+      if (this._offsetMode === "local") {
+        // Local space: rotate offset based on stuck-to object's rotation
+        const angleRad = (stuckToRotationZ * Math.PI) / 180;
+        const cos = Math.cos(angleRad);
+        const sin = Math.sin(angleRad);
+        
+        // Rotate offset in 2D (X-Y plane)
+        const rotatedOffsetX = this._offsetX * cos - this._offsetY * sin;
+        const rotatedOffsetY = this._offsetX * sin + this._offsetY * cos;
+        
+        targetX = stuckToX + rotatedOffsetX;
+        targetY = stuckToY + rotatedOffsetY;
+        targetZ = stuckToZ + this._offsetZ; // Z offset stays the same
+      } else {
+        // World space: offset stays fixed in world coordinates
+        targetX = stuckToX + this._offsetX;
+        targetY = stuckToY + this._offsetY;
+        targetZ = stuckToZ + this._offsetZ;
+      }
 
       // Update this object's position to the target position
       owner.setX(targetX);
@@ -161,8 +185,26 @@ namespace gdjs {
 
       // Calculate and store initial offset based on current positions
       const owner = this.owner;
-      this._offsetX = owner.getX() - targetObject.getX();
-      this._offsetY = owner.getY() - targetObject.getY();
+      const targetAngle = targetObject.getAngle();
+      
+      if (this._offsetMode === "local") {
+        // Local space: calculate offset in target object's local coordinates
+        // This requires inverse rotation transformation
+        const angleRad = (targetAngle * Math.PI) / 180;
+        const cos = Math.cos(-angleRad); // Negative for inverse rotation
+        const sin = Math.sin(-angleRad);
+        
+        const worldOffsetX = owner.getX() - targetObject.getX();
+        const worldOffsetY = owner.getY() - targetObject.getY();
+        
+        // Transform world offset to local space
+        this._offsetX = worldOffsetX * cos - worldOffsetY * sin;
+        this._offsetY = worldOffsetX * sin + worldOffsetY * cos;
+      } else {
+        // World space: offset in world coordinates
+        this._offsetX = owner.getX() - targetObject.getX();
+        this._offsetY = owner.getY() - targetObject.getY();
+      }
 
       if (gdjs.Base3DHandler && gdjs.Base3DHandler.is3D(owner) && gdjs.Base3DHandler.is3D(targetObject)) {
         this._offsetZ = owner.getZ() - targetObject.getZ();
