@@ -15,6 +15,7 @@ This project is released under the MIT License.
 void Sticker3DBehavior::InitializeContent(gd::SerializerElement& content) {
   content.SetAttribute("followRotation", true);
   content.SetAttribute("destroyWithStuckToObject", false);
+  content.SetAttribute("offsetMode", "world");
 }
 
 std::map<gd::String, gd::PropertyDescriptor> Sticker3DBehavior::GetProperties(
@@ -26,6 +27,14 @@ std::map<gd::String, gd::PropertyDescriptor> Sticker3DBehavior::GetProperties(
       .SetType("Boolean")
       .SetLabel(_("Follow rotation"))
       .SetDescription(_("If enabled, the 3D object will also follow the rotation of the stuck-to 3D object."));
+
+  properties["offsetMode"]
+      .SetValue(behaviorContent.GetStringAttribute("offsetMode", "world"))
+      .SetType("Choice")
+      .AddExtraInfo("world")
+      .AddExtraInfo("local")
+      .SetLabel(_("Offset mode"))
+      .SetDescription(_("World space: offset stays fixed in world coordinates. Local space: offset rotates with the stuck-to object around the Z-axis (yaw rotation only), suitable for vehicles and characters on flat surfaces."));
 
   properties["destroyWithStuckToObject"]
       .SetValue(behaviorContent.GetBoolAttribute("destroyWithStuckToObject") ? "true" : "false")
@@ -41,6 +50,10 @@ bool Sticker3DBehavior::UpdateProperty(gd::SerializerElement& behaviorContent,
                                       const gd::String& value) {
   if (name == "followRotation") {
     behaviorContent.SetAttribute("followRotation", value == "1");
+    return true;
+  }
+  if (name == "offsetMode") {
+    behaviorContent.SetAttribute("offsetMode", value);
     return true;
   }
   if (name == "destroyWithStuckToObject") {
