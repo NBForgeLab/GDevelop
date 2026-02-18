@@ -34,7 +34,7 @@ std::map<gd::String, gd::PropertyDescriptor> Sticker3DBehavior::GetProperties(
       .AddExtraInfo("world")
       .AddExtraInfo("local")
       .SetLabel(_("Offset mode"))
-      .SetDescription(_("World space: offset stays fixed in world coordinates (for static objects). Local space: offset rotates with the stuck-to object (for vehicles, trailers, etc)."));
+      .SetDescription(_("World space: offset stays fixed in world coordinates. Local space: offset rotates with the stuck-to object around the Z-axis (yaw rotation only), suitable for vehicles and characters on flat surfaces."));
 
   properties["destroyWithStuckToObject"]
       .SetValue(behaviorContent.GetBoolAttribute("destroyWithStuckToObject") ? "true" : "false")
