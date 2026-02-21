@@ -139,6 +139,7 @@ export type EventsGenerationOptions = {|
   existingEventsAsText: string,
   existingEventsJson: string | null,
   placementHint: string,
+  relatedAiRequestId: string,
 |};
 
 export type AssetSearchAndInstallResult = {|
@@ -155,6 +156,9 @@ export type AssetSearchAndInstallOptions = {|
   searchTerms: string,
   description: string,
   twoDimensionalViewKind: string,
+  relatedAiRequestId?: string | null,
+  lastUserMessage?: string | null,
+  lastAssistantMessages?: string[],
 |};
 
 export type EditorCallbacks = {|
@@ -209,12 +213,19 @@ type RenderForEditorOptions = {|
   editorFunctionCallResultOutput: any,
 |};
 
+export type RelatedAiRequestLastMessages = {|
+  lastUserMessage: string | null,
+  lastAssistantMessages: string[],
+|};
+
 type LaunchFunctionOptionsWithoutProject = {|
   PixiResourcesLoader: any,
   args: any,
   editorCallbacks: EditorCallbacks,
   toolOptions: ToolOptions | null,
   i18n: I18nType,
+  relatedAiRequestId: string | null,
+  getRelatedAiRequestLastMessages: () => RelatedAiRequestLastMessages,
   generateEvents: (
     options: EventsGenerationOptions
   ) => Promise<EventsGenerationResult>,
@@ -653,6 +664,8 @@ const createOrReplaceObject: EditorFunction = {
   launchFunction: async ({
     project,
     args,
+    relatedAiRequestId,
+    getRelatedAiRequestLastMessages,
     ensureExtensionInstalled,
     searchAndInstallAsset,
     onObjectsModifiedOutsideEditor,
@@ -785,6 +798,8 @@ const createOrReplaceObject: EditorFunction = {
             searchTerms: search_terms || '',
             description: description || '',
             twoDimensionalViewKind: two_dimensional_view_kind || '',
+            relatedAiRequestId,
+            ...getRelatedAiRequestLastMessages(),
           }
         );
 
@@ -922,6 +937,8 @@ const createOrReplaceObject: EditorFunction = {
           searchTerms: search_terms || '',
           description: description || '',
           twoDimensionalViewKind: two_dimensional_view_kind || '',
+          relatedAiRequestId,
+          ...getRelatedAiRequestLastMessages(),
         });
 
         if (status === 'error') {
@@ -3567,6 +3584,7 @@ const addSceneEvents: EditorFunction = {
     project,
     args,
     toolOptions,
+    relatedAiRequestId,
     generateEvents,
     onSceneEventsModifiedOutsideEditor,
     ensureExtensionInstalled,
@@ -3591,6 +3609,11 @@ const addSceneEvents: EditorFunction = {
     if (!project.hasLayoutNamed(sceneName)) {
       return makeGenericFailure(`Scene not found: "${sceneName}".`);
     }
+    if (!relatedAiRequestId) {
+      return makeGenericFailure(
+        'No related AI request ID found for events generation.'
+      );
+    }
     const scene = project.getLayout(sceneName);
     const currentSceneEvents = scene.getEvents();
 
@@ -3612,6 +3635,7 @@ const addSceneEvents: EditorFunction = {
           existingEventsAsText,
           existingEventsJson,
           placementHint,
+          relatedAiRequestId,
         }
       );
 
