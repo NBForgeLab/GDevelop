@@ -39,196 +39,194 @@ std::map<gd::String, gd::PropertyDescriptor> MinimapObject::GetProperties()
     const {
   std::map<gd::String, gd::PropertyDescriptor> properties;
 
-  // Basic Settings
-  properties[_("size")]
+  // Layout (ungrouped, for compact row layout)
+  properties["size"]
       .SetValue(gd::String::From(size))
       .SetType("Number")
       .SetLabel(_("Size (square)"))
-      .SetGroup(_("Basic Settings"));
+      .SetGroup("");
 
-  properties[_("zoom")]
+  properties["zoom"]
       .SetValue(gd::String::From(zoom))
       .SetType("Number")
       .SetLabel(_("Zoom level"))
-      .SetGroup(_("Basic Settings"));
+      .SetGroup("");
 
-  properties[_("stayOnScreen")]
+  properties["stayOnScreen"]
       .SetValue(stayOnScreen ? "true" : "false")
       .SetType("Boolean")
       .SetLabel(_("Stay on screen (fixed position)"))
-      .SetGroup(_("Basic Settings"));
+      .SetGroup("");
 
-  // Visual Customization
-  properties[_("backgroundImage")]
+  // Visual
+  properties["backgroundImage"]
       .SetValue(backgroundImage)
       .SetType("resource")
       .AddExtraInfo("image")
       .SetLabel(_("Background image"))
-      .SetGroup(_("Visual Customization"));
+      .SetGroup(_("Visual"));
 
-  properties[_("frameImage")]
+  properties["frameImage"]
       .SetValue(frameImage)
       .SetType("resource")
       .AddExtraInfo("image")
       .SetLabel(_("Frame image"))
-      .SetGroup(_("Visual Customization"));
+      .SetGroup(_("Visual"));
 
-  properties[_("backgroundColor")]
+  properties["backgroundColor"]
       .SetValue(backgroundColor)
       .SetType("color")
       .SetLabel(_("Background color"))
-      .SetGroup(_("Visual Customization"));
+      .SetGroup(_("Visual"));
 
-  properties[_("backgroundOpacity")]
+  properties["backgroundOpacity"]
       .SetValue(gd::String::From(backgroundOpacity))
       .SetType("Number")
       .SetLabel(_("Background opacity (0-1)"))
-      .SetGroup(_("Visual Customization"));
+      .SetGroup(_("Visual"));
 
-  properties[_("borderColor")]
+  properties["borderColor"]
       .SetValue(borderColor)
       .SetType("color")
       .SetLabel(_("Border color"))
-      .SetGroup(_("Visual Customization"));
+      .SetGroup(_("Visual"));
 
-  properties[_("borderWidth")]
+  properties["borderWidth"]
       .SetValue(gd::String::From(borderWidth))
       .SetType("Number")
       .SetLabel(_("Border width"))
-      .SetGroup(_("Visual Customization"));
+      .SetGroup(_("Visual"));
 
-  // Marker customization is managed by MinimapMarker behavior (icon/size per object).
-
-  // Obstacle Display
-  properties[_("showObstacles")]
+  // Obstacles
+  properties["showObstacles"]
       .SetValue(showObstacles ? "true" : "false")
       .SetType("Boolean")
       .SetLabel(_("Show obstacles"))
-      .SetGroup(_("Obstacle Display"));
+      .SetGroup(_("Obstacles"));
 
-  properties[_("obstacleOpacity")]
-      .SetValue(gd::String::From(obstacleOpacity))
-      .SetType("Number")
-      .SetLabel(_("Obstacle opacity (0-1)"))
-      .SetGroup(_("Obstacle Display"));
-
-  properties[_("useObjectShape")]
+  properties["useObjectShape"]
       .SetValue(useObjectShape ? "true" : "false")
       .SetType("Boolean")
       .SetLabel(_("Use object shape for obstacles"))
-      .SetGroup(_("Obstacle Display"));
+      .SetGroup(_("Obstacles"));
+
+  properties["obstacleOpacity"]
+      .SetValue(gd::String::From(obstacleOpacity))
+      .SetType("Number")
+      .SetLabel(_("Obstacle opacity (0-1)"))
+      .SetGroup(_("Obstacles"));
 
   // Advanced
-  properties[_("autoDetectBounds")]
+  properties["autoDetectBounds"]
       .SetValue(autoDetectBounds ? "true" : "false")
       .SetType("Boolean")
       .SetLabel(_("Auto-detect level bounds"))
-      .SetGroup(_("Advanced"));
+      .SetGroup("");
 
-  properties[_("updateRate")]
+  properties["update rate"]
       .SetValue(gd::String::From(updateRate))
       .SetType("Number")
       .SetLabel(_("Update rate (FPS)"))
-      .SetGroup(_("Advanced"));
+      .SetGroup("");
 
   return properties;
 }
 
 bool MinimapObject::UpdateProperty(const gd::String& name,
                                     const gd::String& value) {
-  if (name == _("size")) {
+  if (name == "size") {
     size = value.To<double>();
     return true;
   }
-  if (name == _("zoom")) {
+  if (name == "zoom") {
     zoom = value.To<double>();
     return true;
   }
-  if (name == _("stayOnScreen")) {
+  if (name == "stayOnScreen") {
     stayOnScreen = value == "1" || value == "true";
     return true;
   }
-  if (name == _("backgroundImage")) {
+  if (name == "backgroundImage") {
     backgroundImage = value;
     return true;
   }
-  if (name == _("frameImage")) {
+  if (name == "frameImage") {
     frameImage = value;
     return true;
   }
-  if (name == _("backgroundColor")) {
+  if (name == "backgroundColor") {
     backgroundColor = value;
     return true;
   }
-  if (name == _("backgroundOpacity")) {
+  if (name == "backgroundOpacity") {
     backgroundOpacity = value.To<double>();
     return true;
   }
-  if (name == _("borderColor")) {
+  if (name == "borderColor") {
     borderColor = value;
     return true;
   }
-  if (name == _("borderWidth")) {
+  if (name == "borderWidth") {
     borderWidth = value.To<double>();
     return true;
   }
-  if (name == _("playerMarkerImage")) {
+  if (name == "playerMarkerImage") {
     playerMarkerImage = value;
     return true;
   }
-  if (name == _("playerColor")) {
+  if (name == "playerColor") {
     playerColor = value;
     return true;
   }
-  if (name == _("playerSize")) {
+  if (name == "playerSize") {
     playerSize = value.To<double>();
     return true;
   }
-  if (name == _("enemyMarkerImage")) {
+  if (name == "enemyMarkerImage") {
     enemyMarkerImage = value;
     return true;
   }
-  if (name == _("enemyColor")) {
+  if (name == "enemyColor") {
     enemyColor = value;
     return true;
   }
-  if (name == _("enemySize")) {
+  if (name == "enemySize") {
     enemySize = value.To<double>();
     return true;
   }
-  if (name == _("itemMarkerImage")) {
+  if (name == "itemMarkerImage") {
     itemMarkerImage = value;
     return true;
   }
-  if (name == _("itemColor")) {
+  if (name == "itemColor") {
     itemColor = value;
     return true;
   }
-  if (name == _("itemSize")) {
+  if (name == "itemSize") {
     itemSize = value.To<double>();
     return true;
   }
-  if (name == _("showObstacles")) {
+  if (name == "showObstacles") {
     showObstacles = value == "1" || value == "true";
     return true;
   }
-  if (name == _("obstacleColor")) {
+  if (name == "obstacleColor") {
     obstacleColor = value;
     return true;
   }
-  if (name == _("obstacleOpacity")) {
+  if (name == "obstacleOpacity") {
     obstacleOpacity = value.To<double>();
     return true;
   }
-  if (name == _("useObjectShape")) {
+  if (name == "useObjectShape") {
     useObjectShape = value == "1" || value == "true";
     return true;
   }
-  if (name == _("autoDetectBounds")) {
+  if (name == "autoDetectBounds") {
     autoDetectBounds = value == "1" || value == "true";
     return true;
   }
-  if (name == _("updateRate")) {
+  if (name == "update rate") {
     updateRate = value.To<double>();
     return true;
   }
