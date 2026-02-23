@@ -32,7 +32,8 @@ class GD_EXTENSION_API MinimapObject : public gd::ObjectConfiguration {
                               const gd::String& value) override;
 
   // Getters
-  double GetSize() const { return size; }
+  double GetDefaultWidth() const { return defaultWidth; }
+  double GetDefaultHeight() const { return defaultHeight; }
   double GetZoom() const { return zoom; }
   bool GetStayOnScreen() const { return stayOnScreen; }
   const gd::String& GetBackgroundImage() const { return backgroundImage; }
@@ -55,10 +56,11 @@ class GD_EXTENSION_API MinimapObject : public gd::ObjectConfiguration {
   double GetObstacleOpacity() const { return obstacleOpacity; }
   bool GetUseObjectShape() const { return useObjectShape; }
   bool GetAutoDetectBounds() const { return autoDetectBounds; }
-  double GetUpdateRate() const { return updateRate; }
+  // No update rate: minimap updates every frame
 
   // Setters
-  void SetSize(double value) { size = value; }
+  void SetDefaultWidth(double value) { defaultWidth = value; }
+  void SetDefaultHeight(double value) { defaultHeight = value; }
   void SetZoom(double value) { zoom = value; }
   void SetStayOnScreen(bool value) { stayOnScreen = value; }
   void SetBackgroundImage(const gd::String& value) { backgroundImage = value; }
@@ -81,11 +83,12 @@ class GD_EXTENSION_API MinimapObject : public gd::ObjectConfiguration {
   void SetObstacleOpacity(double value) { obstacleOpacity = value; }
   void SetUseObjectShape(bool value) { useObjectShape = value; }
   void SetAutoDetectBounds(bool value) { autoDetectBounds = value; }
-  void SetUpdateRate(double value) { updateRate = value; }
+  // No update rate setter
 
  private:
   // Basic Settings
-  double size;
+  double defaultWidth;
+  double defaultHeight;
   double zoom;
   bool stayOnScreen;
   
@@ -120,5 +123,5 @@ class GD_EXTENSION_API MinimapObject : public gd::ObjectConfiguration {
   
   // Advanced
   bool autoDetectBounds;
-  double updateRate;
+  // No update rate storage
 };

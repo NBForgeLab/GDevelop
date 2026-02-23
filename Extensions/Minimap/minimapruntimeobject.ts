@@ -1,42 +1,93 @@
-/**
- * Minimap Runtime Object
- * Handles the core logic for the minimap system
- */
-
 namespace gdjs {
+  /**
+   * Base parameters for {@link gdjs.MinimapRuntimeObject}
+   * @category Objects > Minimap
+   */
   export type MinimapObjectDataType = {
+    /** The base parameters of the minimap object */
     content: {
-      size: number;
+      /** Width of the minimap in pixels */
+      width: number;
+      /** Height of the minimap in pixels */
+      height: number;
+      /** Zoom level (0.01 to 1.0) */
       zoom: number;
+      /** Whether the minimap stays fixed on screen */
       stayOnScreen: boolean;
+      /** Background image resource name */
       backgroundImage: string;
+      /** Frame image resource name */
       frameImage: string;
+      /** Background color in "R;G;B" format */
       backgroundColor: string;
+      /** Background opacity (0-1) */
       backgroundOpacity: number;
+      /** Border color in "R;G;B" format */
       borderColor: string;
+      /** Border width in pixels */
       borderWidth: number;
+      /** Player marker image resource name */
       playerMarkerImage: string;
+      /** Player marker color in "R;G;B" format */
       playerColor: string;
+      /** Player marker size in pixels */
       playerSize: number;
+      /** Enemy marker image resource name */
       enemyMarkerImage: string;
+      /** Enemy marker color in "R;G;B" format */
       enemyColor: string;
+      /** Enemy marker size in pixels */
       enemySize: number;
+      /** Item marker image resource name */
       itemMarkerImage: string;
+      /** Item marker color in "R;G;B" format */
       itemColor: string;
+      /** Item marker size in pixels */
       itemSize: number;
+      /** Whether to show obstacles on the minimap */
       showObstacles: boolean;
+      /** Obstacle color in "R;G;B" format */
       obstacleColor: string;
+      /** Obstacle opacity (0-1) */
       obstacleOpacity: number;
+      /** Whether to use object shape for obstacles */
       useObjectShape: boolean;
+      /** Whether to auto-detect level bounds */
       autoDetectBounds: boolean;
-      updateRate: number;
     };
   };
 
+  /**
+   * @category Objects > Minimap
+   */
   export type MinimapObjectData = ObjectData & MinimapObjectDataType;
 
+  /**
+   * Network sync data for Minimap object.
+   * @category Objects > Minimap
+   */
+  export type MinimapNetworkSyncDataType = {
+    w: number;
+    h: number;
+    z: float;
+    vis: boolean;
+  };
+
+  /**
+   * @category Objects > Minimap
+   */
+  export type MinimapNetworkSyncData = ObjectNetworkSyncData &
+    MinimapNetworkSyncDataType;
+
+  /**
+   * Displays a minimap that tracks objects with MinimapMarker behavior.
+   * The minimap can display different marker types (Player, Enemy, Item, etc.)
+   * with customizable colors, sizes, and icons.
+   * @category Objects > Minimap
+   */
   export class MinimapRuntimeObject extends gdjs.RuntimeObject {
-    _size: number;
+    _width: number;
+    _height: number;
     _zoom: number;
     _stayOnScreen: boolean;
     _backgroundImage: string;
@@ -59,7 +110,6 @@ namespace gdjs {
     _obstacleOpacity: number;
     _useObjectShape: boolean;
     _autoDetectBounds: boolean;
-    _updateRate: number;
 
     _visible: boolean = true;
     _renderer: MinimapRuntimeObjectRenderer;
@@ -72,18 +122,24 @@ namespace gdjs {
     _boundsDetected: boolean = false;
 
     // Update throttling
-    _lastUpdateTime: number = 0;
-    _updateInterval: number = 0;
     _elapsedAccumulator: number = 0;
+    _hasCustomSize: boolean = false;
 
+    /**
+     * @param instanceContainer The container the object belongs to.
+     * @param objectData The object data used to initialize the object
+     * @param instanceData The optional instance data
+     */
     constructor(
       instanceContainer: gdjs.RuntimeInstanceContainer,
-      objectData: MinimapObjectData
+      objectData: MinimapObjectData,
+      instanceData?: InstanceData
     ) {
-      super(instanceContainer, objectData, undefined);
+      super(instanceContainer, objectData, instanceData);
 
       const defaultContent = {
-        size: 200,
+        width: 200,
+        height: 200,
         zoom: 0.1,
         stayOnScreen: true,
         backgroundImage: '',
@@ -106,10 +162,11 @@ namespace gdjs {
         obstacleOpacity: 0.5,
         useObjectShape: true,
         autoDetectBounds: true,
-        updateRate: 30,
       };
-      const content = { ...defaultContent, ...(objectData.content || {}) };
-      this._size = content.size;
+      const rawContent = objectData.content || {};
+      const content = { ...defaultContent, ...rawContent };
+      this._width = Math.max(1, content.width);
+      this._height = Math.max(1, content.height);
       this._zoom = content.zoom;
       this._stayOnScreen = content.stayOnScreen;
       this._backgroundImage = content.backgroundImage;
@@ -132,28 +189,27 @@ namespace gdjs {
       this._obstacleOpacity = content.obstacleOpacity;
       this._useObjectShape = content.useObjectShape;
       this._autoDetectBounds = content.autoDetectBounds;
-      this._updateRate = content.updateRate > 0 ? content.updateRate : 30;
-
-      this._updateInterval = this._updateRate > 0 ? 1000 / this._updateRate : 0;
 
       this._renderer = new gdjs.MinimapRuntimeObjectRenderer(
         this,
         instanceContainer
       );
 
+      // *ALWAYS* call `this.onCreated()` at the very end of your object constructor.
       this.onCreated();
     }
 
-    getRendererObject() {
+    override getRendererObject() {
       return this._renderer.getRendererObject();
     }
 
-    updateFromObjectData(
+    override updateFromObjectData(
       oldObjectData: MinimapObjectData,
       newObjectData: MinimapObjectData
     ): boolean {
       const defaultContent = {
-        size: 200,
+        width: 200,
+        height: 200,
         zoom: 0.1,
         stayOnScreen: true,
         backgroundImage: '',
@@ -176,108 +232,178 @@ namespace gdjs {
         obstacleOpacity: 0.5,
         useObjectShape: true,
         autoDetectBounds: true,
-        updateRate: 30,
       };
       const oldContent = { ...defaultContent, ...(oldObjectData.content || {}) };
       const content = { ...defaultContent, ...(newObjectData.content || {}) };
-      
-      if (oldContent.size !== content.size) {
-        this._size = content.size;
+
+      let needsUpdate = false;
+
+      if (!this._hasCustomSize) {
+        if (oldContent.width !== content.width) {
+          this._width = Math.max(1, content.width);
+          needsUpdate = true;
+        }
+        if (oldContent.height !== content.height) {
+          this._height = Math.max(1, content.height);
+          needsUpdate = true;
+        }
       }
       if (oldContent.zoom !== content.zoom) {
         this._zoom = content.zoom;
+        needsUpdate = true;
       }
       if (oldContent.stayOnScreen !== content.stayOnScreen) {
         this._stayOnScreen = content.stayOnScreen;
+        needsUpdate = true;
       }
       if (oldContent.backgroundImage !== content.backgroundImage) {
         this._backgroundImage = content.backgroundImage;
+        needsUpdate = true;
       }
       if (oldContent.frameImage !== content.frameImage) {
         this._frameImage = content.frameImage;
+        needsUpdate = true;
       }
       if (oldContent.backgroundColor !== content.backgroundColor) {
         this._backgroundColor = content.backgroundColor;
+        needsUpdate = true;
       }
       if (oldContent.backgroundOpacity !== content.backgroundOpacity) {
         this._backgroundOpacity = content.backgroundOpacity;
+        needsUpdate = true;
       }
       if (oldContent.borderColor !== content.borderColor) {
         this._borderColor = content.borderColor;
+        needsUpdate = true;
       }
       if (oldContent.borderWidth !== content.borderWidth) {
         this._borderWidth = content.borderWidth;
+        needsUpdate = true;
       }
       if (oldContent.playerMarkerImage !== content.playerMarkerImage) {
         this._playerMarkerImage = content.playerMarkerImage;
+        needsUpdate = true;
       }
       if (oldContent.playerColor !== content.playerColor) {
         this._playerColor = content.playerColor;
+        needsUpdate = true;
       }
       if (oldContent.playerSize !== content.playerSize) {
         this._playerSize = content.playerSize;
+        needsUpdate = true;
       }
       if (oldContent.enemyMarkerImage !== content.enemyMarkerImage) {
         this._enemyMarkerImage = content.enemyMarkerImage;
+        needsUpdate = true;
       }
       if (oldContent.enemyColor !== content.enemyColor) {
         this._enemyColor = content.enemyColor;
+        needsUpdate = true;
       }
       if (oldContent.enemySize !== content.enemySize) {
         this._enemySize = content.enemySize;
+        needsUpdate = true;
       }
       if (oldContent.itemMarkerImage !== content.itemMarkerImage) {
         this._itemMarkerImage = content.itemMarkerImage;
+        needsUpdate = true;
       }
       if (oldContent.itemColor !== content.itemColor) {
         this._itemColor = content.itemColor;
+        needsUpdate = true;
       }
       if (oldContent.itemSize !== content.itemSize) {
         this._itemSize = content.itemSize;
+        needsUpdate = true;
       }
       if (oldContent.showObstacles !== content.showObstacles) {
         this._showObstacles = content.showObstacles;
+        needsUpdate = true;
       }
       if (oldContent.obstacleColor !== content.obstacleColor) {
         this._obstacleColor = content.obstacleColor;
+        needsUpdate = true;
       }
       if (oldContent.obstacleOpacity !== content.obstacleOpacity) {
         this._obstacleOpacity = content.obstacleOpacity;
+        needsUpdate = true;
       }
       if (oldContent.useObjectShape !== content.useObjectShape) {
         this._useObjectShape = content.useObjectShape;
+        needsUpdate = true;
       }
       if (oldContent.autoDetectBounds !== content.autoDetectBounds) {
         this._autoDetectBounds = content.autoDetectBounds;
+        needsUpdate = true;
       }
-      if (oldContent.updateRate !== content.updateRate) {
-        this._updateRate = content.updateRate > 0 ? content.updateRate : 30;
-        this._updateInterval =
-          this._updateRate > 0 ? 1000 / this._updateRate : 0;
+
+      if (needsUpdate) {
+        this._renderer.update();
       }
 
       return true;
     }
 
-    onDestroy(instanceContainer: gdjs.RuntimeInstanceContainer): void {
-      this._renderer.onDestroy();
+    override getNetworkSyncData(
+      syncOptions: GetNetworkSyncDataOptions
+    ): MinimapNetworkSyncData {
+      return {
+        ...super.getNetworkSyncData(syncOptions),
+        w: this._width,
+        h: this._height,
+        z: this._zoom,
+        vis: this._visible,
+      };
     }
 
-    onCreated(): void {
+    override updateFromNetworkSyncData(
+      networkSyncData: MinimapNetworkSyncData,
+      options: UpdateFromNetworkSyncDataOptions
+    ): void {
+      super.updateFromNetworkSyncData(networkSyncData, options);
+
+      if (networkSyncData.w !== undefined) {
+        this._width = networkSyncData.w;
+      }
+      if (networkSyncData.h !== undefined) {
+        this._height = networkSyncData.h;
+      }
+      if (networkSyncData.z !== undefined) {
+        this._zoom = networkSyncData.z;
+      }
+      if (networkSyncData.vis !== undefined) {
+        this._visible = networkSyncData.vis;
+        this._renderer.updateVisibility();
+      }
+    }
+
+    override extraInitializationFromInitialInstance(
+      initialInstanceData: InstanceData
+    ): void {
+      if (initialInstanceData.customSize) {
+        this._width = Math.max(1, initialInstanceData.width);
+        this._height = Math.max(1, initialInstanceData.height);
+        this._hasCustomSize = true;
+      }
+    }
+
+    override onCreated(): void {
+      // Auto-detect bounds on creation if enabled
       if (this._autoDetectBounds) {
         this._detectBounds();
       }
     }
 
-    update(instanceContainer: gdjs.RuntimeInstanceContainer): void {
-      // Throttle updates based on accumulated elapsed time
-      const elapsed = instanceContainer.getElapsedTime();
-      this._elapsedAccumulator += elapsed;
-      if (this._elapsedAccumulator < this._updateInterval) {
-        return;
-      }
-      this._elapsedAccumulator -= this._updateInterval;
+    override onDestroyed(): void {
+      super.onDestroyed();
+      this._renderer.destroy();
+    }
 
+    /**
+     * Called once during the game loop, before events and rendering.
+     * @param instanceContainer The container the object belongs to.
+     */
+    update(instanceContainer: gdjs.RuntimeInstanceContainer): void {
       // Auto-detect bounds if needed
       if (this._autoDetectBounds && !this._boundsDetected) {
         this._detectBounds();
@@ -288,11 +414,12 @@ namespace gdjs {
     }
 
     /**
-     * Detect level bounds automatically from layer size
+     * Detect level bounds automatically from layer size and tracked objects.
+     * @internal
      */
     _detectBounds(): void {
       const layer = this.getInstanceContainer().getLayer(this.getLayer());
-      
+
       // Get camera bounds as a starting point
       const cameraMinX = layer.getCameraX() - layer.getCameraWidth() / 2;
       const cameraMinY = layer.getCameraY() - layer.getCameraHeight() / 2;
@@ -306,16 +433,15 @@ namespace gdjs {
       let maxY = cameraMaxY;
 
       const allObjects = this.getInstanceContainer().getAdhocListOfAllInstances();
-      for (let i = 0; i < allObjects.length; i++) {
-        const obj = allObjects[i];
+      for (const obj of allObjects) {
         const behavior = obj.getBehavior('MinimapMarker');
-        
+
         if (behavior) {
           const x = obj.getX();
           const y = obj.getY();
           const width = obj.getWidth();
           const height = obj.getHeight();
-          
+
           minX = Math.min(minX, x);
           minY = Math.min(minY, y);
           maxX = Math.max(maxX, x + width);
@@ -329,12 +455,15 @@ namespace gdjs {
       this._boundsMinY = minY - padding;
       this._boundsMaxX = maxX + padding;
       this._boundsMaxY = maxY + padding;
-      
+
       this._boundsDetected = true;
     }
 
     /**
-     * Convert world coordinates to minimap coordinates
+     * Convert world coordinates to minimap coordinates.
+     * @param worldX The world X coordinate.
+     * @param worldY The world Y coordinate.
+     * @returns A tuple containing the minimap X and Y coordinates.
      */
     worldToMinimap(worldX: number, worldY: number): [number, number] {
       const worldWidth = this._boundsMaxX - this._boundsMinX;
@@ -342,128 +471,363 @@ namespace gdjs {
       if (worldWidth <= 0 || worldHeight <= 0) {
         return [0, 0];
       }
-      
+
       const normalizedX = (worldX - this._boundsMinX) / worldWidth;
       const normalizedY = (worldY - this._boundsMinY) / worldHeight;
-      
-      const minimapX = normalizedX * this._size;
-      const minimapY = normalizedY * this._size;
-      
+
+      const minimapX = normalizedX * this._width;
+      const minimapY = normalizedY * this._height;
+
       return [minimapX, minimapY];
     }
 
     /**
-     * Get all tracked objects
+     * Get all tracked objects with MinimapMarker behavior.
+     * @returns An array of tracked runtime objects.
      */
     getTrackedObjects(): gdjs.RuntimeObject[] {
       const tracked: gdjs.RuntimeObject[] = [];
       const allObjects = this.getInstanceContainer().getAdhocListOfAllInstances();
-      
-      for (let i = 0; i < allObjects.length; i++) {
-        const obj = allObjects[i];
+
+      for (const obj of allObjects) {
         const behavior = obj.getBehavior('MinimapMarker');
-        
+
         if (behavior) {
-          const markerBehavior = behavior as any;
-          if (markerBehavior.isVisibleOnMinimap && markerBehavior.isVisibleOnMinimap()) {
+          const markerBehavior = behavior as gdjs.MinimapMarkerRuntimeBehavior;
+          if (markerBehavior.isVisibleOnMinimap()) {
             tracked.push(obj);
           }
         }
       }
-      
+
       return tracked;
     }
 
     // ===== PUBLIC API =====
 
+    /**
+     * Show the minimap.
+     */
     show(): void {
       this._visible = true;
       this._renderer.updateVisibility();
     }
 
+    /**
+     * Hide the minimap.
+     */
     hide(): void {
       this._visible = false;
       this._renderer.updateVisibility();
     }
 
+    /**
+     * Toggle the minimap visibility.
+     */
     toggleVisibility(): void {
       this._visible = !this._visible;
       this._renderer.updateVisibility();
     }
 
+    /**
+     * Check if the minimap is visible.
+     * @returns True if the minimap is visible.
+     */
     isVisible(): boolean {
       return this._visible;
     }
 
+    /**
+     * Zoom in the minimap.
+     */
     zoomIn(): void {
       this._zoom = Math.min(1.0, this._zoom + 0.05);
     }
 
+    /**
+     * Zoom out the minimap.
+     */
     zoomOut(): void {
       this._zoom = Math.max(0.01, this._zoom - 0.05);
     }
 
+    /**
+     * Set the zoom level of the minimap.
+     * @param zoom The zoom level (0.01 to 1.0).
+     */
     setZoom(zoom: number): void {
       this._zoom = Math.max(0.01, Math.min(1.0, zoom));
     }
 
+    /**
+     * Get the current zoom level.
+     * @returns The zoom level.
+     */
     getZoomLevel(): number {
       return this._zoom;
     }
 
+    /**
+     * Set the position of the minimap on screen.
+     * @param x The X position.
+     * @param y The Y position.
+     */
     setPosition(x: number, y: number): void {
       this.setX(x);
       this.setY(y);
     }
 
+    /**
+     * Set the size of the minimap (both width and height).
+     * @param size The size in pixels.
+     */
     setSize(size: number): void {
-      this._size = Math.max(50, size);
+      const clamped = Math.max(50, size);
+      this._width = clamped;
+      this._height = clamped;
+      this._hasCustomSize = true;
+      this._renderer.update();
     }
 
+    /**
+     * Set the width of the minimap.
+     * @param width The width in pixels.
+     */
+    override setWidth(width: number): void {
+      this._width = Math.max(1, width);
+      this._hasCustomSize = true;
+      this._renderer.update();
+    }
+
+    /**
+     * Set the height of the minimap.
+     * @param height The height in pixels.
+     */
+    override setHeight(height: number): void {
+      this._height = Math.max(1, height);
+      this._hasCustomSize = true;
+      this._renderer.update();
+    }
+
+    /**
+     * Get the width of the minimap.
+     * @returns The width in pixels.
+     */
+    override getWidth(): number {
+      return this._width;
+    }
+
+    /**
+     * Get the height of the minimap.
+     * @returns The height in pixels.
+     */
+    override getHeight(): number {
+      return this._height;
+    }
+
+    /**
+     * Get the number of tracked objects.
+     * @param markerType Optional marker type to filter by.
+     * @returns The number of tracked objects.
+     */
     getTrackedCount(markerType?: string): number {
       const tracked = this.getTrackedObjects();
-      
+
       if (!markerType) {
         return tracked.length;
       }
-      
+
       let count = 0;
       for (const obj of tracked) {
         const behavior = obj.getBehavior('MinimapMarker');
         if (behavior) {
-          const markerBehavior = behavior as any;
-          if (markerBehavior.getMarkerType && markerBehavior.getMarkerType() === markerType) {
+          const markerBehavior = behavior as gdjs.MinimapMarkerRuntimeBehavior;
+          if (markerBehavior.getMarkerType() === markerType) {
             count++;
           }
         }
       }
-      
+
       return count;
     }
 
     // Getters for renderer
-    getSize(): number { return this._size; }
-    getZoom(): number { return this._zoom; }
-    getStayOnScreen(): boolean { return this._stayOnScreen; }
-    getBackgroundImage(): string { return this._backgroundImage; }
-    getFrameImage(): string { return this._frameImage; }
-    getBackgroundColor(): string { return this._backgroundColor; }
-    getBackgroundOpacity(): number { return this._backgroundOpacity; }
-    getBorderColor(): string { return this._borderColor; }
-    getBorderWidth(): number { return this._borderWidth; }
-    getPlayerMarkerImage(): string { return this._playerMarkerImage; }
-    getPlayerColor(): string { return this._playerColor; }
-    getPlayerSize(): number { return this._playerSize; }
-    getEnemyMarkerImage(): string { return this._enemyMarkerImage; }
-    getEnemyColor(): string { return this._enemyColor; }
-    getEnemySize(): number { return this._enemySize; }
-    getItemMarkerImage(): string { return this._itemMarkerImage; }
-    getItemColor(): string { return this._itemColor; }
-    getItemSize(): number { return this._itemSize; }
-    getShowObstacles(): boolean { return this._showObstacles; }
-    getObstacleColor(): string { return this._obstacleColor; }
-    getObstacleOpacity(): number { return this._obstacleOpacity; }
-    getUseObjectShape(): boolean { return this._useObjectShape; }
+
+    /**
+     * Get the size (maximum of width and height).
+     * @returns The size in pixels.
+     */
+    getSize(): number {
+      return Math.max(this._width, this._height);
+    }
+
+    /**
+     * Get the zoom level.
+     * @returns The zoom level.
+     */
+    getZoom(): number {
+      return this._zoom;
+    }
+
+    /**
+     * Check if the minimap stays on screen.
+     * @returns True if the minimap stays on screen.
+     */
+    getStayOnScreen(): boolean {
+      return this._stayOnScreen;
+    }
+
+    /**
+     * Get the background image resource name.
+     * @returns The background image resource name.
+     */
+    getBackgroundImage(): string {
+      return this._backgroundImage;
+    }
+
+    /**
+     * Get the frame image resource name.
+     * @returns The frame image resource name.
+     */
+    getFrameImage(): string {
+      return this._frameImage;
+    }
+
+    /**
+     * Get the background color.
+     * @returns The background color in "R;G;B" format.
+     */
+    getBackgroundColor(): string {
+      return this._backgroundColor;
+    }
+
+    /**
+     * Get the background opacity.
+     * @returns The background opacity (0-1).
+     */
+    getBackgroundOpacity(): number {
+      return this._backgroundOpacity;
+    }
+
+    /**
+     * Get the border color.
+     * @returns The border color in "R;G;B" format.
+     */
+    getBorderColor(): string {
+      return this._borderColor;
+    }
+
+    /**
+     * Get the border width.
+     * @returns The border width in pixels.
+     */
+    getBorderWidth(): number {
+      return this._borderWidth;
+    }
+
+    /**
+     * Get the player marker image resource name.
+     * @returns The player marker image resource name.
+     */
+    getPlayerMarkerImage(): string {
+      return this._playerMarkerImage;
+    }
+
+    /**
+     * Get the player marker color.
+     * @returns The player marker color in "R;G;B" format.
+     */
+    getPlayerColor(): string {
+      return this._playerColor;
+    }
+
+    /**
+     * Get the player marker size.
+     * @returns The player marker size in pixels.
+     */
+    getPlayerSize(): number {
+      return this._playerSize;
+    }
+
+    /**
+     * Get the enemy marker image resource name.
+     * @returns The enemy marker image resource name.
+     */
+    getEnemyMarkerImage(): string {
+      return this._enemyMarkerImage;
+    }
+
+    /**
+     * Get the enemy marker color.
+     * @returns The enemy marker color in "R;G;B" format.
+     */
+    getEnemyColor(): string {
+      return this._enemyColor;
+    }
+
+    /**
+     * Get the enemy marker size.
+     * @returns The enemy marker size in pixels.
+     */
+    getEnemySize(): number {
+      return this._enemySize;
+    }
+
+    /**
+     * Get the item marker image resource name.
+     * @returns The item marker image resource name.
+     */
+    getItemMarkerImage(): string {
+      return this._itemMarkerImage;
+    }
+
+    /**
+     * Get the item marker color.
+     * @returns The item marker color in "R;G;B" format.
+     */
+    getItemColor(): string {
+      return this._itemColor;
+    }
+
+    /**
+     * Get the item marker size.
+     * @returns The item marker size in pixels.
+     */
+    getItemSize(): number {
+      return this._itemSize;
+    }
+
+    /**
+     * Check if obstacles are shown on the minimap.
+     * @returns True if obstacles are shown.
+     */
+    getShowObstacles(): boolean {
+      return this._showObstacles;
+    }
+
+    /**
+     * Get the obstacle color.
+     * @returns The obstacle color in "R;G;B" format.
+     */
+    getObstacleColor(): string {
+      return this._obstacleColor;
+    }
+
+    /**
+     * Get the obstacle opacity.
+     * @returns The obstacle opacity (0-1).
+     */
+    getObstacleOpacity(): number {
+      return this._obstacleOpacity;
+    }
+
+    /**
+     * Check if object shape is used for obstacles.
+     * @returns True if object shape is used.
+     */
+    getUseObjectShape(): boolean {
+      return this._useObjectShape;
+    }
   }
 
   gdjs.registerObject('Minimap::Minimap', gdjs.MinimapRuntimeObject);

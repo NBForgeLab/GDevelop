@@ -391,8 +391,6 @@ const propertyKeywordCouples: Array<Array<string>> = [
   ['Min', 'Max'],
   ['Low', 'High'],
   ['Color', 'Opacity'],
-  ['Size', 'Update rate'],
-  ['Color', 'Width'],
   ['Horizontal', 'Vertical'],
   ['Acceleration', 'Deceleration'],
   ['Duration', 'Easing'],

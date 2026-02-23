@@ -10,7 +10,8 @@
 #include "GDCore/Tools/Localization.h"
 
 MinimapObject::MinimapObject()
-    : size(200),
+    : defaultWidth(200),
+      defaultHeight(200),
       zoom(0.1),
       stayOnScreen(true),
       backgroundImage(""),
@@ -32,18 +33,25 @@ MinimapObject::MinimapObject()
       obstacleColor("128;128;128"),
       obstacleOpacity(0.5),
       useObjectShape(true),
-      autoDetectBounds(true),
-      updateRate(30) {}
+      autoDetectBounds(true) {}
 
 std::map<gd::String, gd::PropertyDescriptor> MinimapObject::GetProperties()
     const {
   std::map<gd::String, gd::PropertyDescriptor> properties;
 
   // Layout (ungrouped, for compact row layout)
-  properties["size"]
-      .SetValue(gd::String::From(size))
+  properties["width"]
+      .SetValue(gd::String::From(defaultWidth))
       .SetType("Number")
-      .SetLabel(_("Size (square)"))
+      .SetLabel(_("Default width (in pixels)"))
+      .SetMeasurementUnit(gd::MeasurementUnit::GetPixel())
+      .SetGroup("");
+
+  properties["height"]
+      .SetValue(gd::String::From(defaultHeight))
+      .SetType("Number")
+      .SetLabel(_("Default height (in pixels)"))
+      .SetMeasurementUnit(gd::MeasurementUnit::GetPixel())
       .SetGroup("");
 
   properties["zoom"]
@@ -123,19 +131,19 @@ std::map<gd::String, gd::PropertyDescriptor> MinimapObject::GetProperties()
       .SetLabel(_("Auto-detect level bounds"))
       .SetGroup("");
 
-  properties["update rate"]
-      .SetValue(gd::String::From(updateRate))
-      .SetType("Number")
-      .SetLabel(_("Update rate (FPS)"))
-      .SetGroup("");
+  // No update rate field: minimap updates every frame
 
   return properties;
 }
 
 bool MinimapObject::UpdateProperty(const gd::String& name,
                                     const gd::String& value) {
-  if (name == "size") {
-    size = value.To<double>();
+  if (name == "width") {
+    defaultWidth = value.To<double>();
+    return true;
+  }
+  if (name == "height") {
+    defaultHeight = value.To<double>();
     return true;
   }
   if (name == "zoom") {
@@ -226,10 +234,7 @@ bool MinimapObject::UpdateProperty(const gd::String& name,
     autoDetectBounds = value == "1" || value == "true";
     return true;
   }
-  if (name == "update rate") {
-    updateRate = value.To<double>();
-    return true;
-  }
+  // No update rate property
 
   return false;
 }

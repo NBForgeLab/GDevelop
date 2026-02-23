@@ -30,7 +30,8 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
       _("Minimap"),
       _("A minimap that automatically tracks objects with markers and displays "
         "them on screen."),
-      "CppPlatform/Extensions/texticon.png");
+      "CppPlatform/Extensions/texticon.png")
+      .SetCategory("User interface");
 
   minimapObject
       .AddExpression("ZoomLevel",
