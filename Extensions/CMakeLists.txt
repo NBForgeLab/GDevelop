@@ -15,6 +15,7 @@ set(
 	DraggableBehavior
 	Inventory
 	LinkedObjects
+	Minimap
 	Sticker3DBehavior
 	PanelSpriteObject
 	ParticleSystem
