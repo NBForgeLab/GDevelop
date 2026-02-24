@@ -27,7 +27,10 @@ const CompactSearchBar: React.ComponentType<{
   ...CompactSearchBarProps,
   +ref?: React.RefSetter<CompactSearchBarInterface>,
 }> = React.forwardRef<CompactSearchBarProps, CompactSearchBarInterface>(
-  ({ value, onChange, onRequestSearch, id, disabled, errored, placeholder }, ref) => {
+  (
+    { value, onChange, onRequestSearch, id, disabled, errored, placeholder },
+    ref
+  ) => {
     const idToUse = React.useRef<string>(id || makeTimestampedId());
     const inputRef = React.useRef<HTMLInputElement | null>(null);
 

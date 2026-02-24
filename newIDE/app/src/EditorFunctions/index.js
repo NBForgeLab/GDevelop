@@ -911,6 +911,18 @@ const createOrReplaceObject: EditorFunction = {
         return createNewObject();
       }
 
+      if (existingTargetObject.getType() !== object_type) {
+        return makeGenericFailure(
+          `Existing object "${existingTargetObject.getName()}" is of type "${existingTargetObject.getType()}". It can't be replaced by an object of type "${object_type}". This object was not changed/replaced.`
+        );
+      }
+
+      if (!search_terms && !description && !two_dimensional_view_kind) {
+        return makeGenericFailure(
+          `No search terms, description or information were provided to replace the object "${existingTargetObject.getName()}". This object was not changed/replaced.`
+        );
+      }
+
       const objectsContainerWhereObjectWasFound = isTargetObjectGlobal
         ? globalObjects
         : layoutObjects;
