@@ -62,6 +62,7 @@ class GD_EXTENSION_API MinimapObject : public gd::ObjectConfiguration {
   double GetObstacleOpacity() const { return obstacleOpacity; }
   bool GetUseObjectShape() const { return useObjectShape; }
   bool GetAutoDetectBounds() const { return autoDetectBounds; }
+  const gd::String& GetShape() const { return shape; }
   // No update rate: minimap updates every frame
 
   // Setters
@@ -89,6 +90,7 @@ class GD_EXTENSION_API MinimapObject : public gd::ObjectConfiguration {
   void SetObstacleOpacity(double value) { obstacleOpacity = value; }
   void SetUseObjectShape(bool value) { useObjectShape = value; }
   void SetAutoDetectBounds(bool value) { autoDetectBounds = value; }
+  void SetShape(const gd::String& value) { shape = value; }
   // No update rate setter
 
  private:
@@ -133,4 +135,7 @@ class GD_EXTENSION_API MinimapObject : public gd::ObjectConfiguration {
   
   // Mode: Minimap or WorldMap
   gd::String mode;
+  
+  // Shape: Rectangle or Circle
+  gd::String shape;
 };

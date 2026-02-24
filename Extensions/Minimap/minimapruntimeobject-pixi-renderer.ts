@@ -13,6 +13,7 @@ namespace gdjs {
     _contentGraphics: PIXI.Graphics;
     _borderGraphics: PIXI.Graphics;
     _markersContainer: PIXI.Container;
+    _maskGraphics: PIXI.Graphics | null = null;
 
     _backgroundSprite: PIXI.Sprite | null = null;
     _frameSprite: PIXI.Sprite | null = null;
@@ -22,6 +23,7 @@ namespace gdjs {
 
     _currentBackgroundImage: string = '';
     _currentFrameImage: string = '';
+    _currentShape: string = 'Rectangle';
 
     // Track previous world positions to compute heading when angle is unavailable
     _prevWorldPositions: Map<string, { x: number; y: number }> = new Map();
@@ -86,6 +88,14 @@ namespace gdjs {
         this._pixiContainer.removeChild(this._frameSprite);
         this._frameSprite.destroy();
         this._frameSprite = null;
+      }
+
+      // Clean up mask graphics
+      if (this._maskGraphics) {
+        this._pixiContainer.mask = null;
+        this._pixiContainer.removeChild(this._maskGraphics);
+        this._maskGraphics.destroy();
+        this._maskGraphics = null;
       }
 
       // Clean up marker sprites
@@ -165,6 +175,9 @@ namespace gdjs {
         sprite.visible = false;
       });
 
+      // Update mask for circular shape
+      this._updateMask();
+
       // Render background
       this._renderBackground();
 
@@ -179,24 +192,67 @@ namespace gdjs {
     }
 
     /**
+     * Update the mask for circular shape.
+     * @internal
+     */
+    _updateMask(): void {
+      const shape = this._object.getShape();
+      const width = this._object.getWidth();
+      const height = this._object.getHeight();
+
+      if (shape === 'Circle') {
+        // Create or update mask for circular shape
+        if (!this._maskGraphics) {
+          this._maskGraphics = new PIXI.Graphics();
+          this._pixiContainer.addChild(this._maskGraphics);
+          this._pixiContainer.mask = this._maskGraphics;
+        }
+
+        this._maskGraphics.clear();
+        const radius = Math.min(width, height) / 2;
+        this._maskGraphics.beginFill(0xffffff);
+        this._maskGraphics.drawCircle(width / 2, height / 2, radius);
+        this._maskGraphics.endFill();
+        this._currentShape = 'Circle';
+      } else {
+        // Remove mask for rectangular shape
+        if (this._maskGraphics) {
+          this._pixiContainer.mask = null;
+          this._pixiContainer.removeChild(this._maskGraphics);
+          this._maskGraphics.destroy();
+          this._maskGraphics = null;
+        }
+        this._currentShape = 'Rectangle';
+      }
+    }
+
+    /**
      * Render the background of the minimap.
      * @internal
      */
     _renderBackground(): void {
       const bgImage = this._object.getBackgroundImage();
+      const shape = this._object.getShape();
+      const width = this._object.getWidth();
+      const height = this._object.getHeight();
 
       if (bgImage && bgImage !== '') {
         // Use background image
         this._loadAndRenderBackgroundImage(bgImage);
       } else {
         // Use solid color
-        const width = this._object.getWidth();
-        const height = this._object.getHeight();
         const bgColor = this._parseColor(this._object.getBackgroundColor());
         const bgOpacity = this._object.getBackgroundOpacity();
 
         this._backgroundGraphics.beginFill(bgColor, bgOpacity);
-        this._backgroundGraphics.drawRect(0, 0, width, height);
+        if (shape === 'Circle') {
+          // Draw circular background
+          const radius = Math.min(width, height) / 2;
+          this._backgroundGraphics.drawCircle(width / 2, height / 2, radius);
+        } else {
+          // Draw rectangular background
+          this._backgroundGraphics.drawRect(0, 0, width, height);
+        }
         this._backgroundGraphics.endFill();
       }
     }
@@ -539,10 +595,18 @@ namespace gdjs {
       const height = this._object.getHeight();
       const borderColor = this._parseColor(this._object.getBorderColor());
       const borderWidth = this._object.getBorderWidth();
+      const shape = this._object.getShape();
 
       if (borderWidth > 0) {
         this._borderGraphics.lineStyle(borderWidth, borderColor, 1);
-        this._borderGraphics.drawRect(0, 0, width, height);
+        if (shape === 'Circle') {
+          // Draw circular border
+          const radius = Math.min(width, height) / 2;
+          this._borderGraphics.drawCircle(width / 2, height / 2, radius);
+        } else {
+          // Draw rectangular border
+          this._borderGraphics.drawRect(0, 0, width, height);
+        }
       }
     }
 

@@ -8,6 +8,8 @@ namespace gdjs {
     content: {
       /** Map mode: 'Minimap' or 'WorldMap' */
       mode: string;
+      /** Minimap shape: 'Rectangle' or 'Circle' */
+      shape: string;
       /** Width of the minimap in pixels */
       width: number;
       /** Height of the minimap in pixels */
@@ -93,6 +95,7 @@ namespace gdjs {
     _zoom: number;
     _stayOnScreen: boolean;
     _mode: string;
+    _shape: string;
     _backgroundImage: string;
     _frameImage: string;
     _backgroundColor: string;
@@ -142,6 +145,7 @@ namespace gdjs {
 
       const defaultContent = {
         mode: 'Minimap',
+        shape: 'Rectangle',
         width: 200,
         height: 200,
         zoom: 0.1,
@@ -170,6 +174,7 @@ namespace gdjs {
       const rawContent = objectData.content || {};
       const content = { ...defaultContent, ...rawContent };
       this._mode = content.mode === 'WorldMap' ? 'WorldMap' : 'Minimap';
+      this._shape = content.shape === 'Circle' ? 'Circle' : 'Rectangle';
       this._width = Math.max(1, content.width);
       this._height = Math.max(1, content.height);
       this._zoom = content.zoom;
@@ -214,6 +219,7 @@ namespace gdjs {
     ): boolean {
       const defaultContent = {
         mode: 'Minimap',
+        shape: 'Rectangle',
         width: 200,
         height: 200,
         zoom: 0.1,
@@ -246,6 +252,11 @@ namespace gdjs {
 
       if (oldContent.mode !== content.mode) {
         this._mode = content.mode === 'WorldMap' ? 'WorldMap' : 'Minimap';
+        needsUpdate = true;
+      }
+
+      if (oldContent.shape !== content.shape) {
+        this._shape = content.shape === 'Circle' ? 'Circle' : 'Rectangle';
         needsUpdate = true;
       }
 
@@ -736,6 +747,14 @@ namespace gdjs {
      */
     getStayOnScreen(): boolean {
       return this._stayOnScreen;
+    }
+
+    /**
+     * Get the minimap shape.
+     * @returns The shape ('Rectangle' or 'Circle').
+     */
+    getShape(): string {
+      return this._shape;
     }
 
     /**
