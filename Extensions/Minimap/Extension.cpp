@@ -255,8 +255,8 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
       .AddParameter("behavior", _("Behavior"), "MapMarker")
       .AddParameter("stringWithSelector",
                     _("Marker type"),
-                    "[\"Player\", \"Enemy\", \"Ally\", \"Item\", \"Objective\", "
-                    "\"Waypoint\", \"Obstacle\", \"Neutral\", \"Custom\"]")
+                    "[\"Player\", \"Enemy\", \"Ally\", \"Item\", "
+                    "\"Obstacle\", \"Custom\"]")
       .SetFunctionName("setMarkerType")
       .SetIncludeFile("Extensions/Minimap/minimapmarkerbehavior.js");
 
@@ -300,8 +300,8 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
       .AddParameter("behavior", _("Behavior"), "MapMarker")
       .AddParameter("stringWithSelector",
                     _("Marker type"),
-                    "[\"Player\", \"Enemy\", \"Ally\", \"Item\", \"Objective\", "
-                    "\"Waypoint\", \"Obstacle\", \"Neutral\", \"Custom\"]")
+                    "[\"Player\", \"Enemy\", \"Ally\", \"Item\", "
+                    "\"Obstacle\", \"Custom\"]")
       .SetFunctionName("markerTypeIs")
       .SetIncludeFile("Extensions/Minimap/minimapmarkerbehavior.js");
 }

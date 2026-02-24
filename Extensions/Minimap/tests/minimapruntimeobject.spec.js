@@ -313,7 +313,7 @@ describe('gdjs.MinimapMarkerRuntimeBehavior', function () {
   });
 
   describe('Marker Type', function () {
-    it('should have default marker type of Neutral', function () {
+    it('should have default marker type of Player', function () {
       // The default in the test object is Player, so this tests setter works
       expect(behavior.getMarkerType()).to.be('Player');
     });

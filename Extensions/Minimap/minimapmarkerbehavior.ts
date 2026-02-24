@@ -61,7 +61,7 @@ namespace gdjs {
     ) {
       super(instanceContainer, behaviorData, owner);
 
-      this._markerType = behaviorData.markerType || 'Neutral';
+      this._markerType = behaviorData.markerType || 'Player';
       this._customColor = behaviorData.customColor || '255;255;255';
       this._customSize = behaviorData.customSize || 0;
       this._customIcon = behaviorData.customIcon || '';
@@ -151,7 +151,7 @@ namespace gdjs {
 
     /**
      * Set the marker type.
-     * @param type The marker type (Player, Enemy, Item, Ally, Objective, Waypoint, Obstacle, Neutral, Custom).
+     * @param type The marker type (Player, Enemy, Item, Ally, Obstacle, Custom).
      */
     setMarkerType(type: string): void {
       this._markerType = type;

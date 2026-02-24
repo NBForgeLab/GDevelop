@@ -342,16 +342,6 @@ namespace gdjs {
           customIcon =
             markerBehavior.getCustomIcon() || this._object.getItemMarkerImage();
           break;
-        case 'Objective':
-          color = this._parseColor(markerBehavior.getCustomColor() || '255;0;255');
-          size = 10;
-          customIcon = markerBehavior.getCustomIcon() || '';
-          break;
-        case 'Waypoint':
-          color = this._parseColor(markerBehavior.getCustomColor() || '255;255;255');
-          size = 6;
-          customIcon = markerBehavior.getCustomIcon() || '';
-          break;
         case 'Obstacle':
           if (!this._object.getShowObstacles()) return;
           color = this._parseColor(
@@ -364,11 +354,6 @@ namespace gdjs {
             this._renderObstacleShape(obj, minimapX, minimapY, color);
             return;
           }
-          break;
-        case 'Neutral':
-          color = this._parseColor(markerBehavior.getCustomColor() || '255;255;255');
-          size = 8;
-          customIcon = markerBehavior.getCustomIcon() || '';
           break;
         case 'Custom':
           color = this._parseColor(markerBehavior.getCustomColor() || '255;255;255');

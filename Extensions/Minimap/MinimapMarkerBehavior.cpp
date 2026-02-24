@@ -12,7 +12,7 @@
 MinimapMarkerBehavior::MinimapMarkerBehavior() {}
 
 void MinimapMarkerBehavior::InitializeContent(gd::SerializerElement& content) {
-  content.SetAttribute("markerType", "Neutral");
+  content.SetAttribute("markerType", "Player");
   content.SetAttribute("customColor", "255;255;255");
   content.SetAttribute("customSize", 0.0);
   content.SetAttribute("customIcon", "");
@@ -25,16 +25,13 @@ MinimapMarkerBehavior::GetProperties(const gd::SerializerElement& behaviorConten
   std::map<gd::String, gd::PropertyDescriptor> properties;
 
   properties[_("markerType")]
-      .SetValue(behaviorContent.GetStringAttribute("markerType", "Neutral"))
+      .SetValue(behaviorContent.GetStringAttribute("markerType", "Player"))
       .SetType("Choice")
       .AddChoice("Player", _("Player"))
       .AddChoice("Enemy", _("Enemy"))
       .AddChoice("Ally", _("Ally"))
       .AddChoice("Item", _("Item"))
-      .AddChoice("Objective", _("Objective"))
-      .AddChoice("Waypoint", _("Waypoint"))
       .AddChoice("Obstacle", _("Obstacle"))
-      .AddChoice("Neutral", _("Neutral"))
       .AddChoice("Custom", _("Custom"))
       .SetLabel(_("Marker type"))
       .SetGroup(_("Configuration"));
