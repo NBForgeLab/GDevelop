@@ -274,7 +274,7 @@ namespace gdjs {
   }
 
   gdjs.registerBehavior(
-    'Minimap::MinimapMarker',
+    'Map::MapMarker',
     gdjs.MinimapMarkerRuntimeBehavior
   );
 }

@@ -13,8 +13,8 @@
 void DeclareMinimapExtension(gd::PlatformExtension& extension) {
   extension
       .SetExtensionInformation(
-          "Minimap",
-          _("Minimap"),
+          "Map",
+          _("Map"),
           _("Add a minimap to your game with automatic object tracking, "
             "customizable markers, and visual customization support."),
           "GDevelop Community",
@@ -26,8 +26,8 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
   // ===== MINIMAP OBJECT =====
   
   gd::ObjectMetadata& minimapObject = extension.AddObject<MinimapObject>(
-      "Minimap",
-      _("Minimap"),
+      "Map",
+      _("Map"),
       _("A minimap that automatically tracks objects with markers and displays "
         "them on screen."),
       "CppPlatform/Extensions/texticon.png")
@@ -39,7 +39,7 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
                      _("Get the current zoom level."),
                      _("Zoom"),
                      "CppPlatform/Extensions/cameraicon.png")
-      .AddParameter("object", _("Minimap"), "Minimap")
+      .AddParameter("object", _("Map"), "Map")
       .SetFunctionName("getZoomLevel")
       .SetIncludeFile("Extensions/Minimap/minimapruntimeobject.js")
       .AddIncludeFile("Extensions/Minimap/minimapruntimeobject-pixi-renderer.js");
@@ -50,7 +50,7 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
                      _("Get the number of tracked objects."),
                      _("Tracking"),
                      "CppPlatform/Extensions/positionicon.png")
-      .AddParameter("object", _("Minimap"), "Minimap")
+      .AddParameter("object", _("Map"), "Map")
       .AddParameter("string", _("Marker type (optional)"), "", true)
       .SetDefaultValue("")
       .SetFunctionName("getTrackedCount")
@@ -59,13 +59,13 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
   // Visibility actions
   minimapObject
       .AddAction("SetVisible",
-                 _("Show/hide minimap"),
-                 _("Set the visibility of the minimap."),
+                 _("Show/hide map"),
+                 _("Set the visibility of the map."),
                  _("Set visibility of _PARAM0_ to _PARAM1_"),
-                 _("Minimap"),
+                 _("Map"),
                  "CppPlatform/Extensions/visibleicon.png",
                  "CppPlatform/Extensions/visibleicon.png")
-      .AddParameter("object", _("Minimap"), "Minimap")
+      .AddParameter("object", _("Map"), "Map")
       .AddParameter("yesorno", _("Visible"))
       .SetFunctionName("setVisible")
       .SetIncludeFile("Extensions/Minimap/minimapruntimeobject.js");
@@ -75,36 +75,36 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
   minimapObject
       .AddAction("ZoomIn",
                  _("Zoom in"),
-                 _("Zoom in the minimap."),
+                 _("Zoom in the map."),
                  _("Zoom in _PARAM0_"),
-                 _("Minimap"),
+                 _("Map"),
                  "CppPlatform/Extensions/cameraicon.png",
                  "CppPlatform/Extensions/cameraicon.png")
-      .AddParameter("object", _("Minimap"), "Minimap")
+      .AddParameter("object", _("Map"), "Map")
       .SetFunctionName("zoomIn")
       .SetIncludeFile("Extensions/Minimap/minimapruntimeobject.js");
 
   minimapObject
       .AddAction("ZoomOut",
                  _("Zoom out"),
-                 _("Zoom out the minimap."),
+                 _("Zoom out the map."),
                  _("Zoom out _PARAM0_"),
-                 _("Minimap"),
+                 _("Map"),
                  "CppPlatform/Extensions/cameraicon.png",
                  "CppPlatform/Extensions/cameraicon.png")
-      .AddParameter("object", _("Minimap"), "Minimap")
+      .AddParameter("object", _("Map"), "Map")
       .SetFunctionName("zoomOut")
       .SetIncludeFile("Extensions/Minimap/minimapruntimeobject.js");
 
   minimapObject
       .AddAction("SetZoom",
                  _("Set zoom level"),
-                 _("Set the zoom level of the minimap."),
+                 _("Set the zoom level of the map."),
                  _("Set zoom level of _PARAM0_ to _PARAM1_"),
-                 _("Minimap"),
+                 _("Map"),
                  "CppPlatform/Extensions/cameraicon.png",
                  "CppPlatform/Extensions/cameraicon.png")
-      .AddParameter("object", _("Minimap"), "Minimap")
+      .AddParameter("object", _("Map"), "Map")
       .AddParameter("expression", _("Zoom level"))
       .SetFunctionName("setZoom")
       .SetIncludeFile("Extensions/Minimap/minimapruntimeobject.js");
@@ -113,12 +113,12 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
   minimapObject
       .AddAction("SetPosition",
                  _("Set position"),
-                 _("Set the position of the minimap on screen."),
+                 _("Set the position of the map on screen."),
                  _("Set position of _PARAM0_ to _PARAM1_;_PARAM2_"),
-                 _("Minimap"),
+                 _("Map"),
                  "CppPlatform/Extensions/positionicon.png",
                  "CppPlatform/Extensions/positionicon.png")
-      .AddParameter("object", _("Minimap"), "Minimap")
+      .AddParameter("object", _("Map"), "Map")
       .AddParameter("expression", _("X position"))
       .AddParameter("expression", _("Y position"))
       .SetFunctionName("setPosition")
@@ -127,12 +127,12 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
   minimapObject
       .AddAction("SetSize",
                  _("Set size"),
-                 _("Set the size of the minimap."),
+                 _("Set the size of the map."),
                  _("Set size of _PARAM0_ to _PARAM1_"),
-                 _("Minimap"),
+                 _("Map"),
                  "CppPlatform/Extensions/scalewidthicon.png",
                  "CppPlatform/Extensions/scalewidthicon.png")
-      .AddParameter("object", _("Minimap"), "Minimap")
+      .AddParameter("object", _("Map"), "Map")
       .AddParameter("expression", _("Size"))
       .SetFunctionName("setSize")
       .SetIncludeFile("Extensions/Minimap/minimapruntimeobject.js");
@@ -143,10 +143,10 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
                  _("Set player color"),
                  _("Set the default color used for Player markers."),
                  _("Set player color of _PARAM0_ to _PARAM1_"),
-                 _("Minimap"),
+                 _("Map"),
                  "CppPlatform/Extensions/texticon.png",
                  "CppPlatform/Extensions/texticon.png")
-      .AddParameter("object", _("Minimap"), "Minimap")
+      .AddParameter("object", _("Map"), "Map")
       .AddParameter("color", _("Color"))
       .SetFunctionName("setPlayerColor")
       .SetIncludeFile("Extensions/Minimap/minimapruntimeobject.js");
@@ -156,10 +156,10 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
                  _("Set enemy color"),
                  _("Set the default color used for Enemy markers."),
                  _("Set enemy color of _PARAM0_ to _PARAM1_"),
-                 _("Minimap"),
+                 _("Map"),
                  "CppPlatform/Extensions/texticon.png",
                  "CppPlatform/Extensions/texticon.png")
-      .AddParameter("object", _("Minimap"), "Minimap")
+      .AddParameter("object", _("Map"), "Map")
       .AddParameter("color", _("Color"))
       .SetFunctionName("setEnemyColor")
       .SetIncludeFile("Extensions/Minimap/minimapruntimeobject.js");
@@ -169,10 +169,10 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
                  _("Set item color"),
                  _("Set the default color used for Item markers."),
                  _("Set item color of _PARAM0_ to _PARAM1_"),
-                 _("Minimap"),
+                 _("Map"),
                  "CppPlatform/Extensions/texticon.png",
                  "CppPlatform/Extensions/texticon.png")
-      .AddParameter("object", _("Minimap"), "Minimap")
+      .AddParameter("object", _("Map"), "Map")
       .AddParameter("color", _("Color"))
       .SetFunctionName("setItemColor")
       .SetIncludeFile("Extensions/Minimap/minimapruntimeobject.js");
@@ -182,10 +182,10 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
                  _("Set obstacle color"),
                  _("Set the default color used for obstacles on the minimap."),
                  _("Set obstacle color of _PARAM0_ to _PARAM1_"),
-                 _("Minimap"),
+                 _("Map"),
                  "CppPlatform/Extensions/texticon.png",
                  "CppPlatform/Extensions/texticon.png")
-      .AddParameter("object", _("Minimap"), "Minimap")
+      .AddParameter("object", _("Map"), "Map")
       .AddParameter("color", _("Color"))
       .SetFunctionName("setObstacleColor")
       .SetIncludeFile("Extensions/Minimap/minimapruntimeobject.js");
@@ -194,25 +194,25 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
   minimapObject
       .AddCondition("IsVisible",
                     _("Is visible"),
-                    _("Check if the minimap is visible."),
+                    _("Check if the map is visible."),
                     _("_PARAM0_ is visible"),
-                    _("Minimap"),
+                    _("Map"),
                     "CppPlatform/Extensions/visibleicon.png",
                     "CppPlatform/Extensions/visibleicon.png")
-      .AddParameter("object", _("Minimap"), "Minimap")
+      .AddParameter("object", _("Map"), "Map")
       .SetFunctionName("isVisible")
       .SetIncludeFile("Extensions/Minimap/minimapruntimeobject.js");
 
   // ===== MINIMAP MARKER BEHAVIOR =====
   
   gd::BehaviorMetadata& minimapMarkerBehavior = extension.AddBehavior(
-      "MinimapMarker",
-      _("Minimap Marker"),
-      "MinimapMarker",
+      "MapMarker",
+      _("Map Marker"),
+      "MapMarker",
       _("Mark this object to be tracked and displayed on the minimap."),
       "",
       "CppPlatform/Extensions/draggableicon.png",
-      "MinimapMarker",
+      "MapMarker",
       std::make_shared<MinimapMarkerBehavior>(),
       std::make_shared<gd::BehaviorsSharedData>());
 
@@ -226,7 +226,7 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
                  "CppPlatform/Extensions/visibleicon.png",
                  "CppPlatform/Extensions/visibleicon.png")
       .AddParameter("object", _("Object"))
-      .AddParameter("behavior", _("Behavior"), "MinimapMarker")
+      .AddParameter("behavior", _("Behavior"), "MapMarker")
       .SetFunctionName("showOnMinimap")
       .SetIncludeFile("Extensions/Minimap/minimapmarkerbehavior.js");
 
@@ -239,7 +239,7 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
                  "CppPlatform/Extensions/visibleicon.png",
                  "CppPlatform/Extensions/visibleicon.png")
       .AddParameter("object", _("Object"))
-      .AddParameter("behavior", _("Behavior"), "MinimapMarker")
+      .AddParameter("behavior", _("Behavior"), "MapMarker")
       .SetFunctionName("hideOnMinimap")
       .SetIncludeFile("Extensions/Minimap/minimapmarkerbehavior.js");
 
@@ -252,7 +252,7 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
                  "CppPlatform/Extensions/texticon.png",
                  "CppPlatform/Extensions/texticon.png")
       .AddParameter("object", _("Object"))
-      .AddParameter("behavior", _("Behavior"), "MinimapMarker")
+      .AddParameter("behavior", _("Behavior"), "MapMarker")
       .AddParameter("stringWithSelector",
                     _("Marker type"),
                     "[\"Player\", \"Enemy\", \"Ally\", \"Item\", \"Objective\", "
@@ -269,7 +269,7 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
                  "CppPlatform/Extensions/particlesystemicon.png",
                  "CppPlatform/Extensions/particlesystemicon.png")
       .AddParameter("object", _("Object"))
-      .AddParameter("behavior", _("Behavior"), "MinimapMarker")
+      .AddParameter("behavior", _("Behavior"), "MapMarker")
       .AddParameter("expression", _("Duration (seconds)"))
       .SetFunctionName("flash")
       .SetIncludeFile("Extensions/Minimap/minimapmarkerbehavior.js");
@@ -284,7 +284,7 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
                     "CppPlatform/Extensions/visibleicon.png",
                     "CppPlatform/Extensions/visibleicon.png")
       .AddParameter("object", _("Object"))
-      .AddParameter("behavior", _("Behavior"), "MinimapMarker")
+      .AddParameter("behavior", _("Behavior"), "MapMarker")
       .SetFunctionName("isVisibleOnMinimap")
       .SetIncludeFile("Extensions/Minimap/minimapmarkerbehavior.js");
 
@@ -297,7 +297,7 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
                     "CppPlatform/Extensions/texticon.png",
                     "CppPlatform/Extensions/texticon.png")
       .AddParameter("object", _("Object"))
-      .AddParameter("behavior", _("Behavior"), "MinimapMarker")
+      .AddParameter("behavior", _("Behavior"), "MapMarker")
       .AddParameter("stringWithSelector",
                     _("Marker type"),
                     "[\"Player\", \"Enemy\", \"Ally\", \"Item\", \"Objective\", "

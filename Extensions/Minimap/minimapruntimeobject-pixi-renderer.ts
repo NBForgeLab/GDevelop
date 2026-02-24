@@ -264,7 +264,7 @@ namespace gdjs {
       const trackedObjects = this._object.getTrackedObjects();
 
       for (const obj of trackedObjects) {
-        const behavior = obj.getBehavior('MinimapMarker');
+        const behavior = obj.getBehavior('MapMarker');
         if (behavior) {
           this._renderMarker(obj, behavior as gdjs.MinimapMarkerRuntimeBehavior);
         }

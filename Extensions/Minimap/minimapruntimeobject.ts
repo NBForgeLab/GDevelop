@@ -6,6 +6,8 @@ namespace gdjs {
   export type MinimapObjectDataType = {
     /** The base parameters of the minimap object */
     content: {
+      /** Map mode: 'Minimap' or 'WorldMap' */
+      mode: string;
       /** Width of the minimap in pixels */
       width: number;
       /** Height of the minimap in pixels */
@@ -90,6 +92,7 @@ namespace gdjs {
     _height: number;
     _zoom: number;
     _stayOnScreen: boolean;
+    _mode: string;
     _backgroundImage: string;
     _frameImage: string;
     _backgroundColor: string;
@@ -138,6 +141,7 @@ namespace gdjs {
       super(instanceContainer, objectData, instanceData);
 
       const defaultContent = {
+        mode: 'Minimap',
         width: 200,
         height: 200,
         zoom: 0.1,
@@ -165,6 +169,7 @@ namespace gdjs {
       };
       const rawContent = objectData.content || {};
       const content = { ...defaultContent, ...rawContent };
+      this._mode = content.mode === 'WorldMap' ? 'WorldMap' : 'Minimap';
       this._width = Math.max(1, content.width);
       this._height = Math.max(1, content.height);
       this._zoom = content.zoom;
@@ -208,6 +213,7 @@ namespace gdjs {
       newObjectData: MinimapObjectData
     ): boolean {
       const defaultContent = {
+        mode: 'Minimap',
         width: 200,
         height: 200,
         zoom: 0.1,
@@ -237,6 +243,11 @@ namespace gdjs {
       const content = { ...defaultContent, ...(newObjectData.content || {}) };
 
       let needsUpdate = false;
+
+      if (oldContent.mode !== content.mode) {
+        this._mode = content.mode === 'WorldMap' ? 'WorldMap' : 'Minimap';
+        needsUpdate = true;
+      }
 
       if (!this._hasCustomSize) {
         if (oldContent.width !== content.width) {
@@ -434,7 +445,7 @@ namespace gdjs {
 
       const allObjects = this.getInstanceContainer().getAdhocListOfAllInstances();
       for (const obj of allObjects) {
-        const behavior = obj.getBehavior('MinimapMarker');
+        const behavior = obj.getBehavior('MapMarker');
 
         if (behavior) {
           const x = obj.getX();
@@ -466,6 +477,14 @@ namespace gdjs {
      * @returns A tuple containing the minimap X and Y coordinates.
      */
     worldToMinimap(worldX: number, worldY: number): [number, number] {
+      if (this._mode === 'Minimap') {
+        const playerCenter = this._getPlayerCenter();
+        const dx = worldX - playerCenter[0];
+        const dy = worldY - playerCenter[1];
+        const cx = this._width / 2;
+        const cy = this._height / 2;
+        return [cx + dx * this._zoom, cy + dy * this._zoom];
+      }
       const worldWidth = this._boundsMaxX - this._boundsMinX;
       const worldHeight = this._boundsMaxY - this._boundsMinY;
       if (worldWidth <= 0 || worldHeight <= 0) {
@@ -490,7 +509,7 @@ namespace gdjs {
       const allObjects = this.getInstanceContainer().getAdhocListOfAllInstances();
 
       for (const obj of allObjects) {
-        const behavior = obj.getBehavior('MinimapMarker');
+        const behavior = obj.getBehavior('MapMarker');
 
         if (behavior) {
           const markerBehavior = behavior as gdjs.MinimapMarkerRuntimeBehavior;
@@ -514,6 +533,25 @@ namespace gdjs {
     setVisible(visible: boolean): void {
       this._visible = !!visible;
       this._renderer.updateVisibility();
+    }
+
+    /**
+     * Get player center position if available; otherwise use camera center.
+     * @internal
+     */
+    _getPlayerCenter(): [number, number] {
+      const tracked = this.getTrackedObjects();
+      for (const obj of tracked) {
+        const behavior = obj.getBehavior('MapMarker');
+        if (behavior) {
+          const markerBehavior = behavior as gdjs.MinimapMarkerRuntimeBehavior;
+          if (markerBehavior.getMarkerType() === 'Player') {
+            return [obj.getCenterXInScene(), obj.getCenterYInScene()];
+          }
+        }
+      }
+      const layer = this.getInstanceContainer().getLayer(this.getLayer());
+      return [layer.getCameraX(), layer.getCameraY()];
     }
 
     /**
@@ -662,7 +700,7 @@ namespace gdjs {
 
       let count = 0;
       for (const obj of tracked) {
-        const behavior = obj.getBehavior('MinimapMarker');
+        const behavior = obj.getBehavior('MapMarker');
         if (behavior) {
           const markerBehavior = behavior as gdjs.MinimapMarkerRuntimeBehavior;
           if (markerBehavior.getMarkerType() === markerType) {
@@ -853,5 +891,5 @@ namespace gdjs {
     }
   }
 
-  gdjs.registerObject('Minimap::Minimap', gdjs.MinimapRuntimeObject);
+  gdjs.registerObject('Map::Map', gdjs.MinimapRuntimeObject);
 }

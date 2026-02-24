@@ -130,4 +130,7 @@ class GD_EXTENSION_API MinimapObject : public gd::ObjectConfiguration {
   // Advanced
   bool autoDetectBounds;
   // No update rate storage
+  
+  // Mode: Minimap or WorldMap
+  gd::String mode;
 };

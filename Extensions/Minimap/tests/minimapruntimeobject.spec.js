@@ -49,7 +49,7 @@ describe('gdjs.MinimapRuntimeObject', function () {
   // Create a minimap object
   var minimapObject = new gdjs.TestRuntimeObject(runtimeScene, {
     name: 'minimap1',
-    type: 'Minimap::Minimap',
+    type: 'Map::Map',
     variables: [],
     effects: [],
     content: {
@@ -87,8 +87,8 @@ describe('gdjs.MinimapRuntimeObject', function () {
     type: '',
     behaviors: [
       {
-        name: 'MinimapMarker1',
-        type: 'Minimap::MinimapMarker',
+        name: 'MapMarker1',
+        type: 'Map::MapMarker',
         markerType: 'Player',
         customColor: '255;255;255',
         customSize: 0,
@@ -178,7 +178,7 @@ describe('gdjs.MinimapRuntimeObject', function () {
   });
 
   describe('Tracked Objects', function () {
-    it('should track objects with MinimapMarker behavior', function () {
+    it('should track objects with MapMarker behavior', function () {
       const tracked = minimapObject.getTrackedObjects();
       expect(tracked.length).to.be(1);
       expect(tracked[0]).to.be(trackedObject);
@@ -278,8 +278,8 @@ describe('gdjs.MinimapMarkerRuntimeBehavior', function () {
     type: '',
     behaviors: [
       {
-        name: 'MinimapMarker1',
-        type: 'Minimap::MinimapMarker',
+        name: 'MapMarker1',
+        type: 'Map::MapMarker',
         markerType: 'Player',
         customColor: '255;255;255',
         customSize: 0,
@@ -293,7 +293,7 @@ describe('gdjs.MinimapMarkerRuntimeBehavior', function () {
   });
   runtimeScene.addObject(object);
 
-  var behavior = object.getBehavior('MinimapMarker1');
+  var behavior = object.getBehavior('MapMarker1');
 
   describe('Visibility', function () {
     it('should be visible on minimap by default', function () {

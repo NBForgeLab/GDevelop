@@ -25,11 +25,11 @@ class MinimapJsExtension : public gd::PlatformExtension {
     DeclareMinimapExtension(*this);
 
     // Mark the extension as a JavaScript extension
-    GetObjectMetadata("Minimap::Minimap")
+    GetObjectMetadata("Map::Map")
         .SetIncludeFile("Extensions/Minimap/minimapruntimeobject.js")
         .AddIncludeFile("Extensions/Minimap/minimapruntimeobject-pixi-renderer.js");
 
-    GetBehaviorMetadata("Minimap::MinimapMarker")
+    GetBehaviorMetadata("Map::MapMarker")
         .SetIncludeFile("Extensions/Minimap/minimapmarkerbehavior.js");
 
     GD_COMPLETE_EXTENSION_COMPILATION_INFORMATION();
@@ -56,9 +56,9 @@ class MinimapJsExtension : public gd::PlatformExtension {
  public:
   MinimapJsExtension() {
     SetExtensionInformation(
-        "Minimap",
-        "Minimap",
-        "Add a minimap to your game with automatic object tracking.",
+        "Map",
+        "Map",
+        "Add a map (minimap/worldmap) to your game with automatic object tracking.",
         "GDevelop Community",
         "Open source (MIT License)");
   }

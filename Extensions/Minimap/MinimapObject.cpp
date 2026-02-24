@@ -14,6 +14,7 @@ MinimapObject::MinimapObject()
       defaultHeight(200),
       zoom(0.1),
       stayOnScreen(true),
+      mode("Minimap"),
       backgroundImage(""),
       frameImage(""),
       backgroundColor("0;0;0"),
@@ -40,6 +41,14 @@ std::map<gd::String, gd::PropertyDescriptor> MinimapObject::GetProperties()
   std::map<gd::String, gd::PropertyDescriptor> properties;
 
   // Layout (ungrouped, for compact row layout)
+  properties["mode"]
+      .SetValue(mode)
+      .SetType("Choice")
+      .AddChoice("Minimap", _("Minimap"))
+      .AddChoice("WorldMap", _("WorldMap"))
+      .SetLabel(_("Map mode"))
+      .SetGroup("");
+
   properties["width"]
       .SetValue(gd::String::From(defaultWidth))
       .SetType("Number")
@@ -138,6 +147,10 @@ std::map<gd::String, gd::PropertyDescriptor> MinimapObject::GetProperties()
 
 bool MinimapObject::UpdateProperty(const gd::String& name,
                                     const gd::String& value) {
+  if (name == "mode") {
+    mode = value;
+    return true;
+  }
   if (name == "width") {
     defaultWidth = value.To<double>();
     return true;
@@ -241,6 +254,7 @@ bool MinimapObject::UpdateProperty(const gd::String& name,
 
 void MinimapObject::DoSerializeTo(gd::SerializerElement& element) const {
   auto& content = element.AddChild("content");
+  content.SetAttribute("mode", mode);
   content.SetAttribute("width", defaultWidth);
   content.SetAttribute("height", defaultHeight);
   content.SetAttribute("zoom", zoom);
@@ -270,6 +284,7 @@ void MinimapObject::DoSerializeTo(gd::SerializerElement& element) const {
 void MinimapObject::DoUnserializeFrom(gd::Project& project,
                                        const gd::SerializerElement& element) {
   auto& content = element.GetChild("content");
+  mode = content.GetStringAttribute("mode", "Minimap");
   defaultWidth = content.GetDoubleAttribute("width", 200);
   defaultHeight = content.GetDoubleAttribute("height", 200);
   zoom = content.GetDoubleAttribute("zoom", 0.1);
