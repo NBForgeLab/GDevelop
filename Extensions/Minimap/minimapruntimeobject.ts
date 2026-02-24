@@ -530,6 +530,13 @@ namespace gdjs {
         }
       }
 
+      // Sort so that higher-priority markers (e.g., Player) are rendered last and appear on top.
+      tracked.sort((a, b) => {
+        const pa = this._getMarkerPriorityFor(a);
+        const pb = this._getMarkerPriorityFor(b);
+        return pa - pb;
+      });
+
       return tracked;
     }
 
@@ -907,6 +914,35 @@ namespace gdjs {
      */
     getUseObjectShape(): boolean {
       return this._useObjectShape;
+    }
+
+    /**
+     * Compute a priority for a marker type to control draw order.
+     * Lower priority renders first; higher renders later (on top).
+     * @internal
+     */
+    _getMarkerPriorityFor(obj: gdjs.RuntimeObject): number {
+      const behavior = obj.getBehavior('MapMarker');
+      if (behavior) {
+        const type = (behavior as gdjs.MinimapMarkerRuntimeBehavior).getMarkerType();
+        switch (type) {
+          case 'Obstacle':
+            return 100;
+          case 'Custom':
+            return 200;
+          case 'Item':
+            return 300;
+          case 'Ally':
+            return 400;
+          case 'Enemy':
+            return 500;
+          case 'Player':
+            return 1000;
+          default:
+            return 200;
+        }
+      }
+      return 0;
     }
   }
 

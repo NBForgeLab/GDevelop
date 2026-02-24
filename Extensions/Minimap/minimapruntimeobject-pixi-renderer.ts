@@ -48,6 +48,7 @@ namespace gdjs {
       this._contentGraphics = new PIXI.Graphics();
       this._borderGraphics = new PIXI.Graphics();
       this._markersContainer = new PIXI.Container();
+      this._markersContainer.sortableChildren = true;
 
       this._pixiContainer.addChild(this._backgroundGraphics);
       this._pixiContainer.addChild(this._contentGraphics);
@@ -345,6 +346,7 @@ namespace gdjs {
       let size: number;
       let customIcon: string = '';
       let angleDeg: number = 0;
+      let priority: number = this._getMarkerPriorityFromType(markerType);
 
       // Compute angle from object or movement if rotation display is enabled
       const showRotation = markerBehavior.getShowRotation();
@@ -442,7 +444,8 @@ namespace gdjs {
           size,
           customIcon,
           angleDeg,
-          showRotation
+          showRotation,
+          priority
         );
       } else {
         // Render default shape based on type
@@ -681,7 +684,8 @@ namespace gdjs {
       size: number,
       iconName: string,
       angleDeg: number,
-      showRotation: boolean
+      showRotation: boolean,
+      priority: number
     ): void {
       try {
         // Get or create sprite for this object
@@ -707,6 +711,7 @@ namespace gdjs {
         sprite.width = size;
         sprite.height = size;
         sprite.visible = true;
+        sprite.zIndex = priority;
 
         // Apply rotation if needed
         if (showRotation) {
@@ -736,6 +741,29 @@ namespace gdjs {
         return (r << 16) | (g << 8) | b;
       }
       return 0xffffff;
+    }
+
+    /**
+     * Compute marker priority from marker type.
+     * @internal
+     */
+    _getMarkerPriorityFromType(markerType: string): number {
+      switch (markerType) {
+        case 'Obstacle':
+          return 100;
+        case 'Custom':
+          return 200;
+        case 'Item':
+          return 300;
+        case 'Ally':
+          return 400;
+        case 'Enemy':
+          return 500;
+        case 'Player':
+          return 1000;
+        default:
+          return 200;
+      }
     }
   }
 
