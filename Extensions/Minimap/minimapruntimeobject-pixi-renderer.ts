@@ -192,7 +192,7 @@ namespace gdjs {
     }
 
     /**
-     * Update the mask for circular shape.
+     * Update the mask for circular or rectangular shape.
      * @internal
      */
     _updateMask(): void {
@@ -200,30 +200,28 @@ namespace gdjs {
       const width = this._object.getWidth();
       const height = this._object.getHeight();
 
-      if (shape === 'Circle') {
-        // Create or update mask for circular shape
-        if (!this._maskGraphics) {
-          this._maskGraphics = new PIXI.Graphics();
-          this._pixiContainer.addChild(this._maskGraphics);
-          this._pixiContainer.mask = this._maskGraphics;
-        }
+      // Create mask graphics if not exists
+      if (!this._maskGraphics) {
+        this._maskGraphics = new PIXI.Graphics();
+        this._pixiContainer.addChild(this._maskGraphics);
+        this._pixiContainer.mask = this._maskGraphics;
+      }
 
-        this._maskGraphics.clear();
+      this._maskGraphics.clear();
+      this._maskGraphics.beginFill(0xffffff);
+
+      if (shape === 'Circle') {
+        // Draw circular mask
         const radius = Math.min(width, height) / 2;
-        this._maskGraphics.beginFill(0xffffff);
         this._maskGraphics.drawCircle(width / 2, height / 2, radius);
-        this._maskGraphics.endFill();
         this._currentShape = 'Circle';
       } else {
-        // Remove mask for rectangular shape
-        if (this._maskGraphics) {
-          this._pixiContainer.mask = null;
-          this._pixiContainer.removeChild(this._maskGraphics);
-          this._maskGraphics.destroy();
-          this._maskGraphics = null;
-        }
+        // Draw rectangular mask
+        this._maskGraphics.drawRect(0, 0, width, height);
         this._currentShape = 'Rectangle';
       }
+
+      this._maskGraphics.endFill();
     }
 
     /**
