@@ -70,10 +70,6 @@ void DeclareMinimapExtension(gd::PlatformExtension& extension) {
       .SetFunctionName("setVisible")
       .SetIncludeFile("Extensions/Minimap/minimapruntimeobject.js");
 
-  minimapObject
-      // (Removed legacy Hide action)
-
-  // Removed toggle in favor of SetVisible
 
   // Zoom actions
   minimapObject
