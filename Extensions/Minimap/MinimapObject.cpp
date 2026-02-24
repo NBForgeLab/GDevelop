@@ -238,3 +238,60 @@ bool MinimapObject::UpdateProperty(const gd::String& name,
 
   return false;
 }
+
+void MinimapObject::DoSerializeTo(gd::SerializerElement& element) const {
+  auto& content = element.AddChild("content");
+  content.SetAttribute("width", defaultWidth);
+  content.SetAttribute("height", defaultHeight);
+  content.SetAttribute("zoom", zoom);
+  content.SetAttribute("stayOnScreen", stayOnScreen);
+  content.SetAttribute("backgroundImage", backgroundImage);
+  content.SetAttribute("frameImage", frameImage);
+  content.SetAttribute("backgroundColor", backgroundColor);
+  content.SetAttribute("backgroundOpacity", backgroundOpacity);
+  content.SetAttribute("borderColor", borderColor);
+  content.SetAttribute("borderWidth", borderWidth);
+  content.SetAttribute("playerMarkerImage", playerMarkerImage);
+  content.SetAttribute("playerColor", playerColor);
+  content.SetAttribute("playerSize", playerSize);
+  content.SetAttribute("enemyMarkerImage", enemyMarkerImage);
+  content.SetAttribute("enemyColor", enemyColor);
+  content.SetAttribute("enemySize", enemySize);
+  content.SetAttribute("itemMarkerImage", itemMarkerImage);
+  content.SetAttribute("itemColor", itemColor);
+  content.SetAttribute("itemSize", itemSize);
+  content.SetAttribute("showObstacles", showObstacles);
+  content.SetAttribute("obstacleColor", obstacleColor);
+  content.SetAttribute("obstacleOpacity", obstacleOpacity);
+  content.SetAttribute("useObjectShape", useObjectShape);
+  content.SetAttribute("autoDetectBounds", autoDetectBounds);
+}
+
+void MinimapObject::DoUnserializeFrom(gd::Project& project,
+                                       const gd::SerializerElement& element) {
+  auto& content = element.GetChild("content");
+  defaultWidth = content.GetDoubleAttribute("width", 200);
+  defaultHeight = content.GetDoubleAttribute("height", 200);
+  zoom = content.GetDoubleAttribute("zoom", 0.1);
+  stayOnScreen = content.GetBoolAttribute("stayOnScreen", true);
+  backgroundImage = content.GetStringAttribute("backgroundImage", "");
+  frameImage = content.GetStringAttribute("frameImage", "");
+  backgroundColor = content.GetStringAttribute("backgroundColor", "0;0;0");
+  backgroundOpacity = content.GetDoubleAttribute("backgroundOpacity", 0.7);
+  borderColor = content.GetStringAttribute("borderColor", "255;255;255");
+  borderWidth = content.GetDoubleAttribute("borderWidth", 2);
+  playerMarkerImage = content.GetStringAttribute("playerMarkerImage", "");
+  playerColor = content.GetStringAttribute("playerColor", "0;255;0");
+  playerSize = content.GetDoubleAttribute("playerSize", 12);
+  enemyMarkerImage = content.GetStringAttribute("enemyMarkerImage", "");
+  enemyColor = content.GetStringAttribute("enemyColor", "255;0;0");
+  enemySize = content.GetDoubleAttribute("enemySize", 8);
+  itemMarkerImage = content.GetStringAttribute("itemMarkerImage", "");
+  itemColor = content.GetStringAttribute("itemColor", "255;255;0");
+  itemSize = content.GetDoubleAttribute("itemSize", 6);
+  showObstacles = content.GetBoolAttribute("showObstacles", true);
+  obstacleColor = content.GetStringAttribute("obstacleColor", "128;128;128");
+  obstacleOpacity = content.GetDoubleAttribute("obstacleOpacity", 0.5);
+  useObjectShape = content.GetBoolAttribute("useObjectShape", true);
+  autoDetectBounds = content.GetBoolAttribute("autoDetectBounds", true);
+}

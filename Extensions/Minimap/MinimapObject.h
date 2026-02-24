@@ -31,6 +31,12 @@ class GD_EXTENSION_API MinimapObject : public gd::ObjectConfiguration {
   virtual bool UpdateProperty(const gd::String& name,
                               const gd::String& value) override;
 
+ protected:
+  virtual void DoSerializeTo(gd::SerializerElement& element) const override;
+  virtual void DoUnserializeFrom(gd::Project& project,
+                                  const gd::SerializerElement& element) override;
+
+ public:
   // Getters
   double GetDefaultWidth() const { return defaultWidth; }
   double GetDefaultHeight() const { return defaultHeight; }

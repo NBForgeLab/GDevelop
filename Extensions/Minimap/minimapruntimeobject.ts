@@ -505,27 +505,14 @@ namespace gdjs {
 
     // ===== PUBLIC API =====
 
-    /**
-     * Show the minimap.
-     */
-    show(): void {
-      this._visible = true;
-      this._renderer.updateVisibility();
-    }
+    // (Removed legacy show/hide/toggle visibility API)
 
     /**
-     * Hide the minimap.
+     * Set the minimap visibility.
+     * @param visible True to show, false to hide.
      */
-    hide(): void {
-      this._visible = false;
-      this._renderer.updateVisibility();
-    }
-
-    /**
-     * Toggle the minimap visibility.
-     */
-    toggleVisibility(): void {
-      this._visible = !this._visible;
+    setVisible(visible: boolean): void {
+      this._visible = !!visible;
       this._renderer.updateVisibility();
     }
 
@@ -586,6 +573,42 @@ namespace gdjs {
       this._width = clamped;
       this._height = clamped;
       this._hasCustomSize = true;
+      this._renderer.update();
+    }
+
+    /**
+     * Set the default player marker color for this minimap.
+     * @param color The color in "R;G;B" format.
+     */
+    setPlayerColor(color: string): void {
+      this._playerColor = color;
+      this._renderer.update();
+    }
+
+    /**
+     * Set the default enemy marker color for this minimap.
+     * @param color The color in "R;G;B" format.
+     */
+    setEnemyColor(color: string): void {
+      this._enemyColor = color;
+      this._renderer.update();
+    }
+
+    /**
+     * Set the default item marker color for this minimap.
+     * @param color The color in "R;G;B" format.
+     */
+    setItemColor(color: string): void {
+      this._itemColor = color;
+      this._renderer.update();
+    }
+
+    /**
+     * Set the default obstacle color for this minimap.
+     * @param color The color in "R;G;B" format.
+     */
+    setObstacleColor(color: string): void {
+      this._obstacleColor = color;
       this._renderer.update();
     }
 
