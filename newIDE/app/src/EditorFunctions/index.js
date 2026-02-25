@@ -39,6 +39,7 @@ import { type AssetShortHeader } from '../Utils/GDevelopServices/Asset';
 import { swapAsset } from '../AssetStore/AssetSwapper';
 import { type EnsureExtensionInstalledOptions } from '../AiGeneration/UseEnsureExtensionInstalled';
 import { getObjectFolderOrObjectWithContextFromObjectName } from '../SceneEditor/ObjectFolderOrObjectsSelection';
+import { getObjectSizeAndOriginInfo } from './Utils';
 
 const gd: libGDevelop = global.gd;
 
@@ -119,6 +120,11 @@ export type EditorFunctionGenericOutput = {|
 
   // Used when new resources are added by a function call:
   newlyAddedResources?: Array<SingleResourceSearchAndInstallResult>,
+
+  // Size/origin/center info for newly created objects, keyed by object name:
+  newObjectDefaultSize?: {
+    [string]: {| size: string, origin: string, center: string |},
+  },
 |};
 
 export type EventsGenerationResult =
@@ -729,10 +735,9 @@ const createOrReplaceObject: EditorFunction = {
         )
         .filter(Boolean);
 
-      const propertiesText = `It has the following properties: ${propertyShortTexts.join(
+      return `It has the following properties: ${propertyShortTexts.join(
         ', '
       )}.`;
-      return propertiesText;
     };
 
     // Check if target object already exists.
@@ -790,18 +795,21 @@ const createOrReplaceObject: EditorFunction = {
 
       // First try to search and install an object from the asset store.
       try {
-        const { status, message, createdObjects } = await searchAndInstallAsset(
-          {
-            objectsContainer: targetObjectsContainer,
-            objectName: targetObjectName,
-            objectType: object_type,
-            searchTerms: search_terms || '',
-            description: description || '',
-            twoDimensionalViewKind: two_dimensional_view_kind || '',
-            relatedAiRequestId,
-            ...getRelatedAiRequestLastMessages(),
-          }
-        );
+        const {
+          status,
+          message,
+          createdObjects,
+          assetShortHeader,
+        } = await searchAndInstallAsset({
+          objectsContainer: targetObjectsContainer,
+          objectName: targetObjectName,
+          objectType: object_type,
+          searchTerms: search_terms || '',
+          description: description || '',
+          twoDimensionalViewKind: two_dimensional_view_kind || '',
+          relatedAiRequestId,
+          ...getRelatedAiRequestLastMessages(),
+        });
 
         if (status === 'error') {
           return makeGenericFailure(
@@ -825,12 +833,24 @@ const createOrReplaceObject: EditorFunction = {
 
           if (createdObjects.length === 1) {
             const object = createdObjects[0];
-            return makeGenericSuccess(
-              [
+            const sizeAndOriginInfo = getObjectSizeAndOriginInfo(
+              object,
+              project,
+              assetShortHeader
+            );
+            const result: EditorFunctionGenericOutput = {
+              success: true,
+              message: [
                 `Created (from the asset store) object "${object.getName()}" of type "${object.getType()}" in scene "${scene_name}".`,
                 getPropertiesText(object),
-              ].join(' ')
-            );
+              ].join(' '),
+            };
+            if (sizeAndOriginInfo) {
+              result.newObjectDefaultSize = {
+                [object.getName()]: sizeAndOriginInfo,
+              };
+            }
+            return result;
           }
 
           return makeGenericSuccess(
@@ -897,12 +917,24 @@ const createOrReplaceObject: EditorFunction = {
         isNewObjectTypeUsed: isTheFirstOfItsTypeInProject,
       });
 
-      return makeGenericSuccess(
-        [
+      const sizeAndOriginInfo = getObjectSizeAndOriginInfo(
+        object,
+        project,
+        null
+      );
+      const result: EditorFunctionGenericOutput = {
+        success: true,
+        message: [
           `Created a new object (from scratch) called "${targetObjectName}" of type "${object_type}" in scene "${scene_name}".`,
           getPropertiesText(object),
-        ].join(' ')
-      );
+        ].join(' '),
+      };
+      if (sizeAndOriginInfo) {
+        result.newObjectDefaultSize = {
+          [targetObjectName]: sizeAndOriginInfo,
+        };
+      }
+      return result;
     };
 
     const replaceExistingObject = async () => {
