@@ -1,9 +1,9 @@
 namespace gdjs {
   /**
-   * MinimapMarker behavior data structure.
-   * @category Behaviors > MinimapMarker
+   * MapMarker behavior data structure.
+   * @category Behaviors > MapMarker
    */
-  export type MinimapMarkerBehaviorData = {
+  export type MapMarkerBehaviorData = {
     /** The type of marker (Player, Enemy, Item, etc.) */
     markerType: string;
     /** Custom color in "R;G;B" format */
@@ -14,15 +14,15 @@ namespace gdjs {
     customIcon: string;
     /** Whether to show rotation */
     showRotation: boolean;
-    /** Whether the marker is visible on the minimap */
-    visibleOnMinimap: boolean;
+    /** Whether the marker is visible on the map */
+    visibleOnMap: boolean;
   };
 
   /**
-   * Network sync data for MinimapMarker behavior.
-   * @category Behaviors > MinimapMarker
+   * Network sync data for MapMarker behavior.
+   * @category Behaviors > MapMarker
    */
-  export type MinimapMarkerNetworkSyncDataType = {
+  export type MapMarkerNetworkSyncDataType = {
     mt: string;
     vis: boolean;
     cc: string;
@@ -30,17 +30,17 @@ namespace gdjs {
   };
 
   /**
-   * MinimapMarker behavior allows objects to be tracked and displayed on a minimap.
-   * Objects with this behavior will appear as markers on any Minimap object in the scene.
-   * @category Behaviors > MinimapMarker
+   * MapMarker behavior allows objects to be tracked and displayed on a map.
+   * Objects with this behavior will appear as markers on any Map object in the scene.
+   * @category Behaviors > MapMarker
    */
-  export class MinimapMarkerRuntimeBehavior extends gdjs.RuntimeBehavior {
+  export class MapMarkerRuntimeBehavior extends gdjs.RuntimeBehavior {
     _markerType: string;
     _customColor: string;
     _customSize: number;
     _customIcon: string;
     _showRotation: boolean;
-    _visibleOnMinimap: boolean;
+    _visibleOnMap: boolean;
 
     // Flash effect state
     _isFlashing: boolean = false;
@@ -49,14 +49,14 @@ namespace gdjs {
     _flashInterval: number = 0.5; // Flash on/off every 0.5 seconds
 
     /**
-     * Create the MinimapMarker behavior.
+     * Create the MapMarker behavior.
      * @param instanceContainer The container the object belongs to.
      * @param behaviorData The behavior data used to initialize the behavior.
      * @param owner The object that owns this behavior.
      */
     constructor(
       instanceContainer: gdjs.RuntimeInstanceContainer,
-      behaviorData: MinimapMarkerBehaviorData,
+      behaviorData: MapMarkerBehaviorData,
       owner: gdjs.RuntimeObject
     ) {
       super(instanceContainer, behaviorData, owner);
@@ -66,12 +66,12 @@ namespace gdjs {
       this._customSize = behaviorData.customSize || 0;
       this._customIcon = behaviorData.customIcon || '';
       this._showRotation = behaviorData.showRotation || false;
-      this._visibleOnMinimap = behaviorData.visibleOnMinimap !== false;
+      this._visibleOnMap = behaviorData.visibleOnMap !== false;
     }
 
     override updateFromBehaviorData(
-      oldBehaviorData: MinimapMarkerBehaviorData,
-      newBehaviorData: MinimapMarkerBehaviorData
+      oldBehaviorData: MapMarkerBehaviorData,
+      newBehaviorData: MapMarkerBehaviorData
     ): boolean {
       if (oldBehaviorData.markerType !== newBehaviorData.markerType) {
         this._markerType = newBehaviorData.markerType;
@@ -89,9 +89,9 @@ namespace gdjs {
         this._showRotation = newBehaviorData.showRotation;
       }
       if (
-        oldBehaviorData.visibleOnMinimap !== newBehaviorData.visibleOnMinimap
+        oldBehaviorData.visibleOnMap !== newBehaviorData.visibleOnMap
       ) {
-        this._visibleOnMinimap = newBehaviorData.visibleOnMinimap;
+        this._visibleOnMap = newBehaviorData.visibleOnMap;
       }
 
       return true;
@@ -128,25 +128,25 @@ namespace gdjs {
     // ===== PUBLIC API =====
 
     /**
-     * Show the object on the minimap.
+     * Show the object on the map.
      */
-    showOnMinimap(): void {
-      this._visibleOnMinimap = true;
+    showOnMap(): void {
+      this._visibleOnMap = true;
     }
 
     /**
-     * Hide the object from the minimap.
+     * Hide the object from the map.
      */
-    hideOnMinimap(): void {
-      this._visibleOnMinimap = false;
+    hideOnMap(): void {
+      this._visibleOnMap = false;
     }
 
     /**
-     * Check if the object is visible on the minimap.
-     * @returns True if the object is visible on the minimap.
+     * Check if the object is visible on the map.
+     * @returns True if the object is visible on the map.
      */
-    isVisibleOnMinimap(): boolean {
-      return this._visibleOnMinimap;
+    isVisibleOnMap(): boolean {
+      return this._visibleOnMap;
     }
 
     /**
@@ -275,6 +275,6 @@ namespace gdjs {
 
   gdjs.registerBehavior(
     'Map::MapMarker',
-    gdjs.MinimapMarkerRuntimeBehavior
+    gdjs.MapMarkerRuntimeBehavior
   );
 }

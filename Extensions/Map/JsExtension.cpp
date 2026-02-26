@@ -1,5 +1,5 @@
 /**
- * GDevelop - Minimap Extension
+ * GDevelop - Map Extension
  * Copyright (c) 2024 GDevelop Community
  * This project is released under the MIT License.
  */
@@ -7,54 +7,54 @@
 #include "GDCore/Extensions/PlatformExtension.h"
 
 #if defined(GD_IDE_ONLY)
-#include "MinimapObject.h"
-#include "MinimapMarkerBehavior.h"
+#include "MapObject.h"
+#include "MapMarkerBehavior.h"
 #include "GDCore/Extensions/Metadata/MultipleInstructionMetadata.h"
 #include "GDCore/Project/BehaviorsSharedData.h"
 #include "GDCore/Project/Object.h"
 #include "GDCore/Tools/Localization.h"
 
-void DeclareMinimapExtension(gd::PlatformExtension& extension);
+void DeclareMapExtension(gd::PlatformExtension& extension);
 
 /**
- * JavaScript extension declaration for the Minimap extension.
+ * JavaScript extension declaration for the Map extension.
  */
-class MinimapJsExtension : public gd::PlatformExtension {
+class MapJsExtension : public gd::PlatformExtension {
  public:
-  MinimapJsExtension() {
-    DeclareMinimapExtension(*this);
+  MapJsExtension() {
+    DeclareMapExtension(*this);
 
     // Mark the extension as a JavaScript extension
     GetObjectMetadata("Map::Map")
-        .SetIncludeFile("Extensions/Minimap/minimapruntimeobject.js")
-        .AddIncludeFile("Extensions/Minimap/minimapruntimeobject-pixi-renderer.js");
+        .SetIncludeFile("Extensions/Map/mapruntimeobject.js")
+        .AddIncludeFile("Extensions/Map/mapruntimeobject-pixi-renderer.js");
 
     GetBehaviorMetadata("Map::MapMarker")
-        .SetIncludeFile("Extensions/Minimap/minimapmarkerbehavior.js");
+        .SetIncludeFile("Extensions/Map/mapmarkerbehavior.js");
 
     GD_COMPLETE_EXTENSION_COMPILATION_INFORMATION();
   };
 };
 
 #if defined(EMSCRIPTEN)
-extern "C" gd::PlatformExtension* CreateGDJSMinimapExtension() {
-  return new MinimapJsExtension;
+extern "C" gd::PlatformExtension* CreateGDJSMapExtension() {
+  return new MapJsExtension;
 }
 #else
 /**
  * Used by GDevelop to create the extension class
  * -- Do not need to be modified. --
  */
-extern "C" gd::PlatformExtension* GD_EXTENSION_API CreateGDJSMinimapExtension() {
-  return new MinimapJsExtension;
+extern "C" gd::PlatformExtension* GD_EXTENSION_API CreateGDJSMapExtension() {
+  return new MapJsExtension;
 }
 #endif
 
 #else
 // When not in IDE mode (e.g., for Emscripten builds), provide a minimal stub
-class MinimapJsExtension : public gd::PlatformExtension {
+class MapJsExtension : public gd::PlatformExtension {
  public:
-  MinimapJsExtension() {
+  MapJsExtension() {
     SetExtensionInformation(
         "Map",
         "Map",
@@ -65,8 +65,8 @@ class MinimapJsExtension : public gd::PlatformExtension {
 };
 
 #if defined(EMSCRIPTEN)
-extern "C" gd::PlatformExtension* CreateGDJSMinimapExtension() {
-  return new MinimapJsExtension;
+extern "C" gd::PlatformExtension* CreateGDJSMapExtension() {
+  return new MapJsExtension;
 }
 #endif
 #endif

@@ -1,22 +1,22 @@
 namespace gdjs {
   /**
-   * Base parameters for {@link gdjs.MinimapRuntimeObject}
-   * @category Objects > Minimap
+   * Base parameters for {@link gdjs.MapRuntimeObject}
+   * @category Objects > Map
    */
-  export type MinimapObjectDataType = {
-    /** The base parameters of the minimap object */
+  export type MapObjectDataType = {
+    /** The base parameters of the map object */
     content: {
       /** Map mode: 'Minimap' or 'WorldMap' */
       mode: string;
-      /** Minimap shape: 'Rectangle' or 'Circle' */
+      /** map shape: 'Rectangle' or 'Circle' */
       shape: string;
-      /** Width of the minimap in pixels */
+      /** Width of the map in pixels */
       width: number;
-      /** Height of the minimap in pixels */
+      /** Height of the map in pixels */
       height: number;
       /** Zoom level (0.01 to 1.0) */
       zoom: number;
-      /** Whether the minimap stays fixed on screen */
+      /** Whether the map stays fixed on screen */
       stayOnScreen: boolean;
       /** Background image resource name */
       backgroundImage: string;
@@ -48,7 +48,7 @@ namespace gdjs {
       itemColor: string;
       /** Item marker size in pixels */
       itemSize: number;
-      /** Whether to show obstacles on the minimap */
+      /** Whether to show obstacles on the map */
       showObstacles: boolean;
       /** Obstacle color in "R;G;B" format */
       obstacleColor: string;
@@ -62,15 +62,15 @@ namespace gdjs {
   };
 
   /**
-   * @category Objects > Minimap
+   * @category Objects > Map
    */
-  export type MinimapObjectData = ObjectData & MinimapObjectDataType;
+  export type MapObjectData = ObjectData & MapObjectDataType;
 
   /**
-   * Network sync data for Minimap object.
-   * @category Objects > Minimap
+   * Network sync data for map object.
+   * @category Objects > Map
    */
-  export type MinimapNetworkSyncDataType = {
+  export type MapNetworkSyncDataType = {
     w: number;
     h: number;
     z: float;
@@ -78,18 +78,18 @@ namespace gdjs {
   };
 
   /**
-   * @category Objects > Minimap
+   * @category Objects > Map
    */
-  export type MinimapNetworkSyncData = ObjectNetworkSyncData &
-    MinimapNetworkSyncDataType;
+  export type MapNetworkSyncData = ObjectNetworkSyncData &
+    MapNetworkSyncDataType;
 
   /**
-   * Displays a minimap that tracks objects with MinimapMarker behavior.
-   * The minimap can display different marker types (Player, Enemy, Item, etc.)
+   * Displays a map that tracks objects with MapMarker behavior.
+   * The map can display different marker types (Player, Enemy, Item, etc.)
    * with customizable colors, sizes, and icons.
-   * @category Objects > Minimap
+   * @category Objects > Map
    */
-  export class MinimapRuntimeObject extends gdjs.RuntimeObject {
+  export class MapRuntimeObject extends gdjs.RuntimeObject {
     _width: number;
     _height: number;
     _zoom: number;
@@ -118,7 +118,7 @@ namespace gdjs {
     _autoDetectBounds: boolean;
 
     _visible: boolean = true;
-    _renderer: MinimapRuntimeObjectRenderer;
+    _renderer: MapRuntimeObjectRenderer;
 
     // Tracking bounds
     _boundsMinX: number = 0;
@@ -138,7 +138,7 @@ namespace gdjs {
      */
     constructor(
       instanceContainer: gdjs.RuntimeInstanceContainer,
-      objectData: MinimapObjectData,
+      objectData: MapObjectData,
       instanceData?: InstanceData
     ) {
       super(instanceContainer, objectData, instanceData);
@@ -200,7 +200,7 @@ namespace gdjs {
       this._useObjectShape = content.useObjectShape;
       this._autoDetectBounds = content.autoDetectBounds;
 
-      this._renderer = new gdjs.MinimapRuntimeObjectRenderer(
+      this._renderer = new gdjs.MapRuntimeObjectRenderer(
         this,
         instanceContainer
       );
@@ -214,8 +214,8 @@ namespace gdjs {
     }
 
     override updateFromObjectData(
-      oldObjectData: MinimapObjectData,
-      newObjectData: MinimapObjectData
+      oldObjectData: MapObjectData,
+      newObjectData: MapObjectData
     ): boolean {
       const defaultContent = {
         mode: 'Minimap',
@@ -368,7 +368,7 @@ namespace gdjs {
 
     override getNetworkSyncData(
       syncOptions: GetNetworkSyncDataOptions
-    ): MinimapNetworkSyncData {
+    ): MapNetworkSyncData {
       return {
         ...super.getNetworkSyncData(syncOptions),
         w: this._width,
@@ -379,7 +379,7 @@ namespace gdjs {
     }
 
     override updateFromNetworkSyncData(
-      networkSyncData: MinimapNetworkSyncData,
+      networkSyncData: MapNetworkSyncData,
       options: UpdateFromNetworkSyncDataOptions
     ): void {
       super.updateFromNetworkSyncData(networkSyncData, options);
@@ -482,12 +482,12 @@ namespace gdjs {
     }
 
     /**
-     * Convert world coordinates to minimap coordinates.
+     * Convert world coordinates to map coordinates.
      * @param worldX The world X coordinate.
      * @param worldY The world Y coordinate.
-     * @returns A tuple containing the minimap X and Y coordinates.
+     * @returns A tuple containing the map X and Y coordinates.
      */
-    worldToMinimap(worldX: number, worldY: number): [number, number] {
+    worldToMap(worldX: number, worldY: number): [number, number] {
       if (this._mode === 'Minimap') {
         const playerCenter = this._getPlayerCenter();
         const dx = worldX - playerCenter[0];
@@ -505,14 +505,14 @@ namespace gdjs {
       const normalizedX = (worldX - this._boundsMinX) / worldWidth;
       const normalizedY = (worldY - this._boundsMinY) / worldHeight;
 
-      const minimapX = normalizedX * this._width;
-      const minimapY = normalizedY * this._height;
+      const mapX = normalizedX * this._width;
+      const mapY = normalizedY * this._height;
 
-      return [minimapX, minimapY];
+      return [mapX, mapY];
     }
 
     /**
-     * Get all tracked objects with MinimapMarker behavior.
+     * Get all tracked objects with MapMarker behavior.
      * @returns An array of tracked runtime objects.
      */
     getTrackedObjects(): gdjs.RuntimeObject[] {
@@ -520,13 +520,9 @@ namespace gdjs {
       const allObjects = this.getInstanceContainer().getAdhocListOfAllInstances();
 
       for (const obj of allObjects) {
-        const behavior = obj.getBehavior('MapMarker');
-
-        if (behavior) {
-          const markerBehavior = behavior as gdjs.MinimapMarkerRuntimeBehavior;
-          if (markerBehavior.isVisibleOnMinimap()) {
-            tracked.push(obj);
-          }
+        const markerBehavior = this._getMapMarkerBehavior(obj);
+        if (markerBehavior && markerBehavior.isVisibleOnMap()) {
+          tracked.push(obj);
         }
       }
 
@@ -540,12 +536,32 @@ namespace gdjs {
       return tracked;
     }
 
+    /**
+     * Get the MapMarker behavior from an object by type.
+     * @param obj The object to get the behavior from.
+     * @returns The MapMarkerRuntimeBehavior or null if not found.
+     * @internal
+     */
+    _getMapMarkerBehavior(obj: gdjs.RuntimeObject): gdjs.MapMarkerRuntimeBehavior | null {
+      const runtimeObj = obj as any;
+      // Search by type in _behaviorsTable (contains all behaviors by name)
+      if (runtimeObj._behaviorsTable && runtimeObj._behaviorsTable.items) {
+        for (const key in runtimeObj._behaviorsTable.items) {
+          const behavior = runtimeObj._behaviorsTable.items[key];
+          if (behavior && behavior.type === 'Map::MapMarker') {
+            return behavior as unknown as gdjs.MapMarkerRuntimeBehavior;
+          }
+        }
+      }
+      return null;
+    }
+
     // ===== PUBLIC API =====
 
     // (Removed legacy show/hide/toggle visibility API)
 
     /**
-     * Set the minimap visibility.
+     * Set the map visibility.
      * @param visible True to show, false to hide.
      */
     setVisible(visible: boolean): void {
@@ -560,12 +576,9 @@ namespace gdjs {
     _getPlayerCenter(): [number, number] {
       const tracked = this.getTrackedObjects();
       for (const obj of tracked) {
-        const behavior = obj.getBehavior('MapMarker');
-        if (behavior) {
-          const markerBehavior = behavior as gdjs.MinimapMarkerRuntimeBehavior;
-          if (markerBehavior.getMarkerType() === 'Player') {
-            return [obj.getCenterXInScene(), obj.getCenterYInScene()];
-          }
+        const markerBehavior = this._getMapMarkerBehavior(obj);
+        if (markerBehavior && markerBehavior.getMarkerType() === 'Player') {
+          return [obj.getCenterXInScene(), obj.getCenterYInScene()];
         }
       }
       const layer = this.getInstanceContainer().getLayer(this.getLayer());
@@ -573,29 +586,29 @@ namespace gdjs {
     }
 
     /**
-     * Check if the minimap is visible.
-     * @returns True if the minimap is visible.
+     * Check if the map is visible.
+     * @returns True if the map is visible.
      */
     isVisible(): boolean {
       return this._visible;
     }
 
     /**
-     * Zoom in the minimap.
+     * Zoom in the map.
      */
     zoomIn(): void {
       this._zoom = Math.min(1.0, this._zoom + 0.05);
     }
 
     /**
-     * Zoom out the minimap.
+     * Zoom out the map.
      */
     zoomOut(): void {
       this._zoom = Math.max(0.01, this._zoom - 0.05);
     }
 
     /**
-     * Set the zoom level of the minimap.
+     * Set the zoom level of the map.
      * @param zoom The zoom level (0.01 to 1.0).
      */
     setZoom(zoom: number): void {
@@ -611,7 +624,7 @@ namespace gdjs {
     }
 
     /**
-     * Set the position of the minimap on screen.
+     * Set the position of the map on screen.
      * @param x The X position.
      * @param y The Y position.
      */
@@ -621,7 +634,7 @@ namespace gdjs {
     }
 
     /**
-     * Set the size of the minimap (both width and height).
+     * Set the size of the map (both width and height).
      * @param size The size in pixels.
      */
     setSize(size: number): void {
@@ -633,7 +646,7 @@ namespace gdjs {
     }
 
     /**
-     * Set the default player marker color for this minimap.
+     * Set the default player marker color for this map.
      * @param color The color in "R;G;B" format.
      */
     setPlayerColor(color: string): void {
@@ -642,7 +655,7 @@ namespace gdjs {
     }
 
     /**
-     * Set the default enemy marker color for this minimap.
+     * Set the default enemy marker color for this map.
      * @param color The color in "R;G;B" format.
      */
     setEnemyColor(color: string): void {
@@ -651,7 +664,7 @@ namespace gdjs {
     }
 
     /**
-     * Set the default item marker color for this minimap.
+     * Set the default item marker color for this map.
      * @param color The color in "R;G;B" format.
      */
     setItemColor(color: string): void {
@@ -660,7 +673,7 @@ namespace gdjs {
     }
 
     /**
-     * Set the default obstacle color for this minimap.
+     * Set the default obstacle color for this map.
      * @param color The color in "R;G;B" format.
      */
     setObstacleColor(color: string): void {
@@ -669,7 +682,7 @@ namespace gdjs {
     }
 
     /**
-     * Set the width of the minimap.
+     * Set the width of the map.
      * @param width The width in pixels.
      */
     override setWidth(width: number): void {
@@ -679,7 +692,7 @@ namespace gdjs {
     }
 
     /**
-     * Set the height of the minimap.
+     * Set the height of the map.
      * @param height The height in pixels.
      */
     override setHeight(height: number): void {
@@ -689,7 +702,7 @@ namespace gdjs {
     }
 
     /**
-     * Get the width of the minimap.
+     * Get the width of the map.
      * @returns The width in pixels.
      */
     override getWidth(): number {
@@ -697,7 +710,7 @@ namespace gdjs {
     }
 
     /**
-     * Get the height of the minimap.
+     * Get the height of the map.
      * @returns The height in pixels.
      */
     override getHeight(): number {
@@ -718,12 +731,9 @@ namespace gdjs {
 
       let count = 0;
       for (const obj of tracked) {
-        const behavior = obj.getBehavior('MapMarker');
-        if (behavior) {
-          const markerBehavior = behavior as gdjs.MinimapMarkerRuntimeBehavior;
-          if (markerBehavior.getMarkerType() === markerType) {
-            count++;
-          }
+        const markerBehavior = this._getMapMarkerBehavior(obj);
+        if (markerBehavior && markerBehavior.getMarkerType() === markerType) {
+          count++;
         }
       }
 
@@ -749,19 +759,27 @@ namespace gdjs {
     }
 
     /**
-     * Check if the minimap stays on screen.
-     * @returns True if the minimap stays on screen.
+     * Check if the map stays on screen.
+     * @returns True if the map stays on screen.
      */
     getStayOnScreen(): boolean {
       return this._stayOnScreen;
     }
 
     /**
-     * Get the minimap shape.
+     * Get the map shape.
      * @returns The shape ('Rectangle' or 'Circle').
      */
     getShape(): string {
       return this._shape;
+    }
+
+    /**
+     * Get the map mode.
+     * @returns The map mode ('Minimap' or 'WorldMap').
+     */
+    getMode(): string {
+      return this._mode;
     }
 
     /**
@@ -885,7 +903,7 @@ namespace gdjs {
     }
 
     /**
-     * Check if obstacles are shown on the minimap.
+     * Check if obstacles are shown on the map.
      * @returns True if obstacles are shown.
      */
     getShowObstacles(): boolean {
@@ -922,9 +940,13 @@ namespace gdjs {
      * @internal
      */
     _getMarkerPriorityFor(obj: gdjs.RuntimeObject): number {
-      const behavior = obj.getBehavior('MapMarker');
-      if (behavior) {
-        const type = (behavior as gdjs.MinimapMarkerRuntimeBehavior).getMarkerType();
+      const markerBehavior = this._getMapMarkerBehavior(obj);
+      if (markerBehavior) {
+        // Check if the method exists before calling it
+        if (typeof markerBehavior.getMarkerType !== 'function') {
+          return 0;
+        }
+        const type = markerBehavior.getMarkerType();
         switch (type) {
           case 'Obstacle':
             return 100;
@@ -946,5 +968,5 @@ namespace gdjs {
     }
   }
 
-  gdjs.registerObject('Map::Map', gdjs.MinimapRuntimeObject);
+  gdjs.registerObject('Map::Map', gdjs.MapRuntimeObject);
 }

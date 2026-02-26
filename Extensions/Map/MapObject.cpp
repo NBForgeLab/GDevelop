@@ -1,15 +1,15 @@
 /**
- * GDevelop - Minimap Extension
+ * GDevelop - Map Extension
  * Copyright (c) 2024 GDevelop Community
  * This project is released under the MIT License.
  */
 
-#include "MinimapObject.h"
+#include "MapObject.h"
 #include "GDCore/Project/PropertyDescriptor.h"
 #include "GDCore/Serialization/SerializerElement.h"
 #include "GDCore/Tools/Localization.h"
 
-MinimapObject::MinimapObject()
+MapObject::MapObject()
     : defaultWidth(200),
       defaultHeight(200),
       zoom(0.1),
@@ -37,7 +37,7 @@ MinimapObject::MinimapObject()
       useObjectShape(true),
       autoDetectBounds(true) {}
 
-std::map<gd::String, gd::PropertyDescriptor> MinimapObject::GetProperties()
+std::map<gd::String, gd::PropertyDescriptor> MapObject::GetProperties()
     const {
   std::map<gd::String, gd::PropertyDescriptor> properties;
 
@@ -55,7 +55,7 @@ std::map<gd::String, gd::PropertyDescriptor> MinimapObject::GetProperties()
       .SetType("Choice")
       .AddChoice("Rectangle", _("Rectangle"))
       .AddChoice("Circle", _("Circle"))
-      .SetLabel(_("Minimap shape"))
+      .SetLabel(_("Map shape"))
       .SetGroup("");
 
   properties["width"]
@@ -76,12 +76,6 @@ std::map<gd::String, gd::PropertyDescriptor> MinimapObject::GetProperties()
       .SetValue(gd::String::From(zoom))
       .SetType("Number")
       .SetLabel(_("Zoom level"))
-      .SetGroup("");
-
-  properties["stayOnScreen"]
-      .SetValue(stayOnScreen ? "true" : "false")
-      .SetType("Boolean")
-      .SetLabel(_("Stay on screen (fixed position)"))
       .SetGroup("");
 
   // Visual
@@ -149,12 +143,12 @@ std::map<gd::String, gd::PropertyDescriptor> MinimapObject::GetProperties()
       .SetLabel(_("Auto-detect level bounds"))
       .SetGroup("");
 
-  // No update rate field: minimap updates every frame
+  // No update rate field: map updates every frame
 
   return properties;
 }
 
-bool MinimapObject::UpdateProperty(const gd::String& name,
+bool MapObject::UpdateProperty(const gd::String& name,
                                     const gd::String& value) {
   if (name == "mode") {
     mode = value;
@@ -265,7 +259,7 @@ bool MinimapObject::UpdateProperty(const gd::String& name,
   return false;
 }
 
-void MinimapObject::DoSerializeTo(gd::SerializerElement& element) const {
+void MapObject::DoSerializeTo(gd::SerializerElement& element) const {
   auto& content = element.AddChild("content");
   content.SetAttribute("mode", mode);
   content.SetAttribute("shape", shape);
@@ -295,8 +289,8 @@ void MinimapObject::DoSerializeTo(gd::SerializerElement& element) const {
   content.SetAttribute("autoDetectBounds", autoDetectBounds);
 }
 
-void MinimapObject::DoUnserializeFrom(gd::Project& project,
-                                       const gd::SerializerElement& element) {
+void MapObject::DoUnserializeFrom(gd::Project& project,
+                                         const gd::SerializerElement& element) {
   auto& content = element.GetChild("content");
   mode = content.GetStringAttribute("mode", "Minimap");
   shape = content.GetStringAttribute("shape", "Rectangle");

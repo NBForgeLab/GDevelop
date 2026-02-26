@@ -1,5 +1,5 @@
 /**
- * GDevelop - Minimap Extension
+ * GDevelop - Map Extension
  * Copyright (c) 2024 GDevelop Community
  * This project is released under the MIT License.
  */
@@ -15,15 +15,15 @@ class InitialInstance;
 }  // namespace gd
 
 /**
- * Minimap Object - displays a minimap with tracked objects
+ * Map Object - displays a map (minimap/worldmap) with tracked objects
  */
-class GD_EXTENSION_API MinimapObject : public gd::ObjectConfiguration {
+class GD_EXTENSION_API MapObject : public gd::ObjectConfiguration {
  public:
-  MinimapObject();
-  virtual ~MinimapObject(){};
+  MapObject();
+  virtual ~MapObject(){};
   
   virtual std::unique_ptr<gd::ObjectConfiguration> Clone() const override {
-    return gd::make_unique<MinimapObject>(*this);
+    return gd::make_unique<MapObject>(*this);
   }
 
   virtual std::map<gd::String, gd::PropertyDescriptor> GetProperties()
@@ -63,7 +63,8 @@ class GD_EXTENSION_API MinimapObject : public gd::ObjectConfiguration {
   bool GetUseObjectShape() const { return useObjectShape; }
   bool GetAutoDetectBounds() const { return autoDetectBounds; }
   const gd::String& GetShape() const { return shape; }
-  // No update rate: minimap updates every frame
+  const gd::String& GetMode() const { return mode; }
+  // No update rate: map updates every frame
 
   // Setters
   void SetDefaultWidth(double value) { defaultWidth = value; }
@@ -91,6 +92,7 @@ class GD_EXTENSION_API MinimapObject : public gd::ObjectConfiguration {
   void SetUseObjectShape(bool value) { useObjectShape = value; }
   void SetAutoDetectBounds(bool value) { autoDetectBounds = value; }
   void SetShape(const gd::String& value) { shape = value; }
+  void SetMode(const gd::String& value) { mode = value; }
   // No update rate setter
 
  private:

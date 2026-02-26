@@ -12,7 +12,7 @@ import Cube3DEditor from './Editors/Cube3DEditor';
 import Model3DEditor from './Editors/Model3DEditor';
 import SpineEditor from './Editors/SpineEditor';
 import SimpleTileMapEditor from './Editors/SimpleTileMapEditor';
-import MinimapEditor from './Editors/MinimapEditor';
+import MapEditor from './Editors/MapEditor';
 
 const gd: libGDevelop = global.gd;
 
@@ -154,8 +154,8 @@ const ObjectsEditorService = {
         gd.asObjectJsImplementation(objectConfiguration),
       helpPagePath: '/objects/3d-model',
     },
-    'Minimap::Minimap': {
-      component: MinimapEditor,
+    'Map::Map': {
+      component: MapEditor,
       createNewObject: (
         objectConfiguration: gdObjectConfiguration
       ): gdObjectConfiguration =>

@@ -3,7 +3,7 @@ import RenderedUnknownInstance from './RenderedUnknownInstance';
 
 const gd: libGDevelop = global.gd;
 
-export default class RenderedMinimapInstance extends RenderedUnknownInstance {
+export default class RenderedMapInstance extends RenderedUnknownInstance {
   getDefaultWidth(): number {
     const configuration = gd.castObject(
       // $FlowFixMe[incompatible-exact]

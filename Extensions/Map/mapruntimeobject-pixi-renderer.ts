@@ -1,11 +1,11 @@
 namespace gdjs {
   /**
-   * PIXI.js renderer for MinimapRuntimeObject.
-   * Handles the visual rendering of the minimap using PIXI.js.
+   * PIXI.js renderer for MapRuntimeObject.
+   * Handles the visual rendering of the map using PIXI.js.
    * @internal
    */
-  export class MinimapRuntimeObjectPixiRenderer {
-    _object: gdjs.MinimapRuntimeObject;
+  export class MapRuntimeObjectPixiRenderer {
+    _object: gdjs.MapRuntimeObject;
     _instanceContainer: gdjs.RuntimeInstanceContainer;
 
     _pixiContainer: PIXI.Container;
@@ -29,12 +29,12 @@ namespace gdjs {
     _prevWorldPositions: Map<string, { x: number; y: number }> = new Map();
 
     /**
-     * Create the PIXI renderer for the minimap object.
-     * @param runtimeObject The minimap runtime object.
+     * Create the PIXI renderer for the map object.
+     * @param runtimeObject The map runtime object.
      * @param instanceContainer The container the object belongs to.
      */
     constructor(
-      runtimeObject: gdjs.MinimapRuntimeObject,
+      runtimeObject: gdjs.MapRuntimeObject,
       instanceContainer: gdjs.RuntimeInstanceContainer
     ) {
       this._object = runtimeObject;
@@ -131,7 +131,7 @@ namespace gdjs {
     }
 
     /**
-     * Update the position of the minimap on screen.
+     * Update the position of the map on screen.
      */
     updatePosition(): void {
       if (this._object.getStayOnScreen()) {
@@ -156,14 +156,14 @@ namespace gdjs {
     }
 
     /**
-     * Update the visibility of the minimap.
+     * Update the visibility of the map.
      */
     updateVisibility(): void {
       this._pixiContainer.visible = this._object.isVisible();
     }
 
     /**
-     * Render the minimap.
+     * Render the map.
      */
     render(): void {
       // Clear previous frame
@@ -179,6 +179,9 @@ namespace gdjs {
       // Update mask for circular shape
       this._updateMask();
 
+      // Apply rotation for HeadingUp mode
+      this._applyOrientationRotation();
+
       // Render background
       this._renderBackground();
 
@@ -190,6 +193,131 @@ namespace gdjs {
 
       // Render frame (if custom image)
       this._renderFrame();
+    }
+
+    /**
+     * Apply rotation based on orientation mode.
+     * In map mode (HeadingUp), the map rotates so the player's heading is always up.
+     * In WorldMap mode (NorthUp), the map is fixed with north at the top.
+     * @internal
+     */
+    _applyOrientationRotation(): void {
+      const mode = this._object.getMode();
+      const width = this._object.getWidth();
+      const height = this._object.getHeight();
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      // map mode uses HeadingUp (rotates with player)
+      // WorldMap mode uses NorthUp (fixed north)
+      if (mode === 'Minimap') {
+        const headingAngle = this._getCameraAngle();
+        const rotation = -headingAngle - Math.PI / 2;
+        this._contentGraphics.rotation = rotation;
+        this._contentGraphics.position.set(centerX, centerY);
+        this._markersContainer.rotation = rotation;
+        this._markersContainer.position.set(centerX, centerY);
+        this._backgroundGraphics.rotation = rotation;
+        this._backgroundGraphics.position.set(centerX, centerY);
+
+        // The border should stay aligned with the mask (not rotated), but still centered.
+        this._borderGraphics.rotation = 0;
+        this._borderGraphics.position.set(centerX, centerY);
+
+        // Rotate background sprite too, if it exists.
+        if (this._backgroundSprite) {
+          this._backgroundSprite.pivot.set(centerX, centerY);
+          this._backgroundSprite.position.set(centerX, centerY);
+          this._backgroundSprite.rotation = rotation;
+        }
+      } else {
+        // WorldMap mode - NorthUp (no rotation)
+        this._contentGraphics.rotation = 0;
+        this._contentGraphics.position.set(0, 0);
+        this._markersContainer.rotation = 0;
+        this._markersContainer.position.set(0, 0);
+        this._backgroundGraphics.rotation = 0;
+        this._backgroundGraphics.position.set(0, 0);
+        this._borderGraphics.rotation = 0;
+        this._borderGraphics.position.set(0, 0);
+        if (this._backgroundSprite) {
+          this._backgroundSprite.pivot.set(0, 0);
+          this._backgroundSprite.position.set(0, 0);
+          this._backgroundSprite.rotation = 0;
+        }
+      }
+    }
+
+    /**
+     * Get the player's current angle in radians.
+     * @returns The player's angle in radians, or 0 if no player found.
+     * @internal
+     */
+    _getCameraAngle(): number {
+      let layerNameToUse = this._object.getLayer();
+      const trackedObjects = this._object.getTrackedObjects();
+      for (const obj of trackedObjects) {
+        const markerBehavior = this._object._getMapMarkerBehavior(obj);
+        if (markerBehavior && markerBehavior.getMarkerType() === 'Player') {
+          layerNameToUse = obj.getLayer();
+          break;
+        }
+      }
+      const layer = this._instanceContainer.getLayer(layerNameToUse);
+      const layerRenderer: any = layer.getRenderer();
+      const threeCamera =
+        layerRenderer && typeof layerRenderer.getThreeCamera === 'function'
+          ? layerRenderer.getThreeCamera()
+          : null;
+      const three: any = (globalThis as any).THREE;
+      if (threeCamera && three && typeof three.Vector3 === 'function') {
+        const projectNDCToZ0 = (ndcX: number, ndcY: number) => {
+          threeCamera.updateMatrixWorld();
+          if (threeCamera instanceof three.OrthographicCamera) {
+            const vector = new three.Vector3(ndcX, ndcY, 0);
+            vector.unproject(threeCamera);
+            const direction = new three.Vector3();
+            threeCamera.getWorldDirection(direction);
+            if (!direction.z) return null;
+            const distance = (0 - vector.z) / direction.z;
+            vector.x += distance * direction.x;
+            vector.y += distance * direction.y;
+            return vector;
+          }
+
+          const vector = new three.Vector3(ndcX, ndcY, 0.5);
+          vector.unproject(threeCamera);
+          vector.sub(threeCamera.position).normalize();
+          if (!vector.z) return null;
+          const distance = (0 - threeCamera.position.z) / vector.z;
+          const x = distance * vector.x + threeCamera.position.x;
+          const y = distance * vector.y + threeCamera.position.y;
+          return new three.Vector3(x, y, 0);
+        };
+
+        const center = projectNDCToZ0(0, 0);
+        const candidateA = projectNDCToZ0(0, -0.5);
+        const candidateB = projectNDCToZ0(0, 0.5);
+        if (center && candidateA && candidateB) {
+          const aInCamera = candidateA.clone();
+          const bInCamera = candidateB.clone();
+          if (typeof threeCamera.worldToLocal === 'function') {
+            threeCamera.worldToLocal(aInCamera);
+            threeCamera.worldToLocal(bInCamera);
+          }
+          const inScreen = aInCamera.z < bInCamera.z ? candidateA : candidateB;
+
+          const dx = inScreen.x - center.x;
+          const dy = inScreen.y - center.y;
+          const x = dx;
+          const y = -dy;
+          if (x !== 0 || y !== 0) {
+            return Math.atan2(y, x);
+          }
+        }
+      }
+      const rotationDeg = layer.getCameraRotation();
+      return (rotationDeg * Math.PI) / 180;
     }
 
     /**
@@ -226,7 +354,7 @@ namespace gdjs {
     }
 
     /**
-     * Render the background of the minimap.
+     * Render the background of the map.
      * @internal
      */
     _renderBackground(): void {
@@ -234,6 +362,12 @@ namespace gdjs {
       const shape = this._object.getShape();
       const width = this._object.getWidth();
       const height = this._object.getHeight();
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      // Check if we're in map mode (HeadingUp - center-relative coordinates)
+      const mode = this._object.getMode();
+      const ismap = mode === 'Minimap';
 
       if (bgImage && bgImage !== '') {
         // Use background image
@@ -245,12 +379,20 @@ namespace gdjs {
 
         this._backgroundGraphics.beginFill(bgColor, bgOpacity);
         if (shape === 'Circle') {
-          // Draw circular background
+          // Draw circular background (center-relative for map/HeadingUp)
           const radius = Math.min(width, height) / 2;
-          this._backgroundGraphics.drawCircle(width / 2, height / 2, radius);
+          if (ismap) {
+            this._backgroundGraphics.drawCircle(0, 0, radius);
+          } else {
+            this._backgroundGraphics.drawCircle(centerX, centerY, radius);
+          }
         } else {
-          // Draw rectangular background
-          this._backgroundGraphics.drawRect(0, 0, width, height);
+          // Draw rectangular background (center-relative for map/HeadingUp)
+          if (ismap) {
+            this._backgroundGraphics.drawRect(-centerX, -centerY, width, height);
+          } else {
+            this._backgroundGraphics.drawRect(0, 0, width, height);
+          }
         }
         this._backgroundGraphics.endFill();
       }
@@ -299,7 +441,7 @@ namespace gdjs {
         }
       } catch (error) {
         // Fallback to solid color if image loading fails
-        console.warn(`Failed to load minimap background image: ${imageName}`, error);
+        console.warn(`Failed to load map background image: ${imageName}`, error);
         this._currentBackgroundImage = '';
 
         const bgColor = this._parseColor(this._object.getBackgroundColor());
@@ -319,9 +461,12 @@ namespace gdjs {
       const trackedObjects = this._object.getTrackedObjects();
 
       for (const obj of trackedObjects) {
-        const behavior = obj.getBehavior('MapMarker');
-        if (behavior) {
-          this._renderMarker(obj, behavior as gdjs.MinimapMarkerRuntimeBehavior);
+        const markerBehavior = this._object._getMapMarkerBehavior(obj);
+        if (markerBehavior) {
+          // Check if required methods exist before rendering
+          if (typeof markerBehavior.getMarkerType === 'function') {
+            this._renderMarker(obj, markerBehavior);
+          }
         }
       }
     }
@@ -329,17 +474,30 @@ namespace gdjs {
     /**
      * Render a single marker for a tracked object.
      * @param obj The tracked object.
-     * @param markerBehavior The minimap marker behavior.
+     * @param markerBehavior The map marker behavior.
      * @internal
      */
     _renderMarker(
       obj: gdjs.RuntimeObject,
-      markerBehavior: gdjs.MinimapMarkerRuntimeBehavior
+      markerBehavior: gdjs.MapMarkerRuntimeBehavior
     ): void {
       const markerType = markerBehavior.getMarkerType();
       const worldX = obj.getCenterXInScene();
       const worldY = obj.getCenterYInScene();
-      const [minimapX, minimapY] = this._object.worldToMinimap(worldX, worldY);
+      let [mapX, mapY] = this._object.worldToMap(worldX, worldY);
+
+      // Adjust coordinates for rotation (center-relative)
+      const mode = this._object.getMode();
+      const width = this._object.getWidth();
+      const height = this._object.getHeight();
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      // In map mode (HeadingUp), coordinates need to be relative to center
+      if (mode === 'Minimap') {
+        mapX = mapX - centerX;
+        mapY = mapY - centerY;
+      }
 
       // Get marker properties based on type
       let color: number;
@@ -348,8 +506,9 @@ namespace gdjs {
       let angleDeg: number = 0;
       let priority: number = this._getMarkerPriorityFromType(markerType);
 
-      // Compute angle from object or movement if rotation display is enabled
-      const showRotation = markerBehavior.getShowRotation();
+      const showRotation =
+        markerBehavior.getShowRotation() ||
+        (mode === 'Minimap' && markerType === 'Player');
       if (showRotation) {
         const maybeGetAngle = (obj as any).getAngle;
         if (typeof maybeGetAngle === 'function') {
@@ -407,7 +566,7 @@ namespace gdjs {
 
           // Render obstacle shape if enabled
           if (this._object.getUseObjectShape()) {
-            this._renderObstacleShape(obj, minimapX, minimapY, color);
+            this._renderObstacleShape(obj, mapX, mapY, color);
             return;
           }
           break;
@@ -439,8 +598,8 @@ namespace gdjs {
         // Render custom icon
         this._renderCustomIconMarker(
           obj,
-          minimapX,
-          minimapY,
+          mapX,
+          mapY,
           size,
           customIcon,
           angleDeg,
@@ -450,11 +609,11 @@ namespace gdjs {
       } else {
         // Render default shape based on type
         if (markerType === 'Player') {
-          this._renderTriangleMarker(minimapX, minimapY, size, color, angleDeg + 90);
+          this._renderTriangleMarker(mapX, mapY, size, color, angleDeg + 90);
         } else if (markerType === 'Item') {
-          this._renderStarMarker(minimapX, minimapY, size, color);
+          this._renderStarMarker(mapX, mapY, size, color);
         } else {
-          this._renderCircleMarker(minimapX, minimapY, size, color);
+          this._renderCircleMarker(mapX, mapY, size, color);
         }
       }
     }
@@ -559,8 +718,8 @@ namespace gdjs {
     /**
      * Render an obstacle shape.
      * @param obj The obstacle object.
-     * @param centerX The center X position on the minimap.
-     * @param centerY The center Y position on the minimap.
+     * @param centerX The center X position on the map.
+     * @param centerY The center Y position on the map.
      * @param color The color of the obstacle.
      * @internal
      */
@@ -573,7 +732,7 @@ namespace gdjs {
       const opacity = this._object.getObstacleOpacity();
       const zoom = this._object.getZoom();
 
-      // Scale object size to minimap
+      // Scale object size to map
       const width = obj.getWidth() * zoom;
       const height = obj.getHeight() * zoom;
 
@@ -588,25 +747,39 @@ namespace gdjs {
     }
 
     /**
-     * Render the border of the minimap.
+     * Render the border of the map.
      * @internal
      */
     _renderBorder(): void {
       const width = this._object.getWidth();
       const height = this._object.getHeight();
+      const centerX = width / 2;
+      const centerY = height / 2;
       const borderColor = this._parseColor(this._object.getBorderColor());
       const borderWidth = this._object.getBorderWidth();
       const shape = this._object.getShape();
 
+      // Check if we're in map mode (HeadingUp - center-relative coordinates)
+      const mode = this._object.getMode();
+      const ismap = mode === 'Minimap';
+
       if (borderWidth > 0) {
         this._borderGraphics.lineStyle(borderWidth, borderColor, 1);
         if (shape === 'Circle') {
-          // Draw circular border
+          // Draw circular border (center-relative for map/HeadingUp)
           const radius = Math.min(width, height) / 2;
-          this._borderGraphics.drawCircle(width / 2, height / 2, radius);
+          if (ismap) {
+            this._borderGraphics.drawCircle(0, 0, radius);
+          } else {
+            this._borderGraphics.drawCircle(centerX, centerY, radius);
+          }
         } else {
-          // Draw rectangular border
-          this._borderGraphics.drawRect(0, 0, width, height);
+          // Draw rectangular border (center-relative for map/HeadingUp)
+          if (ismap) {
+            this._borderGraphics.drawRect(-centerX, -centerY, width, height);
+          } else {
+            this._borderGraphics.drawRect(0, 0, width, height);
+          }
         }
       }
     }
@@ -652,7 +825,7 @@ namespace gdjs {
             this._frameSprite.height = height;
           }
         } catch (error) {
-          console.warn(`Failed to load minimap frame image: ${frameImage}`, error);
+          console.warn(`Failed to load map frame image: ${frameImage}`, error);
           this._currentFrameImage = '';
         }
       } else {
@@ -767,6 +940,6 @@ namespace gdjs {
     }
   }
 
-  export const MinimapRuntimeObjectRenderer = MinimapRuntimeObjectPixiRenderer;
-  export type MinimapRuntimeObjectRenderer = MinimapRuntimeObjectPixiRenderer;
+  export const MapRuntimeObjectRenderer = MapRuntimeObjectPixiRenderer;
+  export type MapRuntimeObjectRenderer = MapRuntimeObjectPixiRenderer;
 }

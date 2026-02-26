@@ -1,27 +1,27 @@
 /**
- * GDevelop - Minimap Extension
+ * GDevelop - Map Extension
  * Copyright (c) 2024 GDevelop Community
  * This project is released under the MIT License.
  */
 
-#include "MinimapMarkerBehavior.h"
+#include "MapMarkerBehavior.h"
 #include "GDCore/Project/PropertyDescriptor.h"
 #include "GDCore/Serialization/SerializerElement.h"
 #include "GDCore/Tools/Localization.h"
 
-MinimapMarkerBehavior::MinimapMarkerBehavior() {}
+MapMarkerBehavior::MapMarkerBehavior() {}
 
-void MinimapMarkerBehavior::InitializeContent(gd::SerializerElement& content) {
+void MapMarkerBehavior::InitializeContent(gd::SerializerElement& content) {
   content.SetAttribute("markerType", "Player");
   content.SetAttribute("customColor", "255;255;255");
   content.SetAttribute("customSize", 0.0);
   content.SetAttribute("customIcon", "");
   content.SetAttribute("showRotation", false);
-  content.SetAttribute("visibleOnMinimap", true);
+  content.SetAttribute("visibleOnMap", true);
 }
 
 std::map<gd::String, gd::PropertyDescriptor>
-MinimapMarkerBehavior::GetProperties(const gd::SerializerElement& behaviorContent) const {
+MapMarkerBehavior::GetProperties(const gd::SerializerElement& behaviorContent) const {
   std::map<gd::String, gd::PropertyDescriptor> properties;
 
   properties[_("markerType")]
@@ -61,16 +61,16 @@ MinimapMarkerBehavior::GetProperties(const gd::SerializerElement& behaviorConten
       .SetLabel(_("Show rotation"))
       .SetGroup(_("Display Options"));
 
-  properties[_("visibleOnMinimap")]
-      .SetValue(behaviorContent.GetBoolAttribute("visibleOnMinimap", true) ? "true" : "false")
+  properties[_("visibleOnMap")]
+      .SetValue(behaviorContent.GetBoolAttribute("visibleOnMap", true) ? "true" : "false")
       .SetType("Boolean")
-      .SetLabel(_("Visible on minimap"))
+      .SetLabel(_("Visible on map"))
       .SetGroup(_("Display Options"));
 
   return properties;
 }
 
-bool MinimapMarkerBehavior::UpdateProperty(gd::SerializerElement& behaviorContent,
+bool MapMarkerBehavior::UpdateProperty(gd::SerializerElement& behaviorContent,
                                            const gd::String& name,
                                            const gd::String& value) {
   if (name == _("markerType")) {
@@ -93,8 +93,8 @@ bool MinimapMarkerBehavior::UpdateProperty(gd::SerializerElement& behaviorConten
     behaviorContent.SetAttribute("showRotation", value == "1" || value == "true");
     return true;
   }
-  if (name == _("visibleOnMinimap")) {
-    behaviorContent.SetAttribute("visibleOnMinimap", value == "1" || value == "true");
+  if (name == _("visibleOnMap")) {
+    behaviorContent.SetAttribute("visibleOnMap", value == "1" || value == "true");
     return true;
   }
 

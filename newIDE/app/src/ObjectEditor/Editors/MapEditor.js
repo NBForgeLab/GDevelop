@@ -41,7 +41,7 @@ const replaceFieldsWithRow = (
   return nextFields;
 };
 
-const MinimapEditor = (props: Props): React.Node => {
+const MapEditor = (props: Props): React.Node => {
   const {
     objectConfiguration,
     project,
@@ -167,4 +167,4 @@ const MinimapEditor = (props: Props): React.Node => {
   );
 };
 
-export default MinimapEditor;
+export default MapEditor;
