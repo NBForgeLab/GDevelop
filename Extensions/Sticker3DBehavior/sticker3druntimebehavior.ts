@@ -17,15 +17,14 @@ namespace gdjs {
     private _offsetZ: float = 0;
     private _followRotation: boolean = true;
     private _destroyWithStuckToObject: boolean = false;
+    private _offsetMode: string = "world"; // "world" or "local"
 
     // State
     private _stuckToObject: gdjs.RuntimeObject | null = null;
     private _isStuck: boolean = false;
-    
-    // Store previous stuck-to 3D object rotation to detect changes
-    private _lastStuckToRotationX: float = 0;
-    private _lastStuckToRotationY: float = 0;
-    private _lastStuckToRotationZ: float = 0;
+
+    // Callback for when stuck-to object is deleted
+    private _onStuckToObjectDeleted: (() => void) | null = null;
 
     constructor(
       instanceContainer: gdjs.RuntimeInstanceContainer,
@@ -40,6 +39,9 @@ namespace gdjs {
       this._destroyWithStuckToObject = behaviorData.destroyWithStuckToObject !== undefined
         ? behaviorData.destroyWithStuckToObject
         : false;
+      this._offsetMode = behaviorData.offsetMode !== undefined
+        ? behaviorData.offsetMode
+        : "world";
     }
 
     override applyBehaviorOverriding(behaviorData: any): boolean {
@@ -48,6 +50,9 @@ namespace gdjs {
       }
       if (behaviorData.destroyWithStuckToObject !== undefined) {
         this._destroyWithStuckToObject = behaviorData.destroyWithStuckToObject;
+      }
+      if (behaviorData.offsetMode !== undefined) {
+        this._offsetMode = behaviorData.offsetMode;
       }
       return true;
     }
@@ -60,17 +65,14 @@ namespace gdjs {
       // Keep the stick information but stop updating
     }
 
+    override onDestroy(): void {
+      // Clean up when behavior is destroyed
+      this.unstick();
+    }
+
     override doStepPreEvents(instanceContainer: gdjs.RuntimeInstanceContainer): void {
-      if (!this._isStuck || !this._stuckToObject || !this._stuckToObject.isIncludedInParentCollisionMask()) {
-        // Stuck-to 3D object doesn't exist or was deleted
-        if (this._isStuck) {
-          if (this._destroyWithStuckToObject) {
-            // Destroy this 3D object when the stuck-to 3D object is destroyed
-            this.owner.deleteFromScene(instanceContainer);
-            return;
-          }
-          this.unstick();
-        }
+      // Check if we're stuck and have a valid stuck-to object
+      if (!this._isStuck || !this._stuckToObject) {
         return;
       }
 
@@ -93,11 +95,29 @@ namespace gdjs {
         stuckToRotationY = stuckToObject.getRotationY();
       }
 
-      // Calculate absolute target position based on stuck-to 3D object position + offset
-      // This approach eliminates floating-point drift and ensures offsets are always applied
-      const targetX = stuckToX + this._offsetX;
-      const targetY = stuckToY + this._offsetY;
-      const targetZ = stuckToZ + this._offsetZ;
+      // Calculate target position based on offset mode
+      let targetX: float, targetY: float, targetZ: float;
+      
+      if (this._offsetMode === "local") {
+        // Local space: rotate offset based on stuck-to object's Z rotation (2D)
+        // Only Z-axis rotation is applied to keep objects on the same plane (suitable for vehicles, characters)
+        const angleRad = (stuckToRotationZ * Math.PI) / 180;
+        const cos = Math.cos(angleRad);
+        const sin = Math.sin(angleRad);
+
+        // Rotate offset in 2D (X-Y plane)
+        const rotatedOffsetX = this._offsetX * cos - this._offsetY * sin;
+        const rotatedOffsetY = this._offsetX * sin + this._offsetY * cos;
+
+        targetX = stuckToX + rotatedOffsetX;
+        targetY = stuckToY + rotatedOffsetY;
+        targetZ = stuckToZ + this._offsetZ; // Z offset stays the same
+      } else {
+        // World space: offset stays fixed in world coordinates
+        targetX = stuckToX + this._offsetX;
+        targetY = stuckToY + this._offsetY;
+        targetZ = stuckToZ + this._offsetZ;
+      }
 
       // Update this object's position to the target position
       owner.setX(targetX);
@@ -109,42 +129,15 @@ namespace gdjs {
 
       // Update rotation if following rotation
       if (this._followRotation) {
-        // Calculate rotation deltas to apply incremental changes
-        // This preserves any manual rotation adjustments made between frames
-        let deltaRotationZ = stuckToRotationZ - this._lastStuckToRotationZ;
-        
-        // Normalize angle delta to [-180, 180] to handle wrapping correctly
-        // Example: 350° → 10° should be +20°, not -340°
-        while (deltaRotationZ > 180) deltaRotationZ -= 360;
-        while (deltaRotationZ < -180) deltaRotationZ += 360;
-        
-        if (deltaRotationZ !== 0) {
-          owner.setAngle(owner.getAngle() + deltaRotationZ);
-        }
+        // Copy the stuck-to object's rotation directly
+        // This ensures the sticker always has the exact same orientation as the stuck-to object
+        owner.setAngle(stuckToRotationZ);
 
         if (gdjs.Base3DHandler && gdjs.Base3DHandler.is3D(stuckToObject) && gdjs.Base3DHandler.is3D(owner)) {
-          let deltaRotationX = stuckToRotationX - this._lastStuckToRotationX;
-          let deltaRotationY = stuckToRotationY - this._lastStuckToRotationY;
-          
-          // Normalize X and Y rotation deltas as well
-          while (deltaRotationX > 180) deltaRotationX -= 360;
-          while (deltaRotationX < -180) deltaRotationX += 360;
-          while (deltaRotationY > 180) deltaRotationY -= 360;
-          while (deltaRotationY < -180) deltaRotationY += 360;
-          
-          if (deltaRotationX !== 0) {
-            owner.setRotationX(owner.getRotationX() + deltaRotationX);
-          }
-          if (deltaRotationY !== 0) {
-            owner.setRotationY(owner.getRotationY() + deltaRotationY);
-          }
+          owner.setRotationX(stuckToRotationX);
+          owner.setRotationY(stuckToRotationY);
         }
       }
-
-      // Store current rotation for next frame delta calculation
-      this._lastStuckToRotationX = stuckToRotationX;
-      this._lastStuckToRotationY = stuckToRotationY;
-      this._lastStuckToRotationZ = stuckToRotationZ;
     }
 
     /**
@@ -156,29 +149,60 @@ namespace gdjs {
         return;
       }
 
+      // Unregister previous callback if exists
+      if (this._onStuckToObjectDeleted && this._stuckToObject) {
+        this._stuckToObject.unregisterDestroyCallback(this._onStuckToObjectDeleted);
+      }
+
       this._stuckToObject = targetObject;
       this._isStuck = true;
 
+      // Register callback to handle when stuck-to object is deleted
+      this._onStuckToObjectDeleted = () => {
+        if (this._destroyWithStuckToObject) {
+          // Destroy this 3D object when the stuck-to 3D object is destroyed
+          this.owner.deleteFromScene();
+        } else {
+          // Just unstick without destroying
+          this.unstick();
+        }
+      };
+      targetObject.registerDestroyCallback(this._onStuckToObjectDeleted);
+
       // Calculate and store initial offset based on current positions
       const owner = this.owner;
-      this._offsetX = owner.getX() - targetObject.getX();
-      this._offsetY = owner.getY() - targetObject.getY();
+      
+      if (this._offsetMode === "local") {
+        // Local space: calculate offset in target object's local coordinates
+        // This requires inverse rotation transformation (2D only for Z-axis)
+        const targetAngle = targetObject.getAngle();
+        const angleRad = (targetAngle * Math.PI) / 180;
+        const cos = Math.cos(-angleRad); // Negative for inverse rotation
+        const sin = Math.sin(-angleRad);
 
-      if (gdjs.Base3DHandler && gdjs.Base3DHandler.is3D(owner) && gdjs.Base3DHandler.is3D(targetObject)) {
-        this._offsetZ = owner.getZ() - targetObject.getZ();
+        const worldOffsetX = owner.getX() - targetObject.getX();
+        const worldOffsetY = owner.getY() - targetObject.getY();
+
+        // Transform world offset to local space (2D rotation)
+        this._offsetX = worldOffsetX * cos - worldOffsetY * sin;
+        this._offsetY = worldOffsetX * sin + worldOffsetY * cos;
+        
+        // Z offset is always calculated in world space (not affected by rotation)
+        if (gdjs.Base3DHandler && gdjs.Base3DHandler.is3D(owner) && gdjs.Base3DHandler.is3D(targetObject)) {
+          this._offsetZ = owner.getZ() - targetObject.getZ();
+        } else {
+          this._offsetZ = 0;
+        }
       } else {
-        this._offsetZ = 0;
-      }
-
-      // Store initial rotation for delta calculation
-      this._lastStuckToRotationZ = targetObject.getAngle();
-
-      if (gdjs.Base3DHandler && gdjs.Base3DHandler.is3D(targetObject)) {
-        this._lastStuckToRotationX = targetObject.getRotationX();
-        this._lastStuckToRotationY = targetObject.getRotationY();
-      } else {
-        this._lastStuckToRotationX = 0;
-        this._lastStuckToRotationY = 0;
+        // World space: offset in world coordinates
+        this._offsetX = owner.getX() - targetObject.getX();
+        this._offsetY = owner.getY() - targetObject.getY();
+        
+        if (gdjs.Base3DHandler && gdjs.Base3DHandler.is3D(owner) && gdjs.Base3DHandler.is3D(targetObject)) {
+          this._offsetZ = owner.getZ() - targetObject.getZ();
+        } else {
+          this._offsetZ = 0;
+        }
       }
     }
 
@@ -186,6 +210,12 @@ namespace gdjs {
      * Unstick from the current stuck-to 3D object.
      */
     unstick(): void {
+      // Unregister the destroy callback
+      if (this._onStuckToObjectDeleted && this._stuckToObject) {
+        this._stuckToObject.unregisterDestroyCallback(this._onStuckToObjectDeleted);
+        this._onStuckToObjectDeleted = null;
+      }
+      
       this._stuckToObject = null;
       this._isStuck = false;
     }
