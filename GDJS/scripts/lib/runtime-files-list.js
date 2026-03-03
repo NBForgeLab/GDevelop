@@ -37,6 +37,7 @@ const untransformedPaths = [
   'GDJS/Runtime/pixi-renderers/pixi.js',
   'GDJS/Runtime/pixi-renderers/three.js',
   'GDJS/Runtime/pixi-renderers/ThreeAddons.js',
+  'GDJS/Runtime/pixi-renderers/PostProcessing.js',
   'GDJS/Runtime/pixi-renderers/draco/gltf/draco_wasm_wrapper.js',
   'GDJS/Runtime/fontfaceobserver-font-manager/fontfaceobserver.js',
   'GDJS/Runtime/Cordova',

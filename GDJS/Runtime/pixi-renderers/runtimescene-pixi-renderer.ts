@@ -217,7 +217,8 @@ namespace gdjs {
                 threeRenderer.resetState();
               }
 
-              if (isFirstRender) {
+              const isFirst3DRender = isFirstRender;
+              if (isFirst3DRender) {
                 // Render the background color.
                 threeRenderer.setClearColor(
                   this._runtimeScene.getBackgroundColor()
@@ -247,6 +248,18 @@ namespace gdjs {
               // even 3D objects.
               threeRenderer.clearDepth();
               if (runtimeLayerRenderer.hasPostProcessingPass()) {
+                const renderPass = threeEffectComposer.passes[0] as
+                  | THREE_ADDONS.RenderPass
+                  | undefined;
+                if (renderPass && (renderPass as any).isRenderPass) {
+                  // Only the first rendered 3D layer should clear color, otherwise it
+                  // would overwrite what previous layers already rendered.
+                  renderPass.clear = isFirst3DRender;
+                  if (isFirst3DRender && this._backgroundColor) {
+                    renderPass.clearColor = this._backgroundColor;
+                    renderPass.clearAlpha = 1;
+                  }
+                }
                 threeEffectComposer.render();
               } else {
                 threeRenderer.render(threeScene, threeCamera);

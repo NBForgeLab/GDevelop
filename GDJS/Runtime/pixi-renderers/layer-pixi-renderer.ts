@@ -439,9 +439,14 @@ namespace gdjs {
             this._threeEffectComposer = new THREE_ADDONS.EffectComposer(
               threeRenderer
             );
-            this._threeEffectComposer.addPass(
-              new THREE_ADDONS.RenderPass(this._threeScene, this._threeCamera)
+            const renderPass = new THREE_ADDONS.RenderPass(
+              this._threeScene,
+              this._threeCamera
             );
+            // Keep clearing enabled by default. RuntimeScene renderer can adjust this
+            // per layer/frame to preserve correct compositing with 2D layers.
+            renderPass.clear = true;
+            this._threeEffectComposer.addPass(renderPass);
             if (game.getAntialiasingMode() !== 'none') {
               this._threeEffectComposer.addPass(
                 new THREE_ADDONS.SMAAPass(

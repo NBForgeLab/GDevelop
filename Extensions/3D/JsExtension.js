@@ -2742,6 +2742,7 @@ module.exports = {
         .setDescription(_('Adjust hue and saturation.'))
         .markAsNotWorkingForObjects()
         .markAsOnlyWorkingFor3D()
+        .addIncludeFile('Extensions/3D/PostProcessingBridge.js')
         .addIncludeFile('Extensions/3D/HueAndSaturationEffect.js');
       const properties = effect.getProperties();
       properties
@@ -2769,6 +2770,7 @@ module.exports = {
         )
         .markAsNotWorkingForObjects()
         .markAsOnlyWorkingFor3D()
+        .addIncludeFile('Extensions/3D/PostProcessingBridge.js')
         .addIncludeFile('Extensions/3D/ToneMappingEffect.js');
       const properties = effect.getProperties();
       properties
@@ -2797,9 +2799,14 @@ module.exports = {
       const effect = extension
         .addEffect('Exposure')
         .setFullName(_('Exposure'))
-        .setDescription(_('Adjust exposure.'))
+        .setDescription(
+          _(
+            'Adjust post-process exposure. Prefer Tone mapping exposure as the primary control to avoid double exposure.'
+          )
+        )
         .markAsNotWorkingForObjects()
         .markAsOnlyWorkingFor3D()
+        .addIncludeFile('Extensions/3D/PostProcessingBridge.js')
         .addIncludeFile('Extensions/3D/ExposureEffect.js');
       const properties = effect.getProperties();
       properties
@@ -2807,35 +2814,75 @@ module.exports = {
         .setValue('1')
         .setLabel(_('Exposure'))
         .setType('number')
-        .setDescription(_('Positive value'));
+        .setDescription(
+          _('Positive value. Values above 1 brighten the final image quickly.')
+        );
     }
     {
       const effect = extension
         .addEffect('Bloom')
         .setFullName(_('Bloom'))
-        .setDescription(_('Apply a bloom effect.'))
+        .setDescription(
+          _(
+            'Apply a bloom effect. Best used with Tone mapping (ACES Filmic) for stable highlights.'
+          )
+        )
         .markAsNotWorkingForObjects()
         .markAsOnlyWorkingFor3D()
+        .addIncludeFile('Extensions/3D/PostProcessingBridge.js')
         .addIncludeFile('Extensions/3D/BloomEffect.js');
       const properties = effect.getProperties();
       properties
         .getOrCreate('strength')
-        .setValue('1')
+        .setValue('0.35')
         .setLabel(_('Strength'))
         .setType('number')
-        .setDescription(_('Between 0 and 3'));
+        .setDescription(_('Range 0 to 3. Typical values: 0.2 to 0.8.'));
       properties
         .getOrCreate('radius')
-        .setValue('0')
+        .setValue('0.4')
         .setLabel(_('Radius'))
         .setType('number')
-        .setDescription(_('Between 0 and 1'));
+        .setDescription(_('Range 0 to 1. Typical values: 0.2 to 0.6.'));
       properties
         .getOrCreate('threshold')
-        .setValue('0')
+        .setValue('0.85')
         .setLabel(_('Threshold'))
         .setType('number')
-        .setDescription(_('Between 0 and 1'));
+        .setDescription(_('Range 0 to 1. Higher value limits bloom to bright pixels.'));
+    }
+    {
+      const effect = extension
+        .addEffect('DepthOfField')
+        .setFullName(_('Depth of field'))
+        .setDescription(
+          _(
+            'Blur pixels that are outside focus distance. Useful for cinematic depth separation.'
+          )
+        )
+        .markAsNotWorkingForObjects()
+        .markAsOnlyWorkingFor3D()
+        .addIncludeFile('Extensions/3D/PostProcessingBridge.js')
+        .addIncludeFile('Extensions/3D/DepthOfFieldEffect.js');
+      const properties = effect.getProperties();
+      properties
+        .getOrCreate('focusDistance')
+        .setValue('0.02')
+        .setLabel(_('Focus distance'))
+        .setType('number')
+        .setDescription(_('Range 0 to 1. Lower values focus on near objects.'));
+      properties
+        .getOrCreate('focalLength')
+        .setValue('0.05')
+        .setLabel(_('Focal length'))
+        .setType('number')
+        .setDescription(_('Range 0 to 1. Higher values increase blur falloff.'));
+      properties
+        .getOrCreate('bokehScale')
+        .setValue('2')
+        .setLabel(_('Bokeh scale'))
+        .setType('number')
+        .setDescription(_('Range 0 to 20. Controls blur size and intensity.'));
     }
     {
       const effect = extension
@@ -2844,6 +2891,7 @@ module.exports = {
         .setDescription(_('Adjust brightness and contrast.'))
         .markAsNotWorkingForObjects()
         .markAsOnlyWorkingFor3D()
+        .addIncludeFile('Extensions/3D/PostProcessingBridge.js')
         .addIncludeFile('Extensions/3D/BrightnessAndContrastEffect.js');
       const properties = effect.getProperties();
       properties

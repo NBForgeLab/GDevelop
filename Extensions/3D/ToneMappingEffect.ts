@@ -1,4 +1,21 @@
 namespace gdjs {
+  const getPostProcessingBridgeForToneMapping = (): any | null => {
+    const scene3dAny = (gdjs as any).scene3d;
+    if (!scene3dAny) {
+      return null;
+    }
+    const bridge = scene3dAny.postprocessing;
+    if (
+      !bridge ||
+      typeof bridge.isAvailable !== 'function' ||
+      typeof bridge.getApi !== 'function' ||
+      typeof bridge.createEffectPassAdapter !== 'function'
+    ) {
+      return null;
+    }
+    return bridge;
+  };
+
   type ToneMappingName =
     | 'none'
     | 'linear'
@@ -16,44 +33,12 @@ namespace gdjs {
   const defaultToneMappingExposure = 1;
   const defaultToneMappingName: ToneMappingName = 'acesFilmic';
 
-  type ToneMappingSettings = {
-    toneMappingName: ToneMappingName;
-    exposure: number;
-  };
-
-  type ToneMappingSceneState = {
-    defaultToneMapping: THREE.ToneMapping | null;
-    defaultExposure: number | null;
-    controllers: Map<number, ToneMappingSettings>;
-  };
-
-  const toneMappingSceneStates = new WeakMap<gdjs.RuntimeScene, ToneMappingSceneState>();
-  let nextToneMappingControllerId = 1;
-
-  const getThreeRendererFromTarget = (
-    target: EffectsTarget
-  ): THREE.WebGLRenderer | null => {
-    if (!(target instanceof gdjs.Layer)) {
-      return null;
-    }
-    const runtimeLayer = target.getRuntimeLayer();
-    const runtimeScene = runtimeLayer.getRuntimeScene();
-    const renderer = runtimeScene.getGame().getRenderer();
-    if (!renderer || !renderer.getThreeRenderer) {
-      return null;
-    }
-    return renderer.getThreeRenderer();
-  };
-
-  const getRuntimeSceneFromTarget = (
-    target: EffectsTarget
-  ): gdjs.RuntimeScene | null => {
-    if (!(target instanceof gdjs.Layer)) {
-      return null;
-    }
-    const runtimeLayer = target.getRuntimeLayer();
-    return runtimeLayer ? runtimeLayer.getRuntimeScene() : null;
-  };
+  const toneMappingExposureFragmentShader = `
+uniform float exposure;
+void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
+  outputColor = vec4(inputColor.rgb * exposure, inputColor.a);
+}
+`;
 
   const sanitizeToneMappingName = (value: string): ToneMappingName => {
     if (
@@ -78,81 +63,24 @@ namespace gdjs {
     );
   };
 
-  const getToneMappingType = (
+  const getPostProcessingToneMappingMode = (
+    postprocessing: any,
     toneMappingName: ToneMappingName
-  ): THREE.ToneMapping => {
+  ): number => {
+    const toneMappingModes = postprocessing.ToneMappingMode;
+    if (!toneMappingModes) {
+      return 0;
+    }
     if (toneMappingName === 'linear') {
-      return THREE.LinearToneMapping;
+      return toneMappingModes.LINEAR;
     }
     if (toneMappingName === 'reinhard') {
-      return THREE.ReinhardToneMapping;
+      return toneMappingModes.REINHARD;
     }
     if (toneMappingName === 'cineon') {
-      return THREE.CineonToneMapping;
+      return toneMappingModes.CINEON;
     }
-    if (toneMappingName === 'acesFilmic') {
-      return THREE.ACESFilmicToneMapping;
-    }
-    return THREE.NoToneMapping;
-  };
-
-  const getToneMappingSceneState = (
-    runtimeScene: gdjs.RuntimeScene
-  ): ToneMappingSceneState => {
-    const existingState = toneMappingSceneStates.get(runtimeScene);
-    if (existingState) {
-      return existingState;
-    }
-    const createdState: ToneMappingSceneState = {
-      defaultToneMapping: null,
-      defaultExposure: null,
-      controllers: new Map<number, ToneMappingSettings>(),
-    };
-    toneMappingSceneStates.set(runtimeScene, createdState);
-    return createdState;
-  };
-
-  const getLastControllerSettings = (
-    sceneState: ToneMappingSceneState
-  ): ToneMappingSettings | null => {
-    if (sceneState.controllers.size === 0) {
-      return null;
-    }
-    let lastSettings: ToneMappingSettings | null = null;
-    sceneState.controllers.forEach((settings) => {
-      lastSettings = settings;
-    });
-    return lastSettings;
-  };
-
-  const applySceneToneMappingToRenderer = (
-    sceneState: ToneMappingSceneState,
-    threeRenderer: THREE.WebGLRenderer | null
-  ): boolean => {
-    if (!threeRenderer) {
-      return false;
-    }
-    const activeSettings = getLastControllerSettings(sceneState);
-    const expectedToneMapping = activeSettings
-      ? getToneMappingType(activeSettings.toneMappingName)
-      : sceneState.defaultToneMapping !== null
-        ? sceneState.defaultToneMapping
-        : THREE.NoToneMapping;
-    const expectedExposure = activeSettings
-      ? activeSettings.exposure
-      : sceneState.defaultExposure !== null
-        ? sceneState.defaultExposure
-        : defaultToneMappingExposure;
-    const didToneMappingChange = threeRenderer.toneMapping !== expectedToneMapping;
-    const didExposureChange =
-      threeRenderer.toneMappingExposure !== expectedExposure;
-    if (didToneMappingChange) {
-      threeRenderer.toneMapping = expectedToneMapping;
-    }
-    if (didExposureChange) {
-      threeRenderer.toneMappingExposure = expectedExposure;
-    }
-    return didToneMappingChange || didExposureChange;
+    return toneMappingModes.ACES_FILMIC;
   };
 
   gdjs.PixiFiltersTools.registerFilterCreator(
@@ -162,113 +90,172 @@ namespace gdjs {
         target: EffectsTarget,
         effectData: EffectData
       ): gdjs.PixiFiltersTools.Filter {
-        if (typeof THREE === 'undefined') {
+        if (
+          typeof THREE === 'undefined' ||
+          !getPostProcessingBridgeForToneMapping() ||
+          !getPostProcessingBridgeForToneMapping()!.isAvailable()
+        ) {
           return new gdjs.PixiFiltersTools.EmptyFilter();
         }
+
         return new (class implements gdjs.PixiFiltersTools.Filter {
           private _isEnabled = false;
           private _toneMapping: ToneMappingName = defaultToneMappingName;
           private _exposure = defaultToneMappingExposure;
-          private _controllerId = nextToneMappingControllerId++;
+          private _effectPass: THREE_ADDONS.Pass | null = null;
+          private _toneMappingEffect: any | null = null;
+          private _exposureEffect: any | null = null;
+          private _exposureUniform: THREE.Uniform | null = null;
 
-          private _updateSceneState(
-            runtimeScene: gdjs.RuntimeScene,
-            includeController: boolean
-          ): void {
-            const sceneState = getToneMappingSceneState(runtimeScene);
-            const threeRenderer = getThreeRendererFromTarget(target);
-
+          private _createEffects(postprocessing: any): boolean {
+            if (!postprocessing || typeof postprocessing.ToneMappingEffect !== 'function') {
+              return false;
+            }
             if (
-              sceneState.defaultToneMapping === null ||
-              sceneState.defaultExposure === null
+              typeof postprocessing.Effect !== 'function' ||
+              !postprocessing.BlendFunction
             ) {
-              sceneState.defaultToneMapping = threeRenderer
-                ? threeRenderer.toneMapping
-                : THREE.NoToneMapping;
-              sceneState.defaultExposure = threeRenderer
-                ? threeRenderer.toneMappingExposure
-                : defaultToneMappingExposure;
+              return false;
             }
+            this._toneMappingEffect = new postprocessing.ToneMappingEffect({
+              mode: getPostProcessingToneMappingMode(
+                postprocessing,
+                this._toneMapping
+              ),
+            });
+            this._exposureUniform = new THREE.Uniform(this._exposure);
+            this._exposureEffect = new postprocessing.Effect(
+              'GDevelopToneMappingExposureEffect',
+              toneMappingExposureFragmentShader,
+              {
+                blendFunction: postprocessing.BlendFunction.SRC,
+                uniforms: new Map([['exposure', this._exposureUniform]]),
+              }
+            );
+            return true;
+          }
 
-            if (includeController) {
-              sceneState.controllers.delete(this._controllerId);
-              sceneState.controllers.set(this._controllerId, {
-                toneMappingName: this._toneMapping,
-                exposure: this._exposure,
-              });
-            } else {
-              sceneState.controllers.delete(this._controllerId);
+          private _syncEffects(postprocessing: any): void {
+            if (!this._effectPass || !this._toneMappingEffect || !this._exposureUniform) {
+              return;
             }
+            if (this._toneMapping === 'none') {
+              this._effectPass.enabled = false;
+              return;
+            }
+            this._effectPass.enabled = true;
+            this._toneMappingEffect.mode = getPostProcessingToneMappingMode(
+              postprocessing,
+              this._toneMapping
+            );
+            this._exposureUniform.value = this._exposure;
+          }
 
-            applySceneToneMappingToRenderer(sceneState, threeRenderer);
+          private _ensureEffectPass(target: EffectsTarget): boolean {
+            const bridge = getPostProcessingBridgeForToneMapping();
+            if (!bridge) {
+              return false;
+            }
+            const postprocessing = bridge.getApi();
+            if (!postprocessing) {
+              return false;
+            }
+            if (this._effectPass) {
+              this._syncEffects(postprocessing);
+              return true;
+            }
+            if (!this._toneMappingEffect || !this._exposureEffect) {
+              if (!this._createEffects(postprocessing)) {
+                return false;
+              }
+            }
+            this._effectPass = bridge.createEffectPassAdapter(target, [
+              this._toneMappingEffect,
+              this._exposureEffect,
+            ]);
+            if (!this._effectPass) {
+              return false;
+            }
+            this._syncEffects(postprocessing);
+            return true;
           }
 
           isEnabled(target: EffectsTarget): boolean {
             return this._isEnabled;
           }
+
           setEnabled(target: EffectsTarget, enabled: boolean): boolean {
             if (this._isEnabled === enabled) {
               return true;
             }
             return enabled ? this.applyEffect(target) : this.removeEffect(target);
           }
+
           applyEffect(target: EffectsTarget): boolean {
-            const runtimeScene = getRuntimeSceneFromTarget(target);
-            if (!runtimeScene) {
+            if (!(target instanceof gdjs.Layer)) {
               return false;
             }
+            if (!this._ensureEffectPass(target) || !this._effectPass) {
+              return false;
+            }
+            target.getRenderer().addPostProcessingPass(this._effectPass);
             this._isEnabled = true;
-            this._updateSceneState(runtimeScene, true);
             return true;
           }
+
           removeEffect(target: EffectsTarget): boolean {
-            const runtimeScene = getRuntimeSceneFromTarget(target);
-            if (!runtimeScene) {
-              this._isEnabled = false;
+            if (!(target instanceof gdjs.Layer)) {
               return false;
+            }
+            if (this._effectPass) {
+              target.getRenderer().removePostProcessingPass(this._effectPass);
             }
             this._isEnabled = false;
-            this._updateSceneState(runtimeScene, false);
             return true;
           }
+
           updatePreRender(target: gdjs.EffectsTarget): any {
-            if (!this._isEnabled) {
+            if (!this._isEnabled || !(target instanceof gdjs.Layer)) {
               return;
             }
-            const runtimeScene = getRuntimeSceneFromTarget(target);
-            if (!runtimeScene) {
-              return;
-            }
-            this._updateSceneState(runtimeScene, true);
+            this._ensureEffectPass(target);
           }
+
           updateDoubleParameter(parameterName: string, value: number): void {
             if (parameterName === 'exposure') {
               this._exposure = sanitizeExposure(value);
             }
           }
+
           getDoubleParameter(parameterName: string): number {
             if (parameterName === 'exposure') {
               return this._exposure;
             }
             return 0;
           }
+
           updateStringParameter(parameterName: string, value: string): void {
             if (parameterName !== 'toneMapping') {
               return;
             }
             this._toneMapping = sanitizeToneMappingName(value);
           }
+
           updateColorParameter(parameterName: string, value: number): void {}
+
           getColorParameter(parameterName: string): number {
             return 0;
           }
+
           updateBooleanParameter(parameterName: string, value: boolean): void {}
+
           getNetworkSyncData(): ToneMappingFilterNetworkSyncData {
             return {
               t: this._toneMapping,
               e: this._exposure,
             };
           }
+
           updateFromNetworkSyncData(
             syncData: ToneMappingFilterNetworkSyncData
           ): void {
