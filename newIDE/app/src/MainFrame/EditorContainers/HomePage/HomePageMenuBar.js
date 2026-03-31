@@ -97,6 +97,9 @@ export const styles = {
   navigationIcon: {
     fontSize: 17,
   },
+  collapsedNavigationIcon: {
+    fontSize: 20,
+  },
   navigationLabel: {
     fontSize: 15,
     fontWeight: 500,
@@ -129,6 +132,9 @@ const HomePageMenuBar = ({
   const menuWidth = shouldHideLabels
     ? homepageMediumMenuBarWidth
     : homepageDesktopMenuBarWidth;
+  const navigationIconStyle = shouldHideLabels
+    ? styles.collapsedNavigationIcon
+    : styles.navigationIcon;
   const largeScreenOnlyButtons: {
     label: React.Node,
     getIcon: GetIconFunction,
@@ -268,7 +274,7 @@ const HomePageMenuBar = ({
               isActive={activeTab === tab}
               hideLabel={shouldHideLabels}
               id={id}
-              iconStyle={styles.navigationIcon}
+              iconStyle={navigationIconStyle}
               iconFontSize="inherit"
               labelStyle={styles.navigationLabel}
             />
@@ -287,7 +293,7 @@ const HomePageMenuBar = ({
               isActive={false}
               hideLabel={shouldHideLabels}
               id={id}
-              iconStyle={styles.navigationIcon}
+              iconStyle={navigationIconStyle}
               iconFontSize="inherit"
               labelStyle={styles.navigationLabel}
             />
