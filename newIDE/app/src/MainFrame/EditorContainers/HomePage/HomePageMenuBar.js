@@ -94,6 +94,13 @@ export const styles = {
   desktopTabsColumn: {
     paddingTop: 22,
   },
+  navigationIcon: {
+    fontSize: 17,
+  },
+  navigationLabel: {
+    fontSize: 15,
+    fontWeight: 500,
+  },
 };
 
 type Props = {|
@@ -261,6 +268,9 @@ const HomePageMenuBar = ({
               isActive={activeTab === tab}
               hideLabel={shouldHideLabels}
               id={id}
+              iconStyle={styles.navigationIcon}
+              iconFontSize="inherit"
+              labelStyle={styles.navigationLabel}
             />
           ))}
         </Column>
@@ -277,6 +287,9 @@ const HomePageMenuBar = ({
               isActive={false}
               hideLabel={shouldHideLabels}
               id={id}
+              iconStyle={styles.navigationIcon}
+              iconFontSize="inherit"
+              labelStyle={styles.navigationLabel}
             />
           ))}
         </Column>
