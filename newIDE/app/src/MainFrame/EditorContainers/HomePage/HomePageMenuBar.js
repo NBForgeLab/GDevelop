@@ -98,7 +98,7 @@ export const styles = {
     fontSize: 17,
   },
   collapsedNavigationIcon: {
-    fontSize: 20,
+    fontSize: 23,
   },
   navigationLabel: {
     fontSize: 15,
