@@ -271,7 +271,8 @@ module.exports = {
         .setIncludeFile('Extensions/3D/A_RuntimeObject3D.js')
         .addIncludeFile('Extensions/3D/A_RuntimeObject3DRenderer.js')
         .addIncludeFile('Extensions/3D/Model3DRuntimeObject.js')
-        .addIncludeFile('Extensions/3D/Model3DRuntimeObject3DRenderer.js');
+        .addIncludeFile('Extensions/3D/Model3DRuntimeObject3DRenderer.js')
+        .addIncludeFile('Extensions/3D/Model3DRuntimeObjectMeshParts.js');
 
       // Properties expressions/conditions/actions:
 
@@ -842,6 +843,254 @@ module.exports = {
         .addParameter('object', _('3D model'), 'Model3DObject', false)
         .addParameter('number', _('Crossfade duration (in seconds)'), '', false)
         .setFunctionName('setCrossfadeDuration');
+
+      // Mesh Parts Actions and Conditions
+
+      object
+        .addScopedAction(
+          'SetMeshVisible',
+          _('Show/hide a mesh part'),
+          _('Show or hide a specific mesh part of the 3D model.'),
+          _('Set mesh _PARAM1_ visibility of _PARAM0_ to _PARAM2_'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg',
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('string', _('Mesh name'), '', false)
+        .addParameter('yesorno', _('Visible'), '', false)
+        .markAsAdvanced()
+        .setFunctionName('setMeshVisible');
+
+      object
+        .addScopedCondition(
+          'IsMeshVisible',
+          _('Mesh part is visible'),
+          _('Check if a mesh part is visible.'),
+          _('Mesh _PARAM1_ of _PARAM0_ is visible'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg',
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('string', _('Mesh name'), '', false)
+        .markAsAdvanced()
+        .setFunctionName('isMeshVisible');
+
+      object
+        .addScopedCondition(
+          'HasMesh',
+          _('Has mesh part'),
+          _('Check if the model has a mesh part with the given name.'),
+          _('_PARAM0_ has mesh _PARAM1_'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg',
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('string', _('Mesh name'), '', false)
+        .markAsAdvanced()
+        .setFunctionName('hasMesh');
+
+      object
+        .addScopedAction(
+          'SetMeshPosition',
+          _('Change mesh part position'),
+          _('Change the position of a mesh part (relative to the model).'),
+          _('Set mesh _PARAM1_ position of _PARAM0_ to X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg',
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('string', _('Mesh name'), '', false)
+        .addParameter('number', _('X position'), '', false)
+        .addParameter('number', _('Y position'), '', false)
+        .addParameter('number', _('Z position'), '', false)
+        .markAsAdvanced()
+        .setFunctionName('setMeshPosition');
+
+      object
+        .addExpression(
+          'MeshPartPositionX',
+          _('Mesh part X position'),
+          _('Return the X position of a mesh part.'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('string', _('Mesh name'), '', false)
+        .setFunctionName('getMeshPositionX');
+
+      object
+        .addExpression(
+          'MeshPartPositionY',
+          _('Mesh part Y position'),
+          _('Return the Y position of a mesh part.'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('string', _('Mesh name'), '', false)
+        .setFunctionName('getMeshPositionY');
+
+      object
+        .addExpression(
+          'MeshPartPositionZ',
+          _('Mesh part Z position'),
+          _('Return the Z position of a mesh part.'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('string', _('Mesh name'), '', false)
+        .setFunctionName('getMeshPositionZ');
+
+      object
+        .addScopedAction(
+          'SetMeshRotation',
+          _('Change mesh part rotation'),
+          _('Change the rotation of a mesh part (relative to the model).'),
+          _('Set mesh _PARAM1_ rotation of _PARAM0_ to X: _PARAM2_°, Y: _PARAM3_°, Z: _PARAM4_°'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg',
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('string', _('Mesh name'), '', false)
+        .addParameter('number', _('Rotation X (degrees)'), '', false)
+        .addParameter('number', _('Rotation Y (degrees)'), '', false)
+        .addParameter('number', _('Rotation Z (degrees)'), '', false)
+        .markAsAdvanced()
+        .setFunctionName('setMeshRotation');
+
+      object
+        .addExpression(
+          'MeshPartRotationX',
+          _('Mesh part X rotation'),
+          _('Return the X rotation of a mesh part (in degrees).'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('string', _('Mesh name'), '', false)
+        .setFunctionName('getMeshRotationX');
+
+      object
+        .addExpression(
+          'MeshPartRotationY',
+          _('Mesh part Y rotation'),
+          _('Return the Y rotation of a mesh part (in degrees).'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('string', _('Mesh name'), '', false)
+        .setFunctionName('getMeshRotationY');
+
+      object
+        .addExpression(
+          'MeshPartRotationZ',
+          _('Mesh part Z rotation'),
+          _('Return the Z rotation of a mesh part (in degrees).'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('string', _('Mesh name'), '', false)
+        .setFunctionName('getMeshRotationZ');
+
+      object
+        .addScopedAction(
+          'SetMeshScale',
+          _('Change mesh part scale'),
+          _('Change the scale of a mesh part.'),
+          _('Set mesh _PARAM1_ scale of _PARAM0_ to X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg',
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('string', _('Mesh name'), '', false)
+        .addParameter('number', _('Scale X'), '', false)
+        .addParameter('number', _('Scale Y'), '', false)
+        .addParameter('number', _('Scale Z'), '', false)
+        .markAsAdvanced()
+        .setFunctionName('setMeshScale');
+
+      object
+        .addExpression(
+          'MeshPartScaleX',
+          _('Mesh part X scale'),
+          _('Return the X scale of a mesh part.'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('string', _('Mesh name'), '', false)
+        .setFunctionName('getMeshScaleX');
+
+      object
+        .addExpression(
+          'MeshPartScaleY',
+          _('Mesh part Y scale'),
+          _('Return the Y scale of a mesh part.'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('string', _('Mesh name'), '', false)
+        .setFunctionName('getMeshScaleY');
+
+      object
+        .addExpression(
+          'MeshPartScaleZ',
+          _('Mesh part Z scale'),
+          _('Return the Z scale of a mesh part.'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('string', _('Mesh name'), '', false)
+        .setFunctionName('getMeshScaleZ');
+
+      object
+        .addScopedAction(
+          'RemoveMesh',
+          _('Remove mesh part'),
+          _('Remove a mesh part from the 3D model.'),
+          _('Remove mesh _PARAM1_ from _PARAM0_'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg',
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('string', _('Mesh name'), '', false)
+        .markAsAdvanced()
+        .setFunctionName('removeMesh');
+
+      object
+        .addExpression(
+          'MeshesCount',
+          _('Mesh parts count'),
+          _('Return the number of mesh parts in the model.'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .setFunctionName('getMeshesCount');
+
+      object
+        .addStrExpression(
+          'MeshNameAt',
+          _('Mesh part name at index'),
+          _('Return the name of the mesh part at the given index.'),
+          _('Mesh parts'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('number', _('Index'), '', false)
+        .setFunctionName('getMeshNameAt');
     }
 
     const Cube3DObject = new gd.ObjectJsImplementation();
@@ -1972,6 +2221,7 @@ module.exports = {
         )
         .markAsNotWorkingForObjects()
         .markAsOnlyWorkingFor3D()
+        .addIncludeFile('Extensions/3D/ShadowSettings.js')
         .addIncludeFile('Extensions/3D/DirectionalLight.js');
       const properties = effect.getProperties();
       properties
@@ -2014,29 +2264,8 @@ module.exports = {
         .setType('boolean')
         .setGroup(_('Shadows'));
       properties
-        .getOrCreate('shadowQuality')
-        .setValue('medium')
-        .addChoice('low', _('Low quality'))
-        .addChoice('medium', _('Medium quality'))
-        .addChoice('high', _('High quality'))
-        .setLabel(_('Shadow quality'))
-        .setType('choice')
-        .setGroup(_('Shadows'));
-      properties
-        .getOrCreate('minimumShadowBias')
-        .setValue('0')
-        .setLabel(_('Shadow bias'))
-        .setDescription(
-          _(
-            'Use this to avoid "shadow acne" due to depth buffer precision. Choose a value small enough like 0.001 to avoid creating distance between shadows and objects but not too small to avoid shadow glitches on low/medium quality. This value is used for high quality, and multiplied by 1.25 for medium quality and 2 for low quality.'
-          )
-        )
-        .setType('number')
-        .setGroup(_('Shadows'))
-        .setAdvanced(true);
-      properties
         .getOrCreate('frustumSize')
-        .setValue('4000')
+        .setValue('3000')
         .setLabel(_('Shadow frustum size'))
         .setType('number')
         .setMeasurementUnit(gd.MeasurementUnit.getPixel())
@@ -2050,6 +2279,65 @@ module.exports = {
         .setMeasurementUnit(gd.MeasurementUnit.getPixel())
         .setGroup(_('Shadows'))
         .setAdvanced(true);
+      properties
+        .getOrCreate('directionalLightBaseBias')
+        .setValue('-0.0002')
+        .setLabel(_('Directional light bias'))
+        .setDescription(
+          _(
+            'Base bias for Directional Light shadows. Negative values can reduce acne, too much may detach shadows.'
+          )
+        )
+        .setType('number')
+        .setGroup(_('Shadows'))
+        .setAdvanced(true);
+      properties
+        .getOrCreate('directionalLightNormalBias')
+        .setValue('0.02')
+        .setLabel(_('Directional light normal bias'))
+        .setDescription(_('Extra normal bias applied to Directional Light shadows.'))
+        .setType('number')
+        .setGroup(_('Shadows'))
+        .setAdvanced(true);
+    }
+    {
+      const effect = extension
+        .addEffect('ShadowSettings')
+        .setFullName(_('Shadow'))
+        .setDescription(
+          _(
+            'Centralized 3D shadow configuration applied to all shadow-casting lights on the scene.'
+          )
+        )
+        .markAsNotWorkingForObjects()
+        .markAsOnlyWorkingFor3D()
+        .addIncludeFile('Extensions/3D/ShadowSettings.js');
+      const properties = effect.getProperties();
+      properties
+        .getOrCreate('enabled')
+        .setValue('true')
+        .setLabel(_('Enable shadows'))
+        .setType('boolean')
+        .setGroup(_('Global'));
+      properties
+        .getOrCreate('shadowMapType')
+        .setValue('pcf')
+        .addChoice('pcf', _('PCF (recommended default)'))
+        .addChoice('basic', _('Basic (hard, fastest)'))
+        .setLabel(_('Shadow map type'))
+        .setDescription(_('Shadow map type used by the renderer.'))
+        .setType('choice')
+        .setGroup(_('Global'));
+      properties
+        .getOrCreate('directionalShadowQuality')
+        .setValue('medium')
+        .addChoice('low', _('Low quality'))
+        .addChoice('medium', _('Medium quality'))
+        .addChoice('high', _('High quality'))
+        .addChoice('ultra', _('Ultra quality'))
+        .setLabel(_('Directional shadow quality'))
+        .setType('choice')
+        .setGroup(_('Directional light'));
     }
     {
       const effect = extension
@@ -2118,32 +2406,126 @@ module.exports = {
         .getOrCreate('rightFaceResourceName')
         .setType('resource')
         .addExtraInfo('image')
-        .setLabel(_('Right face (X+)'));
+        .setLabel(_('Right face (Z+ / pz)'));
       properties
         .getOrCreate('leftFaceResourceName')
         .setType('resource')
         .addExtraInfo('image')
-        .setLabel(_('Left face (X-)'));
+        .setLabel(_('Left face (Z- / nz)'));
       properties
         .getOrCreate('bottomFaceResourceName')
         .setType('resource')
         .addExtraInfo('image')
-        .setLabel(_('Bottom face (Y+)'));
+        .setLabel(_('Bottom face (Y- / ny)'));
       properties
         .getOrCreate('topFaceResourceName')
         .setType('resource')
         .addExtraInfo('image')
-        .setLabel(_('Top face (Y-)'));
+        .setLabel(_('Top face (Y+ / py)'));
       properties
         .getOrCreate('frontFaceResourceName')
         .setType('resource')
         .addExtraInfo('image')
-        .setLabel(_('Front face (Z+)'));
+        .setLabel(_('Front face (X+ / px)'));
       properties
         .getOrCreate('backFaceResourceName')
         .setType('resource')
         .addExtraInfo('image')
-        .setLabel(_('Back face (Z-)'));
+        .setLabel(_('Back face (X- / nx)'));
+    }
+    {
+      const effect = extension
+        .addEffect('Sky')
+        .setFullName(_('Sky (experimental)'))
+        .setDescription(
+          _('Procedural sky based on the official Three.js Sky addon.')
+        )
+        .markAsNotWorkingForObjects()
+        .markAsOnlyWorkingFor3D()
+        .addIncludeFile('Extensions/3D/Sky.js');
+      const properties = effect.getProperties();
+      properties
+        .getOrCreate('turbidity')
+        .setValue('2')
+        .setLabel(_('Turbidity'))
+        .setType('number')
+        .setGroup(_('Sky'));
+      properties
+        .getOrCreate('rayleigh')
+        .setValue('1')
+        .setLabel(_('Rayleigh'))
+        .setType('number')
+        .setGroup(_('Sky'));
+      properties
+        .getOrCreate('mieCoefficient')
+        .setValue('0.005')
+        .setLabel(_('Mie coefficient'))
+        .setType('number')
+        .setGroup(_('Sky'));
+      properties
+        .getOrCreate('mieDirectionalG')
+        .setValue('0.8')
+        .setLabel(_('Mie directional G'))
+        .setType('number')
+        .setGroup(_('Sky'));
+      properties
+        .getOrCreate('sunElevation')
+        .setValue('2')
+        .setLabel(_('Sun elevation'))
+        .setType('number')
+        .setMeasurementUnit(gd.MeasurementUnit.getDegreeAngle())
+        .setGroup(_('Sun'))
+        .setDescription(_('Between -90° and 90°.'));
+      properties
+        .getOrCreate('sunAzimuth')
+        .setValue('180')
+        .setLabel(_('Sun azimuth'))
+        .setType('number')
+        .setMeasurementUnit(gd.MeasurementUnit.getDegreeAngle())
+        .setGroup(_('Sun'))
+        .setDescription(_('Between 0° and 360°.'));
+      properties
+        .getOrCreate('scale')
+        .setValue('10000')
+        .setLabel(_('Scale'))
+        .setType('number')
+        .setGroup(_('Sky'));
+      properties
+        .getOrCreate('cloudScale')
+        .setValue('0.0002')
+        .setLabel(_('Cloud scale'))
+        .setType('number')
+        .setGroup(_('Clouds'));
+      properties
+        .getOrCreate('cloudSpeed')
+        .setValue('0.0001')
+        .setLabel(_('Cloud speed'))
+        .setType('number')
+        .setGroup(_('Clouds'));
+      properties
+        .getOrCreate('cloudCoverage')
+        .setValue('0.4')
+        .setLabel(_('Cloud coverage'))
+        .setType('number')
+        .setGroup(_('Clouds'));
+      properties
+        .getOrCreate('cloudDensity')
+        .setValue('0.4')
+        .setLabel(_('Cloud density'))
+        .setType('number')
+        .setGroup(_('Clouds'));
+      properties
+        .getOrCreate('cloudElevation')
+        .setValue('0.5')
+        .setLabel(_('Cloud elevation'))
+        .setType('number')
+        .setGroup(_('Clouds'));
+      properties
+        .getOrCreate('timeScale')
+        .setValue('1')
+        .setLabel(_('Time scale'))
+        .setType('number')
+        .setGroup(_('Clouds'));
     }
     {
       const effect = extension
@@ -2167,6 +2549,41 @@ module.exports = {
         .setLabel(_('Saturation'))
         .setType('number')
         .setDescription(_('Between -1 and 1'));
+    }
+    {
+      const effect = extension
+        .addEffect('ToneMapping')
+        .setFullName(_('Tone mapping'))
+        .setDescription(
+          _(
+            'Apply renderer tone mapping for 3D rendering (global to the scene renderer). Recommended default: ACES Filmic with exposure 1.0.'
+          )
+        )
+        .markAsNotWorkingForObjects()
+        .markAsOnlyWorkingFor3D()
+        .addIncludeFile('Extensions/3D/ToneMappingEffect.js');
+      const properties = effect.getProperties();
+      properties
+        .getOrCreate('toneMapping')
+        .setValue('acesFilmic')
+        .addChoice('none', _('None'))
+        .addChoice('linear', _('Linear'))
+        .addChoice('reinhard', _('Reinhard'))
+        .addChoice('cineon', _('Cineon'))
+        .addChoice('acesFilmic', _('ACES Filmic (recommended)'))
+        .setLabel(_('Tone mapping'))
+        .setDescription(
+          _(
+            'None: no tonemapping. Linear/Reinhard/Cineon: legacy looks. ACES Filmic: best default for realistic highlights.'
+          )
+        )
+        .setType('choice');
+      properties
+        .getOrCreate('exposure')
+        .setValue('1')
+        .setLabel(_('Exposure'))
+        .setType('number')
+        .setDescription(_('Range 0 to 10. Typical values: 0.8 to 1.4.'));
     }
     {
       const effect = extension

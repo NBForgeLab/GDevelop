@@ -401,6 +401,18 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     // $FlowFixMe[method-unbinding]
     setShowJsTypeError: (this._setShowJsTypeError.bind(this): any),
     // $FlowFixMe[method-unbinding]
+    addFavoriteExtension: (this._addFavoriteExtension.bind(this): any),
+    // $FlowFixMe[method-unbinding]
+    removeFavoriteExtension: (this._removeFavoriteExtension.bind(this): any),
+    // $FlowFixMe[method-unbinding]
+    isFavoriteExtension: (this._isFavoriteExtension.bind(this): any),
+    // $FlowFixMe[method-unbinding]
+    setExtensionStoreViewMode: (this._setExtensionStoreViewMode.bind(
+      this
+    ): any),
+    // $FlowFixMe[method-unbinding]
+    setBehaviorStoreViewMode: (this._setBehaviorStoreViewMode.bind(this): any),
+    // $FlowFixMe[method-unbinding]
     setHomePageMenuIsCollapsed: (this._setHomePageMenuIsCollapsed.bind(
       this
     ): any),
@@ -1378,6 +1390,67 @@ export default class PreferencesProvider extends React.Component<Props, State> {
         values: {
           ...state.values,
           automaticallyUseCreditsForAiRequests: newValue,
+        },
+      }),
+      () => this._persistValuesToLocalStorage(this.state)
+    );
+  }
+
+  _addFavoriteExtension(extensionName: string) {
+    this.setState(
+      state => {
+        const favoriteExtensions = state.values.favoriteExtensions || [];
+        if (favoriteExtensions.includes(extensionName)) {
+          return state;
+        }
+        return {
+          values: {
+            ...state.values,
+            favoriteExtensions: [...favoriteExtensions, extensionName],
+          },
+        };
+      },
+      () => this._persistValuesToLocalStorage(this.state)
+    );
+  }
+
+  _removeFavoriteExtension(extensionName: string) {
+    this.setState(
+      state => ({
+        values: {
+          ...state.values,
+          favoriteExtensions: (state.values.favoriteExtensions || []).filter(
+            name => name !== extensionName
+          ),
+        },
+      }),
+      () => this._persistValuesToLocalStorage(this.state)
+    );
+  }
+
+  _isFavoriteExtension(extensionName: string): boolean {
+    const favoriteExtensions = this.state.values.favoriteExtensions || [];
+    return favoriteExtensions.includes(extensionName);
+  }
+
+  _setExtensionStoreViewMode(mode: 'list' | 'grid') {
+    this.setState(
+      state => ({
+        values: {
+          ...state.values,
+          extensionStoreViewMode: mode,
+        },
+      }),
+      () => this._persistValuesToLocalStorage(this.state)
+    );
+  }
+
+  _setBehaviorStoreViewMode(mode: 'list' | 'grid') {
+    this.setState(
+      state => ({
+        values: {
+          ...state.values,
+          behaviorStoreViewMode: mode,
         },
       }),
       () => this._persistValuesToLocalStorage(this.state)
