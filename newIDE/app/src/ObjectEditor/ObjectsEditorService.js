@@ -154,6 +154,21 @@ const ObjectsEditorService = {
         gd.asObjectJsImplementation(objectConfiguration),
       helpPagePath: '/objects/3d-model',
     },
+    'Scene3D::PBRModel3DObject': {
+      component: Model3DEditor,
+      createNewObject: (
+        objectConfiguration: gdObjectConfiguration
+      ): gdObjectConfiguration =>
+        gd
+          .asObjectJsImplementation(objectConfiguration)
+          .clone()
+          .release(),
+      castToObjectType: (
+        objectConfiguration: gdObjectConfiguration
+      ): gdObjectJsImplementation =>
+        gd.asObjectJsImplementation(objectConfiguration),
+      helpPagePath: '/objects/3d-model',
+    },
     'Map::Map': {
       component: MapEditor,
       createNewObject: (

@@ -64,8 +64,24 @@ namespace gdjs {
   const traverseToSetBasicMaterialFromMeshes = (node: THREE.Object3D) =>
     node.traverse(setBasicMaterialTo);
 
+  const duplicateUvAttributeForAmbientOcclusion = (mesh: THREE.Mesh): void => {
+    const geometry = mesh.geometry;
+    if (!geometry) {
+      return;
+    }
+    const bufferGeometry = geometry as THREE.BufferGeometry;
+    if (bufferGeometry.getAttribute('uv2')) {
+      return;
+    }
+    const uvAttribute = bufferGeometry.getAttribute('uv');
+    if (uvAttribute) {
+      bufferGeometry.setAttribute('uv2', uvAttribute);
+    }
+  };
+
   class Model3DRuntimeObject3DRenderer extends gdjs.RuntimeObject3DRenderer {
     private _model3DRuntimeObject: gdjs.Model3DRuntimeObject;
+    private _instanceContainer: gdjs.RuntimeInstanceContainer;
     /**
      * The 3D model stretched in a 1x1x1 cube.
      */
@@ -73,6 +89,9 @@ namespace gdjs {
     private _originalModel: THREE_ADDONS.GLTF;
     private _animationMixer: THREE.AnimationMixer;
     private _action: THREE.AnimationAction | null;
+    private _createdMaterials: THREE.Material[] = [];
+    private _createdTextures: THREE.Texture[] = [];
+    private _preparedPBRTextureCache = new Map<string, THREE.Texture>();
 
     /**
      * The model origin evaluated according to the object configuration.
@@ -101,6 +120,7 @@ namespace gdjs {
       super(runtimeObject, instanceContainer, group);
 
       this._model3DRuntimeObject = runtimeObject;
+      this._instanceContainer = instanceContainer;
       this._threeObject = model;
       this._originalModel = originalModel;
       this._modelOriginPoint = [0, 0, 0];
@@ -391,6 +411,7 @@ namespace gdjs {
      * Replace materials to better work with lights (or no light).
      */
     private _replaceMaterials(threeObject: THREE.Object3D) {
+      this._disposeCreatedPBRResources();
       if (
         this._model3DRuntimeObject._materialType ===
         gdjs.Model3DRuntimeObject.MaterialType.StandardWithoutMetalness
@@ -401,7 +422,192 @@ namespace gdjs {
         gdjs.Model3DRuntimeObject.MaterialType.Basic
       ) {
         traverseToSetBasicMaterialFromMeshes(threeObject);
+      } else if (
+        this._model3DRuntimeObject._materialType ===
+        gdjs.Model3DRuntimeObject.MaterialType.CustomPBR
+      ) {
+        this._applyCustomPBRMaterials(threeObject);
       }
+    }
+
+    private _disposeCreatedPBRResources() {
+      for (const material of this._createdMaterials) {
+        material.dispose();
+      }
+      this._createdMaterials.length = 0;
+
+      for (const texture of this._createdTextures) {
+        texture.dispose();
+      }
+      this._createdTextures.length = 0;
+      this._preparedPBRTextureCache.clear();
+    }
+
+    private _createPreparedTexture(
+      resourceName: string,
+      isColorTexture: boolean
+    ): THREE.Texture | null {
+      if (!resourceName) {
+        return null;
+      }
+      const cacheKey = `${resourceName}|${isColorTexture ? 'color' : 'data'}`;
+      const preparedTexture = this._preparedPBRTextureCache.get(cacheKey);
+      if (preparedTexture) {
+        return preparedTexture;
+      }
+      const texture = this
+        ._instanceContainer
+        .getGame()
+        .getImageManager()
+        .getThreeTexture(resourceName)
+        .clone();
+      texture.flipY = false;
+      texture.colorSpace = isColorTexture
+        ? THREE.SRGBColorSpace
+        : THREE.NoColorSpace;
+      texture.needsUpdate = true;
+      this._createdTextures.push(texture);
+      this._preparedPBRTextureCache.set(cacheKey, texture);
+      return texture;
+    }
+
+    private _copyMaterialPropertiesToCustomPBRMaterial(
+      sourceMaterial: THREE.Material,
+      targetMaterial: THREE.MeshStandardMaterial
+    ) {
+      const typedMaterial = sourceMaterial as THREE.MeshStandardMaterial &
+        THREE.MeshBasicMaterial & {
+          emissive?: THREE.Color;
+          emissiveMap?: THREE.Texture | null;
+          emissiveIntensity?: number;
+          normalMap?: THREE.Texture | null;
+          normalScale?: THREE.Vector2;
+          roughness?: number;
+          roughnessMap?: THREE.Texture | null;
+          metalness?: number;
+          metalnessMap?: THREE.Texture | null;
+          aoMap?: THREE.Texture | null;
+          aoMapIntensity?: number;
+        };
+      targetMaterial.name = sourceMaterial.name;
+      targetMaterial.side = sourceMaterial.side;
+      targetMaterial.transparent = sourceMaterial.transparent;
+      targetMaterial.opacity = sourceMaterial.opacity;
+      targetMaterial.alphaTest = sourceMaterial.alphaTest;
+      targetMaterial.depthWrite = sourceMaterial.depthWrite;
+      targetMaterial.depthTest = sourceMaterial.depthTest;
+      targetMaterial.vertexColors = typedMaterial.vertexColors;
+      targetMaterial.color = typedMaterial.color
+        ? typedMaterial.color.clone()
+        : new THREE.Color(0xffffff);
+      targetMaterial.map = typedMaterial.map || null;
+      targetMaterial.emissive = typedMaterial.emissive
+        ? typedMaterial.emissive.clone()
+        : new THREE.Color(0x000000);
+      targetMaterial.emissiveMap = typedMaterial.emissiveMap || null;
+      targetMaterial.emissiveIntensity =
+        typedMaterial.emissiveIntensity !== undefined
+          ? typedMaterial.emissiveIntensity
+          : 1;
+      targetMaterial.normalMap = typedMaterial.normalMap || null;
+      targetMaterial.normalScale = typedMaterial.normalScale
+        ? typedMaterial.normalScale.clone()
+        : new THREE.Vector2(1, 1);
+      targetMaterial.roughness =
+        typedMaterial.roughness !== undefined ? typedMaterial.roughness : 1;
+      targetMaterial.roughnessMap = typedMaterial.roughnessMap || null;
+      targetMaterial.metalness =
+        typedMaterial.metalness !== undefined ? typedMaterial.metalness : 0;
+      targetMaterial.metalnessMap = typedMaterial.metalnessMap || null;
+      targetMaterial.aoMap = typedMaterial.aoMap || null;
+      targetMaterial.aoMapIntensity =
+        typedMaterial.aoMapIntensity !== undefined
+          ? typedMaterial.aoMapIntensity
+          : 1;
+    }
+
+    private _applyCustomPBRMaterialToSingleMaterial(
+      sourceMaterial: THREE.Material,
+      mesh: THREE.Mesh
+    ): THREE.MeshStandardMaterial {
+      const material = new THREE.MeshStandardMaterial();
+      this._copyMaterialPropertiesToCustomPBRMaterial(sourceMaterial, material);
+
+      const albedoTexture = this._createPreparedTexture(
+        this._model3DRuntimeObject._albedoTextureResourceName,
+        true
+      );
+      if (albedoTexture) {
+        material.map = albedoTexture;
+      }
+
+      const normalTexture = this._createPreparedTexture(
+        this._model3DRuntimeObject._normalTextureResourceName,
+        false
+      );
+      if (normalTexture) {
+        material.normalMap = normalTexture;
+      }
+
+      const roughnessTexture = this._createPreparedTexture(
+        this._model3DRuntimeObject._roughnessTextureResourceName,
+        false
+      );
+      if (roughnessTexture) {
+        material.roughnessMap = roughnessTexture;
+        material.roughness = 1;
+      }
+
+      const metalnessTexture = this._createPreparedTexture(
+        this._model3DRuntimeObject._metalnessTextureResourceName,
+        false
+      );
+      if (metalnessTexture) {
+        material.metalnessMap = metalnessTexture;
+        material.metalness = 1;
+      }
+
+      const ambientOcclusionTexture = this._createPreparedTexture(
+        this._model3DRuntimeObject._ambientOcclusionTextureResourceName,
+        false
+      );
+      if (ambientOcclusionTexture) {
+        duplicateUvAttributeForAmbientOcclusion(mesh);
+        material.aoMap = ambientOcclusionTexture;
+      }
+
+      const emissiveTexture = this._createPreparedTexture(
+        this._model3DRuntimeObject._emissiveTextureResourceName,
+        true
+      );
+      if (emissiveTexture) {
+        material.emissiveMap = emissiveTexture;
+        material.emissive = new THREE.Color(0xffffff);
+      }
+
+      material.needsUpdate = true;
+      this._createdMaterials.push(material);
+      return material;
+    }
+
+    private _applyCustomPBRMaterials(threeObject: THREE.Object3D) {
+      threeObject.traverse((node) => {
+        const mesh = node as THREE.Mesh;
+        if (!mesh.material) {
+          return;
+        }
+
+        if (Array.isArray(mesh.material)) {
+          mesh.material = mesh.material.map((material) =>
+            this._applyCustomPBRMaterialToSingleMaterial(material, mesh)
+          );
+        } else {
+          mesh.material = this._applyCustomPBRMaterialToSingleMaterial(
+            mesh.material,
+            mesh
+          );
+        }
+      });
     }
 
     getAnimationCount() {
@@ -529,6 +735,11 @@ namespace gdjs {
      */
     getThreeObject(): THREE.Object3D {
       return this._threeObject;
+    }
+
+    override onDestroy(): void {
+      this._disposeCreatedPBRResources();
+      super.onDestroy();
     }
   }
 

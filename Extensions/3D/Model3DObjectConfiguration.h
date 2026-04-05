@@ -156,6 +156,24 @@ public:
 
   const gd::String& GetModelResourceName() const { return modelResourceName; };
   const gd::String& GetMaterialType() const { return materialType; };
+  const gd::String& GetAlbedoTextureResourceName() const {
+    return albedoTextureResourceName;
+  };
+  const gd::String& GetNormalTextureResourceName() const {
+    return normalTextureResourceName;
+  };
+  const gd::String& GetRoughnessTextureResourceName() const {
+    return roughnessTextureResourceName;
+  };
+  const gd::String& GetMetalnessTextureResourceName() const {
+    return metalnessTextureResourceName;
+  };
+  const gd::String& GetAmbientOcclusionTextureResourceName() const {
+    return ambientOcclusionTextureResourceName;
+  };
+  const gd::String& GetEmissiveTextureResourceName() const {
+    return emissiveTextureResourceName;
+  };
   const gd::String& GetOriginLocation() const { return originLocation; };
   const gd::String& GetCenterLocation() const { return centerLocation; };
 
@@ -180,6 +198,12 @@ private:
 
   gd::String modelResourceName;
   gd::String materialType;
+  gd::String albedoTextureResourceName;
+  gd::String normalTextureResourceName;
+  gd::String roughnessTextureResourceName;
+  gd::String metalnessTextureResourceName;
+  gd::String ambientOcclusionTextureResourceName;
+  gd::String emissiveTextureResourceName;
   gd::String originLocation;
   gd::String centerLocation;
 

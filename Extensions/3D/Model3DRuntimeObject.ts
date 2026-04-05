@@ -28,7 +28,17 @@ namespace gdjs {
       rotationY: number;
       rotationZ: number;
       keepAspectRatio: boolean;
-      materialType: 'Basic' | 'StandardWithoutMetalness' | 'KeepOriginal';
+      materialType:
+        | 'Basic'
+        | 'StandardWithoutMetalness'
+        | 'CustomPBR'
+        | 'KeepOriginal';
+      albedoTextureResourceName: string;
+      normalTextureResourceName: string;
+      roughnessTextureResourceName: string;
+      metalnessTextureResourceName: string;
+      ambientOcclusionTextureResourceName: string;
+      emissiveTextureResourceName: string;
       originLocation:
         | 'ModelOrigin'
         | 'ObjectCenter'
@@ -83,6 +93,12 @@ namespace gdjs {
     _modelResourceName: string;
     _materialType: gdjs.Model3DRuntimeObject.MaterialType =
       gdjs.Model3DRuntimeObject.MaterialType.Basic;
+    _albedoTextureResourceName: string;
+    _normalTextureResourceName: string;
+    _roughnessTextureResourceName: string;
+    _metalnessTextureResourceName: string;
+    _ambientOcclusionTextureResourceName: string;
+    _emissiveTextureResourceName: string;
 
     /**
      * The local point of the model that will be at the object position.
@@ -125,6 +141,18 @@ namespace gdjs {
       this._data = objectData;
       this._modelResourceName = objectData.content.modelResourceName;
       this._animations = objectData.content.animations;
+      this._albedoTextureResourceName =
+        objectData.content.albedoTextureResourceName;
+      this._normalTextureResourceName =
+        objectData.content.normalTextureResourceName;
+      this._roughnessTextureResourceName =
+        objectData.content.roughnessTextureResourceName;
+      this._metalnessTextureResourceName =
+        objectData.content.metalnessTextureResourceName;
+      this._ambientOcclusionTextureResourceName =
+        objectData.content.ambientOcclusionTextureResourceName;
+      this._emissiveTextureResourceName =
+        objectData.content.emissiveTextureResourceName;
       this._originPoint = getPointForLocation(
         objectData.content.originLocation
       );
@@ -178,6 +206,7 @@ namespace gdjs {
       newObjectData: Model3DObjectData
     ): boolean {
       super.updateFromObjectData(oldObjectData, newObjectData);
+      this._data = newObjectData;
 
       if (
         oldObjectData.content.materialType !==
@@ -186,6 +215,48 @@ namespace gdjs {
         this._materialType = this._convertMaterialType(
           newObjectData.content.materialType
         );
+      }
+      if (
+        oldObjectData.content.albedoTextureResourceName !==
+        newObjectData.content.albedoTextureResourceName
+      ) {
+        this._albedoTextureResourceName =
+          newObjectData.content.albedoTextureResourceName;
+      }
+      if (
+        oldObjectData.content.normalTextureResourceName !==
+        newObjectData.content.normalTextureResourceName
+      ) {
+        this._normalTextureResourceName =
+          newObjectData.content.normalTextureResourceName;
+      }
+      if (
+        oldObjectData.content.roughnessTextureResourceName !==
+        newObjectData.content.roughnessTextureResourceName
+      ) {
+        this._roughnessTextureResourceName =
+          newObjectData.content.roughnessTextureResourceName;
+      }
+      if (
+        oldObjectData.content.metalnessTextureResourceName !==
+        newObjectData.content.metalnessTextureResourceName
+      ) {
+        this._metalnessTextureResourceName =
+          newObjectData.content.metalnessTextureResourceName;
+      }
+      if (
+        oldObjectData.content.ambientOcclusionTextureResourceName !==
+        newObjectData.content.ambientOcclusionTextureResourceName
+      ) {
+        this._ambientOcclusionTextureResourceName =
+          newObjectData.content.ambientOcclusionTextureResourceName;
+      }
+      if (
+        oldObjectData.content.emissiveTextureResourceName !==
+        newObjectData.content.emissiveTextureResourceName
+      ) {
+        this._emissiveTextureResourceName =
+          newObjectData.content.emissiveTextureResourceName;
       }
       if (
         oldObjectData.content.modelResourceName !==
@@ -203,6 +274,18 @@ namespace gdjs {
           newObjectData.content.keepAspectRatio ||
         oldObjectData.content.materialType !==
           newObjectData.content.materialType ||
+        oldObjectData.content.albedoTextureResourceName !==
+          newObjectData.content.albedoTextureResourceName ||
+        oldObjectData.content.normalTextureResourceName !==
+          newObjectData.content.normalTextureResourceName ||
+        oldObjectData.content.roughnessTextureResourceName !==
+          newObjectData.content.roughnessTextureResourceName ||
+        oldObjectData.content.metalnessTextureResourceName !==
+          newObjectData.content.metalnessTextureResourceName ||
+        oldObjectData.content.ambientOcclusionTextureResourceName !==
+          newObjectData.content.ambientOcclusionTextureResourceName ||
+        oldObjectData.content.emissiveTextureResourceName !==
+          newObjectData.content.emissiveTextureResourceName ||
         oldObjectData.content.centerLocation !==
           newObjectData.content.centerLocation
       ) {
@@ -339,7 +422,9 @@ namespace gdjs {
     _convertMaterialType(
       materialTypeString: string
     ): gdjs.Model3DRuntimeObject.MaterialType {
-      if (materialTypeString === 'KeepOriginal') {
+      if (materialTypeString === 'CustomPBR') {
+        return gdjs.Model3DRuntimeObject.MaterialType.CustomPBR;
+      } else if (materialTypeString === 'KeepOriginal') {
         return gdjs.Model3DRuntimeObject.MaterialType.KeepOriginal;
       } else if (materialTypeString === 'StandardWithoutMetalness') {
         return gdjs.Model3DRuntimeObject.MaterialType.StandardWithoutMetalness;
@@ -700,8 +785,10 @@ namespace gdjs {
     export enum MaterialType {
       Basic,
       StandardWithoutMetalness,
+      CustomPBR,
       KeepOriginal,
     }
   }
   gdjs.registerObject('Scene3D::Model3DObject', gdjs.Model3DRuntimeObject);
+  gdjs.registerObject('Scene3D::PBRModel3DObject', gdjs.Model3DRuntimeObject);
 }

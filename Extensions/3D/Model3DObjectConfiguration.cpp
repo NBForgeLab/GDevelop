@@ -22,6 +22,9 @@ using namespace std;
 Model3DObjectConfiguration::Model3DObjectConfiguration()
     : width(100), height(100), depth(100), rotationX(90), rotationY(0),
       rotationZ(90), modelResourceName(""), materialType("StandardWithoutMetalness"),
+      albedoTextureResourceName(""), normalTextureResourceName(""),
+      roughnessTextureResourceName(""), metalnessTextureResourceName(""),
+      ambientOcclusionTextureResourceName(""), emissiveTextureResourceName(""),
       originLocation("ModelOrigin"), centerLocation("CenteredOnZ"),
       keepAspectRatio(true), crossfadeDuration(0.1f), isCastingShadow(true), isReceivingShadow(true) {}
 
@@ -61,10 +64,36 @@ bool Model3DObjectConfiguration::UpdateProperty(const gd::String &propertyName,
       materialType = "Basic";
     else if (normalizedValue == "standardwithoutmetalness")
       materialType = "StandardWithoutMetalness";
+    else if (normalizedValue == "custompbr")
+      materialType = "CustomPBR";
     else if (normalizedValue == "keeporiginal")
       materialType = "KeepOriginal";
     else
       return false;
+    return true;
+  }
+  if (propertyName == "albedoTextureResourceName") {
+    albedoTextureResourceName = newValue;
+    return true;
+  }
+  if (propertyName == "normalTextureResourceName") {
+    normalTextureResourceName = newValue;
+    return true;
+  }
+  if (propertyName == "roughnessTextureResourceName") {
+    roughnessTextureResourceName = newValue;
+    return true;
+  }
+  if (propertyName == "metalnessTextureResourceName") {
+    metalnessTextureResourceName = newValue;
+    return true;
+  }
+  if (propertyName == "ambientOcclusionTextureResourceName") {
+    ambientOcclusionTextureResourceName = newValue;
+    return true;
+  }
+  if (propertyName == "emissiveTextureResourceName") {
+    emissiveTextureResourceName = newValue;
     return true;
   }
   if (propertyName == "originLocation") {
@@ -187,9 +216,52 @@ Model3DObjectConfiguration::GetProperties() const {
       .SetType("choice")
       .AddChoice("Basic", _("Basic (no lighting, no shadows)"))
       .AddChoice("StandardWithoutMetalness", _("Standard (without metalness)"))
+      .AddChoice("CustomPBR", _("Custom PBR"))
       .AddChoice("KeepOriginal", _("Keep original"))
       .SetLabel(_("Material"))
       .SetGroup(_("Lighting"));
+
+  objectProperties["albedoTextureResourceName"]
+      .SetValue(albedoTextureResourceName)
+      .SetType("resource")
+      .AddExtraInfo("image")
+      .SetLabel(_("Albedo/base color texture"))
+      .SetGroup(_("Custom PBR"));
+
+  objectProperties["normalTextureResourceName"]
+      .SetValue(normalTextureResourceName)
+      .SetType("resource")
+      .AddExtraInfo("image")
+      .SetLabel(_("Normal texture"))
+      .SetGroup(_("Custom PBR"));
+
+  objectProperties["roughnessTextureResourceName"]
+      .SetValue(roughnessTextureResourceName)
+      .SetType("resource")
+      .AddExtraInfo("image")
+      .SetLabel(_("Roughness texture"))
+      .SetGroup(_("Custom PBR"));
+
+  objectProperties["metalnessTextureResourceName"]
+      .SetValue(metalnessTextureResourceName)
+      .SetType("resource")
+      .AddExtraInfo("image")
+      .SetLabel(_("Metalness texture"))
+      .SetGroup(_("Custom PBR"));
+
+  objectProperties["ambientOcclusionTextureResourceName"]
+      .SetValue(ambientOcclusionTextureResourceName)
+      .SetType("resource")
+      .AddExtraInfo("image")
+      .SetLabel(_("Ambient occlusion texture"))
+      .SetGroup(_("Custom PBR"));
+
+  objectProperties["emissiveTextureResourceName"]
+      .SetValue(emissiveTextureResourceName)
+      .SetType("resource")
+      .AddExtraInfo("image")
+      .SetLabel(_("Emissive texture"))
+      .SetGroup(_("Custom PBR"));
 
   objectProperties["originLocation"]
       .SetValue(originLocation.empty() ? "TopLeft" : originLocation)
@@ -264,6 +336,18 @@ void Model3DObjectConfiguration::DoUnserializeFrom(
   rotationZ = content.GetDoubleAttribute("rotationZ");
   modelResourceName = content.GetStringAttribute("modelResourceName");
   materialType = content.GetStringAttribute("materialType");
+  albedoTextureResourceName =
+      content.GetStringAttribute("albedoTextureResourceName", "");
+  normalTextureResourceName =
+      content.GetStringAttribute("normalTextureResourceName", "");
+  roughnessTextureResourceName =
+      content.GetStringAttribute("roughnessTextureResourceName", "");
+  metalnessTextureResourceName =
+      content.GetStringAttribute("metalnessTextureResourceName", "");
+  ambientOcclusionTextureResourceName =
+      content.GetStringAttribute("ambientOcclusionTextureResourceName", "");
+  emissiveTextureResourceName =
+      content.GetStringAttribute("emissiveTextureResourceName", "");
   originLocation = content.GetStringAttribute("originLocation");
   centerLocation = content.GetStringAttribute("centerLocation");
   keepAspectRatio = content.GetBoolAttribute("keepAspectRatio");
@@ -295,6 +379,16 @@ void Model3DObjectConfiguration::DoSerializeTo(
   content.SetAttribute("rotationZ", rotationZ);
   content.SetAttribute("modelResourceName", modelResourceName);
   content.SetAttribute("materialType", materialType);
+  content.SetAttribute("albedoTextureResourceName", albedoTextureResourceName);
+  content.SetAttribute("normalTextureResourceName", normalTextureResourceName);
+  content.SetAttribute("roughnessTextureResourceName",
+                       roughnessTextureResourceName);
+  content.SetAttribute("metalnessTextureResourceName",
+                       metalnessTextureResourceName);
+  content.SetAttribute("ambientOcclusionTextureResourceName",
+                       ambientOcclusionTextureResourceName);
+  content.SetAttribute("emissiveTextureResourceName",
+                       emissiveTextureResourceName);
   content.SetAttribute("originLocation", originLocation);
   content.SetAttribute("centerLocation", centerLocation);
   content.SetAttribute("keepAspectRatio", keepAspectRatio);
@@ -315,6 +409,12 @@ void Model3DObjectConfiguration::DoSerializeTo(
 void Model3DObjectConfiguration::ExposeResources(
     gd::ArbitraryResourceWorker &worker) {
   worker.ExposeModel3D(modelResourceName);
+  worker.ExposeImage(albedoTextureResourceName);
+  worker.ExposeImage(normalTextureResourceName);
+  worker.ExposeImage(roughnessTextureResourceName);
+  worker.ExposeImage(metalnessTextureResourceName);
+  worker.ExposeImage(ambientOcclusionTextureResourceName);
+  worker.ExposeImage(emissiveTextureResourceName);
 }
 
 const gd::String &

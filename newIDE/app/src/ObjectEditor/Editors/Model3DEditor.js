@@ -16,7 +16,7 @@ import AlertMessage from '../../UI/AlertMessage';
 import IconButton from '../../UI/IconButton';
 import RaisedButton from '../../UI/RaisedButton';
 import FlatButton from '../../UI/FlatButton';
-import { mapFor } from '../../Utils/MapFor';
+import { mapFor, mapVector } from '../../Utils/MapFor';
 import ScrollView, { type ScrollViewInterface } from '../../UI/ScrollView';
 import { EmptyPlaceholder } from '../../UI/EmptyPlaceholder';
 import Add from '../../UI/CustomSvgIcons/Add';
@@ -30,7 +30,11 @@ import useAlertDialog from '../../UI/Alert/useAlertDialog';
 import { type GLTF } from 'three/addons/loaders/GLTFLoader';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils';
 import * as THREE from 'three';
-import { PropertyCheckbox, PropertyField } from './PropertyFields';
+import {
+  PropertyCheckbox,
+  PropertyField,
+  PropertyResourceSelector,
+} from './PropertyFields';
 import ResourceSelectorWithThumbnail from '../../ResourcesList/ResourceSelectorWithThumbnail';
 import { ChoiceProperty } from '../../BehaviorsEditor/Editors/Physics2Editor';
 
@@ -141,6 +145,16 @@ const Model3DEditor = ({
 
   const model3DConfiguration = gd.asModel3DConfiguration(objectConfiguration);
   const properties = objectConfiguration.getProperties();
+  const isPBRModelObject =
+    object && object.getType() === 'Scene3D::PBRModel3DObject';
+  const materialTypeChoices = React.useMemo(
+    () =>
+      mapVector(
+        properties.get('materialType').getChoices(),
+        choice => choice
+      ).filter(choice => isPBRModelObject || choice.getValue() !== 'CustomPBR'),
+    [isPBRModelObject, properties]
+  );
 
   const [nameErrors, setNameErrors] = React.useState<{ [number]: React.Node }>(
     {}
@@ -587,13 +601,22 @@ const Model3DEditor = ({
             />
           </ResponsiveLineStackLayout>
           <Text size="block-title">Lighting</Text>
-          <ChoiceProperty
-            properties={properties}
-            propertyName={'materialType'}
-            onUpdate={(e, i, newValue: string) => {
+          <SelectField
+            value={properties.get('materialType').getValue()}
+            onChange={(event, index, newValue: string) => {
               onChangeProperty('materialType', newValue);
             }}
-          />
+            fullWidth
+            floatingLabelText={properties.get('materialType').getLabel()}
+          >
+            {materialTypeChoices.map(choice => (
+              <SelectOption
+                key={choice.getValue()}
+                value={choice.getValue()}
+                label={choice.getLabel()}
+              />
+            ))}
+          </SelectField>
           {properties.get('materialType').getValue() !== 'Basic' &&
             !hasLight(layout) && (
               <AlertMessage kind="error">
@@ -603,6 +626,74 @@ const Model3DEditor = ({
                   black.
                 </Trans>
               </AlertMessage>
+            )}
+          {isPBRModelObject &&
+            properties.get('materialType').getValue() === 'CustomPBR' && (
+              <React.Fragment>
+                <Text size="block-title" noMargin>
+                  <Trans>Custom PBR textures</Trans>
+                </Text>
+                <PropertyResourceSelector
+                  objectConfiguration={objectConfiguration}
+                  propertyName="albedoTextureResourceName"
+                  project={project}
+                  projectScopedContainersAccessor={
+                    projectScopedContainersAccessor
+                  }
+                  resourceManagementProps={resourceManagementProps}
+                  onChange={() => {}}
+                />
+                <PropertyResourceSelector
+                  objectConfiguration={objectConfiguration}
+                  propertyName="normalTextureResourceName"
+                  project={project}
+                  projectScopedContainersAccessor={
+                    projectScopedContainersAccessor
+                  }
+                  resourceManagementProps={resourceManagementProps}
+                  onChange={() => {}}
+                />
+                <PropertyResourceSelector
+                  objectConfiguration={objectConfiguration}
+                  propertyName="roughnessTextureResourceName"
+                  project={project}
+                  projectScopedContainersAccessor={
+                    projectScopedContainersAccessor
+                  }
+                  resourceManagementProps={resourceManagementProps}
+                  onChange={() => {}}
+                />
+                <PropertyResourceSelector
+                  objectConfiguration={objectConfiguration}
+                  propertyName="metalnessTextureResourceName"
+                  project={project}
+                  projectScopedContainersAccessor={
+                    projectScopedContainersAccessor
+                  }
+                  resourceManagementProps={resourceManagementProps}
+                  onChange={() => {}}
+                />
+                <PropertyResourceSelector
+                  objectConfiguration={objectConfiguration}
+                  propertyName="ambientOcclusionTextureResourceName"
+                  project={project}
+                  projectScopedContainersAccessor={
+                    projectScopedContainersAccessor
+                  }
+                  resourceManagementProps={resourceManagementProps}
+                  onChange={() => {}}
+                />
+                <PropertyResourceSelector
+                  objectConfiguration={objectConfiguration}
+                  propertyName="emissiveTextureResourceName"
+                  project={project}
+                  projectScopedContainersAccessor={
+                    projectScopedContainersAccessor
+                  }
+                  resourceManagementProps={resourceManagementProps}
+                  onChange={() => {}}
+                />
+              </React.Fragment>
             )}
           <PropertyCheckbox
             objectConfiguration={objectConfiguration}
