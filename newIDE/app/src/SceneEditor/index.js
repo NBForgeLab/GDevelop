@@ -98,6 +98,7 @@ import {
   setCameraState,
 } from '../EmbeddedGame/EmbeddedGameFrame';
 import Rectangle from '../Utils/Rectangle';
+import { exceptionallyGuardAgainstDeadObject } from '../Utils/IsNullPtr';
 
 const gd: libGDevelop = global.gd;
 
@@ -1195,7 +1196,12 @@ export default class SceneEditor extends React.Component<Props, State> {
     objectFolderOrObjectWithContext: ?ObjectFolderOrObjectWithContext = null
   ) => {
     const selectedObjectFolderOrObjectsWithContext = [];
-    if (objectFolderOrObjectWithContext) {
+    if (
+      objectFolderOrObjectWithContext &&
+      exceptionallyGuardAgainstDeadObject(
+        objectFolderOrObjectWithContext.objectFolderOrObject
+      )
+    ) {
       selectedObjectFolderOrObjectsWithContext.push(
         objectFolderOrObjectWithContext
       );
@@ -1488,9 +1494,9 @@ export default class SceneEditor extends React.Component<Props, State> {
   }: {|
     updatedObjects: Array<gdObject>,
   |}) => {
-    const serializedObjects = updatedObjects.map(object =>
-      serializeObjectWithCleanDefaultBehaviorFlags(object)
-    );
+    const serializedObjects = updatedObjects
+      .filter(object => !!exceptionallyGuardAgainstDeadObject(object))
+      .map(object => serializeObjectWithCleanDefaultBehaviorFlags(object));
     const { previewDebuggerServer } = this.props;
     if (previewDebuggerServer) {
       previewDebuggerServer
@@ -2903,10 +2909,18 @@ export default class SceneEditor extends React.Component<Props, State> {
       resourceManagementProps,
       isActive,
     } = this.props;
-    const {
-      editedObjectWithContext,
-      selectedObjectFolderOrObjectsWithContext,
-    } = this.state;
+    const { editedObjectWithContext } = this.state;
+
+    // In theory, we do everything to never have a objectFolderOrObjectWithContext pointing to a dead object,
+    // but to be safe we explicitly check if they are dead.
+    const selectedObjectFolderOrObjectsWithContext = this.state.selectedObjectFolderOrObjectsWithContext.filter(
+      objectFolderOrObjectWithContext => {
+        return !!exceptionallyGuardAgainstDeadObject(
+          objectFolderOrObjectWithContext.objectFolderOrObject
+        );
+      }
+    );
+
     const variablesEditedAssociatedObjectName = this.state
       .variablesEditedInstance
       ? this.state.variablesEditedInstance.getObjectName()

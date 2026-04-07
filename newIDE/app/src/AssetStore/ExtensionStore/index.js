@@ -1,4 +1,5 @@
 // @flow
+import { t, Trans } from '@lingui/macro';
 import { type I18n as I18nType } from '@lingui/core';
 import * as React from 'react';
 import SearchBar from '../../UI/SearchBar';
@@ -15,8 +16,7 @@ import {
   sendExtensionAddedToProject,
 } from '../../Utils/Analytics/EventSender';
 import useDismissableTutorialMessage from '../../Hints/useDismissableTutorialMessage';
-import { t, Trans } from '@lingui/macro';
-import { ColumnStackLayout } from '../../UI/Layout';
+import { ColumnStackLayout, LineStackLayout } from '../../UI/Layout';
 import { Column, Line } from '../../UI/Grid';
 import PreferencesContext from '../../MainFrame/Preferences/PreferencesContext';
 import { ResponsiveLineStackLayout } from '../../UI/Layout';
@@ -25,11 +25,41 @@ import SelectOption from '../../UI/SelectOption';
 import ElementWithMenu from '../../UI/Menu/ElementWithMenu';
 import IconButton from '../../UI/IconButton';
 import ThreeDotsMenu from '../../UI/CustomSvgIcons/ThreeDotsMenu';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import ViewList from '@material-ui/icons/ViewList';
-import ViewModule from '@material-ui/icons/ViewModule';
-import Tooltip from '@material-ui/core/Tooltip';
+import ExtensionDetailPanel, {
+  useExtensionDetail,
+} from './ExtensionDetailPanel';
+import { useResponsiveWindowSize } from '../../UI/Responsive/ResponsiveWindowMeasurer';
+import Text from '../../UI/Text';
+import { Divider } from '@material-ui/core';
+
+export const ExtensionDetailSidePanel = ({
+  extensionShortHeader,
+  isInstalling,
+  onInstall,
+  project,
+}: {
+  extensionShortHeader: ExtensionShortHeader,
+  isInstalling: boolean,
+  onInstall?: () => Promise<void>,
+  project: gdProject,
+}): React.Node => {
+  const extensionDetail = useExtensionDetail({
+    extensionShortHeader,
+    isInstalling,
+    onInstall,
+    project,
+  });
+
+  return (
+    <ExtensionDetailPanel
+      extensionShortHeader={extensionShortHeader}
+      isInstalling={isInstalling}
+      onInstall={onInstall}
+      extensionDetail={extensionDetail}
+      shouldDisplayButtons={true}
+    />
+  );
+};
 
 type Props = {|
   isInstalling: boolean,
@@ -74,6 +104,7 @@ export const ExtensionStore = ({
     chosenCategory,
     setChosenCategory,
   } = React.useContext(ExtensionStoreContext);
+  const { isMobile } = useResponsiveWindowSize();
 
   React.useEffect(
     () => {
@@ -112,89 +143,60 @@ export const ExtensionStore = ({
 
   return (
     <React.Fragment>
-      <ColumnStackLayout expand noMargin useFullHeight>
-        <Line noMargin alignItems="center" justifyContent="space-between">
-          <Tabs
-            value={currentTab}
-            onChange={(event, newValue) => setCurrentTab(newValue)}
-            indicatorColor="primary"
-            textColor="primary"
-          >
-            <Tab value="all" label={<Trans>All Extensions</Trans>} />
-            <Tab value="favorites" label={<Trans>Favorites</Trans>} />
-          </Tabs>
-          <Tooltip
-            title={
-              viewMode === 'list' ? (
-                <Trans>Switch to grid view</Trans>
-              ) : (
-                <Trans>Switch to list view</Trans>
-              )
-            }
-          >
-            <IconButton
-              size="small"
-              onClick={() =>
-                handleViewModeChange(viewMode === 'list' ? 'grid' : 'list')
-              }
-            >
-              {viewMode === 'list' ? <ViewModule /> : <ViewList />}
-            </IconButton>
-          </Tooltip>
-        </Line>
-        <ColumnStackLayout noMargin>
-          <ResponsiveLineStackLayout noMargin>
-            <SearchBarSelectField
-              value={chosenCategory}
-              onChange={(e, i, value: string) => {
-                setChosenCategory(value);
-              }}
-            >
-              <SelectOption value="" label={t`All categories`} />
-              {allCategories.map(category => (
-                <SelectOption
-                  key={category}
-                  value={category}
-                  label={category}
-                />
-              ))}
-            </SearchBarSelectField>
-            <Line expand noMargin>
-              <Column expand noMargin>
-                <SearchBar
-                  id="extension-search-bar"
-                  value={searchText}
-                  onChange={setSearchText}
-                  onRequestSearch={() => {}}
-                  placeholder={t`Search extensions`}
-                  autoFocus="desktop"
-                />
-              </Column>
-              <ElementWithMenu
-                key="menu"
-                element={
-                  <IconButton size="small">
-                    <ThreeDotsMenu />
-                  </IconButton>
-                }
-                buildMenuTemplate={(i18n: I18nType) => [
-                  {
-                    label: preferences.values.showExperimentalExtensions
-                      ? i18n._(t`Hide experimental extensions`)
-                      : i18n._(t`Show experimental extensions`),
-                    click: () => {
-                      preferences.setShowExperimentalExtensions(
-                        !preferences.values.showExperimentalExtensions
-                      );
+      <LineStackLayout expand noMargin>
+        <ColumnStackLayout expand noMargin useFullHeight>
+          <ColumnStackLayout noMargin>
+            <ResponsiveLineStackLayout noMargin>
+              <SearchBarSelectField
+                value={chosenCategory}
+                onChange={(e, i, value: string) => {
+                  setChosenCategory(value);
+                }}
+              >
+                <SelectOption value="" label={t`All categories`} />
+                {allCategories.map(category => (
+                  <SelectOption
+                    key={category}
+                    value={category}
+                    label={category}
+                  />
+                ))}
+              </SearchBarSelectField>
+              <Line expand noMargin>
+                <Column expand noMargin>
+                  <SearchBar
+                    id="extension-search-bar"
+                    value={searchText}
+                    onChange={setSearchText}
+                    onRequestSearch={() => {}}
+                    placeholder={t`Search extensions`}
+                    autoFocus="desktop"
+                  />
+                </Column>
+                <ElementWithMenu
+                  key="menu"
+                  element={
+                    <IconButton size="small">
+                      <ThreeDotsMenu />
+                    </IconButton>
+                  }
+                  buildMenuTemplate={(i18n: I18nType) => [
+                    {
+                      label: preferences.values.showExperimentalExtensions
+                        ? i18n._(t`Hide experimental extensions`)
+                        : i18n._(t`Show experimental extensions`),
+                      click: () => {
+                        preferences.setShowExperimentalExtensions(
+                          !preferences.values.showExperimentalExtensions
+                        );
+                      },
                     },
-                  },
-                ]}
-              />
-            </Line>
-          </ResponsiveLineStackLayout>
-          {DismissableTutorialMessage}
-        </ColumnStackLayout>
-        {viewMode === 'list' ? (
+                  ]}
+                />
+              </Line>
+            </ResponsiveLineStackLayout>
+            {DismissableTutorialMessage}
+          </ColumnStackLayout>
           <ListSearchResults
             disableAutoTranslate // Search results text highlighting conflicts with dom handling by browser auto-translations features. Disables auto translation to prevent crashes.
             onRetry={fetchExtensionsAndFilters}
@@ -204,7 +206,6 @@ export const ExtensionStore = ({
               filteredSearchResults.map(({ item }) => item)
             }
             getSearchItemUniqueId={getExtensionName}
-            columnCount={2}
             // $FlowFixMe[missing-local-annot]
             renderSearchItem={(extensionShortHeader, onHeightComputed) => (
               <ExtensionListItem
@@ -221,36 +222,41 @@ export const ExtensionStore = ({
               />
             )}
           />
-        ) : (
-          <GridSearchResults
-            disableAutoTranslate
-            onRetry={fetchExtensionsAndFilters}
-            error={error}
-            searchItems={
-              filteredSearchResults &&
-              filteredSearchResults.map(({ item }) => item)
-            }
-            getSearchItemUniqueId={getExtensionName}
-            columnCount={4}
-            // $FlowFixMe[missing-local-annot]
-            renderSearchItem={(extensionShortHeader, onHeightComputed) => (
-              <ExtensionGridItem
-                id={`extension-grid-item-${extensionShortHeader.name}`}
-                key={extensionShortHeader.name}
-                project={project}
-                onHeightComputed={onHeightComputed}
-                extensionShortHeader={extensionShortHeader}
-                matches={getExtensionsMatches(extensionShortHeader)}
-                onChoose={() => {
-                  sendExtensionDetailsOpened(extensionShortHeader.name);
-                  setSelectedExtensionShortHeader(extensionShortHeader);
-                }}
-              />
+        </ColumnStackLayout>
+        {!isMobile ? (
+          <LineStackLayout expand noMargin>
+            <Divider orientation="vertical" />
+            {selectedExtensionShortHeader ? (
+              <Column expand noOverflowParent>
+                <ExtensionDetailSidePanel
+                  project={project}
+                  extensionShortHeader={selectedExtensionShortHeader}
+                  isInstalling={isInstalling}
+                  onInstall={async () => {
+                    sendExtensionAddedToProject(
+                      selectedExtensionShortHeader.name
+                    );
+                    await onInstall(selectedExtensionShortHeader);
+                  }}
+                />
+              </Column>
+            ) : (
+              <Column
+                expand
+                noMargin
+                noOverflowParent
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Text color="secondary">
+                  <Trans>Select an extension</Trans>
+                </Text>
+              </Column>
             )}
-          />
-        )}
-      </ColumnStackLayout>
-      {!!selectedExtensionShortHeader && (
+          </LineStackLayout>
+        ) : null}
+      </LineStackLayout>
+      {isMobile && !!selectedExtensionShortHeader && (
         <ExtensionInstallDialog
           project={project}
           isInstalling={isInstalling}
