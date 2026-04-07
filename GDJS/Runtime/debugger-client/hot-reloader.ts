@@ -1427,6 +1427,14 @@ namespace gdjs {
           }
         }
       });
+
+      const oldOrder = oldEffects.map((effect) => effect.name).join('\u0000');
+      const newOrder = newEffects.map((effect) => effect.name).join('\u0000');
+      if (oldOrder !== newOrder) {
+        runtimeObjects.forEach((runtimeObject) => {
+          runtimeObject.reorderEffects(newEffects);
+        });
+      }
     }
 
     /**
@@ -1623,6 +1631,16 @@ namespace gdjs {
           }
         }
       });
+
+      const oldOrder = oldEffectsData
+        .map((effect) => effect.name)
+        .join('\u0000');
+      const newOrder = newEffectsData
+        .map((effect) => effect.name)
+        .join('\u0000');
+      if (oldOrder !== newOrder) {
+        runtimeLayer.reorderEffects(newEffectsData);
+      }
     }
 
     _hotReloadRuntimeLayerEffect(

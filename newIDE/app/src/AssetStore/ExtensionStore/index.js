@@ -6,7 +6,9 @@ import SearchBar from '../../UI/SearchBar';
 import { type ExtensionShortHeader } from '../../Utils/GDevelopServices/Extension';
 import { ExtensionStoreContext } from './ExtensionStoreContext';
 import { ListSearchResults } from '../../UI/Search/ListSearchResults';
+import { GridSearchResults } from '../../UI/Search/GridSearchResults';
 import { ExtensionListItem } from './ExtensionListItem';
+import { ExtensionGridItem } from './ExtensionGridItem';
 import ExtensionInstallDialog from './ExtensionInstallDialog';
 import { type SearchMatch } from '../../UI/Search/UseSearchStructuredItem';
 import {
@@ -80,6 +82,18 @@ export const ExtensionStore = ({
     selectedExtensionShortHeader,
     setSelectedExtensionShortHeader,
   ] = React.useState<?ExtensionShortHeader>(null);
+  const [currentTab, setCurrentTab] = React.useState<'all' | 'favorites'>(
+    'all'
+  );
+  const [viewMode, setViewMode] = React.useState<'list' | 'grid'>(
+    preferences.values.extensionStoreViewMode || 'list'
+  );
+
+  const handleViewModeChange = (newMode: 'list' | 'grid') => {
+    setViewMode(newMode);
+    preferences.setExtensionStoreViewMode(newMode);
+  };
+
   const {
     searchResults,
     error,
@@ -100,11 +114,17 @@ export const ExtensionStore = ({
   );
 
   const filteredSearchResults = searchResults
-    ? searchResults.filter(
-        ({ item: extensionShortHeader }) =>
+    ? searchResults.filter(({ item: extensionShortHeader }) => {
+        const matchesBehaviorFilter =
           !showOnlyWithBehaviors ||
-          extensionShortHeader.eventsBasedBehaviorsCount > 0
-      )
+          extensionShortHeader.eventsBasedBehaviorsCount > 0;
+
+        const matchesFavoriteFilter =
+          currentTab === 'all' ||
+          preferences.isFavoriteExtension(extensionShortHeader.name);
+
+        return matchesBehaviorFilter && matchesFavoriteFilter;
+      })
     : null;
 
   const getExtensionsMatches = (
