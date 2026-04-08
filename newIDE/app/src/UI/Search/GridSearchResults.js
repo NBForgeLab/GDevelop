@@ -18,7 +18,6 @@ type Props<SearchItem> = {|
   error: ?Error,
   onRetry: () => void,
   columnCount?: number,
-  columnWidth?: number,
 |};
 
 const styles = {
@@ -33,10 +32,10 @@ const styles = {
 };
 
 const ESTIMATED_CELL_HEIGHT = 250;
-const DEFAULT_COLUMN_COUNT = 3;
+const DEFAULT_COLUMN_COUNT = 2;
 const OVERSCAN_CELLS_COUNT = 25;
+const SCROLLBAR_GUTTER = 12;
 
-/** A virtualized grid of search results, caching the searched item heights. */
 export const GridSearchResults = <SearchItem>({
   disableAutoTranslate,
   searchItems,
@@ -48,13 +47,10 @@ export const GridSearchResults = <SearchItem>({
 }: Props<SearchItem>): any => {
   // $FlowFixMe[value-as-type]
   const grid = React.useRef<?Grid>(null);
-
-  // Height of each item is initially unknown. When rendered, the items
-  // are reporting their heights and we cache these values.
   const cachedHeightsForWidth = React.useRef(0);
   const cachedHeights = React.useRef({});
+
   const onItemHeightComputed = React.useCallback(
-    // $FlowFixMe[missing-local-annot]
     (searchItem, height) => {
       const uniqueId = getSearchItemUniqueId(searchItem);
       // $FlowFixMe[invalid-computed-prop]
@@ -68,11 +64,9 @@ export const GridSearchResults = <SearchItem>({
   );
 
   const getRowHeight = React.useCallback(
-    // $FlowFixMe[missing-local-annot]
     ({ index }) => {
       if (!searchItems) return ESTIMATED_CELL_HEIGHT;
 
-      // Calculate the maximum height for all items in this row
       let maxHeight = ESTIMATED_CELL_HEIGHT;
       for (let col = 0; col < columnCount; col++) {
         const itemIndex = index * columnCount + col;
@@ -85,14 +79,13 @@ export const GridSearchResults = <SearchItem>({
           ESTIMATED_CELL_HEIGHT;
         maxHeight = Math.max(maxHeight, height);
       }
+
       return maxHeight;
     },
     [searchItems, getSearchItemUniqueId, columnCount]
   );
 
-  // Render a cell in the grid
   const renderCell = React.useCallback(
-    // $FlowFixMe[missing-local-annot]
     ({ columnIndex, key, rowIndex, style }) => {
       if (!searchItems) return null;
 
@@ -118,17 +111,17 @@ export const GridSearchResults = <SearchItem>({
 
   if (!searchItems) {
     if (!error) return <PlaceholderLoader />;
-    else {
-      return (
-        <PlaceholderError onRetry={onRetry}>
-          <Trans>
-            Can't load the results. Verify your internet connection or retry
-            later.
-          </Trans>
-        </PlaceholderError>
-      );
-    }
-  } else if (searchItems.length === 0) {
+    return (
+      <PlaceholderError onRetry={onRetry}>
+        <Trans>
+          Can't load the results. Verify your internet connection or retry
+          later.
+        </Trans>
+      </PlaceholderError>
+    );
+  }
+
+  if (searchItems.length === 0) {
     return (
       <EmptyMessage>
         <Trans>
@@ -152,21 +145,18 @@ export const GridSearchResults = <SearchItem>({
       >
         <AutoSizer>
           {({ width, height }) => {
-            // Reset the cached heights in case the width changed.
             if (cachedHeightsForWidth.current !== width) {
               cachedHeights.current = {};
               cachedHeightsForWidth.current = width;
             }
 
-            const columnWidth = Math.floor(width / columnCount);
+            const contentWidth = Math.max(0, width - SCROLLBAR_GUTTER);
+            const columnWidth = Math.floor(contentWidth / columnCount);
 
             return (
               <Grid
                 ref={el => {
-                  if (el) {
-                    // Ensure the grid is recomputed for heights once it is rendered.
-                    el.recomputeGridSize();
-                  }
+                  if (el) el.recomputeGridSize();
                   grid.current = el;
                 }}
                 width={width}
@@ -179,7 +169,6 @@ export const GridSearchResults = <SearchItem>({
                 style={styles.grid}
                 overscanIndicesGetter={({
                   cellCount,
-                  overscanCellsCount,
                   startIndex,
                   stopIndex,
                 }) => ({

@@ -215,6 +215,7 @@ export type PreferencesValues = {|
   resourcesImporationBehavior: ResourceImportationBehavior,
   eventsSheetCancelInlineParameter: 'cancel' | 'apply',
   showExperimentalExtensions: boolean,
+  favoriteExtensions: Array<string>,
   showCreateSectionByDefault: boolean,
   showInAppTutorialDeveloperMode: boolean,
   showDeprecatedInstructionWarning:
@@ -244,9 +245,6 @@ export type PreferencesValues = {|
   useBackgroundSerializerForSaving: boolean,
   disableNpmScriptConfirmation: boolean,
   showJsTypeError: boolean,
-  favoriteExtensions: Array<string>,
-  extensionStoreViewMode: 'list' | 'grid',
-  behaviorStoreViewMode: 'list' | 'grid',
   homePageMenuIsCollapsed: boolean,
 |};
 
@@ -322,6 +320,9 @@ export type Preferences = {|
   setIsAlwaysOnTopInPreview: (enabled: boolean) => void,
   setEventsSheetCancelInlineParameter: (value: string) => void,
   setShowExperimentalExtensions: (enabled: boolean) => void,
+  isFavoriteExtension: (extensionName: string) => boolean,
+  addFavoriteExtension: (extensionName: string) => void,
+  removeFavoriteExtension: (extensionName: string) => void,
   setShowCreateSectionByDefault: (enabled: boolean) => void,
   setShowInAppTutorialDeveloperMode: (enabled: boolean) => void,
   setOpenDiagnosticReportAutomatically: (enabled: boolean) => void,
@@ -371,11 +372,6 @@ export type Preferences = {|
   setAutomaticallyUseCreditsForAiRequests: (enabled: boolean) => void,
   setUseBackgroundSerializerForSaving: (enabled: boolean) => void,
   setShowJsTypeError: (enabled: boolean) => void,
-  addFavoriteExtension: (extensionName: string) => void,
-  removeFavoriteExtension: (extensionName: string) => void,
-  isFavoriteExtension: (extensionName: string) => boolean,
-  setExtensionStoreViewMode: (mode: 'list' | 'grid') => void,
-  setBehaviorStoreViewMode: (mode: 'list' | 'grid') => void,
   setHomePageMenuIsCollapsed: (collapsed: boolean) => void,
 |};
 
@@ -418,6 +414,7 @@ export const initialPreferences = {
     resourcesImporationBehavior: 'ask',
     eventsSheetCancelInlineParameter: 'apply',
     showExperimentalExtensions: false,
+    favoriteExtensions: [],
     showCreateSectionByDefault: false,
     showInAppTutorialDeveloperMode: false,
     openDiagnosticReportAutomatically: true,
@@ -442,9 +439,6 @@ export const initialPreferences = {
     useBackgroundSerializerForSaving: false,
     disableNpmScriptConfirmation: false,
     showJsTypeError: false,
-    favoriteExtensions: ([]: Array<string>),
-    extensionStoreViewMode: 'list',
-    behaviorStoreViewMode: 'list',
     homePageMenuIsCollapsed: false,
   },
   setMultipleValues: () => {},
@@ -498,6 +492,9 @@ export const initialPreferences = {
   setIsAlwaysOnTopInPreview: () => {},
   setEventsSheetCancelInlineParameter: () => {},
   setShowExperimentalExtensions: () => {},
+  isFavoriteExtension: (): boolean => false,
+  addFavoriteExtension: () => {},
+  removeFavoriteExtension: () => {},
   setShowCreateSectionByDefault: (enabled: boolean) => {},
   setShowInAppTutorialDeveloperMode: (enabled: boolean) => {},
   setShowDeprecatedInstructionWarning: (
@@ -532,11 +529,6 @@ export const initialPreferences = {
   setAutomaticallyUseCreditsForAiRequests: (enabled: boolean) => {},
   setUseBackgroundSerializerForSaving: (enabled: boolean) => {},
   setShowJsTypeError: (enabled: boolean) => {},
-  addFavoriteExtension: (extensionName: string) => {},
-  removeFavoriteExtension: (extensionName: string) => {},
-  isFavoriteExtension: (extensionName: string): boolean => false,
-  setExtensionStoreViewMode: (mode: 'list' | 'grid') => {},
-  setBehaviorStoreViewMode: (mode: 'list' | 'grid') => {},
   setHomePageMenuIsCollapsed: (collapsed: boolean) => {},
 };
 

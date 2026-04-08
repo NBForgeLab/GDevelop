@@ -99,6 +99,7 @@ export const getInitialPreferences = (): {
   eventsSheetShowObjectThumbnails: boolean,
   eventsSheetUseAssignmentOperators: boolean,
   eventsSheetZoomLevel: number,
+  favoriteExtensions: Array<string>,
   fetchPlayerTokenForPreviewAutomatically: boolean,
   gamesDashboardOrderBy: string,
   hasProjectOpened: boolean,
@@ -299,6 +300,12 @@ export default class PreferencesProvider extends React.Component<Props, State> {
       this
     ): any),
     // $FlowFixMe[method-unbinding]
+    isFavoriteExtension: (this._isFavoriteExtension.bind(this): any),
+    // $FlowFixMe[method-unbinding]
+    addFavoriteExtension: (this._addFavoriteExtension.bind(this): any),
+    // $FlowFixMe[method-unbinding]
+    removeFavoriteExtension: (this._removeFavoriteExtension.bind(this): any),
+    // $FlowFixMe[method-unbinding]
     setShowCreateSectionByDefault: (this._setShowCreateSectionByDefault.bind(
       this
     ): any),
@@ -400,18 +407,6 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     ): any),
     // $FlowFixMe[method-unbinding]
     setShowJsTypeError: (this._setShowJsTypeError.bind(this): any),
-    // $FlowFixMe[method-unbinding]
-    addFavoriteExtension: (this._addFavoriteExtension.bind(this): any),
-    // $FlowFixMe[method-unbinding]
-    removeFavoriteExtension: (this._removeFavoriteExtension.bind(this): any),
-    // $FlowFixMe[method-unbinding]
-    isFavoriteExtension: (this._isFavoriteExtension.bind(this): any),
-    // $FlowFixMe[method-unbinding]
-    setExtensionStoreViewMode: (this._setExtensionStoreViewMode.bind(
-      this
-    ): any),
-    // $FlowFixMe[method-unbinding]
-    setBehaviorStoreViewMode: (this._setBehaviorStoreViewMode.bind(this): any),
     // $FlowFixMe[method-unbinding]
     setHomePageMenuIsCollapsed: (this._setHomePageMenuIsCollapsed.bind(
       this
@@ -677,6 +672,40 @@ export default class PreferencesProvider extends React.Component<Props, State> {
         values: {
           ...state.values,
           showExperimentalExtensions,
+        },
+      }),
+      () => this._persistValuesToLocalStorage(this.state)
+    );
+  }
+
+  _isFavoriteExtension(extensionName: string): boolean {
+    return this.state.values.favoriteExtensions.includes(extensionName);
+  }
+
+  _addFavoriteExtension(extensionName: string) {
+    this.setState(
+      state => ({
+        values: {
+          ...state.values,
+          favoriteExtensions: state.values.favoriteExtensions.includes(
+            extensionName
+          )
+            ? state.values.favoriteExtensions
+            : [...state.values.favoriteExtensions, extensionName],
+        },
+      }),
+      () => this._persistValuesToLocalStorage(this.state)
+    );
+  }
+
+  _removeFavoriteExtension(extensionName: string) {
+    this.setState(
+      state => ({
+        values: {
+          ...state.values,
+          favoriteExtensions: state.values.favoriteExtensions.filter(
+            favoriteExtension => favoriteExtension !== extensionName
+          ),
         },
       }),
       () => this._persistValuesToLocalStorage(this.state)
@@ -1390,67 +1419,6 @@ export default class PreferencesProvider extends React.Component<Props, State> {
         values: {
           ...state.values,
           automaticallyUseCreditsForAiRequests: newValue,
-        },
-      }),
-      () => this._persistValuesToLocalStorage(this.state)
-    );
-  }
-
-  _addFavoriteExtension(extensionName: string) {
-    this.setState(
-      state => {
-        const favoriteExtensions = state.values.favoriteExtensions || [];
-        if (favoriteExtensions.includes(extensionName)) {
-          return state;
-        }
-        return {
-          values: {
-            ...state.values,
-            favoriteExtensions: [...favoriteExtensions, extensionName],
-          },
-        };
-      },
-      () => this._persistValuesToLocalStorage(this.state)
-    );
-  }
-
-  _removeFavoriteExtension(extensionName: string) {
-    this.setState(
-      state => ({
-        values: {
-          ...state.values,
-          favoriteExtensions: (state.values.favoriteExtensions || []).filter(
-            name => name !== extensionName
-          ),
-        },
-      }),
-      () => this._persistValuesToLocalStorage(this.state)
-    );
-  }
-
-  _isFavoriteExtension(extensionName: string): boolean {
-    const favoriteExtensions = this.state.values.favoriteExtensions || [];
-    return favoriteExtensions.includes(extensionName);
-  }
-
-  _setExtensionStoreViewMode(mode: 'list' | 'grid') {
-    this.setState(
-      state => ({
-        values: {
-          ...state.values,
-          extensionStoreViewMode: mode,
-        },
-      }),
-      () => this._persistValuesToLocalStorage(this.state)
-    );
-  }
-
-  _setBehaviorStoreViewMode(mode: 'list' | 'grid') {
-    this.setState(
-      state => ({
-        values: {
-          ...state.values,
-          behaviorStoreViewMode: mode,
         },
       }),
       () => this._persistValuesToLocalStorage(this.state)
