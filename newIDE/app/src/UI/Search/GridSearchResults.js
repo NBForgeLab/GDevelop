@@ -17,6 +17,7 @@ type Props<SearchItem> = {|
   ) => React.Node,
   error: ?Error,
   onRetry: () => void,
+  columnCount?: number,
 |};
 
 const styles = {
@@ -24,34 +25,32 @@ const styles = {
   grid: {
     overflowX: 'hidden',
   },
+  cell: {
+    padding: 4,
+    boxSizing: 'border-box',
+  },
 };
 
-const ESTIMATED_ROW_HEIGHT = 90;
+const ESTIMATED_CELL_HEIGHT = 250;
+const DEFAULT_COLUMN_COUNT = 2;
+const OVERSCAN_CELLS_COUNT = 25;
 const SCROLLBAR_GUTTER = 12;
 
-// Keep overscanCount relatively high so that:
-// - during in-app tutorials we make sure the tooltip displayer finds
-//   the elements to highlight
-const OVERSCAN_CELLS_COUNT = 25;
-
-/** A virtualized list of search results, caching the searched item heights. */
-export const ListSearchResults = <SearchItem>({
+export const GridSearchResults = <SearchItem>({
   disableAutoTranslate,
   searchItems,
   getSearchItemUniqueId,
   renderSearchItem,
   error,
   onRetry,
+  columnCount = DEFAULT_COLUMN_COUNT,
 }: Props<SearchItem>): any => {
   // $FlowFixMe[value-as-type]
   const grid = React.useRef<?Grid>(null);
-
-  // Height of each item is initially unknown. When rendered, the items
-  // are reporting their heights and we cache these values.
   const cachedHeightsForWidth = React.useRef(0);
   const cachedHeights = React.useRef({});
+
   const onItemHeightComputed = React.useCallback(
-    // $FlowFixMe[missing-local-annot]
     (searchItem, height) => {
       const uniqueId = getSearchItemUniqueId(searchItem);
       // $FlowFixMe[invalid-computed-prop]
@@ -63,32 +62,41 @@ export const ListSearchResults = <SearchItem>({
     },
     [getSearchItemUniqueId]
   );
-  const getRowHeight = React.useCallback(
-    // $FlowFixMe[missing-local-annot]
-    ({ index }) => {
-      if (!searchItems || !searchItems[index]) return ESTIMATED_ROW_HEIGHT;
 
-      const searchItem = searchItems[index];
-      return (
-        // $FlowFixMe[invalid-computed-prop]
-        cachedHeights.current[getSearchItemUniqueId(searchItem)] ||
-        ESTIMATED_ROW_HEIGHT
-      );
+  const getRowHeight = React.useCallback(
+    ({ index }) => {
+      if (!searchItems) return ESTIMATED_CELL_HEIGHT;
+
+      let maxHeight = ESTIMATED_CELL_HEIGHT;
+      for (let col = 0; col < columnCount; col++) {
+        const itemIndex = index * columnCount + col;
+        if (itemIndex >= searchItems.length) break;
+
+        const searchItem = searchItems[itemIndex];
+        const height =
+          // $FlowFixMe[invalid-computed-prop]
+          cachedHeights.current[getSearchItemUniqueId(searchItem)] ||
+          ESTIMATED_CELL_HEIGHT;
+        maxHeight = Math.max(maxHeight, height);
+      }
+
+      return maxHeight;
     },
-    [searchItems, getSearchItemUniqueId]
+    [searchItems, getSearchItemUniqueId, columnCount]
   );
 
-  // Render an item, and update the cached height when it's reported
-  const renderRow = React.useCallback(
-    // $FlowFixMe[missing-local-annot]
-    ({ key, rowIndex, style }) => {
+  const renderCell = React.useCallback(
+    ({ columnIndex, key, rowIndex, style }) => {
       if (!searchItems) return null;
 
-      const searchItem = searchItems[rowIndex];
+      const itemIndex = rowIndex * columnCount + columnIndex;
+      if (itemIndex >= searchItems.length) return null;
+
+      const searchItem = searchItems[itemIndex];
       if (!searchItem) return null;
 
       return (
-        <div key={key} style={style}>
+        <div key={key} style={{ ...style, ...styles.cell }}>
           {renderSearchItem(searchItem, height => {
             const heightWasUpdated = onItemHeightComputed(searchItem, height);
             if (heightWasUpdated && grid.current) {
@@ -98,22 +106,22 @@ export const ListSearchResults = <SearchItem>({
         </div>
       );
     },
-    [searchItems, onItemHeightComputed, renderSearchItem]
+    [searchItems, onItemHeightComputed, renderSearchItem, columnCount]
   );
 
   if (!searchItems) {
     if (!error) return <PlaceholderLoader />;
-    else {
-      return (
-        <PlaceholderError onRetry={onRetry}>
-          <Trans>
-            Can't load the results. Verify your internet connection or retry
-            later.
-          </Trans>
-        </PlaceholderError>
-      );
-    }
-  } else if (searchItems.length === 0) {
+    return (
+      <PlaceholderError onRetry={onRetry}>
+        <Trans>
+          Can't load the results. Verify your internet connection or retry
+          later.
+        </Trans>
+      </PlaceholderError>
+    );
+  }
+
+  if (searchItems.length === 0) {
     return (
       <EmptyMessage>
         <Trans>
@@ -124,10 +132,12 @@ export const ListSearchResults = <SearchItem>({
     );
   }
 
+  const rowCount = Math.ceil(searchItems.length / columnCount);
+
   return (
     <ErrorBoundary
       componentTitle={<Trans>Search results</Trans>}
-      scope="list-search-result"
+      scope="grid-search-result"
     >
       <div
         style={styles.container}
@@ -135,37 +145,30 @@ export const ListSearchResults = <SearchItem>({
       >
         <AutoSizer>
           {({ width, height }) => {
-            // Reset the cached heights in case the width changed.
             if (cachedHeightsForWidth.current !== width) {
               cachedHeights.current = {};
               cachedHeightsForWidth.current = width;
             }
 
             const contentWidth = Math.max(0, width - SCROLLBAR_GUTTER);
+            const columnWidth = Math.floor(contentWidth / columnCount);
 
             return (
               <Grid
                 ref={el => {
-                  if (el) {
-                    // Ensure the grid is recomputed for heights once it is rendered.
-                    el.recomputeGridSize();
-                  }
+                  if (el) el.recomputeGridSize();
                   grid.current = el;
                 }}
                 width={width}
                 height={height}
-                columnCount={1}
-                columnWidth={contentWidth}
+                columnCount={columnCount}
+                columnWidth={columnWidth}
                 rowHeight={getRowHeight}
-                rowCount={searchItems.length}
-                cellRenderer={renderRow}
+                rowCount={rowCount}
+                cellRenderer={renderCell}
                 style={styles.grid}
-                // We override this function to avoid a bug in react-virtualized
-                // where the overscanCellsCount is not taken into account after a scroll
-                // see https://github.com/bvaughn/react-virtualized/issues/1582#issuecomment-785073746
                 overscanIndicesGetter={({
                   cellCount,
-                  overscanCellsCount,
                   startIndex,
                   stopIndex,
                 }) => ({
