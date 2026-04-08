@@ -135,17 +135,6 @@ export const ExtensionStore = ({
     <React.Fragment>
       <LineStackLayout expand noMargin>
         <ColumnStackLayout expand noMargin useFullHeight>
-          <Line noMargin>
-            <Tabs
-              value={currentTab}
-              onChange={(event, newValue) => setCurrentTab(newValue)}
-              indicatorColor="primary"
-              textColor="primary"
-            >
-              <Tab value="all" label={<Trans>All Extensions</Trans>} />
-              <Tab value="favorites" label={<Trans>Favorites</Trans>} />
-            </Tabs>
-          </Line>
           <ColumnStackLayout noMargin>
             <ResponsiveLineStackLayout noMargin>
               <SearchBarSelectField
@@ -174,6 +163,24 @@ export const ExtensionStore = ({
                     autoFocus="desktop"
                   />
                 </Column>
+                <Tabs
+                  value={currentTab}
+                  onChange={(event, newValue) => setCurrentTab(newValue)}
+                  indicatorColor="primary"
+                  textColor="primary"
+                  style={{ minHeight: 36, marginLeft: 8 }}
+                >
+                  <Tab
+                    value="all"
+                    label={<Trans>All</Trans>}
+                    style={{ minHeight: 36, minWidth: 56, padding: '0 10px' }}
+                  />
+                  <Tab
+                    value="favorites"
+                    label={<Trans>Favorites</Trans>}
+                    style={{ minHeight: 36, minWidth: 84, padding: '0 10px' }}
+                  />
+                </Tabs>
                 <ElementWithMenu
                   key="menu"
                   element={
