@@ -15,43 +15,17 @@ import Tooltip from '@material-ui/core/Tooltip';
 import CircledInfo from '../../UI/CustomSvgIcons/SmallCircledInfo';
 import IconButton from '../../UI/IconButton';
 import GDevelopThemeContext from '../../UI/Theme/GDevelopThemeContext';
-import Star from '@material-ui/icons/Star';
-import StarBorder from '@material-ui/icons/StarBorder';
+import Favorite from '@material-ui/icons/Favorite';
+import FavoriteBorder from '@material-ui/icons/FavoriteBorder';
 import PreferencesContext from '../../MainFrame/Preferences/PreferencesContext';
 
 const styles = {
-  button: { width: '100%', height: '100%' },
+  button: { width: '100%' },
   container: {
     display: 'flex',
     textAlign: 'left',
     overflow: 'hidden',
     width: '100%',
-    height: 96,
-    minHeight: 96,
-    boxSizing: 'border-box',
-    padding: '6px 10px',
-  },
-  contentColumn: {
-    display: 'flex',
-    flexDirection: 'column',
-    minWidth: 0,
-    justifyContent: 'center',
-  },
-  title: {
-    minWidth: 0,
-    flexShrink: 1,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-  description: {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    display: '-webkit-box',
-    WebkitLineClamp: 2,
-    WebkitBoxOrient: 'vertical',
-    lineHeight: '1.4',
-    minHeight: '2.8em',
   },
 };
 
@@ -111,10 +85,9 @@ export const ExtensionListItem = ({
   };
 
   const [hover, setHover] = React.useState(false);
-
   const isFavorite = preferences.isFavoriteExtension(extensionShortHeader.name);
 
-  const handleFavoriteClick = (event: any) => {
+  const handleFavoriteClick = (event: SyntheticMouseEvent<>) => {
     event.stopPropagation();
     if (isFavorite) {
       preferences.removeFavoriteExtension(extensionShortHeader.name);
@@ -135,101 +108,97 @@ export const ExtensionListItem = ({
         onPointerLeave={() => setHover(false)}
         ref={containerRef}
       >
-        <LineStackLayout useFullHeight alignItems="center">
+        <LineStackLayout>
           <ListIcon
             src={extensionShortHeader.previewIconUrl}
             iconSize={32}
             padding={4}
             useExactIconSize
           />
-          <Column expand noOverflowParent>
-            <div style={styles.contentColumn}>
-              <LineStackLayout noMargin alignItems="center" overflow="hidden">
-                <Text
-                  noMargin
-                  allowBrowserAutoTranslate={false}
-                  displayInlineAsSpan // Important to avoid the text to use a "p" which causes crashes with automatic translation tools with the highlighted text.
-                  style={styles.title}
-                >
-                  {renderExtensionField('fullName')}
-                </Text>
-                {alreadyInstalled && (
-                  <Chip
-                    size="small"
-                    label={
-                      fromStore ? (
-                        <Trans>Already installed</Trans>
-                      ) : (
-                        <Trans>Already in project</Trans>
-                      )
-                    }
-                    color="secondary"
-                    variant="outlined"
-                  />
-                )}
-                {extensionShortHeader.tier === 'experimental' && (
-                  <Chip
-                    size="small"
-                    label={<Trans>Experimental extension</Trans>}
-                    color="primary"
-                  />
-                )}
-                {extensionShortHeader.authors && (
-                  <Tooltip
-                    title={
-                      extensionShortHeader.authors.length > 0 ? (
-                        <Line>
-                          <div style={{ flexWrap: 'wrap' }}>
-                            {extensionShortHeader.authors.map(author => (
-                              <UserPublicProfileChip
-                                user={author}
-                                key={author.id}
-                                variant="outlined"
-                              />
-                            ))}
-                          </div>
-                        </Line>
-                      ) : (
-                        ''
-                      )
-                    }
-                  >
-                    <IconButton size="small">
-                      <CircledInfo />
-                    </IconButton>
-                  </Tooltip>
-                )}
-                {(hover || isFavorite) && (
-                  <Tooltip
-                    title={
-                      isFavorite ? (
-                        <Trans>Remove from favorites</Trans>
-                      ) : (
-                        <Trans>Add to favorites</Trans>
-                      )
-                    }
-                  >
-                    <IconButton size="small" onClick={handleFavoriteClick}>
-                      {isFavorite ? (
-                        <Star style={{ color: '#FFD700' }} />
-                      ) : (
-                        <StarBorder />
-                      )}
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </LineStackLayout>
+          <Column expand>
+            <LineStackLayout noMargin alignItems="center">
               <Text
                 noMargin
-                size="body2"
                 allowBrowserAutoTranslate={false}
                 displayInlineAsSpan // Important to avoid the text to use a "p" which causes crashes with automatic translation tools with the highlighted text.
-                color={'secondary'}
-                style={styles.description}
               >
-                {renderExtensionField('shortDescription')}
+                {renderExtensionField('fullName')}
               </Text>
-            </div>
+              {alreadyInstalled && (
+                <Chip
+                  size="small"
+                  label={
+                    fromStore ? (
+                      <Trans>Already installed</Trans>
+                    ) : (
+                      <Trans>Already in project</Trans>
+                    )
+                  }
+                  color="secondary"
+                  variant="outlined"
+                />
+              )}
+              {extensionShortHeader.tier === 'experimental' && (
+                <Chip
+                  size="small"
+                  label={<Trans>Experimental extension</Trans>}
+                  color="primary"
+                />
+              )}
+              {extensionShortHeader.authors && (
+                <Tooltip
+                  title={
+                    extensionShortHeader.authors.length > 0 ? (
+                      <Line>
+                        <div style={{ flexWrap: 'wrap' }}>
+                          {extensionShortHeader.authors.map(author => (
+                            <UserPublicProfileChip
+                              user={author}
+                              key={author.id}
+                              variant="outlined"
+                            />
+                          ))}
+                        </div>
+                      </Line>
+                    ) : (
+                      ''
+                    )
+                  }
+                >
+                  <IconButton size="small">
+                    <CircledInfo />
+                  </IconButton>
+                </Tooltip>
+              )}
+              {(hover || isFavorite) && (
+                <Tooltip
+                  title={
+                    isFavorite ? (
+                      <Trans>Remove from favorites</Trans>
+                    ) : (
+                      <Trans>Add to favorites</Trans>
+                    )
+                  }
+                >
+                  <IconButton size="small" onClick={handleFavoriteClick}>
+                    {isFavorite ? (
+                      <Favorite style={{ color: '#e53935' }} />
+                    ) : (
+                      <FavoriteBorder />
+                    )}
+                  </IconButton>
+                </Tooltip>
+              )}
+            </LineStackLayout>
+            <Text
+              noMargin
+              size="body2"
+              allowBrowserAutoTranslate={false}
+              displayInlineAsSpan // Important to avoid the text to use a "p" which causes crashes with automatic translation tools with the highlighted text.
+              color={'secondary'}
+            >
+              {renderExtensionField('shortDescription')}
+            </Text>
           </Column>
         </LineStackLayout>
       </div>

@@ -1,8 +1,7 @@
 // @flow
-import { type I18n as I18nType } from '@lingui/core';
 import { t, Trans } from '@lingui/macro';
+import { type I18n as I18nType } from '@lingui/core';
 import * as React from 'react';
-import { Divider } from '@material-ui/core';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import SearchBar from '../../UI/SearchBar';
@@ -21,16 +20,17 @@ import { ColumnStackLayout, LineStackLayout } from '../../UI/Layout';
 import { Column, Line } from '../../UI/Grid';
 import PreferencesContext from '../../MainFrame/Preferences/PreferencesContext';
 import { ResponsiveLineStackLayout } from '../../UI/Layout';
-import { useResponsiveWindowSize } from '../../UI/Responsive/ResponsiveWindowMeasurer';
 import SearchBarSelectField from '../../UI/SearchBarSelectField';
 import SelectOption from '../../UI/SelectOption';
 import ElementWithMenu from '../../UI/Menu/ElementWithMenu';
 import IconButton from '../../UI/IconButton';
 import ThreeDotsMenu from '../../UI/CustomSvgIcons/ThreeDotsMenu';
-import Text from '../../UI/Text';
 import ExtensionDetailPanel, {
   useExtensionDetail,
 } from './ExtensionDetailPanel';
+import { useResponsiveWindowSize } from '../../UI/Responsive/ResponsiveWindowMeasurer';
+import Text from '../../UI/Text';
+import { Divider } from '@material-ui/core';
 
 export const ExtensionDetailSidePanel = ({
   extensionShortHeader,
@@ -199,7 +199,7 @@ export const ExtensionStore = ({
             {DismissableTutorialMessage}
           </ColumnStackLayout>
           <ListSearchResults
-            disableAutoTranslate
+            disableAutoTranslate // Search results text highlighting conflicts with dom handling by browser auto-translations features. Disables auto translation to prevent crashes.
             onRetry={fetchExtensionsAndFilters}
             error={error}
             searchItems={
@@ -265,6 +265,7 @@ export const ExtensionStore = ({
           onInstall={async () => {
             sendExtensionAddedToProject(selectedExtensionShortHeader.name);
             const wasInstalled = await onInstall(selectedExtensionShortHeader);
+            // An errorBox is already displayed by `installExtension`.
             if (wasInstalled) setSelectedExtensionShortHeader(null);
           }}
           onClose={() => setSelectedExtensionShortHeader(null)}
