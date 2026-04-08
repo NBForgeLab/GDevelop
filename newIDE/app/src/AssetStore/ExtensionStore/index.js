@@ -4,11 +4,16 @@ import { type I18n as I18nType } from '@lingui/core';
 import * as React from 'react';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import Tooltip from '@material-ui/core/Tooltip';
+import ViewList from '@material-ui/icons/ViewList';
+import ViewModule from '@material-ui/icons/ViewModule';
 import SearchBar from '../../UI/SearchBar';
 import { type ExtensionShortHeader } from '../../Utils/GDevelopServices/Extension';
 import { ExtensionStoreContext } from './ExtensionStoreContext';
 import { ListSearchResults } from '../../UI/Search/ListSearchResults';
+import { GridSearchResults } from '../../UI/Search/GridSearchResults';
 import { ExtensionListItem } from './ExtensionListItem';
+import { ExtensionGridItem } from './ExtensionGridItem';
 import ExtensionInstallDialog from './ExtensionInstallDialog';
 import { type SearchMatch } from '../../UI/Search/UseSearchStructuredItem';
 import {
@@ -82,6 +87,7 @@ export const ExtensionStore = ({
     selectedExtensionShortHeader,
     setSelectedExtensionShortHeader,
   ] = React.useState<?ExtensionShortHeader>(null);
+  const [displayMode, setDisplayMode] = React.useState<'list' | 'grid'>('list');
   const [currentTab, setCurrentTab] = React.useState<'all' | 'favorites'>(
     'all'
   );
@@ -181,6 +187,24 @@ export const ExtensionStore = ({
                     style={{ minHeight: 36, minWidth: 84, padding: '0 10px' }}
                   />
                 </Tabs>
+                <Tooltip
+                  title={
+                    displayMode === 'grid' ? (
+                      <Trans>Display as list</Trans>
+                    ) : (
+                      <Trans>Display as grid</Trans>
+                    )
+                  }
+                >
+                  <IconButton
+                    size="small"
+                    onClick={() =>
+                      setDisplayMode(displayMode === 'grid' ? 'list' : 'grid')
+                    }
+                  >
+                    {displayMode === 'grid' ? <ViewList /> : <ViewModule />}
+                  </IconButton>
+                </Tooltip>
                 <ElementWithMenu
                   key="menu"
                   element={
@@ -205,34 +229,67 @@ export const ExtensionStore = ({
             </ResponsiveLineStackLayout>
             {DismissableTutorialMessage}
           </ColumnStackLayout>
-          <ListSearchResults
-            disableAutoTranslate // Search results text highlighting conflicts with dom handling by browser auto-translations features. Disables auto translation to prevent crashes.
-            onRetry={fetchExtensionsAndFilters}
-            error={error}
-            searchItems={
-              filteredSearchResults &&
-              filteredSearchResults.map(({ item }) => item)
-            }
-            getSearchItemUniqueId={getExtensionName}
-            // $FlowFixMe[missing-local-annot]
-            renderSearchItem={(extensionShortHeader, onHeightComputed) => (
-              <ExtensionListItem
-                id={`extension-list-item-${extensionShortHeader.name}`}
-                key={extensionShortHeader.name}
-                project={project}
-                onHeightComputed={onHeightComputed}
-                extensionShortHeader={extensionShortHeader}
-                matches={getExtensionsMatches(extensionShortHeader)}
-                onChoose={() => {
-                  sendExtensionDetailsOpened(extensionShortHeader.name);
-                  setSelectedExtensionShortHeader(extensionShortHeader);
-                }}
-              />
-            )}
-          />
+          {displayMode === 'grid' ? (
+            <GridSearchResults
+              disableAutoTranslate // Search results text highlighting conflicts with dom handling by browser auto-translations features. Disables auto translation to prevent crashes.
+              onRetry={fetchExtensionsAndFilters}
+              error={error}
+              searchItems={
+                filteredSearchResults &&
+                filteredSearchResults.map(({ item }) => item)
+              }
+              getSearchItemUniqueId={getExtensionName}
+              columnCount={2}
+              // $FlowFixMe[missing-local-annot]
+              renderSearchItem={(extensionShortHeader, onHeightComputed) => (
+                <ExtensionGridItem
+                  id={`extension-grid-item-${extensionShortHeader.name}`}
+                  key={extensionShortHeader.name}
+                  project={project}
+                  onHeightComputed={onHeightComputed}
+                  extensionShortHeader={extensionShortHeader}
+                  matches={getExtensionsMatches(extensionShortHeader)}
+                  onChoose={() => {
+                    sendExtensionDetailsOpened(extensionShortHeader.name);
+                    setSelectedExtensionShortHeader(extensionShortHeader);
+                  }}
+                />
+              )}
+            />
+          ) : (
+            <ListSearchResults
+              disableAutoTranslate // Search results text highlighting conflicts with dom handling by browser auto-translations features. Disables auto translation to prevent crashes.
+              onRetry={fetchExtensionsAndFilters}
+              error={error}
+              searchItems={
+                filteredSearchResults &&
+                filteredSearchResults.map(({ item }) => item)
+              }
+              getSearchItemUniqueId={getExtensionName}
+              // $FlowFixMe[missing-local-annot]
+              renderSearchItem={(extensionShortHeader, onHeightComputed) => (
+                <ExtensionListItem
+                  id={`extension-list-item-${extensionShortHeader.name}`}
+                  key={extensionShortHeader.name}
+                  project={project}
+                  onHeightComputed={onHeightComputed}
+                  extensionShortHeader={extensionShortHeader}
+                  matches={getExtensionsMatches(extensionShortHeader)}
+                  onChoose={() => {
+                    sendExtensionDetailsOpened(extensionShortHeader.name);
+                    setSelectedExtensionShortHeader(extensionShortHeader);
+                  }}
+                />
+              )}
+            />
+          )}
         </ColumnStackLayout>
         {!isMobile ? (
-          <LineStackLayout expand noMargin>
+          <LineStackLayout
+            expand
+            noMargin
+            style={{ flex: '0 0 42%', maxWidth: '42%' }}
+          >
             <Divider orientation="vertical" />
             {selectedExtensionShortHeader ? (
               <Column expand noOverflowParent>
