@@ -249,6 +249,11 @@ export const ExtensionStore = ({
                   onHeightComputed={onHeightComputed}
                   extensionShortHeader={extensionShortHeader}
                   matches={getExtensionsMatches(extensionShortHeader)}
+                  selected={
+                    !!selectedExtensionShortHeader &&
+                    selectedExtensionShortHeader.name ===
+                      extensionShortHeader.name
+                  }
                   onChoose={() => {
                     sendExtensionDetailsOpened(extensionShortHeader.name);
                     setSelectedExtensionShortHeader(extensionShortHeader);
@@ -275,6 +280,11 @@ export const ExtensionStore = ({
                   onHeightComputed={onHeightComputed}
                   extensionShortHeader={extensionShortHeader}
                   matches={getExtensionsMatches(extensionShortHeader)}
+                  selected={
+                    !!selectedExtensionShortHeader &&
+                    selectedExtensionShortHeader.name ===
+                      extensionShortHeader.name
+                  }
                   onChoose={() => {
                     sendExtensionDetailsOpened(extensionShortHeader.name);
                     setSelectedExtensionShortHeader(extensionShortHeader);

@@ -34,6 +34,7 @@ type Props = {|
   project: gdProject,
   extensionShortHeader: ExtensionShortHeader,
   matches: ?Array<SearchMatch>,
+  selected?: boolean,
   onChoose: () => void,
   onHeightComputed: number => void,
 |};
@@ -43,6 +44,7 @@ export const ExtensionListItem = ({
   project,
   extensionShortHeader,
   matches,
+  selected = false,
   onChoose,
   onHeightComputed,
 }: Props): React.Node => {
@@ -100,7 +102,15 @@ export const ExtensionListItem = ({
     <ButtonBase id={id} onClick={onChoose} focusRipple style={styles.button}>
       <div
         style={
-          hover
+          selected
+            ? {
+                ...styles.container,
+                ...gdevelopTheme.list.hover,
+                boxShadow: `inset 0 0 0 1px ${
+                  gdevelopTheme.palette.primary.main
+                }`,
+              }
+            : hover
             ? { ...styles.container, ...gdevelopTheme.list.hover }
             : styles.container
         }

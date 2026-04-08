@@ -100,6 +100,7 @@ type Props = {|
   project: gdProject,
   extensionShortHeader: ExtensionShortHeader,
   matches: ?Array<SearchMatch>,
+  selected?: boolean,
   onChoose: () => void,
   onHeightComputed: number => void,
 |};
@@ -109,6 +110,7 @@ export const ExtensionGridItem = ({
   project,
   extensionShortHeader,
   matches,
+  selected = false,
   onChoose,
   onHeightComputed,
 }: Props): React.Node => {
@@ -166,9 +168,16 @@ export const ExtensionGridItem = ({
         <div
           style={{
             ...styles.cardContainer,
-            backgroundColor: hover
-              ? gdevelopTheme.list.hover.backgroundColor
+            backgroundColor: selected
+              ? 'rgba(0, 0, 0, 0.3)'
+              : hover
+              ? 'rgba(0, 0, 0, 0.18)'
               : gdevelopTheme.list.itemsBackgroundColor,
+            border: selected
+              ? `2px solid ${gdevelopTheme.palette.primary.main}`
+              : hover
+              ? `1px solid ${gdevelopTheme.palette.primary.main}`
+              : '1px solid transparent',
           }}
           onPointerEnter={() => setHover(true)}
           onPointerLeave={() => setHover(false)}
