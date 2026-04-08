@@ -27,6 +27,7 @@ const styles = {
 };
 
 const ESTIMATED_ROW_HEIGHT = 90;
+const SCROLLBAR_GUTTER = 12;
 
 // Keep overscanCount relatively high so that:
 // - during in-app tutorials we make sure the tooltip displayer finds
@@ -140,6 +141,8 @@ export const ListSearchResults = <SearchItem>({
               cachedHeightsForWidth.current = width;
             }
 
+            const contentWidth = Math.max(0, width - SCROLLBAR_GUTTER);
+
             return (
               <Grid
                 ref={el => {
@@ -152,7 +155,7 @@ export const ListSearchResults = <SearchItem>({
                 width={width}
                 height={height}
                 columnCount={1}
-                columnWidth={width}
+                columnWidth={contentWidth}
                 rowHeight={getRowHeight}
                 rowCount={searchItems.length}
                 cellRenderer={renderRow}

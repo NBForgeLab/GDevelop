@@ -99,6 +99,7 @@ export const getInitialPreferences = (): {
   eventsSheetShowObjectThumbnails: boolean,
   eventsSheetUseAssignmentOperators: boolean,
   eventsSheetZoomLevel: number,
+  favoriteExtensions: Array<string>,
   fetchPlayerTokenForPreviewAutomatically: boolean,
   gamesDashboardOrderBy: string,
   hasProjectOpened: boolean,
@@ -298,6 +299,12 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     setShowExperimentalExtensions: (this._setShowCommunityExtensions.bind(
       this
     ): any),
+    // $FlowFixMe[method-unbinding]
+    isFavoriteExtension: (this._isFavoriteExtension.bind(this): any),
+    // $FlowFixMe[method-unbinding]
+    addFavoriteExtension: (this._addFavoriteExtension.bind(this): any),
+    // $FlowFixMe[method-unbinding]
+    removeFavoriteExtension: (this._removeFavoriteExtension.bind(this): any),
     // $FlowFixMe[method-unbinding]
     setShowCreateSectionByDefault: (this._setShowCreateSectionByDefault.bind(
       this
@@ -665,6 +672,40 @@ export default class PreferencesProvider extends React.Component<Props, State> {
         values: {
           ...state.values,
           showExperimentalExtensions,
+        },
+      }),
+      () => this._persistValuesToLocalStorage(this.state)
+    );
+  }
+
+  _isFavoriteExtension(extensionName: string): boolean {
+    return this.state.values.favoriteExtensions.includes(extensionName);
+  }
+
+  _addFavoriteExtension(extensionName: string) {
+    this.setState(
+      state => ({
+        values: {
+          ...state.values,
+          favoriteExtensions: state.values.favoriteExtensions.includes(
+            extensionName
+          )
+            ? state.values.favoriteExtensions
+            : [...state.values.favoriteExtensions, extensionName],
+        },
+      }),
+      () => this._persistValuesToLocalStorage(this.state)
+    );
+  }
+
+  _removeFavoriteExtension(extensionName: string) {
+    this.setState(
+      state => ({
+        values: {
+          ...state.values,
+          favoriteExtensions: state.values.favoriteExtensions.filter(
+            favoriteExtension => favoriteExtension !== extensionName
+          ),
         },
       }),
       () => this._persistValuesToLocalStorage(this.state)

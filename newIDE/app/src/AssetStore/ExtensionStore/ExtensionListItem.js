@@ -15,6 +15,9 @@ import Tooltip from '@material-ui/core/Tooltip';
 import CircledInfo from '../../UI/CustomSvgIcons/SmallCircledInfo';
 import IconButton from '../../UI/IconButton';
 import GDevelopThemeContext from '../../UI/Theme/GDevelopThemeContext';
+import Favorite from '@material-ui/icons/Favorite';
+import FavoriteBorder from '@material-ui/icons/FavoriteBorder';
+import PreferencesContext from '../../MainFrame/Preferences/PreferencesContext';
 
 const styles = {
   button: { width: '100%' },
@@ -31,6 +34,7 @@ type Props = {|
   project: gdProject,
   extensionShortHeader: ExtensionShortHeader,
   matches: ?Array<SearchMatch>,
+  selected?: boolean,
   onChoose: () => void,
   onHeightComputed: number => void,
 |};
@@ -40,10 +44,12 @@ export const ExtensionListItem = ({
   project,
   extensionShortHeader,
   matches,
+  selected = false,
   onChoose,
   onHeightComputed,
 }: Props): React.Node => {
   const gdevelopTheme = React.useContext(GDevelopThemeContext);
+  const preferences = React.useContext(PreferencesContext);
 
   const alreadyInstalled = project.hasEventsFunctionsExtensionNamed(
     extensionShortHeader.name
@@ -81,12 +87,30 @@ export const ExtensionListItem = ({
   };
 
   const [hover, setHover] = React.useState(false);
+  const isFavorite = preferences.isFavoriteExtension(extensionShortHeader.name);
+
+  const handleFavoriteClick = (event: SyntheticMouseEvent<>) => {
+    event.stopPropagation();
+    if (isFavorite) {
+      preferences.removeFavoriteExtension(extensionShortHeader.name);
+    } else {
+      preferences.addFavoriteExtension(extensionShortHeader.name);
+    }
+  };
 
   return (
     <ButtonBase id={id} onClick={onChoose} focusRipple style={styles.button}>
       <div
         style={
-          hover
+          selected
+            ? {
+                ...styles.container,
+                ...gdevelopTheme.list.hover,
+                boxShadow: `inset 0 0 0 1px ${
+                  gdevelopTheme.palette.primary.main
+                }`,
+              }
+            : hover
             ? { ...styles.container, ...gdevelopTheme.list.hover }
             : styles.container
         }
@@ -153,6 +177,25 @@ export const ExtensionListItem = ({
                 >
                   <IconButton size="small">
                     <CircledInfo />
+                  </IconButton>
+                </Tooltip>
+              )}
+              {(hover || isFavorite) && (
+                <Tooltip
+                  title={
+                    isFavorite ? (
+                      <Trans>Remove from favorites</Trans>
+                    ) : (
+                      <Trans>Add to favorites</Trans>
+                    )
+                  }
+                >
+                  <IconButton size="small" onClick={handleFavoriteClick}>
+                    {isFavorite ? (
+                      <Favorite style={{ color: '#e53935' }} />
+                    ) : (
+                      <FavoriteBorder />
+                    )}
                   </IconButton>
                 </Tooltip>
               )}

@@ -11,6 +11,7 @@ import RenderedParticleEmitterInstance from './Renderers/RenderedParticleEmitter
 import RenderedCustomObjectInstance from './Renderers/RenderedCustomObjectInstance';
 import LegacyRenderedCustomObjectInstance from './Renderers/LegacyRenderedCustomObjectInstance';
 import RenderedSprite3DInstance from './Renderers/RenderedSprite3DInstance';
+import RenderedMapInstance from './Renderers/RenderedMapInstance';
 import PixiResourcesLoader from './PixiResourcesLoader';
 import ResourcesLoader from '../ResourcesLoader';
 import RenderedInstance from './Renderers/RenderedInstance';
@@ -18,7 +19,7 @@ import Rendered3DInstance from './Renderers/Rendered3DInstance';
 import * as PIXI_LEGACY from 'pixi.js-legacy';
 import * as PIXI_SPINE from 'pixi-spine';
 import * as THREE from 'three';
-import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils';
 import optionalRequire from '../Utils/OptionalRequire';
 import {
   rgbOrHexToHexNumber,
@@ -51,6 +52,7 @@ const ObjectsRenderingService = {
     'PrimitiveDrawing::Drawer': RenderedShapePainterInstance,
     'TextEntryObject::TextEntry': RenderedTextEntryInstance,
     'ParticleSystem::ParticleEmitter': RenderedParticleEmitterInstance,
+    'Map::Map': RenderedMapInstance,
   },
   renderers3D: {},
   // $FlowFixMe[missing-this-annot]

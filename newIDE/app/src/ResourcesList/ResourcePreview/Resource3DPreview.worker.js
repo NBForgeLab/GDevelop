@@ -1,7 +1,7 @@
 /* eslint-env worker */
 // @flow
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader';
 
 // Copied from PixiResourcesLoader.js
 // $FlowFixMe[missing-local-annot]
@@ -51,8 +51,6 @@ const initRenderer = () => {
     antialias: true,
     alpha: true,
   });
-  renderer.useLegacyLights = true; // Use legacy lights as in the editor.
-
   renderer.setSize(width, height, false);
 
   return true;
