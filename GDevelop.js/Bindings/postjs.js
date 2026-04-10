@@ -162,9 +162,6 @@ var adaptNamingConventions = function (gd) {
   gd.asModel3DConfiguration = function (evt) {
     return gd.castObject(evt, gd.Model3DObjectConfiguration);
   };
-  gd.asSpineConfiguration = function (evt) {
-    return gd.castObject(evt, gd.SpineObjectConfiguration);
-  };
 
   gd.asImageResource = function (evt) {
     return gd.castObject(evt, gd.ImageResource);

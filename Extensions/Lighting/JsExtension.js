@@ -22,53 +22,16 @@ module.exports = {
         'Lighting',
         _('Lights'),
 
-        'This provides a 2D light object, and a behavior to mark other 2D objects as being obstacles for the lights. This is a great way to create a special atmosphere to your game, along with effects, make it more realistic or to create gameplays based on lights.',
+        'This provides a 3D point light object for scenes rendered with Three.js.',
         'Harsimran Virk',
         'MIT'
       )
       .setShortDescription(
-        '2D light objects with configurable radius, color, and optional texture. Obstacle behavior blocks light.'
+        '3D point light objects with configurable range, color, and intensity.'
       )
-      .setDimension('2D')
+      .setDimension('3D')
       .setCategory('Visual effect')
       .setTags('light');
-
-    const lightObstacleBehavior = new gd.BehaviorJsImplementation();
-    lightObstacleBehavior.updateProperty = function (
-      behaviorContent,
-      propertyName,
-      newValue
-    ) {
-      return false;
-    };
-
-    lightObstacleBehavior.getProperties = function (behaviorContent) {
-      const behaviorProperties = new gd.MapStringPropertyDescriptor();
-
-      return behaviorProperties;
-    };
-
-    lightObstacleBehavior.initializeContent = function (behaviorContent) {};
-    extension
-      .addBehavior(
-        'LightObstacleBehavior',
-        _('Light Obstacle Behavior'),
-        'LightObstacleBehavior',
-        _(
-          'Flag objects as being obstacles to 2D lights. The light emitted by light objects will be stopped by the object. This does not work on 3D objects and 3D games.'
-        ),
-        '',
-        'CppPlatform/Extensions/lightObstacleIcon32.png',
-        'LightObstacleBehavior',
-        //@ts-ignore The class hierarchy is incorrect leading to a type error, but this is valid.
-        lightObstacleBehavior,
-        new gd.BehaviorsSharedData()
-      )
-      .setIncludeFile('Extensions/Lighting/lightobstacleruntimebehavior.js')
-      .addIncludeFile('Extensions/Lighting/lightruntimeobject.js')
-      .addIncludeFile(
-        'Extensions/Lighting/lightruntimeobject-pixi-renderer.js'
-      );
 
     const lightObject = new gd.ObjectJsImplementation();
 
@@ -85,12 +48,12 @@ module.exports = {
       }
 
       if (propertyName === 'debugMode') {
-        objectContent.debugMode = newValue === '1';
+        objectContent.debugMode = newValue === '1' || newValue === 'true';
         return true;
       }
 
-      if (propertyName === 'texture') {
-        objectContent.texture = newValue;
+      if (propertyName === 'intensity') {
+        objectContent.intensity = parseFloat(newValue);
         return true;
       }
 
@@ -105,7 +68,7 @@ module.exports = {
         'radius',
         new gd.PropertyDescriptor(objectContent.radius.toString())
           .setType('number')
-          .setLabel(_('Radius'))
+          .setLabel(_('Range'))
       );
 
       objectProperties.set(
@@ -122,31 +85,26 @@ module.exports = {
           .setLabel(_('Debug mode'))
           .setDescription(
             _(
-              'When activated, display the lines used to render the light - useful to understand how the light is rendered on screen.'
+              'When activated, display the helper used to preview the point light.'
             )
           )
           .setGroup(_('Advanced'))
       );
 
-      objectProperties
-        .getOrCreate('texture')
-        .setValue(objectContent.texture)
-        .setType('resource')
-        .addExtraInfo('image')
-        .setLabel(_('Light texture (optional)'))
-        .setDescription(
-          _(
-            "A texture to be used to display the light. If you don't specify a texture, the light is rendered as fading from bright, in its center, to dark."
-          )
-        );
+      objectProperties.set(
+        'intensity',
+        new gd.PropertyDescriptor(objectContent.intensity.toString())
+          .setType('number')
+          .setLabel(_('Intensity'))
+      );
 
       return objectProperties;
     };
     lightObject.content = {
-      radius: 50,
+      radius: 200,
       color: '255;255;255',
+      intensity: 1,
       debugMode: false,
-      texture: '',
     };
 
     lightObject.updateInitialInstanceProperty = function (
@@ -168,16 +126,15 @@ module.exports = {
         'LightObject',
         _('Light'),
         _(
-          'Displays a 2D light on the scene, with a customizable radius and color. Then add the Light Obstacle behavior to the objects that must act as obstacle to the lights.'
+          'Displays a 3D point light on the scene, with a customizable range, color, and intensity.'
         ),
         'CppPlatform/Extensions/lightIcon32.png',
         lightObject
       )
       .setIncludeFile('Extensions/Lighting/lightruntimeobject.js')
-      .addIncludeFile('Extensions/Lighting/lightruntimeobject-pixi-renderer.js')
-      .addIncludeFile('Extensions/Lighting/lightobstacleruntimebehavior.js')
+      .addIncludeFile('Extensions/Lighting/lightruntimeobject-three-renderer.js')
       .setCategory('Visual effect')
-      .addDefaultBehavior('EffectCapability::EffectBehavior');
+      .markAsRenderedIn3D();
 
     object
       .addInGameEditorResource()
@@ -188,15 +145,15 @@ module.exports = {
     object
       .addAction(
         'SetRadius',
-        _('Light radius'),
-        _('Set the radius of light object'),
-        _('Set the radius of _PARAM0_ to: _PARAM1_'),
+        _('Light range'),
+        _('Set the range of light object'),
+        _('Set the range of _PARAM0_ to: _PARAM1_'),
         '',
         'CppPlatform/Extensions/lightIcon24.png',
         'CppPlatform/Extensions/lightIcon16.png'
       )
       .addParameter('object', _('Object'), 'LightObject', false)
-      .addParameter('expression', _('Radius'), '', false)
+      .addParameter('expression', _('Range'), '', false)
       .getCodeExtraInformation()
       .setFunctionName('setRadius');
 
@@ -204,7 +161,7 @@ module.exports = {
       .addAction(
         'SetColor',
         _('Light color'),
-        _('Set the color of light object in format "R;G;B" string.'),
+        _('Set the color of the 3D point light in format "R;G;B" string.'),
         _('Set the color of _PARAM0_ to: _PARAM1_'),
         '',
         'res/actions/color24.png',
@@ -214,6 +171,21 @@ module.exports = {
       .addParameter('color', _('Color'), '', false)
       .getCodeExtraInformation()
       .setFunctionName('setColor');
+
+    object
+      .addAction(
+        'SetIntensity',
+        _('Light intensity'),
+        _('Set the intensity of light object'),
+        _('Set the intensity of _PARAM0_ to: _PARAM1_'),
+        '',
+        'CppPlatform/Extensions/lightIcon24.png',
+        'CppPlatform/Extensions/lightIcon16.png'
+      )
+      .addParameter('object', _('Object'), 'LightObject', false)
+      .addParameter('expression', _('Intensity'), '', false)
+      .getCodeExtraInformation()
+      .setFunctionName('setIntensity');
 
     return extension;
   },
@@ -226,7 +198,7 @@ module.exports = {
     objectsEditorService.registerEditorConfiguration(
       'Lighting::LightObject',
       objectsEditorService.getDefaultObjectJsImplementationPropertiesEditor({
-        helpPagePath: '/all-features/lighting/reference',
+        helpPagePath: '',
       })
     );
   },
@@ -236,23 +208,19 @@ module.exports = {
    * ℹ️ Run `node import-GDJS-Runtime.js` (in newIDE/app/scripts) if you make any change.
    */
   registerInstanceRenderers: function (objectsRenderingService) {
-    const RenderedInstance = objectsRenderingService.RenderedInstance;
+    const Rendered3DInstance = objectsRenderingService.Rendered3DInstance;
     const PIXI = objectsRenderingService.PIXI;
+    const THREE = objectsRenderingService.THREE;
 
-    /**
-     * Renderer for instances of LightObject inside the IDE.
-     */
-    class RenderedLightObjectInstance extends RenderedInstance {
+    class RenderedLightObject3DInstance extends Rendered3DInstance {
       _radius = 0;
       _color = 0;
-      /** @type {PIXI.Graphics} The circle to show the radius of the light */
-      _radiusGraphics;
-
       constructor(
         project,
         instance,
         associatedObjectConfiguration,
         pixiContainer,
+        threeGroup,
         pixiResourcesLoader
       ) {
         super(
@@ -260,29 +228,69 @@ module.exports = {
           instance,
           associatedObjectConfiguration,
           pixiContainer,
+          threeGroup,
           pixiResourcesLoader
         );
 
-        // The icon in the middle.
-        const lightIconSprite = new PIXI.Sprite(
-          PIXI.Texture.from('CppPlatform/Extensions/lightIcon32.png')
+        this._threeObject = new THREE.Group();
+        this._threeGroup.add(this._threeObject);
+        this._iconTexture = null;
+        this._iconMaterial = null;
+        this._iconSprite = null;
+        this._rangeCircle = null;
+
+        const pixiTexture = PIXI.Texture.from(
+          'CppPlatform/Extensions/lightIcon32.png'
         );
-        lightIconSprite.anchor.x = 0.5;
-        lightIconSprite.anchor.y = 0.5;
+        const source =
+          pixiTexture.baseTexture &&
+          pixiTexture.baseTexture.resource &&
+          pixiTexture.baseTexture.resource.source;
+        if (source) {
+          const iconTexture = new THREE.Texture(source);
+          iconTexture.needsUpdate = true;
+          iconTexture.colorSpace = THREE.SRGBColorSpace;
+          this._iconTexture = iconTexture;
+          const iconMaterial = new THREE.SpriteMaterial({
+            map: iconTexture,
+            transparent: true,
+            depthTest: false,
+            depthWrite: false,
+          });
+          this._iconMaterial = iconMaterial;
+          const iconSprite = new THREE.Sprite(iconMaterial);
+          iconSprite.center.set(0.5, 0.5);
+          iconSprite.scale.set(32, 32, 1);
+          this._iconSprite = iconSprite;
+          this._threeObject.add(iconSprite);
+        }
 
-        this._radiusGraphics = new PIXI.Graphics();
-
-        this._pixiObject = new PIXI.Container();
-        this._pixiObject.addChild(lightIconSprite);
-        this._pixiObject.addChild(this._radiusGraphics);
-        this._pixiContainer.addChild(this._pixiObject);
+        this._rangeCircle = new THREE.LineLoop(
+          new THREE.BufferGeometry(),
+          new THREE.LineBasicMaterial({
+            transparent: true,
+            opacity: 0.8,
+          })
+        );
+        this._threeObject.add(this._rangeCircle);
         this.update();
       }
 
       onRemovedFromScene() {
         super.onRemovedFromScene();
-        // Keep textures because they are shared by all sprites.
-        this._pixiObject.destroy({ children: true });
+        const rangeCircle = this._rangeCircle;
+        if (rangeCircle) {
+          rangeCircle.geometry.dispose();
+          rangeCircle.material.dispose();
+        }
+        const iconMaterial = this._iconMaterial;
+        if (iconMaterial) {
+          iconMaterial.dispose();
+        }
+        const iconTexture = this._iconTexture;
+        if (iconTexture) {
+          iconTexture.dispose();
+        }
       }
 
       /**
@@ -301,8 +309,11 @@ module.exports = {
           gd.ObjectJsImplementation
         );
 
-        this._pixiObject.position.x = this._instance.getX();
-        this._pixiObject.position.y = this._instance.getY();
+        this._threeObject.position.set(
+          this._instance.getX(),
+          this._instance.getY(),
+          this._instance.getZ()
+        );
 
         let radiusGraphicsDirty = false;
 
@@ -321,15 +332,28 @@ module.exports = {
           radiusGraphicsDirty = true;
         }
 
-        if (radiusGraphicsDirty) {
-          const radiusBorderWidth = 2;
-          this._radiusGraphics.clear();
-          this._radiusGraphics.lineStyle(radiusBorderWidth, color, 0.8);
-          this._radiusGraphics.drawCircle(
-            0,
-            0,
-            Math.max(1, this._radius - radiusBorderWidth)
+        const rangeCircle = this._rangeCircle;
+        if (radiusGraphicsDirty && rangeCircle) {
+          const segments = 48;
+          const positions = new Float32Array(segments * 3);
+          for (let i = 0; i < segments; i++) {
+            const angle = (i / segments) * Math.PI * 2;
+            positions[i * 3] = Math.cos(angle) * Math.max(1, this._radius);
+            positions[i * 3 + 1] = Math.sin(angle) * Math.max(1, this._radius);
+            positions[i * 3 + 2] = 0;
+          }
+
+          rangeCircle.geometry.dispose();
+          rangeCircle.geometry = new THREE.BufferGeometry();
+          rangeCircle.geometry.setAttribute(
+            'position',
+            new THREE.BufferAttribute(positions, 3)
           );
+          rangeCircle.material.color.setHex(color);
+        }
+
+        if (rangeCircle) {
+          rangeCircle.visible = !!object.content.debugMode;
         }
       }
 
@@ -347,18 +371,26 @@ module.exports = {
         return this._radius * 2;
       }
 
+      getDefaultDepth() {
+        return this._radius * 2;
+      }
+
       getOriginX() {
-        return (this._radius / this.getDefaultWidth()) * this.getWidth();
+        return this.getWidth() / 2;
       }
 
       getOriginY() {
-        return (this._radius / this.getDefaultHeight()) * this.getHeight();
+        return this.getHeight() / 2;
+      }
+
+      getOriginZ() {
+        return this.getDepth() / 2;
       }
     }
 
-    objectsRenderingService.registerInstanceRenderer(
+    objectsRenderingService.registerInstance3DRenderer(
       'Lighting::LightObject',
-      RenderedLightObjectInstance
+      RenderedLightObject3DInstance
     );
   },
 };

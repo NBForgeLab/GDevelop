@@ -168,8 +168,7 @@ namespace gdjs {
      */
     _isEmissionPaused: boolean = false;
 
-    // @ts-ignore
-    _renderer: gdjs.ParticleEmitterObjectRenderer;
+    _renderer: gdjs.ParticleEmitterObjectThreeRenderer;
 
     width: float = 32;
     height: float = 32;
@@ -184,7 +183,7 @@ namespace gdjs {
       instanceData?: InstanceData
     ) {
       super(instanceContainer, particleObjectData, instanceData);
-      this._renderer = new gdjs.ParticleEmitterObjectRenderer(
+      this._renderer = new gdjs.ParticleEmitterObjectThreeRenderer(
         instanceContainer,
         this,
         particleObjectData
@@ -361,7 +360,7 @@ namespace gdjs {
         this._renderer.destroy();
 
         // and recreate the renderer, which will add itself to the layer.
-        this._renderer = new gdjs.ParticleEmitterObjectRenderer(
+        this._renderer = new gdjs.ParticleEmitterObjectThreeRenderer(
           this.getInstanceContainer(),
           this,
           newObjectData
@@ -1042,7 +1041,7 @@ namespace gdjs {
     }
 
     isEmitting(): boolean {
-      return this._renderer.emitter.emit;
+      return this._renderer.isEmitting();
     }
 
     noMoreParticles(): boolean {

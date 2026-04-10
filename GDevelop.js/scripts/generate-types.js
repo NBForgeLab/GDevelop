@@ -361,7 +361,6 @@ type CustomObjectConfiguration_EdgeAnchor = 0 | 1 | 2 | 3 | 4`
         `  asObjectJsImplementation(gdObjectConfiguration): gdObjectJsImplementation;`,
         `  asCustomObjectConfiguration(gdObjectConfiguration): gdCustomObjectConfiguration;`,
         `  asModel3DConfiguration(gdObjectConfiguration): gdModel3DObjectConfiguration;`,
-        `  asSpineConfiguration(gdObjectConfiguration): gdSpineObjectConfiguration;`,
         '',
         `  asImageResource(gdResource): gdImageResource;`,
         '',
@@ -522,13 +521,13 @@ type CustomObjectConfiguration_EdgeAnchor = 0 | 1 | 2 | 3 | 4`
     shell.sed(
       '-i',
       /setKind\(kind: string\): void/,
-      "setKind(kind: 'image' | 'audio' | 'font' | 'video' | 'json' | 'tilemap' | 'tileset' | 'model3D' | 'atlas' | 'spine' | 'bitmapFont'): void",
+      "setKind(kind: 'image' | 'audio' | 'font' | 'video' | 'json' | 'tileset' | 'model3D' | 'atlas' | 'bitmapFont'): void",
       'types/gdresource.js'
     );
     shell.sed(
       '-i',
       /getKind\(\): string/,
-      "getKind(): 'image' | 'audio' | 'font' | 'video' | 'json' | 'tilemap' | 'tileset' | 'model3D' | 'atlas' | 'spine' | 'bitmapFont'",
+      "getKind(): 'image' | 'audio' | 'font' | 'video' | 'json' | 'tileset' | 'model3D' | 'atlas' | 'bitmapFont'",
       'types/gdresource.js'
     );
 

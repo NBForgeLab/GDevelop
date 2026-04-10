@@ -82,8 +82,8 @@ namespace gdjs {
     _followBaseLayerCamera: boolean;
     _clearColor: Array<integer>;
 
-    _rendererEffects: Record<string, gdjs.PixiFiltersTools.Filter> = {};
-    _renderer: gdjs.LayerRenderer;
+    _rendererEffects: Record<string, gdjs.EffectsTools.Filter> = {};
+    _renderer: gdjs.LayerThreeRenderer;
 
     /**
      * @param layerData The data used to initialize the layer
@@ -118,7 +118,7 @@ namespace gdjs {
         layerData.ambientLightColorB / 255,
         1.0,
       ];
-      this._renderer = new gdjs.LayerRenderer(
+      this._renderer = new gdjs.LayerThreeRenderer(
         this,
         instanceContainer.getRenderer(),
         instanceContainer.getGame().getRenderer()
@@ -231,7 +231,7 @@ namespace gdjs {
     getRuntimeLayer(): gdjs.RuntimeLayer {
       return this;
     }
-    getRenderer(): gdjs.LayerRenderer {
+    getRenderer(): gdjs.LayerThreeRenderer {
       return this._renderer;
     }
 

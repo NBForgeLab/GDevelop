@@ -19,9 +19,6 @@ describe('FileToCloudProjectResourceUploader', () => {
     expect(getInputAcceptedMimesAndExtensions('json')).toMatchInlineSnapshot(
       `"application/json,.json"`
     );
-    expect(getInputAcceptedMimesAndExtensions('tilemap')).toMatchInlineSnapshot(
-      `"application/json,.json,.ldtk,.tmj"`
-    );
     expect(getInputAcceptedMimesAndExtensions('tileset')).toMatchInlineSnapshot(
       `"application/json,.json,.tsj"`
     );
@@ -33,9 +30,6 @@ describe('FileToCloudProjectResourceUploader', () => {
     );
     expect(getInputAcceptedMimesAndExtensions('atlas')).toMatchInlineSnapshot(
       `".atlas"`
-    );
-    expect(getInputAcceptedMimesAndExtensions('spine')).toMatchInlineSnapshot(
-      `"application/json,.json"`
     );
   });
 });

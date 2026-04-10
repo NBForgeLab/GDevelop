@@ -52,7 +52,6 @@ const renamedExtensionNames = {
   AdMob: 'Admob',
   BuiltinFile: 'Storage',
   FileSystem: 'Filesystem',
-  TileMap: 'Tilemap',
   BuiltinMouse: 'MouseTouch',
 };
 

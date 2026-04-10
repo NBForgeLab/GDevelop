@@ -83,11 +83,6 @@ public:
   virtual void ExposeJson(gd::String &jsonName);
 
   /**
-   * \brief Expose a Tilemap, which is always a reference to a "tilemap" resource.
-   */
-  virtual void ExposeTilemap(gd::String &tilemapName);
-
-  /**
    * \brief Expose a Tileset, which is always a reference to a "tileset" resource.
    */
   virtual void ExposeTileset(gd::String &tilesetName);
@@ -101,11 +96,6 @@ public:
    * \brief Expose an atlas, which is always a reference to a "atlas" resource.
    */
   virtual void ExposeAtlas(gd::String &resourceName);
-
-  /**
-   * \brief Expose an spine, which is always a reference to a "spine" resource.
-   */
-  virtual void ExposeSpine(gd::String &resourceName);
 
   /**
    * \brief Expose a video, which is always a reference to a "video" resource.

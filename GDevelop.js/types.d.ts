@@ -1186,14 +1186,6 @@ export class JsonResource extends Resource {
   constructor();
 }
 
-export class SpineResource extends JsonResource {
-  constructor();
-}
-
-export class TilemapResource extends Resource {
-  constructor();
-}
-
 export class TilesetResource extends Resource {
   constructor();
 }
@@ -2949,32 +2941,6 @@ export class Model3DObjectConfiguration extends ObjectConfiguration {
   shouldKeepAspectRatio(): boolean;
 }
 
-export class SpineAnimation extends EmscriptenObject {
-  constructor();
-  setName(name: string): void;
-  getName(): string;
-  setSource(name: string): void;
-  getSource(): string;
-  setShouldLoop(shouldLoop: boolean): void;
-  shouldLoop(): boolean;
-}
-
-export class SpineObjectConfiguration extends ObjectConfiguration {
-  constructor();
-  addAnimation(animation: SpineAnimation): void;
-  getAnimation(index: number): SpineAnimation;
-  hasAnimationNamed(name: string): boolean;
-  getAnimationsCount(): number;
-  removeAnimation(index: number): void;
-  removeAllAnimations(): void;
-  hasNoAnimations(): boolean;
-  swapAnimations(first: number, second: number): void;
-  moveAnimation(oldIndex: number, newIndex: number): void;
-  getScale(): number;
-  getSpineResourceName(): string;
-  getSkinName(): string;
-}
-
 export class Vector2f extends EmscriptenObject {
   constructor();
   x: float;
@@ -3362,8 +3328,6 @@ export function asParticleEmitterConfiguration(object: ObjectConfiguration): Par
 export function asCustomObjectConfiguration(object: ObjectConfiguration): CustomObjectConfiguration;
 
 export function asModel3DConfiguration(object: ObjectConfiguration): Model3DObjectConfiguration;
-
-export function asSpineConfiguration(object: ObjectConfiguration): SpineObjectConfiguration;
 
 export function asObjectJsImplementation(object: EmscriptenObject): ObjectJsImplementation;
 

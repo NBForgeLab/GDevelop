@@ -10,15 +10,11 @@ const objectTypeToDefaultName = {
   'BBText::BBText': 'NewBBText',
   'BitmapText::BitmapTextObject': 'NewBitmapText',
   'TextEntryObject::TextEntry': 'NewTextEntry',
-  'TileMap::SimpleTileMap': 'NewTileMap',
-  'TileMap::TileMap': 'NewExternalTileMap',
-  'TileMap::CollisionMask': 'NewExternalTileMapMask',
   'MyDummyExtension::DummyObject': 'NewDummyObject',
   'Lighting::LightObject': 'NewLight',
   'TextInput::TextInputObject': 'NewTextInput',
   'Scene3D::Model3DObject': 'New3DModel',
   'Scene3D::Cube3DObject': 'New3DBox',
-  'SpineObject::SpineObject': 'NewSpine',
   'Video::VideoObject': 'NewVideo',
 };
 

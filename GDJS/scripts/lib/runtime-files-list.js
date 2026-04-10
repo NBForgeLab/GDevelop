@@ -34,10 +34,10 @@ const transformExcludedExtensions = ['.min.js', '.d.ts', '.png', '.svg'];
 // be built with esbuild, but simply copied.
 const untransformedPaths = [
   // GDJS prebuilt files:
-  'GDJS/Runtime/pixi-renderers/pixi.js',
-  'GDJS/Runtime/pixi-renderers/three.js',
-  'GDJS/Runtime/pixi-renderers/ThreeAddons.js',
-  'GDJS/Runtime/pixi-renderers/draco/gltf/draco_wasm_wrapper.js',
+  'GDJS/Runtime/rendering-libs/pixi.js',
+  'GDJS/Runtime/rendering-libs/three.js',
+  'GDJS/Runtime/rendering-libs/ThreeAddons.js',
+  'GDJS/Runtime/rendering-libs/draco/gltf/draco_wasm_wrapper.js',
   'GDJS/Runtime/fontfaceobserver-font-manager/fontfaceobserver.js',
   'GDJS/Runtime/Cordova',
   'GDJS/Runtime/Electron',
@@ -50,18 +50,12 @@ const untransformedPaths = [
   'Extensions/Firebase/A_firebasejs',
   'Extensions/BBText/pixi-multistyle-text/dist',
   'Extensions/DialogueTree/bondage.js/dist',
-  'Extensions/Effects/pixi-filters',
   'Extensions/P2P/A_peer.js',
   'Extensions/Multiplayer/peer.js',
-  'Extensions/ParticleSystem/pixi-particles-pixi-renderer.min.js',
   'Extensions/Physics2Behavior/box2d.js',
   'Extensions/PhysicsBehavior/box2djs',
   'Extensions/Shopify/shopify-buy.umd.polyfilled.min.js',
   'Extensions/JsExtensionTypes.flow.js',
-  'Extensions/TileMap/pako/dist/pako.min.js',
-  'Extensions/TileMap/pixi-tilemap/dist/pixi-tilemap.umd.js',
-  'Extensions/TileMap/helper/TileMapHelper.js',
-  'Extensions/Spine/pixi-spine/pixi-spine.js',
 ].map((untransformedPath) => path.resolve(gdevelopRootPath, untransformedPath));
 
 /**

@@ -1,7 +1,15 @@
 namespace gdjs {
-  export interface PixiImageManager {
-    _threeAnimationFrameTextureManager: ThreeAnimationFrameTextureManager;
-  }
+  export type ThreeMaterialImageManager = {
+    getThreeMaterial(
+      resourceName: string,
+      options: {
+        useTransparentTexture: boolean;
+        forceBasicMaterial: boolean;
+        vertexColors: boolean;
+      }
+    ): THREE.Material;
+    _threeAnimationFrameTextureManager?: any;
+  };
   /**
    * The renderer for a {@link gdjs.CustomRuntimeObject3D} using Three.js.
    * @category Renderers > Custom Object 3D
@@ -137,7 +145,7 @@ namespace gdjs {
     }
 
     static getAnimationFrameTextureManager(
-      imageManager: gdjs.PixiImageManager
+      imageManager: gdjs.ThreeMaterialImageManager
     ): ThreeAnimationFrameTextureManager {
       if (!imageManager._threeAnimationFrameTextureManager) {
         imageManager._threeAnimationFrameTextureManager =
@@ -150,9 +158,9 @@ namespace gdjs {
   class ThreeAnimationFrameTextureManager
     implements gdjs.AnimationFrameTextureManager<THREE.Material>
   {
-    private _imageManager: gdjs.PixiImageManager;
+    private _imageManager: gdjs.ThreeMaterialImageManager;
 
-    constructor(imageManager: gdjs.PixiImageManager) {
+    constructor(imageManager: gdjs.ThreeMaterialImageManager) {
       this._imageManager = imageManager;
     }
 
@@ -168,14 +176,16 @@ namespace gdjs {
       const map = (
         material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial
       ).map;
-      return map ? map.image.width : 0;
+      const image = map ? (map.image as { width?: number } | undefined) : null;
+      return image && typeof image.width === 'number' ? image.width : 0;
     }
 
     getAnimationFrameHeight(material: THREE.Material) {
       const map = (
         material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial
       ).map;
-      return map ? map.image.height : 0;
+      const image = map ? (map.image as { height?: number } | undefined) : null;
+      return image && typeof image.height === 'number' ? image.height : 0;
     }
   }
 }

@@ -36,9 +36,7 @@ export const getDefaultResourceThumbnail = (resource: gdResource): string => {
     case 'audio':
       return 'res/actions/music24.png';
     case 'json':
-    case 'tilemap':
     case 'tileset':
-    case 'spine':
       return 'res/actions/fichier24.png';
     case 'video':
       return 'JsPlatform/Extensions/videoicon24.png';

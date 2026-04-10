@@ -9,7 +9,6 @@ const excludedFiles = [
   'global-three.d.ts',
   'global-pixi.d.ts',
   'pixi-particles-pixi-renderer.d.ts',
-  'pixi-tilemap.d.ts',
   'pixi.js',
   'three.js',
 ];

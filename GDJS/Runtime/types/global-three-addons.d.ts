@@ -1,4 +1,5 @@
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader';
+import type { GLTF } from 'three/addons/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils';
 
@@ -22,6 +23,7 @@ declare global {
   namespace THREE_ADDONS {
     export {
       GLTFLoader,
+      GLTF,
       DRACOLoader,
       SkeletonUtils,
       TransformControls,

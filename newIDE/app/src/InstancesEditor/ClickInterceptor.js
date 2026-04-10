@@ -2,8 +2,9 @@
 
 import * as PIXI from 'pixi.js-legacy';
 import ViewPosition from './ViewPosition';
-import { type TileMapTileSelection } from './TileSetVisualizer';
 import panable, { type PanMoveEvent } from '../Utils/PixiSimpleGesture/pan';
+
+type TileMapTileSelection = any;
 
 type Coordinates = {| x: number, y: number |};
 

@@ -31,12 +31,10 @@ public:
   static const gd::String fontType;
   static const gd::String videoType;
   static const gd::String jsonType;
-  static const gd::String tileMapType;
   static const gd::String tileSetType;
   static const gd::String bitmapType;
   static const gd::String model3DType;
   static const gd::String atlasType;
-  static const gd::String spineType;
   static const gd::String javaScriptType;
   static const gd::String internalInGameEditorOnlySvgType;
 
@@ -392,62 +390,6 @@ private:
 };
 
 /**
- * \brief Describe a spine json file used by a project.
- *
- * \see Resource
- * \ingroup ResourcesManagement
- */
-class GD_CORE_API SpineResource : public JsonResource {
-public:
-  SpineResource() : JsonResource() { SetKind("spine"); };
-  virtual ~SpineResource(){};
-  virtual SpineResource *Clone() const override {
-    return new SpineResource(*this);
-  }
-};
-
-/**
- * \brief Describe a tilemap file used by a project.
- *
- * \see Resource
- * \ingroup ResourcesManagement
- */
-class GD_CORE_API TilemapResource : public Resource {
-public:
-  TilemapResource() : Resource(), disablePreload(false) { SetKind("tilemap"); };
-  virtual ~TilemapResource(){};
-  virtual TilemapResource *Clone() const override {
-    return new TilemapResource(*this);
-  }
-
-  virtual const gd::String &GetFile() const override { return file; };
-  virtual void SetFile(const gd::String &newFile) override;
-
-  virtual bool UseFile() const override { return true; }
-
-  std::map<gd::String, gd::PropertyDescriptor> GetProperties() const override;
-  bool UpdateProperty(const gd::String &name, const gd::String &value) override;
-
-  void SerializeTo(SerializerElement &element) const override;
-
-  void UnserializeFrom(const SerializerElement &element) override;
-
-  /**
-   * \brief Return true if the loading at game startup must be disabled
-   */
-  bool IsPreloadDisabled() const { return disablePreload; }
-
-  /**
-   * \brief Set if the tilemap preload at game startup must be disabled
-   */
-  void DisablePreload(bool disable = true) { disablePreload = disable; }
-
-private:
-  bool disablePreload; ///< If "true", don't load the tilemap at game startup
-  gd::String file;
-};
-
-/**
  * \brief Describe a tileset file used by a project.
  *
  * \see Resource
@@ -479,12 +421,12 @@ public:
   bool IsPreloadDisabled() const { return disablePreload; }
 
   /**
-   * \brief Set if the tilemap preload at game startup must be disabled
+   * \brief Set if the tileset preload at game startup must be disabled
    */
   void DisablePreload(bool disable = true) { disablePreload = disable; }
 
 private:
-  bool disablePreload; ///< If "true", don't load the tilemap at game startup
+  bool disablePreload; ///< If "true", don't load the tileset at game startup
   gd::String file;
 };
 

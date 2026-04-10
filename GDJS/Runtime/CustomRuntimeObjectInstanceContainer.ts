@@ -322,7 +322,7 @@ namespace gdjs {
      * Get the renderer associated to the RuntimeScene.
      */
     getRenderer():
-      | gdjs.CustomRuntimeObject2DRenderer
+      | gdjs.CustomRuntimeObject2DThreeRenderer
       | gdjs.CustomRuntimeObject3DRenderer {
       return this._customObject.getRenderer();
     }

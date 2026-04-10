@@ -40,17 +40,17 @@ namespace gdjs {
     }
     return frustumSize / shadowMapSize;
   };
-  gdjs.PixiFiltersTools.registerFilterCreator(
+gdjs.EffectsTools.registerFilterCreator(
     'Scene3D::DirectionalLight',
-    new (class implements gdjs.PixiFiltersTools.FilterCreator {
+  new (class implements gdjs.EffectsTools.FilterCreator {
       makeFilter(
         target: EffectsTarget,
         effectData: EffectData
-      ): gdjs.PixiFiltersTools.Filter {
+    ): gdjs.EffectsTools.Filter {
         if (typeof THREE === 'undefined') {
-          return new gdjs.PixiFiltersTools.EmptyFilter();
+      return new gdjs.EffectsTools.EmptyFilter();
         }
-        return new (class implements gdjs.PixiFiltersTools.Filter {
+      return new (class implements gdjs.EffectsTools.Filter {
           private _top: string = 'Z+';
           private _elevation: float = 45;
           private _rotation: float = 0;

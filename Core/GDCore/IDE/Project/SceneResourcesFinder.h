@@ -73,9 +73,6 @@ private:
   void ExposeJson(gd::String &jsonResourceName) override {
     AddUsedResource(jsonResourceName);
   };
-  void ExposeTilemap(gd::String &tilemapResourceName) override {
-    AddUsedResource(tilemapResourceName);
-  };
   void ExposeTileset(gd::String &tilesetResourceName) override {
     AddUsedResource(tilesetResourceName);
   };
@@ -92,9 +89,6 @@ private:
     AddUsedResource(resourceName);
   };
   void ExposeAtlas(gd::String &resourceName) override {
-    AddUsedResource(resourceName);
-  };
-  void ExposeSpine(gd::String &resourceName) override {
     AddUsedResource(resourceName);
   };
 

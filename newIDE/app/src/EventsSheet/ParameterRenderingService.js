@@ -57,7 +57,6 @@ import ImageResourceField from './ParameterFields/ImageResourceField';
 import AudioResourceField from './ParameterFields/AudioResourceField';
 import VideoResourceField from './ParameterFields/VideoResourceField';
 import JsonResourceField from './ParameterFields/JsonResourceField';
-import SpineResourceField from './ParameterFields/SpineResourceField';
 import BitmapFontResourceField from './ParameterFields/BitmapFontResourceField';
 import FontResourceField from './ParameterFields/FontResourceField';
 import ColorExpressionField from './ParameterFields/ColorExpressionField';
@@ -79,7 +78,6 @@ import LeaderboardIdField, {
   renderInlineLeaderboardIdField,
 } from './ParameterFields/LeaderboardIdField';
 import IdentifierField from './ParameterFields/IdentifierField';
-import TilemapResourceField from './ParameterFields/TilemapResourceField';
 import TilesetResourceField from './ParameterFields/TilesetResourceField';
 import Model3DResourceField from './ParameterFields/Model3DResourceField';
 import AtlasResourceField from './ParameterFields/AtlasResourceField';
@@ -121,7 +119,6 @@ const components = {
   fontResource: FontResourceField,
   model3DResource: Model3DResourceField,
   atlasResource: AtlasResourceField,
-  spineResource: SpineResourceField,
   color: ColorExpressionField,
   forceMultiplier: ForceMultiplierField,
   sceneName: SceneNameField,
@@ -136,7 +133,6 @@ const components = {
   externalLayoutName: ExternalLayoutNameField,
   leaderboardId: LeaderboardIdField,
   identifier: IdentifierField,
-  tilemapResource: TilemapResourceField,
   tilesetResource: TilesetResourceField,
 };
 const inlineRenderers: { [string]: ParameterInlineRenderer } = {
@@ -188,9 +184,7 @@ const userFriendlyTypeName: { [string]: MessageDescriptor } = {
   bitmapFontResource: t`Bitmap font resource`,
   fontResource: t`Font resource`,
   jsonResource: t`JSON resource`,
-  tilemapResource: t`Tile map resource`,
   atlasResource: t`Atlas resource`,
-  spineResource: t`Spine json resource`,
   color: t`Color`,
   forceMultiplier: t`Instant or permanent force`,
   sceneName: t`Scene name`,

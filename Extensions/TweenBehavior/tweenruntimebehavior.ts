@@ -181,7 +181,7 @@ namespace gdjs {
     return (value: float) => object.setCharacterSize(value);
   };
   const getTweenObjectNumberEffectPropertySetter = (
-    effect: PixiFiltersTools.Filter,
+      effect: EffectsTools.Filter,
     propertyName: string
   ) => {
     return (value: float) => {
@@ -189,7 +189,7 @@ namespace gdjs {
     };
   };
   const getTweenObjectColorEffectPropertySetter = (
-    effect: PixiFiltersTools.Filter,
+      effect: EffectsTools.Filter,
     propertyName: string
   ) => {
     return ([hue, saturation, lightness]: number[]) => {

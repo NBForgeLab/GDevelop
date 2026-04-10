@@ -238,8 +238,6 @@ void CustomObjectConfiguration::ExposeResources(gd::ArbitraryResourceWorker& wor
         worker.ExposeVideo(newPropertyValue);
       } else if (resourceType == "json") {
         worker.ExposeJson(newPropertyValue);
-      } else if (resourceType == "tilemap") {
-        worker.ExposeTilemap(newPropertyValue);
       } else if (resourceType == "tileset") {
         worker.ExposeTileset(newPropertyValue);
       } else if (resourceType == "bitmapFont") {
@@ -248,8 +246,6 @@ void CustomObjectConfiguration::ExposeResources(gd::ArbitraryResourceWorker& wor
         worker.ExposeModel3D(newPropertyValue);
       } else if (resourceType == "atlas") {
         worker.ExposeAtlas(newPropertyValue);
-      } else if (resourceType == "spine") {
-        worker.ExposeSpine(newPropertyValue);
       }
 
       if (newPropertyValue != oldPropertyValue) {

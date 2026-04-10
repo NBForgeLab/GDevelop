@@ -1,5 +1,4 @@
 // @flow
-import 'pixi-spine';
 import RenderedUnknownInstance from './Renderers/RenderedUnknownInstance';
 import RenderedSpriteInstance from './Renderers/RenderedSpriteInstance';
 import RenderedTiledSpriteInstance from './Renderers/RenderedTiledSpriteInstance';
@@ -17,7 +16,6 @@ import ResourcesLoader from '../ResourcesLoader';
 import RenderedInstance from './Renderers/RenderedInstance';
 import Rendered3DInstance from './Renderers/Rendered3DInstance';
 import * as PIXI_LEGACY from 'pixi.js-legacy';
-import * as PIXI_SPINE from 'pixi-spine';
 import * as THREE from 'three';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils';
 import optionalRequire from '../Utils/OptionalRequire';
@@ -29,9 +27,9 @@ import {
 const path = optionalRequire('path');
 const electron = optionalRequire('electron');
 const gd: libGDevelop = global.gd;
-const PIXI = { ...PIXI_LEGACY, ...PIXI_SPINE };
+const PIXI = { ...PIXI_LEGACY };
 
-// Some PixiJS plugins like pixi-tilemap are not distributed as UMD modules,
+// Some PixiJS plugins are not distributed as UMD modules,
 // or still require a global PIXI object to be accessible, so we expose PIXI here.
 // This can be removed if no more extension PixiJS plugin requires this.
 global.PIXI = PIXI;

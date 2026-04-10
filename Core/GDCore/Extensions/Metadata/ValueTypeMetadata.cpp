@@ -95,9 +95,6 @@ ValueTypeMetadata::GetResourceType(const gd::String &parameterType) {
   if (parameterType == "jsonResource") {
     return gd::Resource::jsonType;
   }
-  if (parameterType == "tilemapResource") {
-    return gd::Resource::tileMapType;
-  }
   if (parameterType == "tilesetResource") {
     return gd::Resource::tileSetType;
   }
@@ -106,9 +103,6 @@ ValueTypeMetadata::GetResourceType(const gd::String &parameterType) {
   }
   if (parameterType == "atlasResource") {
     return gd::Resource::atlasType;
-  }
-  if (parameterType == "spineResource") {
-    return gd::Resource::spineType;
   }
   return parameterType;
 }

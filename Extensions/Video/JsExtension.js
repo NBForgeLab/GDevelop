@@ -111,7 +111,7 @@ module.exports = {
         videoObject
       )
       .setIncludeFile('Extensions/Video/videoruntimeobject.js')
-      .addIncludeFile('Extensions/Video/videoruntimeobject-pixi-renderer.js')
+      .addIncludeFile('Extensions/Video/videoruntimeobject-three-renderer.js')
       .setCategory('User interface')
       .addDefaultBehavior('EffectCapability::EffectBehavior')
       .addDefaultBehavior('OpacityCapability::OpacityBehavior');
@@ -586,7 +586,7 @@ module.exports = {
         const videoResource = object.content.videoResource;
 
         // This returns a VideoTexture with autoPlay set to false
-        return this._pixiResourcesLoader.getPIXIVideoTexture(
+        return this._pixiResourcesLoader.getLegacyPixiVideoTexture(
           this._project,
           videoResource
         );
@@ -615,7 +615,7 @@ module.exports = {
               if (this._wasDestroyed) return;
 
               that._pixiObject.texture =
-                that._pixiResourcesLoader.getInvalidPIXITexture();
+                that._pixiResourcesLoader.getLegacyInvalidPixiTexture();
             });
           }
         }

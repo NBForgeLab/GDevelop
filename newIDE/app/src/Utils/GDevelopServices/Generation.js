@@ -166,11 +166,9 @@ export type AiGeneratedEventMissingResource = {
     | 'font'
     | 'video'
     | 'json'
-    | 'tilemap'
     | 'tileset'
     | 'model3D'
     | 'atlas'
-    | 'spine'
     | 'spritesheet'
     | 'bitmapFont'
     | string,

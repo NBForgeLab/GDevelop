@@ -26,10 +26,6 @@ void AssetResourcePathCleaner::ExposeJson(gd::String &jsonName) {
   ExposeResourceAsFile(jsonName);
 }
 
-void AssetResourcePathCleaner::ExposeTilemap(gd::String &tilemapName) {
-  ExposeResourceAsFile(tilemapName);
-}
-
 void AssetResourcePathCleaner::ExposeTileset(gd::String &tilesetName) {
   ExposeResourceAsFile(tilesetName);
 }

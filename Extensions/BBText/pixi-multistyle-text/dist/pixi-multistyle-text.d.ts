@@ -26,6 +26,7 @@ declare class MultiStyleText extends PIXI.Text {
   static debugOptions: MstDebugOptions;
   private textStyles;
   private hitboxes;
+  dirty: boolean;
   constructor(text: string, styles: TextStyleSet);
   private handleInteraction;
   set styles(styles: TextStyleSet);

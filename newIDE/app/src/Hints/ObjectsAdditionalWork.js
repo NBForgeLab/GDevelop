@@ -1,7 +1,5 @@
 // @flow
-import { t } from '@lingui/macro';
 import { type AlertMessageIdentifier } from '../MainFrame/Preferences/PreferencesContext';
-import newNameGenerator from '../Utils/NewNameGenerator';
 import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
 import getObjectByName from '../Utils/GetObjectByName';
 
@@ -66,56 +64,4 @@ export const onInstanceAdded = (
   return null;
 };
 
-const getLightingLayer = (layersContainer: gdLayersContainer): ?gdLayer => {
-  for (let i = 0; i < layersContainer.getLayersCount(); i++) {
-    const layer = layersContainer.getLayerAt(i);
-    if (layer.isLightingLayer()) return layer;
-  }
-
-  return null;
-};
-
-const objectType = {
-  'Lighting::LightObject': {
-    onObjectAdded: ({ object, layersContainer }: ObjectAddedOptions) => {
-      const lightingLayer = getLightingLayer(layersContainer);
-      if (lightingLayer === null) {
-        const name = newNameGenerator('Lighting', name =>
-          layersContainer.hasLayerNamed(name)
-        );
-        layersContainer.insertNewLayer(name, layersContainer.getLayersCount());
-        const layer: gdLayer = layersContainer.getLayer('Lighting');
-        layer.setLightingLayer(true);
-        layer.setFollowBaseLayerCamera(true);
-        layer.setAmbientLightColor(128, 128, 128);
-      }
-    },
-
-    onInstanceAdded: ({ instance, layersContainer }: InstanceAddedOptions) => {
-      const lightingLayer = getLightingLayer(layersContainer);
-      if (lightingLayer) {
-        instance.setLayer(lightingLayer.getName());
-      }
-    },
-
-    getInfoBarDetails: (infoBarEvent: InfoBarEvent): ?InfoBarDetails => {
-      if (infoBarEvent === 'onObjectAdded') {
-        return {
-          identifier: 'automatic-lighting-layer',
-          message: t`A lighting layer was created. Lights will be placed on it automatically. You can change the ambient light color in the properties of this layer`,
-          touchScreenMessage: t`A lighting layer was created. Lights will be placed on it automatically. You can change the ambient light color in the properties of this layer`,
-        };
-      }
-
-      if (infoBarEvent === 'onInstanceAdded') {
-        return {
-          identifier: 'object-moved-in-lighting-layer',
-          message: t`The light object was automatically placed on the Lighting layer.`,
-          touchScreenMessage: t`The light object was automatically placed on the Lighting layer.`,
-        };
-      }
-
-      return null;
-    },
-  },
-};
+const objectType = {};

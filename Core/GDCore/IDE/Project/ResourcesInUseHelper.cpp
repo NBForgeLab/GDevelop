@@ -9,8 +9,8 @@
 namespace gd {
 
 const std::vector<gd::String> ResourcesInUseHelper::resourceTypes = {
-    "image", "audio",      "font",    "json",  "tilemap", "tileset",
-    "video", "bitmapFont", "model3D", "atlas", "spine",   "javascript"};
+    "image", "audio",      "font",    "json",  "tileset",
+    "video", "bitmapFont", "model3D", "atlas", "javascript"};
 
 const std::vector<gd::String> &ResourcesInUseHelper::GetAllResources() {
   allResources.clear();

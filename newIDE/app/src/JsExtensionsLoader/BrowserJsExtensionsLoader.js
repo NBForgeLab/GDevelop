@@ -129,25 +129,6 @@ const jsExtensions = [
     },
   },
   {
-    name: 'TileMap',
-    // $FlowFixMe[cannot-resolve-module]
-    extensionModule: require('GDJS-for-web-app-only/Runtime/Extensions/TileMap/JsExtension.js'),
-    objectsRenderingServiceModules: {
-      // $FlowFixMe[cannot-resolve-module]
-      'pixi-tilemap/dist/pixi-tilemap.umd': require('GDJS-for-web-app-only/Runtime/Extensions/TileMap/pixi-tilemap/dist/pixi-tilemap.umd'),
-      // $FlowFixMe[cannot-resolve-module]
-      'helper/TileMapHelper': require('GDJS-for-web-app-only/Runtime/Extensions/TileMap/helper/TileMapHelper.js'),
-      // $FlowFixMe[cannot-resolve-module]
-      'pako/dist/pako.min': require('GDJS-for-web-app-only/Runtime/Extensions/TileMap/pako/dist/pako.min'),
-    },
-  },
-  {
-    name: 'Effects',
-    // $FlowFixMe[cannot-resolve-module]
-    extensionModule: require('GDJS-for-web-app-only/Runtime/Extensions/Effects/JsExtension.js'),
-    objectsRenderingServiceModules: {},
-  },
-  {
     name: 'P2P',
     // $FlowFixMe[cannot-resolve-module]
     extensionModule: require('GDJS-for-web-app-only/Runtime/Extensions/P2P/JsExtension.js'),
@@ -187,12 +168,6 @@ const jsExtensions = [
     name: 'Scene3D',
     // $FlowFixMe[cannot-resolve-module]
     extensionModule: require('GDJS-for-web-app-only/Runtime/Extensions/3D/JsExtension.js'),
-    objectsRenderingServiceModules: {},
-  },
-  {
-    name: 'SpineObject',
-    // $FlowFixMe[cannot-resolve-module]
-    extensionModule: require('GDJS-for-web-app-only/Runtime/Extensions/Spine/JsExtension.js'),
     objectsRenderingServiceModules: {},
   },
   {

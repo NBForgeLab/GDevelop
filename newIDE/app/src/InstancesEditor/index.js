@@ -43,27 +43,12 @@ import {
   getWheelStepZoomFactor,
 } from '../Utils/ZoomUtils';
 import Background from './Background';
-import TileMapPaintingPreview, {
-  updateSceneToTileMapTransformation,
-} from './TileMapPaintingPreview';
-import {
-  getTileIdFromGridCoordinates,
-  getGridCoordinatesFromTileId,
-  createSelectionWithPreviousTool,
-  type TileMapTileSelection,
-  getTileMapPaintingSelection,
-} from './TileSetVisualizer';
 import ClickInterceptor from './ClickInterceptor';
-import getObjectByName from '../Utils/GetObjectByName';
-import { AffineTransformation } from '../Utils/AffineTransformation';
 import { ErrorFallbackComponent } from '../UI/ErrorBoundary';
 import { Trans } from '@lingui/macro';
 import { generateUUID } from 'three/src/math/MathUtils';
-import {
-  getTilesGridCoordinatesFromPointerSceneCoordinates,
-  getTileSet,
-  isTileSetBadlyConfigured,
-} from '../Utils/TileMap';
+
+type TileMapTileSelection = any;
 
 const gd: libGDevelop = global.gd;
 
@@ -167,7 +152,6 @@ export default class InstancesEditor extends Component<Props, State> {
   _instancesAdder: InstancesAdder;
   selectionRectangle: SelectionRectangle;
   selectedInstances: SelectedInstances;
-  tileMapPaintingPreview: TileMapPaintingPreview;
   clickInterceptor: ClickInterceptor;
   highlightedInstance: HighlightedInstance;
   instancesResizer: InstancesResizer;
@@ -194,8 +178,6 @@ export default class InstancesEditor extends Component<Props, State> {
   contextMenuLongTouchTimeoutID: TimeoutID;
   hasCursorMovedSinceItIsDown = false;
   _showObjectInstancesIn3D: boolean = false;
-  _previousToolBeforePicker: ?TileMapTileSelection = null;
-
   // $FlowFixMe[missing-local-annot]
   state = {
     renderingError: null,
@@ -214,23 +196,6 @@ export default class InstancesEditor extends Component<Props, State> {
     // just after the mount (depends on react-dnd versions?).
     if (this.canvasArea && !this.pixiRenderer) {
       this._initializeCanvasAndRenderer();
-    }
-
-    // Track previous tool before picker is activated
-    const { tileMapTileSelection } = this.props;
-    const prevTileMapTileSelection = prevProps.tileMapTileSelection;
-
-    const isPickerActive =
-      tileMapTileSelection && tileMapTileSelection.kind === 'picker';
-    const wasPickerActive =
-      prevTileMapTileSelection && prevTileMapTileSelection.kind === 'picker';
-
-    if (isPickerActive && !wasPickerActive) {
-      // Picker just activated, store the previous tool
-      this._previousToolBeforePicker = prevTileMapTileSelection;
-    } else if (!isPickerActive && wasPickerActive) {
-      // Picker just deactivated, clear the stored previous tool
-      this._previousToolBeforePicker = null;
     }
   }
 
@@ -494,11 +459,6 @@ export default class InstancesEditor extends Component<Props, State> {
         this.highlightedInstance.getPixiObject()
       );
     }
-    if (this.tileMapPaintingPreview) {
-      this.uiPixiContainer.removeChild(
-        this.tileMapPaintingPreview.getPixiObject()
-      );
-    }
     if (this.clickInterceptor) {
       this.uiPixiContainer.removeChild(this.clickInterceptor.getPixiObject());
     }
@@ -572,16 +532,6 @@ export default class InstancesEditor extends Component<Props, State> {
       onPanMove: this._onPanMove,
       onPanEnd: this._onPanEnd,
     });
-    this.tileMapPaintingPreview = new TileMapPaintingPreview({
-      instancesSelection: this.props.instancesSelection,
-      project: props.project,
-      globalObjectsContainer: props.globalObjectsContainer,
-      objectsContainer: props.objectsContainer,
-      getTileMapTileSelection: this.getTileMapTileSelection,
-      getRendererOfInstance: this.getRendererOfInstance,
-      getCoordinatesToRender: this.getCoordinatesToRenderTileMapPreview,
-      viewPosition: this.viewPosition,
-    });
     this.clickInterceptor = new ClickInterceptor({
       getTileMapTileSelection: this.getTileMapTileSelection,
       viewPosition: this.viewPosition,
@@ -631,7 +581,6 @@ export default class InstancesEditor extends Component<Props, State> {
     this.uiPixiContainer.addChild(this.windowMask.getPixiObject());
     this.uiPixiContainer.addChild(this.selectedInstances.getPixiContainer());
     this.uiPixiContainer.addChild(this.highlightedInstance.getPixiObject());
-    this.uiPixiContainer.addChild(this.tileMapPaintingPreview.getPixiObject());
     this.uiPixiContainer.addChild(this.clickInterceptor.getPixiObject());
     this.uiPixiContainer.addChild(this.statusBar.getPixiObject());
     this.uiPixiContainer.addChild(this.profilerBar.getPixiObject());
@@ -798,11 +747,10 @@ export default class InstancesEditor extends Component<Props, State> {
   getSelectedInstancesObjectFillColor = (
     isLocked: boolean
   ): {| color: number, alpha: number |} => {
-    if (this.props.tileMapTileSelection) return { color: 0xfff, alpha: 0 };
     return { color: isLocked ? 0xbc5753 : 0x6868e8, alpha: 1 };
   };
 
-  shouldDisplayClickableHandles = (): any => !this.props.tileMapTileSelection;
+  shouldDisplayClickableHandles = (): any => true;
 
   getZoomFactor = (): any => {
     return this.props.instancesEditorSettings.zoomFactor;
@@ -853,368 +801,9 @@ export default class InstancesEditor extends Component<Props, State> {
     this.lastCursorY = y;
   };
 
-  _onInterceptClick = (sceneCoordinates: Array<{| x: number, y: number |}>) => {
-    const {
-      tileMapTileSelection,
-      instancesSelection,
-      globalObjectsContainer,
-      objectsContainer,
-    } = this.props;
-    if (!tileMapTileSelection) {
-      return;
-    }
-    const selectedInstances = instancesSelection.getSelectedInstances();
-    if (selectedInstances.length !== 1) return;
-    const selectedInstance = selectedInstances[0];
-    const object = getObjectByName(
-      globalObjectsContainer,
-      objectsContainer,
-      selectedInstance.getObjectName()
-    );
-    if (!object) return;
-    const renderedInstance = this.getRendererOfInstance(selectedInstance);
-    if (
-      object.getType() === 'TileMap::SimpleTileMap' &&
-      renderedInstance &&
-      // $FlowFixMe[incompatible-type] - We are confident the renderedInstance is an instance of RenderedSimpleTileMapInstance.
-      !!renderedInstance.getEditableTileMap
-    ) {
-      // $FlowFixMe[incompatible-type]
-      const editableTileMap = renderedInstance.getEditableTileMap();
-      if (!editableTileMap) {
-        console.error(
-          `Could not find the editable tile map for instance of object ${selectedInstance.getObjectName()}`
-        );
-        return;
-      }
-      const sceneToTileMapTransformation = new AffineTransformation();
-      const tileMapToSceneTransformation = new AffineTransformation();
-      const scales = updateSceneToTileMapTransformation(
-        selectedInstance,
-        // $FlowFixMe[incompatible-type]
-        renderedInstance,
-        sceneToTileMapTransformation,
-        tileMapToSceneTransformation
-      );
-      if (!scales) return;
-      const { scaleX, scaleY } = scales;
-      const tileSet = getTileSet(object);
-      if (!tileSet.atlasImage) {
-        console.warn('Trying to paint on a tilemap without an atlas image.');
-        return;
-      }
-      if (isTileSetBadlyConfigured(tileSet)) {
-        console.warn(
-          'Trying to paint on a tilemap with a badly configured tileset.'
-        );
-        return;
-      }
-      const tileMapGridCoordinates = getTilesGridCoordinatesFromPointerSceneCoordinates(
-        {
-          tileMapTileSelection,
-          coordinates: sceneCoordinates,
-          tileSize: tileSet.tileSize,
-          sceneToTileMapTransformation,
-        }
-      );
-
-      let shouldTrimAfterOperations = false;
-
-      // Handle picker tool: select the tile that was clicked on the scene
-      if (tileMapTileSelection.kind === 'picker') {
-        if (tileMapGridCoordinates.length === 0) return;
-        const { topLeftCorner } = tileMapGridCoordinates[0];
-
-        const clickX = topLeftCorner.x;
-        const clickY = topLeftCorner.y;
-
-        const layer = editableTileMap.getTileLayer(0);
-        if (!layer) return;
-
-        // Get the tile ID at the clicked position
-        const tileId = layer.getTileId(clickX, clickY);
-
-        // If there's no tile at this position, do nothing
-        if (tileId === -1) return;
-
-        // Convert the tile ID to tileset grid coordinates
-        const tilesetCoordinates = getGridCoordinatesFromTileId({
-          id: tileId,
-          columnCount: tileSet.columnCount,
-        });
-
-        // Select this tile in the tileset and restore the previous tool
-        const newSelection = createSelectionWithPreviousTool(
-          this._previousToolBeforePicker,
-          [tilesetCoordinates, tilesetCoordinates],
-          { horizontal: false, vertical: false }
-        );
-        this.props.onSelectTileMapTile(newSelection);
-
-        return;
-      }
-
-      if (tileMapTileSelection.kind === 'floodfill') {
-        // Flood fill: get the single clicked grid coordinate.
-        if (tileMapGridCoordinates.length === 0) return;
-        const { topLeftCorner, tileCoordinates } = tileMapGridCoordinates[0];
-        if (!tileCoordinates) return;
-
-        const clickX = topLeftCorner.x;
-        const clickY = topLeftCorner.y;
-
-        const layer = editableTileMap.getTileLayer(0);
-        if (!layer) return;
-
-        // Get the tile ID of the clicked position (the tile being replaced).
-        const targetTileId = layer.getTileId(clickX, clickY);
-
-        const newTileId = getTileIdFromGridCoordinates({
-          columnCount: tileSet.columnCount,
-          ...tileCoordinates,
-        });
-        const tileDefinition = editableTileMap.getTileDefinition(newTileId);
-        if (!tileDefinition) return;
-
-        // BFS flood fill over tiles matching the target tile (4-directional).
-        const dimX = editableTileMap.getDimensionX();
-        const dimY = editableTileMap.getDimensionY();
-        const queue: Array<{| x: number, y: number |}> = [];
-        const visited = new Set<string>();
-
-        if (clickX >= 0 && clickX < dimX && clickY >= 0 && clickY < dimY) {
-          queue.push({ x: clickX, y: clickY });
-          visited.add(`${clickX},${clickY}`);
-        }
-
-        while (queue.length > 0) {
-          const current = queue.shift();
-
-          if (
-            // $FlowFixMe[incompatible-use]
-            current.x < 0 ||
-            // $FlowFixMe[incompatible-use]
-            current.x >= dimX ||
-            // $FlowFixMe[incompatible-use]
-            current.y < 0 ||
-            // $FlowFixMe[incompatible-use]
-            current.y >= dimY
-          )
-            continue;
-
-          // $FlowFixMe[incompatible-use]
-          const currentTileId = layer.getTileId(current.x, current.y);
-          if (currentTileId !== targetTileId) continue;
-
-          // $FlowFixMe[incompatible-use]
-          editableTileMap.setTile(current.x, current.y, 0, newTileId);
-          editableTileMap.flipTileOnX(
-            // $FlowFixMe[incompatible-use]
-            current.x,
-            // $FlowFixMe[incompatible-use]
-            current.y,
-            0,
-            tileMapTileSelection.flipHorizontally
-          );
-          editableTileMap.flipTileOnY(
-            // $FlowFixMe[incompatible-use]
-            current.x,
-            // $FlowFixMe[incompatible-use]
-            current.y,
-            0,
-            tileMapTileSelection.flipVertically
-          );
-
-          // Add neighbors if not already visited
-          const neighbors = [
-            // $FlowFixMe[incompatible-use]
-            { x: current.x - 1, y: current.y },
-            // $FlowFixMe[incompatible-use]
-            { x: current.x + 1, y: current.y },
-            // $FlowFixMe[incompatible-use]
-            { x: current.x, y: current.y - 1 },
-            // $FlowFixMe[incompatible-use]
-            { x: current.x, y: current.y + 1 },
-          ];
-
-          for (const neighbor of neighbors) {
-            const key = `${neighbor.x},${neighbor.y}`;
-            if (!visited.has(key)) {
-              visited.add(key);
-              queue.push(neighbor);
-            }
-          }
-        }
-      } else if (getTileMapPaintingSelection(tileMapTileSelection)) {
-        const paintingSelection = getTileMapPaintingSelection(
-          tileMapTileSelection
-        );
-        if (!paintingSelection) return;
-        shouldTrimAfterOperations = editableTileMap.isEmpty();
-        // TODO: Optimize list execution to make sure the most important size changing operations are done first.
-        let cumulatedUnshiftedRows = 0,
-          cumulatedUnshiftedColumns = 0;
-
-        const layer = editableTileMap.getTileLayer(0);
-        if (!layer) return;
-
-        tileMapGridCoordinates.forEach(
-          ({ bottomRightCorner, topLeftCorner, tileCoordinates }) => {
-            if (!tileCoordinates) return;
-            const tileId = getTileIdFromGridCoordinates({
-              columnCount: tileSet.columnCount,
-              ...tileCoordinates,
-            });
-
-            const tileDefinition = editableTileMap.getTileDefinition(tileId);
-            if (!tileDefinition) return;
-
-            for (
-              let gridX = topLeftCorner.x;
-              gridX <= bottomRightCorner.x;
-              gridX++
-            ) {
-              for (
-                let gridY = topLeftCorner.y;
-                gridY <= bottomRightCorner.y;
-                gridY++
-              ) {
-                // If rows or columns have been unshifted in the previous tile setting operations,
-                // we have to take them into account for the current coordinates.
-                const x = gridX + cumulatedUnshiftedColumns;
-                const y = gridY + cumulatedUnshiftedRows;
-                const rowsToAppend = Math.max(
-                  0,
-                  y - (editableTileMap.getDimensionY() - 1)
-                );
-                const columnsToAppend = Math.max(
-                  0,
-                  x - (editableTileMap.getDimensionX() - 1)
-                );
-                const rowsToUnshift = Math.abs(Math.min(0, y));
-                const columnsToUnshift = Math.abs(Math.min(0, x));
-                if (
-                  rowsToAppend > 0 ||
-                  columnsToAppend > 0 ||
-                  rowsToUnshift > 0 ||
-                  columnsToUnshift > 0
-                ) {
-                  editableTileMap.increaseDimensions(
-                    columnsToAppend,
-                    columnsToUnshift,
-                    rowsToAppend,
-                    rowsToUnshift
-                  );
-                }
-                const newX = x + columnsToUnshift;
-                const newY = y + rowsToUnshift;
-
-                editableTileMap.setTile(newX, newY, 0, tileId);
-                editableTileMap.flipTileOnX(
-                  newX,
-                  newY,
-                  0,
-                  paintingSelection.flipHorizontally
-                );
-                editableTileMap.flipTileOnY(
-                  newX,
-                  newY,
-                  0,
-                  paintingSelection.flipVertically
-                );
-
-                cumulatedUnshiftedRows += rowsToUnshift;
-                cumulatedUnshiftedColumns += columnsToUnshift;
-                // The instance angle is not considered when moving the instance after
-                // rows/columns were added/removed because the instance position does not
-                // include the rotation transformation. Otherwise, we could have used
-                // tileMapToSceneTransformation to get the new position.
-                selectedInstance.setX(
-                  selectedInstance.getX() -
-                    columnsToUnshift * (tileSet.tileSize * scaleX)
-                );
-                selectedInstance.setY(
-                  selectedInstance.getY() -
-                    rowsToUnshift * (tileSet.tileSize * scaleY)
-                );
-                if (selectedInstance.hasCustomSize()) {
-                  selectedInstance.setCustomWidth(
-                    selectedInstance.getCustomWidth() +
-                      tileSet.tileSize *
-                        scaleX *
-                        (columnsToAppend + columnsToUnshift)
-                  );
-                  selectedInstance.setCustomHeight(
-                    selectedInstance.getCustomHeight() +
-                      tileSet.tileSize * scaleY * (rowsToAppend + rowsToUnshift)
-                  );
-                }
-              }
-            }
-          }
-        );
-      } else if (tileMapTileSelection.kind === 'erase') {
-        const { bottomRightCorner, topLeftCorner } = tileMapGridCoordinates[0];
-        for (
-          let gridX = topLeftCorner.x;
-          gridX <= bottomRightCorner.x;
-          gridX++
-        ) {
-          for (
-            let gridY = topLeftCorner.y;
-            gridY <= bottomRightCorner.y;
-            gridY++
-          ) {
-            editableTileMap.removeTile(gridX, gridY, 0);
-          }
-        }
-
-        shouldTrimAfterOperations = true;
-      } else {
-        return;
-      }
-
-      if (shouldTrimAfterOperations) {
-        const trimData = editableTileMap.trimEmptyColumnsAndRowToFitLayer(0);
-        if (trimData) {
-          const {
-            shiftedRows,
-            shiftedColumns,
-            poppedRows,
-            poppedColumns,
-          } = trimData;
-          // The instance angle is not considered when moving the instance after
-          // rows/columns were added/removed because the instance position does not
-          // include the rotation transformation. Otherwise, we could have used
-          // tileMapToSceneTransformation to get the new position.
-          selectedInstance.setX(
-            selectedInstance.getX() +
-              shiftedColumns * (tileSet.tileSize * scaleX)
-          );
-          selectedInstance.setY(
-            selectedInstance.getY() + shiftedRows * (tileSet.tileSize * scaleY)
-          );
-          if (selectedInstance.hasCustomSize()) {
-            selectedInstance.setCustomWidth(
-              selectedInstance.getCustomWidth() -
-                tileSet.tileSize * scaleX * (poppedColumns + shiftedColumns)
-            );
-            selectedInstance.setCustomHeight(
-              selectedInstance.getCustomHeight() -
-                tileSet.tileSize * scaleY * (poppedRows + shiftedRows)
-            );
-          }
-        }
-      }
-      // $FlowIgnore
-      renderedInstance.updatePixiTileMap();
-      selectedInstance.setRawStringProperty(
-        'tilemap',
-        JSON.stringify(editableTileMap.toJSObject())
-      );
-      this.props.onInstancesResized([selectedInstance]);
-    }
-  };
+  _onInterceptClick = (
+    _sceneCoordinates: Array<{| x: number, y: number |}>
+  ) => {};
 
   getRendererOfInstance = (instance: gdInitialInstance): any => {
     return this.instancesRenderer.getRendererOfInstance(
@@ -1593,8 +1182,6 @@ export default class InstancesEditor extends Component<Props, State> {
   onPressEscape = () => {
     if (this.clickInterceptor && this.clickInterceptor.isIntercepting()) {
       this.clickInterceptor.cancelClickInterception();
-    } else if (this.props.tileMapTileSelection) {
-      this.props.onSelectTileMapTile(null);
     }
   };
 
@@ -1736,18 +1323,6 @@ export default class InstancesEditor extends Component<Props, State> {
     );
   };
 
-  getCoordinatesToRenderTileMapPreview = (): any => {
-    const clickInterceptorPointerPathCoordinates = this.clickInterceptor.getPointerPathCoordinates();
-    if (clickInterceptorPointerPathCoordinates) {
-      return clickInterceptorPointerPathCoordinates;
-    }
-    const lastCursorSceneCoordinates = this.getLastCursorSceneCoordinates();
-    if (!lastCursorSceneCoordinates) return [];
-    return [
-      { x: lastCursorSceneCoordinates[0], y: lastCursorSceneCoordinates[1] },
-    ];
-  };
-
   getViewPosition = (): ?ViewPosition => {
     return this.viewPosition;
   };
@@ -1766,7 +1341,6 @@ export default class InstancesEditor extends Component<Props, State> {
         this.canvasCursor.render();
         this.grid.render();
         this.highlightedInstance.render();
-        this.tileMapPaintingPreview.render();
         this.clickInterceptor.render();
         this.selectedInstances.render();
         this.selectionRectangle.render();

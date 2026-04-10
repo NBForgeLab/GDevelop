@@ -1,10 +1,7 @@
 // @flow
-import 'pixi-spine';
 import slugs from 'slugs';
 import axios from 'axios';
 import * as PIXI from 'pixi.js-legacy';
-import * as PIXI_SPINE from 'pixi-spine';
-import { ISkeleton, TextureAtlas } from 'pixi-spine';
 import * as THREE from 'three';
 import { GLTFLoader, GLTF } from 'three/addons/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader';
@@ -13,32 +10,6 @@ import { loadFontFace } from '../Utils/FontFaceLoader';
 import { checkIfCredentialsRequired } from '../Utils/CrossOrigin';
 import { type ResourceKind } from '../ResourcesList/ResourceSource';
 const gd: libGDevelop = global.gd;
-
-type SpineTextureAtlasOrLoadingError = {|
-  // $FlowFixMe[value-as-type]
-  textureAtlas: ?TextureAtlas,
-  loadingError: ?Error,
-  loadingErrorReason:
-    | null
-    | 'invalid-atlas-resource'
-    | 'missing-texture-resources'
-    | 'atlas-resource-loading-error',
-|};
-
-export type SpineDataOrLoadingError = {|
-  // $FlowFixMe[value-as-type]
-  skeleton: ?ISkeleton,
-  loadingError: ?Error,
-  loadingErrorReason:
-    | null
-    | 'invalid-spine-resource'
-    | 'missing-texture-atlas-name'
-    | 'spine-resource-loading-error'
-    // Atlas loading error reasons:
-    | 'invalid-atlas-resource'
-    | 'missing-texture-resources'
-    | 'atlas-resource-loading-error',
-|};
 
 type ResourcePromise<T> = { [resourceName: string]: Promise<T> };
 
@@ -55,8 +26,6 @@ let loadedOrLoadingThreeTextures: ResourcePromise<THREE.Texture> = {};
 let loadedOrLoadingThreeMaterials: ResourcePromise<THREE.Material> = {};
 // $FlowFixMe[value-as-type]
 let loadedOrLoading3DModelPromises: ResourcePromise<THREE.THREE_ADDONS.GLTF> = {};
-let spineAtlasPromises: ResourcePromise<SpineTextureAtlasOrLoadingError> = {};
-let spineDataPromises: ResourcePromise<SpineDataOrLoadingError> = {};
 
 /** Promise to serialize reloads of resources, to avoid race conditions. */
 let ongoingResourceReloads: Promise<void> | null = null;
@@ -273,8 +242,6 @@ export default class PixiResourcesLoader {
     loadedOrLoadingThreeTextures = {};
     loadedOrLoadingThreeMaterials = {};
     loadedOrLoading3DModelPromises = {};
-    spineAtlasPromises = {};
-    spineDataPromises = {};
     ongoingResourceReloads = null;
     pendingResourceReloadPromises = {};
   }
@@ -383,38 +350,6 @@ export default class PixiResourcesLoader {
       threeTexture.dispose();
       delete loadedOrLoadingThreeTextures[resourceName];
     }
-    if (spineAtlasPromises[resourceName]) {
-      // TODO: only unload if no other resources pointing to the same Spine Atlas?
-
-      await PIXI.Assets.unload(resourceName).catch(async () => {
-        // Workaround:
-        // This is an expected error due to https://github.com/pixijs/spine/issues/537 issue (read comments
-        // and search the other mentions to this issue in the codebase):
-        // A string, instead of a TextureAtlas, is stored as the loaded atlas resource (which is the root cause of this exception).
-        // pixi-spine considers it acts on a TextureAtlas and tries to call dispose on it that causes a TypeError.
-        const { textureAtlas } = await spineAtlasPromises[resourceName];
-        if (textureAtlas) {
-          textureAtlas.dispose(); // Workaround by doing `dispose` ourselves.
-        }
-      });
-      delete spineAtlasPromises[resourceName];
-
-      // Also reload any resource embedding this resource:
-      await this._reloadEmbedderResources(project, resourceName, 'spine');
-    }
-    if (spineDataPromises[resourceName]) {
-      // TODO: only unload if no other resources pointing to the same Spine Data?
-
-      await PIXI.Assets.unload(resourceName);
-      delete spineDataPromises[resourceName];
-
-      // This line allows us to avoid issue https://github.com/pixijs/pixijs/issues/10069.
-      // PIXI.Assets.resolver caches data that was passed to `PIXI.Assets.add`, even if resource was unloaded.
-      // So every time we unload spine resources, we need to call it to clean the resolver cache
-      // and pick up fresh data next time we call `getSpineData`.
-      PIXI.Assets.resolver.prefer();
-    }
-
     const matchingMaterialCacheKeys = Object.keys(
       loadedOrLoadingThreeMaterials
     ).filter(key => key.startsWith(resourceName));
@@ -594,7 +529,7 @@ export default class PixiResourcesLoader {
    * should listen to PIXI.Texture `update` event, and refresh your object
    * if this event is triggered.
    */
-  static getPIXITexture(project: gdProject, resourceName: string): any {
+  static getLegacyPixiTexture(project: gdProject, resourceName: string): any {
     // $FlowFixMe[invalid-computed-prop]
     if (loadedTextures[resourceName]) {
       // Extra safety: If the texture's baseTexture was destroyed somehow,
@@ -677,7 +612,7 @@ export default class PixiResourcesLoader {
     // Texture is not loaded, load it now from the PixiJS texture.
     // TODO (3D) - optimization: don't load the PixiJS Texture if not used by PixiJS.
     // TODO (3D) - optimization: Ideally we could even share the same WebGL texture.
-    const pixiTexture = PixiResourcesLoader.getPIXITexture(
+    const pixiTexture = PixiResourcesLoader.getLegacyPixiTexture(
       project,
       resourceName
     );
@@ -774,243 +709,16 @@ export default class PixiResourcesLoader {
   }
 
   /**
-   * Return the Pixi spine texture atlas of the specified resource names.
-   * @param project The project
-   * @param spineTextureAtlasName The name of the atlas texture resource.
-   * @returns The requested texture atlas, or null if it could not be loaded.
-   */
-  static async _getSpineTextureAtlas(
-    project: gdProject,
-    spineTextureAtlasName: string
-  ): Promise<SpineTextureAtlasOrLoadingError> {
-    const promise = spineAtlasPromises[spineTextureAtlasName];
-    // $FlowFixMe[constant-condition]
-    if (promise) return promise;
-
-    if (!spineTextureAtlasName) {
-      return {
-        textureAtlas: null,
-        loadingError: null,
-        loadingErrorReason: 'invalid-atlas-resource',
-      };
-    }
-
-    const resourceManager = project.getResourcesManager();
-    if (
-      spineTextureAtlasName.length === 0 ||
-      !resourceManager.hasResource(spineTextureAtlasName)
-    ) {
-      return {
-        textureAtlas: null,
-        loadingError: null,
-        loadingErrorReason: 'invalid-atlas-resource',
-      };
-    }
-
-    const resource = resourceManager.getResource(spineTextureAtlasName);
-    if (resource.getKind() !== 'atlas') {
-      return {
-        textureAtlas: null,
-        loadingError: null,
-        loadingErrorReason: 'invalid-atlas-resource',
-      };
-    }
-
-    const embeddedResourcesMapping = readEmbeddedResourcesMapping(resource);
-    const textureAtlasMappingEntries = embeddedResourcesMapping
-      ? Object.entries(embeddedResourcesMapping)
-      : [];
-    if (!textureAtlasMappingEntries.length) {
-      return {
-        textureAtlas: null,
-        loadingError: null,
-        loadingErrorReason: 'missing-texture-resources',
-      };
-    }
-
-    const images = textureAtlasMappingEntries.reduce(
-      (imagesMapping, [relatedPath, resourceName]) => {
-        // flow check
-        if (typeof resourceName === 'string') {
-          imagesMapping[relatedPath] = this.getPIXITexture(
-            project,
-            resourceName
-          );
-        }
-
-        return imagesMapping;
-      },
-      {}
-    );
-
-    return (spineAtlasPromises[spineTextureAtlasName] = new Promise(resolve => {
-      const atlasUrl = ResourcesLoader.getResourceFullUrl(
-        project,
-        spineTextureAtlasName,
-        {
-          isResourceForPixi: true,
-        }
-      );
-      PIXI.Assets.setPreferences({
-        preferWorkers: false,
-        crossOrigin: checkIfCredentialsRequired(atlasUrl)
-          ? 'use-credentials'
-          : 'anonymous',
-      });
-      PIXI.Assets.add({
-        alias: spineTextureAtlasName,
-        src: atlasUrl,
-        data: { images },
-      });
-      PIXI.Assets.load(spineTextureAtlasName).then(
-        atlas => {
-          // Ideally atlas of type `TextureAtlas` should be passed here.
-          // But there is a known issue in case of preloaded images (see https://github.com/pixijs/spine/issues/537
-          // and search the other mentions to this issue in the codebase).
-          //
-          // This branching covers all possible ways to make it work fine,
-          // if issue is fixed in pixi-spine or after migration to spine-pixi.
-          if (typeof atlas === 'string') {
-            new PIXI_SPINE.TextureAtlas(
-              atlas,
-              (textureName, textureCb) =>
-                textureCb(images[textureName].baseTexture),
-              textureAtlas =>
-                resolve({
-                  textureAtlas,
-                  loadingError: null,
-                  loadingErrorReason: null,
-                })
-            );
-          } else {
-            resolve({
-              textureAtlas: atlas,
-              loadingError: null,
-              loadingErrorReason: null,
-            });
-          }
-        },
-        err => {
-          console.error(
-            `Error while loading Spine atlas "${spineTextureAtlasName}": ${err}.\nCheck if you selected the correct pair of atlas and image files.`
-          );
-          resolve({
-            textureAtlas: null,
-            loadingError: err,
-            loadingErrorReason: 'atlas-resource-loading-error',
-          });
-        }
-      );
-    }));
-  }
-
-  /**
-   * Return the Pixi spine data for the specified resource name.
-   * @param project The project
-   * @param spineName The name of the spine json resource
-   * @returns The requested spine skeleton.
-   */
-  static async getSpineData(
-    project: gdProject,
-    spineName: string
-  ): Promise<SpineDataOrLoadingError> {
-    const promise = spineDataPromises[spineName];
-    // $FlowFixMe[constant-condition]
-    if (promise) return promise;
-
-    const resourceManager = project.getResourcesManager();
-    if (!spineName || !resourceManager.hasResource(spineName)) {
-      return {
-        skeleton: null,
-        loadingError: null,
-        loadingErrorReason: 'invalid-spine-resource',
-      };
-    }
-
-    const resource = resourceManager.getResource(spineName);
-    if (resource.getKind() !== 'spine') {
-      return {
-        skeleton: null,
-        loadingError: null,
-        loadingErrorReason: 'invalid-spine-resource',
-      };
-    }
-
-    const embeddedResourcesMapping = readEmbeddedResourcesMapping(resource);
-    const spineTextureAtlasName = embeddedResourcesMapping
-      ? Object.values(embeddedResourcesMapping)[0]
-      : null;
-    if (typeof spineTextureAtlasName !== 'string') {
-      return {
-        skeleton: null,
-        loadingError: null,
-        loadingErrorReason: 'missing-texture-atlas-name',
-      };
-    }
-
-    return (spineDataPromises[spineName] = new Promise(resolve => {
-      this._getSpineTextureAtlas(project, spineTextureAtlasName).then(
-        textureAtlasOrLoadingError => {
-          if (!textureAtlasOrLoadingError.textureAtlas) {
-            return resolve({
-              skeleton: null,
-              loadingError: textureAtlasOrLoadingError.loadingError,
-              loadingErrorReason: textureAtlasOrLoadingError.loadingErrorReason,
-            });
-          }
-
-          const spineUrl = ResourcesLoader.getResourceFullUrl(
-            project,
-            spineName,
-            {
-              isResourceForPixi: true,
-            }
-          );
-          PIXI.Assets.setPreferences({
-            preferWorkers: false,
-            crossOrigin: checkIfCredentialsRequired(spineUrl)
-              ? 'use-credentials'
-              : 'anonymous',
-          });
-          PIXI.Assets.add({
-            alias: spineName,
-            src: spineUrl,
-            data: {
-              spineAtlas: textureAtlasOrLoadingError.textureAtlas,
-            },
-          });
-          PIXI.Assets.load(spineName).then(
-            jsonData => {
-              resolve({
-                skeleton: jsonData.spineData,
-                loadingError: null,
-                loadingErrorReason: null,
-              });
-            },
-            err => {
-              console.error(
-                `Error while loading Spine data "${spineName}": ${err}.\nCheck if you selected correct files.`
-              );
-              resolve({
-                skeleton: null,
-                loadingError: err,
-                loadingErrorReason: 'spine-resource-loading-error',
-              });
-            }
-          );
-        }
-      );
-    }));
-  }
-
-  /**
    * Return the PIXI video texture represented by the given resource.
    * If not loaded, it will load it.
    * @returns The PIXI.Texture to be used. It can be loading, so you
    * should listen to PIXI.Texture `update` event, and refresh your object
    * if this event is triggered.
    */
-  static getPIXIVideoTexture(project: gdProject, resourceName: string): any {
+  static getLegacyPixiVideoTexture(
+    project: gdProject,
+    resourceName: string
+  ): any {
     if (loadedTextures[resourceName]) {
       // Extra safety: If the texture's baseTexture was destroyed somehow,
       // evict it from the cache and recreate it below.
@@ -1197,11 +905,11 @@ export default class PixiResourcesLoader {
     );
   }
 
-  static getInvalidPIXITexture(): any {
+  static getLegacyInvalidPixiTexture(): any {
     return invalidTexture;
   }
 
-  static getLoadingPIXITexture(): any {
+  static getLegacyLoadingPixiTexture(): any {
     return loadingTexture;
   }
 
@@ -1221,11 +929,7 @@ export default class PixiResourcesLoader {
       );
 
     const resource = project.getResourcesManager().getResource(resourceName);
-    if (
-      resource.getKind() !== 'json' &&
-      resource.getKind() !== 'tilemap' &&
-      resource.getKind() !== 'tileset'
-    )
+    if (resource.getKind() !== 'json' && resource.getKind() !== 'tileset')
       return Promise.reject(
         new Error(`The resource called ${resourceName} is not a json file.`)
       );

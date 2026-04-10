@@ -7,17 +7,17 @@ namespace gdjs {
     r: number;
     t: string;
   }
-  gdjs.PixiFiltersTools.registerFilterCreator(
+gdjs.EffectsTools.registerFilterCreator(
     'Scene3D::HemisphereLight',
-    new (class implements gdjs.PixiFiltersTools.FilterCreator {
+  new (class implements gdjs.EffectsTools.FilterCreator {
       makeFilter(
         target: EffectsTarget,
         effectData: EffectData
-      ): gdjs.PixiFiltersTools.Filter {
+    ): gdjs.EffectsTools.Filter {
         if (typeof THREE === 'undefined') {
-          return new gdjs.PixiFiltersTools.EmptyFilter();
+      return new gdjs.EffectsTools.EmptyFilter();
         }
-        return new (class implements gdjs.PixiFiltersTools.Filter {
+      return new (class implements gdjs.EffectsTools.Filter {
           _top: string = 'Z+';
           _elevation: float = 90;
           _rotation: float = 0;

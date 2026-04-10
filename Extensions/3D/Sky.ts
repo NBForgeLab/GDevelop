@@ -15,21 +15,21 @@ namespace gdjs {
     ts: number;
   }
 
-  gdjs.PixiFiltersTools.registerFilterCreator(
+gdjs.EffectsTools.registerFilterCreator(
     'Scene3D::Sky',
-    new (class implements gdjs.PixiFiltersTools.FilterCreator {
+  new (class implements gdjs.EffectsTools.FilterCreator {
       makeFilter(
         target: EffectsTarget,
         effectData: EffectData
-      ): gdjs.PixiFiltersTools.Filter {
+    ): gdjs.EffectsTools.Filter {
         if (typeof THREE === 'undefined' || typeof THREE_ADDONS === 'undefined') {
-          return new gdjs.PixiFiltersTools.EmptyFilter();
+      return new gdjs.EffectsTools.EmptyFilter();
         }
         if (!THREE_ADDONS.Sky) {
-          return new gdjs.PixiFiltersTools.EmptyFilter();
+        return new gdjs.EffectsTools.EmptyFilter();
         }
 
-        return new (class implements gdjs.PixiFiltersTools.Filter {
+      return new (class implements gdjs.EffectsTools.Filter {
           _sky: THREE_ADDONS.Sky;
           _sun: THREE.Vector3;
           _skyUp: THREE.Vector3;
@@ -64,6 +64,7 @@ namespace gdjs {
             this._cameraUp = new THREE.Vector3(0, 1, 0);
             this._cachedCameraUp = new THREE.Vector3(0, 1, 0);
             this._orientationQuat = new THREE.Quaternion();
+            this._orientationEuler = new THREE.Euler();
 
             // The Sky shader natively hardcodes direction.y in many places (for clouds, etc).
             // To support varying "Up" axes (like Z, when the game is a top-down 3D game),

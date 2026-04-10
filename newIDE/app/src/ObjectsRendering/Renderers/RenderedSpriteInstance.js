@@ -44,7 +44,7 @@ export default class RenderedSpriteInstance extends RenderedInstance {
 
     //Setup the PIXI object:
     this._pixiObject = new PIXI.Sprite(
-      this._pixiResourcesLoader.getInvalidPIXITexture()
+      this._pixiResourcesLoader.getLegacyInvalidPixiTexture()
     );
     this._pixiContainer.addChild(this._pixiObject);
     this.updatePIXITextureAndSprite();
@@ -180,7 +180,7 @@ export default class RenderedSpriteInstance extends RenderedInstance {
     const sprite = this._sprite;
     if (!sprite) return;
 
-    const texture = this._pixiResourcesLoader.getPIXITexture(
+    const texture = this._pixiResourcesLoader.getLegacyPixiTexture(
       this._project,
       sprite.getImageName()
     );

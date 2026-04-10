@@ -37,7 +37,6 @@ const resourceKindToInputAcceptedMimes = {
   font: ['font/ttf', 'font/otf'],
   video: ['video/mp4', 'video/webm'],
   json: ['application/json'],
-  tilemap: ['application/json'],
   tileset: ['application/json'],
   bitmapFont: [],
   model3D: [
@@ -47,7 +46,6 @@ const resourceKindToInputAcceptedMimes = {
     // 'model/gltf-binary'
   ],
   atlas: [],
-  spine: ['application/json'],
   javascript: ['text/javascript'],
 };
 

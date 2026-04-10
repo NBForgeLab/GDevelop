@@ -174,7 +174,7 @@ module.exports = {
       )
       .setIncludeFile('Extensions/BitmapText/bitmaptextruntimeobject.js')
       .addIncludeFile(
-        'Extensions/BitmapText/bitmaptextruntimeobject-pixi-renderer.js'
+        'Extensions/BitmapText/bitmaptextruntimeobject-three-renderer.js'
       )
       .setCategory('Text')
       .setAssetStoreTag('bitmap texts')
@@ -581,7 +581,10 @@ module.exports = {
         PIXI.BitmapFont.available[bitmapFontInstallKey] &&
         isBitmapFontTextureStale(
           PIXI.BitmapFont.available[bitmapFontInstallKey],
-          pixiResourcesLoader.getPIXITexture(project, textureAtlasResourceName)
+          pixiResourcesLoader.getLegacyPixiTexture(
+            project,
+            textureAtlasResourceName
+          )
         )
       ) {
         // Texture was replaced during resource reload. Uninstall the stale font
@@ -596,7 +599,7 @@ module.exports = {
       }
 
       // Get the atlas texture, the bitmap font data and install the font:
-      const texture = pixiResourcesLoader.getPIXITexture(
+      const texture = pixiResourcesLoader.getLegacyPixiTexture(
         project,
         textureAtlasResourceName
       );

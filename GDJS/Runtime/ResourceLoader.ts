@@ -152,8 +152,6 @@ namespace gdjs {
     private _jsonManager: JsonManager;
     private _model3DManager: Model3DManager;
     private _bitmapFontManager: BitmapFontManager;
-    private _spineAtlasManager: SpineAtlasManager | null = null;
-    private _spineManager: SpineManager | null = null;
     private _svgManager: InternalInGameEditorOnlySvgManager;
 
     /**
@@ -218,8 +216,6 @@ namespace gdjs {
         }
       }
 
-      // Register optional resource managers (like Spine), if their extension
-      // runtime code is available at this moment.
       this._registerOptionalManagersIfNeeded();
     }
 
@@ -757,7 +753,7 @@ namespace gdjs {
      * Get the gdjs.ImageManager of the RuntimeGame.
      * @return The image manager.
      */
-    getImageManager(): gdjs.PixiImageManager {
+    getImageManager(): gdjs.ImageManager {
       return this._imageManager;
     }
 
@@ -795,50 +791,11 @@ namespace gdjs {
       return this._model3DManager;
     }
 
-    /**
-     * Get the Spine manager of the game, used to load and construct spine skeletons from game
-     * resources.
-     * @return The Spine manager for the game
-     */
-    getSpineManager(): gdjs.SpineManager | null {
-      return this._spineManager;
-    }
-
-    /**
-     * Get the Spine Atlas manager of the game, used to load atlases from game
-     * resources.
-     * @return The Spine Atlas manager for the game
-     */
-    getSpineAtlasManager(): gdjs.SpineAtlasManager | null {
-      return this._spineAtlasManager;
-    }
-
     registerOptionalManagersForHotReload(): void {
       this._registerOptionalManagersIfNeeded();
     }
 
     private _registerOptionalManagersIfNeeded(): void {
-      // Spine managers are extension-provided and can become available after
-      // scripts reload. Register them exactly once.
-      if (!this._spineAtlasManager && gdjs.SpineAtlasManager) {
-        this._spineAtlasManager = new gdjs.SpineAtlasManager(
-          this,
-          this._imageManager
-        );
-        for (const resourceKind of this._spineAtlasManager.getResourceKinds()) {
-          this._resourceManagersMap.set(resourceKind, this._spineAtlasManager);
-        }
-      }
-
-      if (!this._spineManager && gdjs.SpineManager && this._spineAtlasManager) {
-        this._spineManager = new gdjs.SpineManager(
-          this,
-          this._spineAtlasManager
-        );
-        for (const resourceKind of this._spineManager.getResourceKinds()) {
-          this._resourceManagersMap.set(resourceKind, this._spineManager);
-        }
-      }
     }
 
     injectMockResourceManagerForTesting(

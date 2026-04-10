@@ -26,9 +26,6 @@ import {
   reorderInstanceSchemaForCustomProperties,
 } from './CompactInstancePropertiesSchema';
 import { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
-import TileSetVisualizer, {
-  type TileMapTileSelection,
-} from '../TileSetVisualizer';
 import {
   TopLevelCollapsibleSection,
   CollapsibleSubPanel,
@@ -123,8 +120,6 @@ type Props = {|
   unsavedChanges?: ?UnsavedChanges,
   i18n: I18nType,
   historyHandler?: HistoryHandler,
-  tileMapTileSelection: ?TileMapTileSelection,
-  onSelectTileMapTile: (?TileMapTileSelection) => void,
   canOverrideBehaviorProperties: boolean,
 |};
 
@@ -144,8 +139,6 @@ export const CompactInstancePropertiesEditor = ({
   editInstanceVariables,
   onInstancesModified,
   projectScopedContainersAccessor,
-  tileMapTileSelection,
-  onSelectTileMapTile,
   canOverrideBehaviorProperties,
 }: Props): null | React.Node => {
   const forceUpdate = useForceUpdate();
@@ -311,31 +304,6 @@ export const CompactInstancePropertiesEditor = ({
     object ? !instance.hasAnyOverriddenProperty(object) : true
   );
 
-  const shouldDisplayTileSetVisualizer =
-    !!object && object.getType() === 'TileMap::SimpleTileMap';
-
-  React.useEffect(
-    () => {
-      if (!shouldDisplayTileSetVisualizer) {
-        // Reset tile map tile selection if tile set visualizer should
-        // not be displayed (an instance that is not a tile map is selected).
-        onSelectTileMapTile(null);
-      }
-      // Reset tile map tile selection if the component is unmounted
-      // (Useful when component is unmounted on an Undo user command).
-      return () => onSelectTileMapTile(null);
-    },
-    [shouldDisplayTileSetVisualizer, onSelectTileMapTile]
-  );
-
-  React.useEffect(
-    () => {
-      onSelectTileMapTile(null);
-    },
-    // Reset tile map tile selection if instance changes.
-    [instance.ptr, onSelectTileMapTile]
-  );
-
   if (!object || !instance || !instanceSchema) return null;
 
   return (
@@ -361,29 +329,6 @@ export const CompactInstancePropertiesEditor = ({
             />
             <Spacer />
           </Column>
-          {shouldDisplayTileSetVisualizer && (
-            <>
-              <Separator />
-              <Column>
-                <Line alignItems="center" justifyContent="space-between">
-                  <Text size="sub-title" noMargin>
-                    <Trans>Tilemap painter</Trans>
-                  </Text>
-                </Line>
-                <TileSetVisualizer
-                  project={project}
-                  objectConfiguration={object.getConfiguration()}
-                  tileMapTileSelection={tileMapTileSelection}
-                  onSelectTileMapTile={onSelectTileMapTile}
-                  showPaintingToolbar
-                  allowMultipleSelection={false}
-                  onScrollY={onScrollY}
-                  allowRectangleSelection
-                  interactive
-                />
-              </Column>
-            </>
-          )}
           {object && canOverrideBehaviorProperties ? (
             <TopLevelCollapsibleSection
               title={<Trans>Behaviors</Trans>}

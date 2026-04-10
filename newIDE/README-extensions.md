@@ -80,12 +80,6 @@ You'll be interested in the constructor (to initialize things), `update` (called
 
 Read about [`gdjs.RuntimeObject`](https://docs.gdevelop.io/GDJS%20Runtime%20Documentation/classes/gdjs.RuntimeObject.html), the base class inherited by all objects.
 
-#### How to create an effect ("shader", PixiJS "filter")
-
-See lots of examples in [Effects](../Extensions/Effects/) (the extension containing lots of effects) and [light-night-pixi-filter.ts](../Extensions/Effects/light-night-pixi-filter.ts) (an example of a custom filter for PixiJS).
-
-You'll have to store the code for your PixiJS filter in the file, and then call `gdjs.PixiFiltersTools.registerFilterCreator` to tell the game engine how to create and update the filter. Don't forget to then **declare** the effect (see next section).
-
 ### 2.2) Declare your extension to the IDE 👋
 
 > ℹ️ Declaration must be done in a file called `JsExtension.js`. Your extension must be in the Extensions folder, in its own directory.
@@ -240,7 +234,7 @@ Finally, to have the instances of your object displayed properly on the scene ed
 
 Add an effect using [`addEffect`](https://docs.gdevelop.io/GDCore%20Documentation/classgd_1_1_platform_extension.html) in your _JsExtension.js_ file.
 
-> 👉 See an example in the [Effects extension _JsExtension.js_ file](../Extensions/Effects/JsExtension.js). Learn more about [properties here](docs/Properties-schema-and-PropertiesEditor-explanations.md).
+> ⚠️ PixiJS filter-based effects are being phased out as GDevelop moves toward a 3D-first, Three.js-oriented renderer. Prefer the current 3D effect APIs and existing extension patterns instead of adding new PixiJS filters.
 
 > ℹ️ Don't forget to use `addIncludeFile` to set the file containing your effect implementation in JavaScript.
 

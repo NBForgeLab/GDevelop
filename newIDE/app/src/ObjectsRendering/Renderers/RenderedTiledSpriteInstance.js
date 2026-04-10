@@ -34,7 +34,10 @@ export default class RenderedTiledSpriteInstance extends RenderedInstance {
     );
     this._texture = tiledSprite.getTexture();
     this._pixiObject = new PIXI.TilingSprite(
-      PixiResourcesLoader.getPIXITexture(project, tiledSprite.getTexture()),
+      PixiResourcesLoader.getLegacyPixiTexture(
+        project,
+        tiledSprite.getTexture()
+      ),
       tiledSprite.getWidth(),
       tiledSprite.getHeight()
     );
@@ -80,7 +83,7 @@ export default class RenderedTiledSpriteInstance extends RenderedInstance {
 
     if (this._texture !== tiledSprite.getTexture()) {
       this._texture = tiledSprite.getTexture();
-      this._pixiObject.texture = PixiResourcesLoader.getPIXITexture(
+      this._pixiObject.texture = PixiResourcesLoader.getLegacyPixiTexture(
         this._project,
         tiledSprite.getTexture()
       );

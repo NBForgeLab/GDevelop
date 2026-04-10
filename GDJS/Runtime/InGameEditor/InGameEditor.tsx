@@ -5568,7 +5568,7 @@ namespace gdjs {
         .invert();
 
       object3D.traverse((child) => {
-        if (!child || !child.isMesh || !child.geometry) return;
+        if (!(child instanceof THREE.Mesh) || !child.geometry) return;
         const wireframeGeometry = new THREE.WireframeGeometry(child.geometry);
         const lines = new THREE.LineSegments(
           wireframeGeometry,
@@ -5589,8 +5589,9 @@ namespace gdjs {
     private _disposeShapeObject(): void {
       if (!this._shapeObject) return;
       this._shapeObject.traverse((object) => {
+        if (!(object instanceof THREE.Mesh)) return;
         if (object.geometry) object.geometry.dispose();
-        if (object.material && Array.isArray(object.material)) {
+        if (Array.isArray(object.material)) {
           object.material.forEach((material) => material.dispose());
         } else if (object.material) {
           object.material.dispose();

@@ -59,7 +59,7 @@ namespace gdjs {
       gdjs.OpacityHandler
   {
     _renderer:
-      | gdjs.CustomRuntimeObject2DRenderer
+      | gdjs.CustomRuntimeObject2DThreeRenderer
       | gdjs.CustomRuntimeObject3DRenderer;
     /** It contains the children of this object. */
     _instanceContainer: gdjs.CustomRuntimeObjectInstanceContainer;
@@ -167,7 +167,7 @@ namespace gdjs {
     }
 
     protected abstract _createRender():
-      | gdjs.CustomRuntimeObject2DRenderer
+      | gdjs.CustomRuntimeObject2DThreeRenderer
       | gdjs.CustomRuntimeObject3DRenderer;
     protected abstract _reinitializeRenderer(): void;
 
@@ -391,7 +391,7 @@ namespace gdjs {
     }
 
     getRenderer():
-      | gdjs.CustomRuntimeObject2DRenderer
+      | gdjs.CustomRuntimeObject2DThreeRenderer
       | gdjs.CustomRuntimeObject3DRenderer {
       return this._renderer;
     }

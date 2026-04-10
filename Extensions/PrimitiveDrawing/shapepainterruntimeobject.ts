@@ -90,7 +90,7 @@ namespace gdjs {
     _useAbsoluteCoordinates: boolean;
     _clearBetweenFrames: boolean;
     _antialiasing: Antialiasing;
-    _renderer: gdjs.ShapePainterRuntimeObjectRenderer;
+    _renderer: gdjs.ShapePainterRuntimeObjectThreeRenderer;
 
     private static readonly _pointForTransformation: FloatPoint = [0, 0];
 
@@ -132,7 +132,7 @@ namespace gdjs {
       this._useAbsoluteCoordinates = shapePainterObjectData.absoluteCoordinates;
       this._clearBetweenFrames = shapePainterObjectData.clearBetweenFrames;
       this._antialiasing = shapePainterObjectData.antialiasing;
-      this._renderer = new gdjs.ShapePainterRuntimeObjectRenderer(
+      this._renderer = new gdjs.ShapePainterRuntimeObjectThreeRenderer(
         this,
         instanceContainer
       );

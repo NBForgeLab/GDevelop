@@ -50,9 +50,6 @@ class ResourcesRenamer : public gd::ArbitraryResourceWorker {
   virtual void ExposeJson(gd::String& jsonResourceName) override {
     RenameIfNeeded(jsonResourceName);
   };
-  virtual void ExposeTilemap(gd::String& tilemapResourceName) override {
-    RenameIfNeeded(tilemapResourceName);
-  };
   virtual void ExposeTileset(gd::String& tilesetResourceName) override {
     RenameIfNeeded(tilesetResourceName);
   };
@@ -69,9 +66,6 @@ class ResourcesRenamer : public gd::ArbitraryResourceWorker {
     RenameIfNeeded(resourceName);
   };
   virtual void ExposeAtlas(gd::String& resourceName) override {
-    RenameIfNeeded(resourceName);
-  };
-  virtual void ExposeSpine(gd::String& resourceName) override {
     RenameIfNeeded(resourceName);
   };
 

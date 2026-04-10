@@ -37,11 +37,6 @@ void ArbitraryResourceWorker::ExposeJson(gd::String& jsonName){
     // do.
 };
 
-void ArbitraryResourceWorker::ExposeTilemap(gd::String& tilemapName){
-    // Nothing to do by default - each child class can define here the action to
-    // do.
-};
-
 void ArbitraryResourceWorker::ExposeTileset(gd::String& tilesetName){
     // Nothing to do by default - each child class can define here the action to
     // do.
@@ -53,11 +48,6 @@ void ArbitraryResourceWorker::ExposeModel3D(gd::String& resourceName){
 };
 
 void ArbitraryResourceWorker::ExposeAtlas(gd::String& resourceName){
-    // Nothing to do by default - each child class can define here the action to
-    // do.
-};
-
-void ArbitraryResourceWorker::ExposeSpine(gd::String& resourceName){
     // Nothing to do by default - each child class can define here the action to
     // do.
 };
@@ -174,11 +164,6 @@ void ArbitraryResourceWorker::ExposeResourceWithType(
     ExposeBitmapFont(resourceName);
     return;
   }
-  if (resourceType == "tilemap") {
-    ExposeTilemap(resourceName);
-    ExposeEmbeddeds(resourceName);
-    return;
-  }
   if (resourceType == "tileset") {
     ExposeTileset(resourceName);
     return;
@@ -194,10 +179,6 @@ void ArbitraryResourceWorker::ExposeResourceWithType(
   }
   if (resourceType == "atlas") {
     ExposeAtlas(resourceName);
-    return;
-  }
-  if (resourceType == "spine") {
-    ExposeSpine(resourceName);
     return;
   }
   if (resourceType == "javascript") {
@@ -256,11 +237,6 @@ bool ResourceWorkerInEventsWorker::DoVisitInstruction(gd::Instruction& instructi
           worker.ExposeJson(updatedParameterValue);
           worker.ExposeEmbeddeds(updatedParameterValue);
           instruction.SetParameter(parameterIndex, updatedParameterValue);
-        } else if (parameterMetadata.GetType() == "tilemapResource") {
-          gd::String updatedParameterValue = parameterValue;
-          worker.ExposeTilemap(updatedParameterValue);
-          worker.ExposeEmbeddeds(updatedParameterValue);
-          instruction.SetParameter(parameterIndex, updatedParameterValue);
         } else if (parameterMetadata.GetType() == "tilesetResource") {
           gd::String updatedParameterValue = parameterValue;
           worker.ExposeTileset(updatedParameterValue);
@@ -272,10 +248,6 @@ bool ResourceWorkerInEventsWorker::DoVisitInstruction(gd::Instruction& instructi
         } else if (parameterMetadata.GetType() == "atlasResource") {
           gd::String updatedParameterValue = parameterValue;
           worker.ExposeAtlas(updatedParameterValue);
-          instruction.SetParameter(parameterIndex, updatedParameterValue);
-        } else if (parameterMetadata.GetType() == "spineResource") {
-          gd::String updatedParameterValue = parameterValue;
-          worker.ExposeSpine(updatedParameterValue);
           instruction.SetParameter(parameterIndex, updatedParameterValue);
         }
       });

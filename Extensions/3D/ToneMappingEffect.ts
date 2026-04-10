@@ -155,17 +155,17 @@ namespace gdjs {
     return didToneMappingChange || didExposureChange;
   };
 
-  gdjs.PixiFiltersTools.registerFilterCreator(
+gdjs.EffectsTools.registerFilterCreator(
     'Scene3D::ToneMapping',
-    new (class implements gdjs.PixiFiltersTools.FilterCreator {
+  new (class implements gdjs.EffectsTools.FilterCreator {
       makeFilter(
         target: EffectsTarget,
         effectData: EffectData
-      ): gdjs.PixiFiltersTools.Filter {
+    ): gdjs.EffectsTools.Filter {
         if (typeof THREE === 'undefined') {
-          return new gdjs.PixiFiltersTools.EmptyFilter();
+      return new gdjs.EffectsTools.EmptyFilter();
         }
-        return new (class implements gdjs.PixiFiltersTools.Filter {
+      return new (class implements gdjs.EffectsTools.Filter {
           private _isEnabled = false;
           private _toneMapping: ToneMappingName = defaultToneMappingName;
           private _exposure = defaultToneMappingExposure;

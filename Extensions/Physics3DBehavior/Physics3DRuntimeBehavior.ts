@@ -54,6 +54,32 @@ namespace gdjs {
     props: Physics3DNetworkSyncDataType;
   }
 
+  type Physics3DBehaviorData = BehaviorData & {
+    bodyType?: string;
+    bullet?: boolean;
+    fixedRotation?: boolean;
+    shape?: string;
+    meshShapeResourceName?: string;
+    shapeOrientation?: string;
+    shapeDimensionA?: number;
+    shapeDimensionB?: number;
+    shapeDimensionC?: number;
+    shapeOffsetX?: number;
+    shapeOffsetY?: number;
+    shapeOffsetZ?: number;
+    shapeScale?: number;
+    density?: number;
+    massOverride?: number;
+    friction?: number;
+    restitution?: number;
+    linearDamping?: number;
+    angularDamping?: number;
+    gravityScale?: number;
+    layers?: number;
+    masks?: number;
+    vertices?: unknown;
+  };
+
   const isModel3D = (
     object: gdjs.RuntimeObject
   ): object is gdjs.Model3DRuntimeObject => {
@@ -445,13 +471,15 @@ namespace gdjs {
       oldBehaviorData: BehaviorData,
       newBehaviorData: BehaviorData
     ): boolean {
-      const behaviorDiff: BehaviorData = {
-        name: newBehaviorData.name,
-        type: newBehaviorData.type,
+      const oldPhysicsBehaviorData = oldBehaviorData as Physics3DBehaviorData;
+      const newPhysicsBehaviorData = newBehaviorData as Physics3DBehaviorData;
+      const behaviorDiff: Physics3DBehaviorData = {
+        name: newPhysicsBehaviorData.name,
+        type: newPhysicsBehaviorData.type,
       };
 
-      const oldShape = oldBehaviorData.shape;
-      const newShape = newBehaviorData.shape;
+      const oldShape = oldPhysicsBehaviorData.shape;
+      const newShape = newPhysicsBehaviorData.shape;
       if (oldShape !== newShape && newShape !== undefined) {
         behaviorDiff.shape = newShape;
       }
@@ -459,11 +487,11 @@ namespace gdjs {
       const oldShapeOrientation =
         oldShape === 'Box'
           ? 'Z'
-          : oldBehaviorData.shapeOrientation || undefined;
+          : oldPhysicsBehaviorData.shapeOrientation || undefined;
       const newShapeOrientation =
         newShape === 'Box'
           ? 'Z'
-          : newBehaviorData.shapeOrientation || undefined;
+          : newPhysicsBehaviorData.shapeOrientation || undefined;
       if (
         oldShapeOrientation !== newShapeOrientation &&
         newShapeOrientation !== undefined
@@ -471,97 +499,103 @@ namespace gdjs {
         behaviorDiff.shapeOrientation = newShapeOrientation;
       }
 
-      const oldMeshShapeResourceName = oldBehaviorData.meshShapeResourceName || '';
-      const newMeshShapeResourceName = newBehaviorData.meshShapeResourceName || '';
+      const oldMeshShapeResourceName =
+        oldPhysicsBehaviorData.meshShapeResourceName || '';
+      const newMeshShapeResourceName =
+        newPhysicsBehaviorData.meshShapeResourceName || '';
       if (oldMeshShapeResourceName !== newMeshShapeResourceName) {
         behaviorDiff.meshShapeResourceName = newMeshShapeResourceName;
       }
 
-      const oldShapeDimensionA = oldBehaviorData.shapeDimensionA ?? 0;
-      const newShapeDimensionA = newBehaviorData.shapeDimensionA ?? 0;
+      const oldShapeDimensionA = oldPhysicsBehaviorData.shapeDimensionA ?? 0;
+      const newShapeDimensionA = newPhysicsBehaviorData.shapeDimensionA ?? 0;
       if (oldShapeDimensionA !== newShapeDimensionA) {
         behaviorDiff.shapeDimensionA = newShapeDimensionA;
       }
-      const oldShapeDimensionB = oldBehaviorData.shapeDimensionB ?? 0;
-      const newShapeDimensionB = newBehaviorData.shapeDimensionB ?? 0;
+      const oldShapeDimensionB = oldPhysicsBehaviorData.shapeDimensionB ?? 0;
+      const newShapeDimensionB = newPhysicsBehaviorData.shapeDimensionB ?? 0;
       if (oldShapeDimensionB !== newShapeDimensionB) {
         behaviorDiff.shapeDimensionB = newShapeDimensionB;
       }
-      const oldShapeDimensionC = oldBehaviorData.shapeDimensionC ?? 0;
-      const newShapeDimensionC = newBehaviorData.shapeDimensionC ?? 0;
+      const oldShapeDimensionC = oldPhysicsBehaviorData.shapeDimensionC ?? 0;
+      const newShapeDimensionC = newPhysicsBehaviorData.shapeDimensionC ?? 0;
       if (oldShapeDimensionC !== newShapeDimensionC) {
         behaviorDiff.shapeDimensionC = newShapeDimensionC;
       }
 
-      const oldShapeOffsetX = oldBehaviorData.shapeOffsetX ?? 0;
-      const newShapeOffsetX = newBehaviorData.shapeOffsetX ?? 0;
+      const oldShapeOffsetX = oldPhysicsBehaviorData.shapeOffsetX ?? 0;
+      const newShapeOffsetX = newPhysicsBehaviorData.shapeOffsetX ?? 0;
       if (oldShapeOffsetX !== newShapeOffsetX) {
         behaviorDiff.shapeOffsetX = newShapeOffsetX;
       }
-      const oldShapeOffsetY = oldBehaviorData.shapeOffsetY ?? 0;
-      const newShapeOffsetY = newBehaviorData.shapeOffsetY ?? 0;
+      const oldShapeOffsetY = oldPhysicsBehaviorData.shapeOffsetY ?? 0;
+      const newShapeOffsetY = newPhysicsBehaviorData.shapeOffsetY ?? 0;
       if (oldShapeOffsetY !== newShapeOffsetY) {
         behaviorDiff.shapeOffsetY = newShapeOffsetY;
       }
-      const oldShapeOffsetZ = oldBehaviorData.shapeOffsetZ ?? 0;
-      const newShapeOffsetZ = newBehaviorData.shapeOffsetZ ?? 0;
+      const oldShapeOffsetZ = oldPhysicsBehaviorData.shapeOffsetZ ?? 0;
+      const newShapeOffsetZ = newPhysicsBehaviorData.shapeOffsetZ ?? 0;
       if (oldShapeOffsetZ !== newShapeOffsetZ) {
         behaviorDiff.shapeOffsetZ = newShapeOffsetZ;
       }
 
-      const oldShapeScale = oldBehaviorData.shapeScale ?? 1;
-      const newShapeScale = newBehaviorData.shapeScale ?? 1;
+      const oldShapeScale = oldPhysicsBehaviorData.shapeScale ?? 1;
+      const newShapeScale = newPhysicsBehaviorData.shapeScale ?? 1;
       if (oldShapeScale !== newShapeScale) {
         behaviorDiff.shapeScale = newShapeScale;
       }
 
-      const oldBullet = oldBehaviorData.bullet ?? false;
-      const newBullet = newBehaviorData.bullet ?? false;
+      const oldBullet = oldPhysicsBehaviorData.bullet ?? false;
+      const newBullet = newPhysicsBehaviorData.bullet ?? false;
       if (oldBullet !== newBullet) {
         behaviorDiff.bullet = newBullet;
       }
 
-      const oldFixedRotation = oldBehaviorData.fixedRotation ?? false;
-      const newFixedRotation = newBehaviorData.fixedRotation ?? false;
+      const oldFixedRotation = oldPhysicsBehaviorData.fixedRotation ?? false;
+      const newFixedRotation = newPhysicsBehaviorData.fixedRotation ?? false;
       if (oldFixedRotation !== newFixedRotation) {
         behaviorDiff.fixedRotation = newFixedRotation;
       }
 
       if (
-        oldBehaviorData.density !== newBehaviorData.density &&
-        newBehaviorData.density !== undefined
+        oldPhysicsBehaviorData.density !== newPhysicsBehaviorData.density &&
+        newPhysicsBehaviorData.density !== undefined
       ) {
-        behaviorDiff.density = newBehaviorData.density;
+        behaviorDiff.density = newPhysicsBehaviorData.density;
       }
       if (
-        oldBehaviorData.friction !== newBehaviorData.friction &&
-        newBehaviorData.friction !== undefined
+        oldPhysicsBehaviorData.friction !== newPhysicsBehaviorData.friction &&
+        newPhysicsBehaviorData.friction !== undefined
       ) {
-        behaviorDiff.friction = newBehaviorData.friction;
+        behaviorDiff.friction = newPhysicsBehaviorData.friction;
       }
       if (
-        oldBehaviorData.restitution !== newBehaviorData.restitution &&
-        newBehaviorData.restitution !== undefined
+        oldPhysicsBehaviorData.restitution !==
+          newPhysicsBehaviorData.restitution &&
+        newPhysicsBehaviorData.restitution !== undefined
       ) {
-        behaviorDiff.restitution = newBehaviorData.restitution;
+        behaviorDiff.restitution = newPhysicsBehaviorData.restitution;
       }
       if (
-        oldBehaviorData.linearDamping !== newBehaviorData.linearDamping &&
-        newBehaviorData.linearDamping !== undefined
+        oldPhysicsBehaviorData.linearDamping !==
+          newPhysicsBehaviorData.linearDamping &&
+        newPhysicsBehaviorData.linearDamping !== undefined
       ) {
-        behaviorDiff.linearDamping = newBehaviorData.linearDamping;
+        behaviorDiff.linearDamping = newPhysicsBehaviorData.linearDamping;
       }
       if (
-        oldBehaviorData.angularDamping !== newBehaviorData.angularDamping &&
-        newBehaviorData.angularDamping !== undefined
+        oldPhysicsBehaviorData.angularDamping !==
+          newPhysicsBehaviorData.angularDamping &&
+        newPhysicsBehaviorData.angularDamping !== undefined
       ) {
-        behaviorDiff.angularDamping = newBehaviorData.angularDamping;
+        behaviorDiff.angularDamping = newPhysicsBehaviorData.angularDamping;
       }
       if (
-        oldBehaviorData.gravityScale !== newBehaviorData.gravityScale &&
-        newBehaviorData.gravityScale !== undefined
+        oldPhysicsBehaviorData.gravityScale !==
+          newPhysicsBehaviorData.gravityScale &&
+        newPhysicsBehaviorData.gravityScale !== undefined
       ) {
-        behaviorDiff.gravityScale = newBehaviorData.gravityScale;
+        behaviorDiff.gravityScale = newPhysicsBehaviorData.gravityScale;
       }
 
       return this.applyBehaviorOverriding(behaviorDiff);

@@ -613,29 +613,6 @@
           "identifier": "https://asset-resources.gdevelop.io/public-resources/3D Animated Characters/bfcac35d635d90e19bbdfd3dd7f51bfb0f8d055f2c44b9a23ebe73d84bc0c196_Femal Witch.glb",
           "name": "Femal Witch.glb"
         }
-      },
-      {
-        "file": "assets/spineboy.png",
-        "kind": "image",
-        "metadata": "",
-        "name": "assets\\spineboy.png",
-        "smoothed": true,
-        "userAdded": false
-      },
-      {
-        "file": "assets/spineboy.atlas",
-        "kind": "atlas",
-        "metadata": "{\"embeddedResourcesMapping\":{\"spineboy.png\":\"assets\\\\spineboy.png\"}}",
-        "name": "assets\\spineboy.atlas",
-        "userAdded": true
-      },
-      {
-        "disablePreload": false,
-        "file": "assets/spineboy.json",
-        "kind": "spine",
-        "metadata": "{\"embeddedResourcesMapping\":{\"spineboy.atlas\":\"assets\\\\spineboy.atlas\"}}",
-        "name": "assets\\spineboy.json",
-        "userAdded": true
       }
     ],
     "resourceFolders": []
@@ -679,9 +656,6 @@
             },
             {
               "name": "FemalWitch"
-            },
-            {
-              "name": "Spine"
             }
           ]
         },
@@ -690,9 +664,6 @@
           "objects": [
             {
               "name": "RedHero"
-            },
-            {
-              "name": "Spine"
             }
           ]
         },
@@ -1268,52 +1239,6 @@
           "x": 320,
           "y": 288,
           "zOrder": 41,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": []
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "depth": 0,
-          "height": 172,
-          "layer": "",
-          "name": "Spine",
-          "persistentUuid": "ddaab7c9-bccf-4854-9958-7190d8819a3b",
-          "width": 114,
-          "x": 222,
-          "y": 223,
-          "zOrder": 42,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": []
-        },
-        {
-          "angle": 0,
-          "customSize": false,
-          "height": 0,
-          "layer": "",
-          "name": "AnimationSpineTimeSlider",
-          "persistentUuid": "05c49a4f-a956-4365-9edf-3d7a933d2359",
-          "width": 0,
-          "x": 32,
-          "y": 356,
-          "zOrder": 43,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": []
-        },
-        {
-          "angle": 0,
-          "customSize": false,
-          "height": 0,
-          "layer": "",
-          "name": "AnimationSpineTimeLabel",
-          "persistentUuid": "dbda273a-0934-49be-ba81-2c5ef555d329",
-          "width": 0,
-          "x": 320,
-          "y": 352,
-          "zOrder": 44,
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": []
@@ -5142,208 +5067,6 @@
           }
         },
         {
-          "assetStoreId": "",
-          "name": "Spine",
-          "type": "SpineObject::SpineObject",
-          "variables": [],
-          "effects": [
-            {
-              "effectType": "Outline",
-              "name": "Effect",
-              "doubleParameters": {
-                "padding": 0,
-                "thickness": 2
-              },
-              "stringParameters": {
-                "color": "255;255;255"
-              },
-              "booleanParameters": {}
-            }
-          ],
-          "behaviors": [
-            {
-              "name": "AnimationTest",
-              "type": "Test::AnimationTest",
-              "Animatable": "Animation"
-            }
-          ],
-          "content": {
-            "scale": 0.125,
-            "spineResourceName": "assets\\spineboy.json",
-            "animations": [
-              {
-                "loop": true,
-                "name": "walk",
-                "source": "walk"
-              },
-              {
-                "loop": true,
-                "name": "Run",
-                "source": "run"
-              },
-              {
-                "loop": false,
-                "name": "Jump",
-                "source": "jump"
-              },
-              {
-                "loop": true,
-                "name": "Idle",
-                "source": "idle"
-              },
-              {
-                "loop": false,
-                "name": "aim",
-                "source": "aim"
-              },
-              {
-                "loop": false,
-                "name": "death",
-                "source": "death"
-              },
-              {
-                "loop": false,
-                "name": "hit",
-                "source": "hit"
-              },
-              {
-                "loop": false,
-                "name": "shoot",
-                "source": "shoot"
-              }
-            ]
-          }
-        },
-        {
-          "assetStoreId": "bfeeb465a4a164b560a2215e3ff9e78e66123af43cbf7ef1f22d56fca4271c80",
-          "name": "AnimationSpineTimeSlider",
-          "type": "PanelSpriteSlider::PanelSpriteSlider",
-          "variables": [],
-          "effects": [],
-          "behaviors": [],
-          "content": {
-            "BarTopPadding": 6,
-            "BarLeftPadding": 6,
-            "BarRightPadding": 6,
-            "BarBottomPadding": 6,
-            "LabelMargin": 6,
-            "MinValue": 0,
-            "MaxValue": 1,
-            "InitialValue": 2,
-            "StepSize": 0
-          },
-          "childrenContent": {
-            "Background": {
-              "bottomMargin": 4,
-              "height": 28,
-              "leftMargin": 2,
-              "rightMargin": 2,
-              "texture": "Square White Slider Border.png",
-              "tiled": false,
-              "topMargin": 4,
-              "width": 265
-            },
-            "FillBar": {
-              "bottomMargin": 2,
-              "height": 16,
-              "leftMargin": 0,
-              "rightMargin": 0,
-              "texture": "Square White Slider Fill Bar.png",
-              "tiled": false,
-              "topMargin": 0,
-              "width": 16
-            },
-            "Label": {
-              "bold": false,
-              "italic": false,
-              "smoothed": true,
-              "underlined": false,
-              "string": "It displays the value when it changes.",
-              "font": "",
-              "textAlignment": "",
-              "characterSize": 20,
-              "color": {
-                "b": 221,
-                "g": 221,
-                "r": 221
-              },
-              "content": {
-                "bold": false,
-                "isOutlineEnabled": false,
-                "isShadowEnabled": false,
-                "italic": false,
-                "outlineColor": "255;255;255",
-                "outlineThickness": 2,
-                "shadowAngle": 90,
-                "shadowBlurRadius": 2,
-                "shadowColor": "0;0;0",
-                "shadowDistance": 4,
-                "shadowOpacity": 127,
-                "smoothed": true,
-                "underlined": false,
-                "text": "It displays the value when it changes.",
-                "font": "",
-                "textAlignment": "",
-                "verticalTextAlignment": "top",
-                "characterSize": 20,
-                "color": "221;221;221"
-              }
-            },
-            "Thumb": {
-              "bottomMargin": 2,
-              "height": 36,
-              "leftMargin": 1,
-              "rightMargin": 1,
-              "texture": "Square White Slider Thumb.png",
-              "tiled": false,
-              "topMargin": 2,
-              "width": 22
-            }
-          }
-        },
-        {
-          "assetStoreId": "",
-          "bold": false,
-          "italic": false,
-          "name": "AnimationSpineTimeLabel",
-          "smoothed": true,
-          "type": "TextObject::Text",
-          "underlined": false,
-          "variables": [],
-          "effects": [],
-          "behaviors": [],
-          "string": "Anim Sp time",
-          "font": "",
-          "textAlignment": "left",
-          "characterSize": 40,
-          "color": {
-            "b": 202,
-            "g": 202,
-            "r": 202
-          },
-          "content": {
-            "bold": false,
-            "isOutlineEnabled": false,
-            "isShadowEnabled": false,
-            "italic": false,
-            "outlineColor": "255;255;255",
-            "outlineThickness": 2,
-            "shadowAngle": 90,
-            "shadowBlurRadius": 2,
-            "shadowColor": "0;0;0",
-            "shadowDistance": 4,
-            "shadowOpacity": 127,
-            "smoothed": true,
-            "underlined": false,
-            "text": "Anim Sp time",
-            "font": "",
-            "textAlignment": "left",
-            "verticalTextAlignment": "top",
-            "characterSize": 40,
-            "color": "202;202;202"
-          }
-        },
-        {
           "assetStoreId": "615de0316452630b9f4f6a39decc82e2449b82c1afd1ff24d6470dad2922177b",
           "name": "RestartButton",
           "type": "PanelSpriteButton::PanelSpriteButton",
@@ -5436,9 +5159,6 @@
           },
           {
             "objectName": "FemalWitch"
-          },
-          {
-            "objectName": "Spine"
           },
           {
             "objectName": "ResumeButton"
@@ -5540,16 +5260,10 @@
             "objectName": "Animation2DTimeLabel"
           },
           {
-            "objectName": "AnimationSpineTimeLabel"
-          },
-          {
             "objectName": "Animation3DTimeSlider"
           },
           {
             "objectName": "Animation2DTimeSlider"
-          },
-          {
-            "objectName": "AnimationSpineTimeSlider"
           },
           {
             "objectName": "NextButton"
@@ -5650,66 +5364,6 @@
                     "value": "PanelSpriteButton::PanelSpriteButton::IsClicked"
                   },
                   "parameters": [
-                    "RestartButton",
-                    ""
-                  ]
-                }
-              ],
-              "actions": [
-                {
-                  "type": {
-                    "value": "AnimatableCapability::AnimatableBehavior::SetElapsedTime"
-                  },
-                  "parameters": [
-                    "Character",
-                    "Animation",
-                    "=",
-                    "0"
-                  ]
-                },
-                {
-                  "type": {
-                    "value": "PanelSpriteSlider::PanelSpriteSlider::SetValue"
-                  },
-                  "parameters": [
-                    "Animation2DTimeSlider",
-                    "=",
-                    "RedHero.Animation::ElapsedTime()",
-                    ""
-                  ]
-                },
-                {
-                  "type": {
-                    "value": "PanelSpriteSlider::PanelSpriteSlider::SetValue"
-                  },
-                  "parameters": [
-                    "Animation3DTimeSlider",
-                    "=",
-                    "FemalWitch.Animation::ElapsedTime()",
-                    ""
-                  ]
-                },
-                {
-                  "type": {
-                    "value": "PanelSpriteSlider::PanelSpriteSlider::SetValue"
-                  },
-                  "parameters": [
-                    "AnimationSpineTimeSlider",
-                    "=",
-                    "Spine.Animation::ElapsedTime()",
-                    ""
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "BuiltinCommonInstructions::Standard",
-              "conditions": [
-                {
-                  "type": {
-                    "value": "PanelSpriteButton::PanelSpriteButton::IsClicked"
-                  },
-                  "parameters": [
                     "RunButton",
                     ""
                   ]
@@ -5752,32 +5406,6 @@
                     "Animation",
                     "=",
                     "2"
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "BuiltinCommonInstructions::Standard",
-              "conditions": [],
-              "actions": [
-                {
-                  "type": {
-                    "value": "TextObject::String"
-                  },
-                  "parameters": [
-                    "PausedLabel",
-                    "=",
-                    "\"Paused: \" + RedHero.AnimationTest::AnimationPaused() + \", \" + Spine.AnimationTest::AnimationPaused() + \", \" + FemalWitch.AnimationTest::AnimationPaused()"
-                  ]
-                },
-                {
-                  "type": {
-                    "value": "TextObject::String"
-                  },
-                  "parameters": [
-                    "EndedLabel",
-                    "=",
-                    "\"Ended: \" + RedHero.AnimationTest::AnimationFinished() + \", \" + Spine.AnimationTest::AnimationFinished() + \", \" + FemalWitch.AnimationTest::AnimationFinished()"
                   ]
                 }
               ]
@@ -5924,34 +5552,6 @@
               "conditions": [
                 {
                   "type": {
-                    "inverted": true,
-                    "value": "AnimatableCapability::AnimatableBehavior::IsAnimationPaused"
-                  },
-                  "parameters": [
-                    "Spine",
-                    "Animation"
-                  ]
-                }
-              ],
-              "actions": [
-                {
-                  "type": {
-                    "value": "PanelSpriteSlider::PanelSpriteSlider::SetValue"
-                  },
-                  "parameters": [
-                    "AnimationSpineTimeSlider",
-                    "=",
-                    "Spine.Animation::ElapsedTime()",
-                    ""
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "BuiltinCommonInstructions::Standard",
-              "conditions": [
-                {
-                  "type": {
                     "value": "AnimatableCapability::AnimatableBehavior::IsAnimationPaused"
                   },
                   "parameters": [
@@ -6015,42 +5615,6 @@
                     "Animation",
                     "=",
                     "Animation3DTimeSlider.Value()"
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "BuiltinCommonInstructions::Standard",
-              "conditions": [
-                {
-                  "type": {
-                    "value": "AnimatableCapability::AnimatableBehavior::IsAnimationPaused"
-                  },
-                  "parameters": [
-                    "Spine",
-                    "Animation"
-                  ]
-                },
-                {
-                  "type": {
-                    "value": "PanelSpriteSlider::PanelSpriteSlider::IsBeingDragged"
-                  },
-                  "parameters": [
-                    "AnimationSpineTimeSlider",
-                    ""
-                  ]
-                }
-              ],
-              "actions": [
-                {
-                  "type": {
-                    "value": "AnimatableCapability::AnimatableBehavior::SetElapsedTime"
-                  },
-                  "parameters": [
-                    "Spine",
-                    "Animation",
-                    "=",
-                    "AnimationSpineTimeSlider.Value()"
                   ]
                 }
               ]

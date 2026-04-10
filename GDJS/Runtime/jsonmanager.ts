@@ -15,7 +15,7 @@ namespace gdjs {
     content: Object | null
   ) => void;
 
-  const resourceKinds: Array<ResourceKind> = ['json', 'tilemap', 'tileset'];
+  const resourceKinds: Array<ResourceKind> = ['json', 'tileset'];
   /**
    * JsonManager loads json files (using `XMLHttpRequest`), using the "json" resources
    * registered in the game resources.

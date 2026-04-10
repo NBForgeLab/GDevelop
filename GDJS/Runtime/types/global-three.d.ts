@@ -1,3 +1,4 @@
-/// <reference path="../../node_modules/@types/three/index.d.ts" />
+import * as THREE from 'three';
 
+export = THREE;
 export as namespace THREE;

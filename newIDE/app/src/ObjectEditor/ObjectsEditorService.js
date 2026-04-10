@@ -10,8 +10,6 @@ import ObjectPropertiesEditor from './Editors/ObjectPropertiesEditor';
 import CustomObjectPropertiesEditor from './Editors/CustomObjectPropertiesEditor';
 import Cube3DEditor from './Editors/Cube3DEditor';
 import Model3DEditor from './Editors/Model3DEditor';
-import SpineEditor from './Editors/SpineEditor';
-import SimpleTileMapEditor from './Editors/SimpleTileMapEditor';
 import MapEditor from './Editors/MapEditor';
 
 const gd: libGDevelop = global.gd;
@@ -168,36 +166,6 @@ const ObjectsEditorService = {
       ): gdObjectJsImplementation =>
         gd.asObjectJsImplementation(objectConfiguration),
       helpPagePath: '/objects/minimap',
-    },
-    'SpineObject::SpineObject': {
-      component: SpineEditor,
-      createNewObject: (
-        objectConfiguration: gdObjectConfiguration
-      ): gdObjectConfiguration =>
-        gd
-          .asObjectJsImplementation(objectConfiguration)
-          .clone()
-          .release(),
-      castToObjectType: (
-        objectConfiguration: gdObjectConfiguration
-      ): gdObjectJsImplementation =>
-        gd.asObjectJsImplementation(objectConfiguration),
-      helpPagePath: '/objects/spine',
-    },
-    'TileMap::SimpleTileMap': {
-      component: SimpleTileMapEditor,
-      createNewObject: (
-        objectConfiguration: gdObjectConfiguration
-      ): gdObjectConfiguration =>
-        gd
-          .asObjectJsImplementation(objectConfiguration)
-          .clone()
-          .release(),
-      castToObjectType: (
-        objectConfiguration: gdObjectConfiguration
-      ): gdObjectJsImplementation =>
-        gd.asObjectJsImplementation(objectConfiguration),
-      helpPagePath: '/objects/simple_tilemap',
     },
     'TiledSpriteObject::TiledSprite': {
       component: TiledSpriteEditor,

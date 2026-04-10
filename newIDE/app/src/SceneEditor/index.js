@@ -89,7 +89,7 @@ import {
   serializeObjectWithCleanDefaultBehaviorFlags,
 } from '../Utils/Serializer';
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
-import { type TileMapTileSelection } from '../InstancesEditor/TileSetVisualizer';
+type TileMapTileSelection = any;
 import { extractAsCustomObject } from './CustomObjectExtractor/CustomObjectExtractor';
 import { isVariantEditable } from '../ObjectEditor/Editors/CustomObjectPropertiesEditor';
 import { addSerializedInstances } from '../InstancesEditor/InstancesAdder';

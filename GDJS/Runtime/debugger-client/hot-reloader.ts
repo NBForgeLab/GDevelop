@@ -122,17 +122,8 @@ namespace gdjs {
           endsWith(srcFilename, 'shopify-buy.umd.polyfilled.min.js') ||
           // Don't reload pixi-multistyle-text library.
           endsWith(srcFilename, 'pixi-multistyle-text.umd.js') ||
-          // Don't reload pixi-tilemap library.
-          endsWith(srcFilename, 'pixi-tilemap.umd.js') ||
           // Don't reload bondage.js library.
-          endsWith(srcFilename, 'bondage.min.js') ||
-          // Don't reload pixi-particles library.
-          endsWith(srcFilename, 'pixi-particles-pixi-renderer.min.js') ||
-          // Don't reload pixi-tilemap amd pixi-tilemap-helper libraries.
-          endsWith(srcFilename, 'pixi-tilemap.umd.js') ||
-          endsWith(srcFilename, 'pixi-tilemap-helper.js') ||
-          // Don't reload pako library (used in pixi-tilemap)
-          endsWith(srcFilename, 'pako/dist/pako.min')
+          endsWith(srcFilename, 'bondage.min.js')
         ) {
           return false;
         }

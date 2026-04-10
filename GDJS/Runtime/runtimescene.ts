@@ -20,7 +20,7 @@ namespace gdjs {
         asyncObjectsList: gdjs.LongLivedObjectsList
       ) => void
     > = null;
-    _renderer: RuntimeSceneRenderer;
+    _renderer: RuntimeSceneThreeRenderer;
     _debuggerRenderer: gdjs.DebuggerRenderer;
     _variables: gdjs.VariablesContainer;
     _variablesByExtensionName: Map<string, gdjs.VariablesContainer>;
@@ -83,7 +83,7 @@ namespace gdjs {
         ? runtimeGame.getGameResolutionHeight()
         : 0;
 
-      this._renderer = new gdjs.RuntimeSceneRenderer(
+      this._renderer = new gdjs.RuntimeSceneThreeRenderer(
         this,
         // @ts-ignore This is needed because of test. They should mock RuntimeGame instead.
         runtimeGame ? runtimeGame.getRenderer() : null
@@ -621,7 +621,7 @@ namespace gdjs {
       return this._lastId;
     }
 
-    getRenderer(): gdjs.RuntimeScenePixiRenderer {
+    getRenderer(): gdjs.RuntimeSceneThreeRenderer {
       return this._renderer;
     }
 

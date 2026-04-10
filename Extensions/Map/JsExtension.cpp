@@ -27,7 +27,7 @@ class MapJsExtension : public gd::PlatformExtension {
     // Mark the extension as a JavaScript extension
     GetObjectMetadata("Map::Map")
         .SetIncludeFile("Extensions/Map/mapruntimeobject.js")
-        .AddIncludeFile("Extensions/Map/mapruntimeobject-pixi-renderer.js");
+        .AddIncludeFile("Extensions/Map/mapruntimeobject-three-renderer.js");
 
     GetBehaviorMetadata("Map::MapMarker")
         .SetIncludeFile("Extensions/Map/mapmarkerbehavior.js");

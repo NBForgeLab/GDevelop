@@ -217,7 +217,6 @@ namespace gdjs {
         syncLayers: true,
         syncAsyncTasks: true,
         syncSceneVisualProps: true,
-        syncFullTileMaps: true,
         syncLinkedObjects: true,
       };
 

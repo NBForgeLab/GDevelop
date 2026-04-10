@@ -202,9 +202,9 @@ export default class RenderedSprite3DInstance extends Rendered3DInstance {
     // An empty image name will display a place holder.
     const imageName = sprite ? sprite.getImageName() : '';
 
-    // Note that `getPIXITexture` could be refactored to return a promise
+    // Note that `getLegacyPixiTexture` could be refactored to return a promise
     // to make it nicer to use (no need to use "once('update')" pattern).
-    const texture = this._pixiResourcesLoader.getPIXITexture(
+    const texture = this._pixiResourcesLoader.getLegacyPixiTexture(
       this._project,
       imageName
     );

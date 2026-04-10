@@ -990,18 +990,18 @@ export const fakeTutorials: Array<Tutorial> = [
     },
   },
   {
-    id: 'intermediate-bitmap-text-and-tilemap',
-    title: 'Intermediate: Bitmap Text & Tilemap',
+    id: 'intermediate-bitmap-text',
+    title: 'Intermediate: Bitmap Text',
     titleByLocale: {
-      en: 'Intermediate: Bitmap Text & Tilemap',
-      fr: '🇫🇷 Bitmap Text et Tilemap',
+      en: 'Intermediate: Bitmap Text',
+      fr: '🇫🇷 Bitmap Text',
     },
     description:
-      'To finish off our coverage of object types in GDevelop, we go over the two currently experimental types: Bitmap Text and Tiled!',
+      'To finish off our coverage of object types in GDevelop, we go over Bitmap Text.',
     descriptionByLocale: {
       en:
-        'To finish off our coverage of object types in GDevelop, we go over the two currently experimental types: Bitmap Text and Tiled!',
-      fr: 'Les objets Bitmap Text et Tiledmap et comment les utiliser.',
+        'To finish off our coverage of object types in GDevelop, we go over Bitmap Text.',
+      fr: 'Les objets Bitmap Text et comment les utiliser.',
     },
     type: 'video',
     category: 'official-intermediate',

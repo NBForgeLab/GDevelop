@@ -9,7 +9,7 @@ import { Trans } from '@lingui/macro';
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
 import { type UnsavedChanges } from '../MainFrame/UnsavedChangesContext';
 import { type HistoryHandler } from '../VariablesList/VariablesList';
-import { type TileMapTileSelection } from '../InstancesEditor/TileSetVisualizer';
+type TileMapTileSelection = any;
 import { CompactObjectPropertiesEditor } from '../ObjectEditor/CompactObjectPropertiesEditor';
 import { type ObjectEditorTab } from '../ObjectEditor/ObjectEditorDialog';
 import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';

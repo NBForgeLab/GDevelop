@@ -2806,7 +2806,7 @@ module.exports = {
         this._pixiObject = new PIXI.Container();
         this._pixiFallbackObject = new PIXI.Graphics();
         this._pixiTexturedObject = new PIXI.Sprite(
-          this._pixiResourcesLoader.getInvalidPIXITexture()
+          this._pixiResourcesLoader.getLegacyInvalidPixiTexture()
         );
         this._pixiObject.addChild(this._pixiTexturedObject);
         this._pixiObject.addChild(this._pixiFallbackObject);
@@ -2859,7 +2859,7 @@ module.exports = {
           this._renderFallbackObject = true;
           this._renderedResourceName = null;
         } else {
-          const texture = this._pixiResourcesLoader.getPIXITexture(
+          const texture = this._pixiResourcesLoader.getLegacyPixiTexture(
             this._project,
             textureName
           );

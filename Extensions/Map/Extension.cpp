@@ -42,7 +42,7 @@ void DeclareMapExtension(gd::PlatformExtension& extension) {
       .AddParameter("object", _("Map"), "Map")
       .SetFunctionName("getZoomLevel")
       .SetIncludeFile("Extensions/Map/mapruntimeobject.js")
-      .AddIncludeFile("Extensions/Map/mapruntimeobject-pixi-renderer.js");
+      .AddIncludeFile("Extensions/Map/mapruntimeobject-three-renderer.js");
 
   mapObject
       .AddExpression("TrackedCount",

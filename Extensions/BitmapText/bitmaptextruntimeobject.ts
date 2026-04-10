@@ -80,7 +80,7 @@ namespace gdjs {
     _textAlign: string;
     _verticalTextAlignment: string;
 
-    _renderer: gdjs.BitmapTextRuntimeObjectPixiRenderer;
+    _renderer: gdjs.BitmapTextRuntimeObjectRenderer;
 
     /**
      * @param instanceContainer The container the object belongs to.
@@ -261,6 +261,10 @@ namespace gdjs {
      */
     getText(): string {
       return this._text;
+    }
+
+    getFontName(): string {
+      return this._renderer.getFontName();
     }
 
     setTint(rgbColorString: string): void {

@@ -208,7 +208,7 @@ namespace gdjs {
     protected _variables: gdjs.VariablesContainer;
 
     //Effects:
-    protected _rendererEffects: Record<string, gdjs.PixiFiltersTools.Filter> =
+    protected _rendererEffects: Record<string, gdjs.EffectsTools.Filter> =
       {};
 
     //Forces:
@@ -716,7 +716,7 @@ namespace gdjs {
 
     //Rendering:
     /**
-     * @return The internal object for a 2D rendering (PIXI.DisplayObject...)
+   * @return The internal object for a 2D rendering.
      */
     getRendererObject(): RendererObjectInterface | null | undefined {
       return undefined;

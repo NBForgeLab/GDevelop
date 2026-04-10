@@ -3347,7 +3347,7 @@ export const videoBasedCourseChapter: VideoBasedCourseChapter = {
       text:
         'Place the **Collision** object into the game scene and, while previewing the game, move the **Circle** object so it touches the Collision object. The Circle object’s animation will change when the collision occurs, but the collision happens before the images appear to overlap.\n\nOpen both the Circle and Collision objects and, through the button in the bottom left corner, adjust the collision masks of both objects so they roughly match their images.(You can add a new point(Vertex) with the “Add a vertex” button.)\n\nThen preview the game again to see how the collision detection has become more accurate.\n\n',
       hint:
-        '(Take note that only sprite and tilemap objects have adjustable collision masks. Most other objects will use their entire height and width as their collision mask, and some objects, like particles, have no collision mask at all.)',
+        '(Take note that sprite objects have adjustable collision masks. Most other objects will use their entire height and width as their collision mask, and some objects, like particles, have no collision mask at all.)',
       answer: {
         imageUrls: [
           'https://public-resources.gdevelop.io/staging/course/images/8e0a7b37-d8f9-448c-9eeb-9d73eac97b07.png',

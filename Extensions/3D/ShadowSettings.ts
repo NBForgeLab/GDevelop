@@ -308,8 +308,14 @@ namespace gdjs {
         }
 
         const biasMultiplier = getShadowBiasMultiplier(shadowMapSize);
-        const bias = options.baseBias * biasMultiplier;
-        const normalBias = options.normalBias;
+        const bias = getEffectiveShadowBaseBias(
+          options.baseBias * biasMultiplier,
+          shadowMapType
+        );
+        const normalBias = getEffectiveShadowNormalBias(
+          options.normalBias,
+          shadowMapType
+        );
         if (!previousState || previousState.bias !== bias) {
           directionalLight.shadow.bias = bias;
           didUpdate = true;
@@ -348,17 +354,17 @@ namespace gdjs {
     dq: gdjs.scene3d.shadows.ShadowQualityName;
   }
 
-  gdjs.PixiFiltersTools.registerFilterCreator(
+gdjs.EffectsTools.registerFilterCreator(
     'Scene3D::ShadowSettings',
-    new (class implements gdjs.PixiFiltersTools.FilterCreator {
+  new (class implements gdjs.EffectsTools.FilterCreator {
       makeFilter(
         target: EffectsTarget,
         effectData: EffectData
-      ): gdjs.PixiFiltersTools.Filter {
+    ): gdjs.EffectsTools.Filter {
         if (typeof THREE === 'undefined') {
-          return new gdjs.PixiFiltersTools.EmptyFilter();
+      return new gdjs.EffectsTools.EmptyFilter();
         }
-        return new (class implements gdjs.PixiFiltersTools.Filter {
+      return new (class implements gdjs.EffectsTools.Filter {
           private _isEnabled = false;
           private _settings = gdjs.scene3d.shadows.getDefaultSettings();
 

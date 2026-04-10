@@ -1,14 +1,4 @@
-/**
- * Tests for Light Object
- */
-
-/**
- * Utility function for adding light object for tests.
- * @param {gdjs.RuntimeScene} runtimeScene
- * @param {number} radius
- * @returns {gdjs.LightRuntimeObject}
- */
-const addLightObject = (runtimeScene, radius) => {
+const addLightObject = (runtimeScene, radius, intensity = 1) => {
   const lightObj = new gdjs.LightRuntimeObject(runtimeScene, {
     name: 'lightObject',
     type: 'Lighting::LightObject',
@@ -16,9 +6,9 @@ const addLightObject = (runtimeScene, radius) => {
     behaviors: [],
     effects: [],
     content: {
-      radius: radius,
+      radius,
       color: '#b4b4b4',
-      texture: '',
+      intensity,
       debugMode: false,
     },
   });
@@ -26,171 +16,60 @@ const addLightObject = (runtimeScene, radius) => {
   return lightObj;
 };
 
-/**
- * Utility function for adding light obstacle for tests.
- * @param {gdjs.RuntimeScene} runtimeScene
- * @param {number} width
- * @param {number} height
- * @returns {gdjs.RuntimeObject}
- */
-const addLightObstacle = (runtimeScene, width, height) => {
-  const obstacle = new gdjs.RuntimeObject(runtimeScene, {
-    name: 'lightObstacle',
-    type: '',
-    behaviors: [
-      {
-        type: 'Lighting::LightObstacleBehavior',
-      },
-    ],
-    effects: [],
-  });
-  obstacle.getWidth = function () {
-    return width;
-  };
-  obstacle.getHeight = function () {
-    return height;
-  };
-  runtimeScene.addObject(obstacle);
-  return obstacle;
-};
-
 describe('gdjs.LightRuntimeObject', function () {
-  PIXI.settings.FAIL_IF_MAJOR_PERFORMANCE_CAVEAT = false;
-  const runtimeGame = gdjs.getPixiRuntimeGame();
-  const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
-  runtimeScene.loadFromScene({
-    sceneData: {
-      layers: [{ name: '', visibility: true, effects: [] }],
-      variables: [],
-      behaviorsSharedData: [],
-      objects: [],
-      instances: [],
-    },
-    usedExtensionsWithVariablesData: [],
-  });
-  const lightObj = addLightObject(runtimeScene, 100);
-  lightObj.setPosition(200, 200);
+  const createScene = () => {
+    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
+    runtimeScene.loadFromScene({
+      sceneData: {
+        layers: [{ name: '', visibility: true, effects: [] }],
+        variables: [],
+        behaviorsSharedData: [],
+        objects: [],
+        instances: [],
+      },
+      usedExtensionsWithVariablesData: [],
+    });
+    return runtimeScene;
+  };
 
-  it('check object properties', function () {
+  it('creates a 3D point light with synced properties', function () {
+    const runtimeScene = createScene();
+    const lightObj = addLightObject(runtimeScene, 100, 2.5);
+
+    lightObj.setPosition(200, 150);
+    lightObj.setZ(75);
+    lightObj.updatePreRender();
+
     expect(lightObj.getRadius()).to.be(100);
     expect(lightObj.getColor()).to.eql('180;180;180');
-    expect(lightObj.getDebugMode()).to.be(false);
+    expect(lightObj.getIntensity()).to.be(2.5);
     expect(lightObj.getDrawableX()).to.be(100);
-    expect(lightObj.getDrawableY()).to.be(100);
+    expect(lightObj.getDrawableY()).to.be(50);
+    expect(lightObj.getDrawableZ()).to.be(-25);
+
+    const rendererObject = lightObj.get3DRendererObject();
+    expect(rendererObject.position.x).to.be(200);
+    expect(rendererObject.position.y).to.be(150);
+    expect(rendererObject.position.z).to.be(75);
+    expect(lightObj._renderer._pointLight.distance).to.be(100);
+    expect(lightObj._renderer._pointLight.intensity).to.be(2.5);
+    expect(lightObj._renderer._pointLight.color.getHex()).to.be(0xb4b4b4);
   });
 
-  it('bail out early while raycasting when there is no light obstacle', function () {
-    expect(lightObj._renderer._computeLightVertices()).to.eql([]);
-    lightObj._renderer._updateBuffers();
-    expect(lightObj._renderer._defaultVertexBuffer).to.eql(
-      new Float32Array([100, 300, 300, 300, 300, 100, 100, 100])
-    );
-    expect(gdjs.LightRuntimeObjectPixiRenderer._defaultIndexBuffer).to.eql(
-      new Float32Array([0, 1, 2, 0, 2, 3])
-    );
-  });
-});
+  it('updates color, range and debug helper', function () {
+    const runtimeScene = createScene();
+    const lightObj = addLightObject(runtimeScene, 120, 1);
 
-describe('Light with obstacles around it', function () {
-  PIXI.settings.FAIL_IF_MAJOR_PERFORMANCE_CAVEAT = false;
-  const runtimeGame = gdjs.getPixiRuntimeGame();
-  const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
-  runtimeScene.loadFromScene({
-    sceneData: {
-      layers: [{ name: '', visibility: true, effects: [] }],
-      variables: [],
-      behaviorsSharedData: [],
-      objects: [],
-      instances: [],
-    },
-    usedExtensionsWithVariablesData: [],
-  });
-  runtimeScene._timeManager.getElapsedTime = function () {
-    return (1 / 60) * 1000;
-  };
-  const light = addLightObject(runtimeScene, 100);
-  const obstacle = addLightObstacle(runtimeScene, 50, 50);
+    lightObj.setColor('255;128;64');
+    lightObj.setRadius(240);
+    lightObj._debugMode = true;
+    lightObj._renderer.updateDebugMode();
+    lightObj.updatePreRender();
 
-  it('Vertex and index buffers when light obstacle is present.', function () {
-    light.setPosition(200, 200);
-    obstacle.setPosition(250, 250);
-
-    runtimeScene.renderAndStep(1000 / 60);
-    light.update();
-
-    const vertexBuffer = light._renderer._vertexBuffer;
-    const indexBuffer = light._renderer._indexBuffer;
-    // prettier-ignore
-    const expectedVertexBuffer = [
-      200, 200, 100, 100.0199966430664, 100, 100, 100.0199966430664, 100, 299.9800109863281,
-      100, 300, 100, 300, 100.0199966430664, 300, 249.9875030517578, 300, 250, 299.9750061035156,
-      250, 250.00999450683594, 250, 250, 250, 250,250.00999450683594, 250, 299.9750061035156, 250,
-      300, 249.9875030517578, 300, 100.0199966430664, 300, 100, 300, 100, 299.9800109863281,
-    ];
-    // prettier-ignore
-    const expectedIndexBuffer = [
-      0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 0, 5, 6,
-      0, 6, 7, 0, 7, 8, 0, 8, 9, 0, 9, 10, 0, 10, 11,
-      0, 11, 12, 0, 12, 13, 0, 13, 14, 0, 14, 15, 0,
-      15, 16, 0, 16, 17, 0, 17, 18, 0, 18, 1,
-    ];
-
-    expectedVertexBuffer.forEach((val, index) => {
-      expect(vertexBuffer[index]).to.be(val);
-    });
-    expectedIndexBuffer.forEach((val, index) => {
-      expect(indexBuffer[index]).to.be(val);
-    });
-  });
-
-  it('Vertex and index buffers after obstacle is moved.', function () {
-    obstacle.setPosition(150, 250);
-    runtimeScene.renderAndStep(1000 / 60);
-    light.update();
-
-    const vertexBuffer = light._renderer._vertexBuffer;
-    const indexBuffer = light._renderer._indexBuffer;
-    // prettier-ignore
-    const expectedVertexBuffer = [
-      200, 200, 100, 100.0199966430664, 100, 100, 100.0199966430664, 100, 299.9800109863281,
-      100, 300, 100, 300, 100.0199966430664, 300, 299.9800109863281, 300, 300, 299.9800109863281,
-      300, 200.00999450683594, 300, 200, 250, 199.9949951171875, 250, 175.00625610351562, 250,
-      175, 250, 174.99374389648438, 250, 150.00999450683594, 250, 150, 250, 100, 299.9800109863281,
-    ];
-    // prettier-ignore
-    const expectedIndexBuffer = [
-      0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 0, 5, 6, 0,
-      6, 7, 0, 7, 8, 0, 8, 9, 0, 9, 10, 0, 10, 11, 0,
-      11, 12, 0, 12, 13, 0, 13, 14, 0, 14, 15, 0, 15,
-      16, 0, 16, 17, 0, 17, 18, 0, 18, 1,
-    ];
-
-    expectedVertexBuffer.forEach((val, index) => {
-      expect(vertexBuffer[index]).to.be(val);
-    });
-    expectedIndexBuffer.forEach((val, index) => {
-      expect(indexBuffer[index]).to.be(val);
-    });
-  });
-
-  it("Obstacle moved outside light's radius.", function () {
-    obstacle.setPosition(400, 400);
-    runtimeScene.renderAndStep(1000 / 60);
-    light.update();
-    // Ensure the fallback to simple quads. There shouldn't be anymore calculations
-    // when the obstacle is not inside light's area.
-    expect(light._renderer._computeLightVertices().length).to.eql(0);
-
-    const vertexBuffer = light._renderer._defaultVertexBuffer;
-    const indexBuffer = gdjs.LightRuntimeObjectPixiRenderer._defaultIndexBuffer;
-    const vertexData = [100, 300, 300, 300, 300, 100, 100, 100];
-    const indexData = [0, 1, 2, 0, 2, 3];
-
-    vertexData.forEach((val, index) => {
-      expect(vertexBuffer[index]).to.be(val);
-    });
-    indexData.forEach((val, index) => {
-      expect(indexBuffer[index]).to.be(val);
-    });
+    expect(lightObj.getColor()).to.eql('255;128;64');
+    expect(lightObj._renderer._pointLight.distance).to.be(240);
+    expect(lightObj._renderer._debugHelper).not.to.be(null);
+    expect(lightObj._renderer._pointLight.color.getHex()).to.be(0xff8040);
   });
 });

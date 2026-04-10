@@ -25,12 +25,10 @@ export type ResourceKind =
   | 'font'
   | 'video'
   | 'json'
-  | 'tilemap'
   | 'tileset'
   | 'bitmapFont'
   | 'model3D'
   | 'atlas'
-  | 'spine'
   | 'javascript';
 
 export const resourcesKindSupportedByResourceStore = ['audio', 'font'];
@@ -69,12 +67,6 @@ export const allResourceKindsAndMetadata = [
     },
   },
   {
-    kind: 'tilemap',
-    displayName: (t`Tile Map`: any),
-    fileExtensions: ['json', 'ldtk', 'tmj'],
-    createNewResource: (): gdTilemapResource => new gd.TilemapResource(),
-  },
-  {
     kind: 'tileset',
     displayName: (t`Tile Set`: any),
     fileExtensions: ['json', 'tsj'],
@@ -97,14 +89,6 @@ export const allResourceKindsAndMetadata = [
     displayName: (t`Atlas`: any),
     fileExtensions: ['atlas'],
     createNewResource: (): gdAtlasResource => new gd.AtlasResource(),
-  },
-  {
-    kind: 'spine',
-    displayName: (t`Spine Json`: any),
-    fileExtensions: ['json'],
-    createNewResource: (): gdSpineResource => {
-      return new gd.SpineResource();
-    },
   },
   {
     kind: 'javascript',

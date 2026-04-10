@@ -354,10 +354,10 @@ module.exports = {
         textInputObject
       )
       .setCategory('User interface')
-      // Effects are unsupported because the object is not rendered with PIXI.
+      // Effects are unsupported because the object is rendered as a DOM element.
       .setIncludeFile('Extensions/TextInput/textinputruntimeobject.js')
       .addIncludeFile(
-        'Extensions/TextInput/textinputruntimeobject-pixi-renderer.js'
+        'Extensions/TextInput/textinputruntimeobject-three-renderer.js'
       )
       .addDefaultBehavior('TextContainerCapability::TextContainerBehavior')
       .addDefaultBehavior('ResizableCapability::ResizableBehavior')

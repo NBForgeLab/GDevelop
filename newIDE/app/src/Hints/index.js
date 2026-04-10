@@ -44,12 +44,6 @@ export const getExtraObjectsInformation = (): {
       message: t`The font size is stored directly inside the font. If you want to change it, export again your font using an external editor like bmFont. Click on the help button to learn more.`,
     },
   ],
-  'TileMap::TileMap': [
-    {
-      kind: 'info',
-      message: t`The tilemap must be designed in a separated program, Tiled, that can be downloaded on mapeditor.org. Save your map as a JSON file, then select here the Atlas image that you used and the Tile map JSON file.`,
-    },
-  ],
   'TextInput::TextInputObject': [
     {
       kind: 'warning',

@@ -64,7 +64,7 @@ namespace gdjs {
     _width: float;
     _height: float;
 
-    _renderer: gdjs.PanelSpriteRuntimeObjectRenderer;
+    _renderer: gdjs.PanelSpriteRuntimeObjectThreeRenderer;
 
     _objectData: PanelSpriteObjectData;
 
@@ -86,7 +86,7 @@ namespace gdjs {
       this._tiled = panelSpriteObjectData.tiled;
       this._width = panelSpriteObjectData.width;
       this._height = panelSpriteObjectData.height;
-      this._renderer = new gdjs.PanelSpriteRuntimeObjectRenderer(
+      this._renderer = new gdjs.PanelSpriteRuntimeObjectThreeRenderer(
         this,
         instanceContainer,
         panelSpriteObjectData.texture,

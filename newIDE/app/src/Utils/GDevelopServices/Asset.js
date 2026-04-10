@@ -104,7 +104,6 @@ export type PrivateAssetPackAssetType =
   | '9patch'
   | 'tiled'
   | 'Scene3D::Model3DObject'
-  | 'TileMap::SimpleTileMap'
   | 'ParticleSystem::ParticleEmitter'
   | string;
 

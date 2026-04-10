@@ -178,7 +178,7 @@ export default class LegacyRenderedCustomObjectInstance
     if (this.childrenRenderedInstances.length === 0) {
       // Show a placeholder.
       this._pixiObject = new PIXI.Sprite(
-        PixiResourcesLoader.getInvalidPIXITexture()
+        PixiResourcesLoader.getLegacyInvalidPixiTexture()
       );
       this._pixiContainer.addChild(this._pixiObject);
     }

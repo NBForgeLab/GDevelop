@@ -255,11 +255,9 @@ class GD_CORE_API ValueTypeMetadata {
              parameterType == "bitmapFontResource" ||
              parameterType == "imageResource" ||
              parameterType == "jsonResource" ||
-             parameterType == "tilemapResource" ||
              parameterType == "tilesetResource" ||
              parameterType == "model3DResource" ||
              parameterType == "atlasResource" ||
-             parameterType == "spineResource" ||
              // Deprecated, old parameter types:
              parameterType == "soundfile" ||
              parameterType == "musicfile" ||

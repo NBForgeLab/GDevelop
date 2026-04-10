@@ -1204,11 +1204,23 @@ void ExporterHelper::AddLibsInclude(bool pixiRenderers,
   }
 
   if (pixiInThreeRenderers || isInGameEdition) {
-    InsertUnique(includesFiles, "pixi-renderers/three.js");
-    InsertUnique(includesFiles, "pixi-renderers/ThreeAddons.js");
-    InsertUnique(includesFiles, "pixi-renderers/draco/gltf/draco_decoder.wasm");
-    InsertUnique(includesFiles,
-                 "pixi-renderers/draco/gltf/draco_wasm_wrapper.js");
+    InsertUnique(includesFiles, "rendering-libs/three.js");
+    InsertUnique(includesFiles, "rendering-libs/ThreeAddons.js");
+    InsertUnique(includesFiles, "rendering-libs/draco/gltf/draco_decoder.wasm");
+    InsertUnique(includesFiles, "rendering-libs/draco/gltf/draco_wasm_wrapper.js");
+    // Three.js renderers for 3D-first scenes
+    InsertUnique(includesFiles, "three-renderers/resource-manager.js");
+    InsertUnique(includesFiles, "three-renderers/camera-system.js");
+    InsertUnique(includesFiles, "three-renderers/layer-three-renderer.js");
+    InsertUnique(includesFiles, "three-renderers/runtimescene-three-renderer.js");
+    InsertUnique(includesFiles, "three-renderers/spriteruntimeobject-three-renderer.js");
+    InsertUnique(includesFiles, "three-renderers/CustomRuntimeObject2DThreeRenderer.js");
+    InsertUnique(includesFiles, "three-renderers/particleemitterobject-three.js");
+    InsertUnique(includesFiles, "three-renderers/loadingscreen-three-renderer.js");
+    InsertUnique(includesFiles, "Extensions/TextObject/textruntimeobject-three-renderer.js");
+    InsertUnique(includesFiles, "Extensions/TiledSpriteObject/tiledspriteruntimeobject-three-renderer.js");
+    InsertUnique(includesFiles, "Extensions/PrimitiveDrawing/shapepainterruntimeobject-three-renderer.js");
+    InsertUnique(includesFiles, "Extensions/PanelSpriteObject/panelspriteruntimeobject-three-renderer.js");
     // Extensions in JS may use it.
     InsertUnique(includesFiles, "Extensions/3D/Scene3DTools.js");
     InsertUnique(includesFiles, "Extensions/3D/A_RuntimeObject3D.js");
@@ -1218,21 +1230,13 @@ void ExporterHelper::AddLibsInclude(bool pixiRenderers,
                  "Extensions/3D/CustomRuntimeObject3DRenderer.js");
   }
   if (pixiRenderers || isInGameEdition) {
-    InsertUnique(includesFiles, "pixi-renderers/pixi.js");
-    InsertUnique(includesFiles, "pixi-renderers/pixi-filters-tools.js");
-    InsertUnique(includesFiles, "pixi-renderers/runtimegame-pixi-renderer.js");
-    InsertUnique(includesFiles, "pixi-renderers/runtimescene-pixi-renderer.js");
-    InsertUnique(includesFiles, "pixi-renderers/layer-pixi-renderer.js");
-    InsertUnique(includesFiles, "pixi-renderers/pixi-image-manager.js");
-    InsertUnique(includesFiles, "pixi-renderers/pixi-bitmapfont-manager.js");
-    InsertUnique(includesFiles,
-                 "pixi-renderers/spriteruntimeobject-pixi-renderer.js");
-    InsertUnique(includesFiles,
-                 "pixi-renderers/CustomRuntimeObject2DPixiRenderer.js");
-    InsertUnique(includesFiles, "pixi-renderers/DebuggerPixiRenderer.js");
-    InsertUnique(includesFiles,
-                 "pixi-renderers/loadingscreen-pixi-renderer.js");
-    InsertUnique(includesFiles, "pixi-renderers/pixi-effects-manager.js");
+    InsertUnique(includesFiles, "rendering-libs/pixi.js");
+    InsertUnique(includesFiles, "effects-tools.js");
+    InsertUnique(includesFiles, "effects-manager.js");
+    InsertUnique(includesFiles, "runtimegame-renderer.js");
+    InsertUnique(includesFiles, "image-manager.js");
+    InsertUnique(includesFiles, "bitmapfont-manager.js");
+    InsertUnique(includesFiles, "debugger-renderer.js");
     InsertUnique(includesFiles, "howler-sound-manager/howler.min.js");
     InsertUnique(includesFiles, "howler-sound-manager/howler-sound-manager.js");
     InsertUnique(includesFiles,
@@ -1257,8 +1261,7 @@ void ExporterHelper::RemoveIncludes(bool pixiRenderers,
   if (pixiRenderers) {
     for (size_t i = 0; i < includesFiles.size();) {
       const gd::String &includeFile = includesFiles[i];
-      if (includeFile.find("pixi-renderer") != gd::String::npos ||
-          includeFile.find("pixi-filter") != gd::String::npos)
+      if (includeFile.find("pixi-renderer") != gd::String::npos)
         includesFiles.erase(includesFiles.begin() + i);
       else
         ++i;

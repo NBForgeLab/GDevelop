@@ -99,7 +99,7 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
     const panelSprite = gd.asPanelSpriteConfiguration(
       this._associatedObjectConfiguration
     );
-    const texture = PixiResourcesLoader.getLoadingPIXITexture();
+    const texture = PixiResourcesLoader.getLegacyLoadingPixiTexture();
 
     this._tiled = panelSprite.isTiled();
     var StretchedSprite = !this._tiled ? PIXI.Sprite : PIXI.TilingSprite;
@@ -283,7 +283,7 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
     this._rightMargin = panelSprite.getRightMargin();
     this._bottomMargin = panelSprite.getBottomMargin();
 
-    const texture = PixiResourcesLoader.getPIXITexture(
+    const texture = PixiResourcesLoader.getLegacyPixiTexture(
       this._project,
       this._textureName
     );

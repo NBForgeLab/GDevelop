@@ -30,9 +30,9 @@ namespace gdjs {
   // Register the effect type and associate it with a "filter creator" object, containing
   // functions to create and manipulate the filter.
   // Don't forget your extension name in the effect type!
-  gdjs.PixiFiltersTools.registerFilterCreator(
+  gdjs.EffectsTools.registerFilterCreator(
     'MyDummyExtension::DummyEffect',
-    new (class extends gdjs.PixiFiltersTools.PixiFilterCreator {
+    new (class extends gdjs.EffectsTools.EffectCreator {
       // MakePIXIFilter should return a PIXI.Filter, that will be applied on the PIXI.Container (for layers)
       // or the PIXI.DisplayObject (for objects).
       makePIXIFilter(layer, effectData) {
@@ -54,8 +54,8 @@ namespace gdjs {
             layer
               .getRuntimeScene()
               .getGame()
-              .getImageManager() as gdjs.PixiImageManager
-          ).getPIXITexture(effectData.stringParameters.someImage)
+              .getImageManager() as gdjs.ImageManager
+          ).getLegacyPixiTexture(effectData.stringParameters.someImage)
         );
         return filter;
       }
@@ -72,7 +72,7 @@ namespace gdjs {
         value: number
       ) {
         if (parameterName === 'opacity') {
-          filter.uniforms.opacity = gdjs.PixiFiltersTools.clampValue(
+          filter.uniforms.opacity = gdjs.EffectsTools.clampValue(
             value,
             0,
             1

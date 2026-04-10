@@ -86,9 +86,6 @@ const unswappableObjectTypes = [
   'TextObject::Text',
   'Lighting::LightObject',
   'PrimitiveDrawing::Drawer',
-  'TileMap::TileMap',
-  'TileMap::CollisionMask',
-  'TileMap::SimpleTileMap',
   'Video::VideoObject',
 ];
 export const canSwapAssetOfObject = (object: gdObject): boolean =>
@@ -150,7 +147,7 @@ const getFirstFrameDimension = (
   if (direction.sprites.length === 0) {
     return null;
   }
-  const image = PixiResourcesLoader.getPIXITexture(
+  const image = PixiResourcesLoader.getLegacyPixiTexture(
     project,
     direction.sprites[0].image
   );

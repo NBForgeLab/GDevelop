@@ -97,9 +97,9 @@ const localResourceSources: Array<ResourceSource> = [
           path => !isPathInProjectFolder(project, path)
         );
 
-        // Some resources, like tilemaps, can have references to other files.
+        // Some resources can have references to other files.
         // We parse these files, optionally copy them, then create a mapping from the previous file name
-        // as written inside the tilemap to the name of the resource that is representing this file.
+        // as written inside the resource file to the name of the resource that is representing this file.
         const filesWithEmbeddedResources = new Map<string, EmbeddedResources>();
         const parseEmbeddedResources = embeddedResourcesParsers[kind];
         const recursivelyParseEmbeddedResources = async (
@@ -178,7 +178,7 @@ const localResourceSources: Array<ResourceSource> = [
 
         // In case of resources embedded inside others,
         // create a mapping from the file name
-        // as written inside the resource (e.g: the tilemap)
+        // as written inside the resource file
         // to the name of the resource that was created to
         // represent this file.
         filesWithMappedResources = createAndMapEmbeddedResources(

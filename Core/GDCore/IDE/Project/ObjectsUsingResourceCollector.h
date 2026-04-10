@@ -64,9 +64,6 @@ public:
   virtual void ExposeJson(gd::String& otherResourceName) override {
     MatchResourceName(otherResourceName);
   };
-  virtual void ExposeTilemap(gd::String& otherResourceName) override {
-    MatchResourceName(otherResourceName);
-  };
   virtual void ExposeTileset(gd::String& otherResourceName) override {
     MatchResourceName(otherResourceName);
   };
@@ -83,9 +80,6 @@ public:
     MatchResourceName(otherResourceName);
   };
   virtual void ExposeAtlas(gd::String& otherResourceName) override {
-    MatchResourceName(otherResourceName);
-  };
-  virtual void ExposeSpine(gd::String& otherResourceName) override {
     MatchResourceName(otherResourceName);
   };
 

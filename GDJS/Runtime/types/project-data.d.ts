@@ -54,7 +54,6 @@ declare type GetNetworkSyncDataOptions = {
   syncLayers?: boolean;
   syncAsyncTasks?: boolean;
   syncSceneVisualProps?: boolean;
-  syncFullTileMaps?: boolean;
   syncLinkedObjects?: boolean;
 };
 
@@ -616,11 +615,9 @@ declare type ResourceKind =
   | 'font'
   | 'video'
   | 'json'
-  | 'tilemap'
   | 'tileset'
   | 'bitmapFont'
   | 'model3D'
   | 'atlas'
-  | 'spine'
   | 'internal-in-game-editor-only-svg'
   | 'fake-resource-kind-for-testing-only';

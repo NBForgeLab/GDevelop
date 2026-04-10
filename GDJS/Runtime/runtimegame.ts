@@ -487,7 +487,7 @@ namespace gdjs {
      * Get the gdjs.ImageManager of the RuntimeGame.
      * @return The image manager.
      */
-    getImageManager(): gdjs.PixiImageManager {
+    getImageManager(): gdjs.ImageManager {
       return this._resourcesLoader.getImageManager();
     }
 
@@ -523,24 +523,6 @@ namespace gdjs {
      */
     getModel3DManager(): gdjs.Model3DManager {
       return this._resourcesLoader.getModel3DManager();
-    }
-
-    /**
-     * Get the Spine manager of the game, used to load and construct spine skeletons from game
-     * resources.
-     * @return The Spine manager for the game
-     */
-    getSpineManager(): gdjs.SpineManager | null {
-      return this._resourcesLoader.getSpineManager();
-    }
-
-    /**
-     * Get the Spine Atlas manager of the game, used to load atlases from game
-     * resources.
-     * @return The Spine Atlas manager for the game
-     */
-    getSpineAtlasManager(): gdjs.SpineAtlasManager | null {
-      return this._resourcesLoader.getSpineAtlasManager();
     }
 
     /**

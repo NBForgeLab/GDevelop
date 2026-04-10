@@ -58,7 +58,7 @@ export const getObjectSizeInfo = (
         textureWidth = assetShortHeader.width;
         textureHeight = assetShortHeader.height;
       } else {
-        const texture = pixiResourcesLoader.getPIXITexture(
+        const texture = pixiResourcesLoader.getLegacyPixiTexture(
           project,
           firstSprite.getImageName()
         );

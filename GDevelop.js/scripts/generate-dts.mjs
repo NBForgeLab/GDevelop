@@ -63,11 +63,6 @@ const castFunctions = {
     inputType: 'ObjectConfiguration',
     returnType: 'Model3DObjectConfiguration',
   },
-  SpineConfiguration: {
-    inputType: 'ObjectConfiguration',
-    returnType: 'SpineObjectConfiguration',
-  },
-
   ObjectJsImplementation: { returnType: 'ObjectJsImplementation' },
 
   ImageResource: { inputType: 'Resource', returnType: 'ImageResource' },

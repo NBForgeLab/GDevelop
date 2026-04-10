@@ -28,7 +28,9 @@ namespace gdjs {
       // You can also create a PIXI sprite or other PIXI object
       // this._imageManager = instanceContainer.getGame().getImageManager();
       // if ( this._sprite === undefined )
-      //     this._sprite = new PIXI.Sprite(this._imageManager.getInvalidPIXITexture());
+      //     this._sprite = new PIXI.Sprite(
+      //       this._imageManager.getLegacyInvalidPixiTexture()
+      //     );
       this._text.anchor.x = 0.5;
       this._text.anchor.y = 0.5;
       instanceContainer

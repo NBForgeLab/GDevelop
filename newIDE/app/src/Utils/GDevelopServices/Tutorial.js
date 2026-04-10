@@ -85,11 +85,8 @@ export const getObjectTutorialIds = (type: string): Array<string> => {
   switch (type) {
     case 'ParticleSystem::ParticleEmitter':
       return ['in-depth-tutorial-particle-emitter'];
-    case 'Lighting::LightObject':
-      return ['flickering-dynamic-light-effect'];
     case 'BitmapText::BitmapTextObject':
-    case 'TileMap::TileMap':
-      return ['intermediate-bitmap-text-and-tilemap'];
+      return [];
     default:
       return [];
   }
