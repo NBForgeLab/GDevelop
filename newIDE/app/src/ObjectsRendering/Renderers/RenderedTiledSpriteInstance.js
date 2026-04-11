@@ -127,7 +127,7 @@ export default class RenderedTiledSpriteInstance extends RenderedInstance {
     this._threeObject.scale.set(width, height, 1);
     this._threeObject.position.x = this._instance.getX() + width / 2;
     this._threeObject.position.y = this._instance.getY() + height / 2;
-    this._threeObject.rotation.z = -RenderedInstance.toRad(
+    this._threeObject.rotation.z = RenderedInstance.toRad(
       this._instance.getAngle()
     );
 

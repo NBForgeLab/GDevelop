@@ -67,7 +67,7 @@ export default class RenderedSprite3DInstance extends Rendered3DInstance {
     this._layerGroup.add(this._threeObject);
 
     this.updateSprite();
-    const geometry = new THREE.PlaneGeometry(1, -1);
+    const geometry = new THREE.PlaneGeometry(1, 1);
     // Set a white tint.
     vertexColors.length = geometry.attributes.position.count * 3;
     vertexColors.fill(1);

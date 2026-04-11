@@ -3202,8 +3202,8 @@ export class ExportOptions extends EmscriptenObject {
 export class Exporter extends EmscriptenObject {
   constructor(fs: AbstractFileSystem, gdjsRoot: string);
   setCodeOutputDirectory(path: string): void;
-  exportProjectForPixiPreview(options: PreviewExportOptions): boolean;
-  exportWholePixiProject(options: ExportOptions): boolean;
+  exportProjectForPreview(options: PreviewExportOptions): boolean;
+  exportWholeProject(options: ExportOptions): boolean;
   serializeProjectData(project: Project, options: PreviewExportOptions, projectDataElement: SerializerElement): void;
   serializeRuntimeGameOptions(options: PreviewExportOptions, runtimeGameOptionsElement: SerializerElement): void;
   getLastError(): string;

@@ -2,8 +2,8 @@
 declare class gdjsExporter {
   constructor(fs: gdAbstractFileSystem, gdjsRoot: string): void;
   setCodeOutputDirectory(path: string): void;
-  exportProjectForPixiPreview(options: gdPreviewExportOptions): boolean;
-  exportWholePixiProject(options: gdExportOptions): boolean;
+  exportProjectForPreview(options: gdPreviewExportOptions): boolean;
+  exportWholeProject(options: gdExportOptions): boolean;
   serializeProjectData(project: gdProject, options: gdPreviewExportOptions, projectDataElement: gdSerializerElement): void;
   serializeRuntimeGameOptions(options: gdPreviewExportOptions, runtimeGameOptionsElement: gdSerializerElement): void;
   getLastError(): string;

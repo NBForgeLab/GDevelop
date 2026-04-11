@@ -567,7 +567,7 @@ export default class RenderedCustomObjectInstance extends Rendered3DInstance
       this._threeObject.position.y =
         this._instance.getY() + unscaledCenterY * Math.abs(scaleY);
 
-      this._threeObject.rotation.z = -RenderedInstance.toRad(
+      this._threeObject.rotation.z = RenderedInstance.toRad(
         this._instance.getAngle()
       );
       this._threeObject.scale.x = scaleX;
@@ -599,7 +599,7 @@ export default class RenderedCustomObjectInstance extends Rendered3DInstance
       this._threeObject.position.x = this._instance.getX() + centerX - originX;
       this._threeObject.position.y = this._instance.getY() + centerY - originY;
 
-      this._threeObject.rotation.z = -RenderedInstance.toRad(
+      this._threeObject.rotation.z = RenderedInstance.toRad(
         this._instance.getAngle()
       );
       this._threeObject.scale.x = 1;

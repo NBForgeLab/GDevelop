@@ -110,7 +110,7 @@ export const browserHTML5ExportPipeline: ExportPipeline<
         fallbackAuthor.username
       );
     }
-    exporter.exportWholePixiProject(exportOptions);
+    exporter.exportWholeProject(exportOptions);
     exportOptions.delete();
     exporter.delete();
 

@@ -113,7 +113,7 @@ export const browserFacebookInstantGamesExportPipeline: ExportPipeline<
         fallbackAuthor.username
       );
     }
-    exporter.exportWholePixiProject(exportOptions);
+    exporter.exportWholeProject(exportOptions);
     exportOptions.delete();
     exporter.delete();
 

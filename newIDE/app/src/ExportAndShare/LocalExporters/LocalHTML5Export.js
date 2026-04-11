@@ -133,7 +133,7 @@ export const localHTML5ExportPipeline: ExportPipeline<
         fallbackAuthor.username
       );
     }
-    exporter.exportWholePixiProject(exportOptions);
+    exporter.exportWholeProject(exportOptions);
     exportOptions.delete();
     exporter.delete();
 

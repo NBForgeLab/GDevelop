@@ -229,7 +229,7 @@ export default class BrowserS3PreviewLauncher extends React.Component<
       if (gdevelopResourceToken)
         previewExportOptions.setGDevelopResourceToken(gdevelopResourceToken);
 
-      exporter.exportProjectForPixiPreview(previewExportOptions);
+      exporter.exportProjectForPreview(previewExportOptions);
       previewExportOptions.delete();
       exporter.delete();
 

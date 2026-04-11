@@ -221,10 +221,9 @@ namespace gdjs {
         );
       }
       if (centerPoint[1] !== null) {
-        // The model is flipped on Y axis.
         threeObject.position.y = -(
           boundingBox.min.y +
-          modelHeight * (1 - centerPoint[1])
+          modelHeight * centerPoint[1]
         );
       }
       if (centerPoint[2] !== null) {
@@ -248,14 +247,11 @@ namespace gdjs {
       const scaleZ = modelDepth < epsilon ? 1 : 1 / modelDepth;
 
       const scaleMatrix = new THREE.Matrix4();
-      // Flip on Y because the Y axis is on the opposite side of direct basis.
-      // It avoids models to be like a mirror refection.
-      scaleMatrix.makeScale(scaleX, -scaleY, scaleZ);
+      scaleMatrix.makeScale(scaleX, scaleY, scaleZ);
       threeObject.updateMatrix();
       threeObject.applyMatrix4(scaleMatrix);
 
       // Store the normalization scale for mesh parts positioning
-      // Note: Y scale is negated in the matrix but we store the absolute value
       this._model3DRuntimeObject._meshParts.setNormalizationScale(
         scaleX,
         scaleY,
@@ -291,9 +287,6 @@ namespace gdjs {
         modelHeight < epsilon ? 0 : -boundingBox.min.y / modelHeight;
       this._modelOriginPoint[2] =
         modelDepth < epsilon ? 0 : -boundingBox.min.z / modelDepth;
-
-      // The model is flipped on Y axis.
-      this._modelOriginPoint[1] = 1 - this._modelOriginPoint[1];
 
       if (keepAspectRatio) {
         // Reduce the object dimensions to keep aspect ratio.

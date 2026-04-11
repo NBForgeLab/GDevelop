@@ -30,11 +30,12 @@ namespace gdjs {
       this._instanceContainer = instanceContainer;
       this._radius = runtimeObject.getRadius();
       const objectColor = runtimeObject._color;
-      this._color = new THREE.Color(
-        objectColor[0] / 255,
-        objectColor[1] / 255,
-        objectColor[2] / 255
+      const hexColor = gdjs.rgbToHexNumber(
+        objectColor[0],
+        objectColor[1],
+        objectColor[2]
       );
+      this._color = new THREE.Color(hexColor);
       this._root = new THREE.Group();
       this._pointLight = new THREE.PointLight(
         this._color,
@@ -127,11 +128,12 @@ namespace gdjs {
 
     updateColor(): void {
       const objectColor = this._object._color;
-      this._color.setRGB(
-        objectColor[0] / 255,
-        objectColor[1] / 255,
-        objectColor[2] / 255
+      const hexColor = gdjs.rgbToHexNumber(
+        objectColor[0],
+        objectColor[1],
+        objectColor[2]
       );
+      this._color.setHex(hexColor);
       this._pointLight.color.copy(this._color);
       if (this._debugHelper) {
         this._debugHelper.color = this._color;

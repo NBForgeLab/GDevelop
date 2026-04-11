@@ -3724,7 +3724,7 @@ describe('libGD.js', function () {
         '/path/for/export/'
       );
       previewExportOptions.setLayoutName('Scene');
-      exporter.exportProjectForPixiPreview(previewExportOptions);
+      exporter.exportProjectForPreview(previewExportOptions);
       previewExportOptions.delete();
       exporter.delete();
 

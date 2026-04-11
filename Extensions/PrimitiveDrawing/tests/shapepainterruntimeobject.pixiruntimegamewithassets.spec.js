@@ -1,6 +1,6 @@
 // @ts-check
 
-describe('gdjs.ShapePainterRuntimeObject (using a PixiJS RuntimeGame with assets)', function () {
+describe('gdjs.ShapePainterRuntimeObject (using a Three.js RuntimeGame with assets)', function () {
   /**
    * @param {gdjs.RuntimeScene} runtimeScene
    */

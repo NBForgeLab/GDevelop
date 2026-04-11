@@ -141,7 +141,6 @@ namespace gdjs {
       gameState: {
         sceneNames,
         isWebGLSupported: runtimeGame.getRenderer().isWebGLSupported(),
-        hasPixiRenderer: !!runtimeGame.getRenderer().getPIXIRenderer(),
         hasThreeRenderer: !!runtimeGame.getRenderer().getThreeRenderer(),
         resourcesTotalCount:
           runtimeGame.getGameData().resources.resources.length,
@@ -720,10 +719,6 @@ namespace gdjs {
         '_gameRenderer',
         '_imageManager',
         '_rendererEffects',
-        // Exclude PIXI textures:
-        'baseTexture',
-        '_baseTexture',
-        '_invalidTexture',
       ];
       const stringifiedMessage = circularSafeStringify(
         message,

@@ -13,17 +13,6 @@ namespace gdjs {
     );
   };
 
-  const applyTextureSettings = (
-    texture: PIXI.Texture | undefined,
-    resourceData: ResourceData
-  ) => {
-    if (!texture) return;
-
-    if (!resourceData.smoothed) {
-      texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-    }
-  };
-
   const applyThreeTextureSettings = (
     threeTexture: THREE.Texture,
     resourceData: ResourceData | null
@@ -43,12 +32,6 @@ namespace gdjs {
   export class ImageManagerImpl implements gdjs.ResourceManager {
     _threeAnimationFrameTextureManager: any;
     private _invalidImageSource: HTMLCanvasElement;
-    private _invalidTexture: PIXI.Texture | null = null;
-
-    /**
-     * Map associating a resource name to the loaded PixiJS texture.
-     */
-    private _loadedTextures = new gdjs.ResourceCache<PIXI.Texture>();
 
     /**
      * Map associating a resource name to the loaded Three.js texture.
@@ -81,126 +64,23 @@ namespace gdjs {
       this._loadedThreeTextures = new Hashtable();
     }
 
+    /**
+     * Get a placeholder Three.js texture for missing resources.
+     * @returns A magenta placeholder texture
+     */
+    private _getPlaceholderThreeTexture(): THREE.Texture {
+      const placeholderTexture = new THREE.Texture(this._invalidImageSource);
+      placeholderTexture.magFilter = THREE.NearestFilter;
+      placeholderTexture.minFilter = THREE.NearestFilter;
+      placeholderTexture.wrapS = THREE.RepeatWrapping;
+      placeholderTexture.wrapT = THREE.RepeatWrapping;
+      placeholderTexture.colorSpace = THREE.SRGBColorSpace;
+      placeholderTexture.needsUpdate = true;
+      return placeholderTexture;
+    }
+
     getResourceKinds(): ResourceKind[] {
       return resourceKinds;
-    }
-
-    /**
-     * Return the legacy Pixi texture associated to the specified resource name.
-     * Returns a placeholder texture if not found.
-     * @param resourceName The name of the resource
-     * @returns The requested texture, or a placeholder if not found.
-     */
-    getLegacyPixiTexture(resourceName: string): PIXI.Texture {
-      const resource = this._getImageResource(resourceName);
-      if (!resource) {
-        logger.warn(
-          'Unable to find texture for resource "' + resourceName + '".'
-        );
-        return this.getLegacyInvalidPixiTexture();
-      }
-
-      const existingTexture = this._loadedTextures.get(resource);
-      if (!existingTexture) {
-        const imageSource = this._loadedImageSources.get(resource);
-        if (!imageSource) {
-          return this.getLegacyInvalidPixiTexture();
-        }
-
-        return this._cachePixiTextureFromImageSource(resource, imageSource);
-      }
-      if (existingTexture.destroyed) {
-        logger.error('Texture for ' + resourceName + ' is not valid anymore.');
-        return this.getLegacyInvalidPixiTexture();
-      }
-      if (!existingTexture.valid) {
-        logger.error(
-          'Texture for ' +
-            resourceName +
-            ' is not valid anymore (or never was).'
-        );
-        return this.getLegacyInvalidPixiTexture();
-      }
-
-      return existingTexture;
-    }
-
-    /**
-     * Return the legacy Pixi texture associated to the specified resource name.
-     * If not found in the loaded textures, this method will try to load it.
-     * Warning: this method should only be used in specific cases that cannot rely on
-     * the initial resources loading of the game, such as the splashscreen.
-     * @param resourceName The name of the resource
-     * @returns The requested texture, or a placeholder if not valid.
-     */
-    getOrLoadLegacyPixiTexture(resourceName: string): PIXI.Texture {
-      const resource = this._getImageResource(resourceName);
-      if (!resource) {
-        logger.warn(
-          'Unable to find texture for resource "' + resourceName + '".'
-        );
-        return this.getLegacyInvalidPixiTexture();
-      }
-
-      const existingTexture = this._loadedTextures.get(resource);
-      if (existingTexture) {
-        if (existingTexture.valid) {
-          return existingTexture;
-        } else {
-          logger.error(
-            'Texture for ' +
-              resourceName +
-              ' is not valid anymore (or never was).'
-          );
-          return this.getLegacyInvalidPixiTexture();
-        }
-      }
-
-      logger.log('Loading texture for resource "' + resourceName + '"...');
-      if (resource.kind === 'video') {
-        const file = resource.file;
-        const url = this._resourceLoader.getFullUrl(file);
-        const texture = PIXI.Texture.from(url, {
-          resourceOptions: {
-            crossorigin: this._resourceLoader.checkIfCredentialsRequired(file)
-              ? 'use-credentials'
-              : 'anonymous',
-          },
-        }).on('error', (error) => {
-          logFileLoadingError(file, error);
-        });
-        if (!texture) {
-          throw new Error(
-            'Texture loading by PIXI returned nothing for file ' +
-              file +
-              ' behind url ' +
-              url
-          );
-        }
-        applyTextureSettings(texture, resource);
-        this._loadedTextures.set(resource, texture);
-        return texture;
-      }
-
-      const imageSource = this._loadedImageSources.get(resource);
-      if (imageSource) {
-        return this._cachePixiTextureFromImageSource(resource, imageSource);
-      }
-
-      const file = resource.file;
-      const url = this._resourceLoader.getFullUrl(file);
-      const texture = PIXI.Texture.from(url, {
-        resourceOptions: {
-          crossorigin: this._resourceLoader.checkIfCredentialsRequired(file)
-            ? 'use-credentials'
-            : 'anonymous',
-        },
-      }).on('error', (error) => {
-        logFileLoadingError(file, error);
-      });
-      applyTextureSettings(texture, resource);
-      this._loadedTextures.set(resource, texture);
-      return texture;
     }
 
     /**
@@ -210,10 +90,25 @@ namespace gdjs {
      * @returns The requested texture, or a placeholder if not found.
      */
     getThreeTexture(resourceName: string): THREE.Texture {
+      // Handle empty or undefined resource names
+      if (!resourceName) {
+        return this._getPlaceholderThreeTexture();
+      }
+
       const loadedThreeTexture = this._loadedThreeTextures.get(resourceName);
       if (loadedThreeTexture) {
         return loadedThreeTexture;
       }
+
+      // Check if resource exists before trying to load it
+      const resource = this._getImageResource(resourceName);
+      if (!resource) {
+        logger.warn(
+          `Texture for resource "${resourceName}" not found. Using placeholder.`
+        );
+        return this._getPlaceholderThreeTexture();
+      }
+
       const image = this._getImageSource(resourceName);
 
       const threeTexture = new THREE.Texture(image);
@@ -223,8 +118,6 @@ namespace gdjs {
       threeTexture.wrapT = THREE.RepeatWrapping;
       threeTexture.colorSpace = THREE.SRGBColorSpace;
       threeTexture.needsUpdate = true;
-
-      const resource = this._getImageResource(resourceName);
 
       applyThreeTextureSettings(threeTexture, resource);
       this._loadedThreeTextures.put(resourceName, threeTexture);
@@ -236,7 +129,7 @@ namespace gdjs {
       const resource = this._getImageResource(resourceName);
       if (!resource) {
         throw new Error(
-          `Can't load texture for missing resource "${resourceName}".`
+          `Can't load texture source for missing resource "${resourceName}".`
         );
       }
 
@@ -248,25 +141,6 @@ namespace gdjs {
       }
 
       return cachedImageSource;
-    }
-
-    private _cachePixiTextureFromImageSource(
-      resource: ResourceData,
-      imageSource: HTMLImageElement
-    ): PIXI.Texture {
-      const existingTexture = this._loadedTextures.get(resource);
-      if (
-        existingTexture &&
-        !existingTexture.destroyed &&
-        existingTexture.valid
-      ) {
-        return existingTexture;
-      }
-
-      const texture = PIXI.Texture.from(imageSource);
-      applyTextureSettings(texture, resource);
-      this._loadedTextures.set(resource, texture);
-      return texture;
     }
 
     /**
@@ -390,60 +264,12 @@ namespace gdjs {
       return material;
     }
 
-    /**
-     * Return the legacy Pixi video texture associated to the specified resource name.
-     * Returns a placeholder texture if not found.
-     * @param resourceName The name of the resource to get.
-     */
-    getLegacyPixiVideoTexture(resourceName: string) {
-      if (resourceName === '') {
-        return this.getLegacyInvalidPixiTexture();
-      }
-      const resource = this._getImageResource(resourceName);
-      if (!resource) {
-        logger.warn(
-          'Unable to find video texture for resource "' + resourceName + '".'
-        );
-        return this.getLegacyInvalidPixiTexture();
-      }
-
-      const texture = this._loadedTextures.get(resource);
-      if (texture) {
-        return texture;
-      }
-
-      const videoSource = this._loadedVideoSources.get(resource);
-      if (!videoSource) {
-        return this.getLegacyInvalidPixiTexture();
-      }
-
-      const videoTexture = PIXI.Texture.from(videoSource, {
-        resourceOptions: {
-          autoPlay: false,
-        },
-      });
-      applyTextureSettings(videoTexture, resource);
-      this._loadedTextures.set(resource, videoTexture);
-      return videoTexture;
-    }
-
     private _getImageResource = (resourceName: string): ResourceData | null => {
       const resource = this._resourceLoader.getResource(resourceName);
       return resource && this.getResourceKinds().includes(resource.kind)
         ? resource
         : null;
     };
-
-    /**
-     * Return a legacy Pixi texture which can be used as a placeholder when no
-     * suitable texture can be found.
-     */
-    getLegacyInvalidPixiTexture() {
-      if (!this._invalidTexture || this._invalidTexture.destroyed) {
-        this._invalidTexture = PIXI.Texture.from(this._invalidImageSource);
-      }
-      return this._invalidTexture;
-    }
 
     getResourceUrl(resourceName: string): string | null {
       const resource = this._getImageResource(resourceName);
@@ -456,7 +282,7 @@ namespace gdjs {
 
     /**
      * Load the specified resources, so that textures are loaded and can then be
-     * used by calling `getPIXITexture`.
+     * used by calling `getThreeTexture`.
      */
     async loadResource(resourceName: string): Promise<void> {
       const resource = this._resourceLoader.getResource(resourceName);
@@ -475,18 +301,14 @@ namespace gdjs {
 
     /**
      * Load the specified resources, so that textures are loaded and can then be
-     * used by calling `getPIXITexture`.
+     * used by calling `getThreeTexture`.
      * @param onProgress Callback called each time a new file is loaded.
      */
     async _loadTexture(resource: ResourceData): Promise<void> {
       if (resource.kind !== 'video' && this._loadedImageSources.get(resource)) {
         return;
       }
-      if (
-        resource.kind === 'video' &&
-        (this._loadedTextures.get(resource) ||
-          this._loadedVideoSources.get(resource))
-      ) {
+      if (resource.kind === 'video' && this._loadedVideoSources.get(resource)) {
         return;
       }
       const resourceUrl = this._resourceLoader.getFullUrl(resource.file);
@@ -552,7 +374,6 @@ namespace gdjs {
      * Clear caches of loaded textures and materials.
      */
     dispose(): void {
-      this._loadedTextures.clear();
       this._loadedImageSources.clear();
       this._loadedVideoSources.clear();
 
@@ -569,20 +390,10 @@ namespace gdjs {
       this._loadedThreeCubeTextureKeysByResourceName.clear();
 
       this._loadedThreeMaterials.disposeAll();
-
-      if (this._invalidTexture && !this._invalidTexture.destroyed) {
-        this._invalidTexture.destroy();
-      }
-      this._invalidTexture = null;
     }
 
     unloadResource(resourceData: ResourceData): void {
       const resourceName = resourceData.name;
-      const texture = this._loadedTextures.getFromName(resourceName);
-      if (texture) {
-        texture.destroy(true);
-        this._loadedTextures.delete(resourceData);
-      }
       this._loadedImageSources.delete(resourceData);
       const videoSource = this._loadedVideoSources.get(resourceData);
       if (videoSource) {

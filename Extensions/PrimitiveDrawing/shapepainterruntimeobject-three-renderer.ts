@@ -21,14 +21,14 @@ namespace gdjs {
     }
 
     if (!Number.isFinite(minX)) {
-      return { left: 0, top: 0, width: 1, height: 1 };
+      return { left: 0, top: 0, width: 0, height: 0 };
     }
 
     return {
       left: minX,
       top: minY,
-      width: Math.max(1, maxX - minX),
-      height: Math.max(1, maxY - minY),
+      width: Math.max(0, maxX - minX),
+      height: Math.max(0, maxY - minY),
     };
   };
 
@@ -45,7 +45,7 @@ namespace gdjs {
     _sprite: THREE.Sprite;
     _commands: ShapePainterCommand[] = [];
     _pathOpen: boolean = false;
-    _localBounds = { left: 0, top: 0, width: 1, height: 1 };
+    _localBounds = { left: 0, top: 0, width: 0, height: 0 };
     _positionXIsUpToDate = false;
     _positionYIsUpToDate = false;
     _transformationIsUpToDate = false;
@@ -96,13 +96,36 @@ namespace gdjs {
 
     private _updateTransformMatrices() {
       this.updatePositionIfNeeded();
-      this._position.set(this._sprite.position.x, this._sprite.position.y, 0);
-      this._quaternion.setFromAxisAngle(
-        new THREE.Vector3(0, 0, 1),
-        this._sprite.material.rotation
+      
+      // Get the rotation center in drawing coordinates
+      const rotationCenterX = this._object.getRotationCenterX();
+      const rotationCenterY = this._object.getRotationCenterY();
+      
+      // Get object position and scale
+      const objX = this._object.getX();
+      const objY = this._object.getY();
+      const scaleX = this._object._scaleX;
+      const scaleY = this._object._scaleY;
+      const angle = this._object.angle;
+      
+      // Build transformation matrix:
+      // 1. Translate to rotation center in scene coordinates
+      const centerInSceneX = objX + rotationCenterX * Math.abs(scaleX);
+      const centerInSceneY = objY + rotationCenterY * Math.abs(scaleY);
+      
+      // 2. Create transformation: translate to center, rotate, scale, translate back
+      const cos = Math.cos(gdjs.toRad(angle));
+      const sin = Math.sin(gdjs.toRad(angle));
+      
+      // Matrix for: point in drawing coords -> scene coords
+      // Transform = Translate(center) * Rotate * Scale * Translate(-rotationCenter)
+      this._matrix.set(
+        scaleX * cos, -scaleY * sin, 0, centerInSceneX - rotationCenterX * scaleX * cos + rotationCenterY * scaleY * sin,
+        scaleX * sin, scaleY * cos, 0, centerInSceneY - rotationCenterX * scaleX * sin - rotationCenterY * scaleY * cos,
+        0, 0, 1, 0,
+        0, 0, 0, 1
       );
-      this._scale.set(this._sprite.scale.x, this._sprite.scale.y, 1);
-      this._matrix.compose(this._position, this._quaternion, this._scale);
+      
       this._inverseMatrix.copy(this._matrix).invert();
       this._transformationIsUpToDate = true;
     }
@@ -116,8 +139,10 @@ namespace gdjs {
     private _renderCommands() {
       const ctx = this._context;
       const padding = this._getPadding();
-      this._canvas.width = Math.ceil(this._localBounds.width + padding * 2);
-      this._canvas.height = Math.ceil(this._localBounds.height + padding * 2);
+      const canvasWidth = Math.max(1, Math.ceil(this._localBounds.width + padding * 2));
+      const canvasHeight = Math.max(1, Math.ceil(this._localBounds.height + padding * 2));
+      this._canvas.width = canvasWidth;
+      this._canvas.height = canvasHeight;
 
       ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -145,20 +170,27 @@ namespace gdjs {
 
     private _pushCommand(command: ShapePainterCommand, points: FloatPoint[]) {
       const nextBounds = boundsFromPoints(points);
-      const currentRight = this._localBounds.left + this._localBounds.width;
-      const currentBottom = this._localBounds.top + this._localBounds.height;
-      const nextRight = nextBounds.left + nextBounds.width;
-      const nextBottom = nextBounds.top + nextBounds.height;
-      this._localBounds = {
-        left: Math.min(this._localBounds.left, nextBounds.left),
-        top: Math.min(this._localBounds.top, nextBounds.top),
-        width:
-          Math.max(currentRight, nextRight) -
-          Math.min(this._localBounds.left, nextBounds.left),
-        height:
-          Math.max(currentBottom, nextBottom) -
-          Math.min(this._localBounds.top, nextBounds.top),
-      };
+      
+      // If this is the first shape (width and height are 0), just use the new bounds
+      if (this._localBounds.width === 0 && this._localBounds.height === 0) {
+        this._localBounds = nextBounds;
+      } else {
+        // Merge with existing bounds
+        const currentRight = this._localBounds.left + this._localBounds.width;
+        const currentBottom = this._localBounds.top + this._localBounds.height;
+        const nextRight = nextBounds.left + nextBounds.width;
+        const nextBottom = nextBounds.top + nextBounds.height;
+        this._localBounds = {
+          left: Math.min(this._localBounds.left, nextBounds.left),
+          top: Math.min(this._localBounds.top, nextBounds.top),
+          width:
+            Math.max(currentRight, nextRight) -
+            Math.min(this._localBounds.left, nextBounds.left),
+          height:
+            Math.max(currentBottom, nextBottom) -
+            Math.min(this._localBounds.top, nextBounds.top),
+        };
+      }
       this._commands.push(command);
       this._rerender();
     }
@@ -166,7 +198,7 @@ namespace gdjs {
     clear() {
       this._commands = [];
       this._pathOpen = false;
-      this._localBounds = { left: 0, top: 0, width: 1, height: 1 };
+      this._localBounds = { left: 0, top: 0, width: 0, height: 0 };
       this._rerender();
     }
 
@@ -221,6 +253,36 @@ namespace gdjs {
     }
 
     drawLine(x1: float, y1: float, x2: float, y2: float, thickness: float) {
+      // Calculate proper bounds for a line with round caps
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const length = Math.sqrt(dx * dx + dy * dy);
+      const radius = thickness / 2;
+      
+      let bounds: FloatPoint[];
+      if (length === 0) {
+        // Point - just a circle
+        bounds = [
+          [x1 - radius, y1 - radius],
+          [x1 + radius, y1 + radius],
+        ];
+      } else {
+        // Normalized perpendicular vector
+        const perpX = -dy / length;
+        const perpY = dx / length;
+        
+        // Four corners of the line with round caps
+        const offsetX = perpX * radius;
+        const offsetY = perpY * radius;
+        
+        bounds = [
+          [x1 + offsetX, y1 + offsetY],
+          [x1 - offsetX, y1 - offsetY],
+          [x2 + offsetX, y2 + offsetY],
+          [x2 - offsetX, y2 - offsetY],
+        ];
+      }
+      
       this._pushCommand(
         (ctx) => {
           ctx.fillStyle = numberToRgba(
@@ -234,14 +296,41 @@ namespace gdjs {
           ctx.lineTo(x2, y2);
           ctx.stroke();
         },
-        [
-          [Math.min(x1, x2) - thickness, Math.min(y1, y2) - thickness],
-          [Math.max(x1, x2) + thickness, Math.max(y1, y2) + thickness],
-        ]
+        bounds
       );
     }
 
     drawLineV2(x1: float, y1: float, x2: float, y2: float, thickness: float) {
+      // Calculate proper bounds for a line with round caps
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const length = Math.sqrt(dx * dx + dy * dy);
+      const radius = thickness / 2;
+      
+      let bounds: FloatPoint[];
+      if (length === 0) {
+        // Point - just a circle
+        bounds = [
+          [x1 - radius, y1 - radius],
+          [x1 + radius, y1 + radius],
+        ];
+      } else {
+        // Normalized perpendicular vector
+        const perpX = -dy / length;
+        const perpY = dx / length;
+        
+        // Four corners of the line with round caps
+        const offsetX = perpX * radius;
+        const offsetY = perpY * radius;
+        
+        bounds = [
+          [x1 + offsetX, y1 + offsetY],
+          [x1 - offsetX, y1 - offsetY],
+          [x2 + offsetX, y2 + offsetY],
+          [x2 - offsetX, y2 - offsetY],
+        ];
+      }
+      
       this._pushCommand(
         (ctx) => {
           ctx.strokeStyle = numberToRgba(
@@ -254,10 +343,7 @@ namespace gdjs {
           ctx.lineTo(x2, y2);
           ctx.stroke();
         },
-        [
-          [Math.min(x1, x2) - thickness, Math.min(y1, y2) - thickness],
-          [Math.max(x1, x2) + thickness, Math.max(y1, y2) + thickness],
-        ]
+        bounds
       );
     }
 
@@ -690,11 +776,11 @@ namespace gdjs {
     }
 
     getWidth(): float {
-      return this._canvas.width * Math.abs(this._object._scaleX);
+      return this._localBounds.width * Math.abs(this._object._scaleX);
     }
 
     getHeight(): float {
-      return this._canvas.height * Math.abs(this._object._scaleY);
+      return this._localBounds.height * Math.abs(this._object._scaleY);
     }
 
     getUnscaledWidth(): float {

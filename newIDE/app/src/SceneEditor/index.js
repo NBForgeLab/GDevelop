@@ -89,7 +89,6 @@ import {
   serializeObjectWithCleanDefaultBehaviorFlags,
 } from '../Utils/Serializer';
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
-type TileMapTileSelection = any;
 import { extractAsCustomObject } from './CustomObjectExtractor/CustomObjectExtractor';
 import { isVariantEditable } from '../ObjectEditor/Editors/CustomObjectPropertiesEditor';
 import { addSerializedInstances } from '../InstancesEditor/InstancesAdder';
@@ -290,8 +289,6 @@ type State = {|
   chosenLayer: string,
   selectedLayer: gdLayer | null,
 
-  tileMapTileSelection: ?TileMapTileSelection,
-
   lastSelectionType: 'instance' | 'object' | 'layer',
 |};
 
@@ -350,7 +347,6 @@ export default class SceneEditor extends React.Component<Props, State> {
         message: '',
         touchScreenMessage: '',
       },
-      tileMapTileSelection: null,
 
       selectedObjectFolderOrObjectsWithContext: [],
       chosenLayer:
@@ -1549,10 +1545,6 @@ export default class SceneEditor extends React.Component<Props, State> {
         updatedObjects: [objectWithContext.object],
       });
     }
-  };
-
-  onSelectTileMapTile = (tileMapTileSelection: ?TileMapTileSelection) => {
-    this.setState({ tileMapTileSelection });
   };
 
   _setSelectedInstances = (
@@ -3025,8 +3017,6 @@ export default class SceneEditor extends React.Component<Props, State> {
                       this._onLayersVisibilityInEditorChanged
                     }
                     onRemoveLayer={this._onRemoveLayer}
-                    tileMapTileSelection={this.state.tileMapTileSelection}
-                    onSelectTileMapTile={this.onSelectTileMapTile}
                     onExportAssets={this.openObjectExporterDialog}
                     onImportAssets={this.openObjectImporterDialog}
                     onDeleteObjects={this._onDeleteObjects}

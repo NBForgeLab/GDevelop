@@ -74,9 +74,9 @@ Read about [`gdjs.RuntimeBehavior`](https://docs.gdevelop.io/GDJS%20Runtime%20Do
 
 #### How to create an object by extending `gdjs.RuntimeObject`
 
-See example in [dummyruntimeobject.ts](../Extensions/ExampleJsExtension/dummyruntimeobject.ts) (the object itself) and [dummyruntimeobject-pixi-renderer.ts](../Extensions/ExampleJsExtension/dummyruntimeobject-pixi-renderer.ts) (the renderer, using PixiJS).
+See example in [dummyruntimeobject.ts](../Extensions/ExampleJsExtension/dummyruntimeobject.ts) (the object itself) and [dummyruntimeobject-three-renderer.ts](../Extensions/ExampleJsExtension/dummyruntimeobject-three-renderer.ts) (the renderer, using Three.js).
 
-You'll be interested in the constructor (to initialize things), `update` (called every frame) and the other methods. In the PIXI renderer, check the constructor (where PixiJS objects are created). Other methods depend on the renderer.
+You'll be interested in the constructor (to initialize things), `update` (called every frame) and the other methods. In the Three.js renderer, check the constructor (where Three.js objects are created). Other methods depend on the renderer.
 
 Read about [`gdjs.RuntimeObject`](https://docs.gdevelop.io/GDJS%20Runtime%20Documentation/classes/gdjs.RuntimeObject.html), the base class inherited by all objects.
 
@@ -224,9 +224,9 @@ registerEditorConfigurations: function(objectsEditorService /*: ObjectsEditorSer
 
 > 👉 See an example in the [example extension _JsExtension.js_ file](../Extensions/ExampleJsExtension/JsExtension.js).
 
-#### Declare the PixiJS renderer for the instance of your object in the scene editor
+#### Declare the Three.js renderer for the instance of your object in the scene editor
 
-Finally, to have the instances of your object displayed properly on the scene editor, implement the function `registerInstanceRenderers` in your extension module. The function is passed an object called `objectsRenderingService`, containing [RenderedInstance](./app/src/ObjectsRendering/Renderers/RenderedInstance.js), the "base class" for instance renderers, and PixiJS, which give you access to [PixiJS rendering engine](https://github.com/pixijs/pixi.js), used in the editor to render the scene.
+Finally, to have the instances of your object displayed properly on the scene editor, implement the function `registerInstanceRenderers` in your extension module. The function is passed an object called `objectsRenderingService`, containing [RenderedInstance](./app/src/ObjectsRendering/Renderers/RenderedInstance.js), the "base class" for instance renderers, and Three.js, which give you access to [Three.js rendering engine](https://github.com/mrdoob/three.js), used in the editor to render the scene.
 
 > 👉 See an example in the [example extension _JsExtension.js_ file](../Extensions/ExampleJsExtension/JsExtension.js).
 

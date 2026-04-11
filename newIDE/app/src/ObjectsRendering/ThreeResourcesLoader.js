@@ -151,10 +151,6 @@ const determineCrossOrigin = (url: string) => {
   return 'anonymous';
 };
 
-const applythreeTextureSettings = (resource: gdResource, texture: any) => {
-  if (resource.getKind() !== 'image') return;
-};
-
 const applyThreeTextureSettings = (
   resource: gdResource,
   // $FlowFixMe[value-as-type]

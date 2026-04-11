@@ -30,77 +30,10 @@ namespace gdjs {
     return node;
   }
 
-  /**
-   * Adapt the Three.js TransformControls gizmos so that the axis are in the same direction as in GDevelop.
-   * This does not change the way the controls work (notably when dragged), it's only a visual adaptation.
-   */
   const patchAxesOnTransformControlsGizmos = (
     controls: THREE_ADDONS.TransformControls
   ) => {
-    const gizmoRoot = controls && (controls as any)._gizmo;
-    if (!gizmoRoot) return;
-
-    // Flip gizmo (visual), picker (raycast), and helper (guide lines)
-    const groupsToFlip = ['gizmo', 'picker', 'helper'];
-
-    // Bake axis reflections into geometry so per-frame handle scaling
-    // inside TransformControlsGizmo.updateMatrixWorld() won't undo it.
-    const flipY = new THREE.Matrix4().makeScale(1, -1, 1);
-    const flipX = new THREE.Matrix4().makeScale(-1, 1, 1);
-
-    // For translate mode: flip Y-axis handles
-    const shouldFlipYByName = (name) =>
-      name === 'Y' || name === 'XY' || name === 'YZ';
-
-    // For scale mode: flip X-axis handles
-    const shouldFlipXByName = (name) =>
-      name === 'X' || name === 'XY' || name === 'XZ';
-
-    // Process translate mode (flip Y)
-    for (const group of groupsToFlip) {
-      const root = gizmoRoot[group] && gizmoRoot[group]['translate'];
-      if (!root) continue;
-
-      root.traverse((obj) => {
-        if (!obj || !obj.geometry) return;
-        const name = obj.name || '';
-        if (!shouldFlipYByName(name)) return;
-
-        // Bake the Y flip directly into the geometry
-        obj.geometry.applyMatrix4(flipY);
-
-        // Keep raycasting bounds correct after mutation
-        if (typeof obj.geometry.computeBoundingBox === 'function') {
-          obj.geometry.computeBoundingBox();
-        }
-        if (typeof obj.geometry.computeBoundingSphere === 'function') {
-          obj.geometry.computeBoundingSphere();
-        }
-      });
-    }
-
-    // Process scale mode (flip X)
-    for (const group of groupsToFlip) {
-      const root = gizmoRoot[group] && gizmoRoot[group]['scale'];
-      if (!root) continue;
-
-      root.traverse((obj) => {
-        if (!obj || !obj.geometry) return;
-        const name = obj.name || '';
-        if (!shouldFlipXByName(name)) return;
-
-        // Bake the X flip directly into the geometry
-        obj.geometry.applyMatrix4(flipX);
-
-        // Keep raycasting bounds correct after mutation
-        if (typeof obj.geometry.computeBoundingBox === 'function') {
-          obj.geometry.computeBoundingBox();
-        }
-        if (typeof obj.geometry.computeBoundingSphere === 'function') {
-          obj.geometry.computeBoundingSphere();
-        }
-      });
-    }
+    void controls;
   };
 
   const patchColorsOnTransformControlsGizmos = (
@@ -2316,10 +2249,6 @@ namespace gdjs {
         return;
       }
       dummyThreeObject.rotation.copy(threeObject.rotation);
-      if (this._transformControlsMode === 'rotate') {
-        dummyThreeObject.rotation.y = -dummyThreeObject.rotation.y;
-        dummyThreeObject.rotation.z = -dummyThreeObject.rotation.z;
-      }
     }
 
     private _forceUpdateSelectionControls() {
@@ -2401,7 +2330,6 @@ namespace gdjs {
               threeTransformControls.getHelper();
 
             threeTransformControlsHelper.rotation.order = 'ZYX';
-            threeTransformControlsHelper.scale.y = -1;
             threeTransformControls.mode = this._transformControlsMode;
             threeTransformControlsHelper.traverse((obj) => {
               // To be detected correctly by OutlinePass.
@@ -2531,10 +2459,10 @@ namespace gdjs {
                 rotationX: gdjs.toDegrees(
                   dummyThreeObject.rotation.x - initialDummyRotation.x
                 ),
-                rotationY: -gdjs.toDegrees(
+                rotationY: gdjs.toDegrees(
                   dummyThreeObject.rotation.y - initialDummyRotation.y
                 ),
-                rotationZ: -gdjs.toDegrees(
+                rotationZ: gdjs.toDegrees(
                   dummyThreeObject.rotation.z - initialDummyRotation.z
                 ),
                 scaleX:
@@ -2648,11 +2576,6 @@ namespace gdjs {
       dummyThreeObject.rotation.copy(threeObject.rotation);
       dummyThreeObject.scale.copy(threeObject.scale);
       if (this._transformControlsMode === 'rotate') {
-        // This is only done for the rotate mode because it messes with the
-        // orientation of the scale mode.
-        dummyThreeObject.rotation.y = -dummyThreeObject.rotation.y;
-        dummyThreeObject.rotation.z = -dummyThreeObject.rotation.z;
-
         dummyThreeObject.position.set(
           lastEditableSelectedObject.getCenterXInScene(),
           lastEditableSelectedObject.getCenterYInScene(),
@@ -2680,6 +2603,8 @@ namespace gdjs {
         .getHelper()
         .removeFromParent();
       this._selectionControls.dummyThreeObject.removeFromParent();
+      // Dispose TransformControls to clean up event listeners and prevent errors
+      this._selectionControls.threeTransformControls.dispose();
       this._editorGrid.setVisible(false);
       this._selectionControls = null;
     }
@@ -2900,42 +2825,45 @@ namespace gdjs {
         return;
       }
       if (!this._threeInnerArea) {
-        const boxMesh = new THREE.Mesh(
-          new THREE.BoxGeometry(1, 1, 1),
-          new THREE.MeshBasicMaterial({
-            transparent: true,
-            opacity: 0,
-            alphaTest: 1,
-          })
-        );
-        boxMesh.position.x = 0.5;
-        boxMesh.position.y = 0.5;
-        boxMesh.position.z = 0.5;
-        const box = new THREE.BoxHelper(boxMesh, '#444444');
-        box.rotation.order = 'ZYX';
-        //box.material.depthTest = false;
-        box.material.fog = false;
+        // Create a grid instead of a box for the camera area
+        const gridSize = 1000; // Will be scaled to fit the camera area
+        const divisions = 20; // Number of grid divisions
+        const gridHelper = new THREE.GridHelper(gridSize, divisions, '#444444', '#444444');
+        gridHelper.material.transparent = true;
+        gridHelper.material.opacity = 0.3;
+        gridHelper.rotation.order = 'ZYX';
+        gridHelper.rotation.x = Math.PI / 2; // Rotate to XY plane
+        gridHelper.material.fog = false;
+        
         const container = new THREE.Group();
         container.rotation.order = 'ZYX';
-        container.add(box);
+        container.add(gridHelper);
         threeGroup.add(container);
         this._threeInnerArea = container;
       }
       const threeInnerArea = this._threeInnerArea;
       if (this._innerArea) {
         const innerArea = this._innerArea;
-        threeInnerArea.scale.x = innerArea.max[0] - innerArea.min[0];
-        threeInnerArea.scale.y = innerArea.max[1] - innerArea.min[1];
-        threeInnerArea.scale.z = innerArea.max[2] - innerArea.min[2];
-        threeInnerArea.position.x = innerArea.min[0];
-        threeInnerArea.position.y = innerArea.min[1];
-        threeInnerArea.position.z = innerArea.min[2];
+        const width = innerArea.max[0] - innerArea.min[0];
+        const height = innerArea.max[1] - innerArea.min[1];
+        const depth = innerArea.max[2] - innerArea.min[2];
+        
+        // Scale grid to fit the camera area
+        const maxDimension = Math.max(width, height);
+        threeInnerArea.scale.set(maxDimension / 1000, maxDimension / 1000, 1);
+        
+        // Position at center of camera area
+        threeInnerArea.position.x = innerArea.min[0] + width / 2;
+        threeInnerArea.position.y = innerArea.min[1] + height / 2;
+        threeInnerArea.position.z = innerArea.min[2] + depth / 2;
       } else {
-        threeInnerArea.scale.x = this._runtimeGame.getOriginalWidth();
-        threeInnerArea.scale.y = this._runtimeGame.getOriginalHeight();
-        threeInnerArea.scale.z = 0.01;
-        threeInnerArea.position.x = 0;
-        threeInnerArea.position.y = 0;
+        const width = this._runtimeGame.getOriginalWidth();
+        const height = this._runtimeGame.getOriginalHeight();
+        const maxDimension = Math.max(width, height);
+        
+        threeInnerArea.scale.set(maxDimension / 1000, maxDimension / 1000, 1);
+        threeInnerArea.position.x = width / 2;
+        threeInnerArea.position.y = height / 2;
         threeInnerArea.position.z = 0;
       }
     }
@@ -4619,7 +4547,7 @@ namespace gdjs {
             : inputManager.getCursorY() - this._lastCursorY;
 
           const rotationSpeed = 0.2;
-          this.rotationAngle += xDelta * rotationSpeed;
+          this.rotationAngle -= xDelta * rotationSpeed;
           this.elevationAngle += yDelta * rotationSpeed;
           this._editorCamera.onHasCameraChanged();
         }
@@ -4668,7 +4596,7 @@ namespace gdjs {
             const dy3 = centroid3.y - this._gestureLastCentroidY;
             if (dx3 !== 0) {
               const tiltSpeed = 0.2;
-              this.rotationAngle += dx3 * tiltSpeed;
+              this.rotationAngle -= dx3 * tiltSpeed;
               this._editorCamera.onHasCameraChanged();
             }
             if (dy3 !== 0) {
@@ -4874,7 +4802,7 @@ namespace gdjs {
         ) {
           moveCameraByVector(right, wheelDeltaY / 5);
         } else if (wheelDeltaX !== 0 || wheelDeltaY !== 0) {
-          moveCameraByVector(up, wheelDeltaY / 5);
+          moveCameraByVector(up, -wheelDeltaY / 5);
           moveCameraByVector(right, wheelDeltaX / 5);
         }
 
@@ -5004,7 +4932,7 @@ namespace gdjs {
             : inputManager.getCursorY() - this._lastCursorY;
 
           const rotationSpeed = 0.2;
-          this.rotationAngle += xDelta * rotationSpeed;
+          this.rotationAngle -= xDelta * rotationSpeed;
           this.elevationAngle += yDelta * rotationSpeed;
           this._editorCamera.onHasCameraChanged();
         }
@@ -5058,9 +4986,10 @@ namespace gdjs {
       // Local right axis in world space:
       const right = new THREE.Vector3(elements[0], elements[1], elements[2]);
       // Local forward axis in world space (note we take the negative of that column).
+      // Fixed: Use consistent sign convention with getCameraForwardVector
       const forward = new THREE.Vector3(
-        elements[8],
-        elements[9],
+        -elements[8],
+        -elements[9],
         -elements[10]
       );
 
@@ -5196,12 +5125,8 @@ namespace gdjs {
         );
         this.dummyObject3DForObject2D = threeObject;
       }
-      // Use a group to invert the Y-axis as the GDevelop Y axis is inverted
-      // compared to Three.js. This is somehow necessary because the position
-      // of the BoxHelper is always (0, 0, 0) and the geometry is hard to manipulate.
       this.container = new THREE.Group();
       this.container.rotation.order = 'ZYX';
-      this.container.scale.y = -1;
       this.boxHelper = new THREE.BoxHelper(threeObject, '#f2a63c');
       this.boxHelper.rotation.order = 'ZYX';
       this.boxHelper.material.depthTest = false;
@@ -5213,7 +5138,7 @@ namespace gdjs {
       if (this.dummyObject3DForObject2D) {
         this.dummyObject3DForObject2D.position.set(
           this.object.getCenterXInScene(),
-          -this.object.getCenterYInScene(),
+          this.object.getCenterYInScene(),
           0
         );
         this.dummyObject3DForObject2D.scale.set(

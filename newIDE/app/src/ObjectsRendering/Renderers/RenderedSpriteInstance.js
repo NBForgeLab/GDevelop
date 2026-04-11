@@ -6,7 +6,6 @@ import * as THREE from 'three';
 const gd: libGDevelop = global.gd;
 
 const sharedGeometry = new THREE.PlaneGeometry(1, 1);
-sharedGeometry.translate(0.5, -0.5, 0);
 
 /**
  * Renderer for gd.SpriteObject using Three.js.
@@ -119,13 +118,13 @@ export default class RenderedSpriteInstance extends RenderedInstance {
     );
     this._threeObject.rotation.z = this._shouldNotRotate
       ? 0
-      : -RenderedInstance.toRad(this._instance.getAngle());
+      : RenderedInstance.toRad(this._instance.getAngle());
     this._threeObject.position.x =
       this._instance.getX() +
       (this._centerX - this._originX) * Math.abs(scaleX);
     this._threeObject.position.y =
       this._instance.getY() +
-      (this._originY - this._centerY) * Math.abs(scaleY);
+      (this._centerY - this._originY) * Math.abs(scaleY);
     this._threeObject.position.z = this._instance.getZ();
 
     const alphaForDisplay = Math.max(this._instance.getOpacity() / 255, 0.5);

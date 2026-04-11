@@ -558,7 +558,6 @@ module.exports = {
         this._loadedVideoResource = null;
 
         const geometry = new THREE.PlaneGeometry(1, 1);
-        geometry.translate(0.5, -0.5, 0);
         const material = new THREE.MeshBasicMaterial({
           map: this._resourcesLoader.getInvalidThreeTexture(),
           transparent: true,
@@ -642,7 +641,7 @@ module.exports = {
         const height = this.getDefaultHeight();
         this._threeObject.position.x = this._instance.getX() + width / 2;
         this._threeObject.position.y = this._instance.getY() + height / 2;
-        this._threeObject.rotation.z = -RenderedInstance.toRad(
+        this._threeObject.rotation.z = RenderedInstance.toRad(
           this._instance.getAngle()
         );
 

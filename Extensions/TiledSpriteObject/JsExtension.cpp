@@ -32,7 +32,7 @@ class TiledSpriteObjectJsExtension : public gd::PlatformExtension {
             "Extensions/TiledSpriteObject/tiledspriteruntimeobject.js")
         .AddIncludeFile(
             "Extensions/TiledSpriteObject/"
-            "tiledspriteruntimeobject-pixi-renderer.js");
+            "tiledspriteruntimeobject-three-renderer.js");
 
     GetAllActionsForObject(
         "TiledSpriteObject::TiledSprite")["TiledSpriteObject::SetOpacity"]

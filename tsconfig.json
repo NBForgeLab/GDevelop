@@ -49,7 +49,6 @@
   ],
   // Exclude pre-built js code
   "exclude": [
-    "GDJS/Runtime/pixi-renderers/pixi.js",
     "GDJS/Runtime/Cordova",
     "GDJS/Runtime/Electron",
     "GDJS/Runtime/FacebookInstantGames",

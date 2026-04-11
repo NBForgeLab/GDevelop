@@ -17,4 +17,4 @@ This folder replaces the hybrid PixiJS/Three.js rendering system with a unified 
 ## Related
 
 - See `.kiro/specs/3d-first-rendering-engine/` for the full specification
-- This replaces `GDJS/Runtime/pixi-renderers/` in the new architecture
+- This replaces the old 2D-first architecture with a unified 3D-first approach

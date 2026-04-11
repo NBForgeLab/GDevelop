@@ -124,21 +124,11 @@ namespace gdjs {
         }
         return new EffectFilter(effectHandle, this);
       }
-      /** Function to call to create the filter */
-      makeEffectHandle(
+      /** Function to call to create the effect handle */
+      abstract makeEffectHandle(
         target: EffectsTarget,
         effectData: EffectData
-      ): EffectHandle {
-        return this.makePIXIFilter(target, effectData);
-      }
-      /**
-       * Legacy alias kept so older effect implementations can keep overriding
-       * the historical name while the runtime moves away from Pixi-specific types.
-       */
-      abstract makePIXIFilter(
-        target: EffectsTarget,
-        effectData: EffectData
-      ): any;
+      ): EffectHandle;
       /** The function to be called to update the filter at every frame before the rendering. */
       abstract updatePreRender(
         filter: EffectHandle,
@@ -188,23 +178,23 @@ namespace gdjs {
      */
     export class EffectFilter implements Filter {
       /** The wrapped effect handle */
-      pixiFilter: EffectHandle;
+      effectHandle: EffectHandle;
       filterCreator: gdjs.EffectsTools.EffectCreator;
 
       constructor(
-        pixiFilter: EffectHandle,
+        effectHandle: EffectHandle,
         filterCreator: gdjs.EffectsTools.EffectCreator
       ) {
-        this.pixiFilter = pixiFilter;
+        this.effectHandle = effectHandle;
         this.filterCreator = filterCreator;
       }
 
       isEnabled(target: EffectsTarget): boolean {
-        return !!this.pixiFilter.enabled;
+        return !!this.effectHandle.enabled;
       }
 
       setEnabled(target: EffectsTarget, enabled: boolean): boolean {
-        this.pixiFilter.enabled = enabled;
+        this.effectHandle.enabled = enabled;
         return enabled;
       }
 
@@ -214,7 +204,7 @@ namespace gdjs {
           return false;
         }
         rendererObject.filters = (rendererObject.filters || []).concat(
-          this.pixiFilter
+          this.effectHandle
         );
         return true;
       }
@@ -225,18 +215,18 @@ namespace gdjs {
           return false;
         }
         rendererObject.filters = (rendererObject.filters || []).filter(
-          (pixiFilter) => pixiFilter !== this.pixiFilter
+          (filter) => filter !== this.effectHandle
         );
         return true;
       }
 
       updatePreRender(target: gdjs.EffectsTarget): any {
-        this.filterCreator.updatePreRender(this.pixiFilter, target);
+        this.filterCreator.updatePreRender(this.effectHandle, target);
       }
 
       updateDoubleParameter(parameterName: string, value: number): void {
         this.filterCreator.updateDoubleParameter(
-          this.pixiFilter,
+          this.effectHandle,
           parameterName,
           value
         );
@@ -244,7 +234,7 @@ namespace gdjs {
 
       updateStringParameter(parameterName: string, value: string): void {
         this.filterCreator.updateStringParameter(
-          this.pixiFilter,
+          this.effectHandle,
           parameterName,
           value
         );
@@ -252,7 +242,7 @@ namespace gdjs {
 
       updateBooleanParameter(parameterName: string, value: boolean): void {
         this.filterCreator.updateBooleanParameter(
-          this.pixiFilter,
+          this.effectHandle,
           parameterName,
           value
         );
@@ -260,7 +250,7 @@ namespace gdjs {
 
       updateColorParameter(parameterName: string, value: number): void {
         this.filterCreator.updateColorParameter(
-          this.pixiFilter,
+          this.effectHandle,
           parameterName,
           value
         );
@@ -268,29 +258,29 @@ namespace gdjs {
 
       getDoubleParameter(parameterName: string): number {
         return this.filterCreator.getDoubleParameter(
-          this.pixiFilter,
+          this.effectHandle,
           parameterName
         );
       }
 
       getColorParameter(parameterName: string): number {
         return this.filterCreator.getColorParameter(
-          this.pixiFilter,
+          this.effectHandle,
           parameterName
         );
       }
 
       getNetworkSyncData(): any {
         return {
-          ena: !!this.pixiFilter.enabled,
-          fc: this.filterCreator.getNetworkSyncData(this.pixiFilter),
+          ena: !!this.effectHandle.enabled,
+          fc: this.filterCreator.getNetworkSyncData(this.effectHandle),
         };
       }
 
       updateFromNetworkSyncData(syncData: any): void {
-        this.pixiFilter.enabled = syncData.ena;
+        this.effectHandle.enabled = syncData.ena;
         this.filterCreator.updateFromNetworkSyncData(
-          this.pixiFilter,
+          this.effectHandle,
           syncData.fc
         );
       }

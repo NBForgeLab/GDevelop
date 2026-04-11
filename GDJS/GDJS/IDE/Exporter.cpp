@@ -48,13 +48,13 @@ Exporter::Exporter(gd::AbstractFileSystem &fileSystem, gd::String gdjsRoot_)
 
 Exporter::~Exporter() {}
 
-bool Exporter::ExportProjectForPixiPreview(
+bool Exporter::ExportProjectForPreview(
     const PreviewExportOptions &options) {
   ExporterHelper helper(fs, gdjsRoot, codeOutputDir);
-  return helper.ExportProjectForPixiPreview(options, includesFiles);
+  return helper.ExportProjectForPreview(options, includesFiles);
 }
 
-bool Exporter::ExportWholePixiProject(const ExportOptions &options) {
+bool Exporter::ExportWholeProject(const ExportOptions &options) {
   ExporterHelper helper(fs, gdjsRoot, codeOutputDir);
   gd::Project exportedProject = options.project;
 
@@ -100,7 +100,7 @@ bool Exporter::ExportWholePixiProject(const ExportOptions &options) {
 
     // Export engine libraries
     helper.AddLibsInclude(
-        /*pixiRenderers=*/true,
+        /*include2DRenderers=*/true,
         usedExtensionsResult.Has3DObjects(),
         /*isInGameEditor=*/false,
         /*includeWebsocketDebuggerClient=*/false,

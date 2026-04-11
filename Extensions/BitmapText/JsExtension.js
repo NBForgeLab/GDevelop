@@ -512,7 +512,6 @@ module.exports = {
         this._canvasTexture.colorSpace = THREE.SRGBColorSpace;
 
         const geometry = new THREE.PlaneGeometry(1, 1);
-        geometry.translate(0.5, -0.5, 0);
         const material = new THREE.MeshBasicMaterial({
           map: this._canvasTexture,
           transparent: true,
@@ -622,7 +621,7 @@ module.exports = {
           this._instance.getY() + this.getDefaultHeight() * (0.5 - alignmentY);
         this._threeObject.scale.y = this.getDefaultHeight();
 
-        this._threeObject.rotation.z = -RenderedInstance.toRad(
+        this._threeObject.rotation.z = RenderedInstance.toRad(
           this._instance.getAngle()
         );
 

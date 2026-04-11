@@ -26,4 +26,4 @@ SOFTWARE.
 External libraries used by GDevelop JS Platform
 ---------------------------------------------------
 
-* Pixi.js is distributed under the MIT license
+* Three.js is distributed under the MIT license

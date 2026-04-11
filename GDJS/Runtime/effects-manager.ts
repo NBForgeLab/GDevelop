@@ -118,7 +118,7 @@ namespace gdjs {
       for (const effectName in rendererEffects) {
         const filter = rendererEffects[effectName];
         if (filter instanceof gdjs.EffectsTools.EffectFilter) {
-          knownFilters.add(filter.pixiFilter);
+          knownFilters.add(filter.effectHandle);
         }
       }
 
@@ -126,7 +126,7 @@ namespace gdjs {
       for (const effectData of effectsData) {
         const filter = rendererEffects[effectData.name];
         if (filter instanceof gdjs.EffectsTools.EffectFilter) {
-          orderedFilters.push(filter.pixiFilter);
+          orderedFilters.push(filter.effectHandle);
         }
       }
 

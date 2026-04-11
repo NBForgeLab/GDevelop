@@ -1,6 +1,6 @@
 // @ts-check
 
-describe('gdjs.TextInputRuntimeObject (using a PixiJS RuntimeGame with DOM elements)', function () {
+describe('gdjs.TextInputRuntimeObject (using a Three.js RuntimeGame with DOM elements)', function () {
   /**
    * @param {gdjs.RuntimeScene} runtimeScene
    */

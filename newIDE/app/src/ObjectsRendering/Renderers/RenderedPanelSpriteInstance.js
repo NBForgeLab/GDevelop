@@ -41,7 +41,6 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
 
     // Setup the THREE object: Single dummy plane for now
     const geometry = new THREE.PlaneGeometry(1, 1);
-    geometry.translate(0.5, -0.5, 0); // Origin top-left
 
     const material = new THREE.MeshBasicMaterial({
       map: this._resourcesLoader.getInvalidThreeTexture(),
@@ -135,25 +134,7 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
     this._threeObject.position.x = this._instance.getX() + this._width / 2;
     this._threeObject.position.y = this._instance.getY() + this._height / 2;
 
-    // Offset the geometry to rotate around center dynamically
-    const cx = 0.5;
-    const cy = 0.5;
-    const left = -cx;
-    const top = -cy;
-    const right = 1 - cx;
-    const bottom = 1 - cy;
-    const positions = this._threeObject.geometry.attributes.position.array;
-    positions[0] = left;
-    positions[1] = -top;
-    positions[3] = right;
-    positions[4] = -top;
-    positions[6] = left;
-    positions[7] = -bottom;
-    positions[9] = right;
-    positions[10] = -bottom;
-    this._threeObject.geometry.attributes.position.needsUpdate = true;
-
-    this._threeObject.rotation.z = -RenderedInstance.toRad(
+    this._threeObject.rotation.z = RenderedInstance.toRad(
       this._instance.getAngle()
     );
 
@@ -172,7 +153,7 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
   ): any {
     const panelSprite = gd.asPanelSpriteConfiguration(objectConfiguration);
 
-    return ResourcesLoader.getResourceFullUrl(
+    return resourcesLoader.getResourceFullUrl(
       project,
       panelSprite.getTexture(),
       {}

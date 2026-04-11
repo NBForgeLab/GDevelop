@@ -97,7 +97,7 @@ namespace gdjs {
       });
   };
 
-  class Cube3DRuntimeObjectPixiRenderer extends gdjs.RuntimeObject3DRenderer {
+  class Cube3DRuntimeObjectThreeRenderer extends gdjs.RuntimeObject3DRenderer {
     private _cube3DRuntimeObject: gdjs.Cube3DRuntimeObject;
     private _boxMesh: THREE.Mesh;
 
@@ -370,7 +370,7 @@ namespace gdjs {
   }
 
   /** @category Renderers > 3D Box */
-  export const Cube3DRuntimeObjectRenderer = Cube3DRuntimeObjectPixiRenderer;
+  export const Cube3DRuntimeObjectRenderer = Cube3DRuntimeObjectThreeRenderer;
   /** @category Renderers > 3D Box */
-  export type Cube3DRuntimeObjectRenderer = Cube3DRuntimeObjectPixiRenderer;
+  export type Cube3DRuntimeObjectRenderer = Cube3DRuntimeObjectThreeRenderer;
 }

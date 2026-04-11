@@ -282,7 +282,7 @@ export default class BrowserSWPreviewLauncher extends React.Component<
       console.log(
         `[BrowserSWPreviewLauncher] Exporting project for preview #${previewId}...`
       );
-      exporter.exportProjectForPixiPreview(previewExportOptions);
+      exporter.exportProjectForPreview(previewExportOptions);
 
       console.log(
         `[BrowserSWPreviewLauncher] Storing preview files in IndexedDB for preview #${previewId}...`

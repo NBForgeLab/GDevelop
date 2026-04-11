@@ -28,8 +28,6 @@ export default (React.forwardRef<ParameterFieldProps, ParameterFieldInterface>(
       focus,
     }));
 
-    const { parameterIndex } = props;
-
     const [skinNames, setSkinNames] = React.useState<Array<string>>([]);
     const [isExpressionField, setIsExpressionField] = React.useState<boolean>(
       false

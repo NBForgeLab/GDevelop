@@ -226,7 +226,7 @@ namespace gdjs {
         return this._cameraZ;
       }
 
-      // Set the camera so that it displays the whole PixiJS plane, as if it was a 2D rendering.
+      // Set the camera so that it displays the whole Three.js plane, as if it was a 2D rendering.
       // The Z position is computed by taking the half height of the displayed rendering,
       // and using the angle of the triangle defined by the field of view to compute the length
       // of the triangle defining the distance between the camera and the rendering plane.

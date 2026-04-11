@@ -42,14 +42,14 @@ class Exporter {
    *
    * \param options The options to generate the preview.
    */
-  bool ExportProjectForPixiPreview(const PreviewExportOptions& options);
+  bool ExportProjectForPreview(const PreviewExportOptions& options);
 
   /**
-   * \brief Export the specified project, using Pixi.js.
+   * \brief Export the specified project.
    *
    * Called by ShowProjectExportDialog if the user clicked on Ok.
    */
-  bool ExportWholePixiProject(const ExportOptions& options);
+  bool ExportWholeProject(const ExportOptions& options);
 
   /**
    * \brief Return the error that occurred during the last export.
@@ -80,7 +80,7 @@ class Exporter {
    * \brief Serialize the content of the extra configuration to store
    * in gdjs.runtimeGameOptions to JSON
    *
-   * \warning `ExportProjectForPixiPreview` must be called first to serialize
+   * \warning `ExportProjectForPreview` must be called first to serialize
    * the list of scripts files.
    *
    * \param options The content of the extra configuration

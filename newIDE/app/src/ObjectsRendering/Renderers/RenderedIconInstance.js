@@ -31,7 +31,6 @@ export default function makeRenderer(
       texture.colorSpace = THREE.SRGBColorSpace;
 
       const geometry = new THREE.PlaneGeometry(1, 1);
-      geometry.translate(0.5, -0.5, 0);
       const material = new THREE.MeshBasicMaterial({
         map: texture,
         transparent: true,
@@ -66,7 +65,7 @@ export default function makeRenderer(
       if (!this._threeObject) return;
       this._threeObject.position.x = this._instance.getX();
       this._threeObject.position.y = this._instance.getY();
-      this._threeObject.rotation.z = -RenderedInstance.toRad(
+      this._threeObject.rotation.z = RenderedInstance.toRad(
         this._instance.getAngle()
       );
 

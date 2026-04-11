@@ -77,8 +77,6 @@ export const Default = (): React.Node => (
         }}
         wrappedEditorRef={() => {}}
         pauseRendering={false}
-        tileMapTileSelection={null}
-        onSelectTileMapTile={() => {}}
         editorViewPosition2D={{ viewX: null, viewY: null }}
       />
     </DragAndDropContextProvider>

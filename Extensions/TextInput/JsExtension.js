@@ -779,7 +779,6 @@ module.exports = {
         this._canvasTexture.magFilter = THREE.LinearFilter;
         this._canvasTexture.colorSpace = THREE.SRGBColorSpace;
         const geometry = new THREE.PlaneGeometry(1, 1);
-        geometry.translate(0.5, -0.5, 0);
         const material = new THREE.MeshBasicMaterial({
           map: this._canvasTexture,
           transparent: true,
@@ -972,7 +971,7 @@ module.exports = {
 
         this._threeObject.position.x = instance.getX() + width / 2;
         this._threeObject.position.y = instance.getY() + height / 2;
-        this._threeObject.rotation.z = -RenderedInstance.toRad(
+        this._threeObject.rotation.z = RenderedInstance.toRad(
           this._instance.getAngle()
         );
         this._threeObject.scale.set(width, height, 1);

@@ -121,13 +121,6 @@ export default class ViewPosition {
     return this.viewY;
   }
 
-  applyTransformationToThreeGroup(container: THREE.Group) {
-    const zoomFactor = this.instancesEditorSettings.zoomFactor;
-    container.position.x = -this.viewX * zoomFactor + this._width / 2;
-    container.position.y = -this.viewY * zoomFactor + this._height / 2;
-    container.scale.set(zoomFactor, zoomFactor, 1);
-  }
-
   applyTransformationToThree(
     threeCamera: THREE.PerspectiveCamera,
     threePlaneMesh: THREE.Mesh | null
@@ -136,7 +129,7 @@ export default class ViewPosition {
     const zoomFactor = this.instancesEditorSettings.zoomFactor;
 
     threeCamera.position.x = this.viewX;
-    threeCamera.position.y = -this.viewY;
+    threeCamera.position.y = this.viewY;
 
     // Calculate Z based on FOV and zoom so that 1 scene unit = 1 pixel at zoom 1
     const cameraFovInRadians = RenderedInstance.toRad(threeCamera.fov);
@@ -150,7 +143,7 @@ export default class ViewPosition {
       threePlaneMesh.scale.x = this._width / zoomFactor;
       threePlaneMesh.scale.y = this._height / zoomFactor;
       threePlaneMesh.position.x = threeCamera.position.x;
-      threePlaneMesh.position.y = -threeCamera.position.y;
+      threePlaneMesh.position.y = threeCamera.position.y;
     }
   }
 }

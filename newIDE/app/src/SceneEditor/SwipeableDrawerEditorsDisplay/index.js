@@ -359,8 +359,6 @@ const SwipeableDrawerEditorsDisplay: React.ComponentType<{
                   pauseRendering={!props.isActive}
                   showObjectInstancesIn3D={values.use3DEditor}
                   showBasicProfilingCounters={values.showBasicProfilingCounters}
-                  tileMapTileSelection={props.tileMapTileSelection}
-                  onSelectTileMapTile={props.onSelectTileMapTile}
                   editorViewPosition2D={props.editorViewPosition2D}
                 />
               )}
@@ -478,8 +476,6 @@ const SwipeableDrawerEditorsDisplay: React.ComponentType<{
                         onGetInstanceSize={getInstanceSize}
                         ref={instanceOrObjectPropertiesEditorRef}
                         historyHandler={props.historyHandler}
-                        tileMapTileSelection={props.tileMapTileSelection}
-                        onSelectTileMapTile={props.onSelectTileMapTile}
                         lastSelectionType={props.lastSelectionType}
                         onWillInstallExtension={props.onWillInstallExtension}
                         onExtensionInstalled={props.onExtensionInstalled}

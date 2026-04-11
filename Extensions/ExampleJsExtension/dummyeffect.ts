@@ -1,31 +1,6 @@
-//A simple PIXI filter doing some color changes
+//A simple Three.js shader effect doing some color changes
 namespace gdjs {
   const logger = new gdjs.Logger('Dummy effect');
-
-  const DummyPixiFilter = function () {
-    var vertexShader = null;
-    var fragmentShader = [
-      'precision mediump float;',
-      '',
-      'varying vec2 vTextureCoord;',
-      'uniform sampler2D uSampler;',
-      'uniform float opacity;',
-      '',
-      'void main(void)',
-      '{',
-      '   mat3 nightMatrix = mat3(0.6, 0, 0, 0, 0.7, 0, 0, 0, 1.3);',
-      '   gl_FragColor = texture2D(uSampler, vTextureCoord);',
-      '   gl_FragColor.rgb = mix(gl_FragColor.rgb, nightMatrix * gl_FragColor.rgb, opacity);',
-      '}',
-    ].join('\n');
-    var uniforms = {
-      opacity: { type: '1f', value: 1 },
-    };
-
-    PIXI.Filter.call(this, vertexShader, fragmentShader, uniforms);
-  };
-  DummyPixiFilter.prototype = Object.create(PIXI.Filter.prototype);
-  DummyPixiFilter.prototype.constructor = DummyPixiFilter;
 
   // Register the effect type and associate it with a "filter creator" object, containing
   // functions to create and manipulate the filter.
@@ -33,15 +8,15 @@ namespace gdjs {
   gdjs.EffectsTools.registerFilterCreator(
     'MyDummyExtension::DummyEffect',
     new (class extends gdjs.EffectsTools.EffectCreator {
-      // MakePIXIFilter should return a PIXI.Filter, that will be applied on the PIXI.Container (for layers)
-      // or the PIXI.DisplayObject (for objects).
-      makePIXIFilter(layer, effectData) {
-        const filter = new DummyPixiFilter();
+      // makeEffectHandle should return an effect handle that will be applied on the renderer object.
+      makeEffectHandle(layer, effectData) {
+        const filter = {
+          enabled: true,
+          opacity: 1.0,
+        };
 
         // If you need to store the time or some state, you can set it up now:
         // filter._time = 0;
-        // But be careful about the existing member of the filter (consider
-        // updating the filter uniforms directly).
 
         // You can also access to the effect properties, classified by type:
         // `effectData.doubleParameters.opacity`
@@ -49,13 +24,13 @@ namespace gdjs {
         // `effectData.stringParameters.someColor`
         // `effectData.booleanParameters.someBoolean`
         logger.info(
-          'The PIXI texture found for the Dummy Effect (not actually used):',
+          'The Three.js texture found for the Dummy Effect (not actually used):',
           (
             layer
               .getRuntimeScene()
               .getGame()
               .getImageManager() as gdjs.ImageManager
-          ).getLegacyPixiTexture(effectData.stringParameters.someImage)
+          ).getThreeTexture(effectData.stringParameters.someImage)
         );
         return filter;
       }
@@ -65,47 +40,47 @@ namespace gdjs {
         // with `layer.getElapsedTime()`.
         // You can update the uniforms or other state of the filter.
       }
-      // Function that will be called to update a (number) parameter of the PIXI filter with a new value
+      // Function that will be called to update a (number) parameter of the effect with a new value
       updateDoubleParameter(
-        filter: PIXI.Filter,
+        filter: any,
         parameterName: string,
         value: number
       ) {
         if (parameterName === 'opacity') {
-          filter.uniforms.opacity = gdjs.EffectsTools.clampValue(value, 0, 1);
+          filter.opacity = gdjs.EffectsTools.clampValue(value, 0, 1);
         }
       }
-      getDoubleParameter(filter: PIXI.Filter, parameterName: string): number {
+      getDoubleParameter(filter: any, parameterName: string): number {
         if (parameterName === 'opacity') {
-          return filter.uniforms.opacity;
+          return filter.opacity;
         }
         return 0;
       }
-      // Function that will be called to update a (string) parameter of the PIXI filter with a new value
+      // Function that will be called to update a (string) parameter of the effect with a new value
       updateStringParameter(
-        filter: PIXI.Filter,
+        filter: any,
         parameterName: string,
         value: string
       ) {}
       updateColorParameter(
-        filter: PIXI.Filter,
+        filter: any,
         parameterName: string,
         value: number
       ): void {}
-      getColorParameter(filter: PIXI.Filter, parameterName: string): number {
+      getColorParameter(filter: any, parameterName: string): number {
         return 0;
       }
-      // Function that will be called to update a (boolean) parameter of the PIXI filter with a new value
+      // Function that will be called to update a (boolean) parameter of the effect with a new value
       updateBooleanParameter(
-        filter: PIXI.Filter,
+        filter: any,
         parameterName: string,
         value: boolean
       ) {}
-      getNetworkSyncData(filter: PIXI.Filter): any {
-        return { opacity: filter.uniforms.opacity };
+      getNetworkSyncData(filter: any): any {
+        return { opacity: filter.opacity };
       }
-      updateFromNetworkSyncData(filter: PIXI.Filter, data: any) {
-        filter.uniforms.opacity = data.opacity;
+      updateFromNetworkSyncData(filter: any, data: any) {
+        filter.opacity = data.opacity;
       }
     })()
   );

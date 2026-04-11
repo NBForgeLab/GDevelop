@@ -117,20 +117,20 @@ export default class InstancesRotator {
       selectedInstance.setAngle(newAngle);
 
       const rotationAngle = ((degreeAngle - initialAngle) * Math.PI) / 180;
-      const cosa = Math.cos(-rotationAngle);
-      const sina = Math.sin(-rotationAngle);
+      const cosa = Math.cos(rotationAngle);
+      const sina = Math.sin(rotationAngle);
       const deltaX = initialAABB.centerX() - this._fixedPoint[0];
       const deltaY = initialAABB.centerY() - this._fixedPoint[1];
       // We also round the position to the nearest pixel after rotation.
       const newX = Math.round(
         this._fixedPoint[0] +
           (initialInstanceOriginPosition.x - initialAABB.centerX()) +
-          cosa * deltaX +
+          cosa * deltaX -
           sina * deltaY
       );
       const newY = Math.round(
         this._fixedPoint[1] +
-          (initialInstanceOriginPosition.y - initialAABB.centerY()) -
+          (initialInstanceOriginPosition.y - initialAABB.centerY()) +
           sina * deltaX +
           cosa * deltaY
       );

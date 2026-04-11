@@ -102,8 +102,8 @@ namespace gdjs {
    */
   export interface AnimationFrameTextureManager<T> {
     getAnimationFrameTexture(imageName: string): T;
-    getAnimationFrameWidth(pixiTexture: T);
-    getAnimationFrameHeight(pixiTexture: T);
+    getAnimationFrameWidth(texture: T);
+    getAnimationFrameHeight(texture: T);
   }
 
   /**

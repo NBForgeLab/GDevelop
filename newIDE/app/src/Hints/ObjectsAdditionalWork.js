@@ -1,4 +1,5 @@
 // @flow
+// (Cache clear comment)
 import { type AlertMessageIdentifier } from '../MainFrame/Preferences/PreferencesContext';
 import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
 import getObjectByName from '../Utils/GetObjectByName';
@@ -15,8 +16,6 @@ export type InfoBarDetails = {|
   message: MessageDescriptor,
   touchScreenMessage: MessageDescriptor,
 |};
-
-type InfoBarEvent = 'onObjectAdded' | 'onInstanceAdded';
 
 type ObjectAddedOptions = {|
   object: gdObject,

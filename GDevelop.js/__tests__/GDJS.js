@@ -63,7 +63,7 @@ describe('libGD.js - GDJS related tests', function () {
       // Export and check the content of written files.
       const exporter = new gd.Exporter(fs, '/fake-gdjs-root');
       const exportOptions = new gd.ExportOptions(project, '/fake-export-dir');
-      expect(exporter.exportWholePixiProject(exportOptions)).toBe(true);
+      expect(exporter.exportWholeProject(exportOptions)).toBe(true);
       exportOptions.delete();
       exporter.delete();
 
@@ -76,7 +76,7 @@ describe('libGD.js - GDJS related tests', function () {
         'affinetransformation.js'
       );
       expect(fs.writeToFile.mock.calls[1][1]).toContain(
-        'pixi-renderers/runtimescene-pixi-renderer.js'
+        'three-renderers/runtimescene-three-renderer.js'
       );
       expect(fs.writeToFile.mock.calls[1][1]).toContain('data.js');
 
@@ -118,7 +118,7 @@ describe('libGD.js - GDJS related tests', function () {
       const exporter = new gd.Exporter(fs, '/fake-gdjs-root');
       const exportOptions = new gd.ExportOptions(project, '/fake-export-dir');
       exportOptions.setTarget('cordova');
-      expect(exporter.exportWholePixiProject(exportOptions)).toBe(true);
+      expect(exporter.exportWholeProject(exportOptions)).toBe(true);
       exportOptions.delete();
       exporter.delete();
 
@@ -176,7 +176,7 @@ describe('libGD.js - GDJS related tests', function () {
       const exporter = new gd.Exporter(fs, '/fake-gdjs-root');
       const exportOptions = new gd.ExportOptions(project, '/fake-export-dir');
       exportOptions.setTarget('cordova');
-      expect(exporter.exportWholePixiProject(exportOptions)).toBe(true);
+      expect(exporter.exportWholeProject(exportOptions)).toBe(true);
       exportOptions.delete();
       exporter.delete();
 

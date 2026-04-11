@@ -19,7 +19,7 @@ namespace gdjs {
 
     throw new Error(
       context +
-        ' received a non-Three renderer object. The 3D-first runtime no longer accepts Pixi display objects.'
+        ' received a non-Three renderer object. The runtime only accepts Three.js display objects.'
     );
   };
 
@@ -64,7 +64,6 @@ namespace gdjs {
       this._threeGroup.name = layer.getName();
       this._threeScene = new THREE.Scene();
       this._threeScene.name = layer.getName();
-      this._threeScene.scale.y = -1;
       this._threeScene.add(this._threeGroup);
       this._threeScene.background = null;
 
@@ -161,8 +160,8 @@ namespace gdjs {
       this._threeCamera.near = this._camera3DNearPlaneDistance;
       this._threeCamera.far = this._camera3DFarPlaneDistance;
       this._threeCamera.position.x = this._layer.getCameraX();
-      this._threeCamera.position.y = -this._layer.getCameraY();
-      this._threeCamera.rotation.z = -gdjs.toRad(
+      this._threeCamera.position.y = this._layer.getCameraY();
+      this._threeCamera.rotation.z = gdjs.toRad(
         this._layer.getCameraRotation()
       );
       this._threeCamera.updateProjectionMatrix();
@@ -247,7 +246,7 @@ namespace gdjs {
       }
 
       result[0] = vector.x;
-      result[1] = -vector.y;
+      result[1] = vector.y;
       return result;
     }
 

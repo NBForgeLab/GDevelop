@@ -1,7 +1,7 @@
 // @flow
 import React, { Component } from 'react';
 import debounce from 'lodash/debounce';
-import KeyboardShortcuts, { MID_MOUSE_BUTTON } from '../UI/KeyboardShortcuts';
+import KeyboardShortcuts from '../UI/KeyboardShortcuts';
 import InstancesRenderer from './InstancesRenderer';
 import ViewPosition from './ViewPosition';
 import SelectedInstances from './SelectedInstances';
@@ -37,12 +37,9 @@ import {
   getWheelStepZoomFactor,
 } from '../Utils/ZoomUtils';
 import Background from './Background';
-import ClickInterceptor from './ClickInterceptor';
 import { ErrorFallbackComponent } from '../UI/ErrorBoundary';
 import { Trans } from '@lingui/macro';
 import { generateUUID } from 'three/src/math/MathUtils';
-
-type TileMapTileSelection = any;
 const gd: libGDevelop = global.gd;
 export const instancesEditorId = 'instances-editor-canvas';
 const styles = {
@@ -102,8 +99,6 @@ export type InstancesEditorPropsWithoutSizeAndScroll = {|
   ) => void,
   pauseRendering: boolean,
   instancesEditorShortcutsCallbacks: InstancesEditorShortcutsCallbacks,
-  tileMapTileSelection: ?TileMapTileSelection,
-  onSelectTileMapTile: (?TileMapTileSelection) => void,
   editorViewPosition2D: EditorViewPosition2D,
 |};
 
@@ -142,7 +137,6 @@ export default class InstancesEditor extends Component<Props, State> {
   _instancesAdder: InstancesAdder;
   selectionRectangle: SelectionRectangle;
   selectedInstances: SelectedInstances;
-  clickInterceptor: ClickInterceptor;
   highlightedInstance: HighlightedInstance;
   instancesResizer: InstancesResizer;
   instancesRotator: InstancesRotator;
@@ -207,6 +201,11 @@ export default class InstancesEditor extends Component<Props, State> {
           this.props.instancesEditorSettings
         );
       }
+      if (this.windowBorder) {
+        this.windowBorder.setInstancesEditorSettings(
+          this.props.instancesEditorSettings
+        );
+      }
       if (this.windowMask) {
         this.windowMask.setInstancesEditorSettings(
           this.props.instancesEditorSettings
@@ -252,9 +251,6 @@ export default class InstancesEditor extends Component<Props, State> {
     color: isLocked ? 0x999999 : 0x4da3ff,
     alpha: isLocked ? 0.25 : 0.35,
   });
-
-  getTileMapTileSelection = (): ?TileMapTileSelection =>
-    this.props.tileMapTileSelection;
 
   _initializeCanvasAndRenderer() {
     const { canvasArea } = this;
@@ -327,7 +323,7 @@ export default class InstancesEditor extends Component<Props, State> {
     );
 
     this.renderer.domElement.addEventListener('mousemove', event => {
-      this._onMouseMove(event.clientX, event.clientY);
+      this._onMouseMove(event.clientX, event.clientY, event);
       if (onMouseMove) onMouseMove(event);
     });
     if (onMouseLeave)
@@ -452,14 +448,6 @@ export default class InstancesEditor extends Component<Props, State> {
       onPanEnd: this._onPanEnd,
     });
 
-    this.clickInterceptor = new ClickInterceptor({
-      getTileMapTileSelection: this.getTileMapTileSelection,
-      viewPosition: this.viewPosition,
-      onClick: this._onInterceptClick,
-      onPanMove: this._onPanMove,
-      onInterceptPointerMove: () => this.fpsLimiter.notifyInteractionHappened(),
-    });
-
     this.highlightedInstance = new HighlightedInstance({
       instanceMeasurer: this.instancesRenderer.getInstanceMeasurer(),
       toCanvasCoordinates: this.viewPosition.toCanvasCoordinates,
@@ -485,6 +473,7 @@ export default class InstancesEditor extends Component<Props, State> {
       layout: props.layout,
       eventsBasedObjectVariant: props.eventsBasedObjectVariant,
       toCanvasCoordinates: this.viewPosition.toCanvasCoordinates,
+      instancesEditorSettings: this.props.instancesEditorSettings,
     });
 
     this.windowMask = new WindowMask({
@@ -507,7 +496,6 @@ export default class InstancesEditor extends Component<Props, State> {
     this.uiGroup.add(this.windowMask.getThreeObject());
     this.uiGroup.add(this.selectedInstances.getThreeGroup());
     this.uiGroup.add(this.highlightedInstance.getThreeObject());
-    this.uiGroup.add(this.clickInterceptor.getThreeObject());
     this.uiGroup.add(this.statusBar.getThreeObject());
     this.uiGroup.add(this.profilerBar.getThreeObject());
     this.uiGroup.add(this.grid.getThreeObject());
@@ -638,10 +626,6 @@ export default class InstancesEditor extends Component<Props, State> {
     const shouldMoveView =
       this.keyboardShortcuts.shouldMoveView() ||
       (event ? event.button === 1 : false);
-    if (this.props.tileMapTileSelection) {
-      this.clickInterceptor.startPointerInterception(canvasX, canvasY);
-      return;
-    }
     if (!shouldMoveView) {
       this.selectionRectangle.startSelectionRectangle(canvasX, canvasY);
     }
@@ -660,47 +644,79 @@ export default class InstancesEditor extends Component<Props, State> {
     const canvasRect = this.renderer.domElement.getBoundingClientRect();
     const canvasX = x - canvasRect.left;
     const canvasY = y - canvasRect.top;
-    if (this.clickInterceptor && this.clickInterceptor.isIntercepting()) {
-      this.clickInterceptor.endPointerInterception();
-      return;
-    }
-    const instancesUnderCursor = this.instancesRenderer.getInstancesAt(
-      canvasX,
-      canvasY,
-      this.renderer,
-      this.raycaster
-    );
-    if (instancesUnderCursor.length > 0) {
+    if (this._activeResizeHandle || this.instancesMover.isMoving()) {
       const scenePoint = this.viewPosition.toSceneCoordinates(canvasX, canvasY);
-      this._onUpInstance(instancesUnderCursor[0], scenePoint[0], scenePoint[1]);
+      this._onUpInstance(null, scenePoint[0], scenePoint[1]);
+    } else {
+      const instancesUnderCursor = this.instancesRenderer.getInstancesAt(
+        canvasX,
+        canvasY,
+        this.renderer,
+        this.raycaster
+      );
+      if (instancesUnderCursor.length > 0) {
+        const scenePoint = this.viewPosition.toSceneCoordinates(
+          canvasX,
+          canvasY
+        );
+        this._onUpInstance(
+          instancesUnderCursor[0],
+          scenePoint[0],
+          scenePoint[1]
+        );
+      }
     }
     if (this.selectionRectangle.hasStartedSelectionRectangle()) {
       this._selectInstanceInsideSelectionRectangle();
     }
   };
 
-  _onMouseMove = (x: number, y: number) => {
+  _onMouseMove = (x: number, y: number, event?: MouseEvent) => {
     this.fpsLimiter.notifyInteractionHappened();
     if (!this.renderer) return;
     const canvasRect = this.renderer.domElement.getBoundingClientRect();
     const canvasX = x - canvasRect.left;
     const canvasY = y - canvasRect.top;
+
+    const deltaX =
+      canvasX - (this.lastCursorX !== undefined ? this.lastCursorX : canvasX);
+    const deltaY =
+      canvasY - (this.lastCursorY !== undefined ? this.lastCursorY : canvasY);
+
     this.lastCursorX = canvasX;
     this.lastCursorY = canvasY;
-    if (this.clickInterceptor && this.clickInterceptor.isIntercepting()) {
-      this.clickInterceptor.interceptPointerMove(canvasX, canvasY);
-      return;
-    }
-    const instancesUnderCursor = this.instancesRenderer.getInstancesAt(
-      canvasX,
-      canvasY,
-      this.renderer,
-      this.raycaster
-    );
-    if (instancesUnderCursor.length > 0) {
-      this._onOverInstance(instancesUnderCursor[0]);
+
+    const isMiddleButtonDown = event ? (event.buttons & 4) !== 0 : false;
+    const isLeftButtonDown = event ? (event.buttons & 1) !== 0 : false;
+
+    const shouldPan =
+      isMiddleButtonDown ||
+      (this.keyboardShortcuts.shouldMoveView() && isLeftButtonDown);
+
+    if (this._activeResizeHandle || this.instancesMover.isMoving()) {
+      const scenePoint = this.viewPosition.toSceneCoordinates(canvasX, canvasY);
+      this._onMoveInstance(null, scenePoint[0], scenePoint[1]);
+    } else if (shouldPan) {
+      if (deltaX !== 0 || deltaY !== 0) {
+        this.scrollBy(
+          -deltaX / this.getZoomFactor(),
+          -deltaY / this.getZoomFactor()
+        );
+      }
+    } else if (this.selectionRectangle.hasStartedSelectionRectangle()) {
+      this.selectionRectangle.updateSelectionRectangle(canvasX, canvasY);
     } else {
-      this.highlightedInstance.setInstance(null);
+      const instancesUnderCursor = this.instancesRenderer.getInstancesAt(
+        canvasX,
+        canvasY,
+        this.renderer,
+        this.raycaster
+      );
+      if (instancesUnderCursor.length > 0) {
+        this._onOverInstance(instancesUnderCursor[0]);
+      } else {
+        this.highlightedInstance.setInstance(null);
+      }
     }
   };
 
@@ -894,12 +910,7 @@ export default class InstancesEditor extends Component<Props, State> {
     });
     this.onInstancesMovedDebounced(unlockedSelectedInstances);
   };
-  onPressEscape = () => {
-    if (this.clickInterceptor && this.clickInterceptor.isIntercepting()) {
-      this.clickInterceptor.cancelClickInterception();
-    }
-  };
-  _onInterceptClick = () => {};
+  onPressEscape = () => {};
   _selectInstanceInsideSelectionRectangle = () => {
     const selected = this.selectionRectangle.endSelectionRectangle();
     this.props.instancesSelection.selectInstances({

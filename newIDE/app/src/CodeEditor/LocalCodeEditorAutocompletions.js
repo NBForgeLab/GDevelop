@@ -4,14 +4,8 @@ import optionalRequire from '../Utils/OptionalRequire';
 const fs = optionalRequire('fs');
 const path = optionalRequire('path');
 
-// Avoid conflicts in declaration of PIXI and THREE namespaces.
-const excludedFiles = [
-  'global-three.d.ts',
-  'global-pixi.d.ts',
-  'pixi-particles-pixi-renderer.d.ts',
-  'pixi.js',
-  'three.js',
-];
+// Avoid conflicts in declaration of THREE namespace.
+const excludedFiles = ['global-three.d.ts', 'three.js'];
 
 export const setupAutocompletions = (monaco: any) => {
   const importAllJsFilesFromFolder = (folderPath: string) =>
@@ -102,7 +96,7 @@ export const setupAutocompletions = (monaco: any) => {
     const runtimePath = path.join(gdjsRoot, 'Runtime-sources');
     const runtimeTypesPath = path.join(runtimePath, 'types');
     const runtimeLibsPath = path.join(runtimePath, 'libs');
-    const runtimePixiRenderersPath = path.join(runtimePath, 'pixi-renderers');
+    const runtimeThreeRenderersPath = path.join(runtimePath, 'three-renderers');
     const runtimeHowlerSoundManagerPath = path.join(
       runtimePath,
       'howler-sound-manager'
@@ -115,18 +109,16 @@ export const setupAutocompletions = (monaco: any) => {
     const eventToolsPath = path.join(runtimePath, 'events-tools');
     const inGameEditorPath = path.join(runtimePath, 'InGameEditor');
     const threeTypesPath = path.join(runtimeTypesPath, 'three');
-    const pixiTypesPath = path.join(runtimeTypesPath, 'pixi');
 
     importAllJsFilesFromFolder(runtimePath);
     importAllJsFilesFromFolder(runtimeTypesPath);
     importAllJsFilesFromFolder(runtimeLibsPath);
-    importAllJsFilesFromFolder(runtimePixiRenderersPath);
+    importAllJsFilesFromFolder(runtimeThreeRenderersPath);
     importAllJsFilesFromFolder(runtimeHowlerSoundManagerPath);
     importAllJsFilesFromFolder(runtimeFontfaceobserverFontManagerPath);
     importAllJsFilesFromFolder(eventToolsPath);
     importAllJsFilesFromFolder(inGameEditorPath);
     importAllJsFilesFromFolderRecursively(threeTypesPath);
-    importAllJsFilesFromFolderRecursively(pixiTypesPath);
 
     fs.readdir(extensionsPath, (error: ?Error, folderNames: Array<string>) => {
       if (error) {

@@ -1,6 +1,6 @@
 
   const makePlatformerTestRuntimeScene = (timeDelta = 1000 / 60) => {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
     runtimeScene.loadFromScene({sceneData: {
       layers: [{ name: '', visibility: true, effects: [] }],

@@ -1,7 +1,7 @@
 // @flow
+// (Cache clear comment)
 import optionalRequire from '../Utils/OptionalRequire';
 import newNameGenerator from '../Utils/NewNameGenerator';
-import { isPathInProjectFolder } from './ResourceUtils';
 import { createNewResource } from './ResourceSource';
 const fs = optionalRequire('fs');
 const path = optionalRequire('path');

@@ -1477,7 +1477,7 @@ module.exports = {
       .setIncludeFile('Extensions/3D/A_RuntimeObject3D.js')
       .addIncludeFile('Extensions/3D/A_RuntimeObject3DRenderer.js')
       .addIncludeFile('Extensions/3D/Cube3DRuntimeObject.js')
-      .addIncludeFile('Extensions/3D/Cube3DRuntimeObjectPixiRenderer.js');
+      .addIncludeFile('Extensions/3D/Cube3DRuntimeObject3DRenderer.js');
 
     // Properties expressions/conditions/actions:
 
@@ -2838,7 +2838,6 @@ module.exports = {
         this._defaultDepth = object.content.depth;
 
         const geometry = new THREE.PlaneGeometry(1, 1);
-        geometry.translate(0.5, -0.5, 0);
         const material = new THREE.MeshBasicMaterial({
           map: this._resourcesLoader.getInvalidThreeTexture(),
           color: 0xffffff,
@@ -2936,7 +2935,7 @@ module.exports = {
         this._threeObject.scale.set(scaleX, scaleY, 1);
         this._threeObject.position.x = this._instance.getX() + width / 2;
         this._threeObject.position.y = this._instance.getY() + height / 2;
-        this._threeObject.rotation.z = -RenderedInstance.toRad(
+        this._threeObject.rotation.z = RenderedInstance.toRad(
           this._instance.getAngle()
         );
       }
@@ -2957,7 +2956,7 @@ module.exports = {
         );
         this._threeObject.position.x = this._instance.getX() + width / 2;
         this._threeObject.position.y = this._instance.getY() + height / 2;
-        this._threeObject.rotation.z = -RenderedInstance.toRad(
+        this._threeObject.rotation.z = RenderedInstance.toRad(
           this._instance.getAngle()
         );
       }
@@ -3473,7 +3472,7 @@ module.exports = {
         this._overlayMesh.scale.set(width, height, 1);
         this._overlayMesh.position.x = this._instance.getX() + width / 2;
         this._overlayMesh.position.y = this._instance.getY() + height / 2;
-        this._overlayMesh.rotation.z = -RenderedInstance.toRad(
+        this._overlayMesh.rotation.z = RenderedInstance.toRad(
           this._instance.getAngle()
         );
       }
@@ -3687,9 +3686,6 @@ module.exports = {
         this._modelOriginPoint[2] =
           modelDepth < epsilon ? 0 : -boundingBox.min.z / modelDepth;
 
-        // The model is flipped on Y axis.
-        this._modelOriginPoint[1] = 1 - this._modelOriginPoint[1];
-
         // Center the model.
         const centerPoint = this._centerPoint;
         if (centerPoint[0]) {
@@ -3699,10 +3695,9 @@ module.exports = {
           );
         }
         if (centerPoint[1]) {
-          // The model is flipped on Y axis.
           threeObject.position.y = -(
             boundingBox.min.y +
-            modelHeight * (1 - centerPoint[1])
+            modelHeight * centerPoint[1]
           );
         }
         if (centerPoint[2]) {
@@ -3726,9 +3721,7 @@ module.exports = {
         const scaleZ = modelDepth < epsilon ? 1 : 1 / modelDepth;
 
         const scaleMatrix = new THREE.Matrix4();
-        // Flip on Y because the Y axis is on the opposite side of direct basis.
-        // It avoids models to be like a mirror refection.
-        scaleMatrix.makeScale(scaleX, -scaleY, scaleZ);
+        scaleMatrix.makeScale(scaleX, scaleY, scaleZ);
         threeObject.updateMatrix();
         threeObject.applyMatrix4(scaleMatrix);
 
@@ -3768,7 +3761,7 @@ module.exports = {
           this._instance.getX() - width * (originPoint[0] - centerPoint[0]);
         this._overlayMesh.position.y =
           this._instance.getY() - height * (originPoint[1] - centerPoint[1]);
-        this._overlayMesh.rotation.z = -RenderedInstance.toRad(
+        this._overlayMesh.rotation.z = RenderedInstance.toRad(
           this._instance.getAngle()
         );
       }
@@ -3992,9 +3985,6 @@ module.exports = {
         this._modelOriginPoint[2] =
           modelDepth < epsilon ? 0 : -boundingBox.min.z / modelDepth;
 
-        // The model is flipped on Y axis.
-        this._modelOriginPoint[1] = 1 - this._modelOriginPoint[1];
-
         // Center the model.
         const centerPoint = this._centerPoint;
         if (centerPoint[0] !== null) {
@@ -4004,10 +3994,9 @@ module.exports = {
           );
         }
         if (centerPoint[1] !== null) {
-          // The model is flipped on Y axis.
           threeModelGroup.position.y = -(
             boundingBox.min.y +
-            modelHeight * (1 - centerPoint[1])
+            modelHeight * centerPoint[1]
           );
         }
         if (centerPoint[2] !== null) {
@@ -4031,9 +4020,7 @@ module.exports = {
         const scaleZ = modelDepth < epsilon ? 1 : 1 / modelDepth;
 
         const scaleMatrix = new THREE.Matrix4();
-        // Flip on Y because the Y axis is on the opposite side of direct basis.
-        // It avoids models to be like a mirror refection.
-        scaleMatrix.makeScale(scaleX, -scaleY, scaleZ);
+        scaleMatrix.makeScale(scaleX, scaleY, scaleZ);
         threeModelGroup.updateMatrix();
         threeModelGroup.applyMatrix4(scaleMatrix);
 
@@ -4224,7 +4211,7 @@ module.exports = {
           this._instance.getX() - width * (originPoint[0] - centerPoint[0]);
         this._overlayMesh.position.y =
           this._instance.getY() - height * (originPoint[1] - centerPoint[1]);
-        this._overlayMesh.rotation.z = -RenderedInstance.toRad(
+        this._overlayMesh.rotation.z = RenderedInstance.toRad(
           this._instance.getAngle()
         );
       }

@@ -53,7 +53,7 @@ export default class RenderedTextInstance extends RenderedInstance {
     this._canvasTexture.magFilter = THREE.LinearFilter;
 
     const geometry = new THREE.PlaneGeometry(1, 1);
-    geometry.translate(0.5, -0.5, 0);
+
     const material = new THREE.MeshBasicMaterial({
       map: this._canvasTexture,
       transparent: true,
@@ -224,19 +224,20 @@ export default class RenderedTextInstance extends RenderedInstance {
           ? 0.5
           : 0;
 
-      let positionX = this._instance.getX();
+      let positionX = this._instance.getX() + width / 2;
       if (this._instance.hasCustomSize()) {
         const customWidth = this.getCustomWidth();
         positionX += (customWidth - width) * alignmentX;
       }
-      const positionY = this._instance.getY() - height * alignmentY;
+      const positionY =
+        this._instance.getY() - height * alignmentY - height / 2;
 
       this._threeObject.position.set(
         positionX,
         positionY,
         this._instance.getZ()
       );
-      this._threeObject.rotation.z = -THREE.MathUtils.degToRad(
+      this._threeObject.rotation.z = THREE.MathUtils.degToRad(
         this._instance.getAngle()
       );
       this._threeObject.material.opacity = Math.max(

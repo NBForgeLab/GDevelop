@@ -79,7 +79,7 @@ export default class RenderedUnknownInstance extends RenderedInstance {
     this._threeObject.position.y = this._instance.getY() + this.getCenterY();
 
     // Rotation is typically done via material in Sprite
-    this._threeObject.material.rotation = -RenderedInstance.toRad(
+    this._threeObject.material.rotation = RenderedInstance.toRad(
       this._instance.getAngle()
     );
 

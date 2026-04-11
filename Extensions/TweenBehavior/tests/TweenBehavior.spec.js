@@ -2,6 +2,68 @@
 describe('gdjs.TweenRuntimeBehavior', () => {
   const behaviorName = 'Tween';
 
+  // Register dummy effects for testing
+  before(() => {
+    // Register Outline effect
+    gdjs.EffectsTools.registerFilterCreator('Outline', {
+      makeFilter: (target, effectData) => {
+        const effectHandle = {
+          enabled: true,
+          doubleParameters: effectData.doubleParameters || {},
+          stringParameters: effectData.stringParameters || {},
+        };
+        return {
+          effectHandle,
+          isEnabled: () => !!effectHandle.enabled,
+          setEnabled: (target, enabled) => { effectHandle.enabled = enabled; return true; },
+          applyEffect: () => true,
+          removeEffect: () => true,
+          updatePreRender: () => {},
+          updateDoubleParameter: (name, value) => { effectHandle.doubleParameters[name] = value; },
+          updateStringParameter: (name, value) => { effectHandle.stringParameters[name] = value; },
+          updateBooleanParameter: () => {},
+          updateColorParameter: (name, value) => { effectHandle.stringParameters[name] = gdjs.rgbToHexNumber(value); },
+          getDoubleParameter: (name) => effectHandle.doubleParameters[name] || 0,
+          getColorParameter: (name) => {
+            const hex = effectHandle.stringParameters[name];
+            if (typeof hex === 'string') {
+              return gdjs.rgbOrHexStringToNumber(hex);
+            }
+            return hex || 0;
+          },
+          getNetworkSyncData: () => ({}),
+          updateFromNetworkSyncData: () => {},
+        };
+      },
+    });
+
+    // Register KawaseBlur effect
+    gdjs.EffectsTools.registerFilterCreator('KawaseBlur', {
+      makeFilter: (target, effectData) => {
+        const effectHandle = {
+          enabled: true,
+          doubleParameters: effectData.doubleParameters || {},
+        };
+        return {
+          effectHandle,
+          isEnabled: () => !!effectHandle.enabled,
+          setEnabled: (target, enabled) => { effectHandle.enabled = enabled; return true; },
+          applyEffect: () => true,
+          removeEffect: () => true,
+          updatePreRender: () => {},
+          updateDoubleParameter: (name, value) => { effectHandle.doubleParameters[name] = value; },
+          updateStringParameter: () => {},
+          updateBooleanParameter: () => {},
+          updateColorParameter: () => {},
+          getDoubleParameter: (name) => effectHandle.doubleParameters[name] || 0,
+          getColorParameter: () => 0,
+          getNetworkSyncData: () => ({}),
+          updateFromNetworkSyncData: () => {},
+        };
+      },
+    });
+  });
+
   const createScene = (timeDelta = 1000 / 60) => {
     const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);

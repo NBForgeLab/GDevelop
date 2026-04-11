@@ -9,7 +9,6 @@ import { Trans } from '@lingui/macro';
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
 import { type UnsavedChanges } from '../MainFrame/UnsavedChangesContext';
 import { type HistoryHandler } from '../VariablesList/VariablesList';
-type TileMapTileSelection = any;
 import { CompactObjectPropertiesEditor } from '../ObjectEditor/CompactObjectPropertiesEditor';
 import { type ObjectEditorTab } from '../ObjectEditor/ObjectEditorDialog';
 import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
@@ -67,8 +66,6 @@ type Props = {|
   onInstancesModified?: (Array<gdInitialInstance>) => void,
   onGetInstanceSize: gdInitialInstance => [number, number, number],
   editInstanceVariables: gdInitialInstance => void,
-  tileMapTileSelection: ?TileMapTileSelection,
-  onSelectTileMapTile: (?TileMapTileSelection) => void,
 
   // For layers:
   layer: gdLayer | null,
@@ -135,8 +132,6 @@ export const InstanceOrObjectPropertiesEditorContainer: React.ComponentType<{
       onInstancesModified,
       onGetInstanceSize,
       editInstanceVariables,
-      tileMapTileSelection,
-      onSelectTileMapTile,
 
       // For layers
       layer,
@@ -167,8 +162,6 @@ export const InstanceOrObjectPropertiesEditorContainer: React.ComponentType<{
             onInstancesModified={onInstancesModified}
             onGetInstanceSize={onGetInstanceSize}
             editInstanceVariables={editInstanceVariables}
-            tileMapTileSelection={tileMapTileSelection}
-            onSelectTileMapTile={onSelectTileMapTile}
             historyHandler={historyHandler}
             layout={layout}
             objectsContainer={objectsContainer}

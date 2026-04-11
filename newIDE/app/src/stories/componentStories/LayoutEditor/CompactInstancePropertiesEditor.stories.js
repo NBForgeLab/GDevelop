@@ -40,8 +40,6 @@ export const InstanceSprite2d = (): React.Node => (
             editObjectInPropertiesPanel={action(
               'edit object in property panel'
             )}
-            tileMapTileSelection={null}
-            onSelectTileMapTile={() => {}}
             canOverrideBehaviorProperties={true}
             resourceManagementProps={fakeResourceManagementProps}
           />
@@ -72,8 +70,6 @@ export const InstanceCube3d = (): React.Node => (
             editObjectInPropertiesPanel={action(
               'edit object in property panel'
             )}
-            tileMapTileSelection={null}
-            onSelectTileMapTile={() => {}}
             canOverrideBehaviorProperties={true}
             resourceManagementProps={fakeResourceManagementProps}
           />
@@ -104,8 +100,6 @@ export const InstanceTextInput = (): React.Node => (
             editObjectInPropertiesPanel={action(
               'edit object in property panel'
             )}
-            tileMapTileSelection={null}
-            onSelectTileMapTile={() => {}}
             canOverrideBehaviorProperties={true}
             resourceManagementProps={fakeResourceManagementProps}
           />

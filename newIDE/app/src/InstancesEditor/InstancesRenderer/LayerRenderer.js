@@ -139,9 +139,10 @@ export default class LayerRenderer {
     this.viewTopLeft = this.viewPosition.getViewTopLeft();
     this.viewBottomRight = this.viewPosition.getViewBottomRight();
 
-    this.instances.iterateOverInstancesInLayer(
-      this.layer.getName(),
-      this.instancesRenderer
+    this.instances.iterateOverInstancesWithZOrdering(
+      // $FlowFixMe[incompatible-type] - gd.castObject is not supporting typings.
+      this.instancesRenderer,
+      this.layer.getName()
     );
 
     this._cleanUnusedRenderedInstances();
@@ -154,7 +155,6 @@ export default class LayerRenderer {
     if (!renderedInstance) {
       const objectName = instance.getObjectName();
       const object = getObjectByName(
-        this.project,
         this.globalObjectsContainer,
         this.objectsContainer,
         objectName
@@ -175,9 +175,11 @@ export default class LayerRenderer {
       renderedInstance.update();
       renderedInstance.wasUsed = true;
     }
+    const duration = performance.now() - startTime;
     increaseInstanceUpdate(
       this._basicProfilingCounters,
-      performance.now() - startTime
+      instance.getObjectName(),
+      duration
     );
   }
 
@@ -245,6 +247,13 @@ export default class LayerRenderer {
         }
       }
     }
+  }
+
+  getRendererOfInstance(
+    instance: gdInitialInstance
+  ): RenderedInstance | Rendered3DInstance | null {
+    if (!this.renderedInstances.hasOwnProperty(instance.ptr)) return null;
+    return this.renderedInstances[instance.ptr];
   }
 
   delete() {

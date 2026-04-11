@@ -380,7 +380,7 @@ export default class LocalPreviewLauncher extends React.Component<
       );
     }
 
-    exporter.exportProjectForPixiPreview(previewExportOptions);
+    exporter.exportProjectForPreview(previewExportOptions);
 
     if (shouldHotReload) {
       const projectDataElement = new gd.SerializerElement();

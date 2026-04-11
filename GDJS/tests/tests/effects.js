@@ -3,6 +3,35 @@
 describe('gdjs.EffectsManager', () => {
   const runtimeGame = gdjs.getRuntimeGame();
 
+  // Register dummy effects for testing
+  before(() => {
+    // Register KawaseBlur effect
+    gdjs.EffectsTools.registerFilterCreator('KawaseBlur', {
+      makeFilter: (target, effectData) => {
+        const effectHandle = {
+          enabled: true,
+          doubleParameters: effectData.doubleParameters || {},
+        };
+        return {
+          effectHandle,
+          isEnabled: () => !!effectHandle.enabled,
+          setEnabled: (target, enabled) => { effectHandle.enabled = enabled; return true; },
+          applyEffect: () => true,
+          removeEffect: () => true,
+          updatePreRender: () => {},
+          updateDoubleParameter: (name, value) => { effectHandle.doubleParameters[name] = value; },
+          updateStringParameter: () => {},
+          updateBooleanParameter: () => {},
+          updateColorParameter: () => {},
+          getDoubleParameter: (name) => effectHandle.doubleParameters[name] || 0,
+          getColorParameter: () => 0,
+          getNetworkSyncData: () => ({}),
+          updateFromNetworkSyncData: () => {},
+        };
+      },
+    });
+  });
+
   it('can add effects on a runtime object', () => {
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
     const object = new gdjs.TestRuntimeObjectWithFakeRenderer(runtimeScene, {

@@ -546,8 +546,8 @@ class ExporterHelper {
   /**
    * \brief Add libraries files to the list of includes.
    */
-  void AddLibsInclude(bool pixiRenderers,
-                      bool pixiInThreeRenderers,
+  void AddLibsInclude(bool include2DRenderers,
+                      bool include3DRenderers,
                       bool isInGameEdition,
                       bool includeWebsocketDebuggerClient,
                       bool includeWindowMessageDebuggerClient,
@@ -555,12 +555,6 @@ class ExporterHelper {
                       bool includeCaptureManager,
                       bool includeInAppTutorialMessage,
                       gd::String gdevelopLogoStyle,
-                      std::vector<gd::String> &includesFiles);
-
-  /**
-   * \brief Remove include files that are Pixi renderers.
-   */
-  void RemoveIncludes(bool pixiRenderers,
                       std::vector<gd::String> &includesFiles);
 
   /**
@@ -713,8 +707,8 @@ class ExporterHelper {
    * \param options The options to generate the preview.
    * \param includesFiles The list of scripts files - useful for hot-reloading
    */
-  bool ExportProjectForPixiPreview(const PreviewExportOptions &options,
-                                   std::vector<gd::String> &includesFiles);
+  bool ExportProjectForPreview(const PreviewExportOptions &options,
+                               std::vector<gd::String> &includesFiles);
 
   /**
    * \brief Given an include file, returns the name of the file to reference

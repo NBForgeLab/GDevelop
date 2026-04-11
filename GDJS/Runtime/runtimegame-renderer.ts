@@ -76,6 +76,21 @@ namespace gdjs {
         this._marginBottom =
           0;
       this._setupOrientation();
+
+      // Try to create a canvas automatically if we're in a browser environment
+      // This is needed for tests and simple game initialization
+      if (typeof document !== 'undefined' && typeof document.createElement === 'function') {
+        try {
+          const canvas = document.createElement('canvas');
+          // Don't add it to the DOM yet - just use it for the renderer
+          this.initializeRenderers(canvas);
+          this._gameCanvas = canvas;
+        } catch (error) {
+          // If we can't create a canvas automatically, that's okay
+          // The user will need to call createStandardCanvas or initializeRenderers manually
+          logger.info('Could not auto-create canvas for renderer:', error);
+        }
+      }
     }
 
     /**
@@ -88,7 +103,9 @@ namespace gdjs {
     createStandardCanvas(parentElement: HTMLElement) {
       this._throwIfDisposed();
 
-      const gameCanvas = document.createElement('canvas');
+      // If a canvas was already automatically created in the constructor, reuse it!
+      // Otherwise, create a new one. (Prevents Three.js rendering to an off-screen canvas)
+      const gameCanvas = this._gameCanvas || document.createElement('canvas');
       parentElement.appendChild(gameCanvas);
 
       this.initializeRenderers(gameCanvas);
@@ -102,6 +119,12 @@ namespace gdjs {
      */
     initializeRenderers(gameCanvas: HTMLCanvasElement): void {
       this._throwIfDisposed();
+
+      // If renderer already exists, don't recreate it
+      if (this._threeRenderer) {
+        logger.info('Three.js renderer already initialized, skipping re-initialization.');
+        return;
+      }
 
       const useAntialias =
         this._game.getAntialiasingMode() !== 'none' &&
@@ -1009,10 +1032,6 @@ namespace gdjs {
 
     stopGameLoop(): void {
       cancelAnimationFrame(this._nextFrameId);
-    }
-
-    getPIXIRenderer() {
-      return null;
     }
 
     /**

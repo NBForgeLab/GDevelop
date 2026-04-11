@@ -106,7 +106,7 @@ ExporterHelper::ExporterHelper(gd::AbstractFileSystem &fileSystem,
                                gd::String codeOutputDir_)
     : fs(fileSystem), gdjsRoot(gdjsRoot_), codeOutputDir(codeOutputDir_) {};
 
-bool ExporterHelper::ExportProjectForPixiPreview(
+bool ExporterHelper::ExportProjectForPreview(
     const PreviewExportOptions &options,
     std::vector<gd::String> &includesFiles) {
 
@@ -175,8 +175,8 @@ bool ExporterHelper::ExportProjectForPixiPreview(
     usedSourceFiles = usedExtensionsResult.GetUsedSourceFiles();
 
     // Export engine libraries
-    AddLibsInclude(/*pixiRenderers=*/true,
-                  /*pixiInThreeRenderers=*/
+    AddLibsInclude(/*include2DRenderers=*/true,
+                  /*include3DRenderers=*/
                   usedExtensionsResult.Has3DObjects(),
                   /*isInGameEdition=*/
                   options.isInGameEdition,
@@ -1111,8 +1111,8 @@ bool ExporterHelper::CompleteIndexFile(
   return true;
 }
 
-void ExporterHelper::AddLibsInclude(bool pixiRenderers,
-                                    bool pixiInThreeRenderers,
+void ExporterHelper::AddLibsInclude(bool include2DRenderers,
+                                    bool include3DRenderers,
                                     bool isInGameEdition,
                                     bool includeWebsocketDebuggerClient,
                                     bool includeWindowMessageDebuggerClient,
@@ -1203,34 +1203,33 @@ void ExporterHelper::AddLibsInclude(bool pixiRenderers,
     InsertUnique(includesFiles, "debugger-client/minimal-debugger-client.js");
   }
 
-  if (pixiInThreeRenderers || isInGameEdition) {
-    InsertUnique(includesFiles, "rendering-libs/three.js");
-    InsertUnique(includesFiles, "rendering-libs/ThreeAddons.js");
-    InsertUnique(includesFiles, "rendering-libs/draco/gltf/draco_decoder.wasm");
-    InsertUnique(includesFiles, "rendering-libs/draco/gltf/draco_wasm_wrapper.js");
-    // Three.js renderers for 3D-first scenes
-    InsertUnique(includesFiles, "three-renderers/resource-manager.js");
-    InsertUnique(includesFiles, "three-renderers/camera-system.js");
-    InsertUnique(includesFiles, "three-renderers/layer-three-renderer.js");
-    InsertUnique(includesFiles, "three-renderers/runtimescene-three-renderer.js");
-    InsertUnique(includesFiles, "three-renderers/spriteruntimeobject-three-renderer.js");
-    InsertUnique(includesFiles, "three-renderers/CustomRuntimeObject2DThreeRenderer.js");
-    InsertUnique(includesFiles, "three-renderers/particleemitterobject-three.js");
-    InsertUnique(includesFiles, "three-renderers/loadingscreen-three-renderer.js");
-    InsertUnique(includesFiles, "Extensions/TextObject/textruntimeobject-three-renderer.js");
-    InsertUnique(includesFiles, "Extensions/TiledSpriteObject/tiledspriteruntimeobject-three-renderer.js");
-    InsertUnique(includesFiles, "Extensions/PrimitiveDrawing/shapepainterruntimeobject-three-renderer.js");
-    InsertUnique(includesFiles, "Extensions/PanelSpriteObject/panelspriteruntimeobject-three-renderer.js");
-    // Extensions in JS may use it.
-    InsertUnique(includesFiles, "Extensions/3D/Scene3DTools.js");
-    InsertUnique(includesFiles, "Extensions/3D/A_RuntimeObject3D.js");
-    InsertUnique(includesFiles, "Extensions/3D/A_RuntimeObject3DRenderer.js");
-    InsertUnique(includesFiles, "Extensions/3D/CustomRuntimeObject3D.js");
-    InsertUnique(includesFiles,
-                 "Extensions/3D/CustomRuntimeObject3DRenderer.js");
-  }
-  if (pixiRenderers || isInGameEdition) {
-    InsertUnique(includesFiles, "rendering-libs/pixi.js");
+  // Three.js and its extensions are unconditionally included in the 3D-first engine
+  InsertUnique(includesFiles, "rendering-libs/three.js");
+  InsertUnique(includesFiles, "rendering-libs/ThreeAddons.js");
+  InsertUnique(includesFiles, "rendering-libs/draco/gltf/draco_decoder.wasm");
+  InsertUnique(includesFiles, "rendering-libs/draco/gltf/draco_wasm_wrapper.js");
+  // Three.js renderers for 3D-first scenes
+  InsertUnique(includesFiles, "three-renderers/resource-manager.js");
+  InsertUnique(includesFiles, "three-renderers/camera-system.js");
+  InsertUnique(includesFiles, "three-renderers/layer-three-renderer.js");
+  InsertUnique(includesFiles, "three-renderers/runtimescene-three-renderer.js");
+  InsertUnique(includesFiles, "three-renderers/spriteruntimeobject-three-renderer.js");
+  InsertUnique(includesFiles, "three-renderers/CustomRuntimeObject2DThreeRenderer.js");
+  InsertUnique(includesFiles, "three-renderers/particleemitterobject-three.js");
+  InsertUnique(includesFiles, "three-renderers/loadingscreen-three-renderer.js");
+  InsertUnique(includesFiles, "Extensions/TextObject/textruntimeobject-three-renderer.js");
+  InsertUnique(includesFiles, "Extensions/TiledSpriteObject/tiledspriteruntimeobject-three-renderer.js");
+  InsertUnique(includesFiles, "Extensions/PrimitiveDrawing/shapepainterruntimeobject-three-renderer.js");
+  InsertUnique(includesFiles, "Extensions/PanelSpriteObject/panelspriteruntimeobject-three-renderer.js");
+  // Extensions in JS may use it.
+  InsertUnique(includesFiles, "Extensions/3D/Scene3DTools.js");
+  InsertUnique(includesFiles, "Extensions/3D/A_RuntimeObject3D.js");
+  InsertUnique(includesFiles, "Extensions/3D/A_RuntimeObject3DRenderer.js");
+  InsertUnique(includesFiles, "Extensions/3D/CustomRuntimeObject3D.js");
+  InsertUnique(includesFiles,
+               "Extensions/3D/CustomRuntimeObject3DRenderer.js");
+
+  if (include2DRenderers || isInGameEdition) {
     InsertUnique(includesFiles, "effects-tools.js");
     InsertUnique(includesFiles, "effects-manager.js");
     InsertUnique(includesFiles, "runtimegame-renderer.js");
@@ -1253,19 +1252,6 @@ void ExporterHelper::AddLibsInclude(bool pixiRenderers,
   }
   if (includeCaptureManager) {
     InsertUnique(includesFiles, "capturemanager.js");
-  }
-}
-
-void ExporterHelper::RemoveIncludes(bool pixiRenderers,
-                                    std::vector<gd::String> &includesFiles) {
-  if (pixiRenderers) {
-    for (size_t i = 0; i < includesFiles.size();) {
-      const gd::String &includeFile = includesFiles[i];
-      if (includeFile.find("pixi-renderer") != gd::String::npos)
-        includesFiles.erase(includesFiles.begin() + i);
-      else
-        ++i;
-    }
   }
 }
 

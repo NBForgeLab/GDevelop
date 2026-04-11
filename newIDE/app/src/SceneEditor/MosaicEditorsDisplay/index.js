@@ -315,8 +315,6 @@ const MosaicEditorsDisplay: React.ComponentType<{
                 ref={instanceOrObjectPropertiesEditorRef}
                 unsavedChanges={props.unsavedChanges}
                 historyHandler={props.historyHandler}
-                tileMapTileSelection={props.tileMapTileSelection}
-                onSelectTileMapTile={props.onSelectTileMapTile}
                 lastSelectionType={props.lastSelectionType}
                 onWillInstallExtension={props.onWillInstallExtension}
                 onExtensionInstalled={props.onExtensionInstalled}
@@ -441,8 +439,6 @@ const MosaicEditorsDisplay: React.ComponentType<{
                     editorRef.current = editor;
                   }}
                   pauseRendering={!props.isActive}
-                  tileMapTileSelection={props.tileMapTileSelection}
-                  onSelectTileMapTile={props.onSelectTileMapTile}
                   editorViewPosition2D={props.editorViewPosition2D}
                 />
               ),

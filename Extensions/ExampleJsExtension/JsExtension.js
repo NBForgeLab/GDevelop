@@ -386,7 +386,7 @@ module.exports = {
       )
       .setIncludeFile('Extensions/ExampleJsExtension/dummyruntimeobject.js')
       .addIncludeFile(
-        'Extensions/ExampleJsExtension/dummyruntimeobject-pixi-renderer.js'
+        'Extensions/ExampleJsExtension/dummyruntimeobject-three-renderer.js'
       )
       .setCategory('Testing');
 
@@ -485,7 +485,6 @@ module.exports = {
         this._context = this._canvas.getContext('2d');
         this._canvasTexture = new THREE.CanvasTexture(this._canvas);
         const geometry = new THREE.PlaneGeometry(1, 1);
-        geometry.translate(0.5, -0.5, 0);
         const material = new THREE.MeshBasicMaterial({
           map: this._canvasTexture,
           transparent: true,
@@ -547,7 +546,7 @@ module.exports = {
 
         this._threeObject.position.x = this._instance.getX() + width / 2;
         this._threeObject.position.y = this._instance.getY() + height / 2;
-        this._threeObject.rotation.z = -RenderedInstance.toRad(
+        this._threeObject.rotation.z = RenderedInstance.toRad(
           this._instance.getAngle()
         );
         this._threeObject.scale.set(width, height, 1);

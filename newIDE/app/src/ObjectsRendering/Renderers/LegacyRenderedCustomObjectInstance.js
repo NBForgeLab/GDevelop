@@ -335,7 +335,7 @@ export default class LegacyRenderedCustomObjectInstance
     this._threeObject.position.x = this._instance.getX() + centerX - originX;
     this._threeObject.position.y = this._instance.getY() + centerY - originY;
 
-    this._threeObject.rotation.z = -RenderedInstance.toRad(
+    this._threeObject.rotation.z = RenderedInstance.toRad(
       this._instance.getAngle()
     );
 

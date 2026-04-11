@@ -55,7 +55,7 @@ namespace gdjs {
             if (!scene) {
               return false;
             }
-            // TODO Add a background stack in LayerPixiRenderer to allow
+            // TODO Add a background stack in LayerThreeRenderer to allow
             // filters to stack them.
             this._oldBackground = scene.background;
             scene.background = this._cubeTexture;

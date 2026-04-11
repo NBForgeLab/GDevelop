@@ -292,7 +292,6 @@ namespace gdjs {
       this._texture.minFilter = THREE.LinearFilter;
       this._texture.magFilter = THREE.LinearFilter;
       const geometry = new THREE.PlaneGeometry(1, 1);
-      geometry.translate(0.5, -0.5, 0);
       this._material = new THREE.MeshBasicMaterial({
         map: this._texture,
         transparent: true,
@@ -476,7 +475,7 @@ namespace gdjs {
     }
 
     updateAngle(): void {
-      this._mesh.rotation.z = -gdjs.toRad(this._object.angle);
+      this._mesh.rotation.z = gdjs.toRad(this._object.angle);
     }
 
     updateOpacity(): void {
