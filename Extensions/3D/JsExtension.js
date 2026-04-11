@@ -261,7 +261,7 @@ module.exports = {
           new gd.Model3DObjectConfiguration()
         )
         .setCategory('General')
-        // Effects are unsupported because the object is not rendered with PIXI.
+        // Effects are unsupported because the object is not rendered through the legacy 2D effect path.
         .addDefaultBehavior('ResizableCapability::ResizableBehavior')
         .addDefaultBehavior('ScalableCapability::ScalableBehavior')
         .addDefaultBehavior('FlippableCapability::FlippableBehavior')
@@ -1462,7 +1462,7 @@ module.exports = {
         Cube3DObject
       )
       .setCategory('General')
-      // Effects are unsupported because the object is not rendered with PIXI.
+        // Effects are unsupported because the object is not rendered through the legacy 2D effect path.
       .addDefaultBehavior('ResizableCapability::ResizableBehavior')
       .addDefaultBehavior('ScalableCapability::ScalableBehavior')
       .addDefaultBehavior('FlippableCapability::FlippableBehavior')
@@ -2683,7 +2683,6 @@ module.exports = {
   registerInstanceRenderers: function (objectsRenderingService) {
     const RenderedInstance = objectsRenderingService.RenderedInstance;
     const Rendered3DInstance = objectsRenderingService.Rendered3DInstance;
-    const PIXI = objectsRenderingService.PIXI;
     const THREE = objectsRenderingService.THREE;
     const THREE_ADDONS = objectsRenderingService.THREE_ADDONS;
 
@@ -2762,6 +2761,33 @@ module.exports = {
       return newTransparentMaterial;
     };
 
+    const createEditorOverlayMesh = (color, opacity) => {
+      const geometry = new THREE.PlaneGeometry(1, 1);
+      const material = new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      });
+      const overlayMesh = new THREE.Mesh(geometry, material);
+      overlayMesh.rotation.order = 'ZYX';
+      return overlayMesh;
+    };
+
+    const disposeEditorOverlayMesh = (overlayMesh) => {
+      if (!overlayMesh) return;
+      if (overlayMesh.parent) {
+        overlayMesh.parent.remove(overlayMesh);
+      }
+      if (overlayMesh.material) {
+        overlayMesh.material.dispose();
+      }
+      if (overlayMesh.geometry) {
+        overlayMesh.geometry.dispose();
+      }
+    };
+
     class RenderedCube3DObject2DInstance extends RenderedInstance {
       /** @type {number} */
       _defaultWidth;
@@ -2785,15 +2811,15 @@ module.exports = {
         project,
         instance,
         associatedObjectConfiguration,
-        pixiContainer,
-        pixiResourcesLoader
+        layerGroup,
+        resourcesLoader
       ) {
         super(
           project,
           instance,
           associatedObjectConfiguration,
-          pixiContainer,
-          pixiResourcesLoader
+          layerGroup,
+          resourcesLoader
         );
         const object = gd.castObject(
           this._associatedObjectConfiguration,
@@ -2803,21 +2829,34 @@ module.exports = {
         this._defaultHeight = object.content.height;
         this._defaultDepth = object.content.depth;
 
-        this._pixiObject = new PIXI.Container();
-        this._pixiFallbackObject = new PIXI.Graphics();
-        this._pixiTexturedObject = new PIXI.Sprite(
-          this._pixiResourcesLoader.getLegacyInvalidPixiTexture()
-        );
-        this._pixiObject.addChild(this._pixiTexturedObject);
-        this._pixiObject.addChild(this._pixiFallbackObject);
-        this._pixiContainer.addChild(this._pixiObject);
+        const geometry = new THREE.PlaneGeometry(1, 1);
+        geometry.translate(0.5, -0.5, 0);
+        const material = new THREE.MeshBasicMaterial({
+          map: this._resourcesLoader.getInvalidThreeTexture(),
+          color: 0xffffff,
+          transparent: true,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+        this._threeObject = new THREE.Mesh(geometry, material);
+        this._threeObject.userData.instance = instance;
+        this._threeObject.rotation.order = 'ZYX';
+        this._layerGroup.add(this._threeObject);
         this.updateTexture();
       }
 
       onRemovedFromScene() {
         super.onRemovedFromScene();
-        // Keep textures because they are shared by all sprites.
-        this._pixiObject.destroy({ children: true });
+        if (this._threeObject) {
+          if (this._threeObject.material) {
+            this._threeObject.material.dispose();
+          }
+          if (this._threeObject.geometry) {
+            this._threeObject.geometry.dispose();
+          }
+          this._threeObject.userData.instance = null;
+          this._threeObject = null;
+        }
       }
 
       static _getResourceNameToDisplay(objectConfiguration) {
@@ -2859,90 +2898,69 @@ module.exports = {
           this._renderFallbackObject = true;
           this._renderedResourceName = null;
         } else {
-          const texture = this._pixiResourcesLoader.getLegacyPixiTexture(
-            this._project,
-            textureName
-          );
-          this._pixiTexturedObject.texture = texture;
-          this._centerX = texture.frame.width / 2;
-          this._centerY = texture.frame.height / 2;
           this._renderedResourceName = textureName;
-
-          if (!texture.baseTexture.valid) {
-            // Post pone texture update if texture is not loaded.
-            texture.once('update', () => {
-              if (this._wasDestroyed) return;
-
-              this.updateTexture();
-              this.updatePIXISprite();
+          this._resourcesLoader
+            .getThreeTexture(this._project, textureName)
+            .then(texture => {
+              if (this._wasDestroyed || !this._threeObject) return;
+              const imageWidth = texture.image?.width || this._defaultWidth;
+              const imageHeight = texture.image?.height || this._defaultHeight;
+              this._centerX = imageWidth / 2;
+              this._centerY = imageHeight / 2;
+              this._renderFallbackObject = false;
+              this._threeObject.material.map = texture;
+              this._threeObject.material.color.set(0xffffff);
+              this._threeObject.material.needsUpdate = true;
+              this.updateThreeSprite();
             });
-            return;
-          }
         }
       }
 
-      updatePIXISprite() {
+      updateThreeSprite() {
+        if (!this._threeObject) {
+          return;
+        }
         const width = this.getWidth();
         const height = this.getHeight();
-        const objectTextureFrame = this._pixiTexturedObject.texture.frame;
-        // In case the texture is not loaded yet, we don't want to crash.
-        if (!objectTextureFrame) return;
+        const scaleX = width * (this._instance.isFlippedX() ? -1 : 1);
+        const scaleY = height * (this._instance.isFlippedY() ? -1 : 1);
 
-        this._pixiTexturedObject.anchor.x =
-          this._centerX / objectTextureFrame.width;
-        this._pixiTexturedObject.anchor.y =
-          this._centerY / objectTextureFrame.height;
-
-        this._pixiTexturedObject.angle = this._instance.getAngle();
-        const scaleX =
-          (width / objectTextureFrame.width) *
-          (this._instance.isFlippedX() ? -1 : 1);
-        const scaleY =
-          (height / objectTextureFrame.height) *
-          (this._instance.isFlippedY() ? -1 : 1);
-        this._pixiTexturedObject.scale.x = scaleX;
-        this._pixiTexturedObject.scale.y = scaleY;
-
-        this._pixiTexturedObject.position.x =
-          this._instance.getX() +
-          this._centerX * Math.abs(this._pixiTexturedObject.scale.x);
-        this._pixiTexturedObject.position.y =
-          this._instance.getY() +
-          this._centerY * Math.abs(this._pixiTexturedObject.scale.y);
+        this._threeObject.scale.set(scaleX, scaleY, 1);
+        this._threeObject.position.x = this._instance.getX() + width / 2;
+        this._threeObject.position.y = this._instance.getY() + height / 2;
+        this._threeObject.rotation.z = -RenderedInstance.toRad(
+          this._instance.getAngle()
+        );
       }
 
       updateFallbackObject() {
+        if (!this._threeObject) {
+          return;
+        }
         const width = this.getWidth();
         const height = this.getHeight();
-
-        this._pixiFallbackObject.clear();
-        this._pixiFallbackObject.beginFill(0x0033ff);
-        this._pixiFallbackObject.lineStyle(1, 0xffd900, 1);
-        this._pixiFallbackObject.moveTo(-width / 2, -height / 2);
-        this._pixiFallbackObject.lineTo(width / 2, -height / 2);
-        this._pixiFallbackObject.lineTo(width / 2, height / 2);
-        this._pixiFallbackObject.lineTo(-width / 2, height / 2);
-        this._pixiFallbackObject.endFill();
-
-        this._pixiFallbackObject.position.x = this._instance.getX() + width / 2;
-        this._pixiFallbackObject.position.y =
-          this._instance.getY() + height / 2;
-        this._pixiFallbackObject.angle = this._instance.getAngle();
-
-        if (this._instance.isFlippedX()) this._pixiFallbackObject.scale.x = -1;
-        if (this._instance.isFlippedY()) this._pixiFallbackObject.scale.y = -1;
+        this._threeObject.material.map = null;
+        this._threeObject.material.color.set(0x0033ff);
+        this._threeObject.material.needsUpdate = true;
+        this._threeObject.scale.set(
+          width * (this._instance.isFlippedX() ? -1 : 1),
+          height * (this._instance.isFlippedY() ? -1 : 1),
+          1
+        );
+        this._threeObject.position.x = this._instance.getX() + width / 2;
+        this._threeObject.position.y = this._instance.getY() + height / 2;
+        this._threeObject.rotation.z = -RenderedInstance.toRad(
+          this._instance.getAngle()
+        );
       }
 
       update() {
         this.updateTextureIfNeeded();
 
-        this._pixiFallbackObject.visible = this._renderFallbackObject;
-        this._pixiTexturedObject.visible = !this._renderFallbackObject;
-
         if (this._renderFallbackObject) {
           this.updateFallbackObject();
         } else {
-          this.updatePIXISprite();
+          this.updateThreeSprite();
         }
       }
 
@@ -2962,7 +2980,9 @@ module.exports = {
         if (this._renderFallbackObject) {
           return this.getWidth() / 2;
         } else {
-          return this._centerX * this._pixiTexturedObject.scale.x;
+          return (
+            this._centerX * (this._instance.isFlippedX() ? -1 : 1)
+          );
         }
       }
 
@@ -2970,7 +2990,9 @@ module.exports = {
         if (this._renderFallbackObject) {
           return this.getHeight() / 2;
         } else {
-          return this._centerY * this._pixiTexturedObject.scale.y;
+          return (
+            this._centerY * (this._instance.isFlippedY() ? -1 : 1)
+          );
         }
       }
     }
@@ -3003,8 +3025,8 @@ module.exports = {
           threeGroup,
           pixiResourcesLoader
         );
-        this._pixiObject = new PIXI.Graphics();
-        this._pixiContainer.addChild(this._pixiObject);
+        this._overlayMesh = createEditorOverlayMesh(0x999999, 0.2);
+        this._layerGroup.add(this._overlayMesh);
 
         const geometry = new THREE.BoxGeometry(1, 1, 1);
         const materials = [
@@ -3022,13 +3044,19 @@ module.exports = {
         this.updateThreeObject();
       }
 
+      onRemovedFromScene() {
+        super.onRemovedFromScene();
+        disposeEditorOverlayMesh(this._overlayMesh);
+        this._overlayMesh = null;
+      }
+
       async _updateThreeObjectMaterials() {
         const getFaceMaterial = async (project, faceIndex) => {
           if (!this._faceVisibilities[faceIndex]) {
             return getTransparentMaterial();
           }
 
-          return await this._pixiResourcesLoader.getThreeMaterial(
+          return await this._resourcesLoader.getThreeMaterial(
             project,
             this._faceResourceNames[faceIndex],
             {
@@ -3433,26 +3461,21 @@ module.exports = {
         uvMapping.needsUpdate = true;
       }
 
-      updatePixiObject() {
+      updateOverlayObject() {
+        if (!this._overlayMesh) return;
         const width = this.getWidth();
         const height = this.getHeight();
 
-        this._pixiObject.clear();
-        this._pixiObject.beginFill(0x999999, 0.2);
-        this._pixiObject.lineStyle(1, 0xffd900, 0);
-        this._pixiObject.moveTo(-width / 2, -height / 2);
-        this._pixiObject.lineTo(width / 2, -height / 2);
-        this._pixiObject.lineTo(width / 2, height / 2);
-        this._pixiObject.lineTo(-width / 2, height / 2);
-        this._pixiObject.endFill();
-
-        this._pixiObject.position.x = this._instance.getX() + width / 2;
-        this._pixiObject.position.y = this._instance.getY() + height / 2;
-        this._pixiObject.angle = this._instance.getAngle();
+        this._overlayMesh.scale.set(width, height, 1);
+        this._overlayMesh.position.x = this._instance.getX() + width / 2;
+        this._overlayMesh.position.y = this._instance.getY() + height / 2;
+        this._overlayMesh.rotation.z = -RenderedInstance.toRad(
+          this._instance.getAngle()
+        );
       }
 
       update() {
-        this.updatePixiObject();
+        this.updateOverlayObject();
         this.updateThreeObject();
       }
 
@@ -3527,11 +3550,10 @@ module.exports = {
         this._originPoint = getPointForLocation(object.getOriginLocation());
         this._centerPoint = getPointForLocation(object.getCenterLocation());
 
-        // This renderer shows a placeholder for the object:
-        this._pixiObject = new PIXI.Graphics();
-        this._pixiContainer.addChild(this._pixiObject);
+        this._overlayMesh = createEditorOverlayMesh(0x0033ff, 1);
+        this._layerGroup.add(this._overlayMesh);
 
-        this._pixiResourcesLoader
+        this._resourcesLoader
           .get3DModel(project, modelResourceName)
           .then((model3d) => {
             if (this._wasDestroyed) return;
@@ -3557,7 +3579,8 @@ module.exports = {
 
       onRemovedFromScene() {
         super.onRemovedFromScene();
-        this._pixiObject.destroy({ children: true });
+        disposeEditorOverlayMesh(this._overlayMesh);
+        this._overlayMesh = null;
       }
 
       static getThumbnail(project, resourcesLoader, objectConfiguration) {
@@ -3731,36 +3754,19 @@ module.exports = {
       }
 
       update() {
+        if (!this._overlayMesh) return;
         const width = this.getWidth();
         const height = this.getHeight();
         const centerPoint = this.getCenterPoint();
-        const centerX = width * centerPoint[0];
-        const centerY = height * centerPoint[1];
-
-        const minX = 0 - centerX;
-        const minY = 0 - centerY;
-        const maxX = width - centerX;
-        const maxY = height - centerY;
-        this._pixiObject.clear();
-        this._pixiObject.beginFill(0x0033ff);
-        this._pixiObject.lineStyle(1, 0xffd900, 1);
-        this._pixiObject.moveTo(minX, minY);
-        this._pixiObject.lineTo(maxX, minY);
-        this._pixiObject.lineTo(maxX, maxY);
-        this._pixiObject.lineTo(minX, maxY);
-        this._pixiObject.endFill();
-
-        this._pixiObject.moveTo(minX, minY);
-        this._pixiObject.lineTo(maxX, maxY);
-        this._pixiObject.moveTo(maxX, minY);
-        this._pixiObject.lineTo(minX, maxY);
-
         const originPoint = this.getOriginPoint();
-        this._pixiObject.position.x =
+        this._overlayMesh.scale.set(width, height, 1);
+        this._overlayMesh.position.x =
           this._instance.getX() - width * (originPoint[0] - centerPoint[0]);
-        this._pixiObject.position.y =
+        this._overlayMesh.position.y =
           this._instance.getY() - height * (originPoint[1] - centerPoint[1]);
-        this._pixiObject.angle = this._instance.getAngle();
+        this._overlayMesh.rotation.z = -RenderedInstance.toRad(
+          this._instance.getAngle()
+        );
       }
 
       getDefaultWidth() {
@@ -3854,14 +3860,20 @@ module.exports = {
           pixiResourcesLoader
         );
 
-        this._pixiObject = new PIXI.Graphics();
-        this._pixiContainer.addChild(this._pixiObject);
+        this._overlayMesh = createEditorOverlayMesh(0x999999, 0.2);
+        this._layerGroup.add(this._overlayMesh);
 
         this._threeObject = new THREE.Group();
         this._threeObject.rotation.order = 'ZYX';
         this._threeObject.castShadow = true;
         this._threeObject.receiveShadow = true;
         this._threeGroup.add(this._threeObject);
+      }
+
+      onRemovedFromScene() {
+        super.onRemovedFromScene();
+        disposeEditorOverlayMesh(this._overlayMesh);
+        this._overlayMesh = null;
       }
 
       getOriginX() {
@@ -4149,7 +4161,7 @@ module.exports = {
         if (this._modelResourceName !== modelResourceName) {
           this._modelResourceName = modelResourceName;
 
-          this._pixiResourcesLoader
+          this._resourcesLoader
             .get3DModel(this._project, modelResourceName)
             .then((model3d) => {
               if (this._wasDestroyed) return;
@@ -4196,36 +4208,25 @@ module.exports = {
         }
       }
 
-      updatePixiObject() {
+      updateOverlayObject() {
+        if (!this._overlayMesh) return;
         const width = this.getWidth();
         const height = this.getHeight();
         const centerPoint = this.getCenterPoint();
-        const centerX = width * centerPoint[0];
-        const centerY = height * centerPoint[1];
-
-        const minX = 0 - centerX;
-        const minY = 0 - centerY;
-        const maxX = width - centerX;
-        const maxY = height - centerY;
-        this._pixiObject.clear();
-        this._pixiObject.beginFill(0x999999, 0.2);
-        this._pixiObject.lineStyle(1, 0xffd900, 0);
-        this._pixiObject.moveTo(minX, minY);
-        this._pixiObject.lineTo(maxX, minY);
-        this._pixiObject.lineTo(maxX, maxY);
-        this._pixiObject.lineTo(minX, maxY);
-        this._pixiObject.endFill();
 
         const originPoint = this.getOriginPoint();
-        this._pixiObject.position.x =
+        this._overlayMesh.scale.set(width, height, 1);
+        this._overlayMesh.position.x =
           this._instance.getX() - width * (originPoint[0] - centerPoint[0]);
-        this._pixiObject.position.y =
+        this._overlayMesh.position.y =
           this._instance.getY() - height * (originPoint[1] - centerPoint[1]);
-        this._pixiObject.angle = this._instance.getAngle();
+        this._overlayMesh.rotation.z = -RenderedInstance.toRad(
+          this._instance.getAngle()
+        );
       }
 
       update() {
-        this.updatePixiObject();
+        this.updateOverlayObject();
         this.updateThreeObject();
       }
 

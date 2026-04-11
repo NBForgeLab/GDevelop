@@ -1,6 +1,6 @@
 // @flow
 import { fakeAssetShortHeader1 } from '../fixtures/GDevelopServicesTestData';
-import { PixiResourcesLoaderMock } from '../fixtures/TestPixiResourcesLoader';
+import { ThreeResourcesLoaderMock } from '../fixtures/TestThreeResourcesLoader';
 import {
   editorFunctions,
   type EditorFunctionGenericOutput,
@@ -74,7 +74,7 @@ describe('editorFunctions', () => {
     onObjectsModifiedOutsideEditor: jest.fn(),
     onWillInstallExtension: jest.fn(),
     onExtensionInstalled: jest.fn(),
-    PixiResourcesLoader: PixiResourcesLoaderMock,
+    ThreeResourcesLoader: ThreeResourcesLoaderMock,
   });
 
   describe('create_or_replace_object', () => {

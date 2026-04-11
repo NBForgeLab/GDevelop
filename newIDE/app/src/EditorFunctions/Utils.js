@@ -17,15 +17,15 @@ export type ObjectSizeInfo = {|
 
 /**
  * Returns the default size, origin and center of an object as numeric values.
- * Uses PixiResourcesLoader to get the actual texture dimensions for Sprite objects.
+ * Uses ThreeResourcesLoader to get the actual texture dimensions for Sprite objects.
  * Accepts an optional assetShortHeader for Sprite objects installed from the asset store,
- * where the texture may not yet be loaded in PixiResourcesLoader.
+ * where the texture may not yet be loaded in ThreeResourcesLoader.
  * Returns 0 for width/height/depth when dimensions are not available.
  */
 export const getObjectSizeInfo = (
   object: gdObject,
   project: gdProject,
-  pixiResourcesLoader: any,
+  threeResourcesLoader: any,
   assetShortHeader?: AssetShortHeader | null
 ): ObjectSizeInfo => {
   const objectConfiguration = object.getConfiguration();
@@ -51,14 +51,14 @@ export const getObjectSizeInfo = (
       const originY = firstSprite.getOrigin().getY();
 
       // Determine texture dimensions: prefer assetShortHeader (reliable for freshly installed
-      // assets whose texture may not be in PixiResourcesLoader yet), then fall back to the loader.
+      // assets whose texture may not be in ThreeResourcesLoader yet), then fall back to the loader.
       let textureWidth = 0;
       let textureHeight = 0;
       if (assetShortHeader && assetShortHeader.width > 0) {
         textureWidth = assetShortHeader.width;
         textureHeight = assetShortHeader.height;
       } else {
-        const texture = pixiResourcesLoader.getLegacyPixiTexture(
+        const texture = threeResourcesLoader.getLegacythreeTexture(
           project,
           firstSprite.getImageName()
         );

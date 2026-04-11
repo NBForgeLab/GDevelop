@@ -1,8 +1,7 @@
 // @flow
 import RenderedInstance from './RenderedInstance';
 import Rendered3DInstance from './Rendered3DInstance';
-import PixiResourcesLoader from '../PixiResourcesLoader';
-import ResourcesLoader from '../../ResourcesLoader';
+import ResourcesLoader from '../ThreeResourcesLoader';
 import ObjectsRenderingService from '../ObjectsRenderingService';
 import RenderedTextInstance from './RenderedTextInstance';
 import { mapReverseFor } from '../../Utils/MapFor';
@@ -16,10 +15,32 @@ import {
   getProportionalPositionY,
   getProportionalPositionZ,
 } from './LegacyCustomObjectLayoutingModel';
-import * as PIXI from 'pixi.js-legacy';
 import * as THREE from 'three';
 
 const gd: libGDevelop = global.gd;
+
+const applyOpacityToObject = (
+  object: THREE.Object3D | null,
+  opacity: number
+) => {
+  if (!object) return;
+
+  object.traverse(node => {
+    const { material } = node;
+    if (!material) return;
+
+    if (Array.isArray(material)) {
+      material.forEach(entry => {
+        entry.transparent = true;
+        entry.opacity = opacity;
+      });
+      return;
+    }
+
+    material.transparent = true;
+    material.opacity = opacity;
+  });
+};
 
 /**
  * Renderer for gd.CustomObject (the class is not exposed to newIDE)
@@ -48,23 +69,24 @@ export default class LegacyRenderedCustomObjectInstance
     instance: gdInitialInstance,
     associatedObjectConfiguration: gdObjectConfiguration,
     // $FlowFixMe[value-as-type]
-    pixiContainer: PIXI.Container,
+    layerGroup: any,
     // $FlowFixMe[value-as-type]
     threeGroup: THREE.Group,
-    pixiResourcesLoader: Class<PixiResourcesLoader>
+    resourcesLoader: Class<ResourcesLoader>
   ) {
     super(
       project,
       instance,
       associatedObjectConfiguration,
-      pixiContainer,
+      layerGroup,
       threeGroup,
-      pixiResourcesLoader
+      resourcesLoader
     );
 
-    // Setup the PIXI object:
-    this._pixiObject = new PIXI.Container();
-    this._pixiContainer.addChild(this._pixiObject);
+    // Setup the THREE object:
+    this._threeObject = new THREE.Group();
+    this._threeObject.userData.instance = instance;
+    this._layerGroup.add(this._threeObject);
 
     if (this._threeGroup) {
       // No Three group means the instance should only be rendered in 2D.
@@ -72,6 +94,7 @@ export default class LegacyRenderedCustomObjectInstance
       threeObject.rotation.order = 'ZYX';
       this._threeGroup.add(threeObject);
       this._threeObject = threeObject;
+      this._threeObject.userData.instance = instance;
     }
 
     const customObjectConfiguration = gd.asCustomObjectConfiguration(
@@ -154,11 +177,11 @@ export default class LegacyRenderedCustomObjectInstance
         // $FlowFixMe[incompatible-type] Use real object instances.
         childInstance,
         childObjectConfiguration,
-        this._pixiObject,
+        this._threeObject,
         this._threeObject
       );
       if (!childLayout.isShown) {
-        this._pixiObject.removeChild(renderer._pixiObject);
+        this._threeObject.remove(renderer._threeObject);
         if (this._threeObject && renderer instanceof Rendered3DInstance) {
           this._threeObject.remove(renderer._threeObject);
         }
@@ -166,7 +189,7 @@ export default class LegacyRenderedCustomObjectInstance
 
       if (renderer instanceof RenderedTextInstance) {
         // TODO EBO Remove this line when an alignment property is added to the text object.
-        renderer._pixiObject.style.align = 'center';
+        // renderer._threeObject.style.align = 'center';
       }
       this.childrenInstances.push(childInstance);
       // $FlowFixMe[incompatible-type]
@@ -177,10 +200,12 @@ export default class LegacyRenderedCustomObjectInstance
 
     if (this.childrenRenderedInstances.length === 0) {
       // Show a placeholder.
-      this._pixiObject = new PIXI.Sprite(
-        PixiResourcesLoader.getLegacyInvalidPixiTexture()
-      );
-      this._pixiContainer.addChild(this._pixiObject);
+      const texture = ResourcesLoader.getInvalidThreeTexture();
+      const geometry = new THREE.PlaneGeometry(32, 32);
+      const material = new THREE.MeshBasicMaterial({ map: texture });
+      this._threeObject = new THREE.Mesh(geometry, material);
+      this._threeObject.userData.instance = instance;
+      this._layerGroup.add(this._threeObject);
     }
   }
 
@@ -197,7 +222,8 @@ export default class LegacyRenderedCustomObjectInstance
     }
 
     // Destroy the container.
-    this._pixiObject.destroy(false);
+    if (this._threeObject) this._threeObject.userData.instance = null;
+    this._threeObject = null;
   }
 
   /**
@@ -263,11 +289,15 @@ export default class LegacyRenderedCustomObjectInstance
     return 'res/unknown32.png';
   }
 
-  _updatePixiObjectsZOrder() {
-    this._pixiContainer.children.sort((a, b) => {
-      a.zOrder = a.zOrder || 0;
-      b.zOrder = b.zOrder || 0;
-      return a.zOrder - b.zOrder;
+  _updateObjectsRenderOrder() {
+    this.childrenRenderedInstances.forEach(renderedInstance => {
+      const threeObject = renderedInstance.getThreeObject();
+      if (!threeObject) return;
+
+      const childInstance = renderedInstance.getInstance();
+      threeObject.renderOrder = renderedInstance.isRenderedIn3D()
+        ? childInstance.getZ() + renderedInstance.getDepth()
+        : childInstance.getZOrder();
     });
   }
 
@@ -302,31 +332,29 @@ export default class LegacyRenderedCustomObjectInstance
       threeObject.position.y += this._instance.getY() + centerY - originY;
       threeObject.position.z += this._instance.getZ() + centerZ - originZ;
     }
-    this._pixiObject.pivot.x = centerX;
-    this._pixiObject.pivot.y = centerY;
-    this._pixiObject.position.x = this._instance.getX() + centerX - originX;
-    this._pixiObject.position.y = this._instance.getY() + centerY - originY;
+    this._threeObject.position.x = this._instance.getX() + centerX - originX;
+    this._threeObject.position.y = this._instance.getY() + centerY - originY;
 
-    this._pixiObject.rotation = RenderedInstance.toRad(
+    this._threeObject.rotation.z = -RenderedInstance.toRad(
       this._instance.getAngle()
     );
 
-    this._pixiObject.scale.x = 1;
-    this._pixiObject.scale.y = 1;
+    this._threeObject.scale.x = 1;
+    this._threeObject.scale.y = 1;
 
-    // Opacity is not handled by 3D objects.
-    // TODO Transform 3D objects according to their flipping.
-    if (!is3D) {
-      // Do not hide completely an object so it can still be manipulated
-      const alphaForDisplay = Math.max(this._instance.getOpacity() / 255, 0.5);
-      this._pixiObject.alpha = alphaForDisplay;
+    const alphaForDisplay = Math.max(this._instance.getOpacity() / 255, 0.5);
+    applyOpacityToObject(this._threeObject, alphaForDisplay);
 
-      this._pixiObject.scale.x =
-        Math.abs(this._pixiObject.scale.x) *
+    if (this._threeObject) {
+      this._threeObject.scale.x =
+        Math.abs(this._threeObject.scale.x) *
         (this._instance.isFlippedX() ? -1 : 1);
-      this._pixiObject.scale.y =
-        Math.abs(this._pixiObject.scale.y) *
+      this._threeObject.scale.y =
+        Math.abs(this._threeObject.scale.y) *
         (this._instance.isFlippedY() ? -1 : 1);
+      this._threeObject.scale.z =
+        Math.abs(this._threeObject.scale.z || 1) *
+        (this._instance.isFlippedZ() ? -1 : 1);
     }
   }
 

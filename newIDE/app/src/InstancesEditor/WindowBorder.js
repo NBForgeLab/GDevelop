@@ -1,7 +1,5 @@
 // @flow
-import * as PIXI from 'pixi.js-legacy';
-import transformRect from '../Utils/TransformRect';
-import { rgbToHexNumber } from '../Utils/ColorTransformer';
+import * as THREE from 'three';
 import Rectangle from '../Utils/Rectangle';
 
 type Props = {|
@@ -16,9 +14,9 @@ export default class WindowBorder {
   layout: gdLayout | null;
   eventsBasedObjectVariant: gdEventsBasedObjectVariant | null;
   toCanvasCoordinates: (x: number, y: number) => [number, number];
-  // $FlowFixMe[missing-local-annot]
-  pixiRectangle = (new PIXI.Graphics(): any);
-  windowRectangle: Rectangle = new Rectangle();
+
+  threeGroup: THREE.Group = new THREE.Group();
+  _line: THREE.LineSegments | null = null;
 
   constructor({
     project,
@@ -31,69 +29,52 @@ export default class WindowBorder {
     this.eventsBasedObjectVariant = eventsBasedObjectVariant;
     this.toCanvasCoordinates = toCanvasCoordinates;
 
-    this.pixiRectangle.hitArea = new PIXI.Rectangle(0, 0, 0, 0);
+    // Create shared geometry for the border
+    const geometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(1, 0, 0),
+      new THREE.Vector3(1, 0, 0),
+      new THREE.Vector3(1, 1, 0),
+      new THREE.Vector3(1, 1, 0),
+      new THREE.Vector3(0, 1, 0),
+      new THREE.Vector3(0, 1, 0),
+      new THREE.Vector3(0, 0, 0),
+    ]);
+    const material = new THREE.LineBasicMaterial({
+      color: 0xffffff,
+      opacity: 0.5,
+      transparent: true,
+    });
+    this._line = new THREE.LineSegments(geometry, material);
+    this.threeGroup.add(this._line);
   }
 
-  getPixiObject(): any {
-    return this.pixiRectangle;
+  getThreeObject(): THREE.Group {
+    return this.threeGroup;
   }
 
   render() {
-    const { layout, eventsBasedObjectVariant } = this;
+    if (!this._line) return;
 
-    this.windowRectangle.set(
-      eventsBasedObjectVariant
-        ? {
-            left: eventsBasedObjectVariant.getAreaMinX(),
-            top: eventsBasedObjectVariant.getAreaMinY(),
-            right: eventsBasedObjectVariant.getAreaMaxX(),
-            bottom: eventsBasedObjectVariant.getAreaMaxY(),
-          }
-        : {
-            left: 0,
-            top: 0,
-            right: this.project.getGameResolutionWidth(),
-            bottom: this.project.getGameResolutionHeight(),
-          }
-    );
-    const displayedRectangle = transformRect(
-      this.toCanvasCoordinates,
-      this.windowRectangle
-    );
+    let width = 800;
+    let height = 600;
 
-    this.pixiRectangle.clear();
-    this.pixiRectangle.beginFill(0x000000);
-    if (layout) {
-      const backgroundRed = layout.getBackgroundColorRed();
-      const backgroundBlue = layout.getBackgroundColorBlue();
-      const backgroundGreen = layout.getBackgroundColorGreen();
-      const isDark =
-        Math.max(backgroundRed, backgroundBlue, backgroundGreen) < 128;
-      this.pixiRectangle.lineStyle(
-        1,
-        rgbToHexNumber(
-          ((isDark ? 255 : 0) + backgroundRed) / 2,
-          ((isDark ? 255 : 0) + backgroundBlue) / 2,
-          ((isDark ? 255 : 0) + backgroundGreen) / 2
-        ),
-        1
-      );
-    } else {
-      this.pixiRectangle.lineStyle(1, 0x888888, 1);
+    if (this.layout) {
+      width = this.project.getGameResolutionWidth();
+      height = this.project.getGameResolutionHeight();
+    } else if (this.eventsBasedObjectVariant) {
+      // Fallback for objects
     }
-    this.pixiRectangle.alpha = 1;
-    this.pixiRectangle.fill.alpha = 0;
-    this.pixiRectangle.drawRect(
-      displayedRectangle.left,
-      displayedRectangle.top,
-      displayedRectangle.width(),
-      displayedRectangle.height()
-    );
-    if (eventsBasedObjectVariant) {
-      const origin = this.toCanvasCoordinates(0, 0);
-      this.pixiRectangle.drawRect(origin[0] - 8, origin[1] - 1, 16, 2);
-      this.pixiRectangle.drawRect(origin[0] - 1, origin[1] - 8, 2, 16);
-    }
-    this.pixiRectangle.endFill();
+
+    const pos1 = this.toCanvasCoordinates(0, 0);
+    const pos2 = this.toCanvasCoordinates(width, height);
+
+    const x = pos1[0];
+    const y = pos1[1];
+    const w = pos2[0] - x;
+    const h = pos2[1] - y;
+
+    this._line.position.set(x, y, 0);
+    this._line.scale.set(w, h, 1);
   }
 }

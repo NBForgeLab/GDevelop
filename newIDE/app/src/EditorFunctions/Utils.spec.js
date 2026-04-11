@@ -1,6 +1,6 @@
 // @flow
 import { fakeAssetShortHeader1 } from '../fixtures/GDevelopServicesTestData';
-import { PixiResourcesLoaderMock } from '../fixtures/TestPixiResourcesLoader';
+import { ThreeResourcesLoaderMock } from '../fixtures/TestThreeResourcesLoader';
 import { getObjectSizeInfo } from './Utils';
 
 const gd: libGDevelop = global.gd;
@@ -38,7 +38,7 @@ describe('getObjectSizeInfo', () => {
       spriteConfig.getAnimations().addAnimation(animation);
 
       expect(
-        getObjectSizeInfo(object, project, PixiResourcesLoaderMock)
+        getObjectSizeInfo(object, project, ThreeResourcesLoaderMock)
       ).toEqual({
         width: 100,
         height: 240,
@@ -72,7 +72,7 @@ describe('getObjectSizeInfo', () => {
       spriteConfig.getAnimations().addAnimation(animation);
 
       expect(
-        getObjectSizeInfo(object, project, PixiResourcesLoaderMock)
+        getObjectSizeInfo(object, project, ThreeResourcesLoaderMock)
       ).toEqual({
         width: 100,
         height: 240,
@@ -104,7 +104,7 @@ describe('getObjectSizeInfo', () => {
       spriteConfig.getAnimations().addAnimation(animation);
 
       expect(
-        getObjectSizeInfo(object, project, PixiResourcesLoaderMock)
+        getObjectSizeInfo(object, project, ThreeResourcesLoaderMock)
       ).toEqual({
         width: 100,
         height: 240,
@@ -135,7 +135,7 @@ describe('getObjectSizeInfo', () => {
       spriteConfig.getAnimations().addAnimation(animation);
 
       expect(
-        getObjectSizeInfo(object, project, PixiResourcesLoaderMock)
+        getObjectSizeInfo(object, project, ThreeResourcesLoaderMock)
       ).toEqual({
         width: 0,
         height: 0,
@@ -167,7 +167,7 @@ describe('getObjectSizeInfo', () => {
       spriteConfig.getAnimations().addAnimation(animation);
 
       expect(
-        getObjectSizeInfo(object, project, PixiResourcesLoaderMock, {
+        getObjectSizeInfo(object, project, ThreeResourcesLoaderMock, {
           ...fakeAssetShortHeader1,
           width: 200,
           height: 300,
@@ -195,7 +195,7 @@ describe('getObjectSizeInfo', () => {
       );
 
       expect(
-        getObjectSizeInfo(object, project, PixiResourcesLoaderMock)
+        getObjectSizeInfo(object, project, ThreeResourcesLoaderMock)
       ).toEqual({
         width: 0,
         height: 0,
@@ -224,7 +224,7 @@ describe('getObjectSizeInfo', () => {
       config.setHeight(150);
 
       expect(
-        getObjectSizeInfo(object, project, PixiResourcesLoaderMock)
+        getObjectSizeInfo(object, project, ThreeResourcesLoaderMock)
       ).toEqual({
         width: 200,
         height: 150,
@@ -253,7 +253,7 @@ describe('getObjectSizeInfo', () => {
       config.setHeight(390);
 
       expect(
-        getObjectSizeInfo(object, project, PixiResourcesLoaderMock)
+        getObjectSizeInfo(object, project, ThreeResourcesLoaderMock)
       ).toEqual({
         width: 120,
         height: 390,
@@ -288,7 +288,7 @@ describe('getObjectSizeInfo', () => {
       );
 
       expect(
-        getObjectSizeInfo(object, project, PixiResourcesLoaderMock)
+        getObjectSizeInfo(object, project, ThreeResourcesLoaderMock)
       ).toEqual({
         width: 100,
         height: 80,
@@ -366,7 +366,7 @@ describe('getObjectSizeInfo', () => {
       );
 
       expect(
-        getObjectSizeInfo(object, project, PixiResourcesLoaderMock)
+        getObjectSizeInfo(object, project, ThreeResourcesLoaderMock)
       ).toEqual({
         width: 50,
         height: 40,
@@ -402,7 +402,7 @@ describe('getObjectSizeInfo', () => {
       );
 
       expect(
-        getObjectSizeInfo(object, project, PixiResourcesLoaderMock)
+        getObjectSizeInfo(object, project, ThreeResourcesLoaderMock)
       ).toEqual({
         width: 100,
         height: 60,
@@ -428,7 +428,7 @@ describe('getObjectSizeInfo', () => {
       );
 
       expect(
-        getObjectSizeInfo(object, project, PixiResourcesLoaderMock)
+        getObjectSizeInfo(object, project, ThreeResourcesLoaderMock)
       ).toEqual({
         width: 0,
         height: 0,

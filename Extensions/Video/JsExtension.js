@@ -533,7 +533,7 @@ module.exports = {
    */
   registerInstanceRenderers: function (objectsRenderingService) {
     const RenderedInstance = objectsRenderingService.RenderedInstance;
-    const PIXI = objectsRenderingService.PIXI;
+    const THREE = objectsRenderingService.THREE;
 
     /**
      * Renderer for instances of VideoObject inside the IDE.
@@ -543,31 +543,49 @@ module.exports = {
         project,
         instance,
         associatedObjectConfiguration,
-        pixiContainer,
-        pixiResourcesLoader
+        threeGroup,
+        resourcesLoader
       ) {
         super(
           project,
           instance,
           associatedObjectConfiguration,
-          pixiContainer,
-          pixiResourcesLoader
+          threeGroup,
+          resourcesLoader
         );
 
         this._videoResource = undefined;
+        this._loadedVideoResource = null;
 
-        //Setup the PIXI object:
-        this._pixiObject = new PIXI.Sprite(this._getVideoTexture());
-        this._pixiObject.anchor.x = 0.5;
-        this._pixiObject.anchor.y = 0.5;
-        this._pixiContainer.addChild(this._pixiObject);
+        const geometry = new THREE.PlaneGeometry(1, 1);
+        geometry.translate(0.5, -0.5, 0);
+        const material = new THREE.MeshBasicMaterial({
+          map: this._resourcesLoader.getInvalidThreeTexture(),
+          transparent: true,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+
+        this._threeObject = new THREE.Mesh(geometry, material);
+        this._threeObject.userData.instance = instance;
+        this._threeObject.rotation.order = 'ZYX';
+        this._layerGroup.add(this._threeObject);
         this.update();
       }
 
       onRemovedFromScene() {
         super.onRemovedFromScene();
-        // Keep textures because they are shared by all sprites.
-        this._pixiObject.destroy(false);
+        if (this._threeObject) {
+          if (this._threeObject.material) {
+            this._threeObject.material.dispose();
+          }
+          if (this._threeObject.geometry) {
+            this._threeObject.geometry.dispose();
+          }
+          this._threeObject.userData.instance = null;
+          this._threeObject = null;
+        }
+        this._loadedVideoResource = null;
       }
 
       /**
@@ -577,7 +595,7 @@ module.exports = {
         return 'JsPlatform/Extensions/videoicon24.png';
       }
 
-      _getVideoTexture() {
+      async _loadVideoTexture() {
         // Get the video resource to use
         const object = gd.castObject(
           this._associatedObjectConfiguration,
@@ -585,17 +603,28 @@ module.exports = {
         );
         const videoResource = object.content.videoResource;
 
-        // This returns a VideoTexture with autoPlay set to false
-        return this._pixiResourcesLoader.getLegacyPixiVideoTexture(
-          this._project,
-          videoResource
-        );
+        const loadedVideoResource =
+          await this._resourcesLoader.getThreeVideoTexture(
+            this._project,
+            videoResource
+          );
+        if (this._wasDestroyed || !this._threeObject) {
+          return;
+        }
+
+        this._loadedVideoResource = loadedVideoResource;
+        this._threeObject.material.map = loadedVideoResource.texture;
+        this._threeObject.material.needsUpdate = true;
+        this.update();
       }
 
       /**
-       * This is called to update the PIXI object on the scene editor
+       * This is called to update the Three.js object on the scene editor.
        */
       update() {
+        if (!this._threeObject) {
+          return;
+        }
         // Check if the video resource has changed
         const object = gd.castObject(
           this._associatedObjectConfiguration,
@@ -605,33 +634,26 @@ module.exports = {
 
         if (videoResource !== this._videoResource) {
           this._videoResource = videoResource;
-          this._pixiObject.texture = this._getVideoTexture();
-
-          if (!this._pixiObject.texture.baseTexture.valid) {
-            var that = this;
-
-            that._pixiObject.texture.on('error', function () {
-              that._pixiObject.texture.off('error', this);
-              if (this._wasDestroyed) return;
-
-              that._pixiObject.texture =
-                that._pixiResourcesLoader.getLegacyInvalidPixiTexture();
-            });
-          }
+          this._loadVideoTexture();
         }
 
         // Read position and angle from the instance
-        this._pixiObject.position.x =
-          this._instance.getX() + this._pixiObject.width / 2;
-        this._pixiObject.position.y =
-          this._instance.getY() + this._pixiObject.height / 2;
-        this._pixiObject.rotation = RenderedInstance.toRad(
+        const width = this.getDefaultWidth();
+        const height = this.getDefaultHeight();
+        this._threeObject.position.x = this._instance.getX() + width / 2;
+        this._threeObject.position.y = this._instance.getY() + height / 2;
+        this._threeObject.rotation.z = -RenderedInstance.toRad(
           this._instance.getAngle()
         );
 
         if (this._instance.hasCustomSize()) {
-          this._pixiObject.width = this.getCustomWidth();
-          this._pixiObject.height = this.getCustomHeight();
+          this._threeObject.scale.set(
+            this.getCustomWidth(),
+            this.getCustomHeight(),
+            1
+          );
+        } else {
+          this._threeObject.scale.set(width, height, 1);
         }
 
         // Do not hide completely an object so it can still be manipulated
@@ -639,21 +661,30 @@ module.exports = {
           this._instance.getOpacity() / 255,
           0.5
         );
-        this._pixiObject.alpha = alphaForDisplay;
+        this._threeObject.material.opacity = alphaForDisplay;
+        this._threeObject.material.transparent = true;
       }
 
       /**
        * Return the width of the instance, when it's not resized.
        */
       getDefaultWidth() {
-        return this._pixiObject.width;
+        return (
+          this._loadedVideoResource?.video.videoWidth ||
+          this._loadedVideoResource?.video.clientWidth ||
+          32
+        );
       }
 
       /**
        * Return the height of the instance, when it's not resized.
        */
       getDefaultHeight() {
-        return this._pixiObject.height;
+        return (
+          this._loadedVideoResource?.video.videoHeight ||
+          this._loadedVideoResource?.video.clientHeight ||
+          32
+        );
       }
     }
 

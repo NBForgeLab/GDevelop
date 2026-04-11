@@ -1,21 +1,17 @@
 type GDNamespace = typeof import('../GDevelop.js/types');
 
-// This is necessary for typescript to interpret the identifier PIXI as a namespace
-// in this file and merge it with the other namespace declarations.
-declare namespace PIXI {}
-
 /**
  * RenderedInstance is the base class used for creating 2D renderers of instances,
- * which display on the scene editor, using Pixi.js, the instance of an object (see InstancesEditor).
+ * which display on the scene editor, using Three.js, the instance of an object (see InstancesEditor).
  */
 class RenderedInstance {
   _project: gd.Project;
   _instance: gd.InitialInstance;
   _associatedObjectConfiguration: gd.ObjectConfiguration;
-  _pixiContainer: PIXI.Container;
-  _pixiResourcesLoader: Class<PixiResourcesLoader>;
-  _pixiObject: PIXI.DisplayObject | null;
-  _propertyOverridings: Map<string, string>;
+  _layerGroup: THREE.Group;
+  _resourcesLoader: Class<ThreeResourcesLoader>;
+  _threeObject: THREE.Object3D | null;
+  _getPropertyOverridings: (() => Map<string, string>) | null;
   wasUsed: boolean;
 
   /** Set to true when onRemovedFromScene is called. Allows to cancel promises/asynchronous operations (notably: waiting for a resource load). */
@@ -25,8 +21,8 @@ class RenderedInstance {
     project: gdProject,
     instance: gdInitialInstance,
     associatedObjectConfiguration: gdObjectConfiguration,
-    pixiContainer: PIXI.Container,
-    pixiResourcesLoader: Class<PixiResourcesLoader>,
+    layerGroup: THREE.Group,
+    resourcesLoader: Class<ThreeResourcesLoader>,
     getPropertyOverridings: (() => Map<string, string>) | null = null
   );
 
@@ -40,13 +36,13 @@ class RenderedInstance {
    */
   update(): void;
 
-  getPixiObject(): PIXI.DisplayObject | null;
+  getThreeObject(): THREE.Object3D | null;
 
   getInstance(): gd.InitialInstance;
 
   /**
    * Called to notify the instance renderer that its associated instance was removed from
-   * the scene. The PIXI object should probably be removed from the container: This is what
+   * the scene. The Three.js object should probably be removed from the container: This is what
    * the default implementation of the method does.
    */
   onRemovedFromScene(): void;
@@ -87,16 +83,15 @@ class RenderedInstance {
 /**
  * Rendered3DInstance is the base class used for creating 3D renderers of instances,
  * which display on the scene editor, using Three.js, the instance of an object (see InstancesEditor).
- * It can also display 2D artifacts on Pixi 2D plane (3D object shadow projected on the plane for instance).
+ * It can also display auxiliary 2D artifacts using Three.js overlay meshes when needed.
  */
 class Rendered3DInstance {
   _project: gdProject;
   _instance: gdInitialInstance;
   _associatedObjectConfiguration: gdObjectConfiguration;
-  _pixiContainer: PIXI.Container;
+  _layerGroup: THREE.Group;
   _threeGroup: THREE.Group;
-  _pixiResourcesLoader: Class<PixiResourcesLoader>;
-  _pixiObject: PIXI.DisplayObject | null;
+  _resourcesLoader: Class<ThreeResourcesLoader>;
   _threeObject: THREE.Object3D | null;
   wasUsed: boolean;
 
@@ -107,9 +102,9 @@ class Rendered3DInstance {
     project: gdProject,
     instance: gdInitialInstance,
     associatedObjectConfiguration: gdObjectConfiguration,
-    pixiContainer: PIXI.Container,
+    layerGroup: THREE.Group,
     threeGroup: THREE.Group,
-    pixiResourcesLoader: Class<PixiResourcesLoader>,
+    resourcesLoader: Class<ThreeResourcesLoader>,
     getPropertyOverridings: (() => Map<string, string>) | null = null
   );
 
@@ -136,15 +131,13 @@ class Rendered3DInstance {
    */
   update(): void;
 
-  getPixiObject(): PIXI.DisplayObject;
-
   getThreeObject(): THREE.Object3D;
 
   getInstance(): gd.InitialInstance;
 
   /**
    * Called to notify the instance renderer that its associated instance was removed from
-   * the scene. The PIXI object should probably be removed from the container: This is what
+   * the scene. The Three.js object should probably be removed from its group: This is what
    * the default implementation of the method does.
    */
   onRemovedFromScene(): void;
@@ -183,7 +176,6 @@ class Rendered3DInstance {
 
 declare type ObjectsRenderingService = {
   gd: GDNamespace;
-  PIXI: PIXI;
   THREE: typeof import('../newIDE/app/node_modules/three');
   THREE_ADDONS: { SkeletonUtils: any };
   RenderedInstance: typeof RenderedInstance;
@@ -199,6 +191,32 @@ declare type ObjectsRenderingService = {
   hexNumberToRGBArray: (value: number) => [number, number, number];
   registerClearCache: (clearCache: (_: any) => void) => void;
 };
+
+declare class ThreeResourcesLoader {
+  static loadFontFamily(project: gd.Project, resourceName: string): Promise<string>;
+  static getThreeTexture(
+    project: gd.Project,
+    resourceName: string
+  ): Promise<THREE.Texture>;
+  static getThreeMaterial(
+    project: gd.Project,
+    resourceName: string,
+    options: {
+      useTransparentTexture: boolean,
+    }
+  ): Promise<THREE.Material>;
+  static get3DModel(project: gd.Project, resourceName: string): Promise<any>;
+  static getBitmapFontData(project: gd.Project, resourceName: string): Promise<any>;
+  static getInvalidThreeTexture(): THREE.Texture;
+  static getLoadingThreeTexture(): THREE.Texture;
+  static getThreeVideoTexture(
+    project: gd.Project,
+    resourceName: string
+  ): Promise<{
+    texture: THREE.VideoTexture,
+    video: HTMLVideoElement,
+  }>;
+}
 
 declare type ObjectsEditorService = {
   registerEditorConfiguration: (

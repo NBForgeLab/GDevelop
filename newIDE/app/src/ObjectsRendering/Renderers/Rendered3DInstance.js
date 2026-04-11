@@ -1,24 +1,22 @@
 // @flow
-import * as PIXI from 'pixi.js-legacy';
 import * as THREE from 'three';
-import PixiResourcesLoader from '../PixiResourcesLoader';
+import ResourcesLoader from '../ThreeResourcesLoader';
+import Rectangle from '../../Utils/Rectangle';
 
 /**
  * Rendered3DInstance is the base class used for creating 3D renderers of instances,
  * which display on the scene editor, using Three.js, the instance of an object (see InstancesEditor).
- * It can also display 2D artifacts on Pixi 2D plane (3D object shadow projected on the plane for instance).
  */
 export default class Rendered3DInstance {
   _project: gdProject;
   _instance: gdInitialInstance;
   _associatedObjectConfiguration: gdObjectConfiguration;
   // $FlowFixMe[value-as-type]
-  _pixiContainer: PIXI.Container;
+  _layerGroup: THREE.Group;
   // $FlowFixMe[value-as-type]
   _threeGroup: THREE.Group;
-  _pixiResourcesLoader: Class<PixiResourcesLoader>;
-  // $FlowFixMe[value-as-type]
-  _pixiObject: PIXI.DisplayObject;
+  _resourcesLoader: Class<ResourcesLoader>;
+
   // $FlowFixMe[value-as-type]
   _threeObject: THREE.Object3D | null;
   wasUsed: boolean;
@@ -30,20 +28,19 @@ export default class Rendered3DInstance {
     instance: gdInitialInstance,
     associatedObjectConfiguration: gdObjectConfiguration,
     // $FlowFixMe[value-as-type]
-    pixiContainer: PIXI.Container,
+    layerGroup: THREE.Group,
     // $FlowFixMe[value-as-type]
     threeGroup: THREE.Group,
-    pixiResourcesLoader: Class<PixiResourcesLoader>,
+    resourcesLoader: Class<ResourcesLoader>,
     getPropertyOverridings: (() => Map<string, string>) | null = null
   ) {
-    this._pixiObject = null;
     this._threeObject = null;
     this._instance = instance;
     this._associatedObjectConfiguration = associatedObjectConfiguration;
-    this._pixiContainer = pixiContainer;
+    this._layerGroup = layerGroup;
     this._threeGroup = threeGroup;
     this._project = project;
-    this._pixiResourcesLoader = pixiResourcesLoader;
+    this._resourcesLoader = resourcesLoader;
     this._getPropertyOverridings = getPropertyOverridings;
     this.wasUsed = true; //Used by InstancesRenderer to track rendered instance that are not used anymore.
     this._wasDestroyed = false;
@@ -82,10 +79,6 @@ export default class Rendered3DInstance {
     //Nothing to do.
   }
 
-  getPixiObject(): any {
-    return this._pixiObject;
-  }
-
   getThreeObject(): any {
     return this._threeObject;
   }
@@ -96,14 +89,15 @@ export default class Rendered3DInstance {
 
   /**
    * Called to notify the instance renderer that its associated instance was removed from
-   * the scene. The PIXI object should probably be removed from the container: This is what
+   * the scene. The object should be removed from the container: This is what
    * the default implementation of the method does.
    */
   onRemovedFromScene() {
     this._wasDestroyed = true;
-    if (this._pixiObject !== null)
-      this._pixiContainer.removeChild(this._pixiObject);
-    if (this._threeObject !== null) this._threeGroup.remove(this._threeObject);
+    if (this._threeObject !== null) {
+      this._layerGroup.remove(this._threeObject);
+      if (this._threeGroup) this._threeGroup.remove(this._threeObject);
+    }
   }
 
   getOriginX(): any {
@@ -159,6 +153,31 @@ export default class Rendered3DInstance {
     return this._instance.hasCustomDepth()
       ? this.getCustomDepth()
       : this.getDefaultDepth();
+  }
+
+  getUnrotatedInstanceSize(): [number, number, number] {
+    return [this.getWidth(), this.getHeight(), this.getDepth()];
+  }
+
+  getUnrotatedInstanceAABB(): Rectangle {
+    const width = this.getWidth();
+    const height = this.getHeight();
+    const depth = this.getDepth();
+
+    return new Rectangle(
+      this._instance.getX() - this.getOriginX(),
+      this._instance.getY() - this.getOriginY(),
+      this._instance.getX() - this.getOriginX() + width,
+      this._instance.getY() - this.getOriginY() + height,
+      this._instance.getZ() - this.getOriginZ(),
+      this._instance.getZ() - this.getOriginZ() + depth
+    );
+  }
+
+  getInstanceAABB(): Rectangle {
+    // For now the editor uses the unrotated bounds as a stable approximation for 3D instances.
+    // This keeps selection/handles functional until a full oriented 3D bounds path is introduced.
+    return this.getUnrotatedInstanceAABB();
   }
 
   /**

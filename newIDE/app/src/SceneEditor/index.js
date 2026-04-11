@@ -46,7 +46,7 @@ import {
   getHistoryInitialState,
   saveToHistory,
 } from '../Utils/History';
-import PixiResourcesLoader from '../ObjectsRendering/PixiResourcesLoader';
+import ThreeResourcesLoader from '../ObjectsRendering/ThreeResourcesLoader';
 import {
   type ObjectWithContext,
   type GroupWithContext,
@@ -644,7 +644,7 @@ export default class SceneEditor extends React.Component<Props, State> {
       // is paused during this period.
       editorDisplay.startSceneRendering(false, 'resource-reload');
       for (const resourceName of resourceNames) {
-        await PixiResourcesLoader.reloadResource(project, resourceName);
+        await ThreeResourcesLoader.reloadResource(project, resourceName);
       }
 
       editorDisplay.forceUpdateObjectsList();

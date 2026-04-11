@@ -93,12 +93,12 @@ export const canSwapAssetOfObject = (object: gdObject): boolean =>
 
 const mergeAnimations = function<A: { name: string }>(
   project: gdProject,
-  PixiResourcesLoader: any,
+  ThreeResourcesLoader: any,
   objectAnimations: Array<A>,
   assetAnimations: Array<A>,
   mergeAnimation: (
     project: gdProject,
-    PixiResourcesLoader: any,
+    ThreeResourcesLoader: any,
     objectsAnimation: A,
     assetAnimation: A
   ) => A
@@ -116,7 +116,7 @@ const mergeAnimations = function<A: { name: string }>(
     animations.push(
       mergeAnimation(
         project,
-        PixiResourcesLoader,
+        ThreeResourcesLoader,
         objectAnimation,
         assetAnimation
       )
@@ -137,7 +137,7 @@ const mergeAnimations = function<A: { name: string }>(
 
 const getFirstFrameDimension = (
   project: gdProject,
-  PixiResourcesLoader: any,
+  ThreeResourcesLoader: any,
   spriteConfiguration: SpriteObjectDataType
 ) => {
   if (spriteConfiguration.animations.length === 0) {
@@ -147,7 +147,7 @@ const getFirstFrameDimension = (
   if (direction.sprites.length === 0) {
     return null;
   }
-  const image = PixiResourcesLoader.getLegacyPixiTexture(
+  const image = ThreeResourcesLoader.getLegacythreeTexture(
     project,
     direction.sprites[0].image
   );
@@ -159,23 +159,23 @@ const getFirstFrameDimension = (
 
 const evaluateImageScale = (
   project: gdProject,
-  PixiResourcesLoader: any,
+  ThreeResourcesLoader: any,
   serializedObject: SpriteObjectDataType,
   serializedAssetObject: SpriteObjectDataType,
   assetShortHeader?: ?AssetShortHeader
 ) => {
   const objectDimensions = getFirstFrameDimension(
     project,
-    PixiResourcesLoader,
+    ThreeResourcesLoader,
     serializedObject
   );
-  // The asset header is used because the Pixi texture will likely be invalid
+  // The asset header is used because the cached texture may still be unavailable
   // when the asset has just been downloaded.
   const assetDimensions = assetShortHeader
     ? { width: assetShortHeader.width, height: assetShortHeader.height }
     : getFirstFrameDimension(
         project,
-        PixiResourcesLoader,
+        ThreeResourcesLoader,
         serializedAssetObject
       );
   if (!objectDimensions || !assetDimensions) {
@@ -188,14 +188,14 @@ const evaluateImageScale = (
 
 const evaluatePreScale = (
   project: gdProject,
-  PixiResourcesLoader: any,
+  ThreeResourcesLoader: any,
   serializedObject: SpriteObjectDataType,
   serializedAssetObject: SpriteObjectDataType,
   assetShortHeader?: ?AssetShortHeader
 ) => {
   const { scaleX, scaleY } = evaluateImageScale(
     project,
-    PixiResourcesLoader,
+    ThreeResourcesLoader,
     serializedObject,
     serializedAssetObject,
     assetShortHeader
@@ -222,7 +222,7 @@ const scalePoint = function<P: { x: number, y: number }>(
 
 const mergeSpriteFrame = (
   project: gdProject,
-  PixiResourcesLoader: any,
+  ThreeResourcesLoader: any,
   objectFrame: SpriteFrameData,
   assetFrame: SpriteFrameData,
   scaleX: number,
@@ -241,7 +241,7 @@ const mergeSpriteFrame = (
 
 const mergeSpriteAnimation = (
   project: gdProject,
-  PixiResourcesLoader: any,
+  ThreeResourcesLoader: any,
   objectAnimation: SpriteAnimationData,
   assetAnimation: SpriteAnimationData,
   scaleX: number,
@@ -257,7 +257,7 @@ const mergeSpriteAnimation = (
         sprites: assetDirection.sprites.map((frame, frameIndex) =>
           mergeSpriteFrame(
             project,
-            PixiResourcesLoader,
+            ThreeResourcesLoader,
             objectDirection.sprites[0],
             frame,
             scaleX,
@@ -271,7 +271,7 @@ const mergeSpriteAnimation = (
 
 const mergeSpriteAnimations = (
   project: gdProject,
-  PixiResourcesLoader: any,
+  ThreeResourcesLoader: any,
   objectAnimations: Array<SpriteAnimationData>,
   assetAnimations: Array<SpriteAnimationData>,
   scaleX: number,
@@ -280,13 +280,13 @@ const mergeSpriteAnimations = (
   // $FlowFixMe[incompatible-type]
   mergeAnimations<SpriteAnimationData>(
     project,
-    PixiResourcesLoader,
+    ThreeResourcesLoader,
     objectAnimations,
     assetAnimations,
-    (project, PixiResourcesLoader, objectAnimation, assetAnimation) =>
+    (project, ThreeResourcesLoader, objectAnimation, assetAnimation) =>
       mergeSpriteAnimation(
         project,
-        PixiResourcesLoader,
+        ThreeResourcesLoader,
         objectAnimation,
         assetAnimation,
         scaleX,
@@ -296,7 +296,7 @@ const mergeSpriteAnimations = (
 
 const mergeModel3DAnimation = (
   project: gdProject,
-  PixiResourcesLoader: any,
+  ThreeResourcesLoader: any,
   // $FlowFixMe[missing-local-annot]
   objectsAnimation,
   // $FlowFixMe[missing-local-annot]
@@ -305,13 +305,13 @@ const mergeModel3DAnimation = (
 
 const mergeModel3DAnimations = (
   project: gdProject,
-  PixiResourcesLoader: any,
+  ThreeResourcesLoader: any,
   objectAnimations: Array<{ name: string }>,
   assetAnimations: Array<{ name: string }>
 ) =>
   mergeAnimations<{ name: string }>(
     project,
-    PixiResourcesLoader,
+    ThreeResourcesLoader,
     objectAnimations,
     assetAnimations,
     mergeModel3DAnimation
@@ -319,7 +319,7 @@ const mergeModel3DAnimations = (
 
 export const swapAsset = (
   project: gdProject,
-  PixiResourcesLoader: any,
+  ThreeResourcesLoader: any,
   object: gdObject,
   assetObject: gdObject,
   assetShortHeader?: ?AssetShortHeader
@@ -337,21 +337,21 @@ export const swapAsset = (
   if (object.getType() === 'Sprite') {
     serializedObject.preScale = evaluatePreScale(
       project,
-      PixiResourcesLoader,
+      ThreeResourcesLoader,
       serializedObject,
       serializedAssetObject,
       assetShortHeader
     );
     const { scaleX, scaleY } = evaluateImageScale(
       project,
-      PixiResourcesLoader,
+      ThreeResourcesLoader,
       serializedObject,
       serializedAssetObject,
       assetShortHeader
     );
     serializedObject.animations = mergeSpriteAnimations(
       project,
-      PixiResourcesLoader,
+      ThreeResourcesLoader,
       serializedObject.animations,
       serializedAssetObject.animations,
       scaleX,
@@ -373,7 +373,7 @@ export const swapAsset = (
       ...serializedAssetObject.content,
       animations: mergeModel3DAnimations(
         project,
-        PixiResourcesLoader,
+        ThreeResourcesLoader,
         serializedObject.content.animations,
         serializedAssetObject.content.animations
       ),

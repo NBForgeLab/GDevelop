@@ -9,8 +9,8 @@ export type BasicProfilingCounters = {
   instanceCounters: { [string]: InstanceCounter },
   totalInstancesUpdateCount: number,
   totalInstancesUpdateTime: number,
-  totalPixiRenderingTime: number,
-  totalPixiUiRenderingTime: number,
+  totalSceneRenderingTime: number,
+  totalUiRenderingTime: number,
   totalThreeRenderingTime: number,
 };
 
@@ -19,8 +19,8 @@ export const makeBasicProfilingCounters = (): BasicProfilingCounters => {
     instanceCounters: {},
     totalInstancesUpdateCount: 0,
     totalInstancesUpdateTime: 0,
-    totalPixiRenderingTime: 0,
-    totalPixiUiRenderingTime: 0,
+    totalSceneRenderingTime: 0,
+    totalUiRenderingTime: 0,
     totalThreeRenderingTime: 0,
   };
 };
@@ -31,8 +31,8 @@ export const resetBasicProfilingCounters = (
   basicProfilingCounters.instanceCounters = {};
   basicProfilingCounters.totalInstancesUpdateCount = 0;
   basicProfilingCounters.totalInstancesUpdateTime = 0;
-  basicProfilingCounters.totalPixiRenderingTime = 0;
-  basicProfilingCounters.totalPixiUiRenderingTime = 0;
+  basicProfilingCounters.totalSceneRenderingTime = 0;
+  basicProfilingCounters.totalUiRenderingTime = 0;
   basicProfilingCounters.totalThreeRenderingTime = 0;
   return basicProfilingCounters;
 };
@@ -56,18 +56,18 @@ export const increaseInstanceUpdate = (
   basicProfilingCounters.totalInstancesUpdateTime += updateDuration;
 };
 
-export const increasePixiRenderingTime = (
+export const increaseSceneRenderingTime = (
   basicProfilingCounters: BasicProfilingCounters,
-  pixiRenderingTime: number
+  sceneRenderingTime: number
 ) => {
-  basicProfilingCounters.totalPixiRenderingTime += pixiRenderingTime;
+  basicProfilingCounters.totalSceneRenderingTime += sceneRenderingTime;
 };
 
-export const increasePixiUiRenderingTime = (
+export const increaseUiRenderingTime = (
   basicProfilingCounters: BasicProfilingCounters,
-  pixiUiRenderingTime: number
+  uiRenderingTime: number
 ) => {
-  basicProfilingCounters.totalPixiUiRenderingTime += pixiUiRenderingTime;
+  basicProfilingCounters.totalUiRenderingTime += uiRenderingTime;
 };
 
 export const increaseThreeRenderingTime = (
@@ -102,8 +102,8 @@ export const mergeBasicProfilingCounters = (
   }
   destination.totalInstancesUpdateCount += source.totalInstancesUpdateCount;
   destination.totalInstancesUpdateTime += source.totalInstancesUpdateTime;
-  destination.totalPixiRenderingTime += source.totalPixiRenderingTime;
-  destination.totalPixiUiRenderingTime += source.totalPixiUiRenderingTime;
+  destination.totalSceneRenderingTime += source.totalSceneRenderingTime;
+  destination.totalUiRenderingTime += source.totalUiRenderingTime;
   destination.totalThreeRenderingTime += source.totalThreeRenderingTime;
   return destination;
 };
@@ -123,7 +123,7 @@ export const getBasicProfilingCountersText = (
     )}ms`
   );
   texts.push(
-    `Pixi rendering time: ${basicProfilingCounters.totalPixiRenderingTime.toFixed(
+    `Scene rendering time: ${basicProfilingCounters.totalSceneRenderingTime.toFixed(
       2
     )}ms`
   );
@@ -133,7 +133,7 @@ export const getBasicProfilingCountersText = (
     )}ms`
   );
   texts.push(
-    `Pixi UI rendering time: ${basicProfilingCounters.totalPixiUiRenderingTime.toFixed(
+    `UI rendering time: ${basicProfilingCounters.totalUiRenderingTime.toFixed(
       2
     )}ms`
   );

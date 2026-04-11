@@ -24,7 +24,7 @@ import {
 } from '../../../UI/Accordion';
 import { mapFor } from '../../../Utils/MapFor';
 import ResourceSelectorWithThumbnail from '../../../ResourcesList/ResourceSelectorWithThumbnail';
-import PixiResourcesLoader from '../../../ObjectsRendering/PixiResourcesLoader';
+import ThreeResourcesLoader from '../../../ObjectsRendering/ThreeResourcesLoader';
 import { type GLTF } from 'three/addons/loaders/GLTFLoader';
 import * as THREE from 'three';
 import AlertMessage from '../../../UI/AlertMessage';
@@ -157,7 +157,7 @@ const Physics3DEditor = (props: Props): React.Node => {
           .get('modelResourceName')
           .getValue();
       }
-      const newModel3d = await PixiResourcesLoader.get3DModel(
+      const newModel3d = await ThreeResourcesLoader.get3DModel(
         project,
         modelResourceName
       );

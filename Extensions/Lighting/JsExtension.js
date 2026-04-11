@@ -209,7 +209,6 @@ module.exports = {
    */
   registerInstanceRenderers: function (objectsRenderingService) {
     const Rendered3DInstance = objectsRenderingService.Rendered3DInstance;
-    const PIXI = objectsRenderingService.PIXI;
     const THREE = objectsRenderingService.THREE;
 
     class RenderedLightObject3DInstance extends Rendered3DInstance {
@@ -239,31 +238,23 @@ module.exports = {
         this._iconSprite = null;
         this._rangeCircle = null;
 
-        const pixiTexture = PIXI.Texture.from(
+        const iconTexture = new THREE.TextureLoader().load(
           'CppPlatform/Extensions/lightIcon32.png'
         );
-        const source =
-          pixiTexture.baseTexture &&
-          pixiTexture.baseTexture.resource &&
-          pixiTexture.baseTexture.resource.source;
-        if (source) {
-          const iconTexture = new THREE.Texture(source);
-          iconTexture.needsUpdate = true;
-          iconTexture.colorSpace = THREE.SRGBColorSpace;
-          this._iconTexture = iconTexture;
-          const iconMaterial = new THREE.SpriteMaterial({
-            map: iconTexture,
-            transparent: true,
-            depthTest: false,
-            depthWrite: false,
-          });
-          this._iconMaterial = iconMaterial;
-          const iconSprite = new THREE.Sprite(iconMaterial);
-          iconSprite.center.set(0.5, 0.5);
-          iconSprite.scale.set(32, 32, 1);
-          this._iconSprite = iconSprite;
-          this._threeObject.add(iconSprite);
-        }
+        iconTexture.colorSpace = THREE.SRGBColorSpace;
+        this._iconTexture = iconTexture;
+        const iconMaterial = new THREE.SpriteMaterial({
+          map: iconTexture,
+          transparent: true,
+          depthTest: false,
+          depthWrite: false,
+        });
+        this._iconMaterial = iconMaterial;
+        const iconSprite = new THREE.Sprite(iconMaterial);
+        iconSprite.center.set(0.5, 0.5);
+        iconSprite.scale.set(32, 32, 1);
+        this._iconSprite = iconSprite;
+        this._threeObject.add(iconSprite);
 
         this._rangeCircle = new THREE.LineLoop(
           new THREE.BufferGeometry(),

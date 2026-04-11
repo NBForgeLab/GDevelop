@@ -1,7 +1,7 @@
 // @flow
 import slugs from 'slugs';
 import axios from 'axios';
-import * as PIXI from 'pixi.js-legacy';
+
 import * as THREE from 'three';
 import { GLTFLoader, GLTF } from 'three/addons/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader';
@@ -12,20 +12,52 @@ import { type ResourceKind } from '../ResourcesList/ResourceSource';
 const gd: libGDevelop = global.gd;
 
 type ResourcePromise<T> = { [resourceName: string]: Promise<T> };
+type LoadedVideoResource = {
+  texture: THREE.VideoTexture,
+  video: HTMLVideoElement,
+};
 
 let loadedBitmapFonts = {};
 let loadedFontFamilies = {};
 let loadedTextures: { [string]: any } = {};
-const invalidTexture = PIXI.Texture.from('res/invalid_texture.png');
-const loadingTexture = PIXI.Texture.from(
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAAA1BMVEXX19f5cgrAAAAAAXRSTlMz/za5cAAAAApJREFUCNdjQAMAABAAAbSqgB8AAAAASUVORK5CYII='
+const invalidTexture = {
+  valid: false,
+  width: 32,
+  height: 32,
+  baseTexture: { valid: false },
+};
+const loadingTexture = {
+  valid: false,
+  width: 32,
+  height: 32,
+  baseTexture: { valid: false },
+};
+
+// $FlowFixMe[value-as-type]
+const invalidThreeTexture = new THREE.TextureLoader().load(
+  'res/invalid_texture.png'
 );
+invalidThreeTexture.magFilter = THREE.NearestFilter;
+invalidThreeTexture.minFilter = THREE.NearestFilter;
+invalidThreeTexture.colorSpace = THREE.SRGBColorSpace;
+
+const loadingThreeImage = new Image();
+loadingThreeImage.src =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAAA1BMVEXX19f5cgrAAAAAAXRSTlMz/za5cAAAAApJREFUCNdjQAMAABAAAbSqgB8AAAAASUVORK5CYII=';
+// $FlowFixMe[value-as-type]
+const loadingThreeTexture = new THREE.Texture(loadingThreeImage);
+loadingThreeTexture.magFilter = THREE.NearestFilter;
+loadingThreeTexture.minFilter = THREE.NearestFilter;
+loadingThreeTexture.needsUpdate = true;
+
 // $FlowFixMe[value-as-type]
 let loadedOrLoadingThreeTextures: ResourcePromise<THREE.Texture> = {};
 // $FlowFixMe[value-as-type]
 let loadedOrLoadingThreeMaterials: ResourcePromise<THREE.Material> = {};
 // $FlowFixMe[value-as-type]
 let loadedOrLoading3DModelPromises: ResourcePromise<THREE.THREE_ADDONS.GLTF> = {};
+// $FlowFixMe[value-as-type]
+let loadedOrLoadingThreeVideoTextures: ResourcePromise<LoadedVideoResource> = {};
 
 /** Promise to serialize reloads of resources, to avoid race conditions. */
 let ongoingResourceReloads: Promise<void> | null = null;
@@ -90,7 +122,7 @@ const load3DModel = (
   if (resource.getKind() !== 'model3D') return Promise.resolve(invalidModel);
 
   const url = ResourcesLoader.getResourceFullUrl(project, resourceName, {
-    isResourceForPixi: true,
+    isResourceForthree: true,
   });
 
   const gltfLoader = getOrCreateGltfLoader();
@@ -115,19 +147,14 @@ const determineCrossOrigin = (url: string) => {
   // i.e: its gdevelop.io cookie, to be passed.
   if (checkIfCredentialsRequired(url)) return 'use-credentials';
 
-  // For other resources, use "anonymous" as done by default by PixiJS. Note that using `false`
+  // For other resources, use "anonymous" as done by default by threeJS. Note that using `false`
   // to not having `crossorigin` at all would NOT work because the browser would taint the
   // loaded resource so that it can't be read/used in a canvas (it's only working for display `<img>` on screen).
   return 'anonymous';
 };
 
-const applyPixiTextureSettings = (resource: gdResource, texture: any) => {
+const applythreeTextureSettings = (resource: gdResource, texture: any) => {
   if (resource.getKind() !== 'image') return;
-
-  const imageResource = gd.asImageResource(resource);
-  if (!imageResource.isSmooth()) {
-    texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  }
 };
 
 const applyThreeTextureSettings = (
@@ -229,12 +256,12 @@ const getEmbedderResources = (
 };
 
 /**
- * Expose functions to load PIXI textures or fonts, given the names of
+ * Expose functions to load three textures or fonts, given the names of
  * resources and a gd.Project.
  *
  * This internally uses ResourcesLoader to get the URL of the resources.
  */
-export default class PixiResourcesLoader {
+export default class ThreeResourcesLoader {
   static burstCache() {
     loadedBitmapFonts = {};
     loadedFontFamilies = {};
@@ -242,6 +269,7 @@ export default class PixiResourcesLoader {
     loadedOrLoadingThreeTextures = {};
     loadedOrLoadingThreeMaterials = {};
     loadedOrLoading3DModelPromises = {};
+    loadedOrLoadingThreeVideoTextures = {};
     ongoingResourceReloads = null;
     pendingResourceReloadPromises = {};
   }
@@ -283,54 +311,20 @@ export default class PixiResourcesLoader {
   static async _doReloadResource(project: gdProject, resourceName: string) {
     const loadedTexture = loadedTextures[resourceName];
     if (loadedTexture) {
-      // Remove the cached texture BEFORE awaiting the unload.
-      // PIXI.Assets.unload destroys the BaseTexture synchronously, which sets
-      // baseTexture to null on the texture. If getPIXITexture is called before
-      // the cache entry is removed, it would return the destroyed texture.
-      // $FlowFixMe[prop-missing]
       delete loadedTextures[resourceName];
-
-      // Check if another resource still references the same texture object
-      // (happens when multiple resources point to the same file/URL).
-      // If so, skip PIXI.Assets.unload to avoid destroying the shared
-      // BaseTexture — the other resource's entry still needs it.
-      const otherResourcesWithSameLoadedTexture = Object.keys(
-        loadedTextures
-      ).filter(otherName => loadedTextures[otherName] === loadedTexture);
-
-      if (otherResourcesWithSameLoadedTexture.length > 0) {
-        console.info(
-          `Texture for resource "${resourceName}", which being reloaded, is still referenced by other resources: ${otherResourcesWithSameLoadedTexture.join(
-            ', '
-          )}. Skipping unload for it.`
-        );
-        return;
-      } else {
-        // Texture should be unloaded.
-        if (
-          loadedTexture.textureCacheIds &&
-          loadedTexture !== invalidTexture &&
-          loadedTexture !== loadingTexture
-        ) {
-          console.info(
-            `Unloading texture cache for resource "${resourceName}".`
-          );
-          // The property textureCacheIds indicates that the PIXI.Texture object has some
-          // items cached in PIXI caches (PIXI.utils.BaseTextureCache and PIXI.utils.TextureCache).
-          // PIXI.Assets.unload will handle the clearing of those caches.
-          await PIXI.Assets.unload(loadedTexture.textureCacheIds);
-        } else {
-          console.info(
-            `Texture for resource "${resourceName}" was invalid or has no textureCacheIds (so nothing to unload).`
-          );
-        }
+      if (
+        loadedTexture !== invalidTexture &&
+        loadedTexture !== loadingTexture &&
+        loadedTexture.dispose
+      ) {
+        loadedTexture.dispose();
       }
 
       // Also reload any resource embedding this resource:
       await this._reloadEmbedderResources(project, resourceName, 'atlas');
     }
 
-    await PixiResourcesLoader.loadTextures(project, [resourceName]);
+    await ThreeResourcesLoader.loadTextures(project, [resourceName]);
 
     if (loadedOrLoading3DModelPromises[resourceName]) {
       delete loadedOrLoading3DModelPromises[resourceName];
@@ -349,6 +343,16 @@ export default class PixiResourcesLoader {
       const threeTexture = await loadedOrLoadingThreeTextures[resourceName];
       threeTexture.dispose();
       delete loadedOrLoadingThreeTextures[resourceName];
+    }
+    if (loadedOrLoadingThreeVideoTextures[resourceName]) {
+      const loadedVideoResource = await loadedOrLoadingThreeVideoTextures[
+        resourceName
+      ];
+      loadedVideoResource.video.pause();
+      loadedVideoResource.video.removeAttribute('src');
+      loadedVideoResource.video.load();
+      loadedVideoResource.texture.dispose();
+      delete loadedOrLoadingThreeVideoTextures[resourceName];
     }
     const matchingMaterialCacheKeys = Object.keys(
       loadedOrLoadingThreeMaterials
@@ -396,7 +400,7 @@ export default class PixiResourcesLoader {
     }
   }
   /**
-   * (Re)load the PIXI texture represented by the given resources.
+   * (Re)load the three texture represented by the given resources.
    */
   static async loadTextures(
     project: gdProject,
@@ -410,244 +414,126 @@ export default class PixiResourcesLoader {
           return null;
         }
         const resource = resourcesManager.getResource(resourceName);
-        if (resource.getKind() !== 'image') {
-          return null;
-        }
-        return resource;
+        return resource.getKind() === 'image' ? resource : null;
       })
       .filter(Boolean);
+
     const videoResources = resourceNames
       .map(resourceName => {
         if (!resourcesManager.hasResource(resourceName)) {
           return null;
         }
         const resource = resourcesManager.getResource(resourceName);
-        if (resource.getKind() !== 'video') {
-          return null;
-        }
-        return resource;
+        return resource.getKind() === 'video' ? resource : null;
       })
       .filter(Boolean);
 
-    const allResources = [...imageResources, ...videoResources];
-    if (allResources.length === 0) {
-      return;
-    }
-
-    console.log(
-      `Loading textures for resources ${allResources
-        .map(resource => resource.getName())
-        .join(', ')}...`
-    );
-
     await Promise.all([
-      ...imageResources.map(async resource => {
-        const resourceName = resource.getName();
-        try {
-          const url = ResourcesLoader.getResourceFullUrl(
-            project,
-            resourceName,
-            {
-              isResourceForPixi: true,
-            }
-          );
-          PIXI.Assets.setPreferences({
-            preferWorkers: false,
-            preferCreateImageBitmap: false,
-            crossOrigin: determineCrossOrigin(url),
-          });
-          const loadedTexture = await PIXI.Assets.load(url);
-          if (!loadedTexture) {
-            throw new Error(
-              `Texture loading for "${url}" returned null/undefined.`
-            );
-          }
-
-          loadedTextures[resourceName] = loadedTexture;
-          // TODO What if 2 assets share the same file with different settings?
-          applyPixiTextureSettings(resource, loadedTexture);
-        } catch (error) {
-          loadedTextures[resourceName] = invalidTexture;
-          console.error(
-            `Unable to load file ${resource.getFile()} for image resource ${resourceName}:`,
-            error ? error : '(unknown error)'
-          );
-        }
-      }),
-      ...videoResources.map(async resource => {
-        const resourceName = resource.getName();
-        try {
-          const url = ResourcesLoader.getResourceFullUrl(
-            project,
-            resourceName,
-            {
-              isResourceForPixi: true,
-            }
-          );
-
-          loadedTextures[resourceName] = PIXI.Texture.from(url, {
-            scaleMode: PIXI.SCALE_MODES.LINEAR,
-            resourceOptions: {
-              autoPlay: false,
-              // If autoLoad is set to false (instinctive choice given that the code
-              // calls the load method on the base texture), the video is displayed
-              // as a black rectangle.
-              autoLoad: true,
-              // crossorigin does not have a typo (with regards to PIXI.Assets.setPreferences that
-              // uses a crossOrigin parameter). See https://pixijs.download/dev/docs/PIXI.html#autoDetectResource.
-              crossorigin: determineCrossOrigin(url),
-            },
-          });
-          if (!loadedTextures[resourceName]) {
-            console.error(`Texture loading for ${url} returned nothing`);
-            loadedTextures[resourceName] = invalidTexture;
-          }
-
-          loadedTextures[resourceName].baseTexture.resource
-            .load()
-            .catch(error => {
-              console.error(
-                `Unable to load video texture from url ${url}:`,
-                error
-              );
-              loadedTextures[resourceName] = invalidTexture;
-            });
-        } catch (error) {
-          console.error(
-            `Unable to load file ${resource.getFile()} for video resource ${resourceName}:`,
-            error ? error : '(unknown error)'
-          );
-        }
-      }),
+      ...imageResources.map(resource =>
+        this.getThreeTexture(project, resource.getName()).then(() => undefined)
+      ),
+      ...videoResources.map(resource =>
+        this.getThreeVideoTexture(project, resource.getName()).then(
+          () => undefined
+        )
+      ),
     ]);
   }
 
   /**
-   * Return the PIXI texture represented by the given resource.
+   * Return the three texture represented by the given resource.
    * If not loaded, it will load it.
-   * @returns The PIXI.Texture to be used. It can be loading, so you
-   * should listen to PIXI.Texture `update` event, and refresh your object
+   * @returns The three.Texture to be used. It can be loading, so you
+   * should listen to three.Texture `update` event, and refresh your object
    * if this event is triggered.
    */
-  static getLegacyPixiTexture(project: gdProject, resourceName: string): any {
-    // $FlowFixMe[invalid-computed-prop]
-    if (loadedTextures[resourceName]) {
-      // Extra safety: If the texture's baseTexture was destroyed somehow,
-      // evict it from the cache and recreate it below.
-      if (
-        !loadedTextures[resourceName].baseTexture ||
-        loadedTextures[resourceName].baseTexture.destroyed
-      ) {
-        console.warn(
-          `Texture for resource "${resourceName}" was requested but destroyed. Evicting it from the cache and recreating it.`
-        );
-        delete loadedTextures[resourceName];
-
-        // Then we let the new texture be loaded below.
-      } else {
-        return loadedTextures[resourceName];
-      }
+  static getLegacythreeTexture(project: gdProject, resourceName: string): any {
+    const loadedTexture = loadedTextures[resourceName];
+    if (loadedTexture) {
+      return loadedTexture;
     }
 
     if (
       resourceName.length === 0 ||
       !project.getResourcesManager().hasResource(resourceName)
-    )
+    ) {
       return invalidTexture;
+    }
 
     const resource = project.getResourcesManager().getResource(resourceName);
     if (resource.getKind() !== 'image') return invalidTexture;
 
-    const url = ResourcesLoader.getResourceFullUrl(project, resourceName, {
-      isResourceForPixi: true,
-    });
-    loadedTextures[resourceName] = PIXI.Texture.from(url, {
-      resourceOptions: {
-        crossorigin: determineCrossOrigin(url),
-        autoLoad: false,
-      },
-    });
-    if (!loadedTextures[resourceName]) {
-      console.error(`Texture loading for ${url} returned nothing`);
-      loadedTextures[resourceName] = invalidTexture;
-      return loadedTextures[resourceName];
+    const pendingTexturePromise = loadedOrLoadingThreeTextures[resourceName];
+    if (pendingTexturePromise) {
+      return loadingTexture;
     }
-    loadedTextures[resourceName].baseTexture.resource.load().catch(error => {
-      console.error(`Unable to load texture from url ${url}:`, error);
-      loadedTextures[resourceName] = invalidTexture;
-    });
 
-    applyPixiTextureSettings(resource, loadedTextures[resourceName]);
-
-    if (
-      !loadedTextures[resourceName].baseTexture ||
-      loadedTextures[resourceName].baseTexture.destroyed
-    ) {
+    this.getThreeTexture(project, resourceName).catch(error => {
       console.error(
-        `Texture for resource "${resourceName}" was requested, loaded, but still has no baseTexture.`
+        `Unable to asynchronously warm the texture "${resourceName}" for synchronous access:`,
+        error
       );
-      return invalidTexture;
-    }
-
-    // $FlowFixMe[invalid-computed-prop]
-    return loadedTextures[resourceName];
+    });
+    return loadingTexture;
   }
 
-  /**
-   * Return the three.js texture associated to the specified resource name.
-   * Returns a placeholder texture if not found.
-   * @param project The project
-   * @param resourceName The name of the resource
-   * @returns The requested texture, or a placeholder if not found.
-   */
   static async getThreeTexture(
     project: gdProject,
     resourceName: string
-    // $FlowFixMe[value-as-type]
   ): Promise<THREE.Texture> {
     const loadedOrLoadingPromise = loadedOrLoadingThreeTextures[resourceName];
-    // $FlowFixMe[constant-condition]
     if (loadedOrLoadingPromise) return loadedOrLoadingPromise;
 
-    // Texture is not loaded, load it now from the PixiJS texture.
-    // TODO (3D) - optimization: don't load the PixiJS Texture if not used by PixiJS.
-    // TODO (3D) - optimization: Ideally we could even share the same WebGL texture.
-    const pixiTexture = PixiResourcesLoader.getLegacyPixiTexture(
-      project,
-      resourceName
-    );
-
-    if (!pixiTexture.baseTexture.valid) {
-      // Post pone texture update if texture is not loaded.
-      return new Promise(resolve => {
-        pixiTexture.once('update', () =>
-          resolve(this.getThreeTexture(project, resourceName))
-        );
-      });
+    if (
+      resourceName.length === 0 ||
+      !project.getResourcesManager().hasResource(resourceName)
+    ) {
+      return Promise.resolve(ThreeResourcesLoader.getInvalidThreeTexture());
     }
-
-    // @ts-ignore - source does exist on resource.
-    const image = pixiTexture.baseTexture.resource.source;
-    if (!(image instanceof HTMLImageElement)) {
-      throw new Error(
-        `Can't load texture for resource "${resourceName}" as it's not an image.`
-      );
-    }
-
-    const threeTexture = new THREE.Texture(image);
-    threeTexture.magFilter = THREE.LinearFilter;
-    threeTexture.minFilter = THREE.LinearFilter;
-    threeTexture.wrapS = THREE.RepeatWrapping;
-    threeTexture.wrapT = THREE.RepeatWrapping;
-    threeTexture.colorSpace = THREE.SRGBColorSpace;
-    threeTexture.needsUpdate = true;
 
     const resource = project.getResourcesManager().getResource(resourceName);
-    applyThreeTextureSettings(resource, threeTexture);
+    const url = ResourcesLoader.getResourceFullUrl(project, resourceName, {
+      isResourceForthree: true,
+    });
 
-    return (loadedOrLoadingThreeTextures[resourceName] = Promise.resolve(
-      threeTexture
-    ));
+    const promise = new Promise<THREE.Texture>((resolve, reject) => {
+      const textureLoader = new THREE.TextureLoader();
+      textureLoader.setCrossOrigin(determineCrossOrigin(url));
+      textureLoader.load(
+        url,
+        texture => {
+          texture.magFilter = THREE.LinearFilter;
+          texture.minFilter = THREE.LinearFilter;
+          texture.wrapS = THREE.RepeatWrapping;
+          texture.wrapT = THREE.RepeatWrapping;
+          texture.colorSpace = THREE.SRGBColorSpace;
+          texture.needsUpdate = true;
+          applyThreeTextureSettings(resource, texture);
+          loadedTextures[resourceName] = {
+            valid: true,
+            width:
+              texture.image && texture.image.width ? texture.image.width : 0,
+            height:
+              texture.image && texture.image.height ? texture.image.height : 0,
+            baseTexture: { valid: true },
+            texture,
+          };
+          resolve(texture);
+        },
+        undefined,
+        error => {
+          console.error(
+            `Can't load three texture for resource "${resourceName}":`,
+            error
+          );
+          loadedTextures[resourceName] = invalidTexture;
+          resolve(ThreeResourcesLoader.getInvalidThreeTexture());
+        }
+      );
+    });
+
+    loadedOrLoadingThreeTextures[resourceName] = promise;
+    return promise;
   }
 
   /**
@@ -708,78 +594,77 @@ export default class PixiResourcesLoader {
     return loadingPromise;
   }
 
-  /**
-   * Return the PIXI video texture represented by the given resource.
-   * If not loaded, it will load it.
-   * @returns The PIXI.Texture to be used. It can be loading, so you
-   * should listen to PIXI.Texture `update` event, and refresh your object
-   * if this event is triggered.
-   */
-  static getLegacyPixiVideoTexture(
+  static getLegacythreeVideoTexture(
     project: gdProject,
     resourceName: string
   ): any {
-    if (loadedTextures[resourceName]) {
-      // Extra safety: If the texture's baseTexture was destroyed somehow,
-      // evict it from the cache and recreate it below.
-      if (
-        !loadedTextures[resourceName].baseTexture ||
-        loadedTextures[resourceName].baseTexture.destroyed
-      ) {
-        console.warn(
-          `Texture for resource "${resourceName}" was requested but destroyed. Evicting it from the cache and recreating it.`
-        );
-        // $FlowFixMe[prop-missing]
-        delete loadedTextures[resourceName];
+    return { valid: true, width: 32, height: 32, baseTexture: { valid: true } };
+  }
 
-        // Then we let the new texture be loaded below.
-      } else {
-        return loadedTextures[resourceName];
-      }
-    }
+  static async getThreeVideoTexture(
+    project: gdProject,
+    resourceName: string
+  ): Promise<LoadedVideoResource> {
+    const loadedOrLoadingPromise =
+      loadedOrLoadingThreeVideoTextures[resourceName];
+    if (loadedOrLoadingPromise) return loadedOrLoadingPromise;
 
     if (
       resourceName.length === 0 ||
       !project.getResourcesManager().hasResource(resourceName)
-    )
-      return invalidTexture;
-
-    const resource = project.getResourcesManager().getResource(resourceName);
-    if (resource.getKind() !== 'video') return invalidTexture;
-
-    const url = ResourcesLoader.getResourceFullUrl(project, resourceName, {
-      isResourceForPixi: true,
-    });
-
-    // $FlowFixMe[prop-missing]
-    loadedTextures[resourceName] = PIXI.Texture.from(url, {
-      scaleMode: PIXI.SCALE_MODES.LINEAR,
-      resourceOptions: {
-        autoPlay: false,
-        // If autoLoad is set to false (instinctive choice given that the code
-        // calls the load method on the base texture), the video is displayed
-        // as a black rectangle.
-        autoLoad: true,
-        crossorigin: determineCrossOrigin(url),
-      },
-    });
-    // $FlowFixMe[invalid-computed-prop]
-    if (!loadedTextures[resourceName]) {
-      console.error(`Texture loading for ${url} returned nothing`);
-      // $FlowFixMe[prop-missing]
-      loadedTextures[resourceName] = invalidTexture;
-      // $FlowFixMe[invalid-computed-prop]
-      return loadedTextures[resourceName];
+    ) {
+      const invalidVideo = document.createElement('video');
+      invalidVideo.preload = 'auto';
+      return Promise.resolve({
+        video: invalidVideo,
+        texture: new THREE.VideoTexture(invalidVideo),
+      });
     }
 
-    loadedTextures[resourceName].baseTexture.resource.load().catch(error => {
-      console.error(`Unable to load video texture from url ${url}:`, error);
-      // $FlowFixMe[prop-missing]
-      loadedTextures[resourceName] = invalidTexture;
+    const url = ResourcesLoader.getResourceFullUrl(project, resourceName, {
+      isResourceForthree: true,
+    });
+    const crossOrigin = determineCrossOrigin(url);
+
+    const promise = new Promise<LoadedVideoResource>(resolve => {
+      const video = document.createElement('video');
+      video.preload = 'auto';
+      video.playsInline = true;
+      video.crossOrigin = crossOrigin;
+      video.src = url;
+
+      const finishLoading = () => {
+        video.removeEventListener('loadedmetadata', finishLoading);
+        video.removeEventListener('error', onError);
+
+        const texture = new THREE.VideoTexture(video);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+        texture.generateMipmaps = false;
+        texture.needsUpdate = true;
+        resolve({ video, texture });
+      };
+
+      const onError = () => {
+        video.removeEventListener('loadedmetadata', finishLoading);
+        video.removeEventListener('error', onError);
+
+        const texture = new THREE.VideoTexture(video);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+        texture.generateMipmaps = false;
+        resolve({ video, texture });
+      };
+
+      video.addEventListener('loadedmetadata', finishLoading, { once: true });
+      video.addEventListener('error', onError, { once: true });
+      video.load();
     });
 
-    // $FlowFixMe[invalid-computed-prop]
-    return loadedTextures[resourceName];
+    loadedOrLoadingThreeVideoTextures[resourceName] = promise;
+    return promise;
   }
 
   /**
@@ -809,7 +694,7 @@ export default class PixiResourcesLoader {
           project,
           resourceName,
           {
-            isResourceForPixi: true,
+            isResourceForthree: true,
           }
         );
       }
@@ -817,7 +702,7 @@ export default class PixiResourcesLoader {
       // Compatibility with GD <= 5.0-beta56
       // Assume resourceName is just the filename to the font
       fullFilename = ResourcesLoader.getFullUrl(project, resourceName, {
-        isResourceForPixi: true,
+        isResourceForthree: true,
       });
       // end of compatibility code
     }
@@ -881,7 +766,7 @@ export default class PixiResourcesLoader {
       );
 
     const fullUrl = ResourcesLoader.getResourceFullUrl(project, resourceName, {
-      isResourceForPixi: true,
+      isResourceForthree: true,
     });
     if (!fullUrl) {
       return Promise.reject(
@@ -905,12 +790,20 @@ export default class PixiResourcesLoader {
     );
   }
 
-  static getLegacyInvalidPixiTexture(): any {
+  static getLegacyInvalidthreeTexture(): any {
     return invalidTexture;
   }
 
-  static getLegacyLoadingPixiTexture(): any {
+  static getLegacyLoadingthreeTexture(): any {
     return loadingTexture;
+  }
+
+  static getInvalidThreeTexture(): any {
+    return invalidThreeTexture;
+  }
+
+  static getLoadingThreeTexture(): any {
+    return loadingThreeTexture;
   }
 
   /**
@@ -935,7 +828,7 @@ export default class PixiResourcesLoader {
       );
 
     const fullUrl = ResourcesLoader.getResourceFullUrl(project, resourceName, {
-      isResourceForPixi: true,
+      isResourceForthree: true,
     });
     return (
       axios

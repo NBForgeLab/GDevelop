@@ -1,13 +1,12 @@
 // @flow
 import RenderedInstance from './RenderedInstance';
-import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
+import ThreeResourcesLoader from '../../ObjectsRendering/ThreeResourcesLoader';
 import ResourcesLoader from '../../ResourcesLoader';
-import { rgbStringToHexNumber } from '../../Utils/ColorTransformer';
-import * as PIXI from 'pixi.js-legacy';
+import * as THREE from 'three';
 const gd: libGDevelop = global.gd;
 
 /**
- * Renderer for a Text object.
+ * Renderer for a Text object using Three.js and a canvas texture.
  */
 export default class RenderedTextInstance extends RenderedInstance {
   _isItalic: boolean = false;
@@ -21,61 +20,66 @@ export default class RenderedTextInstance extends RenderedInstance {
   _color: string = '0;0;0';
   _textAlignment: string = 'left';
   _verticalTextAlignment: string = 'top';
-
-  _isOutlineEnabled = false;
-  _outlineColor = '255;255;255';
-  _outlineThickness = 2;
-
-  _isShadowEnabled = false;
-  _shadowDistance = 3;
-  _shadowAngle = 90;
-  _shadowColor = '0;0;0';
-  _shadowOpacity = 127;
-  _shadowBlurRadius = 2;
   _lineHeight = 0;
+  _textObjStr: string = '';
+  _canvas: HTMLCanvasElement;
+  _context: CanvasRenderingContext2D;
+  _canvasTexture: THREE.CanvasTexture;
 
   constructor(
     project: gdProject,
     instance: gdInitialInstance,
     associatedObjectConfiguration: gdObjectConfiguration,
     // $FlowFixMe[value-as-type]
-    pixiContainer: PIXI.Container,
-    pixiResourcesLoader: Class<PixiResourcesLoader>,
+    threeGroup: THREE.Group,
+    resourcesLoader: Class<ThreeResourcesLoader>,
     getPropertyOverridings: (() => Map<string, string>) | null
   ) {
     super(
       project,
       instance,
       associatedObjectConfiguration,
-      pixiContainer,
-      pixiResourcesLoader,
+      threeGroup,
+      resourcesLoader,
       getPropertyOverridings
     );
 
-    const style = new PIXI.TextStyle({
-      fontFamily: 'Arial',
-      fontSize: 20,
-      align: 'left',
-      padding: 5,
+    this._canvas = document.createElement('canvas');
+    const context = this._canvas.getContext('2d');
+    if (!context) throw new Error('Unable to create 2D context for text.');
+    this._context = context;
+    this._canvasTexture = new THREE.CanvasTexture(this._canvas);
+    this._canvasTexture.minFilter = THREE.LinearFilter;
+    this._canvasTexture.magFilter = THREE.LinearFilter;
+
+    const geometry = new THREE.PlaneGeometry(1, 1);
+    geometry.translate(0.5, -0.5, 0);
+    const material = new THREE.MeshBasicMaterial({
+      map: this._canvasTexture,
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthWrite: false,
     });
 
-    //Setup the PIXI object:
-    this._pixiObject = new PIXI.Text('', style);
-    this._pixiObject.anchor.x = 0.5;
-    this._pixiObject.anchor.y = 0.5;
-    this._pixiContainer.addChild(this._pixiObject);
-    this._styleFontDirty = true;
+    this._threeObject = new THREE.Mesh(geometry, material);
+    this._threeObject.userData.instance = instance;
+    this._threeObject.rotation.order = 'ZYX';
+    this._layerGroup.add(this._threeObject);
     this.update();
   }
 
   onRemovedFromScene(): void {
-    super.onRemovedFromScene();
-    this._pixiObject.destroy(true);
+    if (this._threeObject) {
+      this._layerGroup.remove(this._threeObject);
+      if (this._threeObject.material) this._threeObject.material.dispose();
+      if (this._threeObject.geometry) this._threeObject.geometry.dispose();
+      this._threeObject.userData.instance = null;
+      this._threeObject = null;
+    }
+    this._canvasTexture.dispose();
+    this._wasDestroyed = true;
   }
 
-  /**
-   * Return a URL for thumbnail of the specified object.
-   */
   static getThumbnail(
     project: gdProject,
     resourcesLoader: Class<ResourcesLoader>,
@@ -84,17 +88,78 @@ export default class RenderedTextInstance extends RenderedInstance {
     return 'CppPlatform/Extensions/texticon24.png';
   }
 
+  _renderText() {
+    const textStr = this._textObjStr || ' ';
+    const lines = textStr.split('\n');
+
+    let fontStr = '';
+    if (this._isItalic) fontStr += 'italic ';
+    if (this._isBold) fontStr += 'bold ';
+    fontStr += `${Math.max(1, this._characterSize || 20)}px ${this
+      ._fontFamily || 'Arial'}`;
+
+    this._context.font = fontStr;
+
+    let maxWidth = 0;
+    for (const line of lines) {
+      const metrics = this._context.measureText(line);
+      if (metrics.width > maxWidth) maxWidth = metrics.width;
+    }
+
+    const padding = 10;
+    const canvasHeight =
+      lines.length * ((this._characterSize || 20) + this._lineHeight) + padding;
+    const canvasWidth =
+      this._wrapping && this._wrappingWidth > 0
+        ? this._wrappingWidth
+        : maxWidth + padding;
+
+    this._canvas.width = Math.max(1, Math.ceil(canvasWidth));
+    this._canvas.height = Math.max(1, Math.ceil(canvasHeight));
+
+    this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
+    this._context.font = fontStr;
+    this._context.textBaseline = 'top';
+    this._context.fillStyle = `#${parseInt(
+      this._color
+        .split(';')
+        .map(value => Math.max(0, Math.min(255, parseInt(value, 10) || 0)))
+        .map(value => value.toString(16).padStart(2, '0'))
+        .join(''),
+      16
+    )
+      .toString(16)
+      .padStart(6, '0')}`;
+
+    let y = padding / 2;
+    for (const line of lines) {
+      const lineWidth = this._context.measureText(line).width;
+      let x = padding / 2;
+      if (this._textAlignment === 'center') {
+        x = (this._canvas.width - lineWidth) / 2;
+      } else if (this._textAlignment === 'right') {
+        x = this._canvas.width - lineWidth - padding / 2;
+      }
+      this._context.fillText(line, x, y);
+      y += (this._characterSize || 20) + this._lineHeight;
+    }
+
+    this._canvasTexture.needsUpdate = true;
+    if (this._threeObject) {
+      this._threeObject.scale.set(this._canvas.width, this._canvas.height, 1);
+    }
+  }
+
   update() {
     const textObjectConfiguration = gd.asTextObjectConfiguration(
       this._associatedObjectConfiguration
     );
     const propertyOverridings = this.getPropertyOverridings();
-    this._pixiObject.text =
+    this._textObjStr =
       propertyOverridings && propertyOverridings.has('Text')
-        ? propertyOverridings.get('Text')
+        ? propertyOverridings.get('Text') || ''
         : textObjectConfiguration.getText();
 
-    //Update style, only if needed to avoid destroying text rendering performances
     if (
       textObjectConfiguration.isItalic() !== this._isItalic ||
       textObjectConfiguration.isBold() !== this._isBold ||
@@ -104,19 +169,9 @@ export default class RenderedTextInstance extends RenderedInstance {
       textObjectConfiguration.getVerticalTextAlignment() !==
         this._verticalTextAlignment ||
       textObjectConfiguration.getColor() !== this._color ||
-      textObjectConfiguration.isOutlineEnabled() !== this._isOutlineEnabled ||
-      textObjectConfiguration.getOutlineColor() !== this._outlineColor ||
-      textObjectConfiguration.getOutlineThickness() !==
-        this._outlineThickness ||
-      textObjectConfiguration.isShadowEnabled() !== this._isShadowEnabled ||
-      textObjectConfiguration.getShadowDistance() !== this._shadowDistance ||
-      textObjectConfiguration.getShadowAngle() !== this._shadowAngle ||
-      textObjectConfiguration.getShadowColor() !== this._shadowColor ||
-      textObjectConfiguration.getShadowOpacity() !== this._shadowOpacity ||
-      textObjectConfiguration.getShadowBlurRadius() !==
-        this._shadowBlurRadius ||
       this._instance.hasCustomSize() !== this._wrapping ||
-      (this.getCustomWidth() !== this._wrappingWidth && this._wrapping)
+      (this._instance.hasCustomSize() &&
+        this.getCustomWidth() !== this._wrappingWidth)
     ) {
       this._isItalic = textObjectConfiguration.isItalic();
       this._isBold = textObjectConfiguration.isBold();
@@ -125,131 +180,78 @@ export default class RenderedTextInstance extends RenderedInstance {
       this._textAlignment = textObjectConfiguration.getTextAlignment();
       this._verticalTextAlignment = textObjectConfiguration.getVerticalTextAlignment();
       this._color = textObjectConfiguration.getColor();
-
-      this._isOutlineEnabled = textObjectConfiguration.isOutlineEnabled();
-      this._outlineColor = textObjectConfiguration.getOutlineColor();
-      this._outlineThickness = textObjectConfiguration.getOutlineThickness();
-
-      this._isShadowEnabled = textObjectConfiguration.isShadowEnabled();
-      this._shadowDistance = textObjectConfiguration.getShadowDistance();
-      this._shadowAngle = textObjectConfiguration.getShadowAngle();
-      this._shadowColor = textObjectConfiguration.getShadowColor();
-      this._shadowOpacity = textObjectConfiguration.getShadowOpacity();
-      this._shadowBlurRadius = textObjectConfiguration.getShadowBlurRadius();
-
       this._wrapping = this._instance.hasCustomSize();
       this._wrappingWidth = this.getCustomWidth();
       this._styleFontDirty = true;
     }
 
     if (this._fontName !== textObjectConfiguration.getFontName()) {
-      //Avoid calling loadFontFamily if the font didn't changed.
       this._fontName = textObjectConfiguration.getFontName();
-      PixiResourcesLoader.loadFontFamily(
-        this._project,
-        textObjectConfiguration.getFontName()
-      )
+      this._resourcesLoader
+        .loadFontFamily(this._project, textObjectConfiguration.getFontName())
         .then(fontFamily => {
           if (this._wasDestroyed) return;
-
-          // Once the font is loaded, we can use the given fontFamily.
           this._fontFamily = fontFamily;
           this._styleFontDirty = true;
+          this._renderText();
         })
-        .catch(err => {
-          // Ignore errors
+        .catch(error => {
           console.warn(
             'Unable to load font family for RenderedTextInstance',
-            err
+            error
           );
         });
     }
 
     if (this._styleFontDirty) {
-      const style = this._pixiObject.style;
-      style.fontFamily = this._fontFamily || 'Arial';
-      style.fontSize = Math.max(1, this._characterSize);
-      style.fontStyle = this._isItalic ? 'italic' : 'normal';
-      style.fontWeight = this._isBold ? 'bold' : 'normal';
-      style.lineHeight = this._lineHeight !== 0 ? this._lineHeight : undefined;
-      style.fill = rgbStringToHexNumber(this._color);
-      style.wordWrap = this._wrapping;
-      style.wordWrapWidth = this._wrappingWidth <= 1 ? 1 : this._wrappingWidth;
-      style.breakWords = true;
-      style.align = this._textAlignment;
-
-      style.stroke = rgbStringToHexNumber(this._outlineColor);
-      style.strokeThickness = this._isOutlineEnabled
-        ? this._outlineThickness
-        : 0;
-      style.dropShadow = this._isShadowEnabled;
-      style.dropShadowColor = rgbStringToHexNumber(this._shadowColor);
-      style.dropShadowAlpha = this._shadowOpacity / 255;
-      style.dropShadowBlur = this._shadowBlurRadius;
-      style.dropShadowAngle = RenderedInstance.toRad(this._shadowAngle);
-      style.dropShadowDistance = this._shadowDistance;
-      const extraPaddingForShadow = style.dropShadow
-        ? style.dropShadowDistance + style.dropShadowBlur
-        : 0;
-      style.padding = Math.ceil(extraPaddingForShadow);
-
-      // Manually ask the PIXI object to re-render as we changed a style property
-      // see http://www.html5gamedevs.com/topic/16924-change-text-style-post-render/
-      this._pixiObject.dirty = true;
+      this._renderText();
       this._styleFontDirty = false;
     }
 
-    if (this._instance.hasCustomSize() && this._pixiObject.width !== 0) {
+    if (this._threeObject) {
+      const width = this._canvas.width || 1;
+      const height = this._canvas.height || 1;
       const alignmentX =
         this._textAlignment === 'right'
           ? 1
           : this._textAlignment === 'center'
           ? 0.5
           : 0;
+      const alignmentY =
+        this._verticalTextAlignment === 'bottom'
+          ? 1
+          : this._verticalTextAlignment === 'center'
+          ? 0.5
+          : 0;
 
-      const width = this.getCustomWidth();
+      let positionX = this._instance.getX();
+      if (this._instance.hasCustomSize()) {
+        const customWidth = this.getCustomWidth();
+        positionX += (customWidth - width) * alignmentX;
+      }
+      const positionY = this._instance.getY() - height * alignmentY;
 
-      // A vector from the custom size center to the renderer center.
-      const centerToCenterX =
-        (width - this._pixiObject.width) * (alignmentX - 0.5);
-
-      this._pixiObject.position.x = this._instance.getX() + width / 2;
-      this._pixiObject.anchor.x =
-        0.5 - centerToCenterX / this._pixiObject.width;
-    } else {
-      this._pixiObject.position.x =
-        this._instance.getX() + this._pixiObject.width / 2;
-      this._pixiObject.anchor.x = 0.5;
+      this._threeObject.position.set(
+        positionX,
+        positionY,
+        this._instance.getZ()
+      );
+      this._threeObject.rotation.z = -THREE.MathUtils.degToRad(
+        this._instance.getAngle()
+      );
+      this._threeObject.material.opacity = Math.max(
+        this._instance.getOpacity() / 255,
+        0.5
+      );
     }
-    const alignmentY =
-      this._verticalTextAlignment === 'bottom'
-        ? 1
-        : this._verticalTextAlignment === 'center'
-        ? 0.5
-        : 0;
-    this._pixiObject.position.y =
-      this._instance.getY() + this._pixiObject.height * (0.5 - alignmentY);
-    this._pixiObject.anchor.y = 0.5;
-
-    this._pixiObject.rotation = RenderedInstance.toRad(
-      this._instance.getAngle()
-    );
-
-    // Do not hide completely an object so it can still be manipulated
-    const alphaForDisplay = Math.max(this._instance.getOpacity() / 255, 0.5);
-    this._pixiObject.alpha = alphaForDisplay;
   }
 
   getDefaultWidth(): any {
-    // The default width is dependent of the current wrapping width.
-    // You should avoid to use this value.
-    return this._pixiObject.width;
+    return this._canvas.width;
   }
 
   getDefaultHeight(): any {
-    // The default height is dependent of the current wrapping width.
-    // You should avoid to use this value.
-    return this._pixiObject.height;
+    return this._canvas.height;
   }
 
   getOriginY(): number {

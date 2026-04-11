@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader';
 
-// Copied from PixiResourcesLoader.js
+// Copied from ThreeResourcesLoader.js
 // $FlowFixMe[missing-local-annot]
 const removeMetalness = material => {
   if (material.metalness) {
@@ -11,7 +11,7 @@ const removeMetalness = material => {
   }
 };
 
-// Copied from PixiResourcesLoader.js
+// Copied from ThreeResourcesLoader.js
 // $FlowFixMe[missing-local-annot]
 const removeMetalnessFromMesh = node => {
   if (!node.material) {

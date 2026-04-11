@@ -11,11 +11,10 @@ import RenderedCustomObjectInstance from './Renderers/RenderedCustomObjectInstan
 import LegacyRenderedCustomObjectInstance from './Renderers/LegacyRenderedCustomObjectInstance';
 import RenderedSprite3DInstance from './Renderers/RenderedSprite3DInstance';
 import RenderedMapInstance from './Renderers/RenderedMapInstance';
-import PixiResourcesLoader from './PixiResourcesLoader';
+import ThreeResourcesLoader from './ThreeResourcesLoader';
 import ResourcesLoader from '../ResourcesLoader';
 import RenderedInstance from './Renderers/RenderedInstance';
 import Rendered3DInstance from './Renderers/Rendered3DInstance';
-import * as PIXI_LEGACY from 'pixi.js-legacy';
 import * as THREE from 'three';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils';
 import optionalRequire from '../Utils/OptionalRequire';
@@ -27,18 +26,12 @@ import {
 const path = optionalRequire('path');
 const electron = optionalRequire('electron');
 const gd: libGDevelop = global.gd;
-const PIXI = { ...PIXI_LEGACY };
-
-// Some PixiJS plugins are not distributed as UMD modules,
-// or still require a global PIXI object to be accessible, so we expose PIXI here.
-// This can be removed if no more extension PixiJS plugin requires this.
-global.PIXI = PIXI;
 
 const requirableModules = {};
 
 /**
  * A service containing functions that are called to render instances
- * of objects in a PIXI.Container.
+ * of objects in a any.
  */
 const ObjectsRenderingService = {
   renderers: {
@@ -84,14 +77,14 @@ const ObjectsRenderingService = {
     project: gdProject,
     instance: gdInitialInstance,
     // $FlowFixMe[value-as-type]
-    pixiContainer: PIXI.Container
+    layerGroup: THREE.Group
   ): RenderedInstance | Rendered3DInstance {
     return new this.renderers['unknownObjectType'](
       project,
       instance,
       null,
-      pixiContainer,
-      PixiResourcesLoader
+      layerGroup,
+      ThreeResourcesLoader
     );
   },
   // $FlowFixMe[missing-this-annot]
@@ -100,7 +93,7 @@ const ObjectsRenderingService = {
     instance: gdInitialInstance,
     associatedObjectConfiguration: gdObjectConfiguration,
     // $FlowFixMe[value-as-type]
-    pixiContainer: PIXI.Container,
+    layerGroup: THREE.Group,
     // $FlowFixMe[value-as-type]
     threeGroup: THREE.Group | null,
     getPropertyOverridings: (() => Map<string, string>) | null = null
@@ -111,17 +104,17 @@ const ObjectsRenderingService = {
         project,
         instance,
         associatedObjectConfiguration,
-        pixiContainer,
+        layerGroup,
         threeGroup,
-        PixiResourcesLoader
+        ThreeResourcesLoader
       );
     } else if (this.renderers.hasOwnProperty(objectType))
       return new this.renderers[objectType](
         project,
         instance,
         associatedObjectConfiguration,
-        pixiContainer,
-        PixiResourcesLoader,
+        layerGroup,
+        ThreeResourcesLoader,
         getPropertyOverridings
       );
     else {
@@ -136,27 +129,27 @@ const ObjectsRenderingService = {
             project,
             instance,
             associatedObjectConfiguration,
-            pixiContainer,
+            layerGroup,
             threeGroup,
-            PixiResourcesLoader
+            ThreeResourcesLoader
           );
         } else if (eventsBasedObject.isUsingLegacyInstancesRenderer()) {
           return new LegacyRenderedCustomObjectInstance(
             project,
             instance,
             associatedObjectConfiguration,
-            pixiContainer,
+            layerGroup,
             threeGroup,
-            PixiResourcesLoader
+            ThreeResourcesLoader
           );
         } else {
           return new RenderedCustomObjectInstance(
             project,
             instance,
             associatedObjectConfiguration,
-            pixiContainer,
+            layerGroup,
             threeGroup,
-            PixiResourcesLoader,
+            ThreeResourcesLoader,
             getPropertyOverridings
           );
         }
@@ -169,8 +162,8 @@ const ObjectsRenderingService = {
         project,
         instance,
         associatedObjectConfiguration,
-        pixiContainer,
-        PixiResourcesLoader
+        layerGroup,
+        ThreeResourcesLoader
       );
     }
   },
@@ -190,7 +183,7 @@ const ObjectsRenderingService = {
 
       // If you want to update a renderer, this is currently unsupported.
       // To implement this, we need to add support for instance renderers to be released/destroyed
-      // (some can have reference counting for some PIXI resources, etc... that would need to be properly released).
+      // (some can have cached GPU or resource references that would need to be properly released).
       return;
     }
 
@@ -237,29 +230,21 @@ const ObjectsRenderingService = {
       );
 
       // Get the "module" module from Node.js and temporarily overwrite its internal "_load"
-      // method. This method is called when a module is loaded, and is used here to provide "pixi.js-legacy"
-      // to extensions needing it. If we don't, "pixi.js-legacy" is found in development, because Node.js resolution
-      // algorithm traverses the paths until it reaches newIDE/app/node_modules, but is not found in production,
-      // because newIDE/app node_modules are now gone (compiled by Webpack).
+      // method. This method is called when a module is loaded, and is used here to provide
+      // editor-approved modules to extensions requiring them dynamically. If we don't, the
+      // modules may be found in development because Node.js resolution traverses into
+      // newIDE/app/node_modules, but not in production where those node_modules are bundled away.
       const module = optionalRequire('module');
       if (!module._load) {
         throw new Error(
-          'module._load does not exist. This is possibly a change in Node.js that is breaking the custom loader, in ObjectsRenderingService.requireModule, that is injected to expose Pixi.js to extensions using "require".'
+          'module._load does not exist. This is possibly a change in Node.js that is breaking the custom loader in ObjectsRenderingService.requireModule.'
         );
       }
       const originalNodeModuleLoad = module._load;
 
-      // Allow pixi.js to be required by extensions:
+      // Allow three.js to be required by extensions:
       const allowedModules = {
-        'pixi.js-legacy': PIXI,
-        'pixi.js': PIXI,
-        '@pixi/core': PIXI,
-        '@pixi/display': PIXI,
-        '@pixi/constants': PIXI,
-        '@pixi/sprite': PIXI,
-        '@pixi/math': PIXI,
-        '@pixi/utils': PIXI,
-        '@pixi/graphics': PIXI,
+        three: THREE,
       };
       module._load = function hookedLoader(request, parent, isMain) {
         const loadedModule = allowedModules[request];
@@ -310,7 +295,6 @@ const ObjectsRenderingService = {
   rgbOrHexToHexNumber, // Expose a ColorTransformer function, useful to manage different color types for the extensions
   hexNumberToRGBArray, // Expose a ColorTransformer function, useful to manage different color types for the extensions
   gd, // Expose gd so that it can be used by renderers
-  PIXI, // Expose PIXI so that it can be used by renderers
   THREE, // Expose THREE so that it can be used by renderers
   THREE_ADDONS: {
     SkeletonUtils,

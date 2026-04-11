@@ -1,6 +1,5 @@
 // @flow
-import transformRect from '../Utils/TransformRect';
-import * as PIXI from 'pixi.js-legacy';
+import * as THREE from 'three';
 import { type InstanceMeasurer } from './InstancesRenderer';
 import Rectangle from '../Utils/Rectangle';
 
@@ -10,12 +9,9 @@ export default class HighlightedInstance {
   isInstanceOf3DObject: gdInitialInstance => boolean;
   highlightedInstance: gdInitialInstance | null;
   isHighlightedInstanceOf3DObject: boolean;
-  // $FlowFixMe[value-as-type]
-  highlightRectangle: PIXI.Container;
-  // $FlowFixMe[value-as-type]
-  tooltipBackground: PIXI.Container;
-  // $FlowFixMe[value-as-type]
-  tooltipText: PIXI.Container;
+  highlightRectangle: THREE.LineSegments;
+  _highlightGeometry: THREE.EdgesGeometry;
+  _highlightMaterial: THREE.LineBasicMaterial;
 
   constructor({
     instanceMeasurer,
@@ -32,17 +28,19 @@ export default class HighlightedInstance {
 
     this.highlightedInstance = null;
     this.isHighlightedInstanceOf3DObject = false;
-    this.highlightRectangle = new PIXI.Graphics();
-    this.highlightRectangle.hitArea = new PIXI.Rectangle(0, 0, 0, 0);
-
-    this.tooltipBackground = new PIXI.Graphics();
-    this.tooltipText = new PIXI.Text('', {
-      fontSize: 15,
-      fill: 0xffffff,
-      align: 'center',
+    this._highlightGeometry = new THREE.EdgesGeometry(
+      new THREE.PlaneGeometry(1, 1)
+    );
+    this._highlightMaterial = new THREE.LineBasicMaterial({
+      color: 0x4fc3f7,
+      transparent: true,
+      opacity: 0.9,
     });
-    this.highlightRectangle.addChild(this.tooltipBackground);
-    this.highlightRectangle.addChild(this.tooltipText);
+    this.highlightRectangle = new THREE.LineSegments(
+      this._highlightGeometry,
+      this._highlightMaterial
+    );
+    this.highlightRectangle.visible = false;
   }
 
   setInstance(instance: gdInitialInstance | null) {
@@ -56,81 +54,32 @@ export default class HighlightedInstance {
     return this.highlightedInstance;
   }
 
-  // $FlowFixMe[value-as-type]
-  getPixiObject(): PIXI.Container {
+  getThreeObject(): THREE.LineSegments {
     return this.highlightRectangle;
   }
 
   render() {
-    const { highlightedInstance } = this;
+    const highlightedInstance = this.highlightedInstance;
     if (highlightedInstance === null) {
       this.highlightRectangle.visible = false;
       return;
     }
 
-    const highlightRectangle = transformRect(
-      this.toCanvasCoordinates,
-      this.instanceMeasurer.getInstanceAABB(
-        highlightedInstance,
-        new Rectangle()
-      )
+    const aabb = this.instanceMeasurer.getInstanceAABB(
+      highlightedInstance,
+      new Rectangle()
     );
+    const canvasTopLeft = this.toCanvasCoordinates(aabb.left, aabb.top);
+    const canvasBottomRight = this.toCanvasCoordinates(aabb.right, aabb.bottom);
+    const width = canvasBottomRight[0] - canvasTopLeft[0];
+    const height = canvasBottomRight[1] - canvasTopLeft[1];
 
     this.highlightRectangle.visible = true;
-    this.highlightRectangle.clear();
-    this.highlightRectangle.beginFill(0xeeeeff);
-    this.highlightRectangle.fill.alpha = 0.1;
-    this.highlightRectangle.alpha = 0.8;
-    this.highlightRectangle.lineStyle(1, 0x000000, 1);
-    this.highlightRectangle.drawRect(
-      highlightRectangle.left,
-      highlightRectangle.top,
-      highlightRectangle.width(),
-      highlightRectangle.height()
+    this.highlightRectangle.position.set(
+      canvasTopLeft[0] + width / 2,
+      canvasTopLeft[1] + height / 2,
+      0
     );
-    this.highlightRectangle.endFill();
-
-    const tooltipInfo =
-      highlightedInstance.getObjectName() +
-      '\n' +
-      'X: ' +
-      Math.round(highlightedInstance.getX() * 100) / 100 + // An instance position can have a lot of decimals, so round to 2 decimals.
-      '  Y: ' +
-      Math.round(highlightedInstance.getY() * 100) / 100 + // An instance position can have a lot of decimals, so round to 2 decimals.
-      (this.isHighlightedInstanceOf3DObject
-        ? '  Z: ' +
-          // An instance position can have a lot of decimals, so round to 2 decimals.
-          Math.round(highlightedInstance.getZ() * 100) / 100
-        : '') +
-      '\n' +
-      'Layer: ' +
-      (highlightedInstance.getLayer() || 'Base layer') +
-      (this.isHighlightedInstanceOf3DObject
-        ? ''
-        : '\nZ order: ' + highlightedInstance.getZOrder()) +
-      '\n';
-
-    this.tooltipText.text = tooltipInfo;
-
-    this.tooltipText.x = Math.round(
-      highlightRectangle.left -
-        this.tooltipText.width / 2 +
-        highlightRectangle.width() / 2
-    );
-    this.tooltipText.y = Math.round(
-      highlightRectangle.top - this.tooltipText.height
-    );
-
-    const padding = 5;
-    this.tooltipBackground.clear();
-    this.tooltipBackground.beginFill(0x000000, 0.8);
-    this.tooltipBackground.drawRoundedRect(
-      this.tooltipText.x - padding,
-      this.tooltipText.y - padding,
-      this.tooltipText.width + padding * 2,
-      this.tooltipText.height - padding,
-      4
-    );
-    this.tooltipBackground.endFill();
+    this.highlightRectangle.scale.set(width, height, 1);
   }
 }

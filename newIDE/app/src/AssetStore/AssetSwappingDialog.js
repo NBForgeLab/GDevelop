@@ -10,7 +10,7 @@ import ErrorBoundary from '../UI/ErrorBoundary';
 import LoaderModal from '../UI/LoaderModal';
 import { useInstallAsset } from './NewObjectDialog';
 import { swapAsset } from './AssetSwapper';
-import PixiResourcesLoader from '../ObjectsRendering/PixiResourcesLoader';
+import ThreeResourcesLoader from '../ObjectsRendering/ThreeResourcesLoader';
 import useAlertDialog from '../UI/Alert/useAlertDialog';
 import RaisedButton from '../UI/RaisedButton';
 import { AssetStoreNavigatorContext } from './AssetStoreNavigator';
@@ -92,7 +92,7 @@ function AssetSwappingDialog({
         if (installAssetOutput.createdObjects.length > 0) {
           swapAsset(
             project,
-            PixiResourcesLoader,
+            ThreeResourcesLoader,
             object,
             installAssetOutput.createdObjects[0],
             openedAssetShortHeader

@@ -560,7 +560,7 @@ const getVerticalAnchorFor = (anchor: ?CustomObjectConfiguration_EdgeAnchor) =>
 class MockedChildRenderedInstance implements ChildRenderedInstance {
   // $FlowFixMe[incompatible-exact]
   _instance: gdInitialInstance;
-  _pixiObject: { height: number };
+  _threeObject: { height: number };
   defaultWidth: number;
   defaultHeight: number;
   originX: number;
@@ -578,7 +578,7 @@ class MockedChildRenderedInstance implements ChildRenderedInstance {
     }: MockedRenderedInstanceConfiguration
   ) {
     this._instance = childInstance;
-    this._pixiObject = { height: 0 };
+    this._threeObject = { height: 0 };
     this.defaultWidth = defaultWidth;
     this.defaultHeight = defaultHeight;
     this.originX = originX || 0;
@@ -615,7 +615,7 @@ class MockedChildRenderedInstance implements ChildRenderedInstance {
   }
 
   update(): void {
-    this._pixiObject.height =
+    this._threeObject.height =
       this.heightAfterUpdate ||
       (this._instance.hasCustomSize()
         ? this._instance.getCustomHeight()

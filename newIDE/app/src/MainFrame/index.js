@@ -191,7 +191,7 @@ import newNameGenerator from '../Utils/NewNameGenerator';
 import { addDefaultLightToAllLayers } from '../ProjectCreation/CreateProject';
 import { type NewProjectSetup } from '../ProjectCreation/NewProjectSetupDialog';
 import useEditorTabsStateSaving from './EditorTabs/UseEditorTabsStateSaving';
-import PixiResourcesLoader from '../ObjectsRendering/PixiResourcesLoader';
+import ThreeResourcesLoader from '../ObjectsRendering/ThreeResourcesLoader';
 import useResourcesWatcher from './ResourcesWatcher';
 import { extractGDevelopApiErrorStatusAndCode } from '../Utils/GDevelopServices/Errors';
 import { type CourseChapter } from '../Utils/GDevelopServices/Asset';
@@ -1136,7 +1136,7 @@ const MainFrame = (props: Props): React.MixedElement => {
       // the URL to a resource with a name in the old project is not re-used
       // for another resource with the same name in the new project.
       ResourcesLoader.burstAllUrlsCache();
-      PixiResourcesLoader.burstCache();
+      ThreeResourcesLoader.burstCache();
 
       const state = await setState(state => ({
         ...state,

@@ -1,5 +1,5 @@
 // @flow
-import * as PIXI from 'pixi.js-legacy';
+import * as THREE from 'three';
 import Rectangle from '../Utils/Rectangle';
 import { type InstanceMeasurer } from './InstancesRenderer';
 const gd: libGDevelop = global.gd;
@@ -9,8 +9,7 @@ export default class SelectionRectangle {
   instanceMeasurer: InstanceMeasurer;
   toSceneCoordinates: (x: number, y: number) => [number, number];
 
-  // $FlowFixMe[value-as-type]
-  pixiRectangle: PIXI.Graphics;
+  threeRectangle: THREE.Mesh;
   selectionRectangleStart: { x: number, y: number } | null;
   selectionRectangleEnd: { x: number, y: number } | null;
   _instancesInSelectionRectangle: gdInitialInstance[];
@@ -34,8 +33,19 @@ export default class SelectionRectangle {
     this.instanceMeasurer = instanceMeasurer;
     this.toSceneCoordinates = toSceneCoordinates;
 
-    this.pixiRectangle = new PIXI.Graphics();
-    this.pixiRectangle.hitArea = new PIXI.Rectangle(0, 0, 0, 0);
+    const geometry = new THREE.PlaneGeometry(1, 1);
+    geometry.translate(0.5, 0.5, 0); // Origin top-left
+    const material = new THREE.MeshBasicMaterial({
+      color: 0x6868e8,
+      transparent: true,
+      opacity: 0.1,
+      side: THREE.DoubleSide,
+    });
+    this.threeRectangle = new THREE.Mesh(geometry, material);
+
+    // Orthographic overlay Z index
+    this.threeRectangle.position.z = -1;
+
     this.selectionRectangleStart = null;
     this.selectionRectangleEnd = null;
     this._instancesInSelectionRectangle = [];
@@ -55,11 +65,11 @@ export default class SelectionRectangle {
       const { selectionRectangleEnd, selectionRectangleStart } = this;
       if (!selectionRectangleStart || !selectionRectangleEnd) return;
 
-      const selectionSceneStart = toSceneCoordinates(
+      const selectionSceneStart = this.toSceneCoordinates(
         selectionRectangleStart.x,
         selectionRectangleStart.y
       );
-      const selectionSceneEnd = toSceneCoordinates(
+      const selectionSceneEnd = this.toSceneCoordinates(
         selectionRectangleEnd.x,
         selectionRectangleEnd.y
       );
@@ -115,13 +125,13 @@ export default class SelectionRectangle {
     return this._instancesInSelectionRectangle;
   };
 
-  getPixiObject(): any {
-    return this.pixiRectangle;
+  getThreeObject(): any {
+    return this.threeRectangle;
   }
 
   render() {
     if (!this.selectionRectangleStart || !this.selectionRectangleEnd) {
-      this.pixiRectangle.visible = false;
+      this.threeRectangle.visible = false;
       return;
     }
 
@@ -130,19 +140,15 @@ export default class SelectionRectangle {
     let x2 = this.selectionRectangleEnd.x;
     let y2 = this.selectionRectangleEnd.y;
 
-    this.pixiRectangle.visible = true;
-    this.pixiRectangle.clear();
-    this.pixiRectangle.beginFill(0x6868e8);
-    this.pixiRectangle.lineStyle(1, 0x6868e8, 1);
-    this.pixiRectangle.fill.alpha = 0.1;
-    this.pixiRectangle.alpha = 0.8;
-    this.pixiRectangle.drawRect(
-      Math.min(x1, x2),
-      Math.min(y1, y2),
-      Math.abs(x2 - x1),
-      Math.abs(y2 - y1)
-    );
-    this.pixiRectangle.endFill();
+    this.threeRectangle.visible = true;
+
+    const minX = Math.min(x1, x2);
+    const minY = Math.min(y1, y2);
+    const w = Math.abs(x2 - x1);
+    const h = Math.abs(y2 - y1);
+
+    this.threeRectangle.position.set(minX, minY, -1);
+    this.threeRectangle.scale.set(w, h, 1);
   }
 
   delete() {

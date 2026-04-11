@@ -220,7 +220,7 @@ describe('applyChildLayouts', () => {
     const parent = new MockedParent(200, 100);
     // The child is hidden by RenderedCustomObjectInstance constructor
     // which is not covered by tests.
-    // The constructor removes the child from its Pixi container.
+    // The constructor removes the child from its scene container.
     // This test actually doesn't cover more than the previous one.
     const background = parent.addChild('Background', {
       isShown: false,
@@ -473,7 +473,7 @@ const createCustomObjectConfiguration = (
 class MockedChildRenderedInstance implements ChildRenderedInstance {
   // $FlowFixMe[incompatible-exact]
   _instance: ChildInstance;
-  _pixiObject: { height: number };
+  _threeObject: { height: number };
   defaultWidth: number;
   defaultHeight: number;
   originX: number;
@@ -487,7 +487,7 @@ class MockedChildRenderedInstance implements ChildRenderedInstance {
     heightAfterUpdate: ?number
   ) {
     this._instance = childInstance;
-    this._pixiObject = { height: 0 };
+    this._threeObject = { height: 0 };
     this.defaultWidth = defaultWidth;
     this.defaultHeight = defaultHeight;
     // TODO Add tests with custom origin.
@@ -513,7 +513,7 @@ class MockedChildRenderedInstance implements ChildRenderedInstance {
   }
 
   update(): void {
-    this._pixiObject.height =
+    this._threeObject.height =
       this.heightAfterUpdate ||
       (this._instance.hasCustomSize()
         ? this._instance.getCustomHeight()

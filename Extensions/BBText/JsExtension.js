@@ -15,6 +15,200 @@
 
 const stringifyOptions = (options) => '["' + options.join('","') + '"]';
 
+const cloneBBTextStyle = (style) => ({ ...style });
+
+const normalizeBBTextColor = (color, fallback) => {
+  if (!color) return fallback;
+  const normalizedColor = color.trim();
+  if (!normalizedColor) return fallback;
+  if (normalizedColor.includes(';')) {
+    const rgb = normalizedColor.split(';').map(component =>
+      parseInt(component, 10)
+    );
+    return `rgb(${rgb[0] || 0}, ${rgb[1] || 0}, ${rgb[2] || 0})`;
+  }
+  if (normalizedColor[0] === '#') return normalizedColor;
+  return normalizedColor;
+};
+
+const applyBBTextTag = (style, tagName, tagValue) => {
+  const nextStyle = cloneBBTextStyle(style);
+  if (tagName === 'b') nextStyle.fontWeight = 'bold';
+  else if (tagName === 'i') nextStyle.fontStyle = 'italic';
+  else if (tagName === 'color')
+    nextStyle.fill = normalizeBBTextColor(tagValue, nextStyle.fill);
+  else if (tagName === 'size') {
+    const parsedSize = parseFloat(tagValue || '');
+    if (!isNaN(parsedSize)) nextStyle.fontSize = Math.max(1, parsedSize);
+  } else if (tagName === 'font' && tagValue) nextStyle.fontFamily = tagValue;
+  else if (tagName === 'outline') {
+    nextStyle.stroke = normalizeBBTextColor(tagValue, nextStyle.fill);
+    nextStyle.strokeThickness = Math.max(1, nextStyle.fontSize / 8);
+  } else if (tagName === 'shadow') {
+    nextStyle.shadowColor = normalizeBBTextColor(tagValue, '#000000');
+    nextStyle.shadowBlur = Math.max(1, nextStyle.fontSize / 10);
+    nextStyle.shadowDistance = Math.max(1, nextStyle.fontSize / 10);
+  } else if (tagName === 'spacing') {
+    const parsedSpacing = parseFloat(tagValue || '');
+    if (!isNaN(parsedSpacing)) nextStyle.letterSpacing = parsedSpacing;
+  }
+
+  return nextStyle;
+};
+
+const parseBBTextSegments = (text, baseStyle) => {
+  const stylesStack = [{ tagName: 'default', style: cloneBBTextStyle(baseStyle) }];
+  const segments = [];
+  const tagRegExp =
+    /\[(\/?)(b|i|color|size|font|outline|shadow|spacing)(?:=([^\]]+))?\]/gi;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = tagRegExp.exec(text))) {
+    if (match.index > lastIndex) {
+      const plainText = text.substring(lastIndex, match.index);
+      const lines = plainText.split('\n');
+      for (let index = 0; index < lines.length; index++) {
+        if (lines[index]) {
+          segments.push({
+            text: lines[index],
+            style: cloneBBTextStyle(stylesStack[stylesStack.length - 1].style),
+          });
+        }
+        if (index < lines.length - 1) segments.push({ newline: true });
+      }
+    }
+
+    const isClosingTag = match[1] === '/';
+    const tagName = (match[2] || '').toLowerCase();
+    const tagValue = match[3];
+
+    if (isClosingTag) {
+      for (let stackIndex = stylesStack.length - 1; stackIndex > 0; stackIndex--) {
+        if (stylesStack[stackIndex].tagName === tagName) {
+          stylesStack.splice(stackIndex, 1);
+          break;
+        }
+      }
+    } else {
+      stylesStack.push({
+        tagName,
+        style: applyBBTextTag(
+          stylesStack[stylesStack.length - 1].style,
+          tagName,
+          tagValue
+        ),
+      });
+    }
+
+    lastIndex = tagRegExp.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    const plainText = text.substring(lastIndex);
+    const lines = plainText.split('\n');
+    for (let index = 0; index < lines.length; index++) {
+      if (lines[index]) {
+        segments.push({
+          text: lines[index],
+          style: cloneBBTextStyle(stylesStack[stylesStack.length - 1].style),
+        });
+      }
+      if (index < lines.length - 1) segments.push({ newline: true });
+    }
+  }
+
+  return segments.length
+    ? segments
+    : [{ text: ' ', style: cloneBBTextStyle(baseStyle) }];
+};
+
+const getBBTextFontString = style => {
+  const parts = [];
+  if (style.fontStyle !== 'normal') parts.push(style.fontStyle);
+  if (style.fontWeight !== 'normal') parts.push(style.fontWeight);
+  parts.push(`${style.fontSize}px`);
+  parts.push(`"${style.fontFamily}"`);
+  return parts.join(' ');
+};
+
+const measureBBTextSegmentWidth = (context, text, style) => {
+  if (!text.length) return 0;
+  context.font = getBBTextFontString(style);
+  let width = 0;
+  for (let index = 0; index < text.length; index++) {
+    width += context.measureText(text[index]).width;
+    if (index < text.length - 1) width += style.letterSpacing;
+  }
+  return width;
+};
+
+const buildBBTextLines = (context, parsedSegments, maxWidth) => {
+  /** @type {Array<any>} */
+  const lines = [];
+  let currentLine = {
+    height: 1,
+    segments: /** @type {Array<any>} */ ([]),
+    width: 0,
+  };
+
+  const pushCurrentLine = () => {
+    lines.push(currentLine);
+    currentLine = {
+      height: 1,
+      segments: /** @type {Array<any>} */ ([]),
+      width: 0,
+    };
+  };
+
+  const appendChunk = (text, style) => {
+    if (!text.length) return;
+    let chunk = '';
+
+    for (const character of text) {
+      const candidate = chunk + character;
+      const candidateWidth = measureBBTextSegmentWidth(context, candidate, style);
+      if (
+        maxWidth > 0 &&
+        currentLine.width > 0 &&
+        currentLine.width + candidateWidth > maxWidth
+      ) {
+        const chunkWidth = measureBBTextSegmentWidth(context, chunk, style);
+        currentLine.segments.push({ text: chunk, style, width: chunkWidth });
+        currentLine.width += chunkWidth;
+        currentLine.height = Math.max(
+          currentLine.height,
+          Math.ceil(style.fontSize * 1.2 + style.strokeThickness + style.shadowDistance)
+        );
+        pushCurrentLine();
+        chunk = character;
+      } else {
+        chunk = candidate;
+      }
+    }
+
+    if (!chunk.length) return;
+    const chunkWidth = measureBBTextSegmentWidth(context, chunk, style);
+    currentLine.segments.push({ text: chunk, style, width: chunkWidth });
+    currentLine.width += chunkWidth;
+    currentLine.height = Math.max(
+      currentLine.height,
+      Math.ceil(style.fontSize * 1.2 + style.strokeThickness + style.shadowDistance)
+    );
+  };
+
+  for (const parsedSegment of parsedSegments) {
+    if (parsedSegment.newline) {
+      pushCurrentLine();
+      continue;
+    }
+    appendChunk(parsedSegment.text || ' ', parsedSegment.style);
+  }
+
+  lines.push(currentLine);
+  return lines.length ? lines : [{ height: 1, segments: [], width: 0 }];
+};
+
 /** @type {ExtensionModule} */
 module.exports = {
   createExtension: function (_, gd) {
@@ -171,10 +365,7 @@ module.exports = {
         objectBBText
       )
       .setIncludeFile('Extensions/BBText/bbtextruntimeobject.js')
-      .addIncludeFile('Extensions/BBText/bbtextruntimeobject-pixi-renderer.js')
-      .addIncludeFile(
-        'Extensions/BBText/pixi-multistyle-text/dist/pixi-multistyle-text.umd.js'
-      )
+      .addIncludeFile('Extensions/BBText/bbtextruntimeobject-three-renderer.js')
       .setCategory('Text')
       .addDefaultBehavior('EffectCapability::EffectBehavior')
       .addDefaultBehavior('OpacityCapability::OpacityBehavior');
@@ -515,10 +706,6 @@ module.exports = {
    */
   registerInstanceRenderers: function (objectsRenderingService) {
     const RenderedInstance = objectsRenderingService.RenderedInstance;
-    const MultiStyleText = objectsRenderingService.requireModule(
-      __dirname,
-      'pixi-multistyle-text/dist/pixi-multistyle-text.umd'
-    );
 
     /**
      * Renderer for instances of BBText inside the IDE.
@@ -532,56 +719,39 @@ module.exports = {
         project,
         instance,
         associatedObjectConfiguration,
-        pixiContainer,
-        pixiResourcesLoader,
+        threeGroup,
+        resourcesLoader,
         getPropertyOverridings
       ) {
         super(
           project,
           instance,
           associatedObjectConfiguration,
-          pixiContainer,
-          pixiResourcesLoader,
+          threeGroup,
+          resourcesLoader,
           getPropertyOverridings
         );
+        this._fontResourceName = '';
+        this._fontFamily = 'Arial';
+        this._canvas = document.createElement('canvas');
+        this._context = this._canvas.getContext('2d');
+        this._canvasTexture = new THREE.CanvasTexture(this._canvas);
+        this._canvasTexture.minFilter = THREE.LinearFilter;
+        this._canvasTexture.magFilter = THREE.LinearFilter;
+        this._canvasTexture.colorSpace = THREE.SRGBColorSpace;
 
-        const bbTextStyles = {
-          default: {
-            // Use a default font family the time for the resource font to be loaded.
-            fontFamily: 'Arial',
-            fontSize: '24px',
-            fill: '#cccccc',
-            tagStyle: 'bbcode',
-            wordWrapWidth: 250, // This value is the default wrapping width of the runtime object.
-            align: 'left',
-          },
-        };
-
-        this._pixiObject = new MultiStyleText('', bbTextStyles);
-
-        // Override updateText to catch errors from invalid color values
-        // in BBCode tags (e.g. [color=blues] instead of [color=blue]).
-        // Without this, PixiJS Color.normalize throws "Unable to convert color"
-        // which propagates to _renderScene and crashes the entire editor.
-        const originalUpdateText = this._pixiObject.updateText.bind(
-          this._pixiObject
-        );
-        this._pixiObject.updateText = (...args) => {
-          try {
-            originalUpdateText(...args);
-          } catch (error) {
-            console.warn(
-              'Error rendering BBText (invalid color or style in BBCode):',
-              error
-            );
-            // Mark as not dirty to prevent retrying every frame.
-            this._pixiObject.dirty = false;
-          }
-        };
-
-        this._pixiObject.anchor.x = 0.5;
-        this._pixiObject.anchor.y = 0.5;
-        this._pixiContainer.addChild(this._pixiObject);
+        const geometry = new THREE.PlaneGeometry(1, 1);
+        geometry.translate(0.5, -0.5, 0);
+        const material = new THREE.MeshBasicMaterial({
+          map: this._canvasTexture,
+          transparent: true,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+        this._threeObject = new THREE.Mesh(geometry, material);
+        this._threeObject.userData.instance = instance;
+        this._threeObject.rotation.order = 'ZYX';
+        this._layerGroup.add(this._threeObject);
         this.update();
       }
 
@@ -593,9 +763,10 @@ module.exports = {
       }
 
       /**
-       * This is called to update the PIXI object on the scene editor
+       * This is called to update the Three.js object on the scene editor
        */
       update() {
+        if (!this._threeObject || !this._context) return;
         const object = gd.castObject(
           this._associatedObjectConfiguration,
           gd.ObjectJsImplementation
@@ -606,40 +777,21 @@ module.exports = {
           propertyOverridings && propertyOverridings.has('Text')
             ? propertyOverridings.get('Text')
             : object.content.text;
-        if (rawText !== this._pixiObject.text) {
-          this._pixiObject.text = rawText;
-        }
-
-        const color = object.content.color;
-        const newColor = objectsRenderingService.rgbOrHexToHexNumber(color);
-        if (newColor !== this._pixiObject.textStyles.default.fill) {
-          this._pixiObject.textStyles.default.fill = newColor;
-          this._pixiObject.dirty = true;
-        }
-
-        const fontSize = object.content.fontSize;
-        const newDefaultFontsize = `${fontSize}px`;
-        if (
-          newDefaultFontsize !== this._pixiObject.textStyles.default.fontSize
-        ) {
-          this._pixiObject.textStyles.default.fontSize = `${fontSize}px`;
-          this._pixiObject.dirty = true;
-        }
+        const baseColor = normalizeBBTextColor(object.content.color, '#cccccc');
+        const fontSize = Math.max(1, object.content.fontSize || 20);
 
         const fontResourceName = object.content.fontFamily;
-
         if (this._fontResourceName !== fontResourceName) {
           this._fontResourceName = fontResourceName;
 
-          this._pixiResourcesLoader
+          this._resourcesLoader
             .loadFontFamily(this._project, fontResourceName)
             .then((fontFamily) => {
-              // Once the font is loaded, we can use the given fontFamily.
-              this._pixiObject.textStyles.default.fontFamily = fontFamily;
-              this._pixiObject.dirty = true;
+              if (this._wasDestroyed) return;
+              this._fontFamily = fontFamily;
+              this.update();
             })
             .catch((err) => {
-              // Ignore errors
               console.warn(
                 'Unable to load font family for RenderedBBTextInstance',
                 err
@@ -647,26 +799,103 @@ module.exports = {
             });
         }
 
-        const wordWrap = this._instance.hasCustomSize();
-        if (wordWrap !== this._pixiObject._style.wordWrap) {
-          this._pixiObject._style.wordWrap = wordWrap;
-          this._pixiObject.dirty = true;
-        }
-        if (this._instance.hasCustomSize()) {
-          const customWidth = this.getCustomWidth();
-          if (this._pixiObject._style.wordWrapWidth !== customWidth) {
-            this._pixiObject._style.wordWrapWidth = customWidth;
-            this._pixiObject.dirty = true;
-          }
-        }
-
         const align = object.content.align;
-        if (align !== this._pixiObject._style.align) {
-          this._pixiObject._style.align = align;
-          this._pixiObject.dirty = true;
+        const baseStyle = {
+          fill: baseColor,
+          fontFamily: this._fontFamily || 'Arial',
+          fontSize,
+          fontStyle: 'normal',
+          fontWeight: 'normal',
+          letterSpacing: 0,
+          stroke: null,
+          strokeThickness: 0,
+          shadowColor: null,
+          shadowBlur: 0,
+          shadowDistance: 0,
+        };
+        const parsedSegments = parseBBTextSegments(rawText || ' ', baseStyle);
+        const wrappingWidth = this._instance.hasCustomSize()
+          ? Math.max(1, this.getCustomWidth())
+          : 0;
+        const lines = buildBBTextLines(this._context, parsedSegments, wrappingWidth);
+        const padding = 6;
+        const naturalWidth = lines.reduce(
+          (maxWidth, line) => Math.max(maxWidth, Math.ceil(line.width)),
+          1
+        );
+        const canvasWidth = Math.max(
+          1,
+          Math.ceil((wrappingWidth || naturalWidth) + padding * 2)
+        );
+        const canvasHeight = Math.max(
+          1,
+          Math.ceil(
+            lines.reduce(
+              (height, line) => height + Math.max(1, line.height),
+              0
+            ) + padding * 2
+          )
+        );
+
+        if (
+          this._canvas.width !== canvasWidth ||
+          this._canvas.height !== canvasHeight
+        ) {
+          this._canvas.width = canvasWidth;
+          this._canvas.height = canvasHeight;
         }
 
-        if (this._instance.hasCustomSize() && this._pixiObject.width !== 0) {
+        this._context.clearRect(0, 0, canvasWidth, canvasHeight);
+        this._context.textBaseline = 'top';
+
+        let drawY = padding;
+        for (const line of lines) {
+          const drawX =
+            align === 'right'
+              ? canvasWidth - padding - line.width
+              : align === 'center'
+                ? padding + ((wrappingWidth || line.width) - line.width) / 2
+                : padding;
+          let cursorX = drawX;
+
+          for (const segment of line.segments) {
+            this._context.font = getBBTextFontString(segment.style);
+            this._context.fillStyle = segment.style.fill;
+            this._context.strokeStyle =
+              segment.style.stroke || segment.style.fill;
+            this._context.lineWidth = segment.style.strokeThickness;
+            this._context.shadowColor =
+              segment.style.shadowColor || 'rgba(0,0,0,0)';
+            this._context.shadowBlur = segment.style.shadowBlur;
+            this._context.shadowOffsetX = segment.style.shadowDistance;
+            this._context.shadowOffsetY = segment.style.shadowDistance;
+
+            for (let index = 0; index < segment.text.length; index++) {
+              const character = segment.text[index];
+              const characterWidth = this._context.measureText(character).width;
+              if (segment.style.stroke && segment.style.strokeThickness > 0) {
+                this._context.strokeText(character, cursorX, drawY);
+              }
+              this._context.fillText(character, cursorX, drawY);
+              cursorX +=
+                characterWidth +
+                (index < segment.text.length - 1
+                  ? segment.style.letterSpacing
+                  : 0);
+            }
+
+            this._context.shadowColor = 'rgba(0,0,0,0)';
+            this._context.shadowBlur = 0;
+            this._context.shadowOffsetX = 0;
+            this._context.shadowOffsetY = 0;
+          }
+
+          drawY += Math.max(1, line.height);
+        }
+
+        this._canvasTexture.needsUpdate = true;
+
+        if (this._instance.hasCustomSize() && canvasWidth !== 0) {
           const alignmentX =
             object.content.align === 'right'
               ? 1
@@ -675,18 +904,16 @@ module.exports = {
                 : 0;
 
           const width = this.getCustomWidth();
-
-          // A vector from the custom size center to the renderer center.
-          const centerToCenterX =
-            (width - this._pixiObject.width) * (alignmentX - 0.5);
-
-          this._pixiObject.position.x = this._instance.getX() + width / 2;
-          this._pixiObject.anchor.x =
-            0.5 - centerToCenterX / this._pixiObject.width;
+          const centerToCenterX = (width - canvasWidth) * (alignmentX - 0.5);
+          this._threeObject.position.x = this._instance.getX() + width / 2;
+          this._threeObject.scale.x = width;
+          this._threeObject.userData.anchorX =
+            0.5 - centerToCenterX / canvasWidth;
         } else {
-          this._pixiObject.position.x =
-            this._instance.getX() + this._pixiObject.width / 2;
-          this._pixiObject.anchor.x = 0.5;
+          this._threeObject.position.x =
+            this._instance.getX() + canvasWidth / 2;
+          this._threeObject.scale.x = canvasWidth;
+          this._threeObject.userData.anchorX = 0.5;
         }
         const alignmentY =
           object.content.verticalTextAlignment === 'bottom'
@@ -694,34 +921,42 @@ module.exports = {
             : object.content.verticalTextAlignment === 'center'
               ? 0.5
               : 0;
-        this._pixiObject.position.y =
-          this._instance.getY() + this._pixiObject.height * (0.5 - alignmentY);
-        this._pixiObject.anchor.y = 0.5;
+        this._threeObject.position.y =
+          this._instance.getY() + canvasHeight * (0.5 - alignmentY);
+        this._threeObject.scale.y = canvasHeight;
+        this._threeObject.rotation.z = -RenderedInstance.toRad(this._instance.getAngle());
 
-        this._pixiObject.rotation = RenderedInstance.toRad(
-          this._instance.getAngle()
-        );
-
-        // Do not hide completely an object so it can still be manipulated
         const alphaForDisplay = Math.max(
           this._instance.getOpacity() / 255,
           0.5
         );
-        this._pixiObject.alpha = alphaForDisplay;
+        this._threeObject.material.opacity = alphaForDisplay;
+        this._threeObject.material.transparent = true;
+      }
+
+      onRemovedFromScene() {
+        super.onRemovedFromScene();
+        if (this._threeObject) {
+          if (this._threeObject.material) this._threeObject.material.dispose();
+          if (this._threeObject.geometry) this._threeObject.geometry.dispose();
+          this._threeObject.userData.instance = null;
+          this._threeObject = /** @type {any} */ (null);
+        }
+        if (this._canvasTexture) this._canvasTexture.dispose();
       }
 
       /**
        * Return the width of the instance, when it's not resized.
        */
       getDefaultWidth() {
-        return this._pixiObject.width;
+        return this._canvas.width;
       }
 
       /**
        * Return the height of the instance, when it's not resized.
        */
       getDefaultHeight() {
-        return this._pixiObject.height;
+        return this._canvas.height;
       }
 
       getOriginY() {

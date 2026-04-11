@@ -749,7 +749,7 @@ module.exports = {
    */
   registerInstanceRenderers: function (objectsRenderingService) {
     const RenderedInstance = objectsRenderingService.RenderedInstance;
-    const PIXI = objectsRenderingService.PIXI;
+    const THREE = objectsRenderingService.THREE;
 
     const DEFAULT_WIDTH = 300;
     const DEFAULT_HEIGHT = 30;
@@ -759,38 +759,49 @@ module.exports = {
         project,
         instance,
         associatedObjectConfiguration,
-        pixiContainer,
-        pixiResourcesLoader
+        threeGroup,
+        resourcesLoader
       ) {
         super(
           project,
           instance,
           associatedObjectConfiguration,
-          pixiContainer,
-          pixiResourcesLoader
+          threeGroup,
+          resourcesLoader
         );
 
         this._fontResourceName = '';
         this._finalTextColor = 0x0;
-        this._pixiGraphics = new PIXI.Graphics();
-        this._pixiTextMask = new PIXI.Graphics();
-        this._pixiText = new PIXI.Text(' ', {
-          align: 'left',
-          fontSize: 20,
+        this._canvas = document.createElement('canvas');
+        this._context = this._canvas.getContext('2d');
+        this._canvasTexture = new THREE.CanvasTexture(this._canvas);
+        this._canvasTexture.minFilter = THREE.LinearFilter;
+        this._canvasTexture.magFilter = THREE.LinearFilter;
+        this._canvasTexture.colorSpace = THREE.SRGBColorSpace;
+        const geometry = new THREE.PlaneGeometry(1, 1);
+        geometry.translate(0.5, -0.5, 0);
+        const material = new THREE.MeshBasicMaterial({
+          map: this._canvasTexture,
+          transparent: true,
+          side: THREE.DoubleSide,
+          depthWrite: false,
         });
-        this._pixiText.mask = this._pixiTextMask;
-        this._pixiObject = new PIXI.Container();
-        this._pixiObject.addChild(this._pixiGraphics);
-        this._pixiObject.addChild(this._pixiText);
-        this._pixiObject.addChild(this._pixiTextMask);
-        this._pixiContainer.addChild(this._pixiObject);
+        this._threeObject = new THREE.Mesh(geometry, material);
+        this._threeObject.userData.instance = instance;
+        this._threeObject.rotation.order = 'ZYX';
+        this._layerGroup.add(this._threeObject);
         this.update();
       }
 
       onRemovedFromScene() {
         super.onRemovedFromScene();
-        this._pixiText.destroy(true);
-        this._pixiObject.destroy({ children: true });
+        if (this._threeObject) {
+          if (this._threeObject.material) this._threeObject.material.dispose();
+          if (this._threeObject.geometry) this._threeObject.geometry.dispose();
+          this._threeObject.userData.instance = null;
+          this._threeObject = null;
+        }
+        if (this._canvasTexture) this._canvasTexture.dispose();
       }
 
       static getThumbnail(project, resourcesLoader, objectConfiguration) {
@@ -798,6 +809,7 @@ module.exports = {
       }
 
       update() {
+        if (!this._threeObject || !this._context) return;
         const instance = this._instance;
         const object = gd.castObject(
           this._associatedObjectConfiguration,
@@ -811,7 +823,7 @@ module.exports = {
           instance.getRawStringProperty('initialValue') ||
           object.content.initialValue;
         const hasInitialValue = initialValue !== '';
-        this._pixiText.text = hasInitialValue ? initialValue : placeholder;
+        const displayedText = hasInitialValue ? initialValue : placeholder || ' ';
 
         const textColor = object.content.textColor;
         const finalTextColor = hasInitialValue
@@ -819,29 +831,22 @@ module.exports = {
           : 0x888888;
         if (this._finalTextColor !== finalTextColor) {
           this._finalTextColor = finalTextColor;
-          this._pixiText.style.fill = finalTextColor;
-          this._pixiText.dirty = true;
         }
 
         const fontSize = object.content.fontSize;
-        if (this._pixiText.style.fontSize !== fontSize) {
-          this._pixiText.style.fontSize = fontSize;
-          this._pixiText.dirty = true;
-        }
 
         const fontResourceName = object.content.fontResourceName;
         if (this._fontResourceName !== fontResourceName) {
           this._fontResourceName = fontResourceName;
 
-          this._pixiResourcesLoader
+          this._resourcesLoader
             .loadFontFamily(this._project, fontResourceName)
             .then((fontFamily) => {
               if (this._wasDestroyed) return;
-              this._pixiText.style.fontFamily = fontFamily;
-              this._pixiText.dirty = true;
+              this._fontFamily = fontFamily;
+              this.update();
             })
             .catch((err) => {
-              // Ignore errors
               console.warn(
                 'Unable to load font family for RenderedTextInputObjectInstance',
                 err
@@ -856,14 +861,6 @@ module.exports = {
           width = this.getCustomWidth();
           height = this.getCustomHeight();
         }
-
-        this._pixiObject.pivot.x = width / 2;
-        this._pixiObject.pivot.y = height / 2;
-        this._pixiObject.position.x = instance.getX() + width / 2;
-        this._pixiObject.position.y = instance.getY() + height / 2;
-        this._pixiObject.rotation = RenderedInstance.toRad(
-          this._instance.getAngle()
-        );
 
         const borderWidth = object.content.borderWidth || 0;
         const paddingX =
@@ -881,63 +878,98 @@ module.exports = {
               )
             : 1;
 
-        // Draw the mask for the text.
         const textOffsetX = borderWidth + paddingX;
-        // textOffsetY does not include the paddingY because browsers display the text, even if it is supposed to be cut off by vertical padding.
         const textOffsetY = borderWidth;
-        this._pixiTextMask.clear();
-        this._pixiTextMask.beginFill(0xdddddd, 1);
-        this._pixiTextMask.drawRect(
-          textOffsetX,
-          textOffsetY,
-          width - 2 * textOffsetX,
-          height - 2 * textOffsetY
-        );
-        this._pixiTextMask.endFill();
 
         const isTextArea = object.content.inputType === 'text area';
         const textAlign = object.content.textAlign
           ? object.content.textAlign
           : 'left';
-
-        if (textAlign === 'left') this._pixiText.position.x = textOffsetX;
-        else if (textAlign === 'right')
-          this._pixiText.position.x =
-            0 + width - this._pixiText.width - textOffsetX;
-        else if (textAlign === 'center') {
-          this._pixiText.align = 'center';
-          this._pixiText.position.x = 0 + width / 2 - this._pixiText.width / 2;
-        }
-
-        this._pixiText.position.y = isTextArea
-          ? textOffsetY + paddingY
-          : height / 2 - this._pixiText.height / 2;
-
-        // Draw the background and border.
         const fillColor = object.content.fillColor;
         const fillOpacity = object.content.fillOpacity;
         const borderColor = object.content.borderColor;
         const borderOpacity = object.content.borderOpacity;
+        const textAlignCanvas =
+          textAlign === 'right'
+            ? 'right'
+            : textAlign === 'center'
+              ? 'center'
+              : 'left';
+        const fontFamily = this._fontFamily || 'Arial';
+        this._context.font = `${fontSize}px ${fontFamily}`;
+        const canvasWidth = Math.max(1, Math.ceil(width));
+        const canvasHeight = Math.max(1, Math.ceil(height));
+        if (
+          this._canvas.width !== canvasWidth ||
+          this._canvas.height !== canvasHeight
+        ) {
+          this._canvas.width = canvasWidth;
+          this._canvas.height = canvasHeight;
+        }
+        this._context.clearRect(0, 0, canvasWidth, canvasHeight);
+        this._context.fillStyle = `rgba(${(fillOpacity / 255).toFixed(3)}, ${(fillOpacity / 255).toFixed(3)}, ${(fillOpacity / 255).toFixed(3)}, 1)`;
+        const fillHex = objectsRenderingService.rgbOrHexToHexNumber(fillColor);
+        const borderHex = objectsRenderingService.rgbOrHexToHexNumber(borderColor);
+        const fillRgb = [
+          (fillHex >> 16) & 255,
+          (fillHex >> 8) & 255,
+          fillHex & 255,
+        ];
+        const borderRgb = [
+          (borderHex >> 16) & 255,
+          (borderHex >> 8) & 255,
+          borderHex & 255,
+        ];
+        this._context.fillStyle = `rgba(${fillRgb[0]}, ${fillRgb[1]}, ${fillRgb[2]}, ${fillOpacity / 255})`;
+        this._context.fillRect(0, 0, width, height);
+        if (borderWidth > 0) {
+          this._context.lineWidth = borderWidth;
+          this._context.strokeStyle = `rgba(${borderRgb[0]}, ${borderRgb[1]}, ${borderRgb[2]}, ${borderOpacity / 255})`;
+          this._context.strokeRect(borderWidth / 2, borderWidth / 2, width - borderWidth, height - borderWidth);
+        }
 
-        this._pixiGraphics.clear();
-        this._pixiGraphics.lineStyle(
-          borderWidth,
-          objectsRenderingService.rgbOrHexToHexNumber(borderColor),
-          borderOpacity / 255
+        this._context.font = `${fontSize}px ${fontFamily}`;
+        this._context.textBaseline = 'top';
+        this._context.textAlign = textAlignCanvas;
+        const textRgb = [
+          (finalTextColor >> 16) & 255,
+          (finalTextColor >> 8) & 255,
+          finalTextColor & 255,
+        ];
+        this._context.fillStyle = `rgb(${textRgb[0]}, ${textRgb[1]}, ${textRgb[2]})`;
+        let textX = textOffsetX;
+        if (textAlignCanvas === 'center') textX = width / 2;
+        if (textAlignCanvas === 'right') textX = width - textOffsetX;
+        const textHeight = fontSize;
+        const textY = isTextArea
+          ? textOffsetY + paddingY
+          : height / 2 - textHeight / 2;
+        this._context.save();
+        this._context.beginPath();
+        this._context.rect(
+          textOffsetX,
+          textOffsetY,
+          width - 2 * textOffsetX,
+          height - 2 * textOffsetY
         );
-        this._pixiGraphics.beginFill(
-          objectsRenderingService.rgbOrHexToHexNumber(fillColor),
-          fillOpacity / 255
-        );
-        this._pixiGraphics.drawRect(0, 0, width, height);
-        this._pixiGraphics.endFill();
+        this._context.clip();
+        this._context.fillText(displayedText, textX, textY, width - 2 * textOffsetX);
+        this._context.restore();
+        this._canvasTexture.needsUpdate = true;
 
-        // Do not hide completely an object so it can still be manipulated
+        this._threeObject.position.x = instance.getX() + width / 2;
+        this._threeObject.position.y = instance.getY() + height / 2;
+        this._threeObject.rotation.z = -RenderedInstance.toRad(
+          this._instance.getAngle()
+        );
+        this._threeObject.scale.set(width, height, 1);
+
         const alphaForDisplay = Math.max(
           this._instance.getOpacity() / 255,
           0.5
         );
-        this._pixiObject.alpha = alphaForDisplay;
+        this._threeObject.material.opacity = alphaForDisplay;
+        this._threeObject.material.transparent = true;
       }
 
       getDefaultWidth() {

@@ -9,7 +9,7 @@ import {
   TableRow,
   TableRowColumn,
 } from '../../UI/Table';
-import { readEmbeddedResourcesMapping } from '../../ObjectsRendering/PixiResourcesLoader';
+import { readEmbeddedResourcesMapping } from '../../ObjectsRendering/ThreeResourcesLoader';
 
 type Props = {|
   resources: Array<gdResource>,

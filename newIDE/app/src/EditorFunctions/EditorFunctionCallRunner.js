@@ -22,7 +22,7 @@ import {
   type ObjectGroupsOutsideEditorChanges,
   type ToolOptions,
 } from '.';
-import PixiResourcesLoader from '../ObjectsRendering/PixiResourcesLoader';
+import ThreeResourcesLoader from '../ObjectsRendering/ThreeResourcesLoader';
 import { type EnsureExtensionInstalledOptions } from '../AiGeneration/UseEnsureExtensionInstalled';
 
 type ProcessEditorFunctionCallsOptions = {|
@@ -178,7 +178,7 @@ export const processEditorFunctionCalls = async ({
         onExtensionInstalled,
         searchAndInstallAsset,
         searchAndInstallResources,
-        PixiResourcesLoader,
+        ThreeResourcesLoader,
       };
 
       // Execute the function

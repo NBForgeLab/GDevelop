@@ -1,8 +1,21 @@
 // @flow
 import RenderedInstance from './RenderedInstance';
-import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
-import ResourcesLoader from '../../ResourcesLoader';
-import * as PIXI from 'pixi.js-legacy';
+import ThreeResourcesLoader from '../../ObjectsRendering/ThreeResourcesLoader';
+import * as THREE from 'three';
+
+let invalidThreeTexture = null;
+
+const getInvalidThreeTexture = () => {
+  if (!invalidThreeTexture) {
+    invalidThreeTexture = new THREE.TextureLoader().load(
+      'res/invalid_texture.png'
+    );
+    invalidThreeTexture.magFilter = THREE.NearestFilter;
+    invalidThreeTexture.minFilter = THREE.NearestFilter;
+    invalidThreeTexture.colorSpace = THREE.SRGBColorSpace;
+  }
+  return invalidThreeTexture;
+};
 
 /**
  * Objects with an unknown type are rendered with a placeholder rectangle.
@@ -13,67 +26,72 @@ export default class RenderedUnknownInstance extends RenderedInstance {
     instance: gdInitialInstance,
     associatedObjectConfiguration: gdObjectConfiguration | null,
     // $FlowFixMe[value-as-type]
-    pixiContainer: PIXI.Container,
-    pixiResourcesLoader: Class<PixiResourcesLoader>
+    threeGroup: THREE.Group,
+    resourcesLoader: Class<ThreeResourcesLoader>
   ) {
     super(
       project,
       instance,
       //$FlowFixMe[incompatible-type] It's ok because RenderedUnknownInstance don't use it.
       associatedObjectConfiguration,
-      pixiContainer,
-      pixiResourcesLoader
+      threeGroup,
+      resourcesLoader
     );
 
-    //This renderer show a placeholder for the object:
-    this._pixiObject = new PIXI.Sprite(
-      this._pixiResourcesLoader.getInvalidPIXITexture()
-    );
-    this._pixiContainer.addChild(this._pixiObject);
+    const material = new THREE.SpriteMaterial({
+      map: getInvalidThreeTexture(),
+      color: 0xffffff,
+    });
+    this._threeObject = new THREE.Sprite(material);
+    this._threeObject.userData.instance = instance;
+
+    this._layerGroup.add(this._threeObject);
   }
 
   onRemovedFromScene(): void {
-    super.onRemovedFromScene();
-    this._pixiObject.destroy();
+    super.onRemovedFromScene(); // This calls child removal logic
+    if (this._threeObject && this._threeObject.material) {
+      this._threeObject.material.dispose();
+    }
+    if (this._threeObject) this._threeObject.userData.instance = null;
+    this._threeObject = null;
   }
 
   static getThumbnail(
     project: gdProject,
-    resourcesLoader: Class<ResourcesLoader>,
+    resourcesLoader: Class<ThreeResourcesLoader>,
     objectConfiguration: gdObjectConfiguration
   ): any {
     return 'res/unknown32.png';
   }
 
   update() {
-    // Avoid to use _pixiObject after destroy is called.
+    // Avoid to use _threeObject after destroy is called.
     // It can happen when onRemovedFromScene and update cross each other.
-    if (!this._pixiObject) {
+    if (!this._threeObject) {
       return;
     }
-    const objectTextureFrame = this._pixiObject.texture.frame;
-    // In case the texture is not loaded yet, we don't want to crash.
-    if (!objectTextureFrame) return;
 
-    this._pixiObject.anchor.x = 0.5;
-    this._pixiObject.anchor.y = 0.5;
-    this._pixiObject.rotation = RenderedInstance.toRad(
+    // Three.js sprites use a centered anchor by default, so only position and scale are adjusted.
+
+    // Position
+    this._threeObject.position.x = this._instance.getX() + this.getCenterX();
+    this._threeObject.position.y = this._instance.getY() + this.getCenterY();
+
+    // Rotation is typically done via material in Sprite
+    this._threeObject.material.rotation = -RenderedInstance.toRad(
       this._instance.getAngle()
     );
-    this._pixiObject.scale.x = this.getWidth() / objectTextureFrame.width;
-    this._pixiObject.scale.y = this.getHeight() / objectTextureFrame.height;
-    this._pixiObject.position.x = this._instance.getX() + this.getCenterX();
-    this._pixiObject.position.y = this._instance.getY() + this.getCenterY();
 
-    // Do not hide completely an object so it can still be manipulated
+    // Scale
+    const scaleX = this.getWidth() * (this._instance.isFlippedX() ? -1 : 1);
+    const scaleY = this.getHeight() * (this._instance.isFlippedY() ? -1 : 1);
+
+    this._threeObject.scale.set(scaleX, scaleY, 1);
+
+    // Alpha - Do not hide completely an object so it can still be manipulated
     const alphaForDisplay = Math.max(this._instance.getOpacity() / 255, 0.5);
-    this._pixiObject.alpha = alphaForDisplay;
-
-    this._pixiObject.scale.x =
-      Math.abs(this._pixiObject.scale.x) *
-      (this._instance.isFlippedX() ? -1 : 1);
-    this._pixiObject.scale.y =
-      Math.abs(this._pixiObject.scale.y) *
-      (this._instance.isFlippedY() ? -1 : 1);
+    this._threeObject.material.opacity = alphaForDisplay;
+    this._threeObject.material.transparent = alphaForDisplay < 1.0;
   }
 }

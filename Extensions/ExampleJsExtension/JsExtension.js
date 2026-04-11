@@ -460,7 +460,7 @@ module.exports = {
    */
   registerInstanceRenderers: function (objectsRenderingService) {
     const RenderedInstance = objectsRenderingService.RenderedInstance;
-    const PIXI = objectsRenderingService.PIXI;
+    const THREE = objectsRenderingService.THREE;
 
     /**
      * Renderer for instances of DummyObject inside the IDE.
@@ -470,30 +470,44 @@ module.exports = {
         project,
         instance,
         associatedObjectConfiguration,
-        pixiContainer,
-        pixiResourcesLoader
+        threeGroup,
+        resourcesLoader
       ) {
         super(
           project,
           instance,
           associatedObjectConfiguration,
-          pixiContainer,
-          pixiResourcesLoader
+          threeGroup,
+          resourcesLoader
         );
 
-        //Setup the PIXI object:
-        this._pixiObject = new PIXI.Text('This is a dummy object', {
-          align: 'left',
+        this._canvas = document.createElement('canvas');
+        this._context = this._canvas.getContext('2d');
+        this._canvasTexture = new THREE.CanvasTexture(this._canvas);
+        const geometry = new THREE.PlaneGeometry(1, 1);
+        geometry.translate(0.5, -0.5, 0);
+        const material = new THREE.MeshBasicMaterial({
+          map: this._canvasTexture,
+          transparent: true,
+          side: THREE.DoubleSide,
+          depthWrite: false,
         });
-        this._pixiObject.anchor.x = 0.5;
-        this._pixiObject.anchor.y = 0.5;
-        this._pixiContainer.addChild(this._pixiObject);
+        this._threeObject = new THREE.Mesh(geometry, material);
+        this._threeObject.userData.instance = instance;
+        this._threeObject.rotation.order = 'ZYX';
+        this._layerGroup.add(this._threeObject);
         this.update();
       }
 
       onRemovedFromScene() {
         super.onRemovedFromScene();
-        this._pixiObject.destroy(true);
+        if (this._threeObject) {
+          if (this._threeObject.material) this._threeObject.material.dispose();
+          if (this._threeObject.geometry) this._threeObject.geometry.dispose();
+          this._threeObject.userData.instance = null;
+          this._threeObject = null;
+        }
+        if (this._canvasTexture) this._canvasTexture.dispose();
       }
 
       /**
@@ -504,41 +518,50 @@ module.exports = {
       }
 
       /**
-       * This is called to update the PIXI object on the scene editor
+       * This is called to update the Three.js object on the scene editor.
        */
       update() {
+        if (!this._threeObject || !this._context) return;
         const object = gd.castObject(
           this._associatedObjectConfiguration,
           gd.ObjectJsImplementation
         );
 
-        // Read a property from the object
-        this._pixiObject.text = object.content.property1;
+        const text = object.content.property1 || 'This is a dummy object';
+        this._context.font = '20px Arial';
+        const width = Math.max(1, Math.ceil(this._context.measureText(text).width + 16));
+        const height = 32;
+        if (this._canvas.width !== width || this._canvas.height !== height) {
+          this._canvas.width = width;
+          this._canvas.height = height;
+        }
+        this._context.clearRect(0, 0, width, height);
+        this._context.font = '20px Arial';
+        this._context.textBaseline = 'top';
+        this._context.fillStyle = '#ffffff';
+        this._context.fillText(text, 8, 4);
+        this._canvasTexture.needsUpdate = true;
 
-        // Read position and angle from the instance
-        this._pixiObject.position.x =
-          this._instance.getX() + this._pixiObject.width / 2;
-        this._pixiObject.position.y =
-          this._instance.getY() + this._pixiObject.height / 2;
-        this._pixiObject.rotation = RenderedInstance.toRad(
+        this._threeObject.position.x = this._instance.getX() + width / 2;
+        this._threeObject.position.y = this._instance.getY() + height / 2;
+        this._threeObject.rotation.z = -RenderedInstance.toRad(
           this._instance.getAngle()
         );
-        // Custom size can be read in this.getCustomWidth() and
-        // this.getCustomHeight()
+        this._threeObject.scale.set(width, height, 1);
       }
 
       /**
        * Return the width of the instance, when it's not resized.
        */
       getDefaultWidth() {
-        return this._pixiObject.width;
+        return this._canvas.width;
       }
 
       /**
        * Return the height of the instance, when it's not resized.
        */
       getDefaultHeight() {
-        return this._pixiObject.height;
+        return this._canvas.height;
       }
     }
 

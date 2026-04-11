@@ -1,6 +1,6 @@
 // @flow
 import { swapAsset } from './AssetSwapper';
-import { PixiResourcesLoaderMock } from '../fixtures/TestPixiResourcesLoader';
+import { ThreeResourcesLoaderMock } from '../fixtures/TestThreeResourcesLoader';
 
 const gd: libGDevelop = global.gd;
 
@@ -93,7 +93,7 @@ describe('swapAsset (Sprite)', () => {
     addAnimation(assetConfiguration, 'Run', 'AssetRun');
     addAnimation(assetConfiguration, 'Fire', 'AssetFire');
 
-    swapAsset(project, PixiResourcesLoaderMock, object, assetObject);
+    swapAsset(project, ThreeResourcesLoaderMock, object, assetObject);
 
     const objectNewConfiguration = gd.asSpriteConfiguration(
       object.getConfiguration()
@@ -128,7 +128,7 @@ describe('swapAsset (Sprite)', () => {
   test('can keep the object name', () => {
     const { project, object, assetObject } = makeNewTestProject();
 
-    swapAsset(project, PixiResourcesLoaderMock, object, assetObject);
+    swapAsset(project, ThreeResourcesLoaderMock, object, assetObject);
 
     expect(object.getName()).toEqual('Object');
 
@@ -140,7 +140,7 @@ describe('swapAsset (Sprite)', () => {
 
     object.getVariables().insertNew('MyVariable', 0);
 
-    swapAsset(project, PixiResourcesLoaderMock, object, assetObject);
+    swapAsset(project, ThreeResourcesLoaderMock, object, assetObject);
 
     expect(object.getVariables().has('MyVariable'));
 
@@ -182,7 +182,7 @@ describe('swapAsset (Sprite)', () => {
 
     addAnimation(assetConfiguration, 'Idle', 'Frame100x240');
 
-    swapAsset(project, PixiResourcesLoaderMock, object, assetObject);
+    swapAsset(project, ThreeResourcesLoaderMock, object, assetObject);
 
     const objectNewConfiguration = gd.asSpriteConfiguration(
       object.getConfiguration()
@@ -194,7 +194,7 @@ describe('swapAsset (Sprite)', () => {
       .getSprite(0);
 
     // The coordinates are multiplied by 2 according to the images dimensions
-    // given by PixiResourcesLoaderMock.
+    // given by ThreeResourcesLoaderMock.
     expect(newFrame.getOrigin().getX()).toEqual(16);
     expect(newFrame.getOrigin().getY()).toEqual(32);
 
@@ -243,7 +243,7 @@ describe('swapAsset (Sprite)', () => {
       .addSprite(frame2);
     frame2.delete();
 
-    swapAsset(project, PixiResourcesLoaderMock, object, assetObject);
+    swapAsset(project, ThreeResourcesLoaderMock, object, assetObject);
 
     const objectNewConfiguration = gd.asSpriteConfiguration(
       object.getConfiguration()
@@ -256,7 +256,7 @@ describe('swapAsset (Sprite)', () => {
     const frame1 = newDirection.getSprite(0);
 
     // The coordinates are multiplied by 2 according to the images dimensions
-    // given by PixiResourcesLoaderMock.
+    // given by ThreeResourcesLoaderMock.
     expect(frame0.getOrigin().getX()).toEqual(16);
     expect(frame0.getOrigin().getY()).toEqual(32);
     // The points from the 1st frame is used for every frame because points
@@ -280,7 +280,7 @@ describe('swapAsset (Sprite)', () => {
     addAnimation(objectConfiguration, 'Idle', 'Frame100x240');
     addAnimation(assetConfiguration, 'Idle', 'Frame50x120');
 
-    swapAsset(project, PixiResourcesLoaderMock, object, assetObject);
+    swapAsset(project, ThreeResourcesLoaderMock, object, assetObject);
 
     const objectNewConfiguration = gd.asSpriteConfiguration(
       object.getConfiguration()
@@ -303,7 +303,7 @@ describe('swapAsset (Sprite)', () => {
     addAnimation(objectConfiguration, 'Idle', 'Frame50x120');
     addAnimation(assetConfiguration, 'Idle', 'Frame100x240');
 
-    swapAsset(project, PixiResourcesLoaderMock, object, assetObject);
+    swapAsset(project, ThreeResourcesLoaderMock, object, assetObject);
 
     const objectNewConfiguration = gd.asSpriteConfiguration(
       object.getConfiguration()
@@ -327,7 +327,7 @@ describe('swapAsset (Sprite)', () => {
     addAnimation(objectConfiguration, 'Idle', 'Frame100x240');
     addAnimation(assetConfiguration, 'Idle', 'Frame50x120');
 
-    swapAsset(project, PixiResourcesLoaderMock, object, assetObject);
+    swapAsset(project, ThreeResourcesLoaderMock, object, assetObject);
 
     const objectNewConfiguration = gd.asSpriteConfiguration(
       object.getConfiguration()
@@ -351,7 +351,7 @@ describe('swapAsset (Sprite)', () => {
     addAnimation(objectConfiguration, 'Idle', 'Frame50x120');
     addAnimation(assetConfiguration, 'Idle', 'Frame100x240');
 
-    swapAsset(project, PixiResourcesLoaderMock, object, assetObject);
+    swapAsset(project, ThreeResourcesLoaderMock, object, assetObject);
 
     const objectNewConfiguration = gd.asSpriteConfiguration(
       object.getConfiguration()
@@ -439,7 +439,7 @@ describe('swapAsset (Model)', () => {
     addAnimation(assetConfiguration, 'Run', 'AssetRun');
     addAnimation(assetConfiguration, 'Fire', 'AssetFire');
 
-    swapAsset(project, PixiResourcesLoaderMock, object, assetObject);
+    swapAsset(project, ThreeResourcesLoaderMock, object, assetObject);
 
     const objectNewConfiguration = gd.asModel3DConfiguration(
       object.getConfiguration()
@@ -497,7 +497,7 @@ describe('swapAsset (Model)', () => {
     assetConfiguration.updateProperty('height', '25');
     assetConfiguration.updateProperty('depth', '50');
 
-    swapAsset(project, PixiResourcesLoaderMock, object, assetObject);
+    swapAsset(project, ThreeResourcesLoaderMock, object, assetObject);
 
     const objectNewConfiguration = gd.asModel3DConfiguration(
       object.getConfiguration()
@@ -525,7 +525,7 @@ describe('swapAsset (Model)', () => {
     assetConfiguration.updateProperty('originLocation', 'ModelOrigin');
     assetConfiguration.updateProperty('centerLocation', 'ModelCenter');
 
-    swapAsset(project, PixiResourcesLoaderMock, object, assetObject);
+    swapAsset(project, ThreeResourcesLoaderMock, object, assetObject);
 
     const objectNewConfiguration = gd.asModel3DConfiguration(
       object.getConfiguration()

@@ -1,55 +1,69 @@
 // @flow
 import RenderedInstance from './RenderedInstance';
-import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
+import ThreeResourcesLoader from '../../ObjectsRendering/ThreeResourcesLoader';
 import ResourcesLoader from '../../ResourcesLoader';
-import * as PIXI from 'pixi.js-legacy';
+import * as THREE from 'three';
 const gd: libGDevelop = global.gd;
 
 /**
  * Renderer for gd.TiledSpriteObject
  */
 export default class RenderedTiledSpriteInstance extends RenderedInstance {
-  // $FlowFixMe[value-as-type]
-  _texture: PIXI.Texture;
+  _texture: string;
+  _currentThreeTexture: any = null;
 
   constructor(
     project: gdProject,
     instance: gdInitialInstance,
     associatedObjectConfiguration: gdObjectConfiguration,
     // $FlowFixMe[value-as-type]
-    pixiContainer: PIXI.Container,
-    pixiResourcesLoader: Class<PixiResourcesLoader>
+    threeGroup: THREE.Group,
+    resourcesLoader: Class<ThreeResourcesLoader>
   ) {
     super(
       project,
       instance,
       associatedObjectConfiguration,
-      pixiContainer,
-      pixiResourcesLoader
+      threeGroup,
+      resourcesLoader
     );
 
-    //Setup the PIXI object:
     const tiledSprite = gd.asTiledSpriteConfiguration(
       associatedObjectConfiguration
     );
     this._texture = tiledSprite.getTexture();
-    this._pixiObject = new PIXI.TilingSprite(
-      PixiResourcesLoader.getLegacyPixiTexture(
-        project,
-        tiledSprite.getTexture()
-      ),
-      tiledSprite.getWidth(),
-      tiledSprite.getHeight()
-    );
-    this._pixiObject.anchor.x = 0.5;
-    this._pixiObject.anchor.y = 0.5;
-    this._pixiContainer.addChild(this._pixiObject);
+
+    // Setup the THREE object
+    const geometry = new THREE.PlaneGeometry(1, 1);
+    const material = new THREE.MeshBasicMaterial({
+      map: this._resourcesLoader.getInvalidThreeTexture(),
+      color: 0xffffff,
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    });
+
+    this._threeObject = new THREE.Mesh(geometry, material);
+    this._threeObject.userData.instance = instance;
+    this._threeObject.rotation.order = 'ZYX';
+    this._layerGroup.add(this._threeObject);
+
+    this.updateTexture();
   }
 
   onRemovedFromScene(): void {
-    super.onRemovedFromScene();
-    // Keep textures because they are shared by all sprites.
-    this._pixiObject.destroy(false);
+    if (this._threeObject) {
+      this._layerGroup.remove(this._threeObject);
+      if (this._threeObject.material) {
+        this._threeObject.material.dispose();
+      }
+      if (this._threeObject.geometry) {
+        this._threeObject.geometry.dispose();
+      }
+      this._threeObject.userData.instance = null;
+      this._threeObject = null;
+    }
+    this._wasDestroyed = true;
   }
 
   /**
@@ -57,7 +71,7 @@ export default class RenderedTiledSpriteInstance extends RenderedInstance {
    */
   static getThumbnail(
     project: gdProject,
-    resourcesLoader: Class<ResourcesLoader>,
+    resourcesLoader: Class<ThreeResourcesLoader>,
     objectConfiguration: gdObjectConfiguration
   ): any {
     const tiledSprite = gd.asTiledSpriteConfiguration(objectConfiguration);
@@ -69,35 +83,73 @@ export default class RenderedTiledSpriteInstance extends RenderedInstance {
     );
   }
 
+  updateTexture() {
+    if (!this._threeObject) return;
+
+    this._resourcesLoader
+      .getThreeTexture(this._project, this._texture)
+      .then(threeTexture => {
+        if (this._wasDestroyed || !this._threeObject) return;
+
+        this._currentThreeTexture = threeTexture;
+        // Setup tiling
+        threeTexture.wrapS = THREE.RepeatWrapping;
+        threeTexture.wrapT = THREE.RepeatWrapping;
+
+        this._threeObject.material.map = threeTexture;
+        this._threeObject.material.needsUpdate = true;
+
+        this.updateMesh();
+      });
+  }
+
+  updateMesh() {
+    if (!this._threeObject) return;
+
+    const tiledSprite = gd.asTiledSpriteConfiguration(
+      this._associatedObjectConfiguration
+    );
+    let width = tiledSprite.getWidth();
+    let height = tiledSprite.getHeight();
+
+    if (this._instance.hasCustomSize()) {
+      width = this.getCustomWidth();
+      height = this.getCustomHeight();
+    }
+
+    if (this._currentThreeTexture && this._currentThreeTexture.image) {
+      this._currentThreeTexture.repeat.set(
+        width / this._currentThreeTexture.image.width,
+        height / this._currentThreeTexture.image.height
+      );
+    }
+
+    this._threeObject.scale.set(width, height, 1);
+    this._threeObject.position.x = this._instance.getX() + width / 2;
+    this._threeObject.position.y = this._instance.getY() + height / 2;
+    this._threeObject.rotation.z = -RenderedInstance.toRad(
+      this._instance.getAngle()
+    );
+
+    const alphaForDisplay = Math.max(this._instance.getOpacity() / 255, 0.5);
+    this._threeObject.material.opacity = alphaForDisplay;
+    this._threeObject.material.transparent =
+      alphaForDisplay < 1.0 ||
+      (this._currentThreeTexture &&
+        this._currentThreeTexture.format === THREE.RGBAFormat);
+  }
+
   update() {
     const tiledSprite = gd.asTiledSpriteConfiguration(
       this._associatedObjectConfiguration
     );
-    if (this._instance.hasCustomSize()) {
-      this._pixiObject.width = this.getCustomWidth();
-      this._pixiObject.height = this.getCustomHeight();
-    } else {
-      this._pixiObject.width = tiledSprite.getWidth();
-      this._pixiObject.height = tiledSprite.getHeight();
-    }
 
     if (this._texture !== tiledSprite.getTexture()) {
       this._texture = tiledSprite.getTexture();
-      this._pixiObject.texture = PixiResourcesLoader.getLegacyPixiTexture(
-        this._project,
-        tiledSprite.getTexture()
-      );
+      this.updateTexture();
+    } else {
+      this.updateMesh();
     }
-
-    this._pixiObject.x = this._instance.getX() + this._pixiObject.width / 2;
-    this._pixiObject.y = this._instance.getY() + this._pixiObject.height / 2;
-    this._pixiObject.rotation = RenderedInstance.toRad(
-      this._instance.getAngle()
-    );
-
-    // Do not hide completely an object so it can still be manipulated
-    const alphaForDisplay = Math.max(this._instance.getOpacity() / 255, 0.5);
-    this._pixiObject.alpha = alphaForDisplay;
   }
 
   getDefaultWidth(): any {

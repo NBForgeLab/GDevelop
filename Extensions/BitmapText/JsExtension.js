@@ -476,211 +476,11 @@ module.exports = {
    */
   registerInstanceRenderers: function (objectsRenderingService) {
     const RenderedInstance = objectsRenderingService.RenderedInstance;
-    const PIXI = objectsRenderingService.PIXI;
-
-    /** The bitmap font used in case another font can't be loaded. */
-    let defaultBitmapFont = null;
-
-    const defaultBitmapFontInstallKey = 'GD-DEFAULT-BITMAP-FONT';
-
-    /**
-     * Map counting the number of "reference" to a bitmap font. This is useful
-     * to uninstall a bitmap font when not used anymore.
-     */
-    const bitmapFontUsageCount = {};
-
-    /**
-     * We patch the installed font to use a name that is unique for each font data and texture,
-     * to avoid conflicts between different font files using the same font name (by default, the
-     * font name used by Pixi is the one inside the font data, but this name is not necessarily unique.
-     * For example, 2 resources can use the same font, or we can have multiple objects with the same
-     * font data and different textures).
-     */
-    const patchBitmapFont = (bitmapFont, bitmapFontInstallKey) => {
-      const defaultName = bitmapFont.font;
-      bitmapFont.font = bitmapFontInstallKey;
-      PIXI.BitmapFont.available[bitmapFontInstallKey] = bitmapFont;
-
-      delete PIXI.BitmapFont.available[defaultName];
-      return PIXI.BitmapFont.available[bitmapFontInstallKey];
-    };
-
-    /**
-     * Return a default bitmap font to be used in case another font can't be loaded.
-     */
-    const getDefaultBitmapFont = () => {
-      if (defaultBitmapFont) return defaultBitmapFont;
-
-      const defaultBitmapFontStyle = new PIXI.TextStyle({
-        fontFamily: 'Arial',
-        fontSize: 20,
-        padding: 5,
-        align: 'left',
-        fill: '#ffffff',
-        wordWrap: true,
-        lineHeight: 20,
-      });
-
-      defaultBitmapFont = patchBitmapFont(
-        PIXI.BitmapFont.from(
-          defaultBitmapFontStyle.fontFamily,
-          defaultBitmapFontStyle,
-          {
-            chars: [
-              [' ', '~'], // All the printable ASCII characters
-            ],
-          }
-        ),
-        defaultBitmapFontInstallKey
-      );
-      return defaultBitmapFont;
-    };
-
-    /**
-     * Workaround: PIXI.BitmapFont keeps a direct reference to the texture it
-     * was installed with (`pageTextures`). When a resource is reloaded (e.g.
-     * the image file changes on disk), PixiResourcesLoader creates a new
-     * PIXI.Texture but the existing BitmapFont still points to the old one.
-     * Ideally bitmap font resources would declare their image dependency via
-     * `embeddedResourcesMapping` so that `reloadResource` can cascade the
-     * invalidation automatically. Until then, we detect stale textures here.
-     */
-    const isBitmapFontTextureStale = (bitmapFont, currentTexture) => {
-      const pageTextures = bitmapFont.pageTextures;
-      return (
-        pageTextures &&
-        Object.values(pageTextures).some(
-          (tex) =>
-            (tex.baseTexture && tex.baseTexture.destroyed) ||
-            tex.baseTexture !== currentTexture.baseTexture
-        )
-      );
-    };
-
-    /**
-     * Given a bitmap font resource name and a texture atlas resource name, returns the PIXI.BitmapFont
-     * for it.
-     * The font must be released with `releaseBitmapFont` when not used anymore - so that it can be removed
-     * from memory when not used by any instance.
-     *
-     * @param pixiResourcesLoader
-     * @param project
-     * @param bitmapFontResourceName
-     * @param textureAtlasResourceName
-     */
-    const obtainBitmapFont = (
-      pixiResourcesLoader,
-      project,
-      bitmapFontResourceName,
-      textureAtlasResourceName
-    ) => {
-      const bitmapFontInstallKey =
-        bitmapFontResourceName + '@' + textureAtlasResourceName;
-
-      if (
-        PIXI.BitmapFont.available[bitmapFontInstallKey] &&
-        isBitmapFontTextureStale(
-          PIXI.BitmapFont.available[bitmapFontInstallKey],
-          pixiResourcesLoader.getLegacyPixiTexture(
-            project,
-            textureAtlasResourceName
-          )
-        )
-      ) {
-        // Texture was replaced during resource reload. Uninstall the stale font
-        // so it can be reinstalled with the new texture below.
-        PIXI.BitmapFont.uninstall(bitmapFontInstallKey);
-      }
-
-      if (PIXI.BitmapFont.available[bitmapFontInstallKey]) {
-        bitmapFontUsageCount[bitmapFontInstallKey] =
-          (bitmapFontUsageCount[bitmapFontInstallKey] || 0) + 1;
-        return Promise.resolve(PIXI.BitmapFont.available[bitmapFontInstallKey]);
-      }
-
-      // Get the atlas texture, the bitmap font data and install the font:
-      const texture = pixiResourcesLoader.getLegacyPixiTexture(
-        project,
-        textureAtlasResourceName
-      );
-
-      const loadBitmapFont = () =>
-        pixiResourcesLoader
-          .getBitmapFontData(project, bitmapFontResourceName)
-          .then((fontData) => {
-            if (!texture.valid)
-              throw new Error(
-                'Tried to install a BitmapFont with an invalid texture.'
-              );
-
-            const bitmapFont = patchBitmapFont(
-              PIXI.BitmapFont.install(fontData, texture),
-              bitmapFontInstallKey
-            );
-            bitmapFontUsageCount[bitmapFontInstallKey] =
-              (bitmapFontUsageCount[bitmapFontInstallKey] || 0) + 1;
-
-            return bitmapFont;
-          })
-          .catch((err) => {
-            console.warn('Unable to load font data:', err);
-            console.info(
-              'Is the texture atlas properly set for the Bitmap Text object? The default font will be used instead.'
-            );
-
-            const bitmapFont = getDefaultBitmapFont();
-            return bitmapFont;
-          });
-
-      if (!texture.valid) {
-        // Post pone texture update if texture is not loaded.
-        // (otherwise, the bitmap font would not get updated when the
-        // texture is loaded and updated).
-        return new Promise((resolve) => {
-          texture.once('update', () => {
-            resolve(loadBitmapFont());
-          });
-        });
-      } else {
-        // We're ready to load the bitmap font now, as the texture
-        // is already loaded.
-        return loadBitmapFont();
-      }
-    };
-
-    /**
-     * When a font is not used by an object anymore (object destroyed or font changed),
-     * call this function to decrease the internal count of objects using the font.
-     *
-     * Fonts are unloaded when not used anymore.
-     */
-    const releaseBitmapFont = (bitmapFontInstallKey) => {
-      if (bitmapFontInstallKey === defaultBitmapFontInstallKey) {
-        // Never uninstall the default bitmap font.
-        return;
-      }
-
-      if (!bitmapFontUsageCount[bitmapFontInstallKey]) {
-        console.error(
-          'BitmapFont with name ' +
-            bitmapFontInstallKey +
-            ' was tried to be released but was never marked as used.'
-        );
-        return;
-      }
-      bitmapFontUsageCount[bitmapFontInstallKey]--;
-
-      if (bitmapFontUsageCount[bitmapFontInstallKey] === 0) {
-        PIXI.BitmapFont.uninstall(bitmapFontInstallKey);
-        console.info(
-          'Uninstalled BitmapFont "' + bitmapFontInstallKey + '" from memory.'
-        );
-      }
-    };
+    const THREE = objectsRenderingService.THREE;
 
     /**
      * Return the path to the thumbnail of the specified object.
-     * This is called to update the PIXI object on the scene editor
+     * This is called to update the Three.js object on the scene editor.
      */
     class RenderedBitmapTextInstance extends RenderedInstance {
       static getThumbnail(project, resourcesLoader, objectConfiguration) {
@@ -691,106 +491,103 @@ module.exports = {
         project,
         instance,
         associatedObjectConfiguration,
-        pixiContainer,
-        pixiResourcesLoader,
+        threeGroup,
+        resourcesLoader,
         getPropertyOverridings
       ) {
         super(
           project,
           instance,
           associatedObjectConfiguration,
-          pixiContainer,
-          pixiResourcesLoader,
+          threeGroup,
+          resourcesLoader,
           getPropertyOverridings
         );
 
-        // We'll track changes of the font to trigger the loading of the new font.
-        this._currentBitmapFontResourceName = '';
-        this._currentTextureAtlasResourceName = '';
+        this._canvas = document.createElement('canvas');
+        this._context = this._canvas.getContext('2d');
+        this._canvasTexture = new THREE.CanvasTexture(this._canvas);
+        this._canvasTexture.minFilter = THREE.LinearFilter;
+        this._canvasTexture.magFilter = THREE.LinearFilter;
+        this._canvasTexture.colorSpace = THREE.SRGBColorSpace;
 
-        this._pixiObject = new PIXI.BitmapText('', {
-          // Use a default font. The proper font will be loaded in `update` method.
-          fontName: getDefaultBitmapFont().font,
+        const geometry = new THREE.PlaneGeometry(1, 1);
+        geometry.translate(0.5, -0.5, 0);
+        const material = new THREE.MeshBasicMaterial({
+          map: this._canvasTexture,
+          transparent: true,
+          side: THREE.DoubleSide,
+          depthWrite: false,
         });
+        this._threeObject = new THREE.Mesh(geometry, material);
+        this._threeObject.userData.instance = instance;
+        this._threeObject.rotation.order = 'ZYX';
+        this._layerGroup.add(this._threeObject);
 
-        this._pixiObject.anchor.x = 0.5;
-        this._pixiObject.anchor.y = 0.5;
-        this._pixiContainer.addChild(this._pixiObject);
         this.update();
       }
 
       update() {
+        if (!this._threeObject || !this._context) return;
+
         const object = gd.castObject(
           this._associatedObjectConfiguration,
           gd.ObjectJsImplementation
         );
 
-        // Update the rendered text properties (note: Pixi is only
-        // applying changes if there were changed).
         const propertyOverridings = this.getPropertyOverridings();
-        this._pixiObject.text =
+        const text =
           propertyOverridings && propertyOverridings.has('Text')
             ? propertyOverridings.get('Text')
             : object.content.text;
+        const align = object.content.align || 'left';
+        const scale = object.content.scale || 1;
+        const fontSize = Math.max(1, (object.content.fontSize || 20) * scale);
+        const lines = (text || ' ').split('\n');
 
-        const align = object.content.align;
-        this._pixiObject.align = align;
-
-        const color = object.content.tint;
-        this._pixiObject.tint =
-          objectsRenderingService.rgbOrHexToHexNumber(color);
-
-        const scale = object.content.scale;
-        this._pixiObject.scale.set(scale);
-
-        // Track the changes in font to load the new requested font.
-        const bitmapFontResourceName = object.content.bitmapFontResourceName;
-        const textureAtlasResourceName =
-          object.content.textureAtlasResourceName;
-
+        this._context.font = `${fontSize}px Arial`;
+        const padding = 8;
+        let maxLineWidth = 0;
+        for (const line of lines) {
+          maxLineWidth = Math.max(
+            maxLineWidth,
+            this._context.measureText(line || ' ').width
+          );
+        }
+        const lineHeight = fontSize * 1.2;
+        const canvasWidth = Math.max(1, Math.ceil(maxLineWidth + padding * 2));
+        const canvasHeight = Math.max(
+          1,
+          Math.ceil(lines.length * lineHeight + padding * 2)
+        );
         if (
-          this._currentBitmapFontResourceName !== bitmapFontResourceName ||
-          this._currentTextureAtlasResourceName !== textureAtlasResourceName ||
-          // Belt & suspenders: also reload if the font was externally
-          // uninstalled (e.g. by clearCache after a resource reload).
-          !PIXI.BitmapFont.available[this._pixiObject.fontName]
+          this._canvas.width !== canvasWidth ||
+          this._canvas.height !== canvasHeight
         ) {
-          const oldFontName = this._pixiObject.fontName;
-
-          // Temporarily go back to the default font, as the PIXI.BitmapText
-          // object does not support being displayed with a font not installed at all.
-          // It will be replaced as soon as the proper font is loaded.
-          this._pixiObject.fontName = getDefaultBitmapFont().font;
-
-          // Release the old font (if it's still installed).
-          if (PIXI.BitmapFont.available[oldFontName]) {
-            releaseBitmapFont(oldFontName);
-          }
-
-          this._currentBitmapFontResourceName = bitmapFontResourceName;
-          this._currentTextureAtlasResourceName = textureAtlasResourceName;
-          obtainBitmapFont(
-            this._pixiResourcesLoader,
-            this._project,
-            this._currentBitmapFontResourceName,
-            this._currentTextureAtlasResourceName
-          ).then((bitmapFont) => {
-            if (this._wasDestroyed) return;
-
-            this._pixiObject.fontName = bitmapFont.font;
-            this._pixiObject.fontSize = bitmapFont.size;
-            this._pixiObject.dirty = true;
-          });
+          this._canvas.width = canvasWidth;
+          this._canvas.height = canvasHeight;
         }
 
-        // Set up the wrapping width if enabled.
-        const oldMaxWidth = this._pixiObject.maxWidth;
-        this._pixiObject.maxWidth = this._instance.hasCustomSize()
-          ? this.getCustomWidth() / this._pixiObject.scale.x
-          : 0;
-        if (oldMaxWidth !== this._pixiObject.maxWidth) {
-          this._pixiObject.dirty = true;
+        this._context.clearRect(0, 0, canvasWidth, canvasHeight);
+        this._context.font = `${fontSize}px Arial`;
+        this._context.textBaseline = 'top';
+        this._context.textAlign = align;
+
+        const color = object.content.tint.split(';').map(component =>
+          parseInt(component, 10)
+        );
+        this._context.fillStyle = `rgb(${color[0] || 255}, ${color[1] || 255}, ${color[2] || 255})`;
+
+        let x = padding;
+        if (align === 'center') x = canvasWidth / 2;
+        if (align === 'right') x = canvasWidth - padding;
+
+        let y = padding;
+        for (const line of lines) {
+          this._context.fillText(line || ' ', x, y);
+          y += lineHeight;
         }
+        this._canvasTexture.needsUpdate = true;
 
         if (this._instance.hasCustomSize() && this.getDefaultWidth() !== 0) {
           const alignmentX =
@@ -803,15 +600,17 @@ module.exports = {
           const width = this.getCustomWidth();
           const renderedWidth = this.getDefaultWidth();
 
-          // A vector from the custom size center to the renderer center.
           const centerToCenterX = (width - renderedWidth) * (alignmentX - 0.5);
 
-          this._pixiObject.position.x = this._instance.getX() + width / 2;
-          this._pixiObject.anchor.x = 0.5 - centerToCenterX / renderedWidth;
+          this._threeObject.position.x = this._instance.getX() + width / 2;
+          this._threeObject.scale.x = width;
+          this._threeObject.userData.anchorX =
+            0.5 - centerToCenterX / renderedWidth;
         } else {
-          this._pixiObject.position.x =
+          this._threeObject.position.x =
             this._instance.getX() + this.getDefaultWidth() / 2;
-          this._pixiObject.anchor.x = 0.5;
+          this._threeObject.scale.x = this.getDefaultWidth();
+          this._threeObject.userData.anchorX = 0.5;
         }
         const alignmentY =
           object.content.verticalTextAlignment === 'bottom'
@@ -819,43 +618,45 @@ module.exports = {
             : object.content.verticalTextAlignment === 'center'
               ? 0.5
               : 0;
-        this._pixiObject.position.y =
+        this._threeObject.position.y =
           this._instance.getY() + this.getDefaultHeight() * (0.5 - alignmentY);
-        this._pixiObject.anchor.y = 0.5;
+        this._threeObject.scale.y = this.getDefaultHeight();
 
-        this._pixiObject.rotation = RenderedInstance.toRad(
+        this._threeObject.rotation.z = -RenderedInstance.toRad(
           this._instance.getAngle()
         );
 
-        // Do not hide completely an object so it can still be manipulated
         const alphaForDisplay = Math.max(
           this._instance.getOpacity() / 255,
           0.5
         );
-        this._pixiObject.alpha = alphaForDisplay;
+        this._threeObject.material.opacity = alphaForDisplay;
+        this._threeObject.material.transparent = true;
       }
 
       onRemovedFromScene() {
-        RenderedInstance.prototype.onRemovedFromScene.call(this);
-
-        const fontName = this._pixiObject.fontName;
-        // Belt & suspenders: if the font was already uninstalled (e.g. by
-        // clearCache), switch to default before destroy to avoid a PIXI crash.
-        if (!PIXI.BitmapFont.available[fontName]) {
-          this._pixiObject.fontName = getDefaultBitmapFont().font;
+        super.onRemovedFromScene();
+        if (this._threeObject) {
+          if (this._threeObject.material) {
+            this._threeObject.material.dispose();
+          }
+          if (this._threeObject.geometry) {
+            this._threeObject.geometry.dispose();
+          }
+          this._threeObject.userData.instance = null;
+          this._threeObject = null;
         }
-        this._pixiObject.destroy();
-        if (PIXI.BitmapFont.available[fontName]) {
-          releaseBitmapFont(fontName);
+        if (this._canvasTexture) {
+          this._canvasTexture.dispose();
         }
       }
 
       getDefaultWidth() {
-        return this._pixiObject.textWidth * this._pixiObject.scale.x;
+        return this._canvas.width;
       }
 
       getDefaultHeight() {
-        return this._pixiObject.textHeight * this._pixiObject.scale.y;
+        return this._canvas.height;
       }
 
       getOriginY() {

@@ -1,5 +1,5 @@
 // @flow
-import * as PIXI from 'pixi.js-legacy';
+import * as THREE from 'three';
 
 type Props = {
   width: number,
@@ -9,25 +9,16 @@ type Props = {
 
 export default class Background {
   // $FlowFixMe[value-as-type]
-  _checkeredBackground: PIXI.TilingSprite;
+  _checkeredBackground: THREE.Group;
 
   constructor({ width, height, layout }: Props) {
-    this._checkeredBackground = new PIXI.TilingSprite(
-      new PIXI.Texture(PIXI.Texture.from('res/transparentback.png')),
-      width,
-      height
-    );
-    this._checkeredBackground.tint = 0x444444;
-    this._checkeredBackground.visible = !layout;
+    this._checkeredBackground = new THREE.Group();
   }
 
-  resize(width: number, height: number) {
-    this._checkeredBackground.width = width;
-    this._checkeredBackground.height = height;
-  }
+  resize(width: number, height: number) {}
 
   // $FlowFixMe[value-as-type]
-  getPixiObject(): PIXI.TilingSprite {
+  getThreeObject(): THREE.Group {
     return this._checkeredBackground;
   }
 

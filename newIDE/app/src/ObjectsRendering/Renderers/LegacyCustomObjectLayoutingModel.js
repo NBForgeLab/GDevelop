@@ -616,7 +616,7 @@ export type InitialInstanceDimension = {
  */
 export interface ChildRenderedInstance {
   +_instance: InitialInstanceDimension;
-  _pixiObject: { height: number };
+  _threeObject: { height: number };
   getDefaultWidth(): number;
   getDefaultHeight(): number;
   getOriginX(): number;
@@ -715,7 +715,7 @@ export const applyChildLayouts = <T: ChildRenderedInstance>(
       // custom ones (preferred ones).
       // For instance, text object dimensions change according to how the text is wrapped.
       childInstance.y +=
-        (expectedHeight - renderedInstance._pixiObject.height) / 2;
+        (expectedHeight - renderedInstance._threeObject.height) / 2;
     } else {
       const anchorOrigin = childLayout.verticalLayout.anchorOrigin || 0;
       const anchorTarget = childLayout.verticalLayout.anchorTarget || 0;

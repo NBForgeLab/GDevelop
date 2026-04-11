@@ -1,12 +1,15 @@
 // @flow
 import RenderedInstance from './RenderedInstance';
-import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
+import ThreeResourcesLoader from '../../ObjectsRendering/ThreeResourcesLoader';
 import ResourcesLoader from '../../ResourcesLoader';
-import * as PIXI from 'pixi.js-legacy';
+import * as THREE from 'three';
 const gd: libGDevelop = global.gd;
 
+const sharedGeometry = new THREE.PlaneGeometry(1, 1);
+sharedGeometry.translate(0.5, -0.5, 0);
+
 /**
- * Renderer for gd.SpriteObject
+ * Renderer for gd.SpriteObject using Three.js.
  */
 export default class RenderedSpriteInstance extends RenderedInstance {
   _renderedAnimation: number;
@@ -18,21 +21,22 @@ export default class RenderedSpriteInstance extends RenderedInstance {
   _sprite: ?gdSprite = null;
   _shouldNotRotate: boolean = false;
   _preScale = 1;
+  _currentThreeTexture: THREE.Texture | null = null;
 
   constructor(
     project: gdProject,
     instance: gdInitialInstance,
     associatedObjectConfiguration: gdObjectConfiguration,
     // $FlowFixMe[value-as-type]
-    pixiContainer: PIXI.Container,
-    pixiResourcesLoader: Class<PixiResourcesLoader>
+    threeGroup: THREE.Group,
+    resourcesLoader: Class<ThreeResourcesLoader>
   ) {
     super(
       project,
       instance,
       associatedObjectConfiguration,
-      pixiContainer,
-      pixiResourcesLoader
+      threeGroup,
+      resourcesLoader
     );
 
     this._renderedAnimation = 0;
@@ -42,26 +46,31 @@ export default class RenderedSpriteInstance extends RenderedInstance {
     this._originX = 0;
     this._originY = 0;
 
-    //Setup the PIXI object:
-    this._pixiObject = new PIXI.Sprite(
-      this._pixiResourcesLoader.getLegacyInvalidPixiTexture()
-    );
-    this._pixiContainer.addChild(this._pixiObject);
-    this.updatePIXITextureAndSprite();
+    const material = new THREE.MeshBasicMaterial({
+      map: this._resourcesLoader.getInvalidThreeTexture(),
+      color: 0xffffff,
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    });
+
+    this._threeObject = new THREE.Mesh(sharedGeometry, material);
+    this._threeObject.userData.instance = instance;
+    this._threeObject.rotation.order = 'ZYX';
+    this._layerGroup.add(this._threeObject);
+    this.updateThreeTextureAndSprite();
   }
 
   onRemovedFromScene(): void {
-    super.onRemovedFromScene();
-    // Keep textures because they are shared by all sprites.
-    this._pixiObject.destroy(false);
-    // Avoid to use _pixiObject after destroy is called.
-    // It can happen when onRemovedFromScene and update cross each other.
-    this._pixiObject = null;
+    if (this._threeObject) {
+      this._layerGroup.remove(this._threeObject);
+      if (this._threeObject.material) this._threeObject.material.dispose();
+      this._threeObject.userData.instance = null;
+      this._threeObject = null;
+    }
+    this._wasDestroyed = true;
   }
 
-  /**
-   * Return a URL for thumbnail of the specified object.
-   */
   static getThumbnail(
     project: gdProject,
     resourcesLoader: Class<ResourcesLoader>,
@@ -89,47 +98,39 @@ export default class RenderedSpriteInstance extends RenderedInstance {
     return 'res/unknown32.png';
   }
 
-  updatePIXISprite(): void {
-    // Avoid to use _pixiObject after destroy is called.
-    // It can happen when onRemovedFromScene and update cross each other.
-    if (!this._pixiObject) {
-      return;
-    }
-    const objectTextureFrame = this._pixiObject.texture.frame;
-    // In case the texture is not loaded yet, we don't want to crash.
-    if (!objectTextureFrame) return;
+  updateThreeObject(): void {
+    if (!this._threeObject) return;
 
-    this._pixiObject.anchor.x = this._centerX / objectTextureFrame.width;
-    this._pixiObject.anchor.y = this._centerY / objectTextureFrame.height;
-    this._pixiObject.rotation = this._shouldNotRotate
+    const image = this._currentThreeTexture && this._currentThreeTexture.image;
+    const textureWidth = image && image.width ? image.width : 32;
+    const textureHeight = image && image.height ? image.height : 32;
+
+    const scaleX = this._instance.hasCustomSize()
+      ? this.getCustomWidth() / Math.max(1, textureWidth)
+      : this._preScale;
+    const scaleY = this._instance.hasCustomSize()
+      ? this.getCustomHeight() / Math.max(1, textureHeight)
+      : this._preScale;
+
+    this._threeObject.scale.set(
+      Math.abs(scaleX) * (this._instance.isFlippedX() ? -1 : 1),
+      Math.abs(scaleY) * (this._instance.isFlippedY() ? -1 : 1),
+      1
+    );
+    this._threeObject.rotation.z = this._shouldNotRotate
       ? 0
-      : RenderedInstance.toRad(this._instance.getAngle());
-    if (this._instance.hasCustomSize()) {
-      this._pixiObject.scale.x =
-        this.getCustomWidth() / objectTextureFrame.width;
-      this._pixiObject.scale.y =
-        this.getCustomHeight() / objectTextureFrame.height;
-    } else {
-      this._pixiObject.scale.x = this._preScale;
-      this._pixiObject.scale.y = this._preScale;
-    }
-    this._pixiObject.position.x =
+      : -RenderedInstance.toRad(this._instance.getAngle());
+    this._threeObject.position.x =
       this._instance.getX() +
-      (this._centerX - this._originX) * Math.abs(this._pixiObject.scale.x);
-    this._pixiObject.position.y =
+      (this._centerX - this._originX) * Math.abs(scaleX);
+    this._threeObject.position.y =
       this._instance.getY() +
-      (this._centerY - this._originY) * Math.abs(this._pixiObject.scale.y);
+      (this._originY - this._centerY) * Math.abs(scaleY);
+    this._threeObject.position.z = this._instance.getZ();
 
-    // Do not hide completely an object so it can still be manipulated
     const alphaForDisplay = Math.max(this._instance.getOpacity() / 255, 0.5);
-    this._pixiObject.alpha = alphaForDisplay;
-
-    this._pixiObject.scale.x =
-      Math.abs(this._pixiObject.scale.x) *
-      (this._instance.isFlippedX() ? -1 : 1);
-    this._pixiObject.scale.y =
-      Math.abs(this._pixiObject.scale.y) *
-      (this._instance.isFlippedY() ? -1 : 1);
+    this._threeObject.material.opacity = alphaForDisplay;
+    this._threeObject.material.transparent = true;
   }
 
   updateSprite(): boolean {
@@ -162,7 +163,6 @@ export default class RenderedSpriteInstance extends RenderedInstance {
       this._renderedDirection = 0;
 
     const direction = animation.getDirection(this._renderedDirection);
-
     if (direction.getSpritesCount() === 0) return false;
 
     this._shouldNotRotate = animation.useMultipleDirections();
@@ -170,95 +170,106 @@ export default class RenderedSpriteInstance extends RenderedInstance {
     return true;
   }
 
-  updatePIXITextureAndSprite(): void {
-    // Avoid to use _pixiObject after destroy is called.
-    // It can happen when onRemovedFromScene and update cross each other.
-    if (!this._pixiObject) {
-      return;
-    }
+  updateThreeTextureAndSprite(): void {
+    if (!this._threeObject) return;
+
     this.updateSprite();
     const sprite = this._sprite;
-    if (!sprite) return;
-
-    const texture = this._pixiResourcesLoader.getLegacyPixiTexture(
-      this._project,
-      sprite.getImageName()
-    );
-    this._pixiObject.texture = texture;
-
-    if (!texture.baseTexture || !texture.baseTexture.valid) {
-      // Post pone texture update if texture is not loaded.
-      texture.once('update', () => {
-        if (this._wasDestroyed) return;
-        this.updatePIXITextureAndSprite();
-      });
+    if (!sprite) {
+      this._currentThreeTexture = this._resourcesLoader.getInvalidThreeTexture();
+      this._threeObject.material.map = this._currentThreeTexture;
+      this._threeObject.material.needsUpdate = true;
+      this.updateThreeObject();
       return;
     }
 
-    const origin = sprite.getOrigin();
-    this._originX = origin.getX();
-    this._originY = origin.getY();
+    this._resourcesLoader
+      .getThreeTexture(this._project, sprite.getImageName())
+      .then(texture => {
+        if (this._wasDestroyed || !this._threeObject) return;
 
-    if (sprite.isDefaultCenterPoint()) {
-      this._centerX = texture.width / 2;
-      this._centerY = texture.height / 2;
-    } else {
-      const center = sprite.getCenter();
-      this._centerX = center.getX();
-      this._centerY = center.getY();
-    }
+        this._currentThreeTexture = texture;
+        this._threeObject.material.map = texture;
+        this._threeObject.material.needsUpdate = true;
 
-    this.updatePIXISprite();
+        const origin = sprite.getOrigin();
+        this._originX = origin.getX();
+        this._originY = origin.getY();
+
+        const image = texture.image;
+        const textureWidth = image && image.width ? image.width : 32;
+        const textureHeight = image && image.height ? image.height : 32;
+
+        if (sprite.isDefaultCenterPoint()) {
+          this._centerX = textureWidth / 2;
+          this._centerY = textureHeight / 2;
+        } else {
+          const center = sprite.getCenter();
+          this._centerX = center.getX();
+          this._centerY = center.getY();
+        }
+
+        this.updateThreeObject();
+      });
   }
 
   update(): void {
+    if (!this._threeObject) return;
+
     const animation = this._instance.getRawDoubleProperty('animation');
     if (this._renderedAnimation !== animation) {
-      this.updatePIXITextureAndSprite();
-    } else {
-      this.updatePIXISprite();
+      this.updateThreeTextureAndSprite();
+      return;
     }
+
+    this.updateThreeObject();
   }
 
   getOriginX(): number {
-    if (!this._sprite || !this._pixiObject) return 0;
-
-    return this._sprite.getOrigin().getX() * Math.abs(this._pixiObject.scale.x);
+    const image = this._currentThreeTexture && this._currentThreeTexture.image;
+    const textureWidth = image && image.width ? image.width : 32;
+    const scaleX = this._instance.hasCustomSize()
+      ? this.getCustomWidth() / Math.max(1, textureWidth)
+      : this._preScale;
+    return this._originX * Math.abs(scaleX);
   }
 
   getOriginY(): number {
-    if (!this._sprite || !this._pixiObject) return 0;
-
-    return this._sprite.getOrigin().getY() * Math.abs(this._pixiObject.scale.y);
+    const image = this._currentThreeTexture && this._currentThreeTexture.image;
+    const textureHeight = image && image.height ? image.height : 32;
+    const scaleY = this._instance.hasCustomSize()
+      ? this.getCustomHeight() / Math.max(1, textureHeight)
+      : this._preScale;
+    return this._originY * Math.abs(scaleY);
   }
 
   getDefaultWidth(): number {
-    const objectTextureFrame = this._pixiObject.texture.frame;
-    // In case the texture is not loaded yet, we don't want to crash.
-    if (!objectTextureFrame) return 32;
-
-    return Math.abs(objectTextureFrame.width) * this._preScale;
+    const image = this._currentThreeTexture && this._currentThreeTexture.image;
+    const width = image && image.width ? image.width : 32;
+    return Math.abs(width) * this._preScale;
   }
 
   getDefaultHeight(): number {
-    const objectTextureFrame = this._pixiObject.texture.frame;
-    // In case the texture is not loaded yet, we don't want to crash.
-    if (!objectTextureFrame) return 32;
-
-    return Math.abs(objectTextureFrame.height) * this._preScale;
+    const image = this._currentThreeTexture && this._currentThreeTexture.image;
+    const height = image && image.height ? image.height : 32;
+    return Math.abs(height) * this._preScale;
   }
 
   getCenterX(): number {
-    if (!this._sprite || !this._pixiObject) return 0;
-    return (
-      this._centerX * Math.abs(this._pixiObject.scale.x) // This is equivalent to `this._animationFrame.center.x * Math.abs(this._scaleX)` in the runtime.
-    );
+    const image = this._currentThreeTexture && this._currentThreeTexture.image;
+    const textureWidth = image && image.width ? image.width : 32;
+    const scaleX = this._instance.hasCustomSize()
+      ? this.getCustomWidth() / Math.max(1, textureWidth)
+      : this._preScale;
+    return this._centerX * Math.abs(scaleX);
   }
 
   getCenterY(): number {
-    if (!this._sprite || !this._pixiObject) return 0;
-    return (
-      this._centerY * Math.abs(this._pixiObject.scale.y) // This is equivalent to `this._animationFrame.center.y * Math.abs(this._scaleY)` in the runtime.
-    );
+    const image = this._currentThreeTexture && this._currentThreeTexture.image;
+    const textureHeight = image && image.height ? image.height : 32;
+    const scaleY = this._instance.hasCustomSize()
+      ? this.getCustomHeight() / Math.max(1, textureHeight)
+      : this._preScale;
+    return this._centerY * Math.abs(scaleY);
   }
 }

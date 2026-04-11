@@ -1,8 +1,6 @@
 // @flow
 import Rendered3DInstance from './Rendered3DInstance';
-import PixiResourcesLoader from '../PixiResourcesLoader';
-import ResourcesLoader from '../../ResourcesLoader';
-import * as PIXI from 'pixi.js-legacy';
+import ResourcesLoader from '../ThreeResourcesLoader';
 import * as THREE from 'three';
 
 const gd: libGDevelop = global.gd;
@@ -43,18 +41,18 @@ export default class RenderedSprite3DInstance extends Rendered3DInstance {
     instance: gdInitialInstance,
     associatedObjectConfiguration: gdObjectConfiguration,
     // $FlowFixMe[value-as-type]
-    pixiContainer: PIXI.Container,
+    threeGroup2D: THREE.Group,
     // $FlowFixMe[value-as-type]
     threeGroup: THREE.Group,
-    pixiResourcesLoader: Class<PixiResourcesLoader>
+    resourcesLoader: Class<ResourcesLoader>
   ) {
     super(
       project,
       instance,
       associatedObjectConfiguration,
-      pixiContainer,
+      threeGroup2D,
       threeGroup,
-      pixiResourcesLoader
+      resourcesLoader
     );
 
     this._renderedAnimation = 0;
@@ -64,8 +62,9 @@ export default class RenderedSprite3DInstance extends Rendered3DInstance {
     this._originX = 0;
     this._originY = 0;
 
-    this._pixiObject = new PIXI.Graphics();
-    this._pixiContainer.addChild(this._pixiObject);
+    this._threeObject = new THREE.Group();
+    this._threeObject.userData.instance = instance;
+    this._layerGroup.add(this._threeObject);
 
     this.updateSprite();
     const geometry = new THREE.PlaneGeometry(1, -1);
@@ -81,6 +80,7 @@ export default class RenderedSprite3DInstance extends Rendered3DInstance {
     threeObject.rotation.order = 'ZYX';
     this._threeGroup.add(threeObject);
     this._threeObject = threeObject;
+    this._threeObject.userData.instance = instance;
 
     this.updateTextureAndSprite();
   }
@@ -88,7 +88,8 @@ export default class RenderedSprite3DInstance extends Rendered3DInstance {
   onRemovedFromScene(): void {
     super.onRemovedFromScene();
     // Keep textures because they are shared by all sprites.
-    this._pixiObject.destroy(false);
+    if (this._threeObject) this._threeObject.userData.instance = null;
+    this._threeObject = null;
   }
 
   /**
@@ -202,26 +203,15 @@ export default class RenderedSprite3DInstance extends Rendered3DInstance {
     // An empty image name will display a place holder.
     const imageName = sprite ? sprite.getImageName() : '';
 
-    // Note that `getLegacyPixiTexture` could be refactored to return a promise
-    // to make it nicer to use (no need to use "once('update')" pattern).
-    const texture = this._pixiResourcesLoader.getLegacyPixiTexture(
+    const texture = await this._resourcesLoader.getThreeTexture(
       this._project,
       imageName
     );
-    this._pixiObject.texture = texture;
 
-    if (!texture.baseTexture.valid) {
-      // Post pone texture update if texture is not loaded.
-      texture.once('update', () => {
-        if (this._wasDestroyed) return;
-        this.updateTextureAndSprite();
-      });
-      return;
-    }
-    this._textureWidth = texture.width;
-    this._textureHeight = texture.height;
+    this._textureWidth = texture.image ? texture.image.width : 32;
+    this._textureHeight = texture.image ? texture.image.height : 32;
 
-    const material = await this._pixiResourcesLoader.getThreeMaterial(
+    const material = await this._resourcesLoader.getThreeMaterial(
       this._project,
       imageName,
       {
@@ -256,57 +246,26 @@ export default class RenderedSprite3DInstance extends Rendered3DInstance {
     } else {
       this.updateThreeObject();
     }
-    this.updatePixiObject();
+    this.updateOverlayObject();
   }
 
-  updatePixiObject() {
-    const width = this.getDefaultWidth();
-    const height = this.getDefaultHeight();
+  updateOverlayObject() {
+    if (!this._threeObject) return;
 
-    const minX = -this._originX;
-    const minY = -this._originY;
-    const maxX = minX + width;
-    const maxY = minY + height;
-
-    this._pixiObject.clear();
-    this._pixiObject.beginFill(0x999999, 0.2);
-    this._pixiObject.lineStyle(1, 0xffd900, 0);
-    this._pixiObject.moveTo(minX, minY);
-    this._pixiObject.lineTo(maxX, minY);
-    this._pixiObject.lineTo(maxX, maxY);
-    this._pixiObject.lineTo(minX, maxY);
-    this._pixiObject.endFill();
-
-    this._pixiObject.pivot.x = this._centerX - this._originX;
-    this._pixiObject.pivot.y = this._centerY - this._originY;
-    this._pixiObject.rotation = this._shouldNotRotate
-      ? 0
-      : Rendered3DInstance.toRad(this._instance.getAngle());
-    if (this._instance.hasCustomSize()) {
-      this._pixiObject.scale.x = this.getCustomWidth() / width;
-      this._pixiObject.scale.y = this.getCustomHeight() / height;
-    } else {
-      this._pixiObject.scale.x = 1;
-      this._pixiObject.scale.y = 1;
-    }
-    this._pixiObject.position.x =
-      this._instance.getX() +
-      (this._centerX - this._originX) * Math.abs(this._pixiObject.scale.x);
-    this._pixiObject.position.y =
-      this._instance.getY() +
-      (this._centerY - this._originY) * Math.abs(this._pixiObject.scale.y);
+    this._threeObject.position.x =
+      this._instance.getX() + (this._centerX - this._originX);
+    this._threeObject.position.y =
+      this._instance.getY() + (this._centerY - this._originY);
   }
 
   getOriginX(): number {
-    if (!this._sprite || !this._pixiObject) return 0;
-
-    return this._sprite.getOrigin().getX() * this._pixiObject.scale.x;
+    if (!this._sprite || !this._threeObject) return 0;
+    return this._sprite.getOrigin().getX();
   }
 
   getOriginY(): number {
-    if (!this._sprite || !this._pixiObject) return 0;
-
-    return this._sprite.getOrigin().getY() * this._pixiObject.scale.y;
+    if (!this._sprite || !this._threeObject) return 0;
+    return this._sprite.getOrigin().getY();
   }
 
   getDefaultWidth(): number {
@@ -322,12 +281,12 @@ export default class RenderedSprite3DInstance extends Rendered3DInstance {
   }
 
   getCenterX(): number {
-    if (!this._sprite || !this._pixiObject) return 0;
-    return this._centerX * this._pixiObject.scale.x;
+    if (!this._sprite || !this._threeObject) return 0;
+    return this._centerX;
   }
 
   getCenterY(): number {
-    if (!this._sprite || !this._pixiObject) return 0;
-    return this._centerY * this._pixiObject.scale.y;
+    if (!this._sprite || !this._threeObject) return 0;
+    return this._centerY;
   }
 }

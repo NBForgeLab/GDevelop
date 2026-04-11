@@ -1,9 +1,9 @@
 // @flow
 
-// TODO: PixiResourcesLoader is typed with "any" in the codebase. It should be typed
+// TODO: ThreeResourcesLoader is typed with "any" in the codebase. It should be typed
 // and then this mock and any function needing it can use this type.
-export const PixiResourcesLoaderMock = {
-  getPIXITexture: (
+export const ThreeResourcesLoaderMock = {
+  getThreeTexture: (
     project: gdProject,
     resourceName: string
   ): { height: number, valid: boolean, width: number } => {

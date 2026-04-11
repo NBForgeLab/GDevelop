@@ -336,7 +336,7 @@ export type InitialInstanceDimension = {
  */
 export interface ChildRenderedInstance {
   +_instance: InitialInstanceDimension;
-  _pixiObject: { height: number };
+  _threeObject: { height: number };
   getDefaultWidth(): number;
   getDefaultHeight(): number;
   getWidth(): number;

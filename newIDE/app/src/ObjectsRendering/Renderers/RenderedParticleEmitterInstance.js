@@ -1,97 +1,86 @@
 // @flow
 import RenderedInstance from './RenderedInstance';
-import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
-import ResourcesLoader from '../../ResourcesLoader';
-import * as PIXI from 'pixi.js-legacy';
-import { rgbOrHexToHexNumber } from '../../Utils/ColorTransformer';
+import ThreeResourcesLoader from '../../ObjectsRendering/ThreeResourcesLoader';
+import * as THREE from 'three';
 const gd: libGDevelop = global.gd;
 
 /**
  * Renderer for an ParticleEmitter object.
  */
 export default class RenderedParticleEmitterInstance extends RenderedInstance {
+  _material: any;
+
   constructor(
     project: gdProject,
     instance: gdInitialInstance,
     associatedObjectConfiguration: gdObjectConfiguration,
     // $FlowFixMe[value-as-type]
-    pixiContainer: PIXI.Container,
-    pixiResourcesLoader: Class<PixiResourcesLoader>
+    threeGroup: THREE.Group,
+    resourcesLoader: Class<ThreeResourcesLoader>
   ) {
     super(
       project,
       instance,
       associatedObjectConfiguration,
-      pixiContainer,
-      pixiResourcesLoader
+      threeGroup,
+      resourcesLoader
     );
 
-    this._pixiObject = new PIXI.Graphics();
-    this._pixiContainer.addChild(this._pixiObject);
-    this.updateGraphics();
+    const texture = new THREE.TextureLoader().load(
+      'CppPlatform/Extensions/particleSystemicon.png'
+    );
+    texture.colorSpace = THREE.SRGBColorSpace;
+
+    const geometry = new THREE.PlaneGeometry(32, 32);
+
+    this._material = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    });
+
+    this._threeObject = new THREE.Mesh(geometry, this._material);
+    this._threeObject.userData.instance = instance;
+    this._threeObject.rotation.order = 'ZYX';
+    this._layerGroup.add(this._threeObject);
+    this.update();
   }
 
-  /**
-   * Return a URL for thumbnail of the specified object.
-   */
+  onRemovedFromScene(): void {
+    if (this._threeObject) {
+      this._layerGroup.remove(this._threeObject);
+      if (this._threeObject.material) {
+        if (this._threeObject.material.map)
+          this._threeObject.material.map.dispose();
+        this._threeObject.material.dispose();
+      }
+      if (this._threeObject.geometry) {
+        this._threeObject.geometry.dispose();
+      }
+      this._threeObject.userData.instance = null;
+      this._threeObject = null;
+    }
+    this._wasDestroyed = true;
+  }
+
   static getThumbnail(
     project: gdProject,
-    resourcesLoader: Class<ResourcesLoader>,
+    resourcesLoader: Class<ThreeResourcesLoader>,
     objectConfiguration: gdObjectConfiguration
   ): any {
     return 'CppPlatform/Extensions/particleSystemicon.png';
   }
 
   update() {
-    this._pixiObject.position.x = this._instance.getX();
-    this._pixiObject.position.y = this._instance.getY();
+    if (!this._threeObject) return;
+    this._threeObject.position.x = this._instance.getX();
+    this._threeObject.position.y = this._instance.getY();
     // Do not hide completely an object so it can still be manipulated
     const alphaForDisplay = Math.max(this._instance.getOpacity() / 255, 0.5);
-    this._pixiObject.alpha = alphaForDisplay;
+    this._material.opacity = alphaForDisplay;
 
-    this.updateGraphics();
-  }
-
-  /**
-   * Render the preview of the particle emitter according to the setup of the object
-   */
-  updateGraphics() {
-    const particleEmitterConfiguration = gd.asParticleEmitterConfiguration(
-      this._associatedObjectConfiguration
-    );
-
-    this._pixiObject.clear();
-
-    const emitterAngle = (this._instance.getAngle() / 180) * 3.14159;
-    const sprayConeAngle = particleEmitterConfiguration.getConeSprayAngle();
-    const line1Angle = emitterAngle - (sprayConeAngle / 2.0 / 180.0) * 3.14159;
-    const line2Angle = emitterAngle + (sprayConeAngle / 2.0 / 180.0) * 3.14159;
-    const length = 64;
-
-    this._pixiObject.beginFill(0, 0);
-    this._pixiObject.lineStyle(
-      3,
-      rgbOrHexToHexNumber(particleEmitterConfiguration.getParticleColor2()),
-      1
-    );
-    this._pixiObject.moveTo(0, 0);
-    this._pixiObject.lineTo(
-      Math.cos(line1Angle) * length,
-      Math.sin(line1Angle) * length
-    );
-    this._pixiObject.moveTo(0, 0);
-    this._pixiObject.lineTo(
-      Math.cos(line2Angle) * length,
-      Math.sin(line2Angle) * length
-    );
-    this._pixiObject.endFill();
-
-    this._pixiObject.lineStyle(0, 0x000000, 1);
-    this._pixiObject.beginFill(
-      rgbOrHexToHexNumber(particleEmitterConfiguration.getParticleColor1())
-    );
-    this._pixiObject.drawCircle(0, 0, 8);
-    this._pixiObject.endFill();
+    // TODO: implement 3D line primitive drawing for cone approximation
   }
 
   getDefaultWidth(): any {

@@ -233,7 +233,7 @@ export type RelatedAiRequestLastMessages = {|
 |};
 
 type LaunchFunctionOptionsWithoutProject = {|
-  PixiResourcesLoader: any,
+  ThreeResourcesLoader: any,
   args: any,
   editorCallbacks: EditorCallbacks,
   toolOptions: ToolOptions | null,
@@ -687,7 +687,7 @@ const createOrReplaceObject: EditorFunction = {
     onObjectsModifiedOutsideEditor,
     onWillInstallExtension,
     onExtensionInstalled,
-    PixiResourcesLoader,
+    ThreeResourcesLoader,
   }) => {
     const scene_name = extractRequiredString(args, 'scene_name');
     const object_type = extractRequiredString(args, 'object_type');
@@ -853,7 +853,7 @@ const createOrReplaceObject: EditorFunction = {
                 [object.getName()]: getObjectSizeInfo(
                   object,
                   project,
-                  PixiResourcesLoader,
+                  ThreeResourcesLoader,
                   assetShortHeader
                 ),
               },
@@ -936,7 +936,7 @@ const createOrReplaceObject: EditorFunction = {
         [targetObjectName]: getObjectSizeInfo(
           object,
           project,
-          PixiResourcesLoader
+          ThreeResourcesLoader
         ),
       };
       return scratchResult;
@@ -1002,7 +1002,7 @@ const createOrReplaceObject: EditorFunction = {
         ) {
           swapAsset(
             project,
-            PixiResourcesLoader,
+            ThreeResourcesLoader,
             existingTargetObject,
             createdObjects[0],
             assetShortHeader
@@ -1211,7 +1211,7 @@ const inspectObjectProperties: EditorFunction = {
       ),
     };
   },
-  launchFunction: async ({ project, args, PixiResourcesLoader }) => {
+  launchFunction: async ({ project, args, ThreeResourcesLoader }) => {
     const scene_name = extractRequiredString(args, 'scene_name');
     const object_name = extractRequiredString(args, 'object_name');
 
@@ -1285,7 +1285,7 @@ const inspectObjectProperties: EditorFunction = {
         .filter(Boolean)
         .join('-'),
       objectSizeInfo: {
-        [object_name]: getObjectSizeInfo(object, project, PixiResourcesLoader),
+        [object_name]: getObjectSizeInfo(object, project, ThreeResourcesLoader),
       },
     };
     if (animationNames.length > 0) {
@@ -2321,7 +2321,7 @@ const describeInstances: EditorFunction = {
       ),
     };
   },
-  launchFunction: async ({ project, args, PixiResourcesLoader }) => {
+  launchFunction: async ({ project, args, ThreeResourcesLoader }) => {
     const scene_name = extractRequiredString(args, 'scene_name');
     const filter_by_object_name =
       SafeExtractor.extractStringProperty(args, 'filter_by_object_name') || '';
@@ -2367,7 +2367,7 @@ const describeInstances: EditorFunction = {
           }
 
           const defaultSize = object
-            ? getObjectSizeInfo(object, project, PixiResourcesLoader)
+            ? getObjectSizeInfo(object, project, ThreeResourcesLoader)
             : { width: 0, height: 0, depth: 0 };
 
           const width = instance.hasCustomSize()
@@ -2537,7 +2537,7 @@ const put2dInstances: EditorFunction = {
     project,
     args,
     onInstancesModifiedOutsideEditor,
-    PixiResourcesLoader,
+    ThreeResourcesLoader,
   }) => {
     const scene_name = extractRequiredString(args, 'scene_name');
     const object_name = SafeExtractor.extractStringProperty(
@@ -2589,7 +2589,7 @@ const put2dInstances: EditorFunction = {
       }
     }
     const objectSizeInfo = namedObject
-      ? getObjectSizeInfo(namedObject, project, PixiResourcesLoader)
+      ? getObjectSizeInfo(namedObject, project, ThreeResourcesLoader)
       : null;
 
     // Check if layer exists (empty string is allowed for base layer)
@@ -3107,7 +3107,7 @@ const put3dInstances: EditorFunction = {
     project,
     args,
     onInstancesModifiedOutsideEditor,
-    PixiResourcesLoader,
+    ThreeResourcesLoader,
   }) => {
     const scene_name = extractRequiredString(args, 'scene_name');
     const object_name = SafeExtractor.extractStringProperty(
@@ -3159,7 +3159,7 @@ const put3dInstances: EditorFunction = {
       }
     }
     const objectSizeInfo = namedObject
-      ? getObjectSizeInfo(namedObject, project, PixiResourcesLoader)
+      ? getObjectSizeInfo(namedObject, project, ThreeResourcesLoader)
       : null;
 
     // Check if layer exists (empty string is allowed for base layer)
