@@ -1,7 +1,7 @@
 // @ts-check
 describe('gdjs.TweenRuntimeBehavior', () => {
   const createScene = (timeDelta = 1000 / 60) => {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
     runtimeScene._timeManager.getElapsedTime = () => {
       return timeDelta;

@@ -97,7 +97,7 @@ describe('gdjs.ResourceLoader', () => {
 
   it('should load first scene resources, then others in background', async () => {
     const mockedResourceManager = new gdjs.MockedResourceManager();
-    const runtimeGame = gdjs.getPixiRuntimeGame(gameSettingsWithThreeScenes);
+    const runtimeGame = gdjs.getRuntimeGame(gameSettingsWithThreeScenes);
     const resourceLoader = runtimeGame.getResourceLoader();
     resourceLoader.injectMockResourceManagerForTesting(
       'fake-resource-kind-for-testing-only',
@@ -190,7 +190,7 @@ describe('gdjs.ResourceLoader', () => {
 
   it('should unload only resources unique to the unloaded scene', async () => {
     const mockedResourceManager = new gdjs.MockedResourceManager();
-    const runtimeGame = gdjs.getPixiRuntimeGame(gameSettingsWithThreeScenes);
+    const runtimeGame = gdjs.getRuntimeGame(gameSettingsWithThreeScenes);
     const resourceLoader = runtimeGame.getResourceLoader();
     resourceLoader.injectMockResourceManagerForTesting(
       'fake-resource-kind-for-testing-only',
@@ -271,7 +271,7 @@ describe('gdjs.ResourceLoader', () => {
 
   it('should unload shared resources only when no other scene uses them', async () => {
     const mockedResourceManager = new gdjs.MockedResourceManager();
-    const runtimeGame = gdjs.getPixiRuntimeGame(gameSettingsWithThreeScenes);
+    const runtimeGame = gdjs.getRuntimeGame(gameSettingsWithThreeScenes);
     const resourceLoader = runtimeGame.getResourceLoader();
     resourceLoader.injectMockResourceManagerForTesting(
       'fake-resource-kind-for-testing-only',
@@ -322,7 +322,7 @@ describe('gdjs.ResourceLoader', () => {
 
   it('should handle background scene loading progress correctly', async () => {
     const mockedResourceManager = new gdjs.MockedResourceManager();
-    const runtimeGame = gdjs.getPixiRuntimeGame(gameSettingsWithThreeScenes);
+    const runtimeGame = gdjs.getRuntimeGame(gameSettingsWithThreeScenes);
     const resourceLoader = runtimeGame.getResourceLoader();
     resourceLoader.injectMockResourceManagerForTesting(
       'fake-resource-kind-for-testing-only',

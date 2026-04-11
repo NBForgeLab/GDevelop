@@ -128,7 +128,10 @@ namespace gdjs {
       if (!this._texture) {
         return;
       }
-      const textureWidth = Math.max(getTextureImageSize(this._texture).width, 1);
+      const textureWidth = Math.max(
+        getTextureImageSize(this._texture).width,
+        1
+      );
       this._texture.offset.x = -this._object._xOffset / textureWidth;
       this._texture.needsUpdate = true;
     }

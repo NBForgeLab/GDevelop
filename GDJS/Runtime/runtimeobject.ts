@@ -208,8 +208,7 @@ namespace gdjs {
     protected _variables: gdjs.VariablesContainer;
 
     //Effects:
-    protected _rendererEffects: Record<string, gdjs.EffectsTools.Filter> =
-      {};
+    protected _rendererEffects: Record<string, gdjs.EffectsTools.Filter> = {};
 
     //Forces:
     protected _instantForces: gdjs.Force[] = [];
@@ -716,7 +715,7 @@ namespace gdjs {
 
     //Rendering:
     /**
-   * @return The internal object for a 2D rendering.
+     * @return The internal object for a 2D rendering.
      */
     getRendererObject(): RendererObjectInterface | null | undefined {
       return undefined;

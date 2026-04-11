@@ -9,7 +9,7 @@ describe('gdjs.AnchorRuntimeBehavior', () => {
   /** @type {gdjs.RuntimeLayer} */
   let layer;
   beforeEach(() => {
-    runtimeGame = gdjs.getPixiRuntimeGame({
+    runtimeGame = gdjs.getRuntimeGame({
       propertiesOverrides: { windowHeight: 1000, windowWidth: 1000 },
     });
     runtimeScene = new gdjs.RuntimeScene(runtimeGame);

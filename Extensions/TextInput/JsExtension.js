@@ -823,7 +823,9 @@ module.exports = {
           instance.getRawStringProperty('initialValue') ||
           object.content.initialValue;
         const hasInitialValue = initialValue !== '';
-        const displayedText = hasInitialValue ? initialValue : placeholder || ' ';
+        const displayedText = hasInitialValue
+          ? initialValue
+          : placeholder || ' ';
 
         const textColor = object.content.textColor;
         const finalTextColor = hasInitialValue
@@ -909,7 +911,8 @@ module.exports = {
         this._context.clearRect(0, 0, canvasWidth, canvasHeight);
         this._context.fillStyle = `rgba(${(fillOpacity / 255).toFixed(3)}, ${(fillOpacity / 255).toFixed(3)}, ${(fillOpacity / 255).toFixed(3)}, 1)`;
         const fillHex = objectsRenderingService.rgbOrHexToHexNumber(fillColor);
-        const borderHex = objectsRenderingService.rgbOrHexToHexNumber(borderColor);
+        const borderHex =
+          objectsRenderingService.rgbOrHexToHexNumber(borderColor);
         const fillRgb = [
           (fillHex >> 16) & 255,
           (fillHex >> 8) & 255,
@@ -925,7 +928,12 @@ module.exports = {
         if (borderWidth > 0) {
           this._context.lineWidth = borderWidth;
           this._context.strokeStyle = `rgba(${borderRgb[0]}, ${borderRgb[1]}, ${borderRgb[2]}, ${borderOpacity / 255})`;
-          this._context.strokeRect(borderWidth / 2, borderWidth / 2, width - borderWidth, height - borderWidth);
+          this._context.strokeRect(
+            borderWidth / 2,
+            borderWidth / 2,
+            width - borderWidth,
+            height - borderWidth
+          );
         }
 
         this._context.font = `${fontSize}px ${fontFamily}`;
@@ -953,7 +961,12 @@ module.exports = {
           height - 2 * textOffsetY
         );
         this._context.clip();
-        this._context.fillText(displayedText, textX, textY, width - 2 * textOffsetX);
+        this._context.fillText(
+          displayedText,
+          textX,
+          textY,
+          width - 2 * textOffsetX
+        );
         this._context.restore();
         this._canvasTexture.needsUpdate = true;
 

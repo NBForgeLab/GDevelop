@@ -24,7 +24,10 @@ namespace gdjs {
   ): THREE.Texture => {
     const texture = baseTexture.clone();
     texture.needsUpdate = true;
-    texture.repeat.set(width / Math.max(textureWidth, 1), height / Math.max(textureHeight, 1));
+    texture.repeat.set(
+      width / Math.max(textureWidth, 1),
+      height / Math.max(textureHeight, 1)
+    );
     texture.offset.set(
       x / Math.max(textureWidth, 1),
       1 - (y + height) / Math.max(textureHeight, 1)
@@ -192,7 +195,8 @@ namespace gdjs {
       let leftMargin = obj._lBorder;
       let rightMargin = obj._rBorder;
       if (centerWidth === 0 && obj._lBorder + obj._rBorder > 0) {
-        leftMargin = (obj._width * obj._lBorder) / (obj._lBorder + obj._rBorder);
+        leftMargin =
+          (obj._width * obj._lBorder) / (obj._lBorder + obj._rBorder);
         rightMargin = obj._width - leftMargin;
       }
 
@@ -211,15 +215,96 @@ namespace gdjs {
       const rightX = obj._width - rightMargin;
       const bottomY = obj._height - bottomMargin;
 
-      this._updateRegion(0, centerX, centerY, centerWidth, centerHeight, centerWidth, centerHeight, obj._tiled);
-      this._updateRegion(1, rightX, centerY, rightMargin, centerHeight, obj._rBorder, centerHeight, obj._tiled);
-      this._updateRegion(2, rightX, top, rightMargin, topMargin, obj._rBorder, obj._tBorder, false);
-      this._updateRegion(3, centerX, top, centerWidth, topMargin, centerWidth, obj._tBorder, obj._tiled);
-      this._updateRegion(4, left, top, leftMargin, topMargin, obj._lBorder, obj._tBorder, false);
-      this._updateRegion(5, left, centerY, leftMargin, centerHeight, obj._lBorder, centerHeight, obj._tiled);
-      this._updateRegion(6, left, bottomY, leftMargin, bottomMargin, obj._lBorder, obj._bBorder, false);
-      this._updateRegion(7, centerX, bottomY, centerWidth, bottomMargin, centerWidth, obj._bBorder, obj._tiled);
-      this._updateRegion(8, rightX, bottomY, rightMargin, bottomMargin, obj._rBorder, obj._bBorder, false);
+      this._updateRegion(
+        0,
+        centerX,
+        centerY,
+        centerWidth,
+        centerHeight,
+        centerWidth,
+        centerHeight,
+        obj._tiled
+      );
+      this._updateRegion(
+        1,
+        rightX,
+        centerY,
+        rightMargin,
+        centerHeight,
+        obj._rBorder,
+        centerHeight,
+        obj._tiled
+      );
+      this._updateRegion(
+        2,
+        rightX,
+        top,
+        rightMargin,
+        topMargin,
+        obj._rBorder,
+        obj._tBorder,
+        false
+      );
+      this._updateRegion(
+        3,
+        centerX,
+        top,
+        centerWidth,
+        topMargin,
+        centerWidth,
+        obj._tBorder,
+        obj._tiled
+      );
+      this._updateRegion(
+        4,
+        left,
+        top,
+        leftMargin,
+        topMargin,
+        obj._lBorder,
+        obj._tBorder,
+        false
+      );
+      this._updateRegion(
+        5,
+        left,
+        centerY,
+        leftMargin,
+        centerHeight,
+        obj._lBorder,
+        centerHeight,
+        obj._tiled
+      );
+      this._updateRegion(
+        6,
+        left,
+        bottomY,
+        leftMargin,
+        bottomMargin,
+        obj._lBorder,
+        obj._bBorder,
+        false
+      );
+      this._updateRegion(
+        7,
+        centerX,
+        bottomY,
+        centerWidth,
+        bottomMargin,
+        centerWidth,
+        obj._bBorder,
+        obj._tiled
+      );
+      this._updateRegion(
+        8,
+        rightX,
+        bottomY,
+        rightMargin,
+        bottomMargin,
+        obj._rBorder,
+        obj._bBorder,
+        false
+      );
     }
 
     setTexture(

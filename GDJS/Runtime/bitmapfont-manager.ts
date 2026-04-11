@@ -175,8 +175,7 @@ namespace gdjs {
   export class BitmapFontManagerImpl implements gdjs.ResourceManager {
     private _bitmapFontsInUse: Record<string, { objectsUsingTheFont: number }> =
       {};
-    private _loadedFontsData =
-      new gdjs.ResourceCache<RuntimeBitmapFontData>();
+    private _loadedFontsData = new gdjs.ResourceCache<RuntimeBitmapFontData>();
     private _defaultBitmapFont = createDefaultBitmapFont();
 
     _resourceLoader: gdjs.ResourceLoader;
@@ -197,10 +196,11 @@ namespace gdjs {
     }
 
     private _markBitmapFontAsUsed(bitmapFontInstallKey: string): void {
-      this._bitmapFontsInUse[bitmapFontInstallKey] =
-        this._bitmapFontsInUse[bitmapFontInstallKey] || {
-          objectsUsingTheFont: 0,
-        };
+      this._bitmapFontsInUse[bitmapFontInstallKey] = this._bitmapFontsInUse[
+        bitmapFontInstallKey
+      ] || {
+        objectsUsingTheFont: 0,
+      };
       this._bitmapFontsInUse[bitmapFontInstallKey].objectsUsingTheFont++;
     }
 
@@ -226,7 +226,9 @@ namespace gdjs {
     ): RuntimeBitmapFontData {
       const bitmapFontInstallKey =
         bitmapFontResourceName + '@' + textureAtlasResourceName;
-      const bitmapFont = this._loadedFontsData.getFromName(bitmapFontResourceName);
+      const bitmapFont = this._loadedFontsData.getFromName(
+        bitmapFontResourceName
+      );
       if (!bitmapFont) {
         logger.warn(
           'Could not find Bitmap Font for resource named "' +
@@ -259,13 +261,16 @@ namespace gdjs {
       }
 
       try {
-        const response = await fetch(this._resourceLoader.getFullUrl(resource.file), {
-          credentials: this._resourceLoader.checkIfCredentialsRequired(
-            resource.file
-          )
-            ? 'include'
-            : 'same-origin',
-        });
+        const response = await fetch(
+          this._resourceLoader.getFullUrl(resource.file),
+          {
+            credentials: this._resourceLoader.checkIfCredentialsRequired(
+              resource.file
+            )
+              ? 'include'
+              : 'same-origin',
+          }
+        );
         if (!response.ok) {
           throw new Error(
             `HTTP error while loading bitmap font. Status is ${response.status}.`

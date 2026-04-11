@@ -2,17 +2,17 @@ namespace gdjs {
   interface ExposureFilterNetworkSyncData {
     e: number;
   }
-gdjs.EffectsTools.registerFilterCreator(
+  gdjs.EffectsTools.registerFilterCreator(
     'Scene3D::Exposure',
-  new (class implements gdjs.EffectsTools.FilterCreator {
+    new (class implements gdjs.EffectsTools.FilterCreator {
       makeFilter(
         target: EffectsTarget,
         effectData: EffectData
-    ): gdjs.EffectsTools.Filter {
+      ): gdjs.EffectsTools.Filter {
         if (typeof THREE === 'undefined') {
-      return new gdjs.EffectsTools.EmptyFilter();
+          return new gdjs.EffectsTools.EmptyFilter();
         }
-      return new (class implements gdjs.EffectsTools.Filter {
+        return new (class implements gdjs.EffectsTools.Filter {
           shaderPass: THREE_ADDONS.ShaderPass;
           _isEnabled: boolean;
           _effectName: string;

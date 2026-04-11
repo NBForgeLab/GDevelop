@@ -283,8 +283,5 @@ namespace gdjs {
     }
   }
 
-  gdjs.registerBehavior(
-    'Map::MapMarker',
-    gdjs.MapMarkerRuntimeBehavior
-  );
+  gdjs.registerBehavior('Map::MapMarker', gdjs.MapMarkerRuntimeBehavior);
 }

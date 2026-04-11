@@ -1,6 +1,6 @@
 /**
  * Camera system for managing 2D and 3D cameras.
- * 
+ *
  * @category Renderers > Camera
  */
 namespace gdjs {

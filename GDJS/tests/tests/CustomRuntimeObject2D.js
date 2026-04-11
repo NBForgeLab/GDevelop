@@ -8,7 +8,7 @@ describe('gdjs.CustomRuntimeObject', function () {
    */
   const createCustomObject = (instanceContainer) => {
     // The corresponding event-based object declaration is done by
-    // getPixiRuntimeGameWithAssets.
+    // getRuntimeGameWithAssets.
     const customObject = new gdjs.CustomRuntimeObject2D(instanceContainer, {
       name: 'MyCustomObject',
       type: 'MyExtension::MyEventsBasedObject',
@@ -90,7 +90,7 @@ describe('gdjs.CustomRuntimeObject', function () {
      * @return {Promise<{runtimeScene: gdjs.RuntimeScene, customObject: gdjs.CustomRuntimeObject2D, leftSprite: gdjs.RuntimeObject, rightSprite: gdjs.RuntimeObject}>}
      */
     const makeCustomObjectWith2Children = async () => {
-      const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets({
+      const runtimeGame = await gdjs.getRuntimeGameWithAssets({
         customObjectInstances: instancesSideBySide,
       });
       const runtimeScene = createSceneWithLayer(runtimeGame);

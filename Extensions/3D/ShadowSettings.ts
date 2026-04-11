@@ -64,7 +64,10 @@ namespace gdjs {
       });
 
       const defaultShadowLayerState = createShadowLayerState();
-      const shadowSceneStates = new WeakMap<gdjs.RuntimeScene, ShadowLayerState>();
+      const shadowSceneStates = new WeakMap<
+        gdjs.RuntimeScene,
+        ShadowLayerState
+      >();
 
       const getShadowLayerState = (
         runtimeLayerOrUnknown: unknown
@@ -112,7 +115,9 @@ namespace gdjs {
         _shadowMapTypeName: ShadowMapTypeName
       ): number => rawNormalBias;
 
-      const notifyShadowSettingsObservers = (shadowLayerState: ShadowLayerState) => {
+      const notifyShadowSettingsObservers = (
+        shadowLayerState: ShadowLayerState
+      ) => {
         shadowLayerState.shadowSettingsObservers.forEach((refreshShadows) => {
           refreshShadows();
         });
@@ -193,7 +198,9 @@ namespace gdjs {
         return 1024;
       };
 
-      export const getShadowBiasMultiplier = (shadowMapSize: number): number => {
+      export const getShadowBiasMultiplier = (
+        shadowMapSize: number
+      ): number => {
         if (shadowMapSize < 1024) {
           return 2;
         }
@@ -242,7 +249,8 @@ namespace gdjs {
         const settings = shadowLayerState.settings;
         const directionalLightShadowStates =
           shadowLayerState.directionalLightShadowStates;
-        const previousState = directionalLightShadowStates.get(directionalLight);
+        const previousState =
+          directionalLightShadowStates.get(directionalLight);
         const shadowMapType = settings.shadowMapType;
         const shadowMapSize = getShadowMapSizeForQuality(
           settings.directionalShadowQuality
@@ -261,7 +269,8 @@ namespace gdjs {
             shadowMapSize,
             shadowCameraNear: directionalLight.shadow.camera.near,
             shadowCameraFar: directionalLight.shadow.camera.far,
-            shadowCameraRight: (directionalLight.shadow.camera as any).right || 0,
+            shadowCameraRight:
+              (directionalLight.shadow.camera as any).right || 0,
             shadowCameraLeft: (directionalLight.shadow.camera as any).left || 0,
             shadowCameraTop: (directionalLight.shadow.camera as any).top || 0,
             shadowCameraBottom:
@@ -283,7 +292,8 @@ namespace gdjs {
           didUpdate = true;
         }
 
-        const shadowCamera = directionalLight.shadow.camera as THREE.OrthographicCamera;
+        const shadowCamera = directionalLight.shadow
+          .camera as THREE.OrthographicCamera;
         const halfFrustumSize = options.frustumSize / 2;
         const shadowCameraFar =
           options.distanceFromCamera + directionalLightExtraFarDistance;
@@ -354,17 +364,17 @@ namespace gdjs {
     dq: gdjs.scene3d.shadows.ShadowQualityName;
   }
 
-gdjs.EffectsTools.registerFilterCreator(
+  gdjs.EffectsTools.registerFilterCreator(
     'Scene3D::ShadowSettings',
-  new (class implements gdjs.EffectsTools.FilterCreator {
+    new (class implements gdjs.EffectsTools.FilterCreator {
       makeFilter(
         target: EffectsTarget,
         effectData: EffectData
-    ): gdjs.EffectsTools.Filter {
+      ): gdjs.EffectsTools.Filter {
         if (typeof THREE === 'undefined') {
-      return new gdjs.EffectsTools.EmptyFilter();
+          return new gdjs.EffectsTools.EmptyFilter();
         }
-      return new (class implements gdjs.EffectsTools.Filter {
+        return new (class implements gdjs.EffectsTools.Filter {
           private _isEnabled = false;
           private _settings = gdjs.scene3d.shadows.getDefaultSettings();
 
@@ -428,14 +438,14 @@ gdjs.EffectsTools.registerFilterCreator(
                 this._settings.shadowMapType = value;
               }
             } else if (parameterName === 'directionalShadowQuality') {
-            if (
-              value === 'low' ||
-              value === 'medium' ||
-              value === 'high' ||
-              value === 'ultra'
-            ) {
-              this._settings.directionalShadowQuality = value;
-            }
+              if (
+                value === 'low' ||
+                value === 'medium' ||
+                value === 'high' ||
+                value === 'ultra'
+              ) {
+                this._settings.directionalShadowQuality = value;
+              }
             }
           }
 

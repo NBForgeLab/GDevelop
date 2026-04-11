@@ -3,7 +3,7 @@
  */
 
 describe('gdjs.InputManager', () => {
-  const runtimeGame = gdjs.getPixiRuntimeGame();
+  const runtimeGame = gdjs.getRuntimeGame();
   const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
   runtimeScene.loadFromScene({sceneData: {
     layers: [{ name: '', visibility: true, effects: [] }],
@@ -381,7 +381,7 @@ describe('gdjs.InputManager', () => {
 });
 
 describe('gdjs.RuntimeObject.cursorOnObject', () => {
-  const runtimeGame = gdjs.getPixiRuntimeGame();
+  const runtimeGame = gdjs.getRuntimeGame();
   var runtimeScene = new gdjs.RuntimeScene(runtimeGame);
   runtimeScene.loadFromScene({sceneData: {
     layers: [{ name: '', visibility: true, effects: [] }],

@@ -121,7 +121,10 @@ namespace gdjs {
 
       ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.translate(padding - this._localBounds.left, padding - this._localBounds.top);
+      ctx.translate(
+        padding - this._localBounds.left,
+        padding - this._localBounds.top
+      );
       ctx.lineJoin = 'round';
       ctx.lineCap = 'round';
 
@@ -149,9 +152,12 @@ namespace gdjs {
       this._localBounds = {
         left: Math.min(this._localBounds.left, nextBounds.left),
         top: Math.min(this._localBounds.top, nextBounds.top),
-        width: Math.max(currentRight, nextRight) - Math.min(this._localBounds.left, nextBounds.left),
+        width:
+          Math.max(currentRight, nextRight) -
+          Math.min(this._localBounds.left, nextBounds.left),
         height:
-          Math.max(currentBottom, nextBottom) - Math.min(this._localBounds.top, nextBounds.top),
+          Math.max(currentBottom, nextBottom) -
+          Math.min(this._localBounds.top, nextBounds.top),
       };
       this._commands.push(command);
       this._rerender();
@@ -271,7 +277,13 @@ namespace gdjs {
       );
     }
 
-    drawRoundedRectangle(x1: float, y1: float, x2: float, y2: float, radius: float) {
+    drawRoundedRectangle(
+      x1: float,
+      y1: float,
+      x2: float,
+      y2: float,
+      radius: float
+    ) {
       this._pushCommand(
         (ctx) => {
           this._applyOutline(ctx);
@@ -289,21 +301,53 @@ namespace gdjs {
       );
     }
 
-    drawFilletRectangle(x1: float, y1: float, x2: float, y2: float, fillet: float) {
+    drawFilletRectangle(
+      x1: float,
+      y1: float,
+      x2: float,
+      y2: float,
+      fillet: float
+    ) {
       this.drawRoundedRectangle(x1, y1, x2, y2, fillet);
     }
 
-    drawChamferRectangle(x1: float, y1: float, x2: float, y2: float, chamfer: float) {
+    drawChamferRectangle(
+      x1: float,
+      y1: float,
+      x2: float,
+      y2: float,
+      chamfer: float
+    ) {
       this.drawRoundedRectangle(x1, y1, x2, y2, chamfer);
     }
 
-    drawTorus(x1: float, y1: float, innerRadius: float, outerRadius: float, startArc: float, endArc: float) {
+    drawTorus(
+      x1: float,
+      y1: float,
+      innerRadius: float,
+      outerRadius: float,
+      startArc: float,
+      endArc: float
+    ) {
       this._pushCommand(
         (ctx) => {
           this._applyOutline(ctx);
           ctx.beginPath();
-          ctx.arc(x1, y1, outerRadius, gdjs.toRad(startArc), gdjs.toRad(endArc || 360));
-          ctx.arc(x1, y1, innerRadius, gdjs.toRad(endArc || 360), gdjs.toRad(startArc), true);
+          ctx.arc(
+            x1,
+            y1,
+            outerRadius,
+            gdjs.toRad(startArc),
+            gdjs.toRad(endArc || 360)
+          );
+          ctx.arc(
+            x1,
+            y1,
+            innerRadius,
+            gdjs.toRad(endArc || 360),
+            gdjs.toRad(startArc),
+            true
+          );
           ctx.closePath();
           ctx.fill();
           if (this._object._outlineSize > 0) ctx.stroke();
@@ -315,11 +359,24 @@ namespace gdjs {
       );
     }
 
-    drawRegularPolygon(x1: float, y1: float, sides: float, radius: float, rotation: float) {
+    drawRegularPolygon(
+      x1: float,
+      y1: float,
+      sides: float,
+      radius: float,
+      rotation: float
+    ) {
       this.drawStar(x1, y1, sides, radius, radius, rotation);
     }
 
-    drawStar(x1: float, y1: float, points: float, radius: float, innerRadius: float, rotation: float) {
+    drawStar(
+      x1: float,
+      y1: float,
+      points: float,
+      radius: float,
+      innerRadius: float,
+      rotation: float
+    ) {
       this._pushCommand(
         (ctx) => {
           this._applyOutline(ctx);
@@ -327,7 +384,8 @@ namespace gdjs {
           const count = Math.max(2, Math.floor(points));
           const start = gdjs.toRad(rotation || 0);
           for (let i = 0; i < count * 2; i++) {
-            const currentRadius = i % 2 === 0 ? radius : innerRadius || radius / 2;
+            const currentRadius =
+              i % 2 === 0 ? radius : innerRadius || radius / 2;
             const angle = start + (Math.PI * i) / count;
             const px = x1 + Math.cos(angle) * currentRadius;
             const py = y1 + Math.sin(angle) * currentRadius;
@@ -345,7 +403,15 @@ namespace gdjs {
       );
     }
 
-    drawArc(x1: float, y1: float, radius: float, startAngle: float, endAngle: float, anticlockwise: boolean, closePath: boolean) {
+    drawArc(
+      x1: float,
+      y1: float,
+      radius: float,
+      startAngle: float,
+      endAngle: float,
+      anticlockwise: boolean,
+      closePath: boolean
+    ) {
       this._pushCommand(
         (ctx) => {
           this._applyOutline(ctx);
@@ -373,7 +439,16 @@ namespace gdjs {
       );
     }
 
-    drawBezierCurve(x1: float, y1: float, cpX: float, cpY: float, cpX2: float, cpY2: float, x2: float, y2: float) {
+    drawBezierCurve(
+      x1: float,
+      y1: float,
+      cpX: float,
+      cpY: float,
+      cpX2: float,
+      cpY2: float,
+      x2: float,
+      y2: float
+    ) {
       this._pushCommand(
         (ctx) => {
           this._applyOutline(ctx);
@@ -389,7 +464,14 @@ namespace gdjs {
       );
     }
 
-    drawQuadraticCurve(x1: float, y1: float, cpX: float, cpY: float, x2: float, y2: float) {
+    drawQuadraticCurve(
+      x1: float,
+      y1: float,
+      cpX: float,
+      cpY: float,
+      x2: float,
+      y2: float
+    ) {
       this._pushCommand(
         (ctx) => {
           this._applyOutline(ctx);
@@ -433,8 +515,17 @@ namespace gdjs {
       this._pushCommand(() => {}, [[x1, y1]]);
     }
 
-    drawPathBezierCurveTo(cpX: float, cpY: float, cpX2: float, cpY2: float, toX: float, toY: float) {
-      this._commands.push((ctx) => ctx.bezierCurveTo(cpX, cpY, cpX2, cpY2, toX, toY));
+    drawPathBezierCurveTo(
+      cpX: float,
+      cpY: float,
+      cpX2: float,
+      cpY2: float,
+      toX: float,
+      toY: float
+    ) {
+      this._commands.push((ctx) =>
+        ctx.bezierCurveTo(cpX, cpY, cpX2, cpY2, toX, toY)
+      );
       this._pushCommand(() => {}, [
         [cpX, cpY],
         [cpX2, cpY2],
@@ -442,9 +533,23 @@ namespace gdjs {
       ]);
     }
 
-    drawPathArc(x1: float, y1: float, radius: float, startAngle: float, endAngle: float, anticlockwise: boolean) {
+    drawPathArc(
+      x1: float,
+      y1: float,
+      radius: float,
+      startAngle: float,
+      endAngle: float,
+      anticlockwise: boolean
+    ) {
       this._commands.push((ctx) =>
-        ctx.arc(x1, y1, radius, gdjs.toRad(startAngle), gdjs.toRad(endAngle), !!anticlockwise)
+        ctx.arc(
+          x1,
+          y1,
+          radius,
+          gdjs.toRad(startAngle),
+          gdjs.toRad(endAngle),
+          !!anticlockwise
+        )
       );
       this._pushCommand(() => {}, [
         [x1 - radius, y1 - radius],
@@ -503,7 +608,8 @@ namespace gdjs {
         this._sprite.center.x = 0;
         this._sprite.position.x = 0;
       } else {
-        this._sprite.position.x = this.getDrawableX() + this.getFrameRelativeOriginX();
+        this._sprite.position.x =
+          this.getDrawableX() + this.getFrameRelativeOriginX();
       }
       this._transformationIsUpToDate = false;
     }
@@ -513,7 +619,8 @@ namespace gdjs {
         this._sprite.center.y = 1;
         this._sprite.position.y = 0;
       } else {
-        this._sprite.position.y = this.getDrawableY() + this.getFrameRelativeOriginY();
+        this._sprite.position.y =
+          this.getDrawableY() + this.getFrameRelativeOriginY();
       }
       this._transformationIsUpToDate = false;
     }

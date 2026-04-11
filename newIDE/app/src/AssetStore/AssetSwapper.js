@@ -147,7 +147,7 @@ const getFirstFrameDimension = (
   if (direction.sprites.length === 0) {
     return null;
   }
-  const image = ThreeResourcesLoader.getLegacythreeTexture(
+  const image = ThreeResourcesLoader.getLegacyThreeTexture(
     project,
     direction.sprites[0].image
   );

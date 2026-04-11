@@ -239,7 +239,10 @@ namespace gdjs {
         useObjectShape: true,
         autoDetectBounds: true,
       };
-      const oldContent = { ...defaultContent, ...(oldObjectData.content || {}) };
+      const oldContent = {
+        ...defaultContent,
+        ...(oldObjectData.content || {}),
+      };
       const content = { ...defaultContent, ...(newObjectData.content || {}) };
 
       let needsUpdate = false;
@@ -444,7 +447,8 @@ namespace gdjs {
       let maxX = cameraMaxX;
       let maxY = cameraMaxY;
 
-      const allObjects = this.getInstanceContainer().getAdhocListOfAllInstances();
+      const allObjects =
+        this.getInstanceContainer().getAdhocListOfAllInstances();
       for (const obj of allObjects) {
         const behavior = obj.getBehavior('MapMarker');
 
@@ -507,7 +511,8 @@ namespace gdjs {
      */
     getTrackedObjects(): gdjs.RuntimeObject[] {
       const tracked: gdjs.RuntimeObject[] = [];
-      const allObjects = this.getInstanceContainer().getAdhocListOfAllInstances();
+      const allObjects =
+        this.getInstanceContainer().getAdhocListOfAllInstances();
 
       for (const obj of allObjects) {
         const markerBehavior = this._getMapMarkerBehavior(obj);
@@ -532,7 +537,9 @@ namespace gdjs {
      * @returns The MapMarkerRuntimeBehavior or null if not found.
      * @internal
      */
-    _getMapMarkerBehavior(obj: gdjs.RuntimeObject): gdjs.MapMarkerRuntimeBehavior | null {
+    _getMapMarkerBehavior(
+      obj: gdjs.RuntimeObject
+    ): gdjs.MapMarkerRuntimeBehavior | null {
       const runtimeObj = obj as any;
       // Search by type in _behaviorsTable (contains all behaviors by name)
       if (runtimeObj._behaviorsTable && runtimeObj._behaviorsTable.items) {

@@ -284,7 +284,8 @@ namespace gdjs {
         }
 
         const kerning = this._getKerning(glyph, previousCharCode);
-        const glyphWidth = glyph.xAdvance || this._getGlyphFrame(glyph)?.width || 0;
+        const glyphWidth =
+          glyph.xAdvance || this._getGlyphFrame(glyph)?.width || 0;
         if (maxWidth > 0 && x > 0 && x + kerning + glyphWidth > maxWidth) {
           flushLine();
         }
@@ -367,7 +368,10 @@ namespace gdjs {
       }
 
       const threeTexture = (
-        this._object.getInstanceContainer().getGame().getImageManager() as gdjs.ThreeTextureImageManager
+        this._object
+          .getInstanceContainer()
+          .getGame()
+          .getImageManager() as gdjs.ThreeTextureImageManager
       ).getThreeTexture(this._object._textureAtlasResourceName);
       return (threeTexture?.image as CanvasImageSource | undefined) || null;
     }
@@ -393,10 +397,7 @@ namespace gdjs {
     ): BitmapGlyphData | null {
       const charCode = character.charCodeAt(0);
       return (
-        chars[charCode] ||
-        chars[character] ||
-        chars[String(charCode)] ||
-        null
+        chars[charCode] || chars[character] || chars[String(charCode)] || null
       );
     }
 

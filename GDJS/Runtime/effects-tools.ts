@@ -95,10 +95,7 @@ namespace gdjs {
       /** The function to be called to update the filter at every frame before the rendering. */
       updatePreRender(target: gdjs.EffectsTarget): any;
       /** The function to be called to update a parameter (with a number) */
-      updateDoubleParameter(
-        parameterName: string,
-        value: number
-      ): void;
+      updateDoubleParameter(parameterName: string, value: number): void;
       /** The function to be called to update a parameter (with a string) */
       updateStringParameter(parameterName: string, value: string): void;
       /** The function to be called to update a parameter (with a boolean) */

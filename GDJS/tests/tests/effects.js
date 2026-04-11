@@ -1,7 +1,7 @@
 // @ts-check
 
 describe('gdjs.EffectsManager', () => {
-  const runtimeGame = gdjs.getPixiRuntimeGame();
+  const runtimeGame = gdjs.getRuntimeGame();
 
   it('can add effects on a runtime object', () => {
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);

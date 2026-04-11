@@ -135,7 +135,7 @@ describe('gdjs.SpriteRuntimeObject (using a PixiJS RuntimeGame with assets)', fu
     });
 
   it('returns the size of the object from the texture', async () => {
-    const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+    const runtimeGame = await gdjs.getRuntimeGameWithAssets();
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
 
     const object = makeSpriteRuntimeObjectWithCustomHitBox(runtimeScene);
@@ -145,7 +145,7 @@ describe('gdjs.SpriteRuntimeObject (using a PixiJS RuntimeGame with assets)', fu
   });
 
   it('can rectangular sprites be resized', async () => {
-    const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+    const runtimeGame = await gdjs.getRuntimeGameWithAssets();
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
     const object = makeSpriteRuntimeObjectWithAnimationOfDifferentSize(runtimeScene);
     // Use the 32x128 image.
@@ -171,7 +171,7 @@ describe('gdjs.SpriteRuntimeObject (using a PixiJS RuntimeGame with assets)', fu
   });
 
   it('returns correct dimensions immediately after changing animation', async () => {
-    const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+    const runtimeGame = await gdjs.getRuntimeGameWithAssets();
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
     const object = makeSpriteRuntimeObjectWithAnimationOfDifferentSize(runtimeScene);
 
@@ -232,7 +232,7 @@ describe('gdjs.SpriteRuntimeObject (using a PixiJS RuntimeGame with assets)', fu
   });
 
   it('returns the object drawable X/Y', async () => {
-    const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+    const runtimeGame = await gdjs.getRuntimeGameWithAssets();
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
 
     const object = makeSpriteRuntimeObjectWithCustomHitBox(runtimeScene);
@@ -263,7 +263,7 @@ describe('gdjs.SpriteRuntimeObject (using a PixiJS RuntimeGame with assets)', fu
   });
 
   it('returns the object center X/Y', async () => {
-    const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+    const runtimeGame = await gdjs.getRuntimeGameWithAssets();
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
 
     // Create an object with a custom hitbox
@@ -323,7 +323,7 @@ describe('gdjs.SpriteRuntimeObject (using a PixiJS RuntimeGame with assets)', fu
   });
 
   it('properly computes hitboxes and point positions (after flipping or rotation)', async () => {
-    const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+    const runtimeGame = await gdjs.getRuntimeGameWithAssets();
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
 
     // Create an object with a custom hitbox
@@ -445,7 +445,7 @@ describe('gdjs.SpriteRuntimeObject (using a PixiJS RuntimeGame with assets)', fu
   });
 
   it('properly computes hitboxes and point positions after scaling', async () => {
-    const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+    const runtimeGame = await gdjs.getRuntimeGameWithAssets();
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
 
     // Create an object with a custom hitbox
@@ -528,7 +528,7 @@ describe('gdjs.SpriteRuntimeObject (using a PixiJS RuntimeGame with assets)', fu
   });
 
   it('properly computes hitboxes and point positions after the layer camera has moved', async () => {
-    const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+    const runtimeGame = await gdjs.getRuntimeGameWithAssets();
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
     runtimeScene.addLayer({
       name: '',

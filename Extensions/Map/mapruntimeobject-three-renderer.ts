@@ -31,8 +31,9 @@ namespace gdjs {
     ) {
       this._object = runtimeObject;
       this._instanceContainer = instanceContainer;
-      this._imageManager =
-        instanceContainer.getGame().getImageManager() as gdjs.ThreeTextureImageManager;
+      this._imageManager = instanceContainer
+        .getGame()
+        .getImageManager() as gdjs.ThreeTextureImageManager;
       this._canvas = document.createElement('canvas');
       this._context = this._canvas.getContext('2d') as CanvasRenderingContext2D;
       this._texture = new THREE.CanvasTexture(this._canvas);
@@ -162,7 +163,9 @@ namespace gdjs {
         }
       }
 
-      const [r, g, b] = this._parseColorToRgb(this._object.getBackgroundColor());
+      const [r, g, b] = this._parseColorToRgb(
+        this._object.getBackgroundColor()
+      );
       context.fillStyle = `rgba(${r}, ${g}, ${b}, ${this._object.getBackgroundOpacity()})`;
       context.beginPath();
       if (this._object.getShape() === 'Circle') {
@@ -195,7 +198,10 @@ namespace gdjs {
 
       for (const obj of this._object.getTrackedObjects()) {
         const markerBehavior = this._object._getMapMarkerBehavior(obj);
-        if (!markerBehavior || typeof markerBehavior.getMarkerType !== 'function') {
+        if (
+          !markerBehavior ||
+          typeof markerBehavior.getMarkerType !== 'function'
+        ) {
           continue;
         }
 
@@ -247,8 +253,7 @@ namespace gdjs {
       let angleDeg = 0;
       const priority = this._getMarkerPriorityFromType(markerType);
       const showRotation =
-        markerBehavior.getShowRotation() ||
-        (isMap && markerType === 'Player');
+        markerBehavior.getShowRotation() || (isMap && markerType === 'Player');
 
       if (showRotation) {
         const maybeGetAngle = (obj as any).getAngle;
@@ -275,7 +280,8 @@ namespace gdjs {
           );
           size = this._object.getPlayerSize();
           customIcon =
-            markerBehavior.getCustomIcon() || this._object.getPlayerMarkerImage();
+            markerBehavior.getCustomIcon() ||
+            this._object.getPlayerMarkerImage();
           break;
         case 'Enemy':
           color = this._parseColor(
@@ -283,10 +289,13 @@ namespace gdjs {
           );
           size = this._object.getEnemySize();
           customIcon =
-            markerBehavior.getCustomIcon() || this._object.getEnemyMarkerImage();
+            markerBehavior.getCustomIcon() ||
+            this._object.getEnemyMarkerImage();
           break;
         case 'Ally':
-          color = this._parseColor(markerBehavior.getCustomColor() || '0;128;255');
+          color = this._parseColor(
+            markerBehavior.getCustomColor() || '0;128;255'
+          );
           size = this._object.getPlayerSize();
           customIcon = markerBehavior.getCustomIcon() || '';
           break;
@@ -324,12 +333,16 @@ namespace gdjs {
           }
           break;
         case 'Custom':
-          color = this._parseColor(markerBehavior.getCustomColor() || '255;255;255');
+          color = this._parseColor(
+            markerBehavior.getCustomColor() || '255;255;255'
+          );
           size = markerBehavior.getCustomSize() || 8;
           customIcon = markerBehavior.getCustomIcon() || '';
           break;
         default:
-          color = this._parseColor(markerBehavior.getCustomColor() || '255;255;255');
+          color = this._parseColor(
+            markerBehavior.getCustomColor() || '255;255;255'
+          );
           customIcon = markerBehavior.getCustomIcon() || '';
       }
 
@@ -421,8 +434,10 @@ namespace gdjs {
       context.beginPath();
       for (let i = 0; i < points.length; i++) {
         const point = points[i];
-        const rotatedX = x + point.x * Math.cos(radians) - point.y * Math.sin(radians);
-        const rotatedY = y + point.x * Math.sin(radians) + point.y * Math.cos(radians);
+        const rotatedX =
+          x + point.x * Math.cos(radians) - point.y * Math.sin(radians);
+        const rotatedY =
+          y + point.x * Math.sin(radians) + point.y * Math.cos(radians);
         if (i === 0) {
           context.moveTo(rotatedX, rotatedY);
         } else {

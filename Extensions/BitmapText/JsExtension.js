@@ -573,9 +573,9 @@ module.exports = {
         this._context.textBaseline = 'top';
         this._context.textAlign = align;
 
-        const color = object.content.tint.split(';').map(component =>
-          parseInt(component, 10)
-        );
+        const color = object.content.tint
+          .split(';')
+          .map((component) => parseInt(component, 10));
         this._context.fillStyle = `rgb(${color[0] || 255}, ${color[1] || 255}, ${color[2] || 255})`;
 
         let x = padding;

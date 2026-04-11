@@ -5,7 +5,7 @@
 
 
 describe('gdjs.Layer', () => {
-	const runtimeGame = gdjs.getPixiRuntimeGame();
+	const runtimeGame = gdjs.getRuntimeGame();
 	const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
 
 	it('can convert coordinates', () => {

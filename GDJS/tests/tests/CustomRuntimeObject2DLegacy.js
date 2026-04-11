@@ -8,7 +8,7 @@ describe('gdjs.CustomRuntimeObject', function () {
    */
   const createCustomObject = (instanceContainer) => {
     // The corresponding event-based object declaration is done by
-    // getPixiRuntimeGameWithAssets.
+    // getRuntimeGameWithAssets.
     const customObject = new gdjs.CustomRuntimeObject2D(instanceContainer, {
       name: 'MyCustomObject',
       type: 'MyExtension::MyLegacyEventsBasedObject',
@@ -111,7 +111,7 @@ describe('gdjs.CustomRuntimeObject', function () {
     };
 
     it('can return hit-boxes according to its children', async () => {
-      const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+      const runtimeGame = await gdjs.getRuntimeGameWithAssets();
       const runtimeScene = createSceneWithLayer(runtimeGame);
       makeCustomObjectWith2Children(runtimeScene);
 
@@ -154,7 +154,7 @@ describe('gdjs.CustomRuntimeObject', function () {
     });
 
     it('can translate its hit-boxes', async () => {
-      const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+      const runtimeGame = await gdjs.getRuntimeGameWithAssets();
       const runtimeScene = createSceneWithLayer(runtimeGame);
       makeCustomObjectWith2Children(runtimeScene);
 
@@ -180,7 +180,7 @@ describe('gdjs.CustomRuntimeObject', function () {
     });
 
     it('can rotate its hit-boxes', async () => {
-      const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+      const runtimeGame = await gdjs.getRuntimeGameWithAssets();
       const runtimeScene = createSceneWithLayer(runtimeGame);
       makeCustomObjectWith2Children(runtimeScene);
 
@@ -208,7 +208,7 @@ describe('gdjs.CustomRuntimeObject', function () {
     });
 
     it('can scale its hit-boxes', async () => {
-      const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+      const runtimeGame = await gdjs.getRuntimeGameWithAssets();
       const runtimeScene = createSceneWithLayer(runtimeGame);
       makeCustomObjectWith2Children(runtimeScene);
 
@@ -235,7 +235,7 @@ describe('gdjs.CustomRuntimeObject', function () {
     });
 
     it('can translate, scale and rotate its hit-boxes', async () => {
-      const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+      const runtimeGame = await gdjs.getRuntimeGameWithAssets();
       const runtimeScene = createSceneWithLayer(runtimeGame);
       makeCustomObjectWith2Children(runtimeScene);
 
@@ -270,7 +270,7 @@ describe('gdjs.CustomRuntimeObject', function () {
     });
 
     it('keeps hit-boxes up to date when its children move and push the bottom-right corner', async () => {
-      const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+      const runtimeGame = await gdjs.getRuntimeGameWithAssets();
       const runtimeScene = createSceneWithLayer(runtimeGame);
       makeCustomObjectWith2Children(runtimeScene);
 
@@ -299,7 +299,7 @@ describe('gdjs.CustomRuntimeObject', function () {
     });
 
     it('keeps hit-boxes up to date when its children move and push the top-left corner', async () => {
-      const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+      const runtimeGame = await gdjs.getRuntimeGameWithAssets();
       const runtimeScene = createSceneWithLayer(runtimeGame);
       makeCustomObjectWith2Children(runtimeScene);
 
@@ -331,7 +331,7 @@ describe('gdjs.CustomRuntimeObject', function () {
     });
 
     it('keeps hit-boxes up to date when its children move and shrink the top-left corner', async () => {
-      const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+      const runtimeGame = await gdjs.getRuntimeGameWithAssets();
       const runtimeScene = createSceneWithLayer(runtimeGame);
       makeCustomObjectWith2Children(runtimeScene);
 
@@ -364,7 +364,7 @@ describe('gdjs.CustomRuntimeObject', function () {
     });
 
     it('keeps hit-boxes up to date when new children is added', async () => {
-      const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+      const runtimeGame = await gdjs.getRuntimeGameWithAssets();
       const runtimeScene = createSceneWithLayer(runtimeGame);
       makeCustomObjectWith2Children(runtimeScene);
 
@@ -390,7 +390,7 @@ describe('gdjs.CustomRuntimeObject', function () {
     });
 
     it('properly computes hitboxes and point positions after the scene layer camera has moved', async () => {
-      const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+      const runtimeGame = await gdjs.getRuntimeGameWithAssets();
       const runtimeScene = createSceneWithLayer(runtimeGame);
       makeCustomObjectWith2Children(runtimeScene);
       const sceneLayer = runtimeScene.getLayer('');
@@ -434,7 +434,7 @@ describe('gdjs.CustomRuntimeObject', function () {
     });
 
     it('properly computes hitboxes and point positions after the custom object layer camera has moved', async () => {
-      const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+      const runtimeGame = await gdjs.getRuntimeGameWithAssets();
       const runtimeScene = createSceneWithLayer(runtimeGame);
       makeCustomObjectWith2Children(runtimeScene);
       const customObjectLayer = customObject
@@ -484,7 +484,7 @@ describe('gdjs.CustomRuntimeObject', function () {
 
     describe('convertCoords', function () {
       it('can transform a point from the scene', async () => {
-        const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+        const runtimeGame = await gdjs.getRuntimeGameWithAssets();
         const runtimeScene = createSceneWithLayer(runtimeGame);
         makeCustomObjectWith2Children(runtimeScene);
         const instanceContainer = customObject._instanceContainer;
@@ -497,7 +497,7 @@ describe('gdjs.CustomRuntimeObject', function () {
       });
 
       it('can transform a point from the scene with a negative AABB min position', async () => {
-        const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+        const runtimeGame = await gdjs.getRuntimeGameWithAssets();
         const runtimeScene = createSceneWithLayer(runtimeGame);
         makeCustomObjectWith2Children(runtimeScene);
         const instanceContainer = customObject._instanceContainer;
@@ -511,7 +511,7 @@ describe('gdjs.CustomRuntimeObject', function () {
       });
 
       it('can transform a point from the scene with a positive AABB min position', async () => {
-        const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+        const runtimeGame = await gdjs.getRuntimeGameWithAssets();
         const runtimeScene = createSceneWithLayer(runtimeGame);
         makeCustomObjectWith2Children(runtimeScene);
         const instanceContainer = customObject._instanceContainer;
@@ -527,7 +527,7 @@ describe('gdjs.CustomRuntimeObject', function () {
 
     describe('convertInverseCoords', function () {
       it('can transform a point to the scene', async () => {
-        const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+        const runtimeGame = await gdjs.getRuntimeGameWithAssets();
         const runtimeScene = createSceneWithLayer(runtimeGame);
         makeCustomObjectWith2Children(runtimeScene);
         const instanceContainer = customObject._instanceContainer;
@@ -539,7 +539,7 @@ describe('gdjs.CustomRuntimeObject', function () {
       });
 
       it('can transform a point to scene with a negative AABB min position', async () => {
-        const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+        const runtimeGame = await gdjs.getRuntimeGameWithAssets();
         const runtimeScene = createSceneWithLayer(runtimeGame);
         makeCustomObjectWith2Children(runtimeScene);
         const instanceContainer = customObject._instanceContainer;
@@ -552,7 +552,7 @@ describe('gdjs.CustomRuntimeObject', function () {
       });
 
       it('can transform a point to the scene with a positive AABB min position', async () => {
-        const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+        const runtimeGame = await gdjs.getRuntimeGameWithAssets();
         const runtimeScene = createSceneWithLayer(runtimeGame);
         makeCustomObjectWith2Children(runtimeScene);
         const instanceContainer = customObject._instanceContainer;
@@ -610,7 +610,7 @@ describe('gdjs.CustomRuntimeObject', function () {
     };
 
     it('can return hit-boxes according to its children', async () => {
-      const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+      const runtimeGame = await gdjs.getRuntimeGameWithAssets();
       const runtimeScene = createSceneWithLayer(runtimeGame);
       makeCustomObjectWith2ChildrenAt2Levels(runtimeScene);
 
@@ -649,7 +649,7 @@ describe('gdjs.CustomRuntimeObject', function () {
     });
 
     it('keeps hit-boxes up to date when its children move and push the bottom-right corner', async () => {
-      const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+      const runtimeGame = await gdjs.getRuntimeGameWithAssets();
       const runtimeScene = createSceneWithLayer(runtimeGame);
       makeCustomObjectWith2ChildrenAt2Levels(runtimeScene);
 
@@ -688,7 +688,7 @@ describe('gdjs.CustomRuntimeObject', function () {
     });
 
     it('keeps hit-boxes up to date when new children is added', async () => {
-      const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+      const runtimeGame = await gdjs.getRuntimeGameWithAssets();
       const runtimeScene = createSceneWithLayer(runtimeGame);
       makeCustomObjectWith2ChildrenAt2Levels(runtimeScene);
 

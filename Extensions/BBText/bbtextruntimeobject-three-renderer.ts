@@ -41,9 +41,9 @@ namespace gdjs {
     shadowDistance: 0,
   });
 
-  const cloneBBTextStyle = (
-    style: BBTextSegmentStyle
-  ): BBTextSegmentStyle => ({ ...style });
+  const cloneBBTextStyle = (style: BBTextSegmentStyle): BBTextSegmentStyle => ({
+    ...style,
+  });
 
   const normalizeBBTextColor = (
     color: string | null | undefined,
@@ -136,7 +136,11 @@ namespace gdjs {
       const tagValue = match[3];
 
       if (isClosingTag) {
-        for (let stackIndex = tagsStack.length - 1; stackIndex > 0; stackIndex--) {
+        for (
+          let stackIndex = tagsStack.length - 1;
+          stackIndex > 0;
+          stackIndex--
+        ) {
           if (tagsStack[stackIndex].tagName === tagName) {
             tagsStack.splice(stackIndex, 1);
             break;
@@ -207,7 +211,11 @@ namespace gdjs {
       let chunk = '';
       for (const character of text) {
         const candidate = chunk + character;
-        const candidateWidth = measureBBTextSegmentWidth(context, candidate, style);
+        const candidateWidth = measureBBTextSegmentWidth(
+          context,
+          candidate,
+          style
+        );
         if (
           maxWidth > 0 &&
           currentLine.width > 0 &&
@@ -218,7 +226,11 @@ namespace gdjs {
           currentLine.width += chunkWidth;
           currentLine.height = Math.max(
             currentLine.height,
-            Math.ceil(style.fontSize * 1.2 + style.strokeThickness + style.shadowDistance)
+            Math.ceil(
+              style.fontSize * 1.2 +
+                style.strokeThickness +
+                style.shadowDistance
+            )
           );
           pushCurrentLine();
           chunk = character;
@@ -233,7 +245,9 @@ namespace gdjs {
       currentLine.width += chunkWidth;
       currentLine.height = Math.max(
         currentLine.height,
-        Math.ceil(style.fontSize * 1.2 + style.strokeThickness + style.shadowDistance)
+        Math.ceil(
+          style.fontSize * 1.2 + style.strokeThickness + style.shadowDistance
+        )
       );
     };
 
@@ -309,11 +323,18 @@ namespace gdjs {
         this._object,
         this._fontManager.getFontFamily(this._object._fontFamily)
       );
-      const parsedSegments = parseBBTextSegments(this._object._text || ' ', baseStyle);
+      const parsedSegments = parseBBTextSegments(
+        this._object._text || ' ',
+        baseStyle
+      );
       const wrappingWidth = this._object.isWrapping()
         ? Math.max(1, this._object.getWrappingWidth())
         : 0;
-      const lines = buildBBTextLines(this._context, parsedSegments, wrappingWidth);
+      const lines = buildBBTextLines(
+        this._context,
+        parsedSegments,
+        wrappingWidth
+      );
       const padding = 6;
       const naturalWidth = lines.reduce(
         (maxWidth, line) => Math.max(maxWidth, Math.ceil(line.width)),
@@ -367,7 +388,11 @@ namespace gdjs {
               context.strokeText(character, cursorX, drawY);
             }
             context.fillText(character, cursorX, drawY);
-            cursorX += characterWidth + (index < segment.text.length - 1 ? segment.style.letterSpacing : 0);
+            cursorX +=
+              characterWidth +
+              (index < segment.text.length - 1
+                ? segment.style.letterSpacing
+                : 0);
           }
 
           context.shadowColor = 'rgba(0,0,0,0)';
@@ -426,7 +451,8 @@ namespace gdjs {
               ? 0.5
               : 0;
         const width = this._object.getWrappingWidth();
-        const centerToCenterX = (width - this._canvasWidth) * (alignmentX - 0.5);
+        const centerToCenterX =
+          (width - this._canvasWidth) * (alignmentX - 0.5);
 
         this._mesh.position.x = this._object.x + width / 2;
         this._mesh.scale.x = width;

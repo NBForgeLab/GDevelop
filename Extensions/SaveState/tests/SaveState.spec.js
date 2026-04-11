@@ -87,7 +87,7 @@ describe('SaveState', () => {
   describe('Save State Basics', () => {
     it('saves and restores a game with objects at specific positions (without SaveConfiguration behavior)', async () => {
       // Start a game.
-      const runtimeGame1 = gdjs.getPixiRuntimeGame({
+      const runtimeGame1 = gdjs.getRuntimeGame({
         layouts: [getFakeSceneData({ name: 'Scene1' })],
       });
       await runtimeGame1._resourcesLoader.loadAllResources(() => {});
@@ -128,7 +128,7 @@ describe('SaveState', () => {
       ).not.to.be(undefined);
 
       // Start a new game.
-      const runtimeGame2 = gdjs.getPixiRuntimeGame({
+      const runtimeGame2 = gdjs.getRuntimeGame({
         layouts: [getFakeSceneData({ name: 'Scene1' })],
       });
       await runtimeGame2._resourcesLoader.loadAllResources(() => {});
@@ -165,7 +165,7 @@ describe('SaveState', () => {
 
     it('saves and restores scene variables', async () => {
       // Start a game.
-      const runtimeGame1 = gdjs.getPixiRuntimeGame({
+      const runtimeGame1 = gdjs.getRuntimeGame({
         layouts: [getFakeSceneData({ name: 'Scene1' })],
       });
       await runtimeGame1._resourcesLoader.loadAllResources(() => {});
@@ -186,7 +186,7 @@ describe('SaveState', () => {
       });
 
       // Start a new game.
-      const runtimeGame2 = gdjs.getPixiRuntimeGame({
+      const runtimeGame2 = gdjs.getRuntimeGame({
         layouts: [getFakeSceneData({ name: 'Scene1' })],
       });
       await runtimeGame2._resourcesLoader.loadAllResources(() => {});
@@ -209,7 +209,7 @@ describe('SaveState', () => {
 
     it('saves and restores global variables', async () => {
       // Start a game.
-      const runtimeGame1 = gdjs.getPixiRuntimeGame({
+      const runtimeGame1 = gdjs.getRuntimeGame({
         layouts: [getFakeSceneData({ name: 'Scene1' })],
       });
       await runtimeGame1._resourcesLoader.loadAllResources(() => {});
@@ -230,7 +230,7 @@ describe('SaveState', () => {
       });
 
       // Start a new game.
-      const runtimeGame2 = gdjs.getPixiRuntimeGame({
+      const runtimeGame2 = gdjs.getRuntimeGame({
         layouts: [getFakeSceneData({ name: 'Scene1' })],
       });
       await runtimeGame2._resourcesLoader.loadAllResources(() => {});
@@ -306,7 +306,7 @@ describe('SaveState', () => {
           }),
         ],
       });
-      const runtimeGame1 = gdjs.getPixiRuntimeGame({
+      const runtimeGame1 = gdjs.getRuntimeGame({
         layouts: [sceneData],
       });
       await runtimeGame1._resourcesLoader.loadAllResources(() => {});
@@ -335,7 +335,7 @@ describe('SaveState', () => {
       });
 
       // Start a new game.
-      const runtimeGame2 = gdjs.getPixiRuntimeGame({
+      const runtimeGame2 = gdjs.getRuntimeGame({
         layouts: [sceneData],
       });
       await runtimeGame2._resourcesLoader.loadAllResources(() => {});
@@ -437,7 +437,7 @@ describe('SaveState', () => {
           }),
         ],
       });
-      const runtimeGame1 = gdjs.getPixiRuntimeGame({
+      const runtimeGame1 = gdjs.getRuntimeGame({
         layouts: [sceneData],
       });
       await runtimeGame1._resourcesLoader.loadAllResources(() => {});
@@ -608,7 +608,7 @@ describe('SaveState', () => {
       const scene2Data = getFakeSceneData({ name: 'Scene2' });
       const scene3Data = getFakeSceneData({ name: 'Scene3' });
 
-      const runtimeGame1 = gdjs.getPixiRuntimeGame({
+      const runtimeGame1 = gdjs.getRuntimeGame({
         layouts: [scene1Data, scene2Data, scene3Data],
       });
       await runtimeGame1._resourcesLoader.loadAllResources(() => {});
@@ -779,7 +779,7 @@ describe('SaveState', () => {
         instances: [],
       });
 
-      const runtimeGame1 = gdjs.getPixiRuntimeGame({
+      const runtimeGame1 = gdjs.getRuntimeGame({
         layouts: [sceneData],
       });
       await runtimeGame1._resourcesLoader.loadAllResources(() => {});
@@ -873,7 +873,7 @@ describe('SaveState', () => {
         name: 'Scene2',
       });
 
-      const runtimeGame1 = gdjs.getPixiRuntimeGame({
+      const runtimeGame1 = gdjs.getRuntimeGame({
         layouts: [scene1Data, scene2Data],
       });
       await runtimeGame1._resourcesLoader.loadAllResources(() => {});
@@ -999,7 +999,7 @@ describe('SaveState', () => {
       name: 'Scene2',
     });
 
-    const runtimeGame1 = gdjs.getPixiRuntimeGame({
+    const runtimeGame1 = gdjs.getRuntimeGame({
       layouts: [scene1Data, scene2Data],
     });
     await runtimeGame1._resourcesLoader.loadAllResources(() => {});
@@ -1236,7 +1236,7 @@ describe('SaveState', () => {
   describe('Save State with linked objects', () => {
     it('saves and restores linked objects relations (same type)', async () => {
       // Start a game.
-      const runtimeGame1 = gdjs.getPixiRuntimeGame({
+      const runtimeGame1 = gdjs.getRuntimeGame({
         layouts: [getFakeSceneData({ name: 'Scene1' })],
       });
       await runtimeGame1._resourcesLoader.loadAllResources(() => {});
@@ -1262,7 +1262,7 @@ describe('SaveState', () => {
       });
 
       // Start a new game.
-      const runtimeGame2 = gdjs.getPixiRuntimeGame({
+      const runtimeGame2 = gdjs.getRuntimeGame({
         layouts: [getFakeSceneData({ name: 'Scene1' })],
       });
       await runtimeGame2._resourcesLoader.loadAllResources(() => {});
@@ -1331,7 +1331,7 @@ describe('SaveState', () => {
       });
 
       // Start a game and create linked objects.
-      const runtimeGame1 = gdjs.getPixiRuntimeGame({
+      const runtimeGame1 = gdjs.getRuntimeGame({
         layouts: [sceneData],
       });
       await runtimeGame1._resourcesLoader.loadAllResources(() => {});
@@ -1386,7 +1386,7 @@ describe('SaveState', () => {
       expect(linkedObjects.length).to.be(3);
 
       // Start a new game and restore.
-      const runtimeGame2 = gdjs.getPixiRuntimeGame({
+      const runtimeGame2 = gdjs.getRuntimeGame({
         layouts: [sceneData],
       });
       await runtimeGame2._resourcesLoader.loadAllResources(() => {});
@@ -1487,7 +1487,7 @@ describe('SaveState', () => {
         ],
       });
 
-      const runtimeGame1 = gdjs.getPixiRuntimeGame({
+      const runtimeGame1 = gdjs.getRuntimeGame({
         layouts: [sceneData],
       });
       await runtimeGame1._resourcesLoader.loadAllResources(() => {});

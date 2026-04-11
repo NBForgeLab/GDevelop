@@ -181,8 +181,9 @@ namespace gdjs {
         : 0;
       const padding = Math.ceil(object.getPadding() + extraPaddingForShadow);
       const canvasWidth =
-        Math.ceil((object.isWrapping() ? wrappingWidth : naturalTextWidth) + padding * 2) ||
-        1;
+        Math.ceil(
+          (object.isWrapping() ? wrappingWidth : naturalTextWidth) + padding * 2
+        ) || 1;
       const canvasHeight =
         Math.ceil(lines.length * lineHeight + padding * 2) || 1;
 
@@ -245,7 +246,9 @@ namespace gdjs {
 
         if (object._underlined) {
           const underlineY =
-            drawY + object._characterSize + Math.max(object._outlineThickness, 1);
+            drawY +
+            object._characterSize +
+            Math.max(object._outlineThickness, 1);
           ctx.beginPath();
           ctx.lineWidth = Math.max(1, object._characterSize / 12);
           ctx.strokeStyle =
@@ -256,7 +259,9 @@ namespace gdjs {
           ctx.lineTo(drawX + measuredWidth, underlineY);
           ctx.stroke();
           ctx.strokeStyle = `rgb(${object._outlineColor[0]}, ${object._outlineColor[1]}, ${object._outlineColor[2]})`;
-          ctx.lineWidth = object._isOutlineEnabled ? object._outlineThickness : 0;
+          ctx.lineWidth = object._isOutlineEnabled
+            ? object._outlineThickness
+            : 0;
         }
       }
 

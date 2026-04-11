@@ -8,7 +8,8 @@ namespace gdjs {
     }
 
     const previousParentOpacity =
-      material.userData && typeof material.userData.gdjsParentOpacity === 'number'
+      material.userData &&
+      typeof material.userData.gdjsParentOpacity === 'number'
         ? material.userData.gdjsParentOpacity
         : 1;
     const baseOpacity =
@@ -110,10 +111,8 @@ namespace gdjs {
         this._object.getUnscaledCenterY() * Math.abs(scaleY);
       this._threeGroup.position.z = this._object.getZOrder();
       this._threeGroup.rotation.z = gdjs.toRad(this._object.angle);
-      this._threeGroup.scale.x =
-        scaleX * (this._object.isFlippedX() ? -1 : 1);
-      this._threeGroup.scale.y =
-        scaleY * (this._object.isFlippedY() ? -1 : 1);
+      this._threeGroup.scale.x = scaleX * (this._object.isFlippedX() ? -1 : 1);
+      this._threeGroup.scale.y = scaleY * (this._object.isFlippedY() ? -1 : 1);
       this._threeGroup.visible = !this._object.hidden;
       this._threeGroup.renderOrder = 100000 + this._object.getZOrder();
       this._updateOpacityOnChildren();

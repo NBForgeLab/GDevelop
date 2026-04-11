@@ -137,9 +137,9 @@ namespace gdjs {
         this._debugHelper.color = this._color;
       }
       if (this._editorRangeCircle) {
-        (this._editorRangeCircle.material as THREE.LineBasicMaterial).color.copy(
-          this._color
-        );
+        (
+          this._editorRangeCircle.material as THREE.LineBasicMaterial
+        ).color.copy(this._color);
       }
     }
 
@@ -174,7 +174,9 @@ namespace gdjs {
     _ensureEditorPreview() {
       if (!this._lightIconSprite) {
         const texture = (
-          this._instanceContainer.getGame().getImageManager() as gdjs.ThreeTextureImageManager
+          this._instanceContainer
+            .getGame()
+            .getImageManager() as gdjs.ThreeTextureImageManager
         ).getThreeTexture('InGameEditor-LightIcon');
         const size = getTextureSize(texture);
         const material = new THREE.SpriteMaterial({
@@ -207,9 +209,9 @@ namespace gdjs {
       this._updateEditorCircleGeometry();
       if (this._editorRangeCircle) {
         this._editorRangeCircle.visible = this._debugMode;
-        (this._editorRangeCircle.material as THREE.LineBasicMaterial).color.copy(
-          this._color
-        );
+        (
+          this._editorRangeCircle.material as THREE.LineBasicMaterial
+        ).color.copy(this._color);
       }
     }
 

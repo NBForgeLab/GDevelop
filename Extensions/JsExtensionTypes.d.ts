@@ -193,7 +193,10 @@ declare type ObjectsRenderingService = {
 };
 
 declare class ThreeResourcesLoader {
-  static loadFontFamily(project: gd.Project, resourceName: string): Promise<string>;
+  static loadFontFamily(
+    project: gd.Project,
+    resourceName: string
+  ): Promise<string>;
   static getThreeTexture(
     project: gd.Project,
     resourceName: string
@@ -202,19 +205,22 @@ declare class ThreeResourcesLoader {
     project: gd.Project,
     resourceName: string,
     options: {
-      useTransparentTexture: boolean,
+      useTransparentTexture: boolean;
     }
   ): Promise<THREE.Material>;
   static get3DModel(project: gd.Project, resourceName: string): Promise<any>;
-  static getBitmapFontData(project: gd.Project, resourceName: string): Promise<any>;
+  static getBitmapFontData(
+    project: gd.Project,
+    resourceName: string
+  ): Promise<any>;
   static getInvalidThreeTexture(): THREE.Texture;
   static getLoadingThreeTexture(): THREE.Texture;
   static getThreeVideoTexture(
     project: gd.Project,
     resourceName: string
   ): Promise<{
-    texture: THREE.VideoTexture,
-    video: HTMLVideoElement,
+    texture: THREE.VideoTexture;
+    video: HTMLVideoElement;
   }>;
 }
 

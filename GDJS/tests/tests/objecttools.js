@@ -2,7 +2,7 @@
 
 describe('gdjs.evtTools.object', function () {
   it('can count picked instances of objects', function () {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
 
     runtimeScene.registerEmptyObjectWithName('MyObjectA');
@@ -40,7 +40,7 @@ describe('gdjs.evtTools.object', function () {
   });
 
   it('can count instances of objects living on the scene', function () {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
 
     runtimeScene.registerEmptyObjectWithName('MyObjectA');
@@ -97,7 +97,7 @@ describe('gdjs.evtTools.object', function () {
     instances.map((instance) => instance && instance.id);
 
   it('can create and pick an instance when some instances were not picked', function () {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
 
     runtimeScene.registerEmptyObjectWithName('MyObjectA');
@@ -125,7 +125,7 @@ describe('gdjs.evtTools.object', function () {
   });
 
   it('can create and pick an instance when no instance was picked', function () {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
 
     runtimeScene.registerEmptyObjectWithName('MyObjectA');
@@ -153,7 +153,7 @@ describe('gdjs.evtTools.object', function () {
   });
 
   it('can create an instance and keep all instances picked', function () {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
 
     runtimeScene.registerEmptyObjectWithName('MyObjectA');
@@ -180,7 +180,7 @@ describe('gdjs.evtTools.object', function () {
   });
 
   it('can create and pick an instance when some instances of the group were not picked', function () {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
 
     runtimeScene.registerEmptyObjectWithName('MyObjectA');
@@ -214,7 +214,7 @@ describe('gdjs.evtTools.object', function () {
   });
 
   it('can create an instance and keep all instances picked for a group', function () {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
 
     runtimeScene.registerEmptyObjectWithName('MyObjectA');

@@ -771,7 +771,7 @@ describe('gdjs.HotReloader._hotReloadVariablesContainer', () => {
    * @returns {gdjs.VariablesContainer}
    */
   const hotReloadVariablesContainer = ({ oldInit, current, newInit }) => {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const hotReloader = new gdjs.HotReloader(runtimeGame);
     const variablesContainer = new gdjs.VariablesContainer([]);
     variablesContainer.initFrom(current || oldInit);

@@ -24,12 +24,12 @@ const defaultInstance = {
  * @param props {?{customObjectInstances?: Array<InstanceData>}}
  * @returns {Promise<gdjs.RuntimeGame>} A promise resolving with the game with loaded assets.
  */
-gdjs.getPixiRuntimeGameWithAssets = (props = null) => {
+gdjs.getRuntimeGameWithAssets = (props = null) => {
   if (
-    gdjs.getPixiRuntimeGameWithAssets._pixiRuntimeGameWithAssetsPromise &&
+    gdjs.getRuntimeGameWithAssets._runtimeGameWithAssetsPromise &&
     !props
   ) {
-    return gdjs.getPixiRuntimeGameWithAssets._pixiRuntimeGameWithAssetsPromise;
+    return gdjs.getRuntimeGameWithAssets._runtimeGameWithAssetsPromise;
   }
 
   const runtimeGame = new gdjs.RuntimeGame({
@@ -311,7 +311,7 @@ gdjs.getPixiRuntimeGameWithAssets = (props = null) => {
     ],
   });
 
-  const pixiRuntimeGameWithAssetsPromise = new Promise((resolve) => {
+  const runtimeGameWithAssetsPromise = new Promise((resolve) => {
     runtimeGame.loadAllAssets(
       () => {
         console.info('Done loading assets for test game');
@@ -324,14 +324,14 @@ gdjs.getPixiRuntimeGameWithAssets = (props = null) => {
     );
   });
   if (!props) {
-    gdjs.getPixiRuntimeGameWithAssets._pixiRuntimeGameWithAssetsPromise =
-      pixiRuntimeGameWithAssetsPromise;
+    gdjs.getRuntimeGameWithAssets._runtimeGameWithAssetsPromise =
+      runtimeGameWithAssetsPromise;
   }
-  return pixiRuntimeGameWithAssetsPromise;
+  return runtimeGameWithAssetsPromise;
 };
 
 /**
  * @type {?Promise<gdjs.RuntimeGame>}
  * @internal
  */
-gdjs.getPixiRuntimeGameWithAssets._pixiRuntimeGameWithAssetsPromise = null;
+gdjs.getRuntimeGameWithAssets._runtimeGameWithAssetsPromise = null;

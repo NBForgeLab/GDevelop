@@ -71,8 +71,8 @@ export class ExternalLayoutEditorContainer extends React.Component<
     }
     // This optimization is a bit more cautious than the traditional one, to still allow
     // children, and in particular SceneEditor and InstancesEditor, to be notified when isActive
-    // goes from true to false (in which case PIXI rendering is halted). If isActive was false
-    // and remains false, it's safe to stop update here (PIXI rendering is already halted).
+    // goes from true to false (in which case Three.js rendering is halted). If isActive was false
+    // and remains false, it's safe to stop update here (Three.js rendering is already halted).
     return this.props.isActive || nextProps.isActive;
   }
 
@@ -114,7 +114,7 @@ export class ExternalLayoutEditorContainer extends React.Component<
       this.props.gameEditorMode === 'embedded-game' &&
       layout &&
       projectItemName &&
-      // Avoid to hot-reload the editor every time an image is edited with Pixi.
+      // Avoid to hot-reload the editor every time an image is edited with an external editor.
       (!this.editor || !this.editor.isEditingObject())
     ) {
       switchToSceneEdition({

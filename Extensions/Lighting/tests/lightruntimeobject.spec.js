@@ -18,7 +18,7 @@ const addLightObject = (runtimeScene, radius, intensity = 1) => {
 
 describe('gdjs.LightRuntimeObject', function () {
   const createScene = () => {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
     runtimeScene.loadFromScene({
       sceneData: {

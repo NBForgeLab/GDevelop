@@ -6,7 +6,7 @@
 describe('gdjs.RuntimeScene integration tests', function () {
   describe('Object and behavior lifecycles (using TestObject and TestBehavior)', function () {
     it('should properly create and destroy object, including the behaviors', function () {
-      const runtimeGame = gdjs.getPixiRuntimeGame();
+      const runtimeGame = gdjs.getRuntimeGame();
       const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
       runtimeScene.loadFromScene({sceneData: {
         layers: [
@@ -93,7 +93,7 @@ describe('gdjs.RuntimeScene integration tests', function () {
 
   describe('Layers (using a Sprite object)', function () {
     it('should handle objects on layers', () => {
-      const runtimeGame = gdjs.getPixiRuntimeGame();
+      const runtimeGame = gdjs.getRuntimeGame();
       const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
       runtimeScene.loadFromScene({sceneData: {
         layers: [

@@ -60,7 +60,7 @@ describe('gdjs.SceneStack', () => {
   };
 
   it('should support pushing, replacing and popping scenes', async () => {
-    const runtimeGame = gdjs.getPixiRuntimeGame(gameSettings);
+    const runtimeGame = gdjs.getRuntimeGame(gameSettings);
     let sceneStack = runtimeGame._sceneStack;
     // Async asset loading is not tested here.
     const resourcesLoader = runtimeGame.getResourceLoader();
@@ -208,7 +208,7 @@ describe('gdjs.SceneStack', () => {
   it('can start a layout when all its assets are already downloaded', async () => {
     const mockedResourceManager = new gdjs.MockedResourceManager();
 
-    const runtimeGame = gdjs.getPixiRuntimeGame(gameSettingsWithHeavyResource);
+    const runtimeGame = gdjs.getRuntimeGame(gameSettingsWithHeavyResource);
     const resourcesLoader = runtimeGame.getResourceLoader();
     resourcesLoader.injectMockResourceManagerForTesting(
       'fake-resource-kind-for-testing-only',
@@ -318,7 +318,7 @@ describe('gdjs.SceneStack', () => {
   it('can start a layout while assets loading and wait them to finish', async () => {
     const mockedResourceManager = new gdjs.MockedResourceManager();
 
-    const runtimeGame = gdjs.getPixiRuntimeGame(gameSettingsWithHeavyResource);
+    const runtimeGame = gdjs.getRuntimeGame(gameSettingsWithHeavyResource);
     const resourcesLoader = runtimeGame.getResourceLoader();
     resourcesLoader.injectMockResourceManagerForTesting(
       'fake-resource-kind-for-testing-only',
@@ -422,7 +422,7 @@ describe('gdjs.SceneStack', () => {
 
   it("can start a layout which assets loading didn't stated yet and wait them to finish", async () => {
     const mockedResourceManager = new gdjs.MockedResourceManager();
-    const runtimeGame = gdjs.getPixiRuntimeGame(gameSettingsWithHeavyResource);
+    const runtimeGame = gdjs.getRuntimeGame(gameSettingsWithHeavyResource);
     const resourcesLoader = runtimeGame.getResourceLoader();
     resourcesLoader.injectMockResourceManagerForTesting(
       'fake-resource-kind-for-testing-only',

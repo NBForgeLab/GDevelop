@@ -1,10 +1,10 @@
 // @ts-check
 describe('gdjs.AnchorRuntimeBehavior', () => {
   it('can fill a custom object with a child', async () => {
-    const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets();
+    const runtimeGame = await gdjs.getRuntimeGameWithAssets();
     const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
     // The corresponding event-based object declaration is done by
-    // getPixiRuntimeGame.
+    // getRuntimeGame.
     const customObject = new gdjs.CustomRuntimeObject2D(runtimeScene, {
       name: 'MyCustomObject',
       type: 'MyExtension::MyLayoutedEventsBasedObject',
@@ -46,7 +46,7 @@ describe('gdjs.AnchorRuntimeBehavior', () => {
   });
 
   it('can anchor 2 instances of the same object left and right', async () => {
-    const runtimeGame = await gdjs.getPixiRuntimeGameWithAssets({
+    const runtimeGame = await gdjs.getRuntimeGameWithAssets({
       customObjectInstances: [
         {
           angle: 0,
@@ -98,7 +98,7 @@ describe('gdjs.AnchorRuntimeBehavior', () => {
     });
     const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
     // The corresponding event-based object declaration is done by
-    // getPixiRuntimeGame.
+    // getRuntimeGame.
     const customObject = new gdjs.CustomRuntimeObject2D(runtimeScene, {
       name: 'MyCustomObject',
       type: 'MyExtension::MyLayoutedEventsBasedObject',

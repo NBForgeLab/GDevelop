@@ -529,7 +529,10 @@ module.exports = {
 
         const text = object.content.property1 || 'This is a dummy object';
         this._context.font = '20px Arial';
-        const width = Math.max(1, Math.ceil(this._context.measureText(text).width + 16));
+        const width = Math.max(
+          1,
+          Math.ceil(this._context.measureText(text).width + 16)
+        );
         const height = 32;
         if (this._canvas.width !== width || this._canvas.height !== height) {
           this._canvas.width = width;

@@ -23,7 +23,7 @@
       }
     }
 
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
     const asyncTasksManager = runtimeScene.getAsyncTasksManager();
 
@@ -56,7 +56,7 @@
   });
 
   describe('gdjs.PromiseTask', function () {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
     const asyncTasksManager = runtimeScene.getAsyncTasksManager();
 
@@ -75,7 +75,7 @@
   });
 
   describe('gdjs.WaitTask', () => {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
     const asyncTasksManager = runtimeScene.getAsyncTasksManager();
     const timeManager = runtimeScene.getTimeManager();

@@ -52,7 +52,6 @@ class UrlsCache {
 
 type LoadingOptions = {|
   disableCacheBurst?: boolean,
-  isResourceForPixi?: boolean,
 |};
 
 const addSearchParameterToUrl = (
@@ -120,7 +119,7 @@ export default class ResourcesLoader {
   static getFullUrl(
     project: gdProject,
     urlOrFilename: string,
-    { isResourceForPixi, disableCacheBurst }: LoadingOptions
+    { disableCacheBurst }: LoadingOptions
   ): string {
     if (!!electron && isLocalFile(urlOrFilename)) {
       const cachedUrl = ResourcesLoader._cache.getCachedUrl(
@@ -146,31 +145,6 @@ export default class ResourcesLoader {
     }
 
     let urlWithParameters = addGDevelopResourceTokenIfRequired(urlOrFilename);
-    if (isResourceForPixi) {
-      // To avoid strange/hard to understand CORS issues, we add a dummy parameter.
-      // By doing so, we force browser to consider this URL as different than the one traditionally
-      // used to render the resource in the editor (usually as an `<img>` or as a background image).
-      // If we don't add this distinct parameter, it can happen that browsers fail to load the image
-      // as it's already in the **browser cache** but with slightly different request parameters -
-      // making the CORS checks fail (even if it's coming from the browser cache).
-      //
-      // It's happening sometimes (according to loading order probably) in Chrome and (more often)
-      // in Safari. It might be linked to Amazon S3 + CloudFront that "doesn't support the Vary: Origin header".
-      // To be safe, we entirely avoid the issue with this parameter, making the browsers consider
-      // the resources for use in Pixi.js and for the rest of the editor as entirely separate.
-      //
-      // See:
-      // - https://stackoverflow.com/questions/26140487/cross-origin-amazon-s3-not-working-using-chrome
-      // - https://stackoverflow.com/questions/20253472/cors-problems-with-amazon-s3-on-the-latest-chomium-and-google-canary
-      // - https://stackoverflow.com/a/20299333
-      //
-      // Search for "cors-cache-workaround" in the codebase for the same workarounds.
-      urlWithParameters = addSearchParameterToUrl(
-        urlWithParameters,
-        'gdUsage', // Arbitrary parameter name to designate that this is being used for Pixi.js
-        'pixi'
-      );
-    }
 
     const cachedUrl = ResourcesLoader._cache.getCachedUrl(
       project,

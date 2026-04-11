@@ -34,7 +34,6 @@ const transformExcludedExtensions = ['.min.js', '.d.ts', '.png', '.svg'];
 // be built with esbuild, but simply copied.
 const untransformedPaths = [
   // GDJS prebuilt files:
-  'GDJS/Runtime/rendering-libs/pixi.js',
   'GDJS/Runtime/rendering-libs/three.js',
   'GDJS/Runtime/rendering-libs/ThreeAddons.js',
   'GDJS/Runtime/rendering-libs/draco/gltf/draco_wasm_wrapper.js',

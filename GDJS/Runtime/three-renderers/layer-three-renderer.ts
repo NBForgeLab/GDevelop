@@ -33,9 +33,7 @@ namespace gdjs {
     private _threeRenderer: THREE.WebGLRenderer | null;
     private _threeGroup: THREE.Group;
     private _threeScene: THREE.Scene;
-    private _threeCamera:
-      | THREE.PerspectiveCamera
-      | THREE.OrthographicCamera;
+    private _threeCamera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
     private _threeEffectComposer: THREE_ADDONS.EffectComposer | null = null;
     private _threePostProcessingPassesByEffectName: Map<
       string,
@@ -55,8 +53,10 @@ namespace gdjs {
       this._layer = layer;
       this._threeRenderer = runtimeGameRenderer.getThreeRenderer();
       this._camera3DFieldOfView = layer.getInitialCamera3DFieldOfView();
-      this._camera3DNearPlaneDistance = layer.getInitialCamera3DNearPlaneDistance();
-      this._camera3DFarPlaneDistance = layer.getInitialCamera3DFarPlaneDistance();
+      this._camera3DNearPlaneDistance =
+        layer.getInitialCamera3DNearPlaneDistance();
+      this._camera3DFarPlaneDistance =
+        layer.getInitialCamera3DFarPlaneDistance();
       this._camera2DPlaneMaxDrawingDistance =
         layer.getInitialCamera2DPlaneMaxDrawingDistance();
 
@@ -78,7 +78,9 @@ namespace gdjs {
         ? asThreeObjectOrNull(
             runtimeInstanceContainerRenderer.get3DRendererObject()
           )
-        : asThreeObjectOrNull(runtimeInstanceContainerRenderer.getRendererObject());
+        : asThreeObjectOrNull(
+            runtimeInstanceContainerRenderer.getRendererObject()
+          );
       if (parentRendererObject) {
         parentRendererObject.add(this._threeGroup);
       }
@@ -160,7 +162,9 @@ namespace gdjs {
       this._threeCamera.far = this._camera3DFarPlaneDistance;
       this._threeCamera.position.x = this._layer.getCameraX();
       this._threeCamera.position.y = -this._layer.getCameraY();
-      this._threeCamera.rotation.z = -gdjs.toRad(this._layer.getCameraRotation());
+      this._threeCamera.rotation.z = -gdjs.toRad(
+        this._layer.getCameraRotation()
+      );
       this._threeCamera.updateProjectionMatrix();
       this._needsCameraUpdate = false;
 
@@ -276,10 +280,7 @@ namespace gdjs {
       return this._threeCamera;
     }
 
-    getCamera():
-      | THREE.PerspectiveCamera
-      | THREE.OrthographicCamera
-      | null {
+    getCamera(): THREE.PerspectiveCamera | THREE.OrthographicCamera | null {
       return this._threeCamera;
     }
 

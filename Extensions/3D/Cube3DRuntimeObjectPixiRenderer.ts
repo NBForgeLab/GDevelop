@@ -75,7 +75,8 @@ namespace gdjs {
     if (!runtimeObject.isFaceAtIndexVisible(faceIndex))
       return getTransparentMaterial();
 
-    const faceResourceName = runtimeObject.getFaceAtIndexResourceName(faceIndex);
+    const faceResourceName =
+      runtimeObject.getFaceAtIndexResourceName(faceIndex);
     if (!faceResourceName) {
       return runtimeObject._materialType ===
         gdjs.Cube3DRuntimeObject.MaterialType.Basic

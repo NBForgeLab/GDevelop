@@ -58,7 +58,7 @@ export const getObjectSizeInfo = (
         textureWidth = assetShortHeader.width;
         textureHeight = assetShortHeader.height;
       } else {
-        const texture = threeResourcesLoader.getLegacythreeTexture(
+        const texture = threeResourcesLoader.getLegacyThreeTexture(
           project,
           firstSprite.getImageName()
         );

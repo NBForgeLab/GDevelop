@@ -1,7 +1,7 @@
 // @ts-check
 
 describe('gdjs.Layer', function() {
-  const runtimeGame = gdjs.getPixiRuntimeGame();
+  const runtimeGame = gdjs.getRuntimeGame();
   var runtimeScene = new gdjs.RuntimeScene(runtimeGame);
 
   it('benchmark convertCoords and convertInverseCoords', function() {

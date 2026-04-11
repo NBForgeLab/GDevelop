@@ -4,7 +4,7 @@ describe('gdjs.RuntimeGameRenderer canvas tests', () => {
     let gameContainer;
 
     beforeEach(() => {
-        runtimeGame = gdjs.getPixiRuntimeGame();
+        runtimeGame = gdjs.getRuntimeGame();
         renderer = runtimeGame.getRenderer();
         gameContainer = document.createElement('div');
     });

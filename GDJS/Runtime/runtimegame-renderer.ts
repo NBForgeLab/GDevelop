@@ -114,9 +114,7 @@ namespace gdjs {
         );
       }
       if (typeof WebGL2RenderingContext === 'undefined') {
-        throw new Error(
-          'WebGL2 is required by the 3D-first game renderer.'
-        );
+        throw new Error('WebGL2 is required by the 3D-first game renderer.');
       }
 
       const gl = gameCanvas.getContext('webgl2', {
@@ -156,7 +154,6 @@ namespace gdjs {
           ? error
           : new Error('Three.js WebGLRenderer initialization failed.');
       }
-
     }
 
     /**

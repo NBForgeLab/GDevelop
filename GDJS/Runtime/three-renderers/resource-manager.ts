@@ -1,6 +1,6 @@
 /**
  * Resource manager for loading and caching textures and models.
- * 
+ *
  * @category Renderers > Resources
  */
 namespace gdjs {
@@ -15,7 +15,8 @@ namespace gdjs {
     private _models: Map<string, any> = new Map();
     private _textureLoader: THREE.TextureLoader;
     private _gltfLoader: THREE_ADDONS.GLTFLoader;
-    private _loadingProgressCallback: ((progress: number) => void) | null = null;
+    private _loadingProgressCallback: ((progress: number) => void) | null =
+      null;
     private _loadingManager: THREE.LoadingManager;
 
     constructor() {

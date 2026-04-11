@@ -28,7 +28,7 @@ namespace gdjs {
         return (value: float) => layer.setCameraZoom(value);
       };
       const getTweenNumberEffectPropertySetter = (
-  effect: EffectsTools.Filter,
+        effect: EffectsTools.Filter,
         propertyName: string
       ) => {
         return (value: float) => {
@@ -38,7 +38,7 @@ namespace gdjs {
         };
       };
       const getTweenColorEffectPropertySetter = (
-  effect: EffectsTools.Filter,
+        effect: EffectsTools.Filter,
         propertyName: string
       ) => {
         return ([hue, saturation, lightness]: Array<float>) => {

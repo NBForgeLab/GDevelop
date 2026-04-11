@@ -255,7 +255,11 @@ namespace gdjs {
       imageSource: HTMLImageElement
     ): PIXI.Texture {
       const existingTexture = this._loadedTextures.get(resource);
-      if (existingTexture && !existingTexture.destroyed && existingTexture.valid) {
+      if (
+        existingTexture &&
+        !existingTexture.destroyed &&
+        existingTexture.valid
+      ) {
         return existingTexture;
       }
 
@@ -480,7 +484,8 @@ namespace gdjs {
       }
       if (
         resource.kind === 'video' &&
-        (this._loadedTextures.get(resource) || this._loadedVideoSources.get(resource))
+        (this._loadedTextures.get(resource) ||
+          this._loadedVideoSources.get(resource))
       ) {
         return;
       }

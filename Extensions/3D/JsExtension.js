@@ -897,7 +897,9 @@ module.exports = {
           'SetMeshPosition',
           _('Change mesh part position'),
           _('Change the position of a mesh part (relative to the model).'),
-          _('Set mesh _PARAM1_ position of _PARAM0_ to X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_'),
+          _(
+            'Set mesh _PARAM1_ position of _PARAM0_ to X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_'
+          ),
           _('Mesh parts'),
           'res/conditions/3d_box.svg',
           'res/conditions/3d_box.svg'
@@ -951,7 +953,9 @@ module.exports = {
           'SetMeshRotation',
           _('Change mesh part rotation'),
           _('Change the rotation of a mesh part (relative to the model).'),
-          _('Set mesh _PARAM1_ rotation of _PARAM0_ to X: _PARAM2_°, Y: _PARAM3_°, Z: _PARAM4_°'),
+          _(
+            'Set mesh _PARAM1_ rotation of _PARAM0_ to X: _PARAM2_°, Y: _PARAM3_°, Z: _PARAM4_°'
+          ),
           _('Mesh parts'),
           'res/conditions/3d_box.svg',
           'res/conditions/3d_box.svg'
@@ -1005,7 +1009,9 @@ module.exports = {
           'SetMeshScale',
           _('Change mesh part scale'),
           _('Change the scale of a mesh part.'),
-          _('Set mesh _PARAM1_ scale of _PARAM0_ to X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_'),
+          _(
+            'Set mesh _PARAM1_ scale of _PARAM0_ to X: _PARAM2_, Y: _PARAM3_, Z: _PARAM4_'
+          ),
           _('Mesh parts'),
           'res/conditions/3d_box.svg',
           'res/conditions/3d_box.svg'
@@ -1462,7 +1468,7 @@ module.exports = {
         Cube3DObject
       )
       .setCategory('General')
-        // Effects are unsupported because the object is not rendered through the legacy 2D effect path.
+      // Effects are unsupported because the object is not rendered through the legacy 2D effect path.
       .addDefaultBehavior('ResizableCapability::ResizableBehavior')
       .addDefaultBehavior('ScalableCapability::ScalableBehavior')
       .addDefaultBehavior('FlippableCapability::FlippableBehavior')
@@ -2295,7 +2301,9 @@ module.exports = {
         .getOrCreate('directionalLightNormalBias')
         .setValue('0.02')
         .setLabel(_('Directional light normal bias'))
-        .setDescription(_('Extra normal bias applied to Directional Light shadows.'))
+        .setDescription(
+          _('Extra normal bias applied to Directional Light shadows.')
+        )
         .setType('number')
         .setGroup(_('Shadows'))
         .setAdvanced(true);
@@ -2901,7 +2909,7 @@ module.exports = {
           this._renderedResourceName = textureName;
           this._resourcesLoader
             .getThreeTexture(this._project, textureName)
-            .then(texture => {
+            .then((texture) => {
               if (this._wasDestroyed || !this._threeObject) return;
               const imageWidth = texture.image?.width || this._defaultWidth;
               const imageHeight = texture.image?.height || this._defaultHeight;
@@ -2980,9 +2988,7 @@ module.exports = {
         if (this._renderFallbackObject) {
           return this.getWidth() / 2;
         } else {
-          return (
-            this._centerX * (this._instance.isFlippedX() ? -1 : 1)
-          );
+          return this._centerX * (this._instance.isFlippedX() ? -1 : 1);
         }
       }
 
@@ -2990,9 +2996,7 @@ module.exports = {
         if (this._renderFallbackObject) {
           return this.getHeight() / 2;
         } else {
-          return (
-            this._centerY * (this._instance.isFlippedY() ? -1 : 1)
-          );
+          return this._centerY * (this._instance.isFlippedY() ? -1 : 1);
         }
       }
     }

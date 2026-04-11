@@ -121,7 +121,8 @@ namespace gdjs {
         return;
       }
 
-      const texture = this._material.map || (animationFrame ? animationFrame.texture : null);
+      const texture =
+        this._material.map || (animationFrame ? animationFrame.texture : null);
       if (texture !== this._material.map) {
         this._material.map = texture;
         this._material.needsUpdate = true;

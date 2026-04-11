@@ -20,7 +20,7 @@ describe('gdjs.RuntimeWatermark integration tests', () => {
     });
 
     it('should correctly display elements in the right order (with username)', () => {
-      const runtimeGame = gdjs.getPixiRuntimeGame({
+      const runtimeGame = gdjs.getRuntimeGame({
         propertiesOverrides: {
           authorUsernames: ['HelperWesley'],
           projectUuid: 'project-uuid',
@@ -111,7 +111,7 @@ describe('gdjs.RuntimeWatermark integration tests', () => {
     });
 
     it('should correctly display elements in the right order (without username)', () => {
-      const runtimeGame = gdjs.getPixiRuntimeGame({
+      const runtimeGame = gdjs.getRuntimeGame({
         propertiesOverrides: {
           authorUsernames: [],
           projectUuid: 'project-uuid',

@@ -9,7 +9,7 @@ describe('gdjs.PathfindingRuntimeBehavior', function () {
     const pathFindingName = 'auto1';
 
     const createScene = (framePerSecond = 60) => {
-      const runtimeGame = gdjs.getPixiRuntimeGame();
+      const runtimeGame = gdjs.getRuntimeGame();
       const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
       runtimeScene.loadFromScene({
         sceneData: {

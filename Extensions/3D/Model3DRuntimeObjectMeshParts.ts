@@ -29,7 +29,10 @@ namespace gdjs {
      * @param threeObject The root THREE.Object3D to traverse
      * @param runtimeObject The runtime object that owns this mesh parts manager
      */
-    buildMeshesMap(threeObject: THREE.Object3D, runtimeObject?: gdjs.Model3DRuntimeObject): void {
+    buildMeshesMap(
+      threeObject: THREE.Object3D,
+      runtimeObject?: gdjs.Model3DRuntimeObject
+    ): void {
       this._runtimeObject = runtimeObject || null;
       this._meshesMap = {};
       this._meshesNames = [];
@@ -49,11 +52,11 @@ namespace gdjs {
           if (child.name in this._meshesMap) {
             return;
           }
-          
+
           // Only index Mesh and Group nodes, skip bones, lights, cameras, and other helper nodes
           const isMesh = child instanceof THREE.Mesh;
           const isGroup = child instanceof THREE.Group;
-          
+
           if (isMesh || isGroup) {
             this._meshesMap[child.name] = child;
             this._meshesNames.push(child.name);
@@ -73,7 +76,11 @@ namespace gdjs {
      * @param scaleY The Y normalization scale (1 / modelHeight)
      * @param scaleZ The Z normalization scale (1 / modelDepth)
      */
-    setNormalizationScale(scaleX: number, scaleY: number, scaleZ: number): void {
+    setNormalizationScale(
+      scaleX: number,
+      scaleY: number,
+      scaleZ: number
+    ): void {
       this._normalizationScale = { x: scaleX, y: scaleY, z: scaleZ };
     }
 
@@ -144,7 +151,11 @@ namespace gdjs {
      * @param z Z position
      */
     setMeshPosition(name: string, x: number, y: number, z: number): void {
-      if (!this.hasMesh(name) || !this._runtimeObject || !this._normalizationScale) {
+      if (
+        !this.hasMesh(name) ||
+        !this._runtimeObject ||
+        !this._normalizationScale
+      ) {
         return;
       }
 
@@ -161,16 +172,19 @@ namespace gdjs {
       const objectHeight = this._runtimeObject.getHeight();
       const objectDepth = this._runtimeObject.getDepth();
 
-      const normalizedX = objectWidth !== 0 && this._normalizationScale.x !== 0
-        ? x / (this._normalizationScale.x * objectWidth)
-        : 0;
+      const normalizedX =
+        objectWidth !== 0 && this._normalizationScale.x !== 0
+          ? x / (this._normalizationScale.x * objectWidth)
+          : 0;
       // Y axis is flipped in the renderer, so we need to negate it
-      const normalizedY = objectHeight !== 0 && this._normalizationScale.y !== 0
-        ? -y / (this._normalizationScale.y * objectHeight)
-        : 0;
-      const normalizedZ = objectDepth !== 0 && this._normalizationScale.z !== 0
-        ? z / (this._normalizationScale.z * objectDepth)
-        : 0;
+      const normalizedY =
+        objectHeight !== 0 && this._normalizationScale.y !== 0
+          ? -y / (this._normalizationScale.y * objectHeight)
+          : 0;
+      const normalizedZ =
+        objectDepth !== 0 && this._normalizationScale.z !== 0
+          ? z / (this._normalizationScale.z * objectDepth)
+          : 0;
 
       // Add to the original local position to preserve the mesh's position in the model hierarchy
       this._meshesMap[name].position.set(
@@ -187,7 +201,11 @@ namespace gdjs {
      * @returns X position or 0 if mesh doesn't exist
      */
     getMeshPositionX(name: string): number {
-      if (!this.hasMesh(name) || !this._runtimeObject || !this._normalizationScale) {
+      if (
+        !this.hasMesh(name) ||
+        !this._runtimeObject ||
+        !this._normalizationScale
+      ) {
         return 0;
       }
 
@@ -212,7 +230,11 @@ namespace gdjs {
      * @returns Y position or 0 if mesh doesn't exist
      */
     getMeshPositionY(name: string): number {
-      if (!this.hasMesh(name) || !this._runtimeObject || !this._normalizationScale) {
+      if (
+        !this.hasMesh(name) ||
+        !this._runtimeObject ||
+        !this._normalizationScale
+      ) {
         return 0;
       }
 
@@ -238,7 +260,11 @@ namespace gdjs {
      * @returns Z position or 0 if mesh doesn't exist
      */
     getMeshPositionZ(name: string): number {
-      if (!this.hasMesh(name) || !this._runtimeObject || !this._normalizationScale) {
+      if (
+        !this.hasMesh(name) ||
+        !this._runtimeObject ||
+        !this._normalizationScale
+      ) {
         return 0;
       }
 
@@ -446,7 +472,7 @@ namespace gdjs {
     removeMesh(name: string): void {
       if (this.hasMesh(name)) {
         const mesh = this._meshesMap[name];
-        
+
         // Collect all descendant mesh names that need to be removed from the registry
         const descendantNames: string[] = [];
         mesh.traverse((child: THREE.Object3D) => {
@@ -454,18 +480,18 @@ namespace gdjs {
             descendantNames.push(child.name);
           }
         });
-        
+
         // Remove from parent (this detaches the entire subtree from the scene)
         if (mesh.parent) {
           mesh.parent.remove(mesh);
         }
-        
+
         // Clean up the mesh itself
         delete this._meshesMap[name];
         delete this._originalMeshPositions[name];
         delete this._originalMeshRotations[name];
         delete this._originalMeshScales[name];
-        
+
         // Clean up all descendants
         for (const descendantName of descendantNames) {
           delete this._meshesMap[descendantName];
@@ -473,7 +499,7 @@ namespace gdjs {
           delete this._originalMeshRotations[descendantName];
           delete this._originalMeshScales[descendantName];
         }
-        
+
         // Update the names array to exclude the removed mesh and its descendants
         const removedNames = new Set([name, ...descendantNames]);
         this._meshesNames = this._meshesNames.filter(

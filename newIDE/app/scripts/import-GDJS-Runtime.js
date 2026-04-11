@@ -55,7 +55,6 @@ if (!args['skip-sources']) {
     const startTime = Date.now();
 
     const typesDestinationPath = path.join(destinationPath, 'Runtime-sources', 'types');
-    const pixiDestinationPath = path.join(typesDestinationPath, 'pixi');
     // TODO: Investigate the use of a smart & faster sync
     // that only copy files with changed content.
     return Promise.all([
@@ -79,61 +78,8 @@ if (!args['skip-sources']) {
         path.join(typesDestinationPath, 'three', 'src'),
         { ...copyOptions, filter: ['**/*.d.ts'] }
       ),
-      copy(
-        path.join(gdevelopRootPath, 'GDJS', 'node_modules', '@pixi'),
-        pixiDestinationPath,
-        { ...copyOptions, filter: ['**/*.d.ts'] }
-      ),
     ])
       .then(function([unbundledResults, unbundledExtensionsResults]) {
-        // Replace import of packages by import of relative folders.
-        shell.sed(
-          '-i',
-          'from \'@pixi((/\\w+)+)',
-          'from \'../..$1/lib',
-          pixiDestinationPath + '/*/lib/*.d.ts'
-        );
-        fs.writeFileSync(path.join(pixiDestinationPath, 'index.d.ts'), `
-  import './mixin-cache-as-bitmap/lib';
-  import './mixin-get-child-by-name/lib';
-  import './mixin-get-global-position/lib';
-  export * from './accessibility/lib';
-  export * from './app/lib';
-  export * from './assets/lib';
-  export * from './color/lib';
-  export * from './compressed-textures/lib';
-  export * from './constant/lib';
-  export * from './core';
-  export * from './display/lib';
-  export * from './events/lib';
-  export * from './extensions/lib';
-  export * from './extract/lib';
-  export * from './filter-alpha/lib';
-  export * from './filter-blur/lib';
-  export * from './filter-color-matrix/lib';
-  export * from './filter-displacement/lib';
-  export * from './filter-fxaa/lib';
-  export * from './filter-noise/lib';
-  export * from './graphics/lib';
-  export * from './math/lib';
-  export * from './mesh/lib';
-  export * from './mesh-extras/lib';
-  export * from './particle-container/lib';
-  export * from './prepare/lib';
-  export * from './runner/lib';
-  export * from './settings/lib';
-  export * from './sprite/lib';
-  export * from './sprite-animated/lib';
-  export * from './sprite-tiling/lib';
-  export * from './spritesheet/lib';
-  export * from './text/lib';
-  export * from './text-bitmap/lib';
-  export * from './text-html/lib';
-  export * from './ticker/lib';
-  export * from './utils/lib';
-  
-  export as namespace PIXI;
-      `);
         const totalFilesCount =
           unbundledResults.length + unbundledExtensionsResults.length;
         const duration = Date.now() - startTime;

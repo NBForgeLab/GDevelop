@@ -6,7 +6,7 @@ describe('gdjs.LinksManager', function () {
     object3Names,
     eventsFunctionContext
   ) => {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
     runtimeScene.loadFromScene({
       sceneData: {

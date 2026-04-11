@@ -849,10 +849,8 @@ namespace gdjs {
     private _selection = new Selection();
     private _selectionBoxes: Map<RuntimeObject, ObjectSelectionBoxHelper> =
       new Map();
-    private _physics3DCollisionShapes: Map<
-      any,
-      Physics3DCollisionShapeHelper
-    > = new Map();
+    private _physics3DCollisionShapes: Map<any, Physics3DCollisionShapeHelper> =
+      new Map();
     private _axesHelper: THREE.AxesHelper | null = null;
     private _axesHelperSize: number | null = null;
     private _objectMover = new ObjectMover(this);
@@ -974,7 +972,7 @@ namespace gdjs {
         this._unregisterContextLostListener();
         this._unregisterContextLostListener = null;
       }
-      
+
       this._clearPhysics3DCollisionShapes();
       this._clearAxesHelper();
     }
@@ -4294,7 +4292,6 @@ namespace gdjs {
     }
 
     step(): void {
-
       const runtimeGame = this.editor.getRuntimeGame();
       const inputManager = runtimeGame.getInputManager();
 
@@ -5381,11 +5378,7 @@ namespace gdjs {
         this._shapeRoot.scale.set(1, 1, 1);
       }
 
-      this._shapeContent.position.set(
-        shapeOffsetX,
-        shapeOffsetY,
-        shapeOffsetZ
-      );
+      this._shapeContent.position.set(shapeOffsetX, shapeOffsetY, shapeOffsetZ);
       this._shapeContent.rotation.set(0, 0, 0);
       if (rawShape === 'Capsule' || rawShape === 'Cylinder') {
         if (shapeOrientation === 'X') {

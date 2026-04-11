@@ -73,5 +73,5 @@ gdjs.createProjectData = (settings) => {
  * @param {{layouts?: LayoutData[], resources?: ResourcesData, propertiesOverrides?: Partial<ProjectPropertiesData>}=} settings
  * @returns {gdjs.RuntimeGame}
  */
-gdjs.getPixiRuntimeGame = (settings) =>
+gdjs.getRuntimeGame = (settings) =>
   new gdjs.RuntimeGame(gdjs.createProjectData(settings));

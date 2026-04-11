@@ -10,7 +10,7 @@ describe('gdjs.RuntimeObject', () => {
   /** @type {gdjs.TestRuntimeScene} */
   let runtimeScene;
   beforeEach(function () {
-    runtimeGame = gdjs.getPixiRuntimeGame();
+    runtimeGame = gdjs.getRuntimeGame();
     runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
   });
 

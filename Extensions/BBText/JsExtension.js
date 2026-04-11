@@ -22,9 +22,9 @@ const normalizeBBTextColor = (color, fallback) => {
   const normalizedColor = color.trim();
   if (!normalizedColor) return fallback;
   if (normalizedColor.includes(';')) {
-    const rgb = normalizedColor.split(';').map(component =>
-      parseInt(component, 10)
-    );
+    const rgb = normalizedColor
+      .split(';')
+      .map((component) => parseInt(component, 10));
     return `rgb(${rgb[0] || 0}, ${rgb[1] || 0}, ${rgb[2] || 0})`;
   }
   if (normalizedColor[0] === '#') return normalizedColor;
@@ -57,7 +57,9 @@ const applyBBTextTag = (style, tagName, tagValue) => {
 };
 
 const parseBBTextSegments = (text, baseStyle) => {
-  const stylesStack = [{ tagName: 'default', style: cloneBBTextStyle(baseStyle) }];
+  const stylesStack = [
+    { tagName: 'default', style: cloneBBTextStyle(baseStyle) },
+  ];
   const segments = [];
   const tagRegExp =
     /\[(\/?)(b|i|color|size|font|outline|shadow|spacing)(?:=([^\]]+))?\]/gi;
@@ -84,7 +86,11 @@ const parseBBTextSegments = (text, baseStyle) => {
     const tagValue = match[3];
 
     if (isClosingTag) {
-      for (let stackIndex = stylesStack.length - 1; stackIndex > 0; stackIndex--) {
+      for (
+        let stackIndex = stylesStack.length - 1;
+        stackIndex > 0;
+        stackIndex--
+      ) {
         if (stylesStack[stackIndex].tagName === tagName) {
           stylesStack.splice(stackIndex, 1);
           break;
@@ -123,7 +129,7 @@ const parseBBTextSegments = (text, baseStyle) => {
     : [{ text: ' ', style: cloneBBTextStyle(baseStyle) }];
 };
 
-const getBBTextFontString = style => {
+const getBBTextFontString = (style) => {
   const parts = [];
   if (style.fontStyle !== 'normal') parts.push(style.fontStyle);
   if (style.fontWeight !== 'normal') parts.push(style.fontWeight);
@@ -167,7 +173,11 @@ const buildBBTextLines = (context, parsedSegments, maxWidth) => {
 
     for (const character of text) {
       const candidate = chunk + character;
-      const candidateWidth = measureBBTextSegmentWidth(context, candidate, style);
+      const candidateWidth = measureBBTextSegmentWidth(
+        context,
+        candidate,
+        style
+      );
       if (
         maxWidth > 0 &&
         currentLine.width > 0 &&
@@ -178,7 +188,9 @@ const buildBBTextLines = (context, parsedSegments, maxWidth) => {
         currentLine.width += chunkWidth;
         currentLine.height = Math.max(
           currentLine.height,
-          Math.ceil(style.fontSize * 1.2 + style.strokeThickness + style.shadowDistance)
+          Math.ceil(
+            style.fontSize * 1.2 + style.strokeThickness + style.shadowDistance
+          )
         );
         pushCurrentLine();
         chunk = character;
@@ -193,7 +205,9 @@ const buildBBTextLines = (context, parsedSegments, maxWidth) => {
     currentLine.width += chunkWidth;
     currentLine.height = Math.max(
       currentLine.height,
-      Math.ceil(style.fontSize * 1.2 + style.strokeThickness + style.shadowDistance)
+      Math.ceil(
+        style.fontSize * 1.2 + style.strokeThickness + style.shadowDistance
+      )
     );
   };
 
@@ -817,7 +831,11 @@ module.exports = {
         const wrappingWidth = this._instance.hasCustomSize()
           ? Math.max(1, this.getCustomWidth())
           : 0;
-        const lines = buildBBTextLines(this._context, parsedSegments, wrappingWidth);
+        const lines = buildBBTextLines(
+          this._context,
+          parsedSegments,
+          wrappingWidth
+        );
         const padding = 6;
         const naturalWidth = lines.reduce(
           (maxWidth, line) => Math.max(maxWidth, Math.ceil(line.width)),
@@ -833,7 +851,8 @@ module.exports = {
             lines.reduce(
               (height, line) => height + Math.max(1, line.height),
               0
-            ) + padding * 2
+            ) +
+              padding * 2
           )
         );
 
@@ -924,7 +943,9 @@ module.exports = {
         this._threeObject.position.y =
           this._instance.getY() + canvasHeight * (0.5 - alignmentY);
         this._threeObject.scale.y = canvasHeight;
-        this._threeObject.rotation.z = -RenderedInstance.toRad(this._instance.getAngle());
+        this._threeObject.rotation.z = -RenderedInstance.toRad(
+          this._instance.getAngle()
+        );
 
         const alphaForDisplay = Math.max(
           this._instance.getOpacity() / 255,

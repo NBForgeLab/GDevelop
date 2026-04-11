@@ -1,9 +1,9 @@
 /**
  * 3D-First Rendering Engine
- * 
+ *
  * This module contains the unified Three.js-based rendering system
  * for both 2D and 3D game objects.
- * 
+ *
  * @module three-renderers
  * @category Renderers
  */

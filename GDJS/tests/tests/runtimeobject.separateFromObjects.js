@@ -5,7 +5,7 @@
  */
 
 describe('gdjs.RuntimeObject.separateFromObjects', () => {
-  const runtimeGame = gdjs.getPixiRuntimeGame();
+  const runtimeGame = gdjs.getRuntimeGame();
   const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
 
   const object = new gdjs.TestRuntimeObject(runtimeScene, {

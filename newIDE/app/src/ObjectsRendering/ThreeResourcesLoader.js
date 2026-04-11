@@ -121,9 +121,7 @@ const load3DModel = (
   const resource = project.getResourcesManager().getResource(resourceName);
   if (resource.getKind() !== 'model3D') return Promise.resolve(invalidModel);
 
-  const url = ResourcesLoader.getResourceFullUrl(project, resourceName, {
-    isResourceForthree: true,
-  });
+  const url = ResourcesLoader.getResourceFullUrl(project, resourceName, {});
 
   const gltfLoader = getOrCreateGltfLoader();
   gltfLoader.withCredentials = checkIfCredentialsRequired(url);
@@ -447,7 +445,7 @@ export default class ThreeResourcesLoader {
    * should listen to three.Texture `update` event, and refresh your object
    * if this event is triggered.
    */
-  static getLegacythreeTexture(project: gdProject, resourceName: string): any {
+  static getLegacyThreeTexture(project: gdProject, resourceName: string): any {
     const loadedTexture = loadedTextures[resourceName];
     if (loadedTexture) {
       return loadedTexture;
@@ -492,9 +490,7 @@ export default class ThreeResourcesLoader {
     }
 
     const resource = project.getResourcesManager().getResource(resourceName);
-    const url = ResourcesLoader.getResourceFullUrl(project, resourceName, {
-      isResourceForthree: true,
-    });
+    const url = ResourcesLoader.getResourceFullUrl(project, resourceName, {});
 
     const promise = new Promise<THREE.Texture>((resolve, reject) => {
       const textureLoader = new THREE.TextureLoader();
@@ -594,7 +590,7 @@ export default class ThreeResourcesLoader {
     return loadingPromise;
   }
 
-  static getLegacythreeVideoTexture(
+  static getLegacyThreeVideoTexture(
     project: gdProject,
     resourceName: string
   ): any {
@@ -621,9 +617,7 @@ export default class ThreeResourcesLoader {
       });
     }
 
-    const url = ResourcesLoader.getResourceFullUrl(project, resourceName, {
-      isResourceForthree: true,
-    });
+    const url = ResourcesLoader.getResourceFullUrl(project, resourceName, {});
     const crossOrigin = determineCrossOrigin(url);
 
     const promise = new Promise<LoadedVideoResource>(resolve => {
@@ -693,17 +687,13 @@ export default class ThreeResourcesLoader {
         fullFilename = ResourcesLoader.getResourceFullUrl(
           project,
           resourceName,
-          {
-            isResourceForthree: true,
-          }
+          {}
         );
       }
     } else {
       // Compatibility with GD <= 5.0-beta56
       // Assume resourceName is just the filename to the font
-      fullFilename = ResourcesLoader.getFullUrl(project, resourceName, {
-        isResourceForthree: true,
-      });
+      fullFilename = ResourcesLoader.getFullUrl(project, resourceName, {});
       // end of compatibility code
     }
 
@@ -765,9 +755,11 @@ export default class ThreeResourcesLoader {
         )
       );
 
-    const fullUrl = ResourcesLoader.getResourceFullUrl(project, resourceName, {
-      isResourceForthree: true,
-    });
+    const fullUrl = ResourcesLoader.getResourceFullUrl(
+      project,
+      resourceName,
+      {}
+    );
     if (!fullUrl) {
       return Promise.reject(
         new Error(
@@ -790,11 +782,11 @@ export default class ThreeResourcesLoader {
     );
   }
 
-  static getLegacyInvalidthreeTexture(): any {
+  static getLegacyInvalidThreeTexture(): any {
     return invalidTexture;
   }
 
-  static getLegacyLoadingthreeTexture(): any {
+  static getLegacyLoadingThreeTexture(): any {
     return loadingTexture;
   }
 
@@ -827,9 +819,11 @@ export default class ThreeResourcesLoader {
         new Error(`The resource called ${resourceName} is not a json file.`)
       );
 
-    const fullUrl = ResourcesLoader.getResourceFullUrl(project, resourceName, {
-      isResourceForthree: true,
-    });
+    const fullUrl = ResourcesLoader.getResourceFullUrl(
+      project,
+      resourceName,
+      {}
+    );
     return (
       axios
         // $FlowFixMe[underconstrained-implicit-instantiation]

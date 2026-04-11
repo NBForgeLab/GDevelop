@@ -17,7 +17,7 @@ namespace gdjs {
     private _offsetZ: float = 0;
     private _followRotation: boolean = true;
     private _destroyWithStuckToObject: boolean = false;
-    private _offsetMode: string = "world"; // "world" or "local"
+    private _offsetMode: string = 'world'; // "world" or "local"
 
     // State
     private _stuckToObject: gdjs.RuntimeObject | null = null;
@@ -32,16 +32,19 @@ namespace gdjs {
       owner: gdjs.RuntimeObject
     ) {
       super(instanceContainer, behaviorData, owner);
-      
-      this._followRotation = behaviorData.followRotation !== undefined 
-        ? behaviorData.followRotation 
-        : true;
-      this._destroyWithStuckToObject = behaviorData.destroyWithStuckToObject !== undefined
-        ? behaviorData.destroyWithStuckToObject
-        : false;
-      this._offsetMode = behaviorData.offsetMode !== undefined
-        ? behaviorData.offsetMode
-        : "world";
+
+      this._followRotation =
+        behaviorData.followRotation !== undefined
+          ? behaviorData.followRotation
+          : true;
+      this._destroyWithStuckToObject =
+        behaviorData.destroyWithStuckToObject !== undefined
+          ? behaviorData.destroyWithStuckToObject
+          : false;
+      this._offsetMode =
+        behaviorData.offsetMode !== undefined
+          ? behaviorData.offsetMode
+          : 'world';
     }
 
     override applyBehaviorOverriding(behaviorData: any): boolean {
@@ -70,7 +73,9 @@ namespace gdjs {
       this.unstick();
     }
 
-    override doStepPreEvents(instanceContainer: gdjs.RuntimeInstanceContainer): void {
+    override doStepPreEvents(
+      instanceContainer: gdjs.RuntimeInstanceContainer
+    ): void {
       // Check if we're stuck and have a valid stuck-to object
       if (!this._isStuck || !this._stuckToObject) {
         return;
@@ -82,7 +87,7 @@ namespace gdjs {
       // Get stuck-to 3D object's current position
       const stuckToX = stuckToObject.getX();
       const stuckToY = stuckToObject.getY();
-      
+
       // Check if stuck-to 3D object has 3D capabilities
       let stuckToZ = 0;
       let stuckToRotationX = 0;
@@ -97,8 +102,8 @@ namespace gdjs {
 
       // Calculate target position based on offset mode
       let targetX: float, targetY: float, targetZ: float;
-      
-      if (this._offsetMode === "local") {
+
+      if (this._offsetMode === 'local') {
         // Local space: rotate offset based on stuck-to object's Z rotation (2D)
         // Only Z-axis rotation is applied to keep objects on the same plane (suitable for vehicles, characters)
         const angleRad = (stuckToRotationZ * Math.PI) / 180;
@@ -122,7 +127,7 @@ namespace gdjs {
       // Update this object's position to the target position
       owner.setX(targetX);
       owner.setY(targetY);
-      
+
       if (gdjs.Base3DHandler && gdjs.Base3DHandler.is3D(owner)) {
         owner.setZ(targetZ);
       }
@@ -133,7 +138,11 @@ namespace gdjs {
         // This ensures the sticker always has the exact same orientation as the stuck-to object
         owner.setAngle(stuckToRotationZ);
 
-        if (gdjs.Base3DHandler && gdjs.Base3DHandler.is3D(stuckToObject) && gdjs.Base3DHandler.is3D(owner)) {
+        if (
+          gdjs.Base3DHandler &&
+          gdjs.Base3DHandler.is3D(stuckToObject) &&
+          gdjs.Base3DHandler.is3D(owner)
+        ) {
           owner.setRotationX(stuckToRotationX);
           owner.setRotationY(stuckToRotationY);
         }
@@ -151,7 +160,9 @@ namespace gdjs {
 
       // Unregister previous callback if exists
       if (this._onStuckToObjectDeleted && this._stuckToObject) {
-        this._stuckToObject.unregisterDestroyCallback(this._onStuckToObjectDeleted);
+        this._stuckToObject.unregisterDestroyCallback(
+          this._onStuckToObjectDeleted
+        );
       }
 
       this._stuckToObject = targetObject;
@@ -171,8 +182,8 @@ namespace gdjs {
 
       // Calculate and store initial offset based on current positions
       const owner = this.owner;
-      
-      if (this._offsetMode === "local") {
+
+      if (this._offsetMode === 'local') {
         // Local space: calculate offset in target object's local coordinates
         // This requires inverse rotation transformation (2D only for Z-axis)
         const targetAngle = targetObject.getAngle();
@@ -186,9 +197,13 @@ namespace gdjs {
         // Transform world offset to local space (2D rotation)
         this._offsetX = worldOffsetX * cos - worldOffsetY * sin;
         this._offsetY = worldOffsetX * sin + worldOffsetY * cos;
-        
+
         // Z offset is always calculated in world space (not affected by rotation)
-        if (gdjs.Base3DHandler && gdjs.Base3DHandler.is3D(owner) && gdjs.Base3DHandler.is3D(targetObject)) {
+        if (
+          gdjs.Base3DHandler &&
+          gdjs.Base3DHandler.is3D(owner) &&
+          gdjs.Base3DHandler.is3D(targetObject)
+        ) {
           this._offsetZ = owner.getZ() - targetObject.getZ();
         } else {
           this._offsetZ = 0;
@@ -197,8 +212,12 @@ namespace gdjs {
         // World space: offset in world coordinates
         this._offsetX = owner.getX() - targetObject.getX();
         this._offsetY = owner.getY() - targetObject.getY();
-        
-        if (gdjs.Base3DHandler && gdjs.Base3DHandler.is3D(owner) && gdjs.Base3DHandler.is3D(targetObject)) {
+
+        if (
+          gdjs.Base3DHandler &&
+          gdjs.Base3DHandler.is3D(owner) &&
+          gdjs.Base3DHandler.is3D(targetObject)
+        ) {
           this._offsetZ = owner.getZ() - targetObject.getZ();
         } else {
           this._offsetZ = 0;
@@ -212,10 +231,12 @@ namespace gdjs {
     unstick(): void {
       // Unregister the destroy callback
       if (this._onStuckToObjectDeleted && this._stuckToObject) {
-        this._stuckToObject.unregisterDestroyCallback(this._onStuckToObjectDeleted);
+        this._stuckToObject.unregisterDestroyCallback(
+          this._onStuckToObjectDeleted
+        );
         this._onStuckToObjectDeleted = null;
       }
-      
+
       this._stuckToObject = null;
       this._isStuck = false;
     }
@@ -298,4 +319,3 @@ namespace gdjs {
     gdjs.Sticker3DRuntimeBehavior
   );
 }
-

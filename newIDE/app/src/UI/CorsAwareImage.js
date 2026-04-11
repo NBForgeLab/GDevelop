@@ -50,8 +50,6 @@ export const CorsAwareImage = ({
     //
     // It's happening sometimes (according to loading order probably) in Chrome and (more often)
     // in Safari. It might be linked to Amazon S3 + CloudFront that "doesn't support the Vary: Origin header".
-    // To be safe, we entirely avoid the issue with this parameter, making the browsers consider
-    // the resources for use in Pixi.js and for the rest of the editor as entirely separate.
     //
     // See:
     // - https://stackoverflow.com/questions/26140487/cross-origin-amazon-s3-not-working-using-chrome

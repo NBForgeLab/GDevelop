@@ -59,7 +59,7 @@ describe('Physics2RuntimeBehavior', () => {
   }
 
   function createGameWithSceneWithPhysics2SharedData() {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
     runtimeScene.loadFromScene({
       sceneData: {

@@ -15,21 +15,24 @@ namespace gdjs {
     ts: number;
   }
 
-gdjs.EffectsTools.registerFilterCreator(
+  gdjs.EffectsTools.registerFilterCreator(
     'Scene3D::Sky',
-  new (class implements gdjs.EffectsTools.FilterCreator {
+    new (class implements gdjs.EffectsTools.FilterCreator {
       makeFilter(
         target: EffectsTarget,
         effectData: EffectData
-    ): gdjs.EffectsTools.Filter {
-        if (typeof THREE === 'undefined' || typeof THREE_ADDONS === 'undefined') {
-      return new gdjs.EffectsTools.EmptyFilter();
+      ): gdjs.EffectsTools.Filter {
+        if (
+          typeof THREE === 'undefined' ||
+          typeof THREE_ADDONS === 'undefined'
+        ) {
+          return new gdjs.EffectsTools.EmptyFilter();
         }
         if (!THREE_ADDONS.Sky) {
-        return new gdjs.EffectsTools.EmptyFilter();
+          return new gdjs.EffectsTools.EmptyFilter();
         }
 
-      return new (class implements gdjs.EffectsTools.Filter {
+        return new (class implements gdjs.EffectsTools.Filter {
           _sky: THREE_ADDONS.Sky;
           _sun: THREE.Vector3;
           _skyUp: THREE.Vector3;
@@ -70,7 +73,9 @@ gdjs.EffectsTools.registerFilterCreator(
             // To support varying "Up" axes (like Z, when the game is a top-down 3D game),
             // we dynamically patch the vertex shader to rotate vWorldPosition to match camera.up.
             const material = this._sky.material as THREE.ShaderMaterial;
-            material.uniforms.upTransform = { value: new THREE.Matrix3().identity() };
+            material.uniforms.upTransform = {
+              value: new THREE.Matrix3().identity(),
+            };
             material.vertexShader = material.vertexShader
               .replace(
                 'uniform vec3 up;',
@@ -85,13 +90,12 @@ gdjs.EffectsTools.registerFilterCreator(
             // GDevelop uses Z as the height (depth) axis in 3D levels.
             // The native Sky shader uses Y as the height axis.
             // By swapping Y and Z (direction = direction.xzy), the shader naturally evaluates the Z axis!
-            material.fragmentShader = material.fragmentShader
-              .replace(
-                'vec3 direction = normalize( vWorldPosition - cameraPosition );',
-                'vec3 direction = normalize( vWorldPosition - cameraPosition );\n' +
+            material.fragmentShader = material.fragmentShader.replace(
+              'vec3 direction = normalize( vWorldPosition - cameraPosition );',
+              'vec3 direction = normalize( vWorldPosition - cameraPosition );\n' +
                 '// Map Three.js Y (Height) to GDevelop Z (Height)\n' +
                 'direction = direction.xzy;'
-              );
+            );
 
             this._applyUniforms();
           }
@@ -109,12 +113,14 @@ gdjs.EffectsTools.registerFilterCreator(
             this._cameraUp.copy(camera.up);
             if (this._cameraUp.lengthSq() === 0) return;
             this._cameraUp.normalize();
-            
-            if (this._cameraUp.distanceToSquared(this._cachedCameraUp) < 1e-10) {
+
+            if (
+              this._cameraUp.distanceToSquared(this._cachedCameraUp) < 1e-10
+            ) {
               return;
             }
             this._cachedCameraUp.copy(this._cameraUp);
-            
+
             // Pass the camera's up vector directly to the shader uniform
             this._sky.material.uniforms.up.value.copy(this._cameraUp);
           }

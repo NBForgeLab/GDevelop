@@ -1,7 +1,7 @@
 // @ts-check
 
 describe('gdjs.SpriteRuntimeObject', function () {
-  const runtimeGame = gdjs.getPixiRuntimeGame();
+  const runtimeGame = gdjs.getRuntimeGame();
   var runtimeScene = new gdjs.RuntimeScene(runtimeGame);
 
   const makeSpriteRuntimeObjectWithCustomHitBox = (runtimeScene) =>

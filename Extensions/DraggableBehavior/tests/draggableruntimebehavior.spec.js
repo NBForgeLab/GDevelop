@@ -1,6 +1,6 @@
 // @ts-check
 describe('gdjs.DraggableRuntimeBehavior', function () {
-  const runtimeGame = gdjs.getPixiRuntimeGame();
+  const runtimeGame = gdjs.getRuntimeGame();
   var runtimeScene = new gdjs.RuntimeScene(runtimeGame);
   runtimeScene.loadFromScene({
     sceneData: {

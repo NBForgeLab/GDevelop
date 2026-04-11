@@ -6,7 +6,7 @@
 
 /**
  * Particle emitter renderer using Three.js.
- * 
+ *
  * @category Renderers > Particle Emitter
  */
 namespace gdjs {
@@ -46,7 +46,7 @@ namespace gdjs {
     private _emitterLife: number = 0;
     private _emit: boolean = false;
     private _helperGroup: THREE.Group | null = null;
-    
+
     // Emitter configuration
     private _spawnPos: THREE.Vector3 = new THREE.Vector3();
     private _minAngle: number = 0;
@@ -106,8 +106,7 @@ namespace gdjs {
       this._maxLifeTime = objectData.particleLifeTimeMax;
 
       // Flow and tank
-      this._frequency =
-        objectData.flow < 0 ? 0.0001 : 1.0 / objectData.flow;
+      this._frequency = objectData.flow < 0 ? 0.0001 : 1.0 / objectData.flow;
       this._emitterLifetime = this._computeLifetime(
         objectData.flow,
         objectData.tank
@@ -121,7 +120,11 @@ namespace gdjs {
       this._zoneRadius = objectData.zoneRadius;
 
       // Gravity
-      this._gravity.set(objectData.particleGravityX, objectData.particleGravityY, 0);
+      this._gravity.set(
+        objectData.particleGravityX,
+        objectData.particleGravityY,
+        0
+      );
 
       // Colors
       const color1 = gdjs.hexNumberToRGBArray(
@@ -130,7 +133,11 @@ namespace gdjs {
       const color2 = gdjs.hexNumberToRGBArray(
         gdjs.rgbOrHexStringToNumber(objectData.particleColor2)
       );
-      this._startColor.setRGB(color1[0] / 255, color1[1] / 255, color1[2] / 255);
+      this._startColor.setRGB(
+        color1[0] / 255,
+        color1[1] / 255,
+        color1[2] / 255
+      );
       this._endColor.setRGB(color2[0] / 255, color2[1] / 255, color2[2] / 255);
 
       // Size
@@ -151,8 +158,12 @@ namespace gdjs {
 
       // Angle (spray cone)
       const emitterAngle = this._runtimeObject.getAngle();
-      this._minAngle = gdjs.toRad(emitterAngle - objectData.emitterAngleB / 2.0);
-      this._maxAngle = gdjs.toRad(emitterAngle + objectData.emitterAngleB / 2.0);
+      this._minAngle = gdjs.toRad(
+        emitterAngle - objectData.emitterAngleB / 2.0
+      );
+      this._maxAngle = gdjs.toRad(
+        emitterAngle + objectData.emitterAngleB / 2.0
+      );
 
       // Max particles
       this._maxParticles = objectData.maxParticleNb;
@@ -173,7 +184,9 @@ namespace gdjs {
         .getImageManager() as gdjs.ThreeTextureImageManager;
 
       if (objectData.textureParticleName) {
-        this._texture = imageManager.getThreeTexture(objectData.textureParticleName);
+        this._texture = imageManager.getThreeTexture(
+          objectData.textureParticleName
+        );
       }
 
       // Create default textures for Point and Line renderers
@@ -265,7 +278,7 @@ namespace gdjs {
 
       // Create geometry with buffer attributes
       this._geometry = new THREE.BufferGeometry();
-      
+
       const positions = new Float32Array(this._maxParticles * 3);
       const colors = new Float32Array(this._maxParticles * 3);
       const sizes = new Float32Array(this._maxParticles);
@@ -279,10 +292,7 @@ namespace gdjs {
         'color',
         new THREE.BufferAttribute(colors, 3)
       );
-      this._geometry.setAttribute(
-        'size',
-        new THREE.BufferAttribute(sizes, 1)
-      );
+      this._geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
       this._geometry.setAttribute(
         'alpha',
         new THREE.BufferAttribute(alphas, 1)
@@ -318,10 +328,7 @@ namespace gdjs {
 
     update(delta: number): void {
       if (
-        !this._runtimeObject
-          .getInstanceContainer()
-          .getGame()
-          .isInGameEdition()
+        !this._runtimeObject.getInstanceContainer().getGame().isInGameEdition()
       ) {
         // Update emitter life
         if (this._emitterLifetime > 0) {

@@ -66,7 +66,10 @@ namespace gdjs {
 
       const width = Math.max(1, domContainer.clientWidth);
       const height = Math.max(1, domContainer.clientHeight);
-      if (this._debugCanvas.width !== width || this._debugCanvas.height !== height) {
+      if (
+        this._debugCanvas.width !== width ||
+        this._debugCanvas.height !== height
+      ) {
         this._debugCanvas.width = width;
         this._debugCanvas.height = height;
       }
@@ -136,19 +139,39 @@ namespace gdjs {
         const polygon: float[] = [];
         polygon.push.apply(
           polygon,
-          layer.applyLayerTransformation(aabb.min[0], aabb.min[1], 0, workingPoint)
+          layer.applyLayerTransformation(
+            aabb.min[0],
+            aabb.min[1],
+            0,
+            workingPoint
+          )
         );
         polygon.push.apply(
           polygon,
-          layer.applyLayerTransformation(aabb.max[0], aabb.min[1], 0, workingPoint)
+          layer.applyLayerTransformation(
+            aabb.max[0],
+            aabb.min[1],
+            0,
+            workingPoint
+          )
         );
         polygon.push.apply(
           polygon,
-          layer.applyLayerTransformation(aabb.max[0], aabb.max[1], 0, workingPoint)
+          layer.applyLayerTransformation(
+            aabb.max[0],
+            aabb.max[1],
+            0,
+            workingPoint
+          )
         );
         polygon.push.apply(
           polygon,
-          layer.applyLayerTransformation(aabb.min[0], aabb.max[1], 0, workingPoint)
+          layer.applyLayerTransformation(
+            aabb.min[0],
+            aabb.max[1],
+            0,
+            workingPoint
+          )
         );
 
         context.beginPath();

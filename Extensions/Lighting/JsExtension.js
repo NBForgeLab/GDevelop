@@ -132,7 +132,9 @@ module.exports = {
         lightObject
       )
       .setIncludeFile('Extensions/Lighting/lightruntimeobject.js')
-      .addIncludeFile('Extensions/Lighting/lightruntimeobject-three-renderer.js')
+      .addIncludeFile(
+        'Extensions/Lighting/lightruntimeobject-three-renderer.js'
+      )
       .setCategory('Visual effect')
       .markAsRenderedIn3D();
 

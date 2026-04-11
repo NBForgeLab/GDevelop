@@ -27,7 +27,10 @@ namespace gdjs {
     controllers: Map<number, ToneMappingSettings>;
   };
 
-  const toneMappingSceneStates = new WeakMap<gdjs.RuntimeScene, ToneMappingSceneState>();
+  const toneMappingSceneStates = new WeakMap<
+    gdjs.RuntimeScene,
+    ToneMappingSceneState
+  >();
   let nextToneMappingControllerId = 1;
 
   const getThreeRendererFromTarget = (
@@ -143,7 +146,8 @@ namespace gdjs {
       : sceneState.defaultExposure !== null
         ? sceneState.defaultExposure
         : defaultToneMappingExposure;
-    const didToneMappingChange = threeRenderer.toneMapping !== expectedToneMapping;
+    const didToneMappingChange =
+      threeRenderer.toneMapping !== expectedToneMapping;
     const didExposureChange =
       threeRenderer.toneMappingExposure !== expectedExposure;
     if (didToneMappingChange) {
@@ -155,17 +159,17 @@ namespace gdjs {
     return didToneMappingChange || didExposureChange;
   };
 
-gdjs.EffectsTools.registerFilterCreator(
+  gdjs.EffectsTools.registerFilterCreator(
     'Scene3D::ToneMapping',
-  new (class implements gdjs.EffectsTools.FilterCreator {
+    new (class implements gdjs.EffectsTools.FilterCreator {
       makeFilter(
         target: EffectsTarget,
         effectData: EffectData
-    ): gdjs.EffectsTools.Filter {
+      ): gdjs.EffectsTools.Filter {
         if (typeof THREE === 'undefined') {
-      return new gdjs.EffectsTools.EmptyFilter();
+          return new gdjs.EffectsTools.EmptyFilter();
         }
-      return new (class implements gdjs.EffectsTools.Filter {
+        return new (class implements gdjs.EffectsTools.Filter {
           private _isEnabled = false;
           private _toneMapping: ToneMappingName = defaultToneMappingName;
           private _exposure = defaultToneMappingExposure;
@@ -210,7 +214,9 @@ gdjs.EffectsTools.registerFilterCreator(
             if (this._isEnabled === enabled) {
               return true;
             }
-            return enabled ? this.applyEffect(target) : this.removeEffect(target);
+            return enabled
+              ? this.applyEffect(target)
+              : this.removeEffect(target);
           }
           applyEffect(target: EffectsTarget): boolean {
             const runtimeScene = getRuntimeSceneFromTarget(target);

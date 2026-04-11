@@ -108,7 +108,7 @@ describe('gdjs.SpriteRuntimeObject', () => {
   };
 
   describe('Scaling', () => {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
 
     it('should handle scaling properly', () => {
@@ -135,7 +135,7 @@ describe('gdjs.SpriteRuntimeObject', () => {
   });
 
   describe('Animations', () => {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
 
     const object = new gdjs.SpriteRuntimeObject(runtimeScene, {
@@ -190,7 +190,7 @@ describe('gdjs.SpriteRuntimeObject', () => {
 
   describe('Forward animation', () => {
     it('should increment time elapsed frame when animation is playing', () => {
-      const runtimeGame = gdjs.getPixiRuntimeGame();
+      const runtimeGame = gdjs.getRuntimeGame();
       const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
       const stepDurationInMilliseconds = 1000 / 60;
       runtimeScene._timeManager.getElapsedTime = function () {
@@ -217,7 +217,7 @@ describe('gdjs.SpriteRuntimeObject', () => {
     });
 
     it('should stop when the end of the animation is reached', () => {
-      const runtimeGame = gdjs.getPixiRuntimeGame();
+      const runtimeGame = gdjs.getRuntimeGame();
       const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
       const stepDurationInMilliseconds = 1000 / 60;
       runtimeScene._timeManager.getElapsedTime = function () {
@@ -256,7 +256,7 @@ describe('gdjs.SpriteRuntimeObject', () => {
     });
 
     it('should loop to the beginning when the end of the animation is reached', () => {
-      const runtimeGame = gdjs.getPixiRuntimeGame();
+      const runtimeGame = gdjs.getRuntimeGame();
       const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
       const stepDurationInMilliseconds = 1000 / 60;
       runtimeScene._timeManager.getElapsedTime = function () {
@@ -288,7 +288,7 @@ describe('gdjs.SpriteRuntimeObject', () => {
 
   describe('Backward animation', () => {
     it('should decrement time elapsed frame when animation is playing', () => {
-      const runtimeGame = gdjs.getPixiRuntimeGame();
+      const runtimeGame = gdjs.getRuntimeGame();
       const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
       const stepDurationInMilliseconds = 1000 / 60;
       runtimeScene._timeManager.getElapsedTime = function () {
@@ -309,7 +309,7 @@ describe('gdjs.SpriteRuntimeObject', () => {
     });
 
     it('should stop when the animation beginning is reached', () => {
-      const runtimeGame = gdjs.getPixiRuntimeGame();
+      const runtimeGame = gdjs.getRuntimeGame();
       const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
       const stepDurationInMilliseconds = 1000 / 60;
       runtimeScene._timeManager.getElapsedTime = function () {
@@ -346,7 +346,7 @@ describe('gdjs.SpriteRuntimeObject', () => {
     });
 
     it('should loop to the end when the beginning of the animation is reached', () => {
-      const runtimeGame = gdjs.getPixiRuntimeGame();
+      const runtimeGame = gdjs.getRuntimeGame();
       const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
       const stepDurationInMilliseconds = 1000 / 60;
       runtimeScene._timeManager.getElapsedTime = function () {
@@ -383,7 +383,7 @@ describe('gdjs.SpriteRuntimeObject', () => {
 
   describe('Animation change', () => {
     it('should reset the elapsed time on a frame when changing animation', () => {
-      const runtimeGame = gdjs.getPixiRuntimeGame();
+      const runtimeGame = gdjs.getRuntimeGame();
       const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
       const stepDurationInMilliseconds = 1000 / 60;
       runtimeScene._timeManager.getElapsedTime = function () {
@@ -408,7 +408,7 @@ describe('gdjs.SpriteRuntimeObject', () => {
     });
 
     it('should reset the elapsed time on a frame when changing animation frame', () => {
-      const runtimeGame = gdjs.getPixiRuntimeGame();
+      const runtimeGame = gdjs.getRuntimeGame();
       const runtimeScene = new gdjs.TestRuntimeScene(runtimeGame);
       const stepDurationInMilliseconds = 1000 / 60;
       runtimeScene._timeManager.getElapsedTime = function () {

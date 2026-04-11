@@ -795,8 +795,7 @@ namespace gdjs {
       this._registerOptionalManagersIfNeeded();
     }
 
-    private _registerOptionalManagersIfNeeded(): void {
-    }
+    private _registerOptionalManagersIfNeeded(): void {}
 
     injectMockResourceManagerForTesting(
       resourceKind: ResourceKind,

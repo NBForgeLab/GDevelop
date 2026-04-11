@@ -82,7 +82,7 @@ describe('Multiplayer', () => {
   };
 
   const makeTestRuntimeSceneWithNetworkId = (timeDelta = 1000 / 60) => {
-    const runtimeGame = gdjs.getPixiRuntimeGame();
+    const runtimeGame = gdjs.getRuntimeGame();
     gdjs.projectData = {
       // @ts-ignore - we don't set all project props.
       properties: {
@@ -2407,13 +2407,13 @@ describe('Multiplayer', () => {
       ];
 
       // Launch two games.
-      const p1RuntimeGame = gdjs.getPixiRuntimeGame({
+      const p1RuntimeGame = gdjs.getRuntimeGame({
         layouts: gameLayoutData,
       });
 
       await p1RuntimeGame._resourcesLoader.loadAllResources(() => {});
 
-      const p2RuntimeGame = gdjs.getPixiRuntimeGame({
+      const p2RuntimeGame = gdjs.getRuntimeGame({
         layouts: gameLayoutData,
       });
 
@@ -2539,13 +2539,13 @@ describe('Multiplayer', () => {
       ];
 
       // Launch two games.
-      const p1RuntimeGame = gdjs.getPixiRuntimeGame({
+      const p1RuntimeGame = gdjs.getRuntimeGame({
         layouts: gameLayoutData,
       });
 
       await p1RuntimeGame._resourcesLoader.loadAllResources(() => {});
 
-      const p2RuntimeGame = gdjs.getPixiRuntimeGame({
+      const p2RuntimeGame = gdjs.getRuntimeGame({
         layouts: gameLayoutData,
       });
 

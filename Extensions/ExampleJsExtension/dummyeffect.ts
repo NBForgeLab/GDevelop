@@ -72,11 +72,7 @@ namespace gdjs {
         value: number
       ) {
         if (parameterName === 'opacity') {
-          filter.uniforms.opacity = gdjs.EffectsTools.clampValue(
-            value,
-            0,
-            1
-          );
+          filter.uniforms.opacity = gdjs.EffectsTools.clampValue(value, 0, 1);
         }
       }
       getDoubleParameter(filter: PIXI.Filter, parameterName: string): number {

@@ -60,7 +60,6 @@ module.exports = function (config) {
       './newIDE/app/resources/GDJS/Runtime/gd.js',
       './newIDE/app/resources/GDJS/Runtime/AsyncTasksManager.js',
       './newIDE/app/resources/GDJS/Runtime/libs/rbush.js',
-      './newIDE/app/resources/GDJS/Runtime/rendering-libs/pixi.js',
       './newIDE/app/resources/GDJS/Runtime/rendering-libs/three.js',
       './newIDE/app/resources/GDJS/Runtime/rendering-libs/ThreeAddons.js',
       './newIDE/app/resources/GDJS/Runtime/howler-sound-manager/howler.min.js',
@@ -142,11 +141,11 @@ module.exports = function (config) {
       './newIDE/app/resources/GDJS/Runtime/Extensions/PathfindingBehavior/pathfindingobstacleruntimebehavior.js',
       './newIDE/app/resources/GDJS/Runtime/Extensions/PathfindingBehavior/pathfindingruntimebehavior.js',
       './newIDE/app/resources/GDJS/Runtime/Extensions/PrimitiveDrawing/shapepainterruntimeobject.js',
-      './newIDE/app/resources/GDJS/Runtime/Extensions/PrimitiveDrawing/shapepainterruntimeobject-pixi-renderer.js',
+      './newIDE/app/resources/GDJS/Runtime/Extensions/PrimitiveDrawing/shapepainterruntimeobject-three-renderer.js',
       './newIDE/app/resources/GDJS/Runtime/Extensions/TextInput/textinputruntimeobject.js',
       './newIDE/app/resources/GDJS/Runtime/Extensions/TextInput/textinputruntimeobject-three-renderer.js',
       './newIDE/app/resources/GDJS/Runtime/Extensions/TextObject/textruntimeobject.js',
-      './newIDE/app/resources/GDJS/Runtime/Extensions/TextObject/textruntimeobject-pixi-renderer.js',
+      './newIDE/app/resources/GDJS/Runtime/Extensions/TextObject/textruntimeobject-three-renderer.js',
       './newIDE/app/resources/GDJS/Runtime/Extensions/3D/A_RuntimeObject3D.js',
       './newIDE/app/resources/GDJS/Runtime/Extensions/3D/A_RuntimeObject3DRenderer.js',
       './newIDE/app/resources/GDJS/Runtime/Extensions/3D/Cube3DRuntimeObject.js',
@@ -167,8 +166,8 @@ module.exports = function (config) {
 
       // Other test initialization files:
       './GDJS/tests/tests-utils/init.js',
-      './GDJS/tests/tests-utils/init.pixiruntimegamewithassets.js',
-      './GDJS/tests/tests-utils/init.pixiruntimegame.js',
+      './GDJS/tests/tests-utils/init.runtimegamewithassets.js',
+      './GDJS/tests/tests-utils/init.runtimegame.js',
       './GDJS/tests/tests-utils/MockedCustomObject.js',
 
       // Test helpers
