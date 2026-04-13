@@ -223,7 +223,6 @@ import { useNavigationToEvent } from './UseNavigationToEvent';
 import useNavigateFromGlobalSearch from './UseNavigateFromGlobalSearch';
 import RobotIcon from '../ProjectCreation/RobotIcon';
 import PublicProfileContext from '../Profile/PublicProfileContext';
-import { useGamesPlatformFrame } from './EditorContainers/HomePage/PlaySection/UseGamesPlatformFrame';
 import { useExtensionLoadErrorDialog } from '../Utils/UseExtensionLoadErrorDialog';
 import { PanesContainer } from './PanesContainer';
 import {
@@ -4893,10 +4892,15 @@ const MainFrame = (props: Props): React.MixedElement => {
     onExtensionInstalled,
   });
 
-  const gamesPlatformFrameTools = useGamesPlatformFrame({
-    fetchAndOpenNewProjectSetupDialogForExample,
-    onOpenProfileDialog,
-  });
+  // Games platform frame tools - disabled after removing Play section
+  const gamesPlatformFrameTools = {
+    renderGamesPlatformFrame: () => null,
+    iframeVisible: false,
+    iframeErrored: false,
+    startTimeoutToUnloadIframe: () => {},
+    loadIframeOrRemoveTimeout: () => {},
+    updateIframePosition: () => {},
+  };
 
   const previewLoading = previewLoadingRef.current;
   const hideAskAi =

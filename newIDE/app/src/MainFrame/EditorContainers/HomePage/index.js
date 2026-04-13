@@ -15,7 +15,6 @@ import {
 } from '../../../ProjectsStorage';
 import LearnSection from './LearnSection';
 import { type LearnCategory } from './LearnSection/Utils';
-import PlaySection from './PlaySection';
 import CreateSection from './CreateSection';
 import StoreSection from './StoreSection';
 import { TutorialContext } from '../../../Tutorial/TutorialContext';
@@ -26,23 +25,17 @@ import AuthenticatedUserContext from '../../../Profile/AuthenticatedUserContext'
 import { type ExampleShortHeader } from '../../../Utils/GDevelopServices/Example';
 import { type ResourceManagementProps } from '../../../ResourcesList/ResourceSource';
 import { AssetStoreContext } from '../../../AssetStore/AssetStoreContext';
-import TeamSection from './TeamSection';
-import TeamProvider from '../../../Profile/Team/TeamProvider';
 import { useResponsiveWindowSize } from '../../../UI/Responsive/ResponsiveWindowMeasurer';
 import { type PrivateGameTemplateListingData } from '../../../Utils/GDevelopServices/Shop';
 import { PrivateGameTemplateStoreContext } from '../../../AssetStore/PrivateGameTemplates/PrivateGameTemplateStoreContext';
 import RouterContext, { type RouteArguments } from '../../RouterContext';
 import { type GameDetailsTab } from '../../../GameDashboard';
-import { canUseClassroomFeature } from '../../../Utils/GDevelopServices/Usage';
-import EducationMarketingSection from './EducationMarketingSection';
-import useEducationForm from './UseEducationForm';
 import {
   type ExampleProjectSetup,
   type NewProjectSetup,
 } from '../../../ProjectCreation/NewProjectSetupDialog';
 import { type ObjectWithContext } from '../../../ObjectsList/EnumerateObjects';
 import { type GamesList } from '../../../GameDashboard/UseGamesList';
-import { type GamesPlatformFrameTools } from './PlaySection/UseGamesPlatformFrame';
 import { type CourseChapter } from '../../../Utils/GDevelopServices/Asset';
 import useCourses from './UseCourses';
 import PreferencesContext from '../../Preferences/PreferencesContext';
@@ -71,10 +64,6 @@ const getRequestedTab = (routeArguments: RouteArguments): HomeTab | null => {
     ].includes(routeArguments['initial-dialog'])
   ) {
     return 'create';
-  } else if (routeArguments['initial-dialog'] === 'education') {
-    return 'team-view';
-  } else if (routeArguments['initial-dialog'] === 'play') {
-    return 'play';
   } else if (routeArguments['initial-dialog'] === 'learn') {
     return 'learn';
   }
@@ -120,15 +109,11 @@ type Props = {|
   projectItemName: ?string,
   project: ?gdProject,
   setToolbar: (?React.Node) => void,
-  setGamesPlatformFrameShown: ({| shown: boolean, isMobile: boolean |}) => void,
   storageProviders: Array<StorageProvider>,
   storageProvider: ?StorageProvider,
 
   // Games
   gamesList: GamesList,
-
-  // Games platform
-  gamesPlatformFrameTools: GamesPlatformFrameTools,
 
   // Project opening
   canOpen: boolean,
@@ -238,7 +223,6 @@ export const HomePage: React.ComponentType<Props> = React.memo<Props>(
         onCreateProjectFromExample,
         onCreateEmptyProject,
         setToolbar,
-        setGamesPlatformFrameShown,
         selectInAppTutorial,
         onOpenPreferences,
         onOpenAbout,
@@ -256,7 +240,6 @@ export const HomePage: React.ComponentType<Props> = React.memo<Props>(
         onOpenTemplateFromTutorial,
         onOpenTemplateFromCourseChapter,
         gamesList,
-        gamesPlatformFrameTools,
         onWillInstallExtension,
         onExtensionInstalled,
         gameEditorMode,
@@ -264,16 +247,7 @@ export const HomePage: React.ComponentType<Props> = React.memo<Props>(
       ref
     ) => {
       const authenticatedUser = React.useContext(AuthenticatedUserContext);
-      const {
-        authenticated,
-        onCloudProjectsChanged,
-        onOpenLoginDialog,
-        limits,
-      } = authenticatedUser;
-      const {
-        startTimeoutToUnloadIframe,
-        loadIframeOrRemoveTimeout,
-      } = gamesPlatformFrameTools;
+      const { authenticated, onCloudProjectsChanged } = authenticatedUser;
       const { fetchTutorials } = React.useContext(TutorialContext);
       const { fetchExamplesAndFilters } = React.useContext(ExampleStoreContext);
       const {
@@ -297,14 +271,6 @@ export const HomePage: React.ComponentType<Props> = React.memo<Props>(
       const { routeArguments, removeRouteArguments } = React.useContext(
         RouterContext
       );
-      const {
-        educationForm,
-        onChangeEducationForm,
-        onSendEducationForm,
-        educationFormError,
-        educationFormStatus,
-        onResetEducationForm,
-      } = useEducationForm({ authenticatedUser });
       const {
         courses,
         selectedCourse,
@@ -530,20 +496,9 @@ export const HomePage: React.ComponentType<Props> = React.memo<Props>(
       // as the rest of the interface (same React render).
       React.useLayoutEffect(
         () => {
-          // Hide the toolbars when on mobile in the "play" tab.
-          if (activeTab === 'play') {
-            setGamesPlatformFrameShown({ shown: true, isMobile });
-          } else {
-            setGamesPlatformFrameShown({ shown: false, isMobile });
-            updateToolbar();
-          }
-
-          // Ensure we show it again when the tab changes.
-          return () => {
-            setGamesPlatformFrameShown({ shown: false, isMobile });
-          };
+          updateToolbar();
         },
-        [updateToolbar, activeTab, setGamesPlatformFrameShown, isMobile]
+        [updateToolbar, activeTab]
       );
 
       // $FlowFixMe[incompatible-type]
@@ -562,35 +517,6 @@ export const HomePage: React.ComponentType<Props> = React.memo<Props>(
         onObjectGroupsModifiedOutsideEditor: noop,
       }));
 
-      // As the homepage is never unmounted, we need to ensure the games platform
-      // iframe is unloaded & loaded from here,
-      // allowing to handle when the user navigates to another tab.
-      React.useEffect(
-        () => {
-          if (!isActive) {
-            // This happens when the user navigates to another tab. (ex: Scene or Events)
-            startTimeoutToUnloadIframe();
-            return;
-          }
-
-          if (activeTab === 'play') {
-            // This happens when the user navigates to the "Play" tab,
-            // - From another Home Tab.
-            // - From another tab (ex: Scene or Events).
-            loadIframeOrRemoveTimeout();
-          } else {
-            // This happens when the user navigates to another Home Tab.
-            startTimeoutToUnloadIframe();
-          }
-        },
-        [
-          isActive,
-          startTimeoutToUnloadIframe,
-          loadIframeOrRemoveTimeout,
-          activeTab,
-        ]
-      );
-
       const premiumCourse = courses
         ? courses.find(course => course.id === 'premium-course')
         : null;
@@ -598,141 +524,111 @@ export const HomePage: React.ComponentType<Props> = React.memo<Props>(
       return (
         <I18n>
           {({ i18n }) => (
-            <TeamProvider>
-              <div style={isMobile ? styles.mobileContainer : styles.container}>
-                <div style={styles.scrollableContainer}>
-                  {activeTab === 'create' && (
-                    <CreateSection
-                      project={project}
-                      currentFileMetadata={fileMetadata}
-                      onOpenProject={onOpenRecentFile}
-                      storageProviders={storageProviders}
-                      storageProvider={storageProvider}
-                      resourceManagementProps={resourceManagementProps}
-                      onCreateEmptyProject={onCreateEmptyProject}
-                      onOpenLayout={onOpenLayout}
-                      onWillInstallExtension={onWillInstallExtension}
-                      onExtensionInstalled={onExtensionInstalled}
-                      onCloseAskAi={onCloseAskAi}
-                      closeProject={closeProject}
-                      games={games}
-                      onRefreshGames={fetchGames}
-                      onGameUpdated={onGameUpdated}
-                      gamesFetchingError={gamesFetchingError}
-                      openedGame={openedGame}
-                      setOpenedGameId={setOpenedGameId}
-                      currentTab={gameDetailsCurrentTab}
-                      setCurrentTab={setGameDetailsCurrentTab}
-                      canOpen={canOpen}
-                      onOpenProfile={onOpenProfile}
-                      askToCloseProject={askToCloseProject}
-                      onCreateProjectFromExample={onCreateProjectFromExample}
-                      onSelectExampleShortHeader={onSelectExampleShortHeader}
-                      onSelectPrivateGameTemplateListingData={
-                        onSelectPrivateGameTemplateListingData
-                      }
-                      i18n={i18n}
-                      onOpenNewProjectSetupDialog={onOpenNewProjectSetupDialog}
-                      onChooseProject={onChooseProject}
-                      onSaveProject={onSave}
-                      canSaveProject={canSave}
-                    />
-                  )}
-                  {activeTab === 'learn' && (
-                    <LearnSection
-                      selectInAppTutorial={selectInAppTutorial}
-                      onOpenTemplateFromTutorial={onOpenTemplateFromTutorial}
-                      onOpenTemplateFromCourseChapter={
-                        onOpenTemplateFromCourseChapter
-                      }
-                      selectedCategory={learnCategory}
-                      onSelectCategory={setLearnCategory}
-                      onSelectCourse={onSelectCourse}
-                      courses={courses}
-                      previewedCourse={premiumCourse}
-                      course={selectedCourse}
-                      getCourseChapters={getCourseChapters}
-                      onCompleteCourseTask={onCompleteTask}
-                      isCourseTaskCompleted={isTaskCompleted}
-                      getCourseChapterCompletion={getChapterCompletion}
-                      getCourseCompletion={getCourseCompletion}
-                      onBuyCourseWithCredits={onBuyCourseWithCredits}
-                      onBuyCourse={onBuyCourse}
-                      purchasingCourseListingData={purchasingCourseListingData}
-                      setPurchasingCourseListingData={
-                        setPurchasingCourseListingData
-                      }
-                      onOpenAskAi={onOpenAskAi}
-                      onOpenNewProjectSetupDialog={onOpenNewProjectSetupDialog}
-                      onSelectPrivateGameTemplateListingData={
-                        onSelectPrivateGameTemplateListingData
-                      }
-                      onSelectExampleShortHeader={onSelectExampleShortHeader}
-                      clearInitialBundleValues={() => {
-                        setInitialBundleUserFriendlySlugForLearn(null);
-                        setInitialBundleCategoryForLearn(null);
-                      }}
-                      initialBundleUserFriendlySlug={
-                        initialBundleUserFriendlySlugForLearn
-                      }
-                      initialBundleCategory={initialBundleCategoryForLearn}
-                    />
-                  )}
-                  {activeTab === 'play' && (
-                    <PlaySection
-                      gamesPlatformFrameTools={gamesPlatformFrameTools}
-                    />
-                  )}
-                  {activeTab === 'shop' && (
-                    <StoreSection
-                      project={project}
-                      resourceManagementProps={resourceManagementProps}
-                      onOpenPrivateGameTemplateListingData={
-                        onOpenPrivateGameTemplateListingData
-                      }
-                      onOpenProfile={onOpenProfile}
-                      onWillInstallExtension={onWillInstallExtension}
-                      onExtensionInstalled={onExtensionInstalled}
-                      onCourseOpen={(courseId: string) => {
-                        onSelectCourse(courseId);
-                        setActiveTab('learn');
-                      }}
-                      courses={courses}
-                      getCourseCompletion={getCourseCompletion}
-                    />
-                  )}
-                  {activeTab === 'team-view' &&
-                    (canUseClassroomFeature(limits) ? (
-                      <TeamSection
-                        project={project}
-                        onOpenRecentFile={onOpenRecentFile}
-                        storageProviders={storageProviders}
-                        currentFileMetadata={fileMetadata}
-                        onOpenTeachingResources={() => {
-                          setLearnCategory('education-curriculum');
-                          setActiveTab('learn');
-                        }}
-                      />
-                    ) : (
-                      <EducationMarketingSection
-                        form={educationForm}
-                        onChangeForm={onChangeEducationForm}
-                        onSendForm={onSendEducationForm}
-                        formError={educationFormError}
-                        formStatus={educationFormStatus}
-                        onResetForm={onResetEducationForm}
-                        onLogin={onOpenLoginDialog}
-                      />
-                    ))}
-                </div>
-                <HomePageMenu
-                  activeTab={activeTab}
-                  setActiveTab={setActiveTab}
-                  onOpenPreferences={onOpenPreferences}
-                  onOpenAbout={onOpenAbout}
-                />
+            <div style={isMobile ? styles.mobileContainer : styles.container}>
+              <div style={styles.scrollableContainer}>
+                {activeTab === 'create' && (
+                  <CreateSection
+                    project={project}
+                    currentFileMetadata={fileMetadata}
+                    onOpenProject={onOpenRecentFile}
+                    storageProviders={storageProviders}
+                    storageProvider={storageProvider}
+                    resourceManagementProps={resourceManagementProps}
+                    onCreateEmptyProject={onCreateEmptyProject}
+                    onOpenLayout={onOpenLayout}
+                    onWillInstallExtension={onWillInstallExtension}
+                    onExtensionInstalled={onExtensionInstalled}
+                    onCloseAskAi={onCloseAskAi}
+                    closeProject={closeProject}
+                    games={games}
+                    onRefreshGames={fetchGames}
+                    onGameUpdated={onGameUpdated}
+                    gamesFetchingError={gamesFetchingError}
+                    openedGame={openedGame}
+                    setOpenedGameId={setOpenedGameId}
+                    currentTab={gameDetailsCurrentTab}
+                    setCurrentTab={setGameDetailsCurrentTab}
+                    canOpen={canOpen}
+                    onOpenProfile={onOpenProfile}
+                    askToCloseProject={askToCloseProject}
+                    onCreateProjectFromExample={onCreateProjectFromExample}
+                    onSelectExampleShortHeader={onSelectExampleShortHeader}
+                    onSelectPrivateGameTemplateListingData={
+                      onSelectPrivateGameTemplateListingData
+                    }
+                    i18n={i18n}
+                    onOpenNewProjectSetupDialog={onOpenNewProjectSetupDialog}
+                    onChooseProject={onChooseProject}
+                    onSaveProject={onSave}
+                    canSaveProject={canSave}
+                  />
+                )}
+                {activeTab === 'learn' && (
+                  <LearnSection
+                    selectInAppTutorial={selectInAppTutorial}
+                    onOpenTemplateFromTutorial={onOpenTemplateFromTutorial}
+                    onOpenTemplateFromCourseChapter={
+                      onOpenTemplateFromCourseChapter
+                    }
+                    selectedCategory={learnCategory}
+                    onSelectCategory={setLearnCategory}
+                    onSelectCourse={onSelectCourse}
+                    courses={courses}
+                    previewedCourse={premiumCourse}
+                    course={selectedCourse}
+                    getCourseChapters={getCourseChapters}
+                    onCompleteCourseTask={onCompleteTask}
+                    isCourseTaskCompleted={isTaskCompleted}
+                    getCourseChapterCompletion={getChapterCompletion}
+                    getCourseCompletion={getCourseCompletion}
+                    onBuyCourseWithCredits={onBuyCourseWithCredits}
+                    onBuyCourse={onBuyCourse}
+                    purchasingCourseListingData={purchasingCourseListingData}
+                    setPurchasingCourseListingData={
+                      setPurchasingCourseListingData
+                    }
+                    onOpenAskAi={onOpenAskAi}
+                    onOpenNewProjectSetupDialog={onOpenNewProjectSetupDialog}
+                    onSelectPrivateGameTemplateListingData={
+                      onSelectPrivateGameTemplateListingData
+                    }
+                    onSelectExampleShortHeader={onSelectExampleShortHeader}
+                    clearInitialBundleValues={() => {
+                      setInitialBundleUserFriendlySlugForLearn(null);
+                      setInitialBundleCategoryForLearn(null);
+                    }}
+                    initialBundleUserFriendlySlug={
+                      initialBundleUserFriendlySlugForLearn
+                    }
+                    initialBundleCategory={initialBundleCategoryForLearn}
+                  />
+                )}
+                {activeTab === 'shop' && (
+                  <StoreSection
+                    project={project}
+                    resourceManagementProps={resourceManagementProps}
+                    onOpenPrivateGameTemplateListingData={
+                      onOpenPrivateGameTemplateListingData
+                    }
+                    onOpenProfile={onOpenProfile}
+                    onWillInstallExtension={onWillInstallExtension}
+                    onExtensionInstalled={onExtensionInstalled}
+                    onCourseOpen={(courseId: string) => {
+                      onSelectCourse(courseId);
+                      setActiveTab('learn');
+                    }}
+                    courses={courses}
+                    getCourseCompletion={getCourseCompletion}
+                  />
+                )}
               </div>
-            </TeamProvider>
+              <HomePageMenu
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                onOpenPreferences={onOpenPreferences}
+                onOpenAbout={onOpenAbout}
+              />
+            </div>
           )}
         </I18n>
       );
@@ -754,7 +650,6 @@ export const renderHomePageContainer = (
     isActive={props.isActive}
     projectItemName={props.projectItemName}
     setToolbar={props.setToolbar}
-    setGamesPlatformFrameShown={props.setGamesPlatformFrameShown}
     canOpen={props.canOpen}
     onChooseProject={props.onChooseProject}
     onOpenRecentFile={props.onOpenRecentFile}
@@ -789,7 +684,6 @@ export const renderHomePageContainer = (
     canSave={props.canSave}
     resourceManagementProps={props.resourceManagementProps}
     gamesList={props.gamesList}
-    gamesPlatformFrameTools={props.gamesPlatformFrameTools}
     onWillInstallExtension={props.onWillInstallExtension}
     onExtensionInstalled={props.onExtensionInstalled}
     gameEditorMode={props.gameEditorMode}

@@ -8,19 +8,13 @@ import VerticalTabButton from '../../../UI/VerticalTabButton';
 import DoubleChevronArrowLeft from '../../../UI/CustomSvgIcons/DoubleChevronArrowLeft';
 import HammerIcon from '../../../UI/CustomSvgIcons/Hammer';
 import SchoolIcon from '../../../UI/CustomSvgIcons/School';
-import ControllerIcon from '../../../UI/CustomSvgIcons/Controller';
-import BookLeafIcon from '../../../UI/CustomSvgIcons/BookLeaf';
 import StoreIcon from '../../../UI/CustomSvgIcons/Store';
 import Preferences from '../../../UI/CustomSvgIcons/Preferences';
 import GDevelopGLogo from '../../../UI/CustomSvgIcons/GDevelopGLogo';
 import GDevelopThemeContext from '../../../UI/Theme/GDevelopThemeContext';
 import HomePageMenuBar from './HomePageMenuBar';
-import {
-  shouldHideClassroomTab,
-  type Limits,
-} from '../../../Utils/GDevelopServices/Usage';
+import { type Limits } from '../../../Utils/GDevelopServices/Usage';
 import AuthenticatedUserContext from '../../../Profile/AuthenticatedUserContext';
-import { isNativeMobileApp } from '../../../Utils/Platform';
 
 export const styles = {
   // Ensure it's always interactive, even when another iframe disable pointer events.
@@ -42,7 +36,7 @@ export const styles = {
   },
 };
 
-export type HomeTab = 'create' | 'learn' | 'play' | 'shop' | 'team-view';
+export type HomeTab = 'create' | 'learn' | 'shop';
 
 export type GetIconFunction = ({
   color: string,
@@ -81,22 +75,6 @@ const homePageMenuTabs: { [tab: HomeTab]: HomePageMenuTab } = {
       <SchoolIcon fontSize={fontSize} color={color} />
     ),
   },
-  play: {
-    label: <Trans>Play</Trans>,
-    tab: 'play',
-    id: 'home-play-tab',
-    getIcon: ({ color, fontSize }) => (
-      <ControllerIcon fontSize={fontSize} color={color} />
-    ),
-  },
-  'team-view': {
-    label: <Trans>Teach</Trans>,
-    tab: 'team-view',
-    id: 'team-view-tab',
-    getIcon: ({ color, fontSize }) => (
-      <BookLeafIcon fontSize={fontSize} color={color} />
-    ),
-  },
 };
 
 export const getTabsToDisplay = ({
@@ -104,27 +82,17 @@ export const getTabsToDisplay = ({
 }: {|
   limits: ?Limits,
 |}): HomePageMenuTab[] => {
-  const displayPlayTab =
-    !limits ||
-    !(
-      limits.capabilities.classrooms &&
-      limits.capabilities.classrooms.hidePlayTab
-    );
   const displayShopTab =
     !limits ||
     !(
       limits.capabilities.classrooms &&
       limits.capabilities.classrooms.hidePremiumProducts
     );
-  const displayTeachTab =
-    !shouldHideClassroomTab(limits) && !isNativeMobileApp();
   // $FlowFixMe[incompatible-type]
   const tabs: HomeTab[] = [
     'learn',
     'create',
-    displayPlayTab ? 'play' : null,
     displayShopTab ? 'shop' : null,
-    displayTeachTab ? 'team-view' : null,
   ].filter(Boolean);
   return tabs.map(tab => homePageMenuTabs[tab]);
 };

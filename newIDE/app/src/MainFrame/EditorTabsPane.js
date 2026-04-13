@@ -34,11 +34,11 @@ import { type NavigateToEventFromGlobalSearchParams } from '../Utils/Search';
 import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
 import { type HotReloadPreviewButtonProps } from '../HotReload/HotReloadPreviewButton';
 import { type GamesList } from '../GameDashboard/UseGamesList';
-import { type GamesPlatformFrameTools } from './EditorContainers/HomePage/PlaySection/UseGamesPlatformFrame';
 import {
   type FileMetadata,
   type FileMetadataAndStorageProviderName,
 } from '../ProjectsStorage';
+import { type GamesPlatformFrameTools } from './EditorContainers/BaseEditor';
 import UnsavedChangesContext from './UnsavedChangesContext';
 import { type OpenedVersionStatus } from '../VersionHistory';
 import { type StorageProvider, type SaveAsLocation } from '../ProjectsStorage';

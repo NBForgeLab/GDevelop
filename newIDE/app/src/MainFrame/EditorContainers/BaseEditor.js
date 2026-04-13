@@ -19,8 +19,17 @@ import { type PrivateGameTemplateListingData } from '../../Utils/GDevelopService
 import { type CourseChapter } from '../../Utils/GDevelopServices/Asset';
 import { type ExpandedCloudProjectVersion } from '../../Utils/GDevelopServices/Project';
 import { type GamesList } from '../../GameDashboard/UseGamesList';
-import { type GamesPlatformFrameTools } from './HomePage/PlaySection/UseGamesPlatformFrame';
 import { type ObjectWithContext } from '../../ObjectsList/EnumerateObjects';
+
+// Games Platform - inline type after removing PlaySection
+export type GamesPlatformFrameTools = {|
+  renderGamesPlatformFrame: () => React.Node,
+  iframeVisible: boolean,
+  iframeErrored: boolean,
+  startTimeoutToUnloadIframe: () => void,
+  loadIframeOrRemoveTimeout: () => void,
+  updateIframePosition: () => void,
+|};
 import { type CreateProjectResult } from '../../Utils/UseCreateProject';
 import { type OpenAskAiOptions } from '../../AiGeneration/Utils';
 import type { NavigateToEventFromGlobalSearchParams } from '../../Utils/Search';

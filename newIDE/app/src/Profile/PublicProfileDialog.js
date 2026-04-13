@@ -11,7 +11,6 @@ import {
 } from '../Utils/GDevelopServices/Shop';
 import { type ExampleShortHeader } from '../Utils/GDevelopServices/Example';
 import { useStableUpToDateCallback } from '../Utils/UseStableUpToDateCallback';
-import { gamesPlatformEmbeddedVersion } from '../MainFrame/EditorContainers/HomePage/PlaySection/GamesPlatformFrame.js';
 
 type Props = {|
   userId: string,
@@ -98,19 +97,9 @@ const PublicProfileDialog = ({
       flexColumnBody
       onRequestClose={onClose}
     >
-      <GdGamesFrame
-        path={`/app-embedded/${gamesPlatformEmbeddedVersion}/user/${userId}`}
-        loadErrorMessage={
-          <Trans>
-            Can't load the profile. Verify your internet connection or try again
-            later.
-          </Trans>
-        }
-        supportedMessageIds={Object.entries(callbacks)
-          .filter(([key, value]) => !!value)
-          .map(([key]) => key)}
-        onMessageReceived={stableOnMessageReceived}
-      />
+      <div style={{ padding: 20, textAlign: 'center' }}>
+        <Trans>Profile loading is disabled.</Trans>
+      </div>
     </Dialog>
   );
 };
