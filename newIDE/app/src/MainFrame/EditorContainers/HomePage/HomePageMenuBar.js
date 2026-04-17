@@ -13,6 +13,7 @@ import Preferences from '../../../UI/CustomSvgIcons/Preferences';
 import GDevelopGLogo from '../../../UI/CustomSvgIcons/GDevelopGLogo';
 import GDevelopThemeContext from '../../../UI/Theme/GDevelopThemeContext';
 import Paper from '../../../UI/Paper';
+import { makeStyles } from '@material-ui/core/styles';
 import {
   type HomeTab,
   type GetIconFunction,
@@ -83,18 +84,30 @@ export const styles = {
   },
   collapseButton: {
     position: 'absolute',
-    top: SECTION_DESKTOP_SPACING + 4,
+    top: 0,
     right: 0,
     transform: 'translateX(50%)',
     zIndex: 1,
-    backgroundColor: 'var(--theme-paper-background-dark)',
-    border: '1px solid var(--theme-home-separator-color)',
-    borderRadius: 999,
   },
   desktopTabsColumn: {
     paddingTop: 22,
   },
 };
+
+const useStyles = makeStyles({
+  collapseButtonHover: (props: {|
+    backgroundColor: string,
+    borderColor: string,
+  |}) => ({
+    borderRadius: 999,
+    border: '1px solid transparent', // avoid layout shift when border appears
+    transition: 'background-color 120ms ease, border-color 120ms ease',
+    '&:hover': {
+      borderColor: props.borderColor,
+      backgroundColor: props.backgroundColor,
+    },
+  }),
+});
 
 type Props = {|
   setActiveTab: HomeTab => void,
@@ -114,6 +127,10 @@ const HomePageMenuBar = ({
   const { isMobile, isMediumScreen } = useResponsiveWindowSize();
   const isMobileOrSmallScreen = isMobile || isMediumScreen;
   const gdevelopTheme = React.useContext(GDevelopThemeContext);
+  const classes = useStyles({
+    backgroundColor: gdevelopTheme.home.header.backgroundColor,
+    borderColor: gdevelopTheme.home.separator.color,
+  });
   const { limits } = React.useContext(AuthenticatedUserContext);
   const preferences = React.useContext(PreferencesContext);
   const isMenuCollapsed = preferences.values.homePageMenuIsCollapsed;
@@ -232,11 +249,12 @@ const HomePageMenuBar = ({
               preferences.setHomePageMenuIsCollapsed(!isMenuCollapsed)
             }
             size="small"
+            className={classes.collapseButtonHover}
             style={{
               ...styles.collapseButton,
-              backgroundColor: gdevelopTheme.home.header.backgroundColor,
-              border: `1px solid ${gdevelopTheme.home.separator.color}`,
             }}
+            disableRipple
+            disableFocusRipple
             tooltip={
               isMenuCollapsed ? t`Expand navigation` : t`Collapse navigation`
             }
