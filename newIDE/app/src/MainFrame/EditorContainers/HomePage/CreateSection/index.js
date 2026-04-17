@@ -35,7 +35,6 @@ import {
   type ExampleProjectSetup,
 } from '../../../../ProjectCreation/NewProjectSetupDialog';
 import { type ExampleShortHeader } from '../../../../Utils/GDevelopServices/Example';
-import UrlStorageProvider from '../../../../ProjectsStorage/UrlStorageProvider';
 import {
   type WindowSizeType,
   useResponsiveWindowSize,
