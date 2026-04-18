@@ -24,10 +24,103 @@ import { getIDEVersionWithHash } from '../../../Version';
 import { setEmbeddedGameFramePreviewLocation } from '../../../EmbeddedGame/EmbeddedGameFrame';
 const electron = optionalRequire('electron');
 const path = optionalRequire('path');
+const fs = optionalRequire('fs-extra');
 const ipcRenderer = electron ? electron.ipcRenderer : null;
 const gd: libGDevelop = global.gd;
 
 let nextPreviewId = 1;
+
+const requiredRuntimeScriptPaths = [
+  'rendering-libs/pixi.js',
+  'pixi-renderers/runtime-pixi-overlay-renderer.js',
+  'pixi-renderers/spriteruntimeobject-pixi-renderer.js',
+  'spriteruntimeobject-renderer.js',
+  'Extensions/TextObject/textruntimeobject-pixi-renderer.js',
+  'Extensions/TextObject/textruntimeobject-renderer.js',
+  'Extensions/TiledSpriteObject/tiledspriteruntimeobject-pixi-renderer.js',
+  'Extensions/TiledSpriteObject/tiledspriteruntimeobject-renderer.js',
+  'Extensions/PanelSpriteObject/panelspriteruntimeobject-pixi-renderer.js',
+  'Extensions/PanelSpriteObject/panelspriteruntimeobject-renderer.js',
+  'Extensions/BBText/bbtextruntimeobject-pixi-renderer.js',
+  'Extensions/BBText/bbtextruntimeobject-renderer.js',
+  'Extensions/BitmapText/bitmaptextruntimeobject-pixi-renderer.js',
+  'Extensions/BitmapText/bitmaptextruntimeobject-renderer.js',
+  'Extensions/Video/videoruntimeobject-pixi-renderer.js',
+  'Extensions/Video/videoruntimeobject-renderer.js',
+  'Extensions/Map/mapruntimeobject-pixi-renderer.js',
+  'Extensions/Map/mapruntimeobject-renderer.js',
+];
+
+const hasScriptTag = (html: string, scriptPath: string): boolean =>
+  html.includes(`src="${scriptPath}"`) || html.includes(`src='${scriptPath}'`);
+
+const sanitizePreviewIndexHtml = (indexHtml: string): string => {
+  let sanitizedIndexHtml = indexHtml.replace(
+    /<script\b[^>]*\bsrc=["'][^"']+\.wasm["'][^>]*><\/script>\s*/gi,
+    ''
+  );
+
+  const missingScriptPaths = requiredRuntimeScriptPaths.filter(
+    scriptPath => !hasScriptTag(sanitizedIndexHtml, scriptPath)
+  );
+  if (!missingScriptPaths.length) {
+    return sanitizedIndexHtml;
+  }
+
+  const injectedScriptTags = missingScriptPaths
+    .map(
+      scriptPath =>
+        `\t<script type="text/javascript" src="${scriptPath}"></script>`
+    )
+    .join('\n');
+
+  if (hasScriptTag(sanitizedIndexHtml, 'runtimegame-renderer.js')) {
+    sanitizedIndexHtml = sanitizedIndexHtml.replace(
+      /(\s*<script\b[^>]*\bsrc=["']runtimegame-renderer\.js["'][^>]*><\/script>)/i,
+      `\n${injectedScriptTags}$1`
+    );
+  } else {
+    sanitizedIndexHtml = sanitizedIndexHtml.replace(
+      /<\/head>/i,
+      `\n${injectedScriptTags}\n</head>`
+    );
+  }
+
+  return sanitizedIndexHtml;
+};
+
+const patchLocalPreviewExport = async ({
+  gdjsRoot,
+  outputDir,
+}: {|
+  gdjsRoot: string,
+  outputDir: string,
+|}): Promise<void> => {
+  if (!fs || !path) {
+    return;
+  }
+
+  for (const relativeRuntimePath of requiredRuntimeScriptPaths) {
+    const sourcePath = path.join(gdjsRoot, 'Runtime', relativeRuntimePath);
+    const destinationPath = path.join(outputDir, relativeRuntimePath);
+    if (!fs.existsSync(sourcePath)) {
+      continue;
+    }
+
+    fs.copySync(sourcePath, destinationPath);
+  }
+
+  const indexHtmlPath = path.join(outputDir, 'index.html');
+  if (!fs.existsSync(indexHtmlPath)) {
+    return;
+  }
+
+  const currentIndexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
+  const patchedIndexHtml = sanitizePreviewIndexHtml(currentIndexHtml);
+  if (patchedIndexHtml !== currentIndexHtml) {
+    fs.writeFileSync(indexHtmlPath, patchedIndexHtml, 'utf8');
+  }
+};
 
 type State = {|
   networkPreviewDialogOpen: boolean,
@@ -381,6 +474,7 @@ export default class LocalPreviewLauncher extends React.Component<
     }
 
     exporter.exportProjectForPreview(previewExportOptions);
+    await patchLocalPreviewExport({ gdjsRoot, outputDir });
 
     if (shouldHotReload) {
       const projectDataElement = new gd.SerializerElement();

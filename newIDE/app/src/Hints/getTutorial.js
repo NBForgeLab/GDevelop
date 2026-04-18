@@ -18,7 +18,6 @@ const getTutorial = (
     tutorial => tutorial.id === tutorialId
   );
   if (!tutorial) {
-    console.warn(`Tutorial with id ${tutorialId} not found`);
     return null;
   }
 

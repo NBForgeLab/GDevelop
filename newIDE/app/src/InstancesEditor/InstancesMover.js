@@ -14,6 +14,7 @@ export default class InstancesMover {
   _initialSelectionAABB: ?Rectangle = null;
   _startX: number = 0;
   _startY: number = 0;
+  _isPointerDown: boolean = false;
 
   constructor({
     instanceMeasurer,
@@ -73,6 +74,7 @@ export default class InstancesMover {
   startMove(startX: number, startY: number) {
     this._startX = startX;
     this._startY = startY;
+    this._isPointerDown = true;
   }
 
   moveBy(
@@ -149,6 +151,7 @@ export default class InstancesMover {
   }
 
   endMove() {
+    this._isPointerDown = false;
     this._initialSelectionAABB = null;
     this.instancePositions = {};
     this.totalDeltaX = 0;
@@ -166,6 +169,6 @@ export default class InstancesMover {
   }
 
   isMoving(): any {
-    return !!this._initialSelectionAABB;
+    return this._isPointerDown;
   }
 }

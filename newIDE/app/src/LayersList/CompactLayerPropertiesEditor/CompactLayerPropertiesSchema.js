@@ -7,6 +7,11 @@ import {
   rgbColorToRGBString,
   rgbStringAndAlphaToRGBColor,
 } from '../../Utils/ColorTransformer';
+import {
+  getLayerRenderingType,
+  isBaseLayer,
+  setLayerRenderingType,
+} from '../LayerRenderingType';
 
 const defaultCameraBehaviorChoices = [
   {
@@ -30,20 +35,12 @@ const getDefaultCameraBehaviorField = ({ i18n }: {| i18n: I18nType |}) => ({
 
 const renderingTypeChoices = [
   {
-    value: '',
-    label: t`Display both 2D and 3D objects (default)`,
-  },
-  {
     value: '2d',
-    label: t`Force display only 2D objects`,
+    label: t`2D`,
   },
   {
     value: '3d',
-    label: t`Force display only 3D objects`,
-  },
-  {
-    value: '2d+3d',
-    label: t`Force display both 2D and 3D objects`,
+    label: t`3D`,
   },
 ];
 const getRenderingTypeField = ({
@@ -57,11 +54,12 @@ const getRenderingTypeField = ({
   getLabel: () => i18n._(t`Rendering type`),
   valueType: 'string',
   getChoices: () => renderingTypeChoices,
-  getValue: (layer: gdLayer) => layer.getRenderingType(),
+  getValue: (layer: gdLayer) => getLayerRenderingType(layer),
   setValue: (layer: gdLayer, newValue: string) => {
-    layer.setRenderingType(newValue);
+    setLayerRenderingType(layer, newValue === '2d' ? '2d' : '3d');
     forceUpdate();
   },
+  disabled: (layers: Array<gdLayer>) => !!(layers[0] && isBaseLayer(layers[0])),
 });
 
 const cameraTypeChoices = [
@@ -193,7 +191,7 @@ export const makeSchema = ({
           type: 'column',
           // $FlowFixMe[missing-local-annot]
           isHidden: layers =>
-            layers[0] && layers[0].getRenderingType() === '2d',
+            layers[0] && getLayerRenderingType(layers[0]) === '2d',
           children: [
             {
               name: '3D settings',

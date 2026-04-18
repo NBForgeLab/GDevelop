@@ -1,6 +1,97 @@
 namespace gdjs {
   const logger = new gdjs.Logger('Three game renderer');
 
+  const ensureRuntimePixiOverlayRenderer = (): typeof gdjs.RuntimePixiOverlayRenderer => {
+    if (gdjs.RuntimePixiOverlayRenderer) {
+      return gdjs.RuntimePixiOverlayRenderer;
+    }
+
+    class RuntimePixiOverlayRendererFallback {
+      private _game: gdjs.RuntimeGame;
+      private _canvas: HTMLCanvasElement;
+      private _application: PIXI.Application | null = null;
+      private _rootContainer: PIXI.Container;
+      private _layerContainers = new Map<string, PIXI.Container>();
+      private _initPromise: Promise<void>;
+      private _isReady = false;
+
+      constructor(game: gdjs.RuntimeGame, canvas: HTMLCanvasElement) {
+        this._game = game;
+        this._canvas = canvas;
+        this._rootContainer = new PIXI.Container({ sortableChildren: true });
+        this._initPromise = this._initialize();
+      }
+
+      private async _initialize(): Promise<void> {
+        const application = new PIXI.Application();
+        await application.init({
+          canvas: this._canvas,
+          width: this._game.getGameResolutionWidth(),
+          height: this._game.getGameResolutionHeight(),
+          backgroundAlpha: 0,
+          antialias: this._game.getAntialiasingMode() !== 'none',
+          autoDensity: false,
+          clearBeforeRender: true,
+        });
+        application.stage.addChild(this._rootContainer);
+        this._application = application;
+        this._isReady = true;
+      }
+
+      isReady(): boolean {
+        return this._isReady;
+      }
+
+      getApplication(): PIXI.Application | null {
+        return this._application;
+      }
+
+      registerLayer(layerName: string, container: PIXI.Container): void {
+        this._layerContainers.set(layerName, container);
+        this._rootContainer.addChild(container);
+      }
+
+      unregisterLayer(layerName: string): void {
+        const container = this._layerContainers.get(layerName);
+        if (!container) return;
+
+        this._rootContainer.removeChild(container);
+        this._layerContainers.delete(layerName);
+      }
+
+      resize(width: number, height: number): void {
+        if (!this._application) return;
+
+        this._application.renderer.resize(width, height);
+      }
+
+      render(): void {
+        if (!this._application || !this._isReady) return;
+
+        this._application.renderer.render(this._application.stage);
+      }
+
+      async waitUntilReady(): Promise<void> {
+        await this._initPromise;
+      }
+
+      destroy(): void {
+        this._rootContainer.removeChildren();
+        this._layerContainers.clear();
+        this._application?.destroy(undefined, {
+          context: true,
+          texture: false,
+          textureSource: false,
+        });
+        this._application = null;
+        this._isReady = false;
+      }
+    }
+
+    gdjs.RuntimePixiOverlayRenderer = RuntimePixiOverlayRendererFallback;
+    return gdjs.RuntimePixiOverlayRenderer;
+  };
+
   /**
    * Codes (as in `event.code`) of keys that should have their event `preventDefault`
    * called. This is used to avoid scrolling in a webpage when these keys are pressed
@@ -44,6 +135,8 @@ namespace gdjs {
 
     private _threeRenderer: THREE.WebGLRenderer | null = null;
     private _gameCanvas: HTMLCanvasElement | null = null;
+    private _pixiOverlayCanvas: HTMLCanvasElement | null = null;
+    private _pixiOverlayRenderer: gdjs.RuntimePixiOverlayRenderer | null = null;
     private _domElementsContainer: HTMLDivElement | null = null;
 
     // Current width of the canvas (might be scaled down/up compared to renderer)
@@ -195,6 +288,19 @@ namespace gdjs {
       // Ensure long press can't create a selection
       gameCanvas.style.userSelect = 'none';
       gameCanvas.style.outline = 'none'; // No selection/focus ring on the canvas.
+
+      const pixiOverlayCanvas = document.createElement('canvas');
+      pixiOverlayCanvas.style.position = 'absolute';
+      pixiOverlayCanvas.style.pointerEvents = 'none';
+      pixiOverlayCanvas.style.userSelect = 'none';
+      pixiOverlayCanvas.style.outline = 'none';
+      gameCanvas.parentNode?.appendChild(pixiOverlayCanvas);
+      this._pixiOverlayCanvas = pixiOverlayCanvas;
+      const RuntimePixiOverlayRenderer = ensureRuntimePixiOverlayRenderer();
+      this._pixiOverlayRenderer = new RuntimePixiOverlayRenderer(
+        this._game,
+        pixiOverlayCanvas
+      );
 
       // Set up the container for HTML elements on top of the game canvas.
       const domElementsContainer = document.createElement('div');
@@ -362,6 +468,14 @@ namespace gdjs {
         this._gameCanvas.style.width = canvasWidth + 'px';
         this._gameCanvas.style.height = canvasHeight + 'px';
       }
+      if (this._pixiOverlayCanvas) {
+        this._pixiOverlayCanvas.style.top =
+          this._marginTop + (maxHeight - canvasHeight) / 2 + 'px';
+        this._pixiOverlayCanvas.style.left =
+          this._marginLeft + (maxWidth - canvasWidth) / 2 + 'px';
+        this._pixiOverlayCanvas.style.width = canvasWidth + 'px';
+        this._pixiOverlayCanvas.style.height = canvasHeight + 'px';
+      }
 
       // ...and to the div on top of it showing DOM elements (like inputs).
       this._domElementsContainer.style.top =
@@ -374,6 +488,10 @@ namespace gdjs {
       // Store the canvas size for fast access to it.
       this._canvasWidth = canvasWidth;
       this._canvasHeight = canvasHeight;
+      this._pixiOverlayRenderer?.resize(
+        this._game.getGameResolutionWidth(),
+        this._game.getGameResolutionHeight()
+      );
     }
 
     /**
@@ -1113,14 +1231,20 @@ namespace gdjs {
      * @param removeCanvas If true, the canvas will be removed from the DOM.
      */
     dispose(removeCanvas?: boolean) {
+      this._pixiOverlayRenderer?.destroy();
+      this._pixiOverlayRenderer = null;
       this._threeRenderer?.dispose();
       this._threeRenderer = null;
 
       if (removeCanvas && this._gameCanvas) {
         this._gameCanvas.parentNode?.removeChild(this._gameCanvas);
       }
+      if (removeCanvas && this._pixiOverlayCanvas) {
+        this._pixiOverlayCanvas.parentNode?.removeChild(this._pixiOverlayCanvas);
+      }
 
       this._gameCanvas = null;
+      this._pixiOverlayCanvas = null;
       this._domElementsContainer?.parentNode?.removeChild(
         this._domElementsContainer
       );
@@ -1133,6 +1257,10 @@ namespace gdjs {
      */
     getCanvas(): HTMLCanvasElement | null {
       return this._gameCanvas;
+    }
+
+    getPixiOverlayRenderer(): gdjs.RuntimePixiOverlayRenderer | null {
+      return this._pixiOverlayRenderer;
     }
 
     /**

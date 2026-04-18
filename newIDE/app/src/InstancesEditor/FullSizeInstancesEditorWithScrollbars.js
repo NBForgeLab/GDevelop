@@ -30,13 +30,14 @@ const styles = {
 
 type Props = {|
   ...InstancesEditorPropsWithoutSizeAndScroll,
+  showObjectInstancesIn3D: boolean,
   wrappedEditorRef: ?(?InstancesEditor) => void,
 |};
 
 const noop = () => {};
 
 const FullSizeInstancesEditorWithScrollbars = (props: Props): React.Node => {
-  const { wrappedEditorRef, ...otherProps } = props;
+  const { wrappedEditorRef, showObjectInstancesIn3D, ...otherProps } = props;
   const { values } = React.useContext(PreferencesContext);
   const isMounted = useIsMounted();
 
@@ -435,7 +436,7 @@ const FullSizeInstancesEditorWithScrollbars = (props: Props): React.Node => {
                     }
                   }
                 }}
-                showObjectInstancesIn3D={values.use3DEditor}
+                showObjectInstancesIn3D={showObjectInstancesIn3D}
                 showBasicProfilingCounters={values.showBasicProfilingCounters}
                 {...otherProps}
               />

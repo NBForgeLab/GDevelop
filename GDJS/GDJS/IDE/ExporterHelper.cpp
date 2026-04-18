@@ -1084,8 +1084,19 @@ bool ExporterHelper::CompleteIndexFile(
     gd::String additionalSpec) {
   if (additionalSpec.empty()) additionalSpec = "{}";
 
+  const auto hasScriptExtension = [](const gd::String& filename) {
+    return (filename.size() >= 3 &&
+            filename.substr(filename.size() - 3) == ".js") ||
+           (filename.size() >= 4 &&
+            filename.substr(filename.size() - 4) == ".mjs");
+  };
+
   gd::String codeFilesIncludes;
   for (auto &include : includesFiles) {
+    if (!hasScriptExtension(include)) {
+      continue;
+    }
+
     gd::String scriptSrc =
         GetExportedIncludeFilename(fs, gdjsRoot, include, nonRuntimeScriptsCacheBurst);
 
@@ -1151,6 +1162,17 @@ void ExporterHelper::AddLibsInclude(bool include2DRenderers,
   InsertUnique(includesFiles, "variablescontainer.js");
   InsertUnique(includesFiles, "oncetriggers.js");
   InsertUnique(includesFiles, "runtimebehavior.js");
+
+  // Object capability behaviors can be added by extensions as default behaviors
+  // on objects. They must be registered before any object instances are created.
+  InsertUnique(includesFiles, "object-capabilities/AnimatableBehavior.js");
+  InsertUnique(includesFiles, "object-capabilities/EffectBehavior.js");
+  InsertUnique(includesFiles, "object-capabilities/FlippableBehavior.js");
+  InsertUnique(includesFiles, "object-capabilities/OpacityBehavior.js");
+  InsertUnique(includesFiles, "object-capabilities/ResizableBehavior.js");
+  InsertUnique(includesFiles, "object-capabilities/ScalableBehavior.js");
+  InsertUnique(includesFiles, "object-capabilities/TextContainerBehavior.js");
+
   InsertUnique(includesFiles, "SpriteAnimator.js");
   InsertUnique(includesFiles, "spriteruntimeobject.js");
   InsertUnique(includesFiles, "affinetransformation.js");
@@ -1204,10 +1226,14 @@ void ExporterHelper::AddLibsInclude(bool include2DRenderers,
   }
 
   // Three.js and its extensions are unconditionally included in the 3D-first engine
+  InsertUnique(includesFiles, "rendering-libs/pixi.js");
   InsertUnique(includesFiles, "rendering-libs/three.js");
   InsertUnique(includesFiles, "rendering-libs/ThreeAddons.js");
   InsertUnique(includesFiles, "rendering-libs/draco/gltf/draco_decoder.wasm");
   InsertUnique(includesFiles, "rendering-libs/draco/gltf/draco_wasm_wrapper.js");
+  InsertUnique(includesFiles, "pixi-renderers/runtime-pixi-overlay-renderer.js");
+  InsertUnique(includesFiles, "pixi-renderers/spriteruntimeobject-pixi-renderer.js");
+  InsertUnique(includesFiles, "spriteruntimeobject-renderer.js");
   // Three.js renderers for 3D-first scenes
   InsertUnique(includesFiles, "three-renderers/resource-manager.js");
   InsertUnique(includesFiles, "three-renderers/camera-system.js");
@@ -1217,10 +1243,21 @@ void ExporterHelper::AddLibsInclude(bool include2DRenderers,
   InsertUnique(includesFiles, "three-renderers/CustomRuntimeObject2DThreeRenderer.js");
   InsertUnique(includesFiles, "three-renderers/particleemitterobject-three.js");
   InsertUnique(includesFiles, "three-renderers/loadingscreen-three-renderer.js");
-  InsertUnique(includesFiles, "Extensions/TextObject/textruntimeobject-three-renderer.js");
-  InsertUnique(includesFiles, "Extensions/TiledSpriteObject/tiledspriteruntimeobject-three-renderer.js");
+  InsertUnique(includesFiles, "Extensions/TextObject/textruntimeobject-pixi-renderer.js");
+  InsertUnique(includesFiles, "Extensions/TextObject/textruntimeobject-renderer.js");
+  InsertUnique(includesFiles, "Extensions/TiledSpriteObject/tiledspriteruntimeobject-pixi-renderer.js");
+  InsertUnique(includesFiles, "Extensions/TiledSpriteObject/tiledspriteruntimeobject-renderer.js");
   InsertUnique(includesFiles, "Extensions/PrimitiveDrawing/shapepainterruntimeobject-three-renderer.js");
-  InsertUnique(includesFiles, "Extensions/PanelSpriteObject/panelspriteruntimeobject-three-renderer.js");
+  InsertUnique(includesFiles, "Extensions/PanelSpriteObject/panelspriteruntimeobject-pixi-renderer.js");
+  InsertUnique(includesFiles, "Extensions/PanelSpriteObject/panelspriteruntimeobject-renderer.js");
+  InsertUnique(includesFiles, "Extensions/BBText/bbtextruntimeobject-pixi-renderer.js");
+  InsertUnique(includesFiles, "Extensions/BBText/bbtextruntimeobject-renderer.js");
+  InsertUnique(includesFiles, "Extensions/BitmapText/bitmaptextruntimeobject-pixi-renderer.js");
+  InsertUnique(includesFiles, "Extensions/BitmapText/bitmaptextruntimeobject-renderer.js");
+  InsertUnique(includesFiles, "Extensions/Video/videoruntimeobject-pixi-renderer.js");
+  InsertUnique(includesFiles, "Extensions/Video/videoruntimeobject-renderer.js");
+  InsertUnique(includesFiles, "Extensions/Map/mapruntimeobject-pixi-renderer.js");
+  InsertUnique(includesFiles, "Extensions/Map/mapruntimeobject-renderer.js");
   // Extensions in JS may use it.
   InsertUnique(includesFiles, "Extensions/3D/Scene3DTools.js");
   InsertUnique(includesFiles, "Extensions/3D/A_RuntimeObject3D.js");

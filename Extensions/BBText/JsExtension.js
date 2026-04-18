@@ -379,7 +379,8 @@ module.exports = {
         objectBBText
       )
       .setIncludeFile('Extensions/BBText/bbtextruntimeobject.js')
-      .addIncludeFile('Extensions/BBText/bbtextruntimeobject-three-renderer.js')
+      .addIncludeFile('Extensions/BBText/bbtextruntimeobject-renderer.js')
+      .addIncludeFile('Extensions/BBText/bbtextruntimeobject-pixi-renderer.js')
       .setCategory('Text')
       .addDefaultBehavior('EffectCapability::EffectBehavior')
       .addDefaultBehavior('OpacityCapability::OpacityBehavior');

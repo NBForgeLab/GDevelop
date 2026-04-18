@@ -1,14 +1,19 @@
 // @flow
 import jsSHA from './Crypto/sha512';
 
+let hasWarnedAboutSubtleCryptoFallback = false;
+
 const digestWithSha512TruncatedTo256 = (
   arrayBuffer: ArrayBuffer
 ): Promise<string> => {
   // $FlowFixMe[incompatible-type] - Flow does not know about crypto API
-  // $FlowFixMe[cannot-resolve-name]
-  if (crypto && crypto.subtle) {
-    // $FlowFixMe[cannot-resolve-name]
-    crypto.subtle.digest('SHA-512', arrayBuffer).then(hashBuffer => {
+  const subtleCrypto =
+    typeof window !== 'undefined' && window.crypto && window.crypto.subtle
+      ? window.crypto.subtle
+      : null;
+
+  if (subtleCrypto) {
+    return subtleCrypto.digest('SHA-512', arrayBuffer).then(hashBuffer => {
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const hashHexString = hashArray
         .map(b => b.toString(16).padStart(2, '0'))
@@ -19,9 +24,12 @@ const digestWithSha512TruncatedTo256 = (
 
   // In some environments, crypto.subtle is not available. This is the case
   // for a development app accessed from local network outside HTTPS (http://192.168.x.x...).
-  console.warn(
-    'crypto.subtle is not available in this environment - using jsSHA instead.'
-  );
+  if (!hasWarnedAboutSubtleCryptoFallback) {
+    hasWarnedAboutSubtleCryptoFallback = true;
+    console.warn(
+      'crypto.subtle is not available in this environment - using jsSHA instead.'
+    );
+  }
 
   const shaObj = new jsSHA('SHA-512', 'ARRAYBUFFER');
   shaObj.update(arrayBuffer);

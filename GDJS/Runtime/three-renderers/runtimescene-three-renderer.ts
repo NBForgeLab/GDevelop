@@ -59,6 +59,9 @@ namespace gdjs {
       if (!threeRenderer) {
         return;
       }
+      const pixiOverlayRenderer = this._runtimeGameRenderer
+        ? this._runtimeGameRenderer.getPixiOverlayRenderer()
+        : null;
 
       if (threeRenderer.xr.isPresenting) {
         return;
@@ -74,6 +77,18 @@ namespace gdjs {
         }
 
         const layerRenderer = runtimeLayer.getRenderer();
+        if (
+          runtimeLayer.getRenderingType() === gdjs.RuntimeLayerRenderingType.TWO_D
+        ) {
+          if (isFirstRender) {
+            threeRenderer.setClearColor(this._runtimeScene.getBackgroundColor());
+            if (this._runtimeScene.getClearCanvas()) {
+              threeRenderer.clear(true, true, true);
+            }
+            isFirstRender = false;
+          }
+          continue;
+        }
         const threeScene = layerRenderer.getThreeScene();
         const threeCamera = layerRenderer.getThreeCamera();
         const threeEffectComposer = layerRenderer.getThreeEffectComposer();
@@ -113,6 +128,7 @@ namespace gdjs {
         threeRenderer.setClearColor(this._runtimeScene.getBackgroundColor());
         threeRenderer.clear(true, true, true);
       }
+      pixiOverlayRenderer?.render();
 
       if (this._showCursorAtNextRender) {
         const canvas = this._runtimeGameRenderer
@@ -158,4 +174,7 @@ namespace gdjs {
       }
     }
   }
+
+  export const RuntimeSceneRenderer = RuntimeSceneThreeRenderer;
+  export type RuntimeSceneRenderer = RuntimeSceneThreeRenderer;
 }

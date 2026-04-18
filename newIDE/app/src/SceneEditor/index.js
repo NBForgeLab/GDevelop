@@ -99,6 +99,10 @@ import {
 } from '../EmbeddedGame/EmbeddedGameFrame';
 import Rectangle from '../Utils/Rectangle';
 import { exceptionallyGuardAgainstDeadObject } from '../Utils/IsNullPtr';
+import {
+  getLayerRenderingType,
+  getLayerVisibility,
+} from '../LayersList/LayerRenderingType';
 
 const gd: libGDevelop = global.gd;
 
@@ -375,6 +379,7 @@ export default class SceneEditor extends React.Component<Props, State> {
         this.state.instancesEditorSettings.gameEditorMode
       );
     }
+    this._ensureCompatibleGameEditorMode();
 
     this.resourceExternallyChangedCallbackId = registerOnResourceExternallyChangedCallback(
       this.onResourceExternallyChanged.bind(this)
@@ -404,7 +409,7 @@ export default class SceneEditor extends React.Component<Props, State> {
             }
 
             // The rest of the messages are only relevant when the embedded game editor is visible.
-            if (this.props.gameEditorMode !== 'embedded-game') {
+            if (!this._isEmbeddedGameEditorActive()) {
               return;
             }
             if (parsedMessage.command === 'updateInstances') {
@@ -743,6 +748,8 @@ export default class SceneEditor extends React.Component<Props, State> {
         <MosaicEditorsDisplayToolbar
           gameEditorMode={this.state.instancesEditorSettings.gameEditorMode}
           setGameEditorMode={this.setGameEditorMode}
+          canUse2DEditor={this._canUse2DEditor()}
+          canUse3DEditor={this._canUse3DEditor()}
           selectedInstancesCount={
             this.instancesSelection.getSelectedInstances().length
           }
@@ -787,8 +794,10 @@ export default class SceneEditor extends React.Component<Props, State> {
     } else {
       this.props.setToolbar(
         <SwipeableDrawerEditorsDisplayToolbar
-          gameEditorMode={this.props.gameEditorMode}
-          setGameEditorMode={this.props.setGameEditorMode}
+          gameEditorMode={this.state.instancesEditorSettings.gameEditorMode}
+          setGameEditorMode={this.setGameEditorMode}
+          canUse2DEditor={this._canUse2DEditor()}
+          canUse3DEditor={this._canUse3DEditor()}
           selectedInstancesCount={
             this.instancesSelection.getSelectedInstances().length
           }
@@ -839,13 +848,10 @@ export default class SceneEditor extends React.Component<Props, State> {
       this.openSceneProperties(false);
     }
     if (!this.props.isActive && nextProps.isActive) {
-      // Sync the saved gameEditorMode from instancesEditorSettings to mainframe
-      // when the editor becomes active again
-      if (this.state.instancesEditorSettings.gameEditorMode) {
-        this.props.setGameEditorMode(
-          this.state.instancesEditorSettings.gameEditorMode
-        );
-      }
+      const requiredMode = this._canUse3DEditor()
+        ? 'embedded-game'
+        : 'instances-editor';
+      this.props.setGameEditorMode(requiredMode);
 
       // When the scene is refocused, the selections are cleaned
       // to avoid cases where we hold references to instances or objects
@@ -920,6 +926,13 @@ export default class SceneEditor extends React.Component<Props, State> {
   };
 
   setGameEditorMode = (newMode: 'instances-editor' | 'embedded-game') => {
+    if (newMode === 'embedded-game' && !this._canUse3DEditor()) {
+      return;
+    }
+    if (newMode === 'instances-editor' && !this._canUse2DEditor()) {
+      return;
+    }
+
     this.setInstancesEditorSettings({
       ...this.state.instancesEditorSettings,
       gameEditorMode: newMode,
@@ -927,6 +940,35 @@ export default class SceneEditor extends React.Component<Props, State> {
 
     // Call the setGameEditorMode from mainframe so it can make some global changes. (ex: hot reload)
     this.props.setGameEditorMode(newMode);
+  };
+
+  _getChosenLayer = (): ?gdLayer => {
+    const { layersContainer } = this.props;
+    return layersContainer.hasLayerNamed(this.state.chosenLayer)
+      ? layersContainer.getLayer(this.state.chosenLayer)
+      : null;
+  };
+
+  _canUse3DEditor = (): boolean => {
+    const chosenLayer = this._getChosenLayer();
+    return !!chosenLayer && getLayerRenderingType(chosenLayer) === '3d';
+  };
+
+  _canUse2DEditor = (): boolean => !this._canUse3DEditor();
+
+  _isEmbeddedGameEditorActive = (): boolean =>
+    this.state.instancesEditorSettings.gameEditorMode === 'embedded-game';
+
+  _ensureCompatibleGameEditorMode = () => {
+    const requiredMode = this._canUse3DEditor()
+      ? 'embedded-game'
+      : 'instances-editor';
+    if (
+      this.state.instancesEditorSettings.gameEditorMode !== requiredMode ||
+      this.props.gameEditorMode !== requiredMode
+    ) {
+      this.setGameEditorMode(requiredMode);
+    }
   };
 
   openSetupGrid = (open: boolean = true) => {
@@ -1281,7 +1323,7 @@ export default class SceneEditor extends React.Component<Props, State> {
     instances.forEach(instance => {
       if (invisibleLayerOnWhichInstancesHaveJustBeenAdded === null) {
         const layer = this.props.layersContainer.getLayer(instance.getLayer());
-        if (!layer.getVisibility()) {
+        if (!getLayerVisibility(layer)) {
           invisibleLayerOnWhichInstancesHaveJustBeenAdded = instance.getLayer();
         }
       }
@@ -1600,7 +1642,7 @@ export default class SceneEditor extends React.Component<Props, State> {
       viewControls.centerViewOnLastInstance(instances, offset);
     }
 
-    if (this.props.gameEditorMode === 'embedded-game') {
+    if (this._isEmbeddedGameEditorActive()) {
       changeViewPosition('centerViewOnLastSelectedInstance');
     }
   };
@@ -1785,6 +1827,8 @@ export default class SceneEditor extends React.Component<Props, State> {
     } else {
       this._sendHotReloadLayers();
     }
+    this._ensureCompatibleGameEditorMode();
+    this.updateToolbar();
   };
 
   _onLayersVisibilityInEditorChanged = () => {
@@ -1792,9 +1836,15 @@ export default class SceneEditor extends React.Component<Props, State> {
   };
 
   _onChooseLayer = (layerName: string) => {
-    this.setState({
-      chosenLayer: layerName,
-    });
+    this.setState(
+      {
+        chosenLayer: layerName,
+      },
+      () => {
+        this._ensureCompatibleGameEditorMode();
+        this.updateToolbar();
+      }
+    );
 
     const { previewDebuggerServer } = this.props;
     if (previewDebuggerServer) {
@@ -2220,7 +2270,7 @@ export default class SceneEditor extends React.Component<Props, State> {
     }
     editorDisplay.viewControls.zoomToInitialPosition();
 
-    if (this.props.gameEditorMode === 'embedded-game') {
+    if (this._isEmbeddedGameEditorActive()) {
       changeViewPosition('zoomToInitialPosition');
     }
   };
@@ -2232,7 +2282,7 @@ export default class SceneEditor extends React.Component<Props, State> {
     }
     editorDisplay.viewControls.zoomToFitContent();
 
-    if (this.props.gameEditorMode === 'embedded-game') {
+    if (this._isEmbeddedGameEditorActive()) {
       changeViewPosition('zoomToFitContent');
     }
   };
@@ -2244,7 +2294,7 @@ export default class SceneEditor extends React.Component<Props, State> {
     }
     editorDisplay.viewControls.zoomToFitSelection();
 
-    if (this.props.gameEditorMode === 'embedded-game') {
+    if (this._isEmbeddedGameEditorActive()) {
       changeViewPosition('zoomToFitSelection');
     }
   };
@@ -2380,7 +2430,7 @@ export default class SceneEditor extends React.Component<Props, State> {
   };
 
   _sendSetZoom(zoom: number): void {
-    if (this.props.gameEditorMode === 'embedded-game') {
+    if (this._isEmbeddedGameEditorActive()) {
       const { previewDebuggerServer } = this.props;
       if (!previewDebuggerServer) return;
       previewDebuggerServer
@@ -2397,7 +2447,7 @@ export default class SceneEditor extends React.Component<Props, State> {
   }
 
   _sendZoomBy(zoomFactor: number): void {
-    if (this.props.gameEditorMode === 'embedded-game') {
+    if (this._isEmbeddedGameEditorActive()) {
       const { previewDebuggerServer } = this.props;
       if (!previewDebuggerServer) return;
       previewDebuggerServer
@@ -2767,7 +2817,7 @@ export default class SceneEditor extends React.Component<Props, State> {
     if (!onExtractAsEventBasedObject) return;
 
     let selectionAABB = new Rectangle();
-    if (this.props.gameEditorMode === 'embedded-game') {
+    if (this._isEmbeddedGameEditorActive()) {
       const { previewDebuggerServer } = this.props;
       if (!previewDebuggerServer) return;
       try {
@@ -2978,7 +3028,12 @@ export default class SceneEditor extends React.Component<Props, State> {
                   />
                   <EditorsDisplay
                     ref={ref => (this.editorDisplay = ref)}
-                    gameEditorMode={this.props.gameEditorMode}
+                    gameEditorMode={
+                      this.state.instancesEditorSettings.gameEditorMode
+                    }
+                    canUse2DEditor={this._canUse2DEditor()}
+                    canUse3DEditor={this._canUse3DEditor()}
+                    showObjectInstancesIn3D={false}
                     onRestartInGameEditor={this.props.onRestartInGameEditor}
                     showRestartInGameEditorAfterErrorButton={
                       this.props.showRestartInGameEditorAfterErrorButton

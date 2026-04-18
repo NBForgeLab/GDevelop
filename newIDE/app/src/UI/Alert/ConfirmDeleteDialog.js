@@ -8,7 +8,6 @@ import Dialog, { DialogPrimaryButton } from '../Dialog';
 import { type ButtonInterface } from '../Button';
 import FlatButton from '../FlatButton';
 import { LargeSpacer } from '../Grid';
-import Text from '../Text';
 import TextField from '../TextField';
 import { useShouldAutofocusInput } from '../Responsive/ScreenTypeMeasurer';
 import { MarkdownText } from '../MarkdownText';
@@ -101,9 +100,13 @@ function ConfirmDeleteDialog(props: Props): React.Node {
           fullscreen="never-even-on-mobile"
         >
           {props.header}
-          <Text size="body" allowSelection>
-            <MarkdownText translatableSource={props.message} allowParagraphs />
-          </Text>
+          <div style={{ userSelect: 'text', cursor: 'text' }}>
+            <MarkdownText
+              translatableSource={props.message}
+              allowParagraphs
+              isStandaloneText
+            />
+          </div>
           {props.confirmText && props.fieldMessage && (
             <>
               <LargeSpacer />

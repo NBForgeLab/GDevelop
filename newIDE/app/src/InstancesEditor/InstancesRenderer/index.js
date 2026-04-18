@@ -5,6 +5,11 @@ import * as THREE from 'three';
 import { rgbToHexNumber } from '../../Utils/ColorTransformer';
 import Rectangle from '../../Utils/Rectangle';
 import {
+  getLayerRenderingType,
+  getLayerVisibility,
+  isLayerLocked,
+} from '../../LayersList/LayerRenderingType';
+import {
   type BasicProfilingCounters,
   makeBasicProfilingCounters,
   mergeBasicProfilingCounters,
@@ -42,6 +47,7 @@ export default class InstancesRenderer {
   onMoveInstanceEnd: void => void;
   onDownInstance: (gdInitialInstance, number, number) => void;
   onUpInstance: (gdInitialInstance, number, number) => void;
+  pixiOverlayRenderer: any;
 
   layersRenderers: { [string]: LayerRenderer };
   layersGroup: THREE.Group = new THREE.Group();
@@ -89,6 +95,7 @@ export default class InstancesRenderer {
     onDownInstance,
     onUpInstance,
     showObjectInstancesIn3D,
+    pixiOverlayRenderer,
   }: {|
     project: gdProject,
     instances: gdInitialInstancesContainer,
@@ -112,6 +119,7 @@ export default class InstancesRenderer {
     onDownInstance: (gdInitialInstance, number, number) => void,
     onUpInstance: (gdInitialInstance, number, number) => void,
     showObjectInstancesIn3D: boolean,
+    pixiOverlayRenderer: any,
   |}) {
     this.project = project;
     this.globalObjectsContainer = globalObjectsContainer;
@@ -129,12 +137,25 @@ export default class InstancesRenderer {
     this.onMoveInstanceEnd = onMoveInstanceEnd;
     this.onDownInstance = onDownInstance;
     this.onUpInstance = onUpInstance;
+    this.pixiOverlayRenderer = pixiOverlayRenderer;
 
     this._showObjectInstancesIn3D = showObjectInstancesIn3D;
     this.layersRenderers = {};
 
     this.instanceMeasurer = {
       getInstanceAABB: (instance, bounds) => {
+        const layer = this.layersContainer.getLayer(instance.getLayer());
+        if (
+          layer &&
+          getLayerRenderingType(layer) === '2d' &&
+          this.pixiOverlayRenderer
+        ) {
+          const pixiBounds = this.pixiOverlayRenderer.getInstanceAABB(
+            instance,
+            bounds
+          );
+          if (pixiBounds) return pixiBounds;
+        }
         const layerName = instance.getLayer();
         const layerRenderer = this.layersRenderers[layerName];
         if (!layerRenderer) {
@@ -149,6 +170,18 @@ export default class InstancesRenderer {
         return layerRenderer.getInstanceAABB(instance, bounds);
       },
       getUnrotatedInstanceAABB: (instance, bounds) => {
+        const layer = this.layersContainer.getLayer(instance.getLayer());
+        if (
+          layer &&
+          getLayerRenderingType(layer) === '2d' &&
+          this.pixiOverlayRenderer
+        ) {
+          const pixiBounds = this.pixiOverlayRenderer.getUnrotatedInstanceAABB(
+            instance,
+            bounds
+          );
+          if (pixiBounds) return pixiBounds;
+        }
         const layerName = instance.getLayer();
         const layerRenderer = this.layersRenderers[layerName];
         if (!layerRenderer) {
@@ -163,6 +196,17 @@ export default class InstancesRenderer {
         return layerRenderer.getUnrotatedInstanceAABB(instance, bounds);
       },
       getUnrotatedInstanceSize: instance => {
+        const layer = this.layersContainer.getLayer(instance.getLayer());
+        if (
+          layer &&
+          getLayerRenderingType(layer) === '2d' &&
+          this.pixiOverlayRenderer
+        ) {
+          const pixiSize = this.pixiOverlayRenderer.getUnrotatedInstanceSize(
+            instance
+          );
+          if (pixiSize) return pixiSize;
+        }
         const layerName = instance.getLayer();
         const layerRenderer = this.layersRenderers[layerName];
         if (!layerRenderer) return [0, 0, 0];
@@ -187,7 +231,8 @@ export default class InstancesRenderer {
     renderer: THREE.WebGLRenderer,
     viewPosition: ViewPosition,
     uiGroup: THREE.Group,
-    backgroundGroup: THREE.Group
+    backgroundGroup: THREE.Group,
+    renderThreeScene: boolean = true
   ) {
     resetBasicProfilingCounters(this._basicProfilingCounters);
 
@@ -196,76 +241,79 @@ export default class InstancesRenderer {
     }
 
     const { layout } = this;
-    const backgroundColor = layout
-      ? rgbToHexNumber(
-          layout.getBackgroundColorRed(),
-          layout.getBackgroundColorGreen(),
-          layout.getBackgroundColorBlue()
-        )
-      : 0x888888;
+    const backgroundColor =
+      renderThreeScene && layout
+        ? rgbToHexNumber(
+            layout.getBackgroundColorRed(),
+            layout.getBackgroundColorGreen(),
+            layout.getBackgroundColorBlue()
+          )
+        : 0x000000;
 
-    renderer.setClearColor(backgroundColor, 1);
+    renderer.setClearColor(backgroundColor, renderThreeScene ? 1 : 0);
     renderer.clear();
 
-    // Efficiently render background
-    if (this._bgScene.children[0] !== backgroundGroup) {
-      this._bgScene.clear();
-      this._bgScene.add(backgroundGroup);
-    }
-    renderer.render(this._bgScene, this._bgCamera);
-
-    for (let i = 0; i < this.layersContainer.getLayersCount(); i++) {
-      const layer = this.layersContainer.getLayerAt(i);
-      const layerName = layer.getName();
-
-      let layerRenderer = this.layersRenderers[layerName];
-      if (!layerRenderer) {
-        this.layersRenderers[layerName] = layerRenderer = new LayerRenderer({
-          project: this.project,
-          globalObjectsContainer: this.globalObjectsContainer,
-          objectsContainer: this.objectsContainer,
-          instances: this.instances,
-          viewPosition: this.viewPosition,
-          layer: layer,
-          onInstanceClicked: this.onInstanceClicked,
-          onInstanceRightClicked: this.onInstanceRightClicked,
-          onInstanceDoubleClicked: this.onInstanceDoubleClicked,
-          onOverInstance: this.onOverInstance,
-          onOutInstance: this.onOutInstance,
-          onMoveInstance: this.onMoveInstance,
-          onMoveInstanceEnd: this.onMoveInstanceEnd,
-          onDownInstance: this.onDownInstance,
-          onUpInstance: this.onUpInstance,
-          renderer: renderer,
-          showObjectInstancesIn3D: this._showObjectInstancesIn3D,
-        });
-        this.layersGroup.add(layerRenderer.getLayerGroup());
+    if (renderThreeScene) {
+      if (this._bgScene.children[0] !== backgroundGroup) {
+        this._bgScene.clear();
+        this._bgScene.add(backgroundGroup);
       }
+      renderer.render(this._bgScene, this._bgCamera);
 
-      layerRenderer.layer = layer;
-      layerRenderer.wasUsed = true;
-      layerRenderer.render();
-      mergeBasicProfilingCounters(
-        this._basicProfilingCounters,
-        layerRenderer.getBasicProfilingCounters()
-      );
+      for (let i = 0; i < this.layersContainer.getLayersCount(); i++) {
+        const layer = this.layersContainer.getLayerAt(i);
+        if (getLayerRenderingType(layer) !== '3d') continue;
+        const layerName = layer.getName();
 
-      const threeCamera = layerRenderer.getThreeCamera();
-      const threePlaneMesh = layerRenderer.getThreePlaneMesh();
-      if (threeCamera && threePlaneMesh) {
-        viewPosition.applyTransformationToThree(threeCamera, threePlaneMesh);
-        threeCamera.fov = layer.getCamera3DFieldOfView();
-      }
+        let layerRenderer = this.layersRenderers[layerName];
+        if (!layerRenderer) {
+          this.layersRenderers[layerName] = layerRenderer = new LayerRenderer({
+            project: this.project,
+            globalObjectsContainer: this.globalObjectsContainer,
+            objectsContainer: this.objectsContainer,
+            instances: this.instances,
+            viewPosition: this.viewPosition,
+            layer: layer,
+            onInstanceClicked: this.onInstanceClicked,
+            onInstanceRightClicked: this.onInstanceRightClicked,
+            onInstanceDoubleClicked: this.onInstanceDoubleClicked,
+            onOverInstance: this.onOverInstance,
+            onOutInstance: this.onOutInstance,
+            onMoveInstance: this.onMoveInstance,
+            onMoveInstanceEnd: this.onMoveInstanceEnd,
+            onDownInstance: this.onDownInstance,
+            onUpInstance: this.onUpInstance,
+            renderer: renderer,
+            showObjectInstancesIn3D: this._showObjectInstancesIn3D,
+          });
+          this.layersGroup.add(layerRenderer.getLayerGroup());
+        }
 
-      const threeScene = layerRenderer.getThreeScene();
-      if (threeScene && threeCamera && renderer) {
-        renderer.clearDepth();
-        const threeStartTime = performance.now();
-        renderer.render(threeScene, threeCamera);
-        increaseThreeRenderingTime(
+        layerRenderer.layer = layer;
+        layerRenderer.wasUsed = true;
+        layerRenderer.render();
+        mergeBasicProfilingCounters(
           this._basicProfilingCounters,
-          performance.now() - threeStartTime
+          layerRenderer.getBasicProfilingCounters()
         );
+
+        const threeCamera = layerRenderer.getThreeCamera();
+        const threePlaneMesh = layerRenderer.getThreePlaneMesh();
+        if (threeCamera && threePlaneMesh) {
+          viewPosition.applyTransformationToThree(threeCamera, threePlaneMesh);
+          threeCamera.fov = layer.getCamera3DFieldOfView();
+        }
+
+        const threeScene = layerRenderer.getThreeScene();
+        if (threeScene && threeCamera && renderer) {
+          renderer.clearDepth();
+          const threeStartTime = performance.now();
+          renderer.render(threeScene, threeCamera);
+          increaseThreeRenderingTime(
+            this._basicProfilingCounters,
+            performance.now() - threeStartTime
+          );
+        }
       }
     }
     this._cleanUnusedLayerRenderers();
@@ -305,6 +353,15 @@ export default class InstancesRenderer {
     renderer: THREE.WebGLRenderer,
     raycaster: THREE.Raycaster
   ): Array<gdInitialInstance> {
+    if (this.pixiOverlayRenderer) {
+      const pixiInstances = this.pixiOverlayRenderer.getInstancesAt(
+        canvasX,
+        canvasY,
+        this.layersContainer
+      );
+      if (pixiInstances.length > 0) return pixiInstances;
+    }
+
     const foundInstances = [];
     const width = renderer.domElement.clientWidth;
     const height = renderer.domElement.clientHeight;
@@ -318,7 +375,12 @@ export default class InstancesRenderer {
     const layersCount = this.layersContainer.getLayersCount();
     for (let i = layersCount - 1; i >= 0; i--) {
       const layer = this.layersContainer.getLayerAt(i);
-      if (!layer.getVisibility() || layer.isLocked()) continue;
+      if (
+        !getLayerVisibility(layer) ||
+        isLayerLocked(layer) ||
+        getLayerRenderingType(layer) !== '3d'
+      )
+        continue;
 
       const layerName = layer.getName();
       const layerRenderer = this.layersRenderers[layerName];

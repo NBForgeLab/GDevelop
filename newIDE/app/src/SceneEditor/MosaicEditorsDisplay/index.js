@@ -207,6 +207,8 @@ const MosaicEditorsDisplay: React.ComponentType<{
     // $FlowFixMe[incompatible-type]
     React.useImperativeHandle(ref, () => {
       const { current: editor } = editorRef;
+      const getSelectionAABB = () =>
+        editor ? editor.getSelectionAABB() || new Rectangle() : new Rectangle();
       return {
         getName: () => 'mosaic',
         forceUpdateInstancesList,
@@ -239,9 +241,7 @@ const MosaicEditorsDisplay: React.ComponentType<{
         },
         instancesHandlers: {
           getContentAABB: editor ? editor.getContentAABB : () => null,
-          getSelectionAABB: editor
-            ? editor.selectedInstances.getSelectionAABB
-            : () => new Rectangle(),
+          getSelectionAABB,
           addInstances: editor ? editor.addInstances : () => [],
           clearHighlightedInstance: editor
             ? editor.clearHighlightedInstance
@@ -249,7 +249,9 @@ const MosaicEditorsDisplay: React.ComponentType<{
           resetInstanceRenderersFor: editor
             ? editor.resetInstanceRenderersFor
             : noop,
-          forceRemountInstancesRenderers: editor ? editor.forceRemount : noop,
+          forceRemountInstancesRenderers: editor
+            ? editor.forceRemountInstancesRenderers
+            : noop,
           addSerializedInstances: editor
             ? editor.addSerializedInstances
             : () => [],
@@ -439,6 +441,7 @@ const MosaicEditorsDisplay: React.ComponentType<{
                     editorRef.current = editor;
                   }}
                   pauseRendering={!props.isActive}
+                  showObjectInstancesIn3D={props.showObjectInstancesIn3D}
                   editorViewPosition2D={props.editorViewPosition2D}
                 />
               ),

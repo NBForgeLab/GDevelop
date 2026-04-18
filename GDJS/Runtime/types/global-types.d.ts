@@ -88,6 +88,9 @@ declare namespace gdjs {
 /** The global cc object from Cocos2D-Js. */
 declare var cc: any;
 
+/** The global PixiJS namespace loaded from the runtime rendering libs bundle. */
+declare const PIXI: typeof import('pixi.js');
+
 /**
  * Fixes https://github.com/microsoft/TypeScript/issues/16655 for `Array.prototype.filter()`
  * For example, using the fix the type of `bar` is `string[]` in the below snippet as it should be.

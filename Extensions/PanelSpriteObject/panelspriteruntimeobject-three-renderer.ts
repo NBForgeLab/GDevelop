@@ -98,7 +98,7 @@ namespace gdjs {
       }
 
       instanceContainer
-        .getLayer('')
+        .getLayer(runtimeObject.getLayer())
         .getRenderer()
         .addRendererObject(this._group, runtimeObject.getZOrder());
 

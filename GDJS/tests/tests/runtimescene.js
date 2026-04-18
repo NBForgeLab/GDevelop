@@ -184,5 +184,70 @@ describe('gdjs.RuntimeScene integration tests', function () {
       expect(runtimeScene.hasLayer('MyLayer')).to.be(false);
       expect(runtimeScene.hasLayer('MyOtherLayer')).to.be(true);
     });
+
+    it('should support 2d+3d layer rendering type', () => {
+      const runtimeGame = gdjs.getRuntimeGame();
+      const runtimeScene = new gdjs.RuntimeScene(runtimeGame);
+      runtimeScene.loadFromScene({
+        sceneData: {
+          layers: [
+            {
+              name: '',
+              visibility: true,
+              cameras: [],
+              effects: [],
+              ambientLightColorR: 127,
+              ambientLightColorB: 127,
+              ambientLightColorG: 127,
+              isLightingLayer: false,
+              followBaseLayerCamera: false,
+            },
+            {
+              name: 'MyLayer',
+              visibility: true,
+              cameras: [],
+              effects: [],
+              ambientLightColorR: 127,
+              ambientLightColorB: 127,
+              ambientLightColorG: 127,
+              isLightingLayer: false,
+              followBaseLayerCamera: false,
+              renderingType: '2d+3d',
+            },
+          ],
+          variables: [],
+          r: 0,
+          v: 0,
+          b: 0,
+          mangledName: 'Scene1',
+          name: 'Scene1',
+          stopSoundsOnStartup: false,
+          title: '',
+          behaviorsSharedData: [],
+          usedResources: [],
+          objects: [],
+          instances: [],
+          uiSettings: {
+            grid: false,
+            gridType: 'rectangular',
+            gridWidth: 10,
+            gridHeight: 10,
+            gridDepth: 10,
+            gridOffsetX: 0,
+            gridOffsetY: 0,
+            gridOffsetZ: 0,
+            gridColor: 0,
+            gridAlpha: 1,
+            snap: false,
+          },
+        },
+        usedExtensionsWithVariablesData: [],
+      });
+
+      const layer = runtimeScene.getLayer('MyLayer');
+      expect(layer.getRenderingType()).to.be(
+        gdjs.RuntimeLayerRenderingType.TWO_D_AND_THREE_D
+      );
+    });
   });
 });

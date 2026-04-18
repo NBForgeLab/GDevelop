@@ -13,6 +13,7 @@ import {
   makeBasicProfilingCounters,
   resetBasicProfilingCounters,
 } from './BasicProfilingCounters';
+import { getLayerRenderingType } from '../../LayersList/LayerRenderingType';
 
 const gd: libGDevelop = global.gd;
 
@@ -57,6 +58,7 @@ export default class LayerRenderer {
   _threePlaneMesh: THREE.Mesh | null = null;
 
   _showObjectInstancesIn3D: boolean;
+  _isObjectTypeRenderedIn3D: { [string]: boolean } = {};
   _basicProfilingCounters = (makeBasicProfilingCounters(): BasicProfilingCounters);
 
   constructor({
@@ -152,14 +154,38 @@ export default class LayerRenderer {
     const startTime = performance.now();
     const ptr = instance.ptr;
     let renderedInstance = this.renderedInstances[ptr];
-    if (!renderedInstance) {
-      const objectName = instance.getObjectName();
-      const object = getObjectByName(
-        this.globalObjectsContainer,
-        this.objectsContainer,
-        objectName
-      );
-      if (object) {
+    const objectName = instance.getObjectName();
+    const object = getObjectByName(
+      this.globalObjectsContainer,
+      this.objectsContainer,
+      objectName
+    );
+    if (object) {
+      const objectType = object.getType();
+      const is3DObject =
+        this._isObjectTypeRenderedIn3D[objectType] !== undefined
+          ? this._isObjectTypeRenderedIn3D[objectType]
+          : gd.MetadataProvider.getObjectMetadata(
+              this.project.getCurrentPlatform(),
+              objectType
+            ).isRenderedIn3D();
+      this._isObjectTypeRenderedIn3D[objectType] = is3DObject;
+      const layerRenderingType = getLayerRenderingType(this.layer);
+      const shouldRenderInstance =
+        (layerRenderingType === '3d' && is3DObject) ||
+        (layerRenderingType === '2d' && !is3DObject);
+
+      if (!shouldRenderInstance) {
+        const duration = performance.now() - startTime;
+        increaseInstanceUpdate(
+          this._basicProfilingCounters,
+          instance.getObjectName(),
+          duration
+        );
+        return;
+      }
+
+      if (!renderedInstance) {
         renderedInstance = ObjectsRenderingService.createNewInstanceRenderer(
           this.project,
           instance,

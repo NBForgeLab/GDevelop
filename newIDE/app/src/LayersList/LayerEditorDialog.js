@@ -27,6 +27,11 @@ import SelectField from '../UI/SelectField';
 import SelectOption from '../UI/SelectOption';
 import Paper from '../UI/Paper';
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+import {
+  getLayerRenderingType,
+  isBaseLayer,
+  setLayerRenderingType,
+} from './LayerRenderingType';
 
 const gd: libGDevelop = global.gd;
 
@@ -63,6 +68,8 @@ const LayerEditorDialog = ({
   resourceManagementProps,
   projectScopedContainersAccessor,
 }: Props): React.Node => {
+  const layerRenderingType = getLayerRenderingType(layer);
+  const isBaseLayerRenderingType = isBaseLayer(layer);
   const forceUpdate = useForceUpdate();
   const {
     onCancelChanges,
@@ -343,32 +350,18 @@ const LayerEditorDialog = ({
               <SelectField
                 fullWidth
                 floatingLabelText={<Trans>Rendering type</Trans>}
-                value={layer.getRenderingType()}
+                value={layerRenderingType}
+                disabled={isBaseLayerRenderingType}
                 onChange={(e, i, newValue: string) => {
-                  layer.setRenderingType(newValue);
+                  setLayerRenderingType(layer, newValue === '2d' ? '2d' : '3d');
                   forceUpdate();
+                  notifyOfChange();
                 }}
               >
-                <SelectOption
-                  value={''}
-                  label={t`Display both 2D and 3D objects (default)`}
-                />
-                <SelectOption
-                  value={'2d'}
-                  label={t`Force display only 2D objects`}
-                />
-                <SelectOption
-                  value={'3d'}
-                  label={t`Force display only 3D objects`}
-                  disabled={layer.isLightingLayer()}
-                />
-                <SelectOption
-                  value={'2d+3d'}
-                  label={t`Force display both 2D and 3D objects`}
-                  disabled={layer.isLightingLayer()}
-                />
+                <SelectOption value={'3d'} label={t`3D`} />
+                <SelectOption value={'2d'} label={t`2D`} />
               </SelectField>
-              {layer.getRenderingType() !== '2d' && (
+              {layerRenderingType !== '2d' && (
                 <ColumnStackLayout noMargin>
                   <ResponsiveLineStackLayout noResponsiveLandscape noMargin>
                     <SelectField
@@ -501,7 +494,7 @@ const LayerEditorDialog = ({
       {currentTab === 'effects' && (
         <EffectsList
           target="layer"
-          layerRenderingType={layer.getRenderingType()}
+          layerRenderingType={layerRenderingType}
           project={project}
           resourceManagementProps={resourceManagementProps}
           projectScopedContainersAccessor={projectScopedContainersAccessor}

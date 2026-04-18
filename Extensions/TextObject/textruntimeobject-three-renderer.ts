@@ -120,7 +120,7 @@ namespace gdjs {
       this._sprite.renderOrder = 100000 + runtimeObject.getZOrder();
 
       instanceContainer
-        .getLayer('')
+        .getLayer(runtimeObject.getLayer())
         .getRenderer()
         .addRendererObject(this._sprite, runtimeObject.getZOrder());
 

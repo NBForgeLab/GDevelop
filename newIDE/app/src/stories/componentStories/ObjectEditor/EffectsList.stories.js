@@ -15,7 +15,7 @@ export const withSomeEffectsForAMixedLayer = (): React.Node => (
     <FixedHeightFlexContainer height={600}>
       <EffectsList
         target="layer"
-        layerRenderingType="2d+3d"
+        layerRenderingType="3d"
         project={testProject.project}
         resourceManagementProps={fakeResourceManagementProps}
         projectScopedContainersAccessor={
@@ -118,7 +118,7 @@ export const withoutEffectsForAMixedLayer = (): React.Node => (
     <FixedHeightFlexContainer height={600}>
       <EffectsList
         target="layer"
-        layerRenderingType="2d+3d"
+        layerRenderingType="3d"
         project={testProject.project}
         resourceManagementProps={fakeResourceManagementProps}
         projectScopedContainersAccessor={

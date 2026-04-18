@@ -14,7 +14,7 @@ namespace gd {
 Camera Layer::badCamera;
 
 Layer::Layer()
-    : renderingType(""),
+    : renderingType("3d"),
       defaultCameraBehavior("top-left-anchored-if-never-moved"),
       isVisible(true),
       isLocked(false),
@@ -85,7 +85,7 @@ void Layer::SerializeTo(SerializerElement& element) const {
  */
 void Layer::UnserializeFrom(const SerializerElement& element) {
   SetName(element.GetStringAttribute("name", "", "Name"));
-  SetRenderingType(element.GetStringAttribute("renderingType", ""));
+  SetRenderingType(element.GetStringAttribute("renderingType", "3d"));
   SetCameraType(element.GetStringAttribute("cameraType", "perspective"));
   SetDefaultCameraBehavior(element.GetStringAttribute("defaultCameraBehavior", "top-left-anchored-if-never-moved"));
   SetVisibility(element.GetBoolAttribute("visibility", true, "Visibility"));

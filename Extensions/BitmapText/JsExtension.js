@@ -174,7 +174,10 @@ module.exports = {
       )
       .setIncludeFile('Extensions/BitmapText/bitmaptextruntimeobject.js')
       .addIncludeFile(
-        'Extensions/BitmapText/bitmaptextruntimeobject-three-renderer.js'
+        'Extensions/BitmapText/bitmaptextruntimeobject-renderer.js'
+      )
+      .addIncludeFile(
+        'Extensions/BitmapText/bitmaptextruntimeobject-pixi-renderer.js'
       )
       .setCategory('Text')
       .setAssetStoreTag('bitmap texts')

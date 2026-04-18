@@ -10,7 +10,6 @@ import SelectField from '../UI/SelectField';
 import SelectOption from '../UI/SelectOption';
 import { mapFor } from '../Utils/MapFor';
 import RaisedButton from '../UI/RaisedButton';
-import FlatButton from '../UI/FlatButton';
 import IconButton from '../UI/IconButton';
 import ElementWithMenu from '../UI/Menu/ElementWithMenu';
 import SemiControlledTextField from '../UI/SemiControlledTextField';
@@ -856,7 +855,7 @@ type Props = {|
   onEffectsRenamed: (oldName: string, newName: string) => void,
   onEffectAdded: () => void,
   target: 'object' | 'layer',
-  layerRenderingType: string,
+  layerRenderingType: '2d' | '3d',
 |};
 
 /**
@@ -928,11 +927,7 @@ export default function EffectsList(props: Props): React.Node {
   const effects2DCount = getEffects2DCount(platform, effectsContainer);
   const effects3DCount = getEffects3DCount(platform, effectsContainer);
   const visibleEffectsCount =
-    props.layerRenderingType === '2d'
-      ? effects2DCount
-      : props.layerRenderingType === '3d'
-      ? effects3DCount
-      : effectsContainer.getEffectsCount();
+    props.layerRenderingType === '2d' ? effects2DCount : effects3DCount;
 
   const buildAdd3DEffectMenuTemplate = React.useCallback(
     (i18n: I18nType) =>
@@ -996,17 +991,15 @@ export default function EffectsList(props: Props): React.Node {
                     </Column>
                   </Line>
                 )}
-                {props.layerRenderingType !== '2d' && effects3DCount > 0 && (
+                {props.layerRenderingType === '3d' && effects3DCount > 0 && (
                   <Column noMargin expand>
-                    {props.layerRenderingType !== '3d' && (
-                      <Column noMargin>
-                        <Line>
-                          <Text size="block-title">
-                            <Trans>3D effects</Trans>
-                          </Text>
-                        </Line>
-                      </Column>
-                    )}
+                    <Column noMargin>
+                      <Line>
+                        <Text size="block-title">
+                          <Trans>3D effects</Trans>
+                        </Text>
+                      </Line>
+                    </Column>
                     <Line>
                       <Column noMargin expand>
                         {mapFor(
@@ -1090,17 +1083,15 @@ export default function EffectsList(props: Props): React.Node {
                     </Line>
                   </Column>
                 )}
-                {props.layerRenderingType !== '3d' && effects2DCount > 0 && (
+                {props.layerRenderingType === '2d' && effects2DCount > 0 && (
                   <Column noMargin expand>
-                    {props.layerRenderingType !== '2d' && (
-                      <Column noMargin>
-                        <Line>
-                          <Text size="block-title">
-                            <Trans>2D effects</Trans>
-                          </Text>
-                        </Line>
-                      </Column>
-                    )}
+                    <Column noMargin>
+                      <Line>
+                        <Text size="block-title">
+                          <Trans>2D effects</Trans>
+                        </Text>
+                      </Line>
+                    </Column>
                     <Line>
                       <Column noMargin expand>
                         {mapFor(
@@ -1207,9 +1198,9 @@ export default function EffectsList(props: Props): React.Node {
                     />
                   </LineStackLayout>
                   <LineStackLayout justifyContent="flex-end" expand>
-                    {props.layerRenderingType !== '2d' &&
+                    {props.layerRenderingType === '3d' &&
                       renderAdd3DEffectButton()}
-                    {props.layerRenderingType !== '3d' && (
+                    {props.layerRenderingType === '2d' && (
                       <RaisedButton
                         primary
                         label={<Trans>Add a 2D effect</Trans>}
@@ -1223,67 +1214,41 @@ export default function EffectsList(props: Props): React.Node {
             </React.Fragment>
           ) : (
             <Column noMargin expand justifyContent="center">
-              {props.layerRenderingType === '' ||
-              props.layerRenderingType === '2d+3d' ? (
-                <EmptyPlaceholder
-                  title={<Trans>Add your first effect</Trans>}
-                  description={
-                    <Trans>Effects create visual changes to the object.</Trans>
+              <EmptyPlaceholder
+                title={<Trans>Add your first effect</Trans>}
+                description={
+                  <Trans>Effects create visual changes to the object.</Trans>
+                }
+                actionLabel={
+                  props.layerRenderingType === '3d' ? (
+                    <Trans>Add a 3D effect</Trans>
+                  ) : (
+                    <Trans>Add a 2D effect</Trans>
+                  )
+                }
+                actionElement={
+                  props.layerRenderingType === '3d'
+                    ? renderAdd3DEffectButton()
+                    : null
+                }
+                helpPagePath={
+                  props.target === 'object'
+                    ? '/objects/effects'
+                    : '/interface/scene-editor/layer-effects'
+                }
+                onAction={() => {
+                  if (props.layerRenderingType === '2d') {
+                    addEffect(false);
                   }
-                  actionLabel={<Trans>Add a 3D effect</Trans>}
-                  actionElement={renderAdd3DEffectButton()}
-                  helpPagePath={
-                    props.target === 'object'
-                      ? '/objects/effects'
-                      : '/interface/scene-editor/layer-effects'
-                  }
-                  onAction={() => {}}
-                  secondaryActionElement={
-                    <FlatButton
-                      label={<Trans>Add a 2D effect</Trans>}
-                      primary
-                      onClick={() => addEffect(false)}
-                      leftIcon={<Add />}
-                    />
-                  }
-                />
-              ) : (
-                <EmptyPlaceholder
-                  title={<Trans>Add your first effect</Trans>}
-                  description={
-                    <Trans>Effects create visual changes to the object.</Trans>
-                  }
-                  actionLabel={
-                    props.layerRenderingType === '3d' ? (
-                      <Trans>Add a 3D effect</Trans>
-                    ) : (
-                      <Trans>Add a 2D effect</Trans>
-                    )
-                  }
-                  actionElement={
-                    props.layerRenderingType === '3d'
-                      ? renderAdd3DEffectButton()
-                      : null
-                  }
-                  helpPagePath={
-                    props.target === 'object'
-                      ? '/objects/effects'
-                      : '/interface/scene-editor/layer-effects'
-                  }
-                  onAction={() => {
-                    if (props.layerRenderingType !== '3d') {
-                      addEffect(false);
-                    }
-                  }}
-                  secondaryActionIcon={<PasteIcon />}
-                  secondaryActionLabel={
-                    isClipboardContainingEffects ? <Trans>Paste</Trans> : null
-                  }
-                  onSecondaryAction={() => {
-                    pasteEffectsAtTheEnd();
-                  }}
-                />
-              )}
+                }}
+                secondaryActionIcon={<PasteIcon />}
+                secondaryActionLabel={
+                  isClipboardContainingEffects ? <Trans>Paste</Trans> : null
+                }
+                onSecondaryAction={() => {
+                  pasteEffectsAtTheEnd();
+                }}
+              />
             </Column>
           )}
         </Column>

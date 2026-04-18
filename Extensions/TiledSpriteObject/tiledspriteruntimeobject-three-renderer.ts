@@ -43,7 +43,7 @@ namespace gdjs {
       this._mesh.rotation.order = 'ZYX';
 
       instanceContainer
-        .getLayer('')
+        .getLayer(runtimeObject.getLayer())
         .getRenderer()
         .addRendererObject(this._mesh, runtimeObject.getZOrder());
 

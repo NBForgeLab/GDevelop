@@ -224,6 +224,8 @@ const SwipeableDrawerEditorsDisplay: React.ComponentType<{
     // $FlowFixMe[incompatible-type]
     React.useImperativeHandle(ref, () => {
       const { current: editor } = editorRef;
+      const getSelectionAABB = () =>
+        editor ? editor.getSelectionAABB() || new Rectangle() : new Rectangle();
 
       return {
         getName: () => 'swipeableDrawer',
@@ -257,9 +259,7 @@ const SwipeableDrawerEditorsDisplay: React.ComponentType<{
         },
         instancesHandlers: {
           getContentAABB: editor ? editor.getContentAABB : () => null,
-          getSelectionAABB: editor
-            ? editor.selectedInstances.getSelectionAABB
-            : () => new Rectangle(),
+          getSelectionAABB,
           addInstances: editor ? editor.addInstances : () => [],
           clearHighlightedInstance: editor
             ? editor.clearHighlightedInstance
@@ -267,7 +267,9 @@ const SwipeableDrawerEditorsDisplay: React.ComponentType<{
           resetInstanceRenderersFor: editor
             ? editor.resetInstanceRenderersFor
             : noop,
-          forceRemountInstancesRenderers: editor ? editor.forceRemount : noop,
+          forceRemountInstancesRenderers: editor
+            ? editor.forceRemountInstancesRenderers
+            : noop,
           addSerializedInstances: editor
             ? editor.addSerializedInstances
             : () => [],
@@ -357,7 +359,7 @@ const SwipeableDrawerEditorsDisplay: React.ComponentType<{
                     props.instancesEditorShortcutsCallbacks
                   }
                   pauseRendering={!props.isActive}
-                  showObjectInstancesIn3D={values.use3DEditor}
+                  showObjectInstancesIn3D={props.showObjectInstancesIn3D}
                   showBasicProfilingCounters={values.showBasicProfilingCounters}
                   editorViewPosition2D={props.editorViewPosition2D}
                 />

@@ -27,8 +27,9 @@ class TextObjectJsExtension : public gd::PlatformExtension {
 
     GetObjectMetadata("TextObject::Text")
         .SetIncludeFile("Extensions/TextObject/textruntimeobject.js")
+        .AddIncludeFile("Extensions/TextObject/textruntimeobject-renderer.js")
         .AddIncludeFile(
-            "Extensions/TextObject/textruntimeobject-three-renderer.js");
+            "Extensions/TextObject/textruntimeobject-pixi-renderer.js");
 
     GetAllActionsForObject("TextObject::Text")["TextObject::Text::SetFontSize"]
         .SetFunctionName("setCharacterSize")

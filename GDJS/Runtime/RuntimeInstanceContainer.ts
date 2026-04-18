@@ -745,6 +745,99 @@ namespace gdjs {
       return this._layers.get('');
     }
 
+    getExpectedRenderingTypeForObject(
+      object: gdjs.RuntimeObject
+    ): gdjs.RuntimeLayerRenderingType {
+      return gdjs.Base3DHandler && gdjs.Base3DHandler.is3D(object)
+        ? gdjs.RuntimeLayerRenderingType.THREE_D
+        : gdjs.RuntimeLayerRenderingType.TWO_D;
+    }
+
+    getFirstLayerNameForRenderingType(
+      renderingType: gdjs.RuntimeLayerRenderingType,
+      excludedLayerName?: string
+    ): string | null {
+      for (const layer of this._orderedLayers) {
+        if (layer.getName() === excludedLayerName) {
+          continue;
+        }
+        const layerRenderingType = layer.getRenderingType();
+        if (
+          layerRenderingType === renderingType ||
+          layerRenderingType === gdjs.RuntimeLayerRenderingType.TWO_D_AND_THREE_D
+        ) {
+          return layer.getName();
+        }
+      }
+
+      return null;
+    }
+
+    resolveLayerNameForObject(
+      object: gdjs.RuntimeObject,
+      requestedLayerName: string,
+      options?: {
+        excludedLayerName?: string;
+        allowImplicitFallback?: boolean;
+      }
+    ): string {
+      const expectedRenderingType = this.getExpectedRenderingTypeForObject(object);
+      const effectiveRequestedLayerName =
+        requestedLayerName && this.hasLayer(requestedLayerName)
+          ? requestedLayerName
+          : '';
+      const requestedLayer =
+        effectiveRequestedLayerName &&
+        effectiveRequestedLayerName !== options?.excludedLayerName
+          ? this.getLayer(effectiveRequestedLayerName)
+          : null;
+
+      if (
+        requestedLayer &&
+        (requestedLayer.getRenderingType() === expectedRenderingType ||
+          requestedLayer.getRenderingType() ===
+            gdjs.RuntimeLayerRenderingType.TWO_D_AND_THREE_D)
+      ) {
+        return effectiveRequestedLayerName;
+      }
+
+      const allowImplicitFallback =
+        options?.allowImplicitFallback !== false &&
+        effectiveRequestedLayerName === '';
+      if (allowImplicitFallback) {
+        const fallbackLayerName = this.getFirstLayerNameForRenderingType(
+          expectedRenderingType,
+          options?.excludedLayerName
+        );
+        if (fallbackLayerName !== null) {
+          return fallbackLayerName;
+        }
+        // If no matching layer exists, keep the base layer instead of throwing.
+        // This avoids crashing scenes that contain 2D objects but only have 3D layers
+        // (the renderer can still display 2D objects in the Pixi overlay).
+        return '';
+      }
+
+      const objectDimensionLabel =
+        expectedRenderingType === gdjs.RuntimeLayerRenderingType.THREE_D
+          ? '3D'
+          : '2D';
+      const requestedDimensionLabel =
+        requestedLayer &&
+        requestedLayer.getRenderingType() ===
+          gdjs.RuntimeLayerRenderingType.THREE_D
+          ? '3D'
+          : requestedLayer &&
+              requestedLayer.getRenderingType() ===
+                gdjs.RuntimeLayerRenderingType.TWO_D_AND_THREE_D
+            ? '2D+3D'
+          : '2D';
+      const requestedLabel = effectiveRequestedLayerName || '(base layer)';
+      throw new Error(
+        `Cannot place ${object.getName()} on layer "${requestedLabel}". ${objectDimensionLabel} objects require a ${objectDimensionLabel} layer, but "${requestedLabel}" is ${requestedDimensionLabel}.`
+      );
+    }
+
     /**
      * Check if a layer exists
      * @param name The name of the layer

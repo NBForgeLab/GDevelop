@@ -3,14 +3,12 @@ import * as React from 'react';
 import { DragLayer } from 'react-dnd';
 import { Identifier } from 'dnd-core';
 import Text from '../Text';
-import { instancesEditorId } from '../../InstancesEditor';
 import {
   useScreenType,
   type ScreenType,
 } from '../Responsive/ScreenTypeMeasurer';
 import { CorsAwareImage } from '../CorsAwareImage';
 import { type DraggedItem } from './DragSourceAndDropTarget';
-import { swipeableDrawerContainerId } from '../../SceneEditor/SwipeableDrawerEditorsDisplay';
 import { getActiveEmbeddedGameFrameHoleRect } from '../../EmbeddedGame/EmbeddedGameFrameHole';
 
 const layerStyles = {
@@ -88,44 +86,6 @@ const shouldHidePreviewBecauseDraggingOnSceneEditorCanvas = ({
       x <= activeEmbeddedGameFrameHoleRect.right &&
       y >= activeEmbeddedGameFrameHoleRect.top &&
       y <= activeEmbeddedGameFrameHoleRect.bottom
-    ) {
-      return true;
-    }
-  }
-
-  // Otherwise, this means the classic "2D" editor is used:
-
-  const swipeableDrawerContainer = document.querySelector(
-    `#${swipeableDrawerContainerId}`
-  );
-  // If the swipeable drawer exists, we are on mobile, and we want to show the preview
-  // only when the user is dragging in the drawer, otherwise they are on the canvas.
-  // (the drawer is on top of the canvas)
-  if (swipeableDrawerContainer) {
-    const drawerRect = swipeableDrawerContainer.getBoundingClientRect();
-    if (
-      x >= drawerRect.left &&
-      x <= drawerRect.right &&
-      y >= drawerRect.top &&
-      y <= drawerRect.bottom
-    ) {
-      return false;
-    }
-    return true;
-  }
-
-  // Otherwise, we are on desktop, and we want to hide the preview when the user
-  // is dragging on the canvas.
-  const activeCanvas = document.querySelector(
-    `#scene-editor[data-active=true] #${instancesEditorId}`
-  );
-  if (activeCanvas) {
-    const canvasRect = activeCanvas.getBoundingClientRect();
-    if (
-      x >= canvasRect.left &&
-      x <= canvasRect.right &&
-      y >= canvasRect.top &&
-      y <= canvasRect.bottom
     ) {
       return true;
     }

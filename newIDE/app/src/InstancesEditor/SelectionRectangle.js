@@ -8,6 +8,7 @@ export default class SelectionRectangle {
   instances: gdInitialInstancesContainer;
   instanceMeasurer: InstanceMeasurer;
   toSceneCoordinates: (x: number, y: number) => [number, number];
+  shouldSelectInstance: gdInitialInstance => boolean;
 
   threeRectangle: THREE.Mesh;
   selectionRectangleStart: { x: number, y: number } | null;
@@ -24,14 +25,17 @@ export default class SelectionRectangle {
     instances,
     instanceMeasurer,
     toSceneCoordinates,
+    shouldSelectInstance,
   }: {
     instances: gdInitialInstancesContainer,
     instanceMeasurer: InstanceMeasurer,
     toSceneCoordinates: (x: number, y: number) => [number, number],
+    shouldSelectInstance: gdInitialInstance => boolean,
   }) {
     this.instances = instances;
     this.instanceMeasurer = instanceMeasurer;
     this.toSceneCoordinates = toSceneCoordinates;
+    this.shouldSelectInstance = shouldSelectInstance;
 
     const geometry = new THREE.PlaneGeometry(1, 1);
     geometry.translate(0.5, 0.5, 0); // Origin top-left
@@ -57,6 +61,7 @@ export default class SelectionRectangle {
     this.selector.invoke = instancePtr => {
       // $FlowFixMe[incompatible-type] - wrapPointer is not exposed
       const instance = gd.wrapPointer(instancePtr, gd.InitialInstance);
+      if (!this.shouldSelectInstance(instance)) return;
       const instanceAABB = this.instanceMeasurer.getInstanceAABB(
         instance,
         this._temporaryAABB
@@ -73,12 +78,28 @@ export default class SelectionRectangle {
         selectionRectangleEnd.x,
         selectionRectangleEnd.y
       );
+      const selectionLeft = Math.min(
+        selectionSceneStart[0],
+        selectionSceneEnd[0]
+      );
+      const selectionRight = Math.max(
+        selectionSceneStart[0],
+        selectionSceneEnd[0]
+      );
+      const selectionTop = Math.min(
+        selectionSceneStart[1],
+        selectionSceneEnd[1]
+      );
+      const selectionBottom = Math.max(
+        selectionSceneStart[1],
+        selectionSceneEnd[1]
+      );
 
       if (
-        selectionSceneStart[0] <= instanceAABB.left &&
-        instanceAABB.right <= selectionSceneEnd[0] &&
-        selectionSceneStart[1] <= instanceAABB.top &&
-        instanceAABB.bottom <= selectionSceneEnd[1]
+        instanceAABB.right >= selectionLeft &&
+        instanceAABB.left <= selectionRight &&
+        instanceAABB.bottom >= selectionTop &&
+        instanceAABB.top <= selectionBottom
       ) {
         this._instancesInSelectionRectangle.push(instance);
       }

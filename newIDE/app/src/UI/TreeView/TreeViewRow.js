@@ -121,6 +121,25 @@ const SemiControlledRowInput = ({
 // $FlowFixMe[missing-local-annot]
 const memoized = memoizeOne((initialValue, callback) => callback());
 
+const DragOverStateSync = ({
+  isOver,
+  canDrop,
+  onChange,
+}: {|
+  isOver: boolean,
+  canDrop: boolean,
+  onChange: ({| isOver: boolean, canDrop: boolean |}) => void,
+|}) => {
+  React.useEffect(
+    () => {
+      onChange({ isOver, canDrop });
+    },
+    [isOver, canDrop, onChange]
+  );
+
+  return null;
+};
+
 type Props<Item> = {|
   index: number,
   style: any,
@@ -155,6 +174,13 @@ const TreeViewRow = <Item: ItemBaseAttributes>(props: Props<Item>) => {
   const forceUpdate = useForceUpdate();
   const isStayingOverRef = React.useRef<boolean>(false);
   const openWhenOverTimeoutId = React.useRef<?TimeoutID>(null);
+  const [dragOverState, setDragOverState] = React.useState<{|
+    isOver: boolean,
+    canDrop: boolean,
+  |}>({
+    isOver: false,
+    canDrop: false,
+  });
   const [whereToDrop, setWhereToDrop] = React.useState<
     'before' | 'after' | 'inside'
   >('before');
@@ -245,6 +271,13 @@ const TreeViewRow = <Item: ItemBaseAttributes>(props: Props<Item>) => {
     // We want to have isStayingOverRef.current as dependency.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [onOpen, node, forceUpdate, isStayingOverRef.current]
+  );
+
+  React.useEffect(
+    () => {
+      setIsStayingOver(dragOverState.isOver, dragOverState.canDrop);
+    },
+    [dragOverState, setIsStayingOver]
   );
 
   const endRenaming = React.useCallback(
@@ -362,8 +395,6 @@ const TreeViewRow = <Item: ItemBaseAttributes>(props: Props<Item>) => {
           isOver,
           canDrop,
         }) => {
-          setIsStayingOver(isOver, canDrop);
-
           let itemRow = (
             <div
               className={classNames(classes.rowContentSide, {
@@ -585,6 +616,11 @@ const TreeViewRow = <Item: ItemBaseAttributes>(props: Props<Item>) => {
                 [classes.withDivider]: node.item.isRoot && index > 0,
               })}
             >
+              <DragOverStateSync
+                isOver={isOver}
+                canDrop={canDrop}
+                onChange={setDragOverState}
+              />
               {dropTarget}
             </div>
           );

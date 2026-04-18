@@ -9,6 +9,14 @@ namespace gdjs {
     return null;
   };
 
+  const asPixiContainerOrNull = (object: unknown): PIXI.Container | null => {
+    if (object instanceof PIXI.Container) {
+      return object;
+    }
+
+    return null;
+  };
+
   const throwIfNotThreeObject = (
     object: unknown,
     context: string
@@ -31,7 +39,9 @@ namespace gdjs {
     private static vectorForProjections: THREE.Vector3 | null = null;
     private _layer: gdjs.RuntimeLayer;
     private _threeRenderer: THREE.WebGLRenderer | null;
+    private _pixiOverlayRenderer: gdjs.RuntimePixiOverlayRenderer | null;
     private _threeGroup: THREE.Group;
+    private _pixiContainer: PIXI.Container;
     private _threeScene: THREE.Scene;
     private _threeCamera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
     private _threeEffectComposer: THREE_ADDONS.EffectComposer | null = null;
@@ -52,6 +62,7 @@ namespace gdjs {
     ) {
       this._layer = layer;
       this._threeRenderer = runtimeGameRenderer.getThreeRenderer();
+      this._pixiOverlayRenderer = runtimeGameRenderer.getPixiOverlayRenderer();
       this._camera3DFieldOfView = layer.getInitialCamera3DFieldOfView();
       this._camera3DNearPlaneDistance =
         layer.getInitialCamera3DNearPlaneDistance();
@@ -62,6 +73,8 @@ namespace gdjs {
 
       this._threeGroup = new THREE.Group();
       this._threeGroup.name = layer.getName();
+      this._pixiContainer = new PIXI.Container({ sortableChildren: true });
+      this._pixiContainer.label = layer.getName();
       this._threeScene = new THREE.Scene();
       this._threeScene.name = layer.getName();
       this._threeScene.add(this._threeGroup);
@@ -83,6 +96,7 @@ namespace gdjs {
       if (parentRendererObject) {
         parentRendererObject.add(this._threeGroup);
       }
+      this._pixiOverlayRenderer?.registerLayer(layer.getName(), this._pixiContainer);
 
       this._setupEffectComposer();
       this.updateVisibility(layer.isVisible());
@@ -252,16 +266,32 @@ namespace gdjs {
 
     updateVisibility(visible: boolean): void {
       this._threeGroup.visible = !!visible;
+      this._pixiContainer.visible = !!visible;
     }
 
     updatePreRender(): void {
       if (this._needsCameraUpdate) {
         this._updateCameraProjectionAndPosition();
       }
+      this._pixiContainer.position.set(
+        this._layer.getWidth() / 2,
+        this._layer.getHeight() / 2
+      );
+      this._pixiContainer.pivot.set(
+        this._layer.getCameraX(),
+        this._layer.getCameraY()
+      );
+      this._pixiContainer.scale.set(
+        this._layer.getCameraZoom(),
+        this._layer.getCameraZoom()
+      );
+      this._pixiContainer.rotation = -gdjs.toRad(this._layer.getCameraRotation());
     }
 
     getRendererObject() {
-      return this._threeGroup;
+      return this._layer.getRenderingType() === gdjs.RuntimeLayerRenderingType.TWO_D
+        ? this._pixiContainer
+        : this._threeGroup;
     }
 
     getThreeScene(): THREE.Scene | null {
@@ -383,9 +413,23 @@ namespace gdjs {
 
     setLayerIndex(index: number) {
       this._threeGroup.renderOrder = index;
+      this._pixiContainer.zIndex = index;
     }
 
     addRendererObject(rendererObject: unknown, zOrder: float): void {
+      const pixiObject = asPixiContainerOrNull(rendererObject);
+      if (pixiObject) {
+        pixiObject.zIndex = zOrder || 0;
+        this._pixiContainer.addChild(pixiObject);
+        return;
+      }
+      if (
+        this._layer.getRenderingType() === gdjs.RuntimeLayerRenderingType.TWO_D
+      ) {
+        throw new Error(
+          `Layer "${this._layer.getName()}" is 2D and only accepts Pixi renderer objects.`
+        );
+      }
       const object = throwIfNotThreeObject(
         rendererObject,
         'LayerThreeRenderer.addRendererObject'
@@ -399,6 +443,11 @@ namespace gdjs {
       rendererObject: unknown,
       newZOrder: float
     ): void {
+      const pixiObject = asPixiContainerOrNull(rendererObject);
+      if (pixiObject) {
+        pixiObject.zIndex = newZOrder || 0;
+        return;
+      }
       const object = throwIfNotThreeObject(
         rendererObject,
         'LayerThreeRenderer.changeRendererObjectZOrder'
@@ -407,6 +456,11 @@ namespace gdjs {
     }
 
     removeRendererObject(rendererObject: unknown): void {
+      const pixiObject = asPixiContainerOrNull(rendererObject);
+      if (pixiObject) {
+        this._pixiContainer.removeChild(pixiObject);
+        return;
+      }
       const object = throwIfNotThreeObject(
         rendererObject,
         'LayerThreeRenderer.removeRendererObject'
@@ -421,8 +475,11 @@ namespace gdjs {
     }
 
     has2DObjects(): boolean {
-      return this._threeGroup.children.some(
-        (child) => !!child.userData.gdjsIs2DRendererObject
+      return (
+        this._pixiContainer.children.length > 0 ||
+        this._threeGroup.children.some(
+          (child) => !!child.userData.gdjsIs2DRendererObject
+        )
       );
     }
 
@@ -478,6 +535,8 @@ namespace gdjs {
     }
 
     dispose(): void {
+      this._pixiOverlayRenderer?.unregisterLayer(this._layer.getName());
+      this._pixiContainer.destroy({ children: true });
       this._threePostProcessingPassesByEffectName.clear();
       if (this._threeEffectComposer) {
         this._threeEffectComposer.passes.length = 0;
@@ -487,4 +546,7 @@ namespace gdjs {
       this._threeScene.clear();
     }
   }
+
+  export const LayerRenderer = LayerThreeRenderer;
+  export type LayerRenderer = LayerThreeRenderer;
 }

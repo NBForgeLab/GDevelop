@@ -10,6 +10,7 @@ import {
   type LayoutedParent,
 } from './CustomObjectLayoutingModel';
 import { mapVector } from '../../Utils/MapFor';
+import { getLayerVisibility } from '../../LayersList/LayerRenderingType';
 import * as THREE from 'three';
 
 const gd: libGDevelop = global.gd;
@@ -516,7 +517,7 @@ export default class RenderedCustomObjectInstance extends Rendered3DInstance
       layerIndex++
     ) {
       const layer = layers.getLayerAt(layerIndex);
-      if (layer.getVisibility()) {
+      if (getLayerVisibility(layer)) {
         variant.getInitialInstances().iterateOverInstancesWithZOrdering(
           // $FlowFixMe[incompatible-type] - gd.castObject is not supporting typings.
           this.instancesRenderer,

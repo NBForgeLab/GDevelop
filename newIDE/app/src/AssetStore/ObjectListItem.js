@@ -94,8 +94,18 @@ export const ObjectListItem = ({
 
   return (
     <ButtonBase
+      component="div"
+      role="button"
+      tabIndex={0}
       id={id}
       onClick={chooseObject}
+      onKeyDown={event => {
+        if (!isEnabled) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          chooseObject();
+        }
+      }}
       focusRipple
       style={styles.button}
     >

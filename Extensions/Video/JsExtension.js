@@ -111,7 +111,8 @@ module.exports = {
         videoObject
       )
       .setIncludeFile('Extensions/Video/videoruntimeobject.js')
-      .addIncludeFile('Extensions/Video/videoruntimeobject-three-renderer.js')
+      .addIncludeFile('Extensions/Video/videoruntimeobject-renderer.js')
+      .addIncludeFile('Extensions/Video/videoruntimeobject-pixi-renderer.js')
       .setCategory('User interface')
       .addDefaultBehavior('EffectCapability::EffectBehavior')
       .addDefaultBehavior('OpacityCapability::OpacityBehavior');

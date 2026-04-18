@@ -31,12 +31,14 @@ namespace gdjs {
    */
   export class ImageManagerImpl implements gdjs.ResourceManager {
     _threeAnimationFrameTextureManager: any;
+    _pixiAnimationFrameTextureManager: any;
     private _invalidImageSource: HTMLCanvasElement;
 
     /**
      * Map associating a resource name to the loaded Three.js texture.
      */
     private _loadedThreeTextures: Hashtable<THREE.Texture>;
+    private _loadedPixiTextures: Hashtable<PIXI.Texture>;
     private _loadedImageSources = new gdjs.ResourceCache<HTMLImageElement>();
     private _loadedVideoSources = new gdjs.ResourceCache<HTMLVideoElement>();
     private _loadedThreeMaterials = new ThreeMaterialCache();
@@ -47,6 +49,13 @@ namespace gdjs {
     >();
 
     private _resourceLoader: gdjs.ResourceLoader;
+    private _placeholderThreeTexture: THREE.Texture | null = null;
+    private _placeholderPixiTexture: PIXI.Texture | null = null;
+    private _missingThreeTextureWarnings = new Set<string>();
+    private _missingPixiTextureWarnings = new Set<string>();
+    private _notReadyThreeTextureWarnings = new Set<string>();
+    private _notReadyPixiTextureWarnings = new Set<string>();
+    private _fallbackResourceNames = new Map<string, string>();
 
     /**
      * @param resourceLoader The resources loader of the game.
@@ -62,6 +71,7 @@ namespace gdjs {
         invalidContext.fillRect(0, 0, 192, 192);
       }
       this._loadedThreeTextures = new Hashtable();
+      this._loadedPixiTextures = new Hashtable();
     }
 
     /**
@@ -69,6 +79,9 @@ namespace gdjs {
      * @returns A magenta placeholder texture
      */
     private _getPlaceholderThreeTexture(): THREE.Texture {
+      if (this._placeholderThreeTexture) {
+        return this._placeholderThreeTexture;
+      }
       const placeholderTexture = new THREE.Texture(this._invalidImageSource);
       placeholderTexture.magFilter = THREE.NearestFilter;
       placeholderTexture.minFilter = THREE.NearestFilter;
@@ -76,7 +89,16 @@ namespace gdjs {
       placeholderTexture.wrapT = THREE.RepeatWrapping;
       placeholderTexture.colorSpace = THREE.SRGBColorSpace;
       placeholderTexture.needsUpdate = true;
-      return placeholderTexture;
+      this._placeholderThreeTexture = placeholderTexture;
+      return this._placeholderThreeTexture;
+    }
+
+    private _getPlaceholderPixiTexture(): PIXI.Texture {
+      if (this._placeholderPixiTexture) {
+        return this._placeholderPixiTexture;
+      }
+      this._placeholderPixiTexture = PIXI.Texture.from(this._invalidImageSource);
+      return this._placeholderPixiTexture;
     }
 
     getResourceKinds(): ResourceKind[] {
@@ -103,13 +125,35 @@ namespace gdjs {
       // Check if resource exists before trying to load it
       const resource = this._getImageResource(resourceName);
       if (!resource) {
-        logger.warn(
-          `Texture for resource "${resourceName}" not found. Using placeholder.`
-        );
+        if (!this._missingThreeTextureWarnings.has(resourceName)) {
+          this._missingThreeTextureWarnings.add(resourceName);
+          logger.warn(
+            `Texture for resource "${resourceName}" not found. Using placeholder.`
+          );
+        }
         return this._getPlaceholderThreeTexture();
       }
+      const loadedThreeTextureFromResolvedName = this._loadedThreeTextures.get(
+        resource.name
+      );
+      if (loadedThreeTextureFromResolvedName) {
+        this._loadedThreeTextures.put(resourceName, loadedThreeTextureFromResolvedName);
+        return loadedThreeTextureFromResolvedName;
+      }
 
-      const image = this._getImageSource(resourceName);
+      let image;
+      try {
+        image = this._getImageSource(resourceName);
+      } catch (error) {
+        if (!this._notReadyThreeTextureWarnings.has(resourceName)) {
+          this._notReadyThreeTextureWarnings.add(resourceName);
+          logger.warn(
+            `Texture for resource "${resourceName}" is not ready yet. Using placeholder.`,
+            error
+          );
+        }
+        return this._getPlaceholderThreeTexture();
+      }
 
       const threeTexture = new THREE.Texture(image);
       threeTexture.magFilter = THREE.LinearFilter;
@@ -121,8 +165,63 @@ namespace gdjs {
 
       applyThreeTextureSettings(threeTexture, resource);
       this._loadedThreeTextures.put(resourceName, threeTexture);
+      if (resource.name !== resourceName) {
+        this._loadedThreeTextures.put(resource.name, threeTexture);
+      }
 
       return threeTexture;
+    }
+
+    getPixiTexture(resourceName: string): PIXI.Texture {
+      if (!resourceName) {
+        return this._getPlaceholderPixiTexture();
+      }
+
+      const loadedPixiTexture = this._loadedPixiTextures.get(resourceName);
+      if (loadedPixiTexture) {
+        return loadedPixiTexture;
+      }
+
+      const resource = this._getImageResource(resourceName);
+      if (!resource) {
+        if (!this._missingPixiTextureWarnings.has(resourceName)) {
+          this._missingPixiTextureWarnings.add(resourceName);
+          logger.warn(
+            `Pixi texture for resource "${resourceName}" not found. Using placeholder.`
+          );
+        }
+        return this._getPlaceholderPixiTexture();
+      }
+      const loadedPixiTextureFromResolvedName = this._loadedPixiTextures.get(
+        resource.name
+      );
+      if (loadedPixiTextureFromResolvedName) {
+        this._loadedPixiTextures.put(resourceName, loadedPixiTextureFromResolvedName);
+        return loadedPixiTextureFromResolvedName;
+      }
+
+      let image;
+      try {
+        image = this._getImageSource(resourceName);
+      } catch (error) {
+        if (!this._notReadyPixiTextureWarnings.has(resourceName)) {
+          this._notReadyPixiTextureWarnings.add(resourceName);
+          logger.warn(
+            `Pixi texture for resource "${resourceName}" is not ready yet. Using placeholder.`,
+            error
+          );
+        }
+        return this._getPlaceholderPixiTexture();
+      }
+      const pixiTexture = PIXI.Texture.from(image);
+      if ((pixiTexture.source as any) && resource && !resource.smoothed) {
+        (pixiTexture.source as any).scaleMode = PIXI.SCALE_MODES.NEAREST;
+      }
+      this._loadedPixiTextures.put(resourceName, pixiTexture);
+      if (resource.name !== resourceName) {
+        this._loadedPixiTextures.put(resource.name, pixiTexture);
+      }
+      return pixiTexture;
     }
 
     private _getImageSource(resourceName: string): HTMLImageElement {
@@ -265,10 +364,53 @@ namespace gdjs {
     }
 
     private _getImageResource = (resourceName: string): ResourceData | null => {
-      const resource = this._resourceLoader.getResource(resourceName);
-      return resource && this.getResourceKinds().includes(resource.kind)
-        ? resource
-        : null;
+      const directResource = this._resourceLoader.getResource(resourceName);
+      if (
+        directResource &&
+        this.getResourceKinds().includes(directResource.kind)
+      ) {
+        return directResource;
+      }
+
+      const cachedFallbackResourceName = this._fallbackResourceNames.get(
+        resourceName
+      );
+      if (cachedFallbackResourceName) {
+        const cachedFallbackResource = this._resourceLoader.getResource(
+          cachedFallbackResourceName
+        );
+        if (
+          cachedFallbackResource &&
+          this.getResourceKinds().includes(cachedFallbackResource.kind)
+        ) {
+          return cachedFallbackResource;
+        }
+      }
+
+      const resourcesMap = (this._resourceLoader as any)._resources as
+        | Map<string, ResourceData>
+        | undefined;
+      if (!resourcesMap) {
+        return null;
+      }
+
+      const expectedSuffix = '-' + resourceName;
+      for (const resource of resourcesMap.values()) {
+        if (!this.getResourceKinds().includes(resource.kind)) continue;
+        if (
+          resource.name === resourceName ||
+          resource.file === resourceName ||
+          resource.name.endsWith(expectedSuffix) ||
+          resource.file.endsWith(expectedSuffix) ||
+          resource.name.endsWith(resourceName) ||
+          resource.file.endsWith(resourceName)
+        ) {
+          this._fallbackResourceNames.set(resourceName, resource.name);
+          return resource;
+        }
+      }
+
+      return null;
     };
 
     getResourceUrl(resourceName: string): string | null {
@@ -383,6 +525,12 @@ namespace gdjs {
       for (const threeTexture of threeTextures) {
         threeTexture.dispose();
       }
+      const pixiTextures: PIXI.Texture[] = [];
+      this._loadedPixiTextures.values(pixiTextures);
+      this._loadedPixiTextures.clear();
+      for (const pixiTexture of pixiTextures) {
+        pixiTexture.destroy(true);
+      }
       for (const cubeTexture of this._loadedThreeCubeTextures.values()) {
         cubeTexture.dispose();
       }
@@ -407,6 +555,11 @@ namespace gdjs {
       if (threeTexture) {
         threeTexture.dispose();
         this._loadedThreeTextures.remove(resourceName);
+      }
+      const pixiTexture = this._loadedPixiTextures.get(resourceName);
+      if (pixiTexture) {
+        pixiTexture.destroy(true);
+        this._loadedPixiTextures.remove(resourceName);
       }
 
       this._loadedThreeMaterials.dispose(resourceName);

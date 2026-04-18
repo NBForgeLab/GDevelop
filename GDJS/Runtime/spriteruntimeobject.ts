@@ -64,7 +64,7 @@ namespace gdjs {
     _updateIfNotVisible: boolean;
     _preScale: float = 1;
 
-    _renderer: gdjs.SpriteRuntimeObjectThreeRenderer;
+    _renderer: gdjs.SpriteRuntimeObjectRenderer;
     _animationFrameDirty = true;
 
     /**
@@ -79,13 +79,13 @@ namespace gdjs {
       super(instanceContainer, spriteObjectData, instanceData);
       this._updateIfNotVisible = !!spriteObjectData.updateIfNotVisible;
       this._preScale = spriteObjectData.preScale || 1;
-      this._renderer = new gdjs.SpriteRuntimeObjectThreeRenderer(
+      this._renderer = new gdjs.SpriteRuntimeObjectRenderer(
         this,
         instanceContainer
       );
       this._animator = new gdjs.SpriteAnimator(
         spriteObjectData.animations,
-        gdjs.SpriteRuntimeObjectThreeRenderer.getAnimationFrameTextureManager(
+        gdjs.SpriteRuntimeObjectRenderer.getAnimationFrameTextureManager(
           instanceContainer.getGame().getImageManager()
         )
       );

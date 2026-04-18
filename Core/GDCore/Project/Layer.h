@@ -96,7 +96,12 @@ class GD_CORE_API Layer {
   /**
    * \brief Change layer name
    */
-  void SetName(const gd::String& name_) { name = name_; }
+  void SetName(const gd::String& name_) {
+    name = name_;
+    if (name.empty()) {
+      renderingType = "3d";
+    }
+  }
 
   /**
    * \brief Get layer name
@@ -106,7 +111,12 @@ class GD_CORE_API Layer {
   const gd::String& GetRenderingType() const { return renderingType; }
 
   void SetRenderingType(const gd::String& renderingType_) {
-    renderingType = renderingType_;
+    if (name.empty()) {
+      renderingType = "3d";
+      return;
+    }
+
+    renderingType = renderingType_ == "2d" ? "2d" : "3d";
   }
 
   const gd::String& GetDefaultCameraBehavior() const { return defaultCameraBehavior; }
@@ -281,8 +291,7 @@ class GD_CORE_API Layer {
 
  private:
   gd::String name;           ///< The name of the layer
-  gd::String renderingType;  ///< The rendering type: "" (empty), "2d", "3d" or
-                             ///< "2d+3d".
+  gd::String renderingType;  ///< The rendering type: "2d" or "3d".
   gd::String defaultCameraBehavior;
   gd::String cameraType;
   bool isVisible;            ///< True if the layer is visible

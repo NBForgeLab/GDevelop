@@ -122,7 +122,7 @@ namespace gdjs {
 
     _padding: integer = 5;
     _str: string;
-    _renderer: gdjs.TextRuntimeObjectThreeRenderer;
+    _renderer: gdjs.TextRuntimeObjectRenderer;
 
     // We can store the scale as nothing else can change it.
     _scaleX: number = 1;
@@ -161,7 +161,7 @@ namespace gdjs {
       this._shadowAngle = content.shadowAngle;
       this._lineHeight = content.lineHeight || 0;
 
-      this._renderer = new gdjs.TextRuntimeObjectThreeRenderer(
+      this._renderer = new gdjs.TextRuntimeObjectRenderer(
         this,
         instanceContainer
       );

@@ -247,6 +247,7 @@ namespace gdjs {
       this._nameId = RuntimeObject.getNameIdentifier(this.name);
       this.id = instanceContainer.getScene().createNewUniqueId();
       this._runtimeScene = instanceContainer;
+      this.layer = instanceData?.layer || '';
       this._defaultHitBoxes.push(gdjs.Polygon.createRectangle(0, 0));
       this.hitBoxes = this._defaultHitBoxes;
       this._variables = new gdjs.VariablesContainer(
@@ -975,12 +976,24 @@ namespace gdjs {
      * @param layer The new layer of the object
      */
     setLayer(layer: string): void {
-      if (layer === this.layer) {
+      const resolvedLayerName = this._runtimeScene.resolveLayerNameForObject(
+        this,
+        layer,
+        {
+          allowImplicitFallback: true,
+        }
+      );
+      if (resolvedLayerName === this.layer) {
         return;
       }
       const oldLayer = this._runtimeScene.getLayer(this.layer);
-      this.layer = layer;
+      this.layer = resolvedLayerName;
       const newLayer = this._runtimeScene.getLayer(this.layer);
+      const renderer = (this as any)._renderer;
+      if (renderer && typeof renderer.onMovedToLayer === 'function') {
+        renderer.onMovedToLayer(oldLayer, newLayer, this);
+        return;
+      }
       const rendererObject = this.getRendererObject();
       if (rendererObject) {
         oldLayer.getRenderer().removeRendererObject(rendererObject);

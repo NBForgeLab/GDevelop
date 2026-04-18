@@ -75,7 +75,7 @@ namespace gdjs {
       this._sprite = new THREE.Sprite(this._material);
       this._sprite.rotation.order = 'ZYX';
 
-      const layer = instanceContainer.getLayer('');
+      const layer = instanceContainer.getLayer(runtimeObject.getLayer());
       if (layer) {
         layer
           .getRenderer()
@@ -94,7 +94,7 @@ namespace gdjs {
       this._material.map = null;
       this._material.needsUpdate = true;
 
-      const layer = instanceContainer.getLayer('');
+      const layer = instanceContainer.getLayer(runtimeObject.getLayer());
       if (layer) {
         layer
           .getRenderer()

@@ -53,7 +53,7 @@ namespace gdjs {
     _width: float;
     _height: float;
 
-    _renderer: gdjs.TiledSpriteRuntimeObjectThreeRenderer;
+    _renderer: gdjs.TiledSpriteRuntimeObjectRenderer;
 
     _objectData: TiledSpriteObjectData;
 
@@ -68,7 +68,7 @@ namespace gdjs {
     ) {
       super(instanceContainer, tiledSpriteObjectData, instanceData);
       this._objectData = tiledSpriteObjectData;
-      this._renderer = new gdjs.TiledSpriteRuntimeObjectThreeRenderer(
+      this._renderer = new gdjs.TiledSpriteRuntimeObjectRenderer(
         this,
         instanceContainer,
         tiledSpriteObjectData.texture

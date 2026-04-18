@@ -67,7 +67,7 @@ namespace gdjs {
       this._threeGroup.rotation.order = 'ZYX';
       this._threeGroup.renderOrder = 100000 + object.getZOrder();
 
-      const layer = parent.getLayer('');
+      const layer = parent.getLayer(object.getLayer());
       if (layer) {
         layer
           .getRenderer()
@@ -165,7 +165,7 @@ namespace gdjs {
     static getAnimationFrameTextureManager(
       imageManager: gdjs.ThreeTextureImageManager
     ) {
-      return gdjs.SpriteRuntimeObjectThreeRenderer.getAnimationFrameTextureManager(
+      return gdjs.SpriteRuntimeObjectRenderer.getAnimationFrameTextureManager(
         imageManager
       );
     }

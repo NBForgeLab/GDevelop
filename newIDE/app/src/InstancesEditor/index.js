@@ -37,13 +37,23 @@ import {
   getWheelStepZoomFactor,
 } from '../Utils/ZoomUtils';
 import Background from './Background';
+import { getLayerRenderingType } from '../LayersList/LayerRenderingType';
 import { ErrorFallbackComponent } from '../UI/ErrorBoundary';
 import { Trans } from '@lingui/macro';
 import { generateUUID } from 'three/src/math/MathUtils';
+import Pixi2DOverlayRenderer from './Pixi2DOverlayRenderer';
 const gd: libGDevelop = global.gd;
 export const instancesEditorId = 'instances-editor-canvas';
 const styles = {
-  canvasArea: { flex: 1, position: 'absolute', overflow: 'hidden' },
+  canvasArea: {
+    flex: 1,
+    position: 'absolute',
+    overflow: 'hidden',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  },
   dropCursor: { cursor: 'copy' },
 };
 
@@ -129,6 +139,7 @@ export default class InstancesEditor extends Component<Props, State> {
   fpsLimiter: FpsLimiter = new FpsLimiter({ maxFps: 60, idleFps: 10 });
   canvasArea: ?HTMLDivElement;
   renderer: THREE.WebGLRenderer | null = null;
+  pixiOverlayRenderer: Pixi2DOverlayRenderer | null = null;
   raycaster: THREE.Raycaster = new THREE.Raycaster();
   mouse: THREE.Vector2 = new THREE.Vector2();
   keyboardShortcuts: KeyboardShortcuts;
@@ -182,6 +193,12 @@ export default class InstancesEditor extends Component<Props, State> {
       prevProps.height !== this.props.height
     ) {
       this.renderer.setSize(this.props.width || 1, this.props.height || 1);
+      if (this.pixiOverlayRenderer) {
+        this.pixiOverlayRenderer.resize(
+          this.props.width || 1,
+          this.props.height || 1
+        );
+      }
       if (this.viewPosition) {
         this.viewPosition.resize(this.props.width, this.props.height);
       }
@@ -252,7 +269,7 @@ export default class InstancesEditor extends Component<Props, State> {
     alpha: isLocked ? 0.25 : 0.35,
   });
 
-  _initializeCanvasAndRenderer() {
+  async _initializeCanvasAndRenderer() {
     const { canvasArea } = this;
     if (!canvasArea) return;
 
@@ -271,16 +288,38 @@ export default class InstancesEditor extends Component<Props, State> {
     const initialHeight = this.props.height || 1;
 
     const gameCanvas = document.createElement('canvas');
+    const overlayCanvas = document.createElement('canvas');
     const threeRenderer = new THREE.WebGLRenderer({
       canvas: gameCanvas,
       antialias: true,
+      alpha: true,
     });
     threeRenderer.autoClear = false;
     threeRenderer.setSize(initialWidth, initialHeight);
     this.renderer = threeRenderer;
 
     canvasArea.appendChild(gameCanvas);
+    canvasArea.appendChild(overlayCanvas);
+    gameCanvas.style.position = 'absolute';
+    gameCanvas.style.left = '0';
+    gameCanvas.style.top = '0';
+    gameCanvas.style.width = '100%';
+    gameCanvas.style.height = '100%';
+    gameCanvas.style.zIndex = '0';
+    overlayCanvas.style.position = 'absolute';
+    overlayCanvas.style.left = '0';
+    overlayCanvas.style.top = '0';
+    overlayCanvas.style.width = '100%';
+    overlayCanvas.style.height = '100%';
+    overlayCanvas.style.zIndex = '1';
+    overlayCanvas.style.pointerEvents = 'none';
     this.renderer.domElement.style.outline = 'none';
+    this.pixiOverlayRenderer = new Pixi2DOverlayRenderer();
+    await this.pixiOverlayRenderer.initialize(
+      overlayCanvas,
+      initialWidth,
+      initialHeight
+    );
 
     this.longTouchHandler = new LongTouchHandler({
       canvas: this.renderer.domElement,
@@ -424,12 +463,14 @@ export default class InstancesEditor extends Component<Props, State> {
       onInstanceRightClicked: this._onInstanceRightClicked,
       onInstanceDoubleClicked: this._onInstanceDoubleClicked,
       showObjectInstancesIn3D: this._showObjectInstancesIn3D,
+      pixiOverlayRenderer: this.pixiOverlayRenderer,
     });
 
     this.selectionRectangle = new SelectionRectangle({
       instances: props.initialInstances,
       instanceMeasurer: this.instancesRenderer.getInstanceMeasurer(),
       toSceneCoordinates: this.viewPosition.toSceneCoordinates,
+      shouldSelectInstance: this._shouldHandleInstanceInCurrentEditor,
     });
 
     this.selectedInstances = new SelectedInstances({
@@ -508,6 +549,19 @@ export default class InstancesEditor extends Component<Props, State> {
     this.backgroundGroup.add(this.background.getThreeObject());
   }
 
+  forceRemountInstancesRenderers = () => {
+    if (!this.renderer) return;
+
+    this.clearHighlightedInstance();
+    this._mountEditorComponents(this.props);
+  };
+
+  resetInstanceRenderersFor = (objectName: string) => {
+    if (!this.instancesRenderer) return;
+
+    this.instancesRenderer.resetInstanceRenderersFor(objectName);
+  };
+
   componentWillUnmount() {
     this._unmounted = true;
     if (this.selectionRectangle) this.selectionRectangle.delete();
@@ -521,6 +575,7 @@ export default class InstancesEditor extends Component<Props, State> {
     if (this.uiGroup) this.uiGroup.clear();
     if (this.backgroundGroup) this.backgroundGroup.clear();
     if (this.renderer) this.renderer.dispose();
+    if (this.pixiOverlayRenderer) this.pixiOverlayRenderer.delete();
   }
 
   _renderScene = () => {
@@ -549,8 +604,20 @@ export default class InstancesEditor extends Component<Props, State> {
           this.renderer,
           this.viewPosition,
           this.uiGroup,
-          this.backgroundGroup
+          this.backgroundGroup,
+          this._shouldRenderThreeScene()
         );
+        if (this.pixiOverlayRenderer) {
+          this.pixiOverlayRenderer.render({
+            project: this.props.project,
+            layout: this.props.layout || null,
+            layersContainer: this.props.layersContainer,
+            globalObjectsContainer: this.props.globalObjectsContainer,
+            objectsContainer: this.props.objectsContainer,
+            instances: this.props.initialInstances,
+            viewPosition: this.viewPosition,
+          });
+        }
       }
     } catch (error) {
       console.error('Exception caught while doing the rendering:', error);
@@ -585,6 +652,13 @@ export default class InstancesEditor extends Component<Props, State> {
       if (uiIntersects.length > 0) {
         const hit = uiIntersects[0];
         if (hit.object.userData.isHandle) {
+          if (
+            !this._shouldHandleInstanceInCurrentEditor(
+              hit.object.userData.instance
+            )
+          ) {
+            return;
+          }
           const scenePoint = this.viewPosition.toSceneCoordinates(
             canvasX,
             canvasY
@@ -722,7 +796,12 @@ export default class InstancesEditor extends Component<Props, State> {
 
   // ... (keeping other helper methods simplified for the audit fix)
   _getAreaRectangle = () =>
-    new Rectangle(0, 0, this.props.width, this.props.height);
+    new Rectangle(
+      0,
+      0,
+      this.props.project.getGameResolutionWidth(),
+      this.props.project.getGameResolutionHeight()
+    );
   getZoomFactor = () => this.props.instancesEditorSettings.zoomFactor;
   setZoomFactor = (zoomFactor: number) => {
     this.props.instancesEditorSettings.zoomFactor = clampInstancesEditorZoom(
@@ -922,6 +1001,33 @@ export default class InstancesEditor extends Component<Props, State> {
       this.props.instancesSelection.getSelectedInstances()
     );
   };
+  _isCurrentEditor3D = (): boolean => {
+    const { layersContainer, chosenLayer } = this.props;
+    if (!layersContainer.hasLayerNamed(chosenLayer)) {
+      return false;
+    }
+
+    return (
+      getLayerRenderingType(layersContainer.getLayer(chosenLayer)) === '3d'
+    );
+  };
+  _shouldRenderThreeScene = (): boolean => this._isCurrentEditor3D();
+  _shouldHandleInstanceInCurrentEditor = (
+    instance: gdInitialInstance
+  ): boolean => {
+    const { layersContainer } = this.props;
+    const layerName = instance.getLayer();
+    if (!layersContainer.hasLayerNamed(layerName)) {
+      return false;
+    }
+
+    const instanceLayerRenderingType = getLayerRenderingType(
+      layersContainer.getLayer(layerName)
+    );
+    return this._isCurrentEditor3D()
+      ? instanceLayerRenderingType === '3d'
+      : instanceLayerRenderingType === '2d';
+  };
   getBoundingClientRect = (): any => {
     if (!this.canvasArea) return { left: 0, top: 0, right: 0, bottom: 0 };
     return this.canvasArea.getBoundingClientRect();
@@ -968,18 +1074,8 @@ export default class InstancesEditor extends Component<Props, State> {
     this.scrollTo(areaRectangle.centerX(), areaRectangle.centerY());
   };
   zoomToFitSelection = () => {
-    const selectedInstances = this.props.instancesSelection.getSelectedInstances();
-    if (!selectedInstances.length || !this.instancesRenderer) return;
-    let selectionRectangle = this.instancesRenderer
-      .getInstanceMeasurer()
-      .getInstanceAABB(selectedInstances[0], new Rectangle());
-    for (let i = 1; i < selectedInstances.length; i++) {
-      selectionRectangle.union(
-        this.instancesRenderer
-          .getInstanceMeasurer()
-          .getInstanceAABB(selectedInstances[i], new Rectangle())
-      );
-    }
+    const selectionRectangle = this.getSelectionAABB();
+    if (!selectionRectangle) return;
     if (selectionRectangle.width() > 0 && selectionRectangle.height() > 0) {
       this.fitViewToRectangle(selectionRectangle, { adaptZoom: true });
     }
@@ -1005,6 +1101,23 @@ export default class InstancesEditor extends Component<Props, State> {
       ? this.viewPosition.toSceneCoordinates(this.lastCursorX, this.lastCursorY)
       : null;
   getViewPosition = (): ?ViewPosition => this.viewPosition;
+  getSelectionAABB = (): Rectangle | null => {
+    const selectedInstances = this.props.instancesSelection.getSelectedInstances();
+    if (!selectedInstances.length || !this.instancesRenderer) return null;
+
+    let selectionRectangle = this.instancesRenderer
+      .getInstanceMeasurer()
+      .getInstanceAABB(selectedInstances[0], new Rectangle());
+    for (let i = 1; i < selectedInstances.length; i++) {
+      selectionRectangle.union(
+        this.instancesRenderer
+          .getInstanceMeasurer()
+          .getInstanceAABB(selectedInstances[i], new Rectangle())
+      );
+    }
+
+    return selectionRectangle;
+  };
   getInstanceSize = (
     initialInstance: gdInitialInstance
   ): [number, number, number] =>
@@ -1035,6 +1148,20 @@ export default class InstancesEditor extends Component<Props, State> {
           const { _instancesAdder, viewPosition, canvasArea } = this;
           if (!_instancesAdder || !canvasArea || !viewPosition) return;
 
+          const draggedItem = monitor.getItem();
+          const draggedObjectName =
+            draggedItem && typeof draggedItem.name === 'string'
+              ? draggedItem.name
+              : null;
+          const objectNames =
+            this.props.selectedObjectNames &&
+            this.props.selectedObjectNames.length
+              ? this.props.selectedObjectNames
+              : draggedObjectName
+              ? [draggedObjectName]
+              : [];
+          if (!objectNames.length) return;
+
           const clientOffset = monitor.getClientOffset();
           if (!clientOffset) return;
 
@@ -1045,7 +1172,7 @@ export default class InstancesEditor extends Component<Props, State> {
           );
           _instancesAdder.createOrUpdateTemporaryInstancesFromObjectNames(
             pos,
-            this.props.selectedObjectNames,
+            objectNames,
             this.props.chosenLayer
           );
         }}
@@ -1057,6 +1184,20 @@ export default class InstancesEditor extends Component<Props, State> {
             return;
           }
 
+          const draggedItem = monitor.getItem();
+          const draggedObjectName =
+            draggedItem && typeof draggedItem.name === 'string'
+              ? draggedItem.name
+              : null;
+          const objectNames =
+            this.props.selectedObjectNames &&
+            this.props.selectedObjectNames.length
+              ? this.props.selectedObjectNames
+              : draggedObjectName
+              ? [draggedObjectName]
+              : [];
+          if (!objectNames.length) return;
+
           const clientOffset = monitor.getClientOffset();
           if (!clientOffset) return;
 
@@ -1064,6 +1205,11 @@ export default class InstancesEditor extends Component<Props, State> {
           const pos = viewPosition.toSceneCoordinates(
             clientOffset.x - canvasRect.left,
             clientOffset.y - canvasRect.top
+          );
+          _instancesAdder.createOrUpdateTemporaryInstancesFromObjectNames(
+            pos,
+            objectNames,
+            this.props.chosenLayer
           );
           const instances = _instancesAdder.updateTemporaryInstancePositions(
             pos

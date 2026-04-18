@@ -23,6 +23,9 @@ import { type FileMetadata } from '../ProjectsStorage';
 
 export type SceneEditorsDisplayProps = {|
   gameEditorMode: 'embedded-game' | 'instances-editor',
+  canUse2DEditor: boolean,
+  canUse3DEditor: boolean,
+  showObjectInstancesIn3D: boolean,
   project: gdProject,
   fileMetadata: ?FileMetadata,
   layout: gdLayout | null,

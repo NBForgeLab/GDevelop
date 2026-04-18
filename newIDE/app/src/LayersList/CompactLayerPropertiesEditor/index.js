@@ -29,6 +29,7 @@ import { makeSchema } from './CompactLayerPropertiesSchema';
 import { type Schema } from '../../PropertiesEditor/PropertiesEditorSchema';
 import { CompactEffectsListEditor } from './CompactEffectsListEditor';
 import { useForceRecompute } from '../../Utils/UseForceUpdate';
+import { getLayerRenderingType } from '../LayerRenderingType';
 
 export const styles = {
   icon: {
@@ -143,6 +144,7 @@ export const CompactLayerPropertiesEditor = ({
   onLayersModified,
   onEffectAdded,
 }: Props): React.Node => {
+  const layerRenderingType = getLayerRenderingType(layer);
   const forceUpdate = useForceUpdate();
   const [isPropertiesFoldedOrDefault, setIsPropertiesFolded] = React.useState<
     boolean | null
@@ -228,7 +230,7 @@ export const CompactLayerPropertiesEditor = ({
               )}
             />
           )}
-          {layer.getRenderingType() !== '3d' && (
+          {layerRenderingType === '2d' && (
             <CompactEffectsListEditor
               layerRenderingType={'2d'}
               target={'layer'}
@@ -243,7 +245,7 @@ export const CompactLayerPropertiesEditor = ({
               onEffectAdded={onEffectAdded}
             />
           )}
-          {layer.getRenderingType() !== '2d' && !layer.isLightingLayer() && (
+          {layerRenderingType === '3d' && !layer.isLightingLayer() && (
             <CompactEffectsListEditor
               layerRenderingType={'3d'}
               target={'layer'}

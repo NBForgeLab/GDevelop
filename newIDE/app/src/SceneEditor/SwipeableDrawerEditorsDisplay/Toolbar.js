@@ -21,6 +21,8 @@ import Grid3d from '../../UI/CustomSvgIcons/Grid3d';
 type Props = {|
   gameEditorMode: 'embedded-game' | 'instances-editor',
   setGameEditorMode: ('embedded-game' | 'instances-editor') => void,
+  canUse2DEditor: boolean,
+  canUse3DEditor: boolean,
   toggleObjectsList: () => void,
   toggleObjectGroupsList: () => void,
   toggleProperties: () => void,
@@ -82,6 +84,7 @@ const Toolbar: React.ComponentType<Props> = React.memo<Props>(function(props) {
               props.setGameEditorMode('instances-editor');
             },
             isActive: props.gameEditorMode === 'instances-editor',
+            disabled: !props.canUse2DEditor,
           },
           {
             id: '3d-game-editor',
@@ -92,6 +95,7 @@ const Toolbar: React.ComponentType<Props> = React.memo<Props>(function(props) {
               props.setGameEditorMode('embedded-game');
             },
             isActive: props.gameEditorMode === 'embedded-game',
+            disabled: !props.canUse3DEditor,
           },
         ]}
       />

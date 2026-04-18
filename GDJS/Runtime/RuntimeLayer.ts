@@ -10,17 +10,22 @@ namespace gdjs {
   export enum RuntimeLayerRenderingType {
     TWO_D,
     THREE_D,
-    TWO_D_PLUS_THREE_D,
+    TWO_D_AND_THREE_D,
   }
 
   const getRenderingTypeFromString = (
+    layerName: string,
     renderingTypeAsString: string | undefined
   ) =>
-    renderingTypeAsString === '3d'
-      ? RuntimeLayerRenderingType.THREE_D
-      : renderingTypeAsString === '2d+3d' || renderingTypeAsString === ''
-        ? RuntimeLayerRenderingType.TWO_D_PLUS_THREE_D
-        : RuntimeLayerRenderingType.TWO_D;
+    renderingTypeAsString === '2d+3d'
+      ? RuntimeLayerRenderingType.TWO_D_AND_THREE_D
+      : layerName === ''
+        ? RuntimeLayerRenderingType.THREE_D
+        : renderingTypeAsString === '3d'
+          ? RuntimeLayerRenderingType.THREE_D
+          : renderingTypeAsString === '2d'
+            ? RuntimeLayerRenderingType.TWO_D
+            : RuntimeLayerRenderingType.THREE_D;
 
   /**
    * @category Core Engine > Layers
@@ -83,7 +88,7 @@ namespace gdjs {
     _clearColor: Array<integer>;
 
     _rendererEffects: Record<string, gdjs.EffectsTools.Filter> = {};
-    _renderer: gdjs.LayerThreeRenderer;
+    _renderer: gdjs.LayerRenderer;
 
     /**
      * @param layerData The data used to initialize the layer
@@ -94,7 +99,10 @@ namespace gdjs {
       instanceContainer: gdjs.RuntimeInstanceContainer
     ) {
       this._name = layerData.name;
-      this._renderingType = getRenderingTypeFromString(layerData.renderingType);
+      this._renderingType = getRenderingTypeFromString(
+        layerData.name,
+        layerData.renderingType
+      );
       this._cameraType = getCameraTypeFromString(layerData.cameraType);
       this._defaultCameraBehavior = getDefaultCameraBehaviorFromString(
         layerData.defaultCameraBehavior || 'top-left-anchored-if-never-moved'
@@ -118,7 +126,7 @@ namespace gdjs {
         layerData.ambientLightColorB / 255,
         1.0,
       ];
-      this._renderer = new gdjs.LayerThreeRenderer(
+      this._renderer = new gdjs.LayerRenderer(
         this,
         instanceContainer.getRenderer(),
         instanceContainer.getGame().getRenderer()
@@ -231,7 +239,7 @@ namespace gdjs {
     getRuntimeLayer(): gdjs.RuntimeLayer {
       return this;
     }
-    getRenderer(): gdjs.LayerThreeRenderer {
+    getRenderer(): gdjs.LayerRenderer {
       return this._renderer;
     }
 

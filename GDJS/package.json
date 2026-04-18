@@ -30,5 +30,8 @@
     "format": "prettier --write \"Runtime/**/*.ts\" \"Runtime/**/*.tsx\" \"../Extensions/**/*.ts\" \"../Extensions/**/JsExtension.js\" \"../Extensions/**/*.spec.js\"",
     "check-format": "prettier --list-different \"Runtime/**/*.ts\" \"Runtime/**/*.tsx\" \"../Extensions/**/*.ts\" \"../Extensions/**/JsExtension.js\" \"../Extensions/**/*.spec.js\"",
     "generate-doc": "typedoc --options docs/typedoc.json --plugin typedoc-plugin-reference-excluder"
+  },
+  "dependencies": {
+    "pixi.js": "^8.18.1"
   }
 }

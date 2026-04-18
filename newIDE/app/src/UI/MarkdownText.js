@@ -129,7 +129,10 @@ export const MarkdownText = (props: Props): React.MixedElement => {
     'text-ellipsis': props.withTextEllipsis,
   });
 
-  return props.isStandaloneText ? (
+  const shouldRenderAsBlock =
+    !!props.isStandaloneText || !!props.allowParagraphs;
+
+  return shouldRenderAsBlock ? (
     <div className={className}>{markdownElement}</div>
   ) : (
     <span className={className}>{markdownElement}</span>
