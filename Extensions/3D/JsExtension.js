@@ -2406,32 +2406,32 @@ module.exports = {
         .getOrCreate('rightFaceResourceName')
         .setType('resource')
         .addExtraInfo('image')
-        .setLabel(_('Right face (Z+ / pz)'));
+        .setLabel(_('Right face (X+)'));
       properties
         .getOrCreate('leftFaceResourceName')
         .setType('resource')
         .addExtraInfo('image')
-        .setLabel(_('Left face (Z- / nz)'));
+        .setLabel(_('Left face (X-)'));
       properties
         .getOrCreate('bottomFaceResourceName')
         .setType('resource')
         .addExtraInfo('image')
-        .setLabel(_('Bottom face (Y- / ny)'));
+        .setLabel(_('Bottom face (Y+)'));
       properties
         .getOrCreate('topFaceResourceName')
         .setType('resource')
         .addExtraInfo('image')
-        .setLabel(_('Top face (Y+ / py)'));
+        .setLabel(_('Top face (Y-)'));
       properties
         .getOrCreate('frontFaceResourceName')
         .setType('resource')
         .addExtraInfo('image')
-        .setLabel(_('Front face (X+ / px)'));
+        .setLabel(_('Front face (Z+)'));
       properties
         .getOrCreate('backFaceResourceName')
         .setType('resource')
         .addExtraInfo('image')
-        .setLabel(_('Back face (X- / nx)'));
+        .setLabel(_('Back face (Z-)'));
     }
     {
       const effect = extension
