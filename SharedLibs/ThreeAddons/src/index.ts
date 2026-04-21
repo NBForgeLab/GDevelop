@@ -7,6 +7,7 @@ export { GLTFLoader } from "./addons/loaders/GLTFLoader";
 export { DRACOLoader } from "./addons/loaders/DRACOLoader";
 
 export * as SkeletonUtils from "./addons/utils/SkeletonUtils";
+export * as BufferGeometryUtils from "./addons/utils/BufferGeometryUtils";
 
 export { TransformControls } from "./addons/controls/TransformControls";
 export { SelectionBox } from "./addons/interactive/SelectionBox";

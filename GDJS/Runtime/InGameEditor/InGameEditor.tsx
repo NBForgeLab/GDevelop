@@ -5566,22 +5566,41 @@ namespace gdjs {
       const rootInverse = new THREE.Matrix4()
         .copy(object3D.matrixWorld)
         .invert();
+      const mergedPositions: number[] = [];
 
       object3D.traverse((child) => {
         if (!child || !child.isMesh || !child.geometry) return;
         const wireframeGeometry = new THREE.WireframeGeometry(child.geometry);
-        const lines = new THREE.LineSegments(
-          wireframeGeometry,
-          this._lineMaterial
-        );
         const relativeMatrix = new THREE.Matrix4().multiplyMatrices(
           rootInverse,
           child.matrixWorld
         );
-        lines.matrixAutoUpdate = false;
-        lines.matrix.copy(relativeMatrix);
-        group.add(lines);
+        wireframeGeometry.applyMatrix4(relativeMatrix);
+
+        const positionAttribute = wireframeGeometry.getAttribute('position');
+        if (positionAttribute) {
+          for (let i = 0; i < positionAttribute.count; i++) {
+            mergedPositions.push(
+              positionAttribute.getX(i),
+              positionAttribute.getY(i),
+              positionAttribute.getZ(i)
+            );
+          }
+        }
+
+        wireframeGeometry.dispose();
       });
+
+      if (mergedPositions.length === 0) {
+        return group;
+      }
+
+      const mergedGeometry = new THREE.BufferGeometry();
+      mergedGeometry.setAttribute(
+        'position',
+        new THREE.Float32BufferAttribute(mergedPositions, 3)
+      );
+      group.add(new THREE.LineSegments(mergedGeometry, this._lineMaterial));
 
       return group;
     }

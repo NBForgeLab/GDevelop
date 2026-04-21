@@ -162,6 +162,10 @@ public:
   bool shouldKeepAspectRatio() const { return keepAspectRatio; };
   bool shouldCastShadow() const { return isCastingShadow; };
   bool shouldReceiveShadow() const { return isReceivingShadow; };
+  bool shouldOptimizeGeometry() const { return optimizeGeometry; };
+  double GetOptimizeGeometryTolerance() const {
+    return optimizeGeometryTolerance;
+  };
   ///@}
 
 protected:
@@ -186,6 +190,8 @@ private:
   bool keepAspectRatio;
   bool isCastingShadow;
   bool isReceivingShadow;
+  bool optimizeGeometry;
+  double optimizeGeometryTolerance;
 
   std::vector<Model3DAnimation> animations;
   static Model3DAnimation badAnimation; //< Bad animation when an out of bound

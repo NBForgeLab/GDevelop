@@ -20,6 +20,7 @@ import * as PIXI_LEGACY from 'pixi.js-legacy';
 import * as PIXI_SPINE from 'pixi-spine';
 import * as THREE from 'three';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils';
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils';
 import optionalRequire from '../Utils/OptionalRequire';
 import {
   rgbOrHexToHexNumber,
@@ -316,6 +317,7 @@ const ObjectsRenderingService = {
   THREE, // Expose THREE so that it can be used by renderers
   THREE_ADDONS: {
     SkeletonUtils,
+    BufferGeometryUtils,
   }, // Expose THREE so that it can be used by renderers
   RenderedInstance, // Expose the base class for renderers so that it can be used by renderers
   Rendered3DInstance, // Expose the base class for 3D renderers so that it can be used by renderers

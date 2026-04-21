@@ -2,6 +2,7 @@ namespace gdjs {
   type FloatPoint3D = [float, float, float];
 
   const epsilon = 1 / (1 << 16);
+  const defaultOptimizeGeometryTolerance = 1e-4;
 
   const removeMetalness = (material: THREE.Material): void => {
     //@ts-ignore
@@ -63,6 +64,60 @@ namespace gdjs {
 
   const traverseToSetBasicMaterialFromMeshes = (node: THREE.Object3D) =>
     node.traverse(setBasicMaterialTo);
+
+  const optimizeGeometryForModel = (
+    node: THREE.Object3D,
+    tolerance: number
+  ): void => {
+    const bufferGeometryUtils = THREE_ADDONS.BufferGeometryUtils;
+    if (
+      !bufferGeometryUtils ||
+      typeof bufferGeometryUtils.mergeVertices !== 'function'
+    ) {
+      return;
+    }
+    const effectiveTolerance =
+      Number.isFinite(tolerance) && tolerance >= 0
+        ? tolerance
+        : defaultOptimizeGeometryTolerance;
+
+    const optimizedByGeometry = new Map<
+      THREE.BufferGeometry,
+      THREE.BufferGeometry
+    >();
+    node.traverse((child) => {
+      const mesh = child as THREE.Mesh;
+      if (!mesh.isMesh || !mesh.geometry || !mesh.geometry.isBufferGeometry) {
+        return;
+      }
+
+      const sourceGeometry = mesh.geometry as THREE.BufferGeometry;
+      const hasMorphTargets =
+        !!sourceGeometry.morphAttributes &&
+        Object.keys(sourceGeometry.morphAttributes).length > 0;
+      const isSkinnedMesh = (mesh as any).isSkinnedMesh === true;
+
+      // Never optimize geometries used by skinned/morphed meshes.
+      // Check eligibility before cache lookup so shared geometries do not
+      // accidentally reuse an optimized version on non-eligible meshes.
+      if (isSkinnedMesh || hasMorphTargets) {
+        return;
+      }
+
+      const cachedGeometry = optimizedByGeometry.get(sourceGeometry);
+      if (cachedGeometry) {
+        mesh.geometry = cachedGeometry;
+        return;
+      }
+
+      const optimizedGeometry =
+        bufferGeometryUtils.mergeVertices(sourceGeometry, effectiveTolerance) ||
+        sourceGeometry;
+
+      optimizedByGeometry.set(sourceGeometry, optimizedGeometry);
+      mesh.geometry = optimizedGeometry;
+    });
+  };
 
   class Model3DRuntimeObject3DRenderer extends gdjs.RuntimeObject3DRenderer {
     private _model3DRuntimeObject: gdjs.Model3DRuntimeObject;
@@ -352,6 +407,13 @@ namespace gdjs {
       threeObject.rotation.order = 'ZYX';
       const root = THREE_ADDONS.SkeletonUtils.clone(this._originalModel.scene);
       threeObject.add(root);
+
+      if (this._model3DRuntimeObject._optimizeGeometry) {
+        optimizeGeometryForModel(
+          root,
+          this._model3DRuntimeObject._optimizeGeometryTolerance
+        );
+      }
 
       this._replaceMaterials(threeObject);
 

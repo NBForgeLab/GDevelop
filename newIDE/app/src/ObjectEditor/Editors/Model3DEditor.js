@@ -612,6 +612,14 @@ const Model3DEditor = ({
             objectConfiguration={objectConfiguration}
             propertyName="isReceivingShadow"
           />
+          <PropertyCheckbox
+            objectConfiguration={objectConfiguration}
+            propertyName="optimizeGeometry"
+          />
+          <PropertyField
+            objectConfiguration={objectConfiguration}
+            propertyName="optimizeGeometryTolerance"
+          />
           <Text size="block-title">Animations</Text>
           <Column noMargin expand>
             <PropertyField

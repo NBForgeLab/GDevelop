@@ -3479,6 +3479,73 @@ module.exports = {
     );
 
     const epsilon = 1 / (1 << 16);
+    const defaultOptimizeGeometryTolerance = 1e-4;
+
+    /**
+     * @param {unknown} value
+     * @returns {number}
+     */
+    const sanitizeOptimizeGeometryTolerance = (value) => {
+      if (typeof value !== 'number' || !Number.isFinite(value)) {
+        return defaultOptimizeGeometryTolerance;
+      }
+      return value < 0 ? 0 : value;
+    };
+
+    /**
+     * @param {THREE.Object3D} node
+     * @param {number} tolerance
+     */
+    const optimizeGeometryForModel = (node, tolerance) => {
+      const bufferGeometryUtils = THREE_ADDONS.BufferGeometryUtils;
+      if (
+        !bufferGeometryUtils ||
+        typeof bufferGeometryUtils.mergeVertices !== 'function'
+      ) {
+        return;
+      }
+      const effectiveTolerance = sanitizeOptimizeGeometryTolerance(tolerance);
+
+      /** @type {Map<THREE.BufferGeometry, THREE.BufferGeometry>} */
+      const optimizedByGeometry = new Map();
+      node.traverse((child) => {
+        const mesh = /** @type {THREE.Mesh} */ (child);
+        if (
+          !mesh.isMesh ||
+          !mesh.geometry ||
+          !mesh.geometry.isBufferGeometry
+        ) {
+          return;
+        }
+
+        const sourceGeometry = /** @type {THREE.BufferGeometry} */ (
+          mesh.geometry
+        );
+        const hasMorphTargets =
+          !!sourceGeometry.morphAttributes &&
+          Object.keys(sourceGeometry.morphAttributes).length > 0;
+        const isSkinnedMesh = mesh.isSkinnedMesh === true;
+
+        // Never optimize geometries used by skinned/morphed meshes.
+        // Check eligibility before cache lookup so shared geometries do not
+        // accidentally reuse an optimized version on non-eligible meshes.
+        if (isSkinnedMesh || hasMorphTargets) {
+          return;
+        }
+
+        const cachedGeometry = optimizedByGeometry.get(sourceGeometry);
+        if (cachedGeometry) {
+          mesh.geometry = cachedGeometry;
+          return;
+        }
+
+        const optimizedGeometry =
+          bufferGeometryUtils.mergeVertices(sourceGeometry, effectiveTolerance) ||
+          sourceGeometry;
+        optimizedByGeometry.set(sourceGeometry, optimizedGeometry);
+        mesh.geometry = optimizedGeometry;
+      });
+    };
 
     class Model3DRendered2DInstance extends RenderedInstance {
       /** @type {number} */
@@ -3523,6 +3590,12 @@ module.exports = {
         const rotationZ = object.getRotationZ();
         const keepAspectRatio = object.shouldKeepAspectRatio();
         const modelResourceName = object.getModelResourceName();
+        const optimizeGeometry = object.shouldOptimizeGeometry();
+        const optimizeGeometryTolerance = sanitizeOptimizeGeometryTolerance(
+          typeof object.getOptimizeGeometryTolerance === 'function'
+            ? object.getOptimizeGeometryTolerance()
+            : defaultOptimizeGeometryTolerance
+        );
 
         this._originPoint = getPointForLocation(object.getOriginLocation());
         this._centerPoint = getPointForLocation(object.getCenterLocation());
@@ -3538,6 +3611,12 @@ module.exports = {
             const clonedModel3D = THREE_ADDONS.SkeletonUtils.clone(
               model3d.scene
             );
+            if (optimizeGeometry) {
+              optimizeGeometryForModel(
+                clonedModel3D,
+                optimizeGeometryTolerance
+              );
+            }
             // This group hold the rotation defined by properties.
             const threeObject = new THREE.Group();
             threeObject.rotation.order = 'ZYX';
@@ -3836,6 +3915,8 @@ module.exports = {
 
       /** @type {THREE.Object3D | null} */
       _clonedModel3D = null;
+      _optimizeGeometry = false;
+      _optimizeGeometryTolerance = defaultOptimizeGeometryTolerance;
 
       constructor(
         project,
@@ -4089,6 +4170,39 @@ module.exports = {
         this._threeObject.add(threeModelGroup);
       }
 
+      _reloadModel() {
+        if (!this._modelResourceName) {
+          this._clonedModel3D = null;
+          if (this._threeModelGroup) {
+            this._threeObject.clear();
+            this._threeModelGroup = null;
+          }
+          // Without a model resource, fall back to the configured object size.
+          this._defaultWidth = this._originalWidth;
+          this._defaultHeight = this._originalHeight;
+          this._defaultDepth = this._originalDepth;
+          this._modelOriginPoint = [0, 0, 0];
+          return;
+        }
+
+        this._pixiResourcesLoader
+          .get3DModel(this._project, this._modelResourceName)
+          .then((model3d) => {
+            if (this._wasDestroyed) return;
+            this._clonedModel3D = THREE_ADDONS.SkeletonUtils.clone(
+              model3d.scene
+            );
+            if (this._optimizeGeometry) {
+              optimizeGeometryForModel(
+                this._clonedModel3D,
+                this._optimizeGeometryTolerance
+              );
+            }
+
+            this._updateDefaultTransformation();
+          });
+      }
+
       updateThreeObject() {
         const object = gd.castObject(
           this._associatedObjectConfiguration,
@@ -4143,22 +4257,35 @@ module.exports = {
           defaultTransformationDirty = true;
         }
 
+        let shouldReloadModel = false;
+        const optimizeGeometry = object.shouldOptimizeGeometry();
+        const optimizeGeometryTolerance = sanitizeOptimizeGeometryTolerance(
+          typeof object.getOptimizeGeometryTolerance === 'function'
+            ? object.getOptimizeGeometryTolerance()
+            : defaultOptimizeGeometryTolerance
+        );
+        const optimizeGeometryChanged =
+          this._optimizeGeometry !== optimizeGeometry;
+        const optimizeGeometryToleranceChanged =
+          this._optimizeGeometryTolerance !== optimizeGeometryTolerance;
+        if (
+          optimizeGeometryChanged ||
+          (optimizeGeometry && optimizeGeometryToleranceChanged)
+        ) {
+          this._optimizeGeometry = optimizeGeometry;
+          this._optimizeGeometryTolerance = optimizeGeometryTolerance;
+          shouldReloadModel = true;
+        }
+
         if (defaultTransformationDirty) this._updateDefaultTransformation();
 
         const modelResourceName = object.getModelResourceName();
         if (this._modelResourceName !== modelResourceName) {
           this._modelResourceName = modelResourceName;
-
-          this._pixiResourcesLoader
-            .get3DModel(this._project, modelResourceName)
-            .then((model3d) => {
-              if (this._wasDestroyed) return;
-              this._clonedModel3D = THREE_ADDONS.SkeletonUtils.clone(
-                model3d.scene
-              );
-
-              this._updateDefaultTransformation();
-            });
+          shouldReloadModel = true;
+        }
+        if (shouldReloadModel) {
+          this._reloadModel();
         }
 
         this._updateThreeObjectPosition();

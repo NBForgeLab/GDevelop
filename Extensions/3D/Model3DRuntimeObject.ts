@@ -1,5 +1,15 @@
 namespace gdjs {
   type Model3DAnimation = { name: string; source: string; loop: boolean };
+  const defaultOptimizeGeometryTolerance = 1e-4;
+
+  const sanitizeOptimizeGeometryTolerance = (
+    value: unknown
+  ): number => {
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+      return defaultOptimizeGeometryTolerance;
+    }
+    return value < 0 ? 0 : value;
+  };
 
   type Model3DObjectNetworkSyncDataType = {
     mt: number;
@@ -45,6 +55,8 @@ namespace gdjs {
       crossfadeDuration: float;
       isCastingShadow: boolean;
       isReceivingShadow: boolean;
+      optimizeGeometry: boolean;
+      optimizeGeometryTolerance?: number;
     };
   }
 
@@ -114,6 +126,8 @@ namespace gdjs {
     _crossfadeDuration: float = 0;
     _isCastingShadow: boolean = true;
     _isReceivingShadow: boolean = true;
+    _optimizeGeometry: boolean = false;
+    _optimizeGeometryTolerance: number = defaultOptimizeGeometryTolerance;
     _data: Model3DObjectData;
 
     constructor(
@@ -140,6 +154,10 @@ namespace gdjs {
         objectData.content.materialType
       );
       this._crossfadeDuration = objectData.content.crossfadeDuration || 0;
+      this._optimizeGeometry = !!objectData.content.optimizeGeometry;
+      this._optimizeGeometryTolerance = sanitizeOptimizeGeometryTolerance(
+        objectData.content.optimizeGeometryTolerance
+      );
 
       this.setIsCastingShadow(objectData.content.isCastingShadow);
       this.setIsReceivingShadow(objectData.content.isReceivingShadow);
@@ -187,6 +205,16 @@ namespace gdjs {
           newObjectData.content.materialType
         );
       }
+      this._optimizeGeometry = !!newObjectData.content.optimizeGeometry;
+      const oldOptimizeGeometryTolerance = this._optimizeGeometryTolerance;
+      this._optimizeGeometryTolerance = sanitizeOptimizeGeometryTolerance(
+        newObjectData.content.optimizeGeometryTolerance
+      );
+      const optimizeGeometryChanged =
+        oldObjectData.content.optimizeGeometry !==
+        newObjectData.content.optimizeGeometry;
+      const optimizeGeometryToleranceChanged =
+        oldOptimizeGeometryTolerance !== this._optimizeGeometryTolerance;
       if (
         oldObjectData.content.modelResourceName !==
         newObjectData.content.modelResourceName
@@ -203,6 +231,9 @@ namespace gdjs {
           newObjectData.content.keepAspectRatio ||
         oldObjectData.content.materialType !==
           newObjectData.content.materialType ||
+        optimizeGeometryChanged ||
+        (newObjectData.content.optimizeGeometry &&
+          optimizeGeometryToleranceChanged) ||
         oldObjectData.content.centerLocation !==
           newObjectData.content.centerLocation
       ) {

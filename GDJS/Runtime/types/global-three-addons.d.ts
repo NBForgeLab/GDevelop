@@ -1,6 +1,7 @@
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils';
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils';
 
 import { TransformControls } from 'three/addons/controls/TransformControls';
 import { SelectionBox } from 'three/addons/interactive/SelectionBox';
@@ -24,6 +25,7 @@ declare global {
       GLTFLoader,
       DRACOLoader,
       SkeletonUtils,
+      BufferGeometryUtils,
       TransformControls,
       SelectionBox,
       Sky,
