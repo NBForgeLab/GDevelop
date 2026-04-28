@@ -844,6 +844,56 @@ module.exports = {
         .addParameter('number', _('Crossfade duration (in seconds)'), '', false)
         .setFunctionName('setCrossfadeDuration');
 
+      object
+        .addScopedAction(
+          'SetGeometryOptimizationEnabled',
+          _('Enable geometry optimization'),
+          _(
+            'Enable or disable geometry optimization. Changing it rebuilds the current model instance.'
+          ),
+          _('Enable geometry optimization for _PARAM0_: _PARAM1_'),
+          _('Performance'),
+          'res/conditions/3d_box.svg',
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .addParameter('yesorno', _('Enable'), '', false)
+        .markAsAdvanced()
+        .setFunctionName('setGeometryOptimizationEnabled');
+
+      object
+        .addScopedCondition(
+          'IsGeometryOptimizationEnabled',
+          _('Geometry optimization enabled'),
+          _('Check if geometry optimization is enabled.'),
+          _('Geometry optimization is enabled for _PARAM0_'),
+          _('Performance'),
+          'res/conditions/3d_box.svg',
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .markAsAdvanced()
+        .setFunctionName('isGeometryOptimizationEnabled');
+
+      object
+        .addExpressionAndConditionAndAction(
+          'number',
+          'GeometryOptimizationTolerance',
+          _('Geometry optimization tolerance'),
+          _('the geometry optimization tolerance'),
+          _('the geometry optimization tolerance'),
+          _('Performance'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D model'), 'Model3DObject', false)
+        .useStandardParameters(
+          'number',
+          gd.ParameterOptions.makeNewOptions().setDescription(_('Tolerance'))
+        )
+        .markAsAdvanced()
+        .setFunctionName('setGeometryOptimizationTolerance')
+        .setGetter('getGeometryOptimizationTolerance');
+
       // Mesh Parts Actions and Conditions
 
       object

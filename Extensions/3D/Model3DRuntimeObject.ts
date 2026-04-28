@@ -196,6 +196,7 @@ namespace gdjs {
       newObjectData: Model3DObjectData
     ): boolean {
       super.updateFromObjectData(oldObjectData, newObjectData);
+      this._data = newObjectData;
 
       if (
         oldObjectData.content.materialType !==
@@ -344,6 +345,25 @@ namespace gdjs {
       this.onModelChanged(objectData);
     }
 
+    _rebuildModelForGeometryOptimizationChange(): void {
+      const animationIndex = this._currentAnimationIndex;
+      const animationElapsedTime = this.getAnimationElapsedTime();
+      const wasAnimationPaused = this.isAnimationPaused();
+
+      this._updateModel(this._data);
+
+      if (animationIndex >= 0 && animationIndex < this._animations.length) {
+        const animation = this._animations[animationIndex];
+        this._renderer.playAnimation(animation.source, animation.loop, true);
+        this._renderer.setAnimationElapsedTime(animationElapsedTime);
+        if (wasAnimationPaused) {
+          this._renderer.pauseAnimation();
+        } else {
+          this._renderer.resumeAnimation();
+        }
+      }
+    }
+
     _updateModel(objectData: Model3DObjectData) {
       const rotationX = objectData.content.rotationX || 0;
       const rotationY = objectData.content.rotationY || 0;
@@ -462,6 +482,32 @@ namespace gdjs {
     setIsReceivingShadow(value: boolean): void {
       this._isReceivingShadow = value;
       this._renderer._updateShadow();
+    }
+
+    setGeometryOptimizationEnabled(value: boolean): void {
+      const shouldOptimizeGeometry = !!value;
+      if (this._optimizeGeometry === shouldOptimizeGeometry) return;
+
+      this._optimizeGeometry = shouldOptimizeGeometry;
+      this._rebuildModelForGeometryOptimizationChange();
+    }
+
+    isGeometryOptimizationEnabled(): boolean {
+      return this._optimizeGeometry;
+    }
+
+    setGeometryOptimizationTolerance(tolerance: number): void {
+      const sanitizedTolerance = sanitizeOptimizeGeometryTolerance(tolerance);
+      if (this._optimizeGeometryTolerance === sanitizedTolerance) return;
+
+      this._optimizeGeometryTolerance = sanitizedTolerance;
+      if (this._optimizeGeometry) {
+        this._rebuildModelForGeometryOptimizationChange();
+      }
+    }
+
+    getGeometryOptimizationTolerance(): number {
+      return this._optimizeGeometryTolerance;
     }
 
     setCrossfadeDuration(duration: number): void {
