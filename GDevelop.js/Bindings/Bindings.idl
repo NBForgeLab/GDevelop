@@ -3979,6 +3979,8 @@ interface Model3DObjectConfiguration {
     [Const, Ref] DOMString GetCenterLocation();
 
     boolean shouldKeepAspectRatio();
+    boolean shouldOptimizeGeometry();
+    double GetOptimizeGeometryTolerance();
 };
 Model3DObjectConfiguration implements ObjectConfiguration;
 

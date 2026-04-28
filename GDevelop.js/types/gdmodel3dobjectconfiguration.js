@@ -21,6 +21,8 @@ declare class gdModel3DObjectConfiguration extends gdObjectConfiguration {
   getOriginLocation(): string;
   getCenterLocation(): string;
   shouldKeepAspectRatio(): boolean;
+  shouldOptimizeGeometry(): boolean;
+  getOptimizeGeometryTolerance(): number;
   delete(): void;
   ptr: number;
 };

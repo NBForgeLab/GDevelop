@@ -2949,6 +2949,8 @@ export class Model3DObjectConfiguration extends ObjectConfiguration {
   getOriginLocation(): string;
   getCenterLocation(): string;
   shouldKeepAspectRatio(): boolean;
+  shouldOptimizeGeometry(): boolean;
+  getOptimizeGeometryTolerance(): number;
 }
 
 export class SpineAnimation extends EmscriptenObject {

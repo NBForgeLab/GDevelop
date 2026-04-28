@@ -3592,9 +3592,7 @@ module.exports = {
         const modelResourceName = object.getModelResourceName();
         const optimizeGeometry = object.shouldOptimizeGeometry();
         const optimizeGeometryTolerance = sanitizeOptimizeGeometryTolerance(
-          typeof object.getOptimizeGeometryTolerance === 'function'
-            ? object.getOptimizeGeometryTolerance()
-            : defaultOptimizeGeometryTolerance
+          object.getOptimizeGeometryTolerance()
         );
 
         this._originPoint = getPointForLocation(object.getOriginLocation());
@@ -4260,9 +4258,7 @@ module.exports = {
         let shouldReloadModel = false;
         const optimizeGeometry = object.shouldOptimizeGeometry();
         const optimizeGeometryTolerance = sanitizeOptimizeGeometryTolerance(
-          typeof object.getOptimizeGeometryTolerance === 'function'
-            ? object.getOptimizeGeometryTolerance()
-            : defaultOptimizeGeometryTolerance
+          object.getOptimizeGeometryTolerance()
         );
         const optimizeGeometryChanged =
           this._optimizeGeometry !== optimizeGeometry;
