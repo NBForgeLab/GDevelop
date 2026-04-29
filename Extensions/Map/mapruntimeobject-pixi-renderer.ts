@@ -321,20 +321,19 @@ namespace gdjs {
       }
 
       this._maskGraphics.clear();
-      this._maskGraphics.beginFill(0xffffff);
 
       if (shape === 'Circle') {
         // Draw circular mask
         const radius = Math.min(width, height) / 2;
-        this._maskGraphics.drawCircle(width / 2, height / 2, radius);
+        this._maskGraphics
+          .circle(width / 2, height / 2, radius)
+          .fill(0xffffff);
         this._currentShape = 'Circle';
       } else {
         // Draw rectangular mask
-        this._maskGraphics.drawRect(0, 0, width, height);
+        this._maskGraphics.rect(0, 0, width, height).fill(0xffffff);
         this._currentShape = 'Rectangle';
       }
-
-      this._maskGraphics.endFill();
     }
 
     /**
@@ -361,24 +360,30 @@ namespace gdjs {
         const bgColor = this._parseColor(this._object.getBackgroundColor());
         const bgOpacity = this._object.getBackgroundOpacity();
 
-        this._backgroundGraphics.beginFill(bgColor, bgOpacity);
         if (shape === 'Circle') {
           // Draw circular background (center-relative for map/HeadingUp)
           const radius = Math.min(width, height) / 2;
           if (ismap) {
-            this._backgroundGraphics.drawCircle(0, 0, radius);
+            this._backgroundGraphics
+              .circle(0, 0, radius)
+              .fill({ color: bgColor, alpha: bgOpacity });
           } else {
-            this._backgroundGraphics.drawCircle(centerX, centerY, radius);
+            this._backgroundGraphics
+              .circle(centerX, centerY, radius)
+              .fill({ color: bgColor, alpha: bgOpacity });
           }
         } else {
           // Draw rectangular background (center-relative for map/HeadingUp)
           if (ismap) {
-            this._backgroundGraphics.drawRect(-centerX, -centerY, width, height);
+            this._backgroundGraphics
+              .rect(-centerX, -centerY, width, height)
+              .fill({ color: bgColor, alpha: bgOpacity });
           } else {
-            this._backgroundGraphics.drawRect(0, 0, width, height);
+            this._backgroundGraphics
+              .rect(0, 0, width, height)
+              .fill({ color: bgColor, alpha: bgOpacity });
           }
         }
-        this._backgroundGraphics.endFill();
       }
     }
 
@@ -408,7 +413,7 @@ namespace gdjs {
             .getPIXITexture(imageName);
 
           // Create sprite
-          this._backgroundSprite = new PIXI.Sprite(texture);
+          this._backgroundSprite = new PIXI.Sprite({ texture });
           this._backgroundSprite.width = width;
           this._backgroundSprite.height = height;
           this._backgroundSprite.alpha = this._object.getBackgroundOpacity();
@@ -431,9 +436,9 @@ namespace gdjs {
         const bgColor = this._parseColor(this._object.getBackgroundColor());
         const bgOpacity = this._object.getBackgroundOpacity();
 
-        this._backgroundGraphics.beginFill(bgColor, bgOpacity);
-        this._backgroundGraphics.drawRect(0, 0, width, height);
-        this._backgroundGraphics.endFill();
+        this._backgroundGraphics
+          .rect(0, 0, width, height)
+          .fill({ color: bgColor, alpha: bgOpacity });
       }
     }
 
@@ -616,9 +621,7 @@ namespace gdjs {
       size: number,
       color: number
     ): void {
-      this._contentGraphics.beginFill(color);
-      this._contentGraphics.drawCircle(x, y, size / 2);
-      this._contentGraphics.endFill();
+      this._contentGraphics.circle(x, y, size / 2).fill(color);
     }
 
     /**
@@ -653,13 +656,16 @@ namespace gdjs {
         x: x + p.x * Math.cos(rad) - p.y * Math.sin(rad),
         y: y + p.x * Math.sin(rad) + p.y * Math.cos(rad),
       }));
+      const trianglePoints = [
+        rotatedPoints[0].x,
+        rotatedPoints[0].y,
+        rotatedPoints[1].x,
+        rotatedPoints[1].y,
+        rotatedPoints[2].x,
+        rotatedPoints[2].y,
+      ];
 
-      this._contentGraphics.beginFill(color);
-      this._contentGraphics.moveTo(rotatedPoints[0].x, rotatedPoints[0].y);
-      this._contentGraphics.lineTo(rotatedPoints[1].x, rotatedPoints[1].y);
-      this._contentGraphics.lineTo(rotatedPoints[2].x, rotatedPoints[2].y);
-      this._contentGraphics.closePath();
-      this._contentGraphics.endFill();
+      this._contentGraphics.poly(trianglePoints).fill(color);
     }
 
     /**
@@ -680,7 +686,7 @@ namespace gdjs {
       const innerRadius = size / 4;
       const points = 5;
 
-      this._contentGraphics.beginFill(color);
+      const starPoints: number[] = [];
 
       for (let i = 0; i < points * 2; i++) {
         const radius = i % 2 === 0 ? outerRadius : innerRadius;
@@ -688,15 +694,10 @@ namespace gdjs {
         const px = x + Math.cos(angle) * radius;
         const py = y + Math.sin(angle) * radius;
 
-        if (i === 0) {
-          this._contentGraphics.moveTo(px, py);
-        } else {
-          this._contentGraphics.lineTo(px, py);
-        }
+        starPoints.push(px, py);
       }
 
-      this._contentGraphics.closePath();
-      this._contentGraphics.endFill();
+      this._contentGraphics.poly(starPoints).fill(color);
     }
 
     /**
@@ -720,14 +721,9 @@ namespace gdjs {
       const width = obj.getWidth() * zoom;
       const height = obj.getHeight() * zoom;
 
-      this._contentGraphics.beginFill(color, opacity);
-      this._contentGraphics.drawRect(
-        centerX - width / 2,
-        centerY - height / 2,
-        width,
-        height
-      );
-      this._contentGraphics.endFill();
+      this._contentGraphics
+        .rect(centerX - width / 2, centerY - height / 2, width, height)
+        .fill({ color, alpha: opacity });
     }
 
     /**
@@ -748,23 +744,23 @@ namespace gdjs {
       const ismap = mode === 'Minimap';
 
       if (borderWidth > 0) {
-        this._borderGraphics.lineStyle(borderWidth, borderColor, 1);
         if (shape === 'Circle') {
           // Draw circular border (center-relative for map/HeadingUp)
           const radius = Math.min(width, height) / 2;
           if (ismap) {
-            this._borderGraphics.drawCircle(0, 0, radius);
+            this._borderGraphics.circle(0, 0, radius);
           } else {
-            this._borderGraphics.drawCircle(centerX, centerY, radius);
+            this._borderGraphics.circle(centerX, centerY, radius);
           }
         } else {
           // Draw rectangular border (center-relative for map/HeadingUp)
           if (ismap) {
-            this._borderGraphics.drawRect(-centerX, -centerY, width, height);
+            this._borderGraphics.rect(-centerX, -centerY, width, height);
           } else {
-            this._borderGraphics.drawRect(0, 0, width, height);
+            this._borderGraphics.rect(0, 0, width, height);
           }
         }
+        this._borderGraphics.stroke({ width: borderWidth, color: borderColor });
       }
     }
 
@@ -795,7 +791,7 @@ namespace gdjs {
               .getPIXITexture(frameImage);
 
             // Create sprite
-            this._frameSprite = new PIXI.Sprite(texture);
+            this._frameSprite = new PIXI.Sprite({ texture });
             this._frameSprite.width = width;
             this._frameSprite.height = height;
 
@@ -857,7 +853,7 @@ namespace gdjs {
             .getPIXITexture(iconName);
 
           // Create sprite
-          sprite = new PIXI.Sprite(texture);
+          sprite = new PIXI.Sprite({ texture });
           sprite.anchor.set(0.5, 0.5);
           this._markersContainer.addChild(sprite);
           this._markerSprites.set(spriteKey, sprite);

@@ -20,7 +20,8 @@ namespace gdjs {
         if (parameterName === 'alpha') {
           blendingModeFilter.alpha = value;
         } else if (parameterName === 'blendmode') {
-          blendingModeFilter.blendMode = value;
+          blendingModeFilter.blendMode =
+            gdjs.PixiFiltersTools.toPixiBlendMode(value);
         }
       }
       getDoubleParameter(filter: PIXI.Filter, parameterName: string): number {
@@ -29,7 +30,9 @@ namespace gdjs {
           return blendingModeFilter.alpha;
         }
         if (parameterName === 'blendmode') {
-          return blendingModeFilter.blendMode;
+          return gdjs.PixiFiltersTools.toGDevelopBlendMode(
+            blendingModeFilter.blendMode
+          );
         }
         return 0;
       }
@@ -57,7 +60,9 @@ namespace gdjs {
         const blendingModeFilter = filter as unknown as PIXI.AlphaFilter;
         return {
           a: blendingModeFilter.alpha,
-          bm: blendingModeFilter.blendMode,
+          bm: gdjs.PixiFiltersTools.toGDevelopBlendMode(
+            blendingModeFilter.blendMode
+          ),
         };
       }
       updateFromNetworkSyncData(
@@ -66,7 +71,8 @@ namespace gdjs {
       ) {
         const blendingModeFilter = filter as unknown as PIXI.AlphaFilter;
         blendingModeFilter.alpha = data.a;
-        blendingModeFilter.blendMode = data.bm;
+        blendingModeFilter.blendMode =
+          gdjs.PixiFiltersTools.toPixiBlendMode(data.bm);
       }
     })()
   );

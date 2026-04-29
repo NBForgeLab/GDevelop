@@ -716,7 +716,7 @@ namespace gdjs {
 
     //Rendering:
     /**
-     * @return The internal object for a 2D rendering (PIXI.DisplayObject...)
+     * @return The internal object for a 2D rendering (PIXI.Container...)
      */
     getRendererObject(): RendererObjectInterface | null | undefined {
       return undefined;

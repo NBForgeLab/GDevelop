@@ -482,8 +482,11 @@ module.exports = {
         );
 
         //Setup the PIXI object:
-        this._pixiObject = new PIXI.Text('This is a dummy object', {
-          align: 'left',
+        this._pixiObject = new PIXI.Text({
+          text: 'This is a dummy object',
+          style: {
+            align: 'left',
+          },
         });
         this._pixiObject.anchor.x = 0.5;
         this._pixiObject.anchor.y = 0.5;

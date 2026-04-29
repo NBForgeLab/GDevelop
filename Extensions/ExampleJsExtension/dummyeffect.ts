@@ -2,30 +2,49 @@
 namespace gdjs {
   const logger = new gdjs.Logger('Dummy effect');
 
-  const DummyPixiFilter = function () {
-    var vertexShader = null;
+  type DummyPixiFilterUniforms = {
+    opacity: number;
+  };
+  type DummyPixiFilter = PIXI.Filter & {
+    resources: {
+      uniforms: {
+        uniforms: DummyPixiFilterUniforms;
+      };
+    };
+  };
+
+  const getDummyPixiFilterUniforms = (
+    filter: PIXI.Filter
+  ): DummyPixiFilterUniforms =>
+    (filter as DummyPixiFilter).resources.uniforms.uniforms;
+
+  const makeDummyPixiFilter = function (): PIXI.Filter {
     var fragmentShader = [
-      'precision mediump float;',
-      '',
-      'varying vec2 vTextureCoord;',
-      'uniform sampler2D uSampler;',
+      'in vec2 vTextureCoord;',
+      'uniform sampler2D uTexture;',
       'uniform float opacity;',
+      'out vec4 finalColor;',
       '',
       'void main(void)',
       '{',
       '   mat3 nightMatrix = mat3(0.6, 0, 0, 0, 0.7, 0, 0, 0, 1.3);',
-      '   gl_FragColor = texture2D(uSampler, vTextureCoord);',
-      '   gl_FragColor.rgb = mix(gl_FragColor.rgb, nightMatrix * gl_FragColor.rgb, opacity);',
+      '   vec4 color = texture(uTexture, vTextureCoord);',
+      '   color.rgb = mix(color.rgb, nightMatrix * color.rgb, opacity);',
+      '   finalColor = color;',
       '}',
     ].join('\n');
-    var uniforms = {
-      opacity: { type: '1f', value: 1 },
-    };
-
-    PIXI.Filter.call(this, vertexShader, fragmentShader, uniforms);
+    return PIXI.Filter.from({
+      gl: {
+        vertex: gdjs.PixiFiltersTools.defaultFilterVertexShader,
+        fragment: fragmentShader,
+      },
+      resources: {
+        uniforms: {
+          opacity: { value: 1, type: 'f32' },
+        },
+      },
+    });
   };
-  DummyPixiFilter.prototype = Object.create(PIXI.Filter.prototype);
-  DummyPixiFilter.prototype.constructor = DummyPixiFilter;
 
   // Register the effect type and associate it with a "filter creator" object, containing
   // functions to create and manipulate the filter.
@@ -34,9 +53,9 @@ namespace gdjs {
     'MyDummyExtension::DummyEffect',
     new (class extends gdjs.PixiFiltersTools.PixiFilterCreator {
       // MakePIXIFilter should return a PIXI.Filter, that will be applied on the PIXI.Container (for layers)
-      // or the PIXI.DisplayObject (for objects).
+      // or the PIXI.Container (for objects).
       makePIXIFilter(layer, effectData) {
-        const filter = new DummyPixiFilter();
+        const filter = makeDummyPixiFilter();
 
         // If you need to store the time or some state, you can set it up now:
         // filter._time = 0;
@@ -72,16 +91,17 @@ namespace gdjs {
         value: number
       ) {
         if (parameterName === 'opacity') {
-          filter.uniforms.opacity = gdjs.PixiFiltersTools.clampValue(
-            value,
-            0,
-            1
-          );
+          getDummyPixiFilterUniforms(filter).opacity =
+            gdjs.PixiFiltersTools.clampValue(
+              value,
+              0,
+              1
+            );
         }
       }
       getDoubleParameter(filter: PIXI.Filter, parameterName: string): number {
         if (parameterName === 'opacity') {
-          return filter.uniforms.opacity;
+          return getDummyPixiFilterUniforms(filter).opacity;
         }
         return 0;
       }
@@ -106,10 +126,10 @@ namespace gdjs {
         value: boolean
       ) {}
       getNetworkSyncData(filter: PIXI.Filter): any {
-        return { opacity: filter.uniforms.opacity };
+        return { opacity: getDummyPixiFilterUniforms(filter).opacity };
       }
       updateFromNetworkSyncData(filter: PIXI.Filter, data: any) {
-        filter.uniforms.opacity = data.opacity;
+        getDummyPixiFilterUniforms(filter).opacity = data.opacity;
       }
     })()
   );

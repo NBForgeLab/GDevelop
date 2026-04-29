@@ -1,5 +1,5 @@
 // @flow
-import 'pixi-spine';
+import '@esotericsoftware/spine-pixi-v8';
 import RenderedUnknownInstance from './Renderers/RenderedUnknownInstance';
 import RenderedSpriteInstance from './Renderers/RenderedSpriteInstance';
 import RenderedTiledSpriteInstance from './Renderers/RenderedTiledSpriteInstance';
@@ -16,8 +16,9 @@ import PixiResourcesLoader from './PixiResourcesLoader';
 import ResourcesLoader from '../ResourcesLoader';
 import RenderedInstance from './Renderers/RenderedInstance';
 import Rendered3DInstance from './Renderers/Rendered3DInstance';
-import * as PIXI_LEGACY from 'pixi.js-legacy';
-import * as PIXI_SPINE from 'pixi-spine';
+import * as PIXI_BASE from 'pixi.js';
+import * as PIXI_SPINE from '@esotericsoftware/spine-pixi-v8';
+import * as PIXI_TILEMAP from '@pixi/tilemap';
 import * as THREE from 'three';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils';
@@ -30,11 +31,10 @@ import {
 const path = optionalRequire('path');
 const electron = optionalRequire('electron');
 const gd: libGDevelop = global.gd;
-const PIXI = { ...PIXI_LEGACY, ...PIXI_SPINE };
+const PIXI = { ...PIXI_BASE, ...PIXI_SPINE, tilemap: PIXI_TILEMAP };
 
-// Some PixiJS plugins like pixi-tilemap are not distributed as UMD modules,
-// or still require a global PIXI object to be accessible, so we expose PIXI here.
-// This can be removed if no more extension PixiJS plugin requires this.
+// Some PixiJS extensions still expect a global PIXI object when loaded from
+// generated extension code, so we expose the v8 namespace here.
 global.PIXI = PIXI;
 
 const requirableModules = {};
@@ -240,8 +240,8 @@ const ObjectsRenderingService = {
       );
 
       // Get the "module" module from Node.js and temporarily overwrite its internal "_load"
-      // method. This method is called when a module is loaded, and is used here to provide "pixi.js-legacy"
-      // to extensions needing it. If we don't, "pixi.js-legacy" is found in development, because Node.js resolution
+      // method. This method is called when a module is loaded, and is used here to provide PixiJS
+      // to extensions needing it. If we don't, "pixi.js" is found in development, because Node.js resolution
       // algorithm traverses the paths until it reaches newIDE/app/node_modules, but is not found in production,
       // because newIDE/app node_modules are now gone (compiled by Webpack).
       const module = optionalRequire('module');
@@ -254,15 +254,9 @@ const ObjectsRenderingService = {
 
       // Allow pixi.js to be required by extensions:
       const allowedModules = {
-        'pixi.js-legacy': PIXI,
         'pixi.js': PIXI,
-        '@pixi/core': PIXI,
-        '@pixi/display': PIXI,
-        '@pixi/constants': PIXI,
-        '@pixi/sprite': PIXI,
-        '@pixi/math': PIXI,
-        '@pixi/utils': PIXI,
-        '@pixi/graphics': PIXI,
+        '@pixi/tilemap': PIXI_TILEMAP,
+        '@esotericsoftware/spine-pixi-v8': PIXI_SPINE,
       };
       module._load = function hookedLoader(request, parent, isMain) {
         const loadedModule = allowedModules[request];

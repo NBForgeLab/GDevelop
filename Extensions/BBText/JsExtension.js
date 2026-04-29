@@ -172,9 +172,6 @@ module.exports = {
       )
       .setIncludeFile('Extensions/BBText/bbtextruntimeobject.js')
       .addIncludeFile('Extensions/BBText/bbtextruntimeobject-pixi-renderer.js')
-      .addIncludeFile(
-        'Extensions/BBText/pixi-multistyle-text/dist/pixi-multistyle-text.umd.js'
-      )
       .setCategory('Text')
       .addDefaultBehavior('EffectCapability::EffectBehavior')
       .addDefaultBehavior('OpacityCapability::OpacityBehavior');
@@ -515,10 +512,116 @@ module.exports = {
    */
   registerInstanceRenderers: function (objectsRenderingService) {
     const RenderedInstance = objectsRenderingService.RenderedInstance;
-    const MultiStyleText = objectsRenderingService.requireModule(
-      __dirname,
-      'pixi-multistyle-text/dist/pixi-multistyle-text.umd'
-    );
+    const PIXI = objectsRenderingService.PIXI;
+
+    const escapePixiTagText = text =>
+      text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    const getSafeColor = color => {
+      try {
+        new PIXI.Color(color);
+        return color;
+      } catch (error) {
+        console.warn(
+          'Error rendering BBText (invalid color or style in BBCode):',
+          error
+        );
+        return null;
+      }
+    };
+
+    const getPixiTagStyle = (tagName, value) => {
+      switch (tagName) {
+        case 'b':
+          return { fontWeight: 'bold' };
+        case 'i':
+          return { fontStyle: 'italic' };
+        case 'color': {
+          const color = value ? getSafeColor(value) : null;
+          return color ? { fill: color } : null;
+        }
+        case 'outline': {
+          const color = value ? getSafeColor(value) : null;
+          return color ? { stroke: { color, width: 6 } } : null;
+        }
+        case 'font':
+          return value ? { fontFamily: value } : null;
+        case 'shadow': {
+          const color = value ? getSafeColor(value) : null;
+          return color
+            ? {
+                dropShadow: {
+                  color,
+                  blur: 3,
+                  distance: 3,
+                  angle: 2,
+                },
+              }
+            : null;
+        }
+        case 'size': {
+          const fontSize = value ? parseFloat(value) : NaN;
+          return Number.isFinite(fontSize) ? { fontSize } : null;
+        }
+        case 'spacing': {
+          const letterSpacing = value ? parseFloat(value) : NaN;
+          return Number.isFinite(letterSpacing) ? { letterSpacing } : null;
+        }
+        case 'align':
+          return value ? { align: value } : null;
+        default:
+          return null;
+      }
+    };
+
+    const parseBBCodeText = text => {
+      const tagStyles = {
+        b: { fontWeight: 'bold' },
+        i: { fontStyle: 'italic' },
+      };
+      const tagStacks = {};
+      const output = [];
+      const tagRegex =
+        /\[(\/?)(b|i|color|outline|font|shadow|size|spacing|align)(?:=([^\]]+))?\]/gi;
+      let lastIndex = 0;
+      let dynamicTagIndex = 0;
+      let match = null;
+
+      while ((match = tagRegex.exec(text))) {
+        output.push(escapePixiTagText(text.substring(lastIndex, match.index)));
+        lastIndex = match.index + match[0].length;
+
+        const isClosingTag = match[1] === '/';
+        const baseTagName = match[2].toLowerCase();
+        if (isClosingTag) {
+          const tagName = (tagStacks[baseTagName] || []).pop();
+          if (tagName) output.push(`</${tagName}>`);
+          continue;
+        }
+
+        const tagStyle = getPixiTagStyle(baseTagName, match[3]);
+        if (!tagStyle) continue;
+
+        const tagName =
+          baseTagName === 'b' || baseTagName === 'i'
+            ? baseTagName
+            : `${baseTagName}${dynamicTagIndex++}`;
+        tagStyles[tagName] = tagStyle;
+        tagStacks[baseTagName] = tagStacks[baseTagName] || [];
+        tagStacks[baseTagName].push(tagName);
+        output.push(`<${tagName}>`);
+      }
+
+      output.push(escapePixiTagText(text.substring(lastIndex)));
+
+      return {
+        text: output.join(''),
+        tagStyles,
+      };
+    };
 
     /**
      * Renderer for instances of BBText inside the IDE.
@@ -545,39 +648,19 @@ module.exports = {
           getPropertyOverridings
         );
 
-        const bbTextStyles = {
-          default: {
+        this._rawText = '';
+        this._pixiObject = new PIXI.Text({
+          text: '',
+          style: {
             // Use a default font family the time for the resource font to be loaded.
             fontFamily: 'Arial',
-            fontSize: '24px',
+            fontSize: 24,
             fill: '#cccccc',
-            tagStyle: 'bbcode',
             wordWrapWidth: 250, // This value is the default wrapping width of the runtime object.
             align: 'left',
+            tagStyles: {},
           },
-        };
-
-        this._pixiObject = new MultiStyleText('', bbTextStyles);
-
-        // Override updateText to catch errors from invalid color values
-        // in BBCode tags (e.g. [color=blues] instead of [color=blue]).
-        // Without this, PixiJS Color.normalize throws "Unable to convert color"
-        // which propagates to _renderScene and crashes the entire editor.
-        const originalUpdateText = this._pixiObject.updateText.bind(
-          this._pixiObject
-        );
-        this._pixiObject.updateText = (...args) => {
-          try {
-            originalUpdateText(...args);
-          } catch (error) {
-            console.warn(
-              'Error rendering BBText (invalid color or style in BBCode):',
-              error
-            );
-            // Mark as not dirty to prevent retrying every frame.
-            this._pixiObject.dirty = false;
-          }
-        };
+        });
 
         this._pixiObject.anchor.x = 0.5;
         this._pixiObject.anchor.y = 0.5;
@@ -606,24 +689,22 @@ module.exports = {
           propertyOverridings && propertyOverridings.has('Text')
             ? propertyOverridings.get('Text')
             : object.content.text;
-        if (rawText !== this._pixiObject.text) {
-          this._pixiObject.text = rawText;
+        if (rawText !== this._rawText) {
+          this._rawText = rawText;
+          const renderData = parseBBCodeText(rawText);
+          this._pixiObject.text = renderData.text;
+          this._pixiObject.style.tagStyles = renderData.tagStyles;
         }
 
         const color = object.content.color;
         const newColor = objectsRenderingService.rgbOrHexToHexNumber(color);
-        if (newColor !== this._pixiObject.textStyles.default.fill) {
-          this._pixiObject.textStyles.default.fill = newColor;
-          this._pixiObject.dirty = true;
+        if (newColor !== this._pixiObject.style.fill) {
+          this._pixiObject.style.fill = newColor;
         }
 
         const fontSize = object.content.fontSize;
-        const newDefaultFontsize = `${fontSize}px`;
-        if (
-          newDefaultFontsize !== this._pixiObject.textStyles.default.fontSize
-        ) {
-          this._pixiObject.textStyles.default.fontSize = `${fontSize}px`;
-          this._pixiObject.dirty = true;
+        if (fontSize !== this._pixiObject.style.fontSize) {
+          this._pixiObject.style.fontSize = fontSize;
         }
 
         const fontResourceName = object.content.fontFamily;
@@ -635,8 +716,7 @@ module.exports = {
             .loadFontFamily(this._project, fontResourceName)
             .then((fontFamily) => {
               // Once the font is loaded, we can use the given fontFamily.
-              this._pixiObject.textStyles.default.fontFamily = fontFamily;
-              this._pixiObject.dirty = true;
+              this._pixiObject.style.fontFamily = fontFamily;
             })
             .catch((err) => {
               // Ignore errors
@@ -648,22 +728,19 @@ module.exports = {
         }
 
         const wordWrap = this._instance.hasCustomSize();
-        if (wordWrap !== this._pixiObject._style.wordWrap) {
-          this._pixiObject._style.wordWrap = wordWrap;
-          this._pixiObject.dirty = true;
+        if (wordWrap !== this._pixiObject.style.wordWrap) {
+          this._pixiObject.style.wordWrap = wordWrap;
         }
         if (this._instance.hasCustomSize()) {
           const customWidth = this.getCustomWidth();
-          if (this._pixiObject._style.wordWrapWidth !== customWidth) {
-            this._pixiObject._style.wordWrapWidth = customWidth;
-            this._pixiObject.dirty = true;
+          if (this._pixiObject.style.wordWrapWidth !== customWidth) {
+            this._pixiObject.style.wordWrapWidth = customWidth;
           }
         }
 
         const align = object.content.align;
-        if (align !== this._pixiObject._style.align) {
-          this._pixiObject._style.align = align;
-          this._pixiObject.dirty = true;
+        if (align !== this._pixiObject.style.align) {
+          this._pixiObject.style.align = align;
         }
 
         if (this._instance.hasCustomSize() && this._pixiObject.width !== 0) {

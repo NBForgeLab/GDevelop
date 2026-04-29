@@ -774,9 +774,12 @@ module.exports = {
         this._finalTextColor = 0x0;
         this._pixiGraphics = new PIXI.Graphics();
         this._pixiTextMask = new PIXI.Graphics();
-        this._pixiText = new PIXI.Text(' ', {
-          align: 'left',
-          fontSize: 20,
+        this._pixiText = new PIXI.Text({
+          text: ' ',
+          style: {
+            align: 'left',
+            fontSize: 20,
+          },
         });
         this._pixiText.mask = this._pixiTextMask;
         this._pixiObject = new PIXI.Container();
@@ -885,15 +888,15 @@ module.exports = {
         const textOffsetX = borderWidth + paddingX;
         // textOffsetY does not include the paddingY because browsers display the text, even if it is supposed to be cut off by vertical padding.
         const textOffsetY = borderWidth;
-        this._pixiTextMask.clear();
-        this._pixiTextMask.beginFill(0xdddddd, 1);
-        this._pixiTextMask.drawRect(
-          textOffsetX,
-          textOffsetY,
-          width - 2 * textOffsetX,
-          height - 2 * textOffsetY
-        );
-        this._pixiTextMask.endFill();
+        this._pixiTextMask
+          .clear()
+          .rect(
+            textOffsetX,
+            textOffsetY,
+            width - 2 * textOffsetX,
+            height - 2 * textOffsetY
+          )
+          .fill({ color: 0xdddddd });
 
         const isTextArea = object.content.inputType === 'text area';
         const textAlign = object.content.textAlign
@@ -919,18 +922,18 @@ module.exports = {
         const borderColor = object.content.borderColor;
         const borderOpacity = object.content.borderOpacity;
 
-        this._pixiGraphics.clear();
-        this._pixiGraphics.lineStyle(
-          borderWidth,
-          objectsRenderingService.rgbOrHexToHexNumber(borderColor),
-          borderOpacity / 255
-        );
-        this._pixiGraphics.beginFill(
-          objectsRenderingService.rgbOrHexToHexNumber(fillColor),
-          fillOpacity / 255
-        );
-        this._pixiGraphics.drawRect(0, 0, width, height);
-        this._pixiGraphics.endFill();
+        this._pixiGraphics
+          .clear()
+          .rect(0, 0, width, height)
+          .fill({
+            color: objectsRenderingService.rgbOrHexToHexNumber(fillColor),
+            alpha: fillOpacity / 255,
+          })
+          .stroke({
+            width: borderWidth,
+            color: objectsRenderingService.rgbOrHexToHexNumber(borderColor),
+            alpha: borderOpacity / 255,
+          });
 
         // Do not hide completely an object so it can still be manipulated
         const alphaForDisplay = Math.max(

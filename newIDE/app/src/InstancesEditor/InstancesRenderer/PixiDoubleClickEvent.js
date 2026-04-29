@@ -1,5 +1,5 @@
 // @flow
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 
 const moveTolerance = 10; // px
 const doubleClickDelay = 500; //ms
@@ -10,14 +10,14 @@ const doubleClickDelay = 500; //ms
  * 500ms (using touch or mouse) on the same position (with a small tolerance).
  */
 // $FlowFixMe[value-as-type]
-export const makeDoubleClickable = (pixiDisplayObject: PIXI.DisplayObject) => {
+export const makeDoubleClickable = (pixiDisplayObject: PIXI.Container) => {
   let lastClickTime = 0;
   let lastClickGlobalX = 0;
   let lastClickGlobalY = 0;
 
   // $FlowFixMe[value-as-type]
-  const handleTap = (event: PIXI.InteractionEvent) => {
-    const { x, y } = event.data.global;
+  const handleTap = (event: PIXI.FederatedPointerEvent) => {
+    const { x, y } = event.global;
     const currentTime = Date.now();
 
     if (

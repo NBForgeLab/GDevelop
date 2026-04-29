@@ -86,13 +86,13 @@ namespace gdjs {
      *
      * @param parentElement The parent element to which the canvas will be added.
      */
-    createStandardCanvas(parentElement: HTMLElement) {
+    async createStandardCanvas(parentElement: HTMLElement): Promise<void> {
       this._throwIfDisposed();
 
       const gameCanvas = document.createElement('canvas');
       parentElement.appendChild(gameCanvas);
 
-      this.initializeRenderers(gameCanvas);
+      await this.initializeRenderers(gameCanvas);
       this.initializeCanvas(gameCanvas);
     }
 
@@ -101,13 +101,18 @@ namespace gdjs {
      *
      * In most cases, you can use `createStandardCanvas` instead to initialize the game.
      */
-    initializeRenderers(gameCanvas: HTMLCanvasElement): void {
+    async initializeRenderers(gameCanvas: HTMLCanvasElement): Promise<void> {
       this._throwIfDisposed();
 
       const useAntialias =
         this._game.getAntialiasingMode() !== 'none' &&
         (this._game.isAntialisingEnabledOnMobile() ||
           !gdjs.evtTools.common.isMobile());
+
+      // Deactivate accessibility support in PixiJS renderer, as GDevelop
+      // manages DOM accessibility separately.
+      PIXI.AccessibilitySystem.defaultOptions.enabledByDefault = false;
+      PIXI.AccessibilitySystem.defaultOptions.activateOnTab = false;
 
       if (typeof THREE !== 'undefined') {
         let gl: WebGL2RenderingContext | null = null;
@@ -135,7 +140,7 @@ namespace gdjs {
             this._threeRenderer.toneMapping = THREE.NoToneMapping;
             this._threeRenderer.toneMappingExposure = 1;
             this._threeRenderer.autoClear = false;
-            this._threeRenderer.pixelRatio = window.devicePixelRatio;
+            this._threeRenderer.setPixelRatio(window.devicePixelRatio);
             this._threeRenderer.setSize(
               this._game.getGameResolutionWidth(),
               this._game.getGameResolutionHeight()
@@ -157,48 +162,47 @@ namespace gdjs {
         // so that both can render to the canvas and even have PixiJS rendering
         // reused in Three.js (by using a RenderTexture and the same internal WebGL texture).
         if (gl) {
-          this._pixiRenderer = new PIXI.Renderer({
+          const pixiRenderer = new PIXI.WebGLRenderer();
+          await pixiRenderer.init({
             width: this._game.getGameResolutionWidth(),
             height: this._game.getGameResolutionHeight(),
-            view: gameCanvas,
-            // @ts-ignore - reuse the context from Three.js or WebGL2 probe.
+            canvas: gameCanvas,
             context: gl,
             clearBeforeRender: false,
             preserveDrawingBuffer: true, // Keep to true to allow screenshots.
             antialias: false,
             backgroundAlpha: 0,
+            roundPixels: this._game.getPixelsRounding(),
             // TODO (3D): add a setting for pixel ratio (`resolution: window.devicePixelRatio`)
           });
+          this._pixiRenderer = pixiRenderer;
         } else {
           // Create the renderer and setup the rendering area.
           // "preserveDrawingBuffer: true" is needed to avoid flickering
           // and background issues on some mobile phones (see #585 #572 #566 #463).
           logger.info('Using 2D renderer only (no WebGL2 context).');
-          this._pixiRenderer = PIXI.autoDetectRenderer({
+          this._pixiRenderer = await PIXI.autoDetectRenderer({
             width: this._game.getGameResolutionWidth(),
             height: this._game.getGameResolutionHeight(),
-            view: gameCanvas,
+            canvas: gameCanvas,
             preserveDrawingBuffer: true,
             antialias: false,
-          }) as PIXI.Renderer;
+            roundPixels: this._game.getPixelsRounding(),
+          });
         }
       } else {
         // Create the renderer and setup the rendering area.
         // "preserveDrawingBuffer: true" is needed to avoid flickering
         // and background issues on some mobile phones (see #585 #572 #566 #463).
-        this._pixiRenderer = PIXI.autoDetectRenderer({
+        this._pixiRenderer = await PIXI.autoDetectRenderer({
           width: this._game.getGameResolutionWidth(),
           height: this._game.getGameResolutionHeight(),
-          view: gameCanvas,
+          canvas: gameCanvas,
           preserveDrawingBuffer: true,
           antialias: false,
-        }) as PIXI.Renderer;
+          roundPixels: this._game.getPixelsRounding(),
+        });
       }
-
-      // Deactivating accessibility support in PixiJS renderer, as we want to be in control of this.
-      // See https://github.com/pixijs/pixijs/issues/5111#issuecomment-420047824
-      this._pixiRenderer.plugins.accessibility.destroy();
-      delete this._pixiRenderer.plugins.accessibility;
     }
 
     /**
@@ -259,8 +263,10 @@ namespace gdjs {
       }
 
       // Handle pixels rounding.
-      if (this._game.getPixelsRounding()) {
-        PIXI.settings.ROUND_PIXELS = true;
+      if (this._pixiRenderer) {
+        this._pixiRenderer._roundPixels = this._game.getPixelsRounding()
+          ? 1
+          : 0;
       }
 
       // Handle resize: immediately adjust the game canvas (and dom element container)
@@ -1179,7 +1185,7 @@ namespace gdjs {
     isWebGLSupported(): boolean {
       return (
         !!this._pixiRenderer &&
-        this._pixiRenderer.type === PIXI.RENDERER_TYPE.WEBGL
+        this._pixiRenderer.name === 'webgl'
       );
     }
 

@@ -23,8 +23,8 @@ export namespace PixiTileMapHelper {
   export function parseAtlas(
     tileMap: TileMapFileContent,
     levelIndex: number,
-    atlasTexture: PIXI.BaseTexture<PIXI.Resource> | null,
-    getTexture: (textureName: string) => PIXI.BaseTexture<PIXI.Resource>
+    atlasTexture: PIXI.TextureSource | null,
+    getTexture: (textureName: string) => PIXI.TextureSource
   ): TileTextureCache | null {
     if (tileMap.kind === "ldtk") {
       return LDtkPixiHelper.parseAtlas(
@@ -60,7 +60,7 @@ export namespace PixiTileMapHelper {
    * @returns A textures cache.
    */
   export function parseSimpleTileMapAtlas(
-    atlasTexture: PIXI.BaseTexture<PIXI.Resource>,
+    atlasTexture: PIXI.TextureSource,
     columnCount: number,
     rowCount: number,
     tileSize: number
@@ -75,7 +75,7 @@ export namespace PixiTileMapHelper {
           tileSize
         );
 
-        const texture = new PIXI.Texture(atlasTexture, rect);
+        const texture = new PIXI.Texture({ source: atlasTexture, frame: rect });
 
         textureCache.setTexture(
           // Id of the tile
@@ -116,7 +116,7 @@ export namespace PixiTileMapHelper {
     bottomBound: number,
   ): void {
     // The extension doesn't handle the Pixi sub-namespace very well.
-    const pixiTileMap = untypedPixiTileMap as PIXI.tilemap.CompositeTilemap;
+    const pixiTileMap = untypedPixiTileMap as any;
     if (!pixiTileMap) return;
     pixiTileMap.clear();
 
@@ -243,8 +243,9 @@ export namespace PixiTileMapHelper {
     if (!pixiGraphics) return;
     pixiGraphics.clear();
 
-    pixiGraphics.lineStyle(outlineSize, outlineColor, outlineOpacity);
-    pixiGraphics.drawRect(0, 0, tileMap.getWidth(), tileMap.getHeight());
+    pixiGraphics
+      .rect(0, 0, tileMap.getWidth(), tileMap.getHeight())
+      .stroke({ width: outlineSize, color: outlineColor, alpha: outlineOpacity });
 
     if (layerIndex) {
       const tileMapLayer = tileMap.getTileLayer(layerIndex);
@@ -301,7 +302,6 @@ export namespace PixiTileMapHelper {
         for (const vertices of hitboxes) {
           if (vertices.length === 0) continue;
 
-          pixiGraphics.beginFill(fillColor, fillOpacity);
           for (let index = 0; index < vertices.length; index++) {
             let vertexX = vertices[index][0];
             let vertexY = vertices[index][1];
@@ -325,7 +325,7 @@ export namespace PixiTileMapHelper {
             }
           }
           pixiGraphics.closePath();
-          pixiGraphics.endFill();
+          pixiGraphics.fill({ color: fillColor, alpha: fillOpacity });
         }
       }
     }

@@ -1,11 +1,12 @@
 declare namespace PIXI.filters {
-  export type PointLike = PIXI.Point | number[];
   interface ShockwaveFilterOptions {
-    amplitude: number;
-    wavelength: number;
-    speed: number;
-    brightness: number;
-    radius: number;
+    center?: PIXI.PointData;
+    amplitude?: number;
+    wavelength?: number;
+    speed?: number;
+    brightness?: number;
+    radius?: number;
+    time?: number;
   }
   /**
    * The ShockwaveFilter class lets you apply a shockwave effect.<br>
@@ -17,41 +18,21 @@ declare namespace PIXI.filters {
    */
   export class ShockwaveFilter extends PIXI.Filter {
     /** Default constructor options. */
-    static readonly defaults: ShockwaveFilterOptions;
+    static readonly DEFAULT_OPTIONS: ShockwaveFilterOptions;
     /**
      * Sets the elapsed time of the shockwave.
      * It could control the current size of shockwave.
      */
     time: number;
-    /**
-     * @param {PIXI.Point|number[]} [center=[0.5, 0.5]] - See `center` property.
-     * @param {object} [options] - The optional parameters of shockwave filter.
-     * @param {number} [options.amplitude=0.5] - See `amplitude`` property.
-     * @param {number} [options.wavelength=1.0] - See `wavelength` property.
-     * @param {number} [options.speed=500.0] - See `speed` property.
-     * @param {number} [options.brightness=8] - See `brightness` property.
-     * @param {number} [options.radius=4] - See `radius` property.
-     * @param {number} [time=0] - See `time` property.
-     */
-    constructor(
-      center?: PointLike,
-      options?: Partial<ShockwaveFilterOptions>,
-      time?: number
-    );
-    apply(
-      filterManager: PIXI.FilterSystem,
-      input: PIXI.RenderTexture,
-      output: PIXI.RenderTexture,
-      clear: PIXI.CLEAR_MODES
-    ): void;
+    constructor(options?: ShockwaveFilterOptions);
     /**
      * Sets the center of the shockwave in normalized screen coords. That is
      * (0,0) is the top-left and (1,1) is the bottom right.
      *
-     * @member {PIXI.Point|number[]}
+     * @member {PIXI.PointData}
      */
-    get center(): PointLike;
-    set center(value: PointLike);
+    get center(): PIXI.PointData;
+    set center(value: PIXI.PointData | number[]);
     /**
      * The amplitude of the shockwave.
      */

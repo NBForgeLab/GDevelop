@@ -1,5 +1,23 @@
 namespace gdjs {
   const logger = new gdjs.Logger('Light object');
+  type LightShaderUniforms = {
+    center: Float32Array;
+    radius: number;
+    color: Float32Array;
+  };
+  type LightShader = PIXI.Shader & {
+    resources: {
+      lightUniforms: {
+        uniforms: LightShaderUniforms;
+      };
+      uTexture?: any;
+      uSampler?: any;
+    };
+  };
+
+  const getLightShaderUniforms = (
+    shader: PIXI.Shader
+  ): LightShaderUniforms => (shader as LightShader).resources.lightUniforms.uniforms;
 
   /**
    * Pixi renderer for light runtime objects.
@@ -10,13 +28,13 @@ namespace gdjs {
     _instanceContainer: gdjs.RuntimeInstanceContainer;
     _manager: gdjs.LightObstaclesManager;
     _radius: number;
-    _color: [number, number, number];
+    _color: Float32Array;
     _texture: PIXI.Texture | null = null;
     _center: Float32Array;
     _defaultVertexBuffer: Float32Array;
     _vertexBuffer: Float32Array;
-    _indexBuffer: Uint16Array;
-    _light: PIXI.Mesh<PIXI.Shader> | null = null;
+    _indexBuffer: Uint32Array;
+    _light: PIXI.Mesh<PIXI.MeshGeometry, PIXI.Shader> | null = null;
     _isPreview: boolean;
     _debugMode: boolean = false;
     _debugLight: PIXI.Container | null = null;
@@ -64,11 +82,11 @@ namespace gdjs {
       this._manager = runtimeObject.getObstaclesManager();
       this._radius = runtimeObject.getRadius();
       const objectColor = runtimeObject._color;
-      this._color = [
+      this._color = new Float32Array([
         objectColor[0] / 255,
         objectColor[1] / 255,
         objectColor[2] / 255,
-      ];
+      ]);
       this.updateTexture();
       this._center = new Float32Array([runtimeObject.x, runtimeObject.y]);
       this._defaultVertexBuffer = new Float32Array(8);
@@ -82,7 +100,7 @@ namespace gdjs {
         runtimeObject.x - this._radius,
         runtimeObject.y - this._radius,
       ]);
-      this._indexBuffer = new Uint16Array([0, 1, 2, 0, 2, 3]);
+      this._indexBuffer = new Uint32Array([0, 1, 2, 0, 2, 3]);
       this.updateMesh();
       this._isPreview = instanceContainer.getGame().isPreview();
       this._lightBoundingPoly = gdjs.Polygon.createRectangle(0, 0);
@@ -94,7 +112,7 @@ namespace gdjs {
         const texture = game
           .getImageManager()
           .getPIXITexture('InGameEditor-LightIcon');
-        this._lightIconSprite = new PIXI.Sprite(texture);
+        this._lightIconSprite = new PIXI.Sprite({ texture });
         this._lightIconSprite.anchor.x = 0.5;
         this._lightIconSprite.anchor.y = 0.5;
 
@@ -272,29 +290,30 @@ namespace gdjs {
         this._debugLight.y = this._object.getY();
         if (
           this._radius === this._object.getRadius() &&
-          this._color[0] === this._object._color[0] &&
-          this._color[1] === this._object._color[1] &&
-          this._color[2] === this._object._color[2]
+          this._color[0] === this._object._color[0] / 255 &&
+          this._color[1] === this._object._color[1] / 255 &&
+          this._color[2] === this._object._color[2] / 255
         ) {
           return;
         }
         if (this._debugGraphics) {
           this._radius = this._object.getRadius();
-          this._color[0] = this._object._color[0];
-          this._color[1] = this._object._color[1];
-          this._color[2] = this._object._color[2];
+          this._color[0] = this._object._color[0] / 255;
+          this._color[1] = this._object._color[1] / 255;
+          this._color[2] = this._object._color[2] / 255;
           const radiusBorderWidth = 2;
           this._debugGraphics.clear();
-          this._debugGraphics.lineStyle(
-            radiusBorderWidth,
-            gdjs.rgbToHexNumber(this._color[0], this._color[1], this._color[2]),
-            0.8
-          );
-          this._debugGraphics.drawCircle(
-            0,
-            0,
-            Math.max(1, this._radius - radiusBorderWidth)
-          );
+          this._debugGraphics
+            .circle(0, 0, Math.max(1, this._radius - radiusBorderWidth))
+            .stroke({
+              width: radiusBorderWidth,
+              color: gdjs.rgbToHexNumber(
+                this._object._color[0],
+                this._object._color[1],
+                this._object._color[2]
+              ),
+              alpha: 0.8,
+            });
         }
         return;
       }
@@ -311,7 +330,11 @@ namespace gdjs {
       if (this._object.getInstanceContainer().getGame().isInGameEdition()) {
         return;
       }
-      if (!PIXI.utils.isWebGLSupported()) {
+      const pixiRenderer = this._instanceContainer
+        .getGame()
+        .getRenderer()
+        .getPIXIRenderer();
+      if (!pixiRenderer || pixiRenderer.type !== PIXI.RendererType.WEBGL) {
         logger.warn(
           'This device does not support webgl, which is required for Lighting Extension.'
         );
@@ -322,30 +345,33 @@ namespace gdjs {
         this._texture === null
           ? LightRuntimeObjectPixiRenderer.defaultFragmentShader
           : LightRuntimeObjectPixiRenderer.texturedFragmentShader;
-      const shaderUniforms = {
-        center: this._center,
-        radius: this._radius,
-        color: this._color,
+      const resources: Record<string, any> = {
+        lightUniforms: new PIXI.UniformGroup({
+          center: { value: this._center, type: 'vec2<f32>' },
+          radius: { value: this._radius, type: 'f32' },
+          color: { value: this._color, type: 'vec3<f32>' },
+        }),
       };
       if (this._texture) {
-        // @ts-ignore
-        shaderUniforms.uSampler = this._texture;
+        resources.uTexture = this._texture.source;
+        resources.uSampler = this._texture.source.style;
       }
-      const shader = PIXI.Shader.from(
-        LightRuntimeObjectPixiRenderer.defaultVertexShader,
-        fragmentShader,
-        shaderUniforms
-      );
-      const geometry = new PIXI.Geometry();
-      geometry
-        .addAttribute('aVertexPosition', this._vertexBuffer, 2)
-        .addIndex(this._indexBuffer);
+      const shader = PIXI.Shader.from({
+        gl: {
+          vertex: LightRuntimeObjectPixiRenderer.defaultVertexShader,
+          fragment: fragmentShader,
+        },
+        resources,
+      });
+      const geometry = new PIXI.MeshGeometry({
+        positions: this._vertexBuffer,
+        indices: this._indexBuffer,
+      });
       if (!this._light) {
-        this._light = new PIXI.Mesh(geometry, shader);
-        this._light.blendMode = PIXI.BLEND_MODES.ADD;
+        this._light = new PIXI.Mesh({ geometry, shader });
+        this._light.blendMode = 'add';
       } else {
         this._light.shader = shader;
-        // @ts-ignore - replacing the read-only geometry
         this._light.geometry = geometry;
       }
     }
@@ -355,7 +381,8 @@ namespace gdjs {
         return;
       }
       this._radius = this._object.getRadius();
-      this._light.shader.uniforms.radius = this._radius;
+      getLightShaderUniforms(this._light.shader as PIXI.Shader).radius =
+        this._radius;
     }
 
     updateColor(): void {
@@ -363,12 +390,11 @@ namespace gdjs {
         return;
       }
       const objectColor = this._object._color;
-      this._color = [
-        objectColor[0] / 255,
-        objectColor[1] / 255,
-        objectColor[2] / 255,
-      ];
-      this._light.shader.uniforms.color = this._color;
+      this._color[0] = objectColor[0] / 255;
+      this._color[1] = objectColor[1] / 255;
+      this._color[2] = objectColor[2] / 255;
+      getLightShaderUniforms(this._light.shader as PIXI.Shader).color =
+        this._color;
     }
 
     updateTexture(): void {
@@ -411,7 +437,6 @@ namespace gdjs {
       if (!computedVertices.length) {
         debugGraphics.clear();
         debugGraphics
-          .lineStyle(1, 16711680, 1)
           .moveTo(this._object.x, this._object.y)
           .lineTo(this._object.x - this._radius, this._object.y + this._radius)
           .lineTo(this._object.x + this._radius, this._object.y + this._radius)
@@ -423,7 +448,8 @@ namespace gdjs {
           .lineTo(this._object.x - this._radius, this._object.y - this._radius)
           .moveTo(this._object.x, this._object.y)
           .lineTo(this._object.x - this._radius, this._object.y - this._radius)
-          .lineTo(this._object.x - this._radius, this._object.y + this._radius);
+          .lineTo(this._object.x - this._radius, this._object.y + this._radius)
+          .stroke({ width: 1, color: 16711680 });
         return;
       }
       const vertices = new Array(2 * computedVertices.length + 2);
@@ -441,13 +467,13 @@ namespace gdjs {
         const lastX = i + 2 >= verticesCount ? 2 : i + 2;
         const lastY = i + 3 >= verticesCount ? 3 : i + 3;
         debugGraphics
-          .lineStyle(1, lineColor, 1)
           .lineTo(vertices[i], vertices[i + 1])
           .lineTo(vertices[lastX], vertices[lastY])
           .moveTo(vertices[0], vertices[1])
           .lineTo(vertices[i], vertices[i + 1])
           .moveTo(vertices[0], vertices[1])
-          .lineTo(vertices[lastX], vertices[lastY]);
+          .lineTo(vertices[lastX], vertices[lastY])
+          .stroke({ width: 1, color: lineColor });
       }
     }
 
@@ -469,13 +495,11 @@ namespace gdjs {
         this._defaultVertexBuffer[5] = this._object.y - this._radius;
         this._defaultVertexBuffer[6] = this._object.x - this._radius;
         this._defaultVertexBuffer[7] = this._object.y - this._radius;
-        this._light.shader.uniforms.center = this._center;
-        this._light.geometry
-          .getBuffer('aVertexPosition')
-          .update(this._defaultVertexBuffer);
-        this._light.geometry
-          .getIndex()
-          .update(LightRuntimeObjectPixiRenderer._defaultIndexBuffer);
+        getLightShaderUniforms(this._light.shader as PIXI.Shader).center =
+          this._center;
+        this._light.geometry.positions = this._defaultVertexBuffer;
+        this._light.geometry.indices =
+          LightRuntimeObjectPixiRenderer._defaultIndexBuffer;
         return;
       }
       const verticesCount = vertices.length;
@@ -486,7 +510,7 @@ namespace gdjs {
       // there would be memory wastage.
       let isSubArrayUsed = false;
       let vertexBufferSubArray: Float32Array | null = null;
-      let indexBufferSubArray: Uint16Array | null = null;
+      let indexBufferSubArray: Uint32Array | null = null;
       if (this._vertexBuffer.length > 2 * verticesCount + 2) {
         if (this._vertexBuffer.length < 4 * verticesCount + 4) {
           isSubArrayUsed = true;
@@ -500,7 +524,7 @@ namespace gdjs {
           );
         } else {
           this._vertexBuffer = new Float32Array(2 * verticesCount + 2);
-          this._indexBuffer = new Uint16Array(3 * verticesCount);
+          this._indexBuffer = new Uint32Array(3 * verticesCount);
         }
       }
 
@@ -508,7 +532,7 @@ namespace gdjs {
       // required, we'll have to allocated new array buffers.
       if (this._vertexBuffer.length < 2 * verticesCount + 2) {
         this._vertexBuffer = new Float32Array(2 * verticesCount + 2);
-        this._indexBuffer = new Uint16Array(3 * verticesCount);
+        this._indexBuffer = new Uint32Array(3 * verticesCount);
       }
       this._vertexBuffer[0] = this._object.x;
       this._vertexBuffer[1] = this._object.y;
@@ -525,19 +549,14 @@ namespace gdjs {
           this._indexBuffer[i + 2] = 1;
         }
       }
-      this._light.shader.uniforms.center = this._center;
+      getLightShaderUniforms(this._light.shader as PIXI.Shader).center =
+        this._center;
       if (!isSubArrayUsed) {
-        this._light.geometry
-          .getBuffer('aVertexPosition')
-          .update(this._vertexBuffer);
-        this._light.geometry.getIndex().update(this._indexBuffer);
+        this._light.geometry.positions = this._vertexBuffer;
+        this._light.geometry.indices = this._indexBuffer;
       } else {
-        this._light.geometry
-          .getBuffer('aVertexPosition')
-          // @ts-ignore
-          .update(vertexBufferSubArray);
-        // @ts-ignore
-        this._light.geometry.getIndex().update(indexBufferSubArray);
+        this._light.geometry.positions = vertexBufferSubArray as Float32Array;
+        this._light.geometry.indices = indexBufferSubArray as Uint32Array;
       }
     }
 
@@ -744,46 +763,47 @@ namespace gdjs {
       return filteredVerticesResult;
     }
 
-    static _defaultIndexBuffer = new Uint16Array([0, 1, 2, 0, 2, 3]);
+    static _defaultIndexBuffer = new Uint32Array([0, 1, 2, 0, 2, 3]);
     static defaultVertexShader = `
-  precision highp float;
-  attribute vec2 aVertexPosition;
+  in vec2 aPosition;
+  out vec2 vPos;
 
-  uniform mat3 translationMatrix;
-  uniform mat3 projectionMatrix;
-  varying vec2 vPos;
+  uniform mat3 uProjectionMatrix;
+  uniform mat3 uWorldTransformMatrix;
+  uniform mat3 uTransformMatrix;
 
   void main() {
-      vPos = aVertexPosition;
-      gl_Position = vec4((projectionMatrix * translationMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
+      vPos = aPosition;
+      mat3 modelViewProjectionMatrix = uProjectionMatrix * uWorldTransformMatrix * uTransformMatrix;
+      gl_Position = vec4((modelViewProjectionMatrix * vec3(aPosition, 1.0)).xy, 0.0, 1.0);
   }`;
     static defaultFragmentShader = `
-  precision highp float;
   uniform vec2 center;
   uniform float radius;
   uniform vec3 color;
-  varying vec2 vPos;
+  in vec2 vPos;
+  out vec4 finalColor;
 
   void main() {
       float l = length(vPos - center);
       float intensity = 0.0;
       if(l < radius)
         intensity = clamp((radius - l)*(radius - l)/(radius*radius), 0.0, 1.0);
-      gl_FragColor = vec4(color*intensity, 1.0);
+      finalColor = vec4(color*intensity, 1.0);
   }`;
     static texturedFragmentShader = `
-  precision highp float;
   uniform vec2 center;
   uniform float radius;
   uniform vec3 color;
-  uniform sampler2D uSampler;
-  varying vec2 vPos;
+  uniform sampler2D uTexture;
+  in vec2 vPos;
+  out vec4 finalColor;
 
   void main() {
     vec2 topleft = vec2(center.x - radius, center.y - radius);
     vec2 texCoord = (vPos - topleft)/(2.0 * radius);
-    gl_FragColor = (texCoord.x > 0.0 && texCoord.x < 1.0 && texCoord.y > 0.0 && texCoord.y < 1.0)
-      ? vec4(color, 1.0) * texture2D(uSampler, texCoord)
+    finalColor = (texCoord.x > 0.0 && texCoord.x < 1.0 && texCoord.y > 0.0 && texCoord.y < 1.0)
+      ? vec4(color, 1.0) * texture(uTexture, texCoord)
       : vec4(0.0, 0.0, 0.0, 0.0);
   }`;
   }

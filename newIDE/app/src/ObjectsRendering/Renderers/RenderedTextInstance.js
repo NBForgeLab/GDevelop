@@ -3,7 +3,7 @@ import RenderedInstance from './RenderedInstance';
 import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
 import ResourcesLoader from '../../ResourcesLoader';
 import { rgbStringToHexNumber } from '../../Utils/ColorTransformer';
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 const gd: libGDevelop = global.gd;
 
 /**
@@ -60,7 +60,7 @@ export default class RenderedTextInstance extends RenderedInstance {
     });
 
     //Setup the PIXI object:
-    this._pixiObject = new PIXI.Text('', style);
+    this._pixiObject = new PIXI.Text({ text: '', style });
     this._pixiObject.anchor.x = 0.5;
     this._pixiObject.anchor.y = 0.5;
     this._pixiContainer.addChild(this._pixiObject);

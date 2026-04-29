@@ -26,7 +26,15 @@ export default [
       resolve({
           extensions: ['.js'],
       }),
-      typescript({ tsconfig: './tsconfig.json' }),
+      typescript({
+        tsconfig: './tsconfig.json',
+        compilerOptions: {
+          declaration: false,
+          declarationMap: false,
+          declarationDir: null,
+          outDir: null,
+        },
+      }),
     ],
   },
 ];

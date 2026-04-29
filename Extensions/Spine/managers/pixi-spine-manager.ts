@@ -15,7 +15,7 @@ namespace gdjs {
   export class SpineManager implements gdjs.ResourceManager {
     private _spineAtlasManager: SpineAtlasManager;
     private _resourceLoader: ResourceLoader;
-    private _loadedSpines = new gdjs.ResourceCache<pixi_spine.ISkeletonData>();
+    private _loadedSpines = new gdjs.ResourceCache<pixi_spine.SkeletonData>();
 
     /**
      * @param resourceLoader The resources loader of the game.
@@ -34,7 +34,7 @@ namespace gdjs {
     }
 
     async processResource(resourceName: string): Promise<void> {
-      // Do nothing because pixi-spine parses resources by itself.
+      // Do nothing because spine-pixi-v8 parses resources by itself.
     }
 
     async loadResource(resourceName: string): Promise<void> {
@@ -66,8 +66,16 @@ namespace gdjs {
           resource.name,
           embeddedResourcesNames[0]
         );
-        const spineAtlas =
-          await this._spineAtlasManager.getOrLoad(atlasResourceName);
+        await this._spineAtlasManager.getOrLoad(atlasResourceName);
+        const atlasResource = this._resourceLoader.getResource(
+          atlasResourceName
+        );
+        if (!atlasResource) {
+          return logger.error(
+            `Unable to find atlas resource ${atlasResourceName} for spine json ${resourceName}.`
+          );
+        }
+        const atlasAlias = this._resourceLoader.getFullUrl(atlasResource.file);
 
         PIXI.Assets.setPreferences({
           preferWorkers: false,
@@ -78,17 +86,15 @@ namespace gdjs {
         PIXI.Assets.add({
           alias,
           src: url,
-          data: { spineAtlas },
         });
-        const loadedJson = await PIXI.Assets.load(alias);
+        await PIXI.Assets.load(alias);
 
-        if (loadedJson.spineData) {
-          this._loadedSpines.set(resource, loadedJson.spineData);
-        } else {
-          logger.error(
-            `Loader cannot process spine resource ${resource.name} correctly.`
-          );
-        }
+        const spine = pixi_spine.Spine.from({
+          skeleton: alias,
+          atlas: atlasAlias,
+        });
+        this._loadedSpines.set(resource, spine.skeleton.data);
+        spine.destroy();
       } catch (error) {
         logger.error(
           `Error while preloading spine resource ${resource.name}: ${error}`
@@ -105,7 +111,7 @@ namespace gdjs {
      * @param resourceName The name of the spine skeleton.
      * @returns the spine skeleton if loaded, `null` otherwise.
      */
-    getSpine(resourceName: string): pixi_spine.ISkeletonData | null {
+    getSpine(resourceName: string): pixi_spine.SkeletonData | null {
       return this._loadedSpines.getFromName(resourceName);
     }
 

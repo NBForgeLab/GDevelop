@@ -12,15 +12,15 @@ namespace gdjs {
           .getGame()
           .getImageManager()
           .getPIXITexture(effectData.stringParameters.colorMapTexture);
-        const colorMapFilter = new PIXI.filters.ColorMapFilter(
-          colorMapTexture,
-          effectData.booleanParameters.nearest,
-          gdjs.PixiFiltersTools.clampValue(
+        const colorMapFilter = new PIXI.filters.ColorMapFilter({
+          colorMap: colorMapTexture,
+          nearest: effectData.booleanParameters.nearest,
+          mix: gdjs.PixiFiltersTools.clampValue(
             effectData.doubleParameters.mix / 100,
             0,
             1
-          )
-        );
+          ),
+        });
         return colorMapFilter;
       }
       updatePreRender(filter: PIXI.Filter, target: EffectsTarget) {}

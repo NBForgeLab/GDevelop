@@ -18,8 +18,19 @@ namespace gdjs {
       object.alpha = 1;
     }
   };
-  const hasFadedIn = (object: PIXI.DisplayObject | null) => {
+  const hasFadedIn = (object: { alpha: number } | null) => {
     return !object || object.alpha >= 1;
+  };
+  const isTextureReady = (texture: PIXI.Texture | null | undefined): boolean => {
+    return !!(
+      texture &&
+      !texture.destroyed &&
+      texture.source &&
+      !texture.source.destroyed &&
+      texture.source !== PIXI.Texture.EMPTY.source &&
+      texture.source.width > 0 &&
+      texture.source.height > 0
+    );
   };
 
   class LoadingScreenPixiRenderer {
@@ -100,7 +111,10 @@ namespace gdjs {
     private _updatePositions() {
       if (!this._pixiRenderer) return;
 
-      if (this._backgroundSprite && this._backgroundSprite.texture.valid) {
+      if (
+        this._backgroundSprite &&
+        isTextureReady(this._backgroundSprite.texture)
+      ) {
         this._backgroundSprite.position.x = this._pixiRenderer.width / 2;
         this._backgroundSprite.position.y = this._pixiRenderer.height / 2;
         const scale = Math.max(
@@ -173,7 +187,10 @@ namespace gdjs {
       if (this._state == LoadingScreenState.NOT_STARTED) {
         this._pixiRenderer.background.color =
           this._loadingScreenData.backgroundColor;
-        if (!this._backgroundSprite || this._backgroundSprite.texture.valid) {
+        if (
+          !this._backgroundSprite ||
+          isTextureReady(this._backgroundSprite.texture)
+        ) {
           this._startLoadingScreen();
         }
         return true;
@@ -244,26 +261,40 @@ namespace gdjs {
         // Display bar with an additional 1% to ensure it's filled at the end.
         const progress = Math.min(1, (this._progressPercent + 1) / 100);
         this._progressBarGraphics.clear();
-        this._progressBarGraphics.lineStyle(lineWidth, color, 1, 0);
-        this._progressBarGraphics.drawRect(
+        this._progressBarGraphics.rect(
           progressBarX,
           progressBarY,
           progressBarWidth,
           progressBarHeight
         );
+        this._progressBarGraphics.stroke({
+          width: lineWidth,
+          color,
+          alpha: 1,
+          alignment: 0,
+        });
 
-        this._progressBarGraphics.beginFill(color, 1);
-        this._progressBarGraphics.lineStyle(0, color, 1);
-        this._progressBarGraphics.drawRect(
-          progressBarX + lineWidth,
-          progressBarY + lineWidth,
-          progressBarWidth * progress - lineWidth * 2,
+        const filledProgressBarWidth = Math.max(
+          0,
+          progressBarWidth * progress - lineWidth * 2
+        );
+        const filledProgressBarHeight = Math.max(
+          0,
           progressBarHeight - lineWidth * 2
         );
-        this._progressBarGraphics.endFill();
+        if (filledProgressBarWidth > 0 && filledProgressBarHeight > 0) {
+          this._progressBarGraphics
+            .rect(
+              progressBarX + lineWidth,
+              progressBarY + lineWidth,
+              filledProgressBarWidth,
+              filledProgressBarHeight
+            )
+            .fill({ color, alpha: 1 });
+        }
       }
 
-      this._pixiRenderer.render(this._loadingScreenContainer);
+      this._pixiRenderer.render({ container: this._loadingScreenContainer });
       return true;
     }
 

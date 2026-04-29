@@ -78,6 +78,11 @@ static void InsertUniqueFirst(std::vector<gd::String> &container, gd::String str
     container.insert(container.begin(), str);
 }
 
+static bool IsJavaScriptIncludeFile(const gd::String &includeFile) {
+  return includeFile.length() >= 3 &&
+         includeFile.substr(includeFile.length() - 3) == ".js";
+}
+
 static gd::String CleanProjectName(gd::String projectName) {
   gd::String partiallyCleanedProjectName = projectName;
 
@@ -500,6 +505,8 @@ void ExporterHelper::SerializeRuntimeGameOptions(
     scriptFilesElement.ConsiderAsArrayOf("scriptFile");
 
     for (const auto &includeFile : includesFiles) {
+      if (!IsJavaScriptIncludeFile(includeFile)) continue;
+
       auto hashIt = options.includeFileHashes.find(includeFile);
       gd::String scriptSrc = GetExportedIncludeFilename(fs, gdjsRoot, includeFile);
       scriptFilesElement.AddChild("scriptFile")
@@ -1090,6 +1097,8 @@ bool ExporterHelper::CompleteIndexFile(
 
   gd::String codeFilesIncludes;
   for (auto &include : includesFiles) {
+    if (!IsJavaScriptIncludeFile(include)) continue;
+
     gd::String scriptSrc =
         GetExportedIncludeFilename(fs, gdjsRoot, include, nonRuntimeScriptsCacheBurst);
 

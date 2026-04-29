@@ -14,13 +14,14 @@
       "expect.js",
       "@types/offscreencanvas"
     ],
-    "lib": ["DOM", "ES5", "ES6"],
+    "lib": ["DOM", "ESNext"],
     "esModuleInterop": false, 
     "downlevelIteration": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dts"
   ]
 }

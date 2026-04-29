@@ -1,6 +1,6 @@
 // @flow
 
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 import getObjectByName from '../Utils/GetObjectByName';
 import InstancesSelection from './InstancesSelection';
 import PixiResourcesLoader from '../ObjectsRendering/PixiResourcesLoader';
@@ -164,7 +164,10 @@ class TileMapPaintingPreview {
     );
 
     try {
-      const texture = new PIXI.Texture(atlasTexture, rect);
+      const texture = new PIXI.Texture({
+        source: atlasTexture.source,
+        frame: rect,
+      });
       this.cache.set(cacheKey, texture);
       return texture;
     } catch (error) {
@@ -195,7 +198,7 @@ class TileMapPaintingPreview {
     // $FlowFixMe[value-as-type]
     texture: PIXI.Texture,
   |}): any {
-    const sprite = new PIXI.TilingSprite(texture);
+    const sprite = new PIXI.TilingSprite({ texture });
     const workingPoint = [0, 0];
 
     sprite.tileScale.x =
@@ -294,7 +297,7 @@ class TileMapPaintingPreview {
           texture = PIXI.Texture.from(
             'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAARSURBVHgBY7h58+Z/BhgAcQA/VAcVLiw46wAAAABJRU5ErkJggg=='
           );
-          texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+          texture.source.scaleMode = 'nearest';
         }
       }
       const sprite = this._getTilingSpriteForRectangle({

@@ -5,7 +5,7 @@ import RenderedInstance from '../../ObjectsRendering/Renderers/RenderedInstance'
 import getObjectByName from '../../Utils/GetObjectByName';
 import ViewPosition from '../ViewPosition';
 
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 import * as THREE from 'three';
 import { shouldBeHandledByPinch } from '../PinchHandler';
 import { makeDoubleClickable } from './PixiDoubleClickEvent';
@@ -188,7 +188,7 @@ export default class LayerRenderer {
       if (!renderedInstance) return;
 
       // $FlowFixMe[value-as-type]
-      const pixiObject: PIXI.DisplayObject | null = renderedInstance.getPixiObject();
+      const pixiObject: PIXI.Container | null = renderedInstance.getPixiObject();
       if (pixiObject) {
         if (renderedInstance.isRenderedIn3D()) {
           pixiObject.zOrder = instance.getZ() + renderedInstance.getDepth();
@@ -456,8 +456,7 @@ export default class LayerRenderer {
       panable(renderedInstance._pixiObject);
       makeDoubleClickable(renderedInstance._pixiObject);
       renderedInstance._pixiObject.addEventListener('click', event => {
-        if (event.data.originalEvent.button === 0)
-          this.onInstanceClicked(instance);
+        if (event.button === 0) this.onInstanceClicked(instance);
       });
       renderedInstance._pixiObject.addEventListener('doubleclick', () => {
         this.onInstanceDoubleClicked(instance);
@@ -468,9 +467,9 @@ export default class LayerRenderer {
       renderedInstance._pixiObject.addEventListener(
         'mousedown',
         // $FlowFixMe[value-as-type]
-        (event: PIXI.InteractionEvent) => {
-          if (event.data.originalEvent.button === 0) {
-            const viewPoint = event.data.global;
+        (event: PIXI.FederatedPointerEvent) => {
+          if (event.button === 0) {
+            const viewPoint = event.global;
             const scenePoint = this.viewPosition.toSceneCoordinates(
               viewPoint.x,
               viewPoint.y
@@ -482,9 +481,9 @@ export default class LayerRenderer {
       renderedInstance._pixiObject.addEventListener(
         'mouseup',
         // $FlowFixMe[value-as-type]
-        (event: PIXI.InteractionEvent) => {
-          if (event.data.originalEvent.button === 0) {
-            const viewPoint = event.data.global;
+        (event: PIXI.FederatedPointerEvent) => {
+          if (event.button === 0) {
+            const viewPoint = event.global;
             const scenePoint = this.viewPosition.toSceneCoordinates(
               viewPoint.x,
               viewPoint.y
@@ -496,9 +495,8 @@ export default class LayerRenderer {
       renderedInstance._pixiObject.addEventListener(
         'rightclick',
         interactionEvent => {
-          const {
-            data: { global: viewPoint, originalEvent: event },
-          } = interactionEvent;
+          const viewPoint = interactionEvent.global;
+          const event = interactionEvent.nativeEvent;
 
           // First select the instance
           const scenePoint = this.viewPosition.toSceneCoordinates(
@@ -521,11 +519,11 @@ export default class LayerRenderer {
         }
       );
       renderedInstance._pixiObject.addEventListener('touchstart', event => {
-        if (shouldBeHandledByPinch(event.data && event.data.originalEvent)) {
+        if (shouldBeHandledByPinch(event.nativeEvent)) {
           return null;
         }
 
-        const viewPoint = event.data.global;
+        const viewPoint = event.global;
         const scenePoint = this.viewPosition.toSceneCoordinates(
           viewPoint.x,
           viewPoint.y
@@ -533,11 +531,11 @@ export default class LayerRenderer {
         this.onDownInstance(instance, scenePoint[0], scenePoint[1]);
       });
       renderedInstance._pixiObject.addEventListener('touchend', event => {
-        if (shouldBeHandledByPinch(event.data && event.data.originalEvent)) {
+        if (shouldBeHandledByPinch(event.nativeEvent)) {
           return null;
         }
 
-        const viewPoint = event.data.global;
+        const viewPoint = event.global;
         const scenePoint = this.viewPosition.toSceneCoordinates(
           viewPoint.x,
           viewPoint.y
@@ -550,7 +548,7 @@ export default class LayerRenderer {
       renderedInstance._pixiObject.addEventListener(
         'panmove',
         (event: PanMoveEvent) => {
-          if (shouldBeHandledByPinch(event.data && event.data.originalEvent)) {
+          if (shouldBeHandledByPinch(event.pointerEvent.nativeEvent)) {
             return null;
           }
 
@@ -719,6 +717,7 @@ export default class LayerRenderer {
       },
       side: THREE.FrontSide,
       transparent: true,
+      depthWrite: false,
     };
     const threePlaneMaterial = new THREE.ShaderMaterial(
       noGammaCorrectionShader
@@ -741,7 +740,7 @@ export default class LayerRenderer {
    */
   // $FlowFixMe[value-as-type]
   _createPixiRenderTexture(pixiRenderer: PIXI.Renderer | null): void {
-    if (!pixiRenderer || pixiRenderer.type !== PIXI.RENDERER_TYPE.WEBGL) {
+    if (!pixiRenderer || pixiRenderer.name !== 'webgl') {
       return;
     }
     if (this._renderTexture) {
@@ -762,8 +761,27 @@ export default class LayerRenderer {
       height: height || 100,
       resolution,
     });
-    this._renderTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.LINEAR;
+    this._updatePixiRenderTextureSamplerStyle();
     console.info(`RenderTexture created for layer ${this.layer.getName()}.`);
+  }
+
+  _getRenderTextureScaleMode(): 'nearest' | 'linear' {
+    return this.project.getScaleMode() === 'nearest' ? 'nearest' : 'linear';
+  }
+
+  _updatePixiRenderTextureSamplerStyle(): void {
+    if (!this._renderTexture) {
+      return;
+    }
+
+    const source = this._renderTexture.source;
+    const scaleMode = this._getRenderTextureScaleMode();
+
+    source.scaleMode = scaleMode;
+    source.addressMode = 'clamp-to-edge';
+    source.autoGenerateMipmaps = false;
+    source.mipmapFilter = 'nearest';
+    source.style.update();
   }
 
   /**
@@ -784,24 +802,16 @@ export default class LayerRenderer {
         pixiRenderer.screen.width || 100,
         pixiRenderer.screen.height || 100
       );
+      this._updatePixiRenderTextureSamplerStyle();
       this._oldWidth = pixiRenderer.screen.width;
       this._oldHeight = pixiRenderer.screen.height;
     }
-    const oldRenderTexture = pixiRenderer.renderTexture.current;
-    const oldSourceFrame = pixiRenderer.renderTexture.sourceFrame;
-    pixiRenderer.renderTexture.bind(this._renderTexture);
-
-    pixiRenderer.renderTexture.clear([0, 0, 0, 0]);
-
-    pixiRenderer.render(this.pixiContainer, {
-      renderTexture: this._renderTexture,
-      clear: false,
+    pixiRenderer.render({
+      container: this.pixiContainer,
+      target: this._renderTexture,
+      clear: true,
+      clearColor: [0, 0, 0, 0],
     });
-    pixiRenderer.renderTexture.bind(
-      oldRenderTexture,
-      oldSourceFrame,
-      undefined
-    );
   }
 
   /**
@@ -818,16 +828,48 @@ export default class LayerRenderer {
       return;
     }
 
-    const glTexture = this._renderTexture.baseTexture._glTextures[
-      pixiRenderer.CONTEXT_UID
-    ];
+    const glTexture = this._renderTexture.source._gpuData[pixiRenderer.uid];
     if (glTexture) {
       // "Hack" into the Three.js renderer by getting the internal WebGL texture for the PixiJS plane,
       // and set it so that it's the same as the WebGL texture for the PixiJS RenderTexture.
       // This works because PixiJS and Three.js are using the same WebGL context.
       const texture = threeRenderer.properties.get(this._threePlaneTexture);
       texture.__webglTexture = glTexture.texture;
+      this._updateThreeSharedRenderTextureSamplerStyle(
+        threeRenderer,
+        glTexture
+      );
     }
+  }
+
+  _updateThreeSharedRenderTextureSamplerStyle(
+    // $FlowFixMe[value-as-type]
+    threeRenderer: THREE.WebGLRenderer,
+    glTexture: any
+  ): void {
+    if (!this._threePlaneTexture) {
+      return;
+    }
+
+    const scaleMode = this._getRenderTextureScaleMode();
+    const threeFilter =
+      scaleMode === 'nearest' ? THREE.NearestFilter : THREE.LinearFilter;
+    this._threePlaneTexture.generateMipmaps = false;
+    this._threePlaneTexture.minFilter = threeFilter;
+    this._threePlaneTexture.magFilter = threeFilter;
+    this._threePlaneTexture.wrapS = THREE.ClampToEdgeWrapping;
+    this._threePlaneTexture.wrapT = THREE.ClampToEdgeWrapping;
+
+    const gl = threeRenderer.getContext();
+    const target = glTexture.target || gl.TEXTURE_2D;
+    const glFilter = scaleMode === 'nearest' ? gl.NEAREST : gl.LINEAR;
+
+    gl.bindTexture(target, glTexture.texture);
+    gl.texParameteri(target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, glFilter);
+    gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, glFilter);
+    gl.bindTexture(target, null);
   }
 
   _updatePixiObjectsZOrder() {

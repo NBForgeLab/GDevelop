@@ -3,38 +3,57 @@ namespace gdjs {
     i: number;
     o: number;
   }
-  /** @internal - should not have been exported? */
-  export class NightPixiFilter extends PIXI.Filter {
-    constructor() {
-      const vertexShader = undefined;
-      const fragmentShader = [
-        'precision mediump float;',
-        '',
-        'varying vec2 vTextureCoord;',
-        'uniform sampler2D uSampler;',
-        'uniform float intensity;',
-        'uniform float opacity;',
-        '',
-        'void main(void)',
-        '{',
-        '   mat3 nightMatrix = mat3(-2.0 * intensity, -1.0 * intensity, 0, -1.0 * intensity, 0, 1.0 * intensity, 0, 1.0 * intensity, 2.0 * intensity);',
-        '   gl_FragColor = texture2D(uSampler, vTextureCoord);',
-        '   gl_FragColor.rgb = mix(gl_FragColor.rgb, nightMatrix * gl_FragColor.rgb, opacity);',
-        '}',
-      ].join('\n');
-      const uniforms = {
-        intensity: { type: '1f', value: 1 },
-        opacity: { type: '1f', value: 1 },
+  type NightFilterUniforms = {
+    intensity: number;
+    opacity: number;
+  };
+  type NightFilter = PIXI.Filter & {
+    resources: {
+      uniforms: {
+        uniforms: NightFilterUniforms;
       };
-      super(vertexShader, fragmentShader, uniforms);
-    }
-  }
-  NightPixiFilter.prototype.constructor = gdjs.NightPixiFilter;
+    };
+  };
+
+  const getNightFilterUniforms = (
+    filter: PIXI.Filter
+  ): NightFilterUniforms => (filter as NightFilter).resources.uniforms.uniforms;
+
+  /** @internal - should not have been exported? */
+  export const makeNightPixiFilter = (): PIXI.Filter => {
+    const fragmentShader = [
+      'in vec2 vTextureCoord;',
+      'uniform sampler2D uTexture;',
+      'uniform float intensity;',
+      'uniform float opacity;',
+      'out vec4 finalColor;',
+      '',
+      'void main(void)',
+      '{',
+      '   mat3 nightMatrix = mat3(-2.0 * intensity, -1.0 * intensity, 0, -1.0 * intensity, 0, 1.0 * intensity, 0, 1.0 * intensity, 2.0 * intensity);',
+      '   vec4 color = texture(uTexture, vTextureCoord);',
+      '   color.rgb = mix(color.rgb, nightMatrix * color.rgb, opacity);',
+      '   finalColor = color;',
+      '}',
+    ].join('\n');
+    return PIXI.Filter.from({
+      gl: {
+        vertex: gdjs.PixiFiltersTools.defaultFilterVertexShader,
+        fragment: fragmentShader,
+      },
+      resources: {
+        uniforms: {
+          intensity: { value: 1, type: 'f32' },
+          opacity: { value: 1, type: 'f32' },
+        },
+      },
+    });
+  };
   gdjs.PixiFiltersTools.registerFilterCreator(
     'Night',
     new (class extends gdjs.PixiFiltersTools.PixiFilterCreator {
       makePIXIFilter(target: EffectsTarget, effectData) {
-        const filter = new gdjs.NightPixiFilter();
+        const filter = gdjs.makeNightPixiFilter();
         return filter;
       }
       updatePreRender(filter: PIXI.Filter, target: EffectsTarget) {}
@@ -46,14 +65,14 @@ namespace gdjs {
         if (parameterName !== 'intensity' && parameterName !== 'opacity') {
           return;
         }
-        filter.uniforms[parameterName] = gdjs.PixiFiltersTools.clampValue(
+        getNightFilterUniforms(filter)[parameterName] = gdjs.PixiFiltersTools.clampValue(
           value,
           0,
           1
         );
       }
       getDoubleParameter(filter: PIXI.Filter, parameterName: string): number {
-        return filter.uniforms[parameterName] || 0;
+        return getNightFilterUniforms(filter)[parameterName] || 0;
       }
       updateStringParameter(
         filter: PIXI.Filter,
@@ -75,16 +94,16 @@ namespace gdjs {
       ) {}
       getNetworkSyncData(filter: PIXI.Filter): NightFilterNetworkSyncData {
         return {
-          i: filter.uniforms['intensity'],
-          o: filter.uniforms['opacity'],
+          i: getNightFilterUniforms(filter).intensity,
+          o: getNightFilterUniforms(filter).opacity,
         };
       }
       updateFromNetworkSyncData(
         filter: PIXI.Filter,
         data: NightFilterNetworkSyncData
       ) {
-        filter.uniforms['intensity'] = data.i;
-        filter.uniforms['opacity'] = data.o;
+        getNightFilterUniforms(filter).intensity = data.i;
+        getNightFilterUniforms(filter).opacity = data.o;
       }
     })()
   );

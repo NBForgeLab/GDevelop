@@ -309,9 +309,9 @@ module.exports = {
 
         // there is issue with spine selection. mouse events are not triggering during interaction.
         // create the invisible background rectangle to fill spine range.
-        this._placeholder = new PIXI.Sprite(
-          this._pixiResourcesLoader.getInvalidPIXITexture()
-        );
+        this._placeholder = new PIXI.Sprite({
+          texture: this._pixiResourcesLoader.getInvalidPIXITexture(),
+        });
         this._placeholder.alpha = 0;
         this._pixiObject = new PIXI.Container();
         this._pixiObject.addChild(this._placeholder);
@@ -383,7 +383,7 @@ module.exports = {
 
         const spine = this._spine;
         if (spine) {
-          const localBounds = spine.getLocalBounds(undefined, true);
+          const localBounds = spine.getLocalBounds();
           this._initialWidth = localBounds.width * scale;
           this._initialHeight = localBounds.height * scale;
         } else {
@@ -396,7 +396,7 @@ module.exports = {
         if (spine) {
           spine.width = width;
           spine.height = height;
-          const localBounds = spine.getLocalBounds(undefined, true);
+          const localBounds = spine.getLocalBounds();
 
           this._spineOriginOffsetX = localBounds.x * spine.scale.x;
           this._spineOriginOffsetY = localBounds.y * spine.scale.y;
@@ -467,7 +467,10 @@ module.exports = {
         // if custom size is set it will be reinitialized in update method
         spine.scale.set(1, 1);
         spine.state.setAnimation(0, source, shouldLoop);
-        spine.state.tracks[0].trackTime = 0;
+        const track = spine.state.tracks[0];
+        if (track) {
+          track.trackTime = 0;
+        }
         spine.update(0);
         spine.autoUpdate = false;
       }

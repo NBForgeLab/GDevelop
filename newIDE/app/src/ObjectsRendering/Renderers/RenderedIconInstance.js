@@ -2,7 +2,7 @@
 import RenderedInstance from './RenderedInstance';
 import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
 import ResourcesLoader from '../../ResourcesLoader';
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 
 /**
  * Create a renderer for an type of object displayed as an icon
@@ -28,8 +28,24 @@ export default function makeRenderer(
         pixiResourcesLoader
       );
 
-      this._pixiObject = new PIXI.Sprite(PIXI.Texture.from(iconPath));
+      const texture = PIXI.Cache.has(iconPath)
+        ? PIXI.Texture.from(iconPath)
+        : PIXI.Texture.EMPTY;
+      this._pixiObject = new PIXI.Sprite({
+        texture,
+      });
       this._pixiContainer.addChild(this._pixiObject);
+
+      if (texture === PIXI.Texture.EMPTY) {
+        PIXI.Assets.load(iconPath)
+          .then(loadedTexture => {
+            if (this._wasDestroyed) return;
+            this._pixiObject.texture = loadedTexture;
+          })
+          .catch(error => {
+            console.error(`Unable to load icon texture "${iconPath}".`, error);
+          });
+      }
     }
 
     onRemovedFromScene(): void {

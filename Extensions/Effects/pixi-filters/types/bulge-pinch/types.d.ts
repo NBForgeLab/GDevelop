@@ -1,17 +1,14 @@
 declare namespace PIXI.filters {
   export interface BulgePinchFilterOptions {
-    center?: PIXI.Point | [number, number];
+    center?: PIXI.PointData | number[] | number;
     radius?: number;
     strength?: number;
   }
   export class BulgePinchFilter extends PIXI.Filter {
     constructor(options?: BulgePinchFilterOptions);
-    constructor(
-      center?: PIXI.Point | [number, number],
-      radius?: number,
-      strength?: number
-    );
-    center: PIXI.Point;
+    center: PIXI.PointData;
+    centerX: number;
+    centerY: number;
     radius: number;
     strength: number;
   }

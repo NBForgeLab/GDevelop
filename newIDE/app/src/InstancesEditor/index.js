@@ -18,7 +18,7 @@ import InstancesMover from './InstancesMover';
 import Grid from './Grid';
 import WindowBorder from './WindowBorder';
 import WindowMask from './WindowMask';
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 import * as THREE from 'three';
 import FpsLimiter from './FpsLimiter';
 import { startPIXITicker, stopPIXITicker } from '../Utils/PIXITicker';
@@ -159,6 +159,7 @@ export default class InstancesEditor extends Component<Props, State> {
   canvasArea: ?HTMLDivElement;
   // $FlowFixMe[value-as-type]
   pixiRenderer: PIXI.Renderer;
+  _pixiRendererInitializationPromise: Promise<void> | null = null;
   // $FlowFixMe[value-as-type]
   threeRenderer: THREE.WebGLRenderer | null = null;
   keyboardShortcuts: KeyboardShortcuts;
@@ -235,6 +236,25 @@ export default class InstancesEditor extends Component<Props, State> {
   }
 
   _initializeCanvasAndRenderer() {
+    if (this._pixiRendererInitializationPromise) return;
+
+    this._pixiRendererInitializationPromise = this._initializeCanvasAndRendererAsync()
+      .catch(error => {
+        if (!this._unmounted) {
+          this.setState({
+            renderingError: {
+              error: error instanceof Error ? error : new Error(String(error)),
+              uniqueErrorId: generateUUID(),
+            },
+          });
+        }
+      })
+      .finally(() => {
+        this._pixiRendererInitializationPromise = null;
+      });
+  }
+
+  async _initializeCanvasAndRendererAsync() {
     const { canvasArea } = this;
     if (!canvasArea) return;
 
@@ -260,8 +280,33 @@ export default class InstancesEditor extends Component<Props, State> {
     // TODO (3D): Should it handle preference changes without needing to reopen tabs?
     if (this._showObjectInstancesIn3D) {
       gameCanvas = document.createElement('canvas');
+      const contextAttributes = {
+        antialias: false,
+        preserveDrawingBuffer: true,
+        stencil: true,
+      };
+      let glContext:
+        | WebGLRenderingContext
+        | WebGL2RenderingContext
+        | null = null;
+      if (typeof WebGL2RenderingContext !== 'undefined') {
+        glContext = gameCanvas.getContext('webgl2', contextAttributes);
+      }
+      if (!glContext) {
+        glContext =
+          gameCanvas.getContext('webgl', contextAttributes) ||
+          gameCanvas.getContext('experimental-webgl', contextAttributes);
+      }
+      if (!glContext) {
+        throw new Error('Unable to create a WebGL context.');
+      }
+
       const threeRenderer = new THREE.WebGLRenderer({
         canvas: gameCanvas,
+        context: glContext,
+        antialias: false,
+        preserveDrawingBuffer: true,
+        stencil: true,
       });
       threeRenderer.autoClear = false;
       threeRenderer.setSize(initialWidth, initialHeight);
@@ -269,10 +314,11 @@ export default class InstancesEditor extends Component<Props, State> {
       // Create a PixiJS renderer that use the same GL context as Three.js
       // so that both can render to the canvas and even have PixiJS rendering
       // reused in Three.js (by using a RenderTexture and the same internal WebGL texture).
-      this.pixiRenderer = new PIXI.Renderer({
+      const pixiRenderer = new PIXI.WebGLRenderer();
+      await pixiRenderer.init({
         width: initialWidth,
         height: initialHeight,
-        view: gameCanvas,
+        canvas: gameCanvas,
         context: threeRenderer.getContext(),
         clearBeforeRender: false,
         preserveDrawingBuffer: true,
@@ -281,13 +327,24 @@ export default class InstancesEditor extends Component<Props, State> {
         // It's the default value, but it's better to make it explicit.
         // It allows instances composed of several pixi objects to detect hovering.
         eventMode: 'auto',
+        accessibilityOptions: {
+          enabledByDefault: false,
+          activateOnTab: false,
+        },
         // TODO (3D): add a setting for pixel ratio (`resolution: window.devicePixelRatio`)
       });
 
+      if (this._unmounted || !this.canvasArea) {
+        pixiRenderer.destroy();
+        threeRenderer.dispose();
+        return;
+      }
+
+      this.pixiRenderer = pixiRenderer;
       this.threeRenderer = threeRenderer;
     } else {
       // Create the renderer and setup the rendering area for scene editor.
-      this.pixiRenderer = PIXI.autoDetectRenderer({
+      const pixiRenderer = await PIXI.autoDetectRenderer({
         width: initialWidth,
         height: initialHeight,
         // "preserveDrawingBuffer: true" is needed to avoid flickering and background issues on some mobile phones (see #585 #572 #566 #463)
@@ -296,28 +353,38 @@ export default class InstancesEditor extends Component<Props, State> {
         antialias: false,
         clearBeforeRender: false,
         backgroundAlpha: 0,
+        accessibilityOptions: {
+          enabledByDefault: false,
+          activateOnTab: false,
+        },
       });
 
-      gameCanvas = this.pixiRenderer.view;
+      if (this._unmounted || !this.canvasArea) {
+        pixiRenderer.destroy();
+        return;
+      }
+
+      this.pixiRenderer = pixiRenderer;
+      gameCanvas = this.pixiRenderer.canvas;
     }
 
-    // Deactivating accessibility support in PixiJS renderer, as we want to be in control of this.
-    // See https://github.com/pixijs/pixijs/issues/5111#issuecomment-420047824
-    this.pixiRenderer.plugins.accessibility.destroy();
-    delete this.pixiRenderer.plugins.accessibility;
+    // Deactivate accessibility support in PixiJS renderer, as we want to be in control of this.
+    if (this.pixiRenderer.accessibility) {
+      this.pixiRenderer.accessibility.setAccessibilityEnabled(false);
+    }
 
     // Add the renderer view element to the DOM
     canvasArea.appendChild(gameCanvas);
 
-    this.pixiRenderer.view.style.outline = 'none';
+    gameCanvas.style.outline = 'none';
 
     this.longTouchHandler = new LongTouchHandler({
-      canvas: this.pixiRenderer.view,
+      canvas: gameCanvas,
       onLongTouch: event =>
         this.props.onContextMenu(event.clientX, event.clientY),
     });
 
-    this.pixiRenderer.view.onwheel = (event: WheelEvent) => {
+    gameCanvas.onwheel = (event: WheelEvent) => {
       this.fpsLimiter.notifyInteractionHappened();
       const zoomFactor = this.getZoomFactor();
       if (this.keyboardShortcuts.shouldZoom(event)) {
@@ -333,32 +400,23 @@ export default class InstancesEditor extends Component<Props, State> {
 
       event.preventDefault();
     };
-    this.pixiRenderer.view.setAttribute('tabIndex', -1);
-    this.pixiRenderer.view.addEventListener(
-      'keydown',
-      this.keyboardShortcuts.onKeyDown
-    );
-    this.pixiRenderer.view.addEventListener(
-      'keyup',
-      this.keyboardShortcuts.onKeyUp
-    );
-    this.pixiRenderer.view.addEventListener(
+    gameCanvas.setAttribute('tabIndex', -1);
+    gameCanvas.addEventListener('keydown', this.keyboardShortcuts.onKeyDown);
+    gameCanvas.addEventListener('keyup', this.keyboardShortcuts.onKeyUp);
+    gameCanvas.addEventListener(
       'mousedown',
       this.keyboardShortcuts.onMouseDown
     );
-    this.pixiRenderer.view.addEventListener(
-      'mouseup',
-      this.keyboardShortcuts.onMouseUp
-    );
+    gameCanvas.addEventListener('mouseup', this.keyboardShortcuts.onMouseUp);
     if (onMouseMove)
-      this.pixiRenderer.view.addEventListener('mousemove', event => {
+      gameCanvas.addEventListener('mousemove', event => {
         onMouseMove(event);
       });
     if (onMouseLeave)
-      this.pixiRenderer.view.addEventListener('mouseout', event => {
+      gameCanvas.addEventListener('mouseout', event => {
         onMouseLeave(event);
       });
-    this.pixiRenderer.view.addEventListener('focusout', event => {
+    gameCanvas.addEventListener('focusout', event => {
       if (this.keyboardShortcuts) {
         this.keyboardShortcuts.resetModifiers();
       }
@@ -376,18 +434,16 @@ export default class InstancesEditor extends Component<Props, State> {
     );
     panable(this.backgroundArea);
     this.backgroundArea.addEventListener('mousedown', event =>
-      this._onDownBackground(event.data.global.x, event.data.global.y, event)
+      this._onDownBackground(event.global.x, event.global.y, event)
     );
     this.backgroundArea.addEventListener('mouseup', event =>
-      this._onUpBackground(event.data.global.x, event.data.global.y, event)
+      this._onUpBackground(event.global.x, event.global.y, event)
     );
     this.backgroundArea.addEventListener(
       'rightclick',
       // $FlowFixMe[value-as-type]
-      (interactionEvent: PIXI.InteractionEvent) => {
-        const {
-          data: { originalEvent: event },
-        } = interactionEvent;
+      (interactionEvent: PIXI.FederatedMouseEvent) => {
+        const event = interactionEvent.nativeEvent;
         this._onRightClicked({
           offsetX: event.offsetX,
           offsetY: event.offsetY,
@@ -400,30 +456,30 @@ export default class InstancesEditor extends Component<Props, State> {
       }
     );
     this.backgroundArea.addEventListener('touchstart', event => {
-      if (shouldBeHandledByPinch(event.data && event.data.originalEvent)) {
+      if (shouldBeHandledByPinch(event.nativeEvent)) {
         return;
       }
 
-      this._onDownBackground(event.data.global.x, event.data.global.y);
+      this._onDownBackground(event.global.x, event.global.y);
     });
     this.backgroundArea.addEventListener('touchend', event => {
-      if (shouldBeHandledByPinch(event.data && event.data.originalEvent)) {
+      if (shouldBeHandledByPinch(event.nativeEvent)) {
         return;
       }
 
-      this._onUpBackground(event.data.global.x, event.data.global.y);
+      this._onUpBackground(event.global.x, event.global.y);
     });
     this.backgroundArea.addEventListener('globalmousemove', event => {
-      const cursorX = event.data.global.x || 0;
-      const cursorY = event.data.global.y || 0;
+      const cursorX = event.global.x || 0;
+      const cursorY = event.global.y || 0;
       this._onMouseMove(cursorX, cursorY);
     });
     this.backgroundArea.addEventListener('panmove', (event: PanMoveEvent) =>
       this._onPanMove(
         event.deltaX,
         event.deltaY,
-        event.data.global.x,
-        event.data.global.y
+        event.pointerEvent.global.x,
+        event.pointerEvent.global.y
       )
     );
     this.backgroundArea.addEventListener('panend', event => this._onPanEnd());
@@ -451,7 +507,7 @@ export default class InstancesEditor extends Component<Props, State> {
     this.uiPixiContainer.addChild(this.grid.getPixiObject());
 
     this.pinchHandler = new PinchHandler({
-      canvas: this.pixiRenderer.view,
+      canvas: gameCanvas,
       setZoomFactor: this.setZoomFactor,
       getZoomFactor: this.getZoomFactor,
       viewPosition: this.viewPosition,
@@ -700,9 +756,9 @@ export default class InstancesEditor extends Component<Props, State> {
         if (this.threeRenderer) {
           this.threeRenderer.resetState();
 
-          // Actually do not reset PixiJS renderer as we get crashes when doing it
+          // Actually do not reset PixiJS renderer state as we get crashes when doing it
           // ("Cannot read properties of null (reading '_batchEnabled')").
-          // this.pixiRenderer.reset();
+          // this.pixiRenderer.resetState();
         }
 
         this.pixiRenderer.resize(width, height);
@@ -1233,10 +1289,10 @@ export default class InstancesEditor extends Component<Props, State> {
     );
   };
 
-  _onDownBackground = (x: number, y: number, event?: PointerEvent) => {
+  _onDownBackground = (x: number, y: number, event?: any) => {
     this.lastCursorX = x;
     this.lastCursorY = y;
-    this.pixiRenderer.view.focus();
+    this.pixiRenderer.canvas.focus();
 
     // KeyboardShortcuts.shouldMoveView cannot be used here because
     // the click event fires first on the background, then on the pixi
@@ -1321,7 +1377,7 @@ export default class InstancesEditor extends Component<Props, State> {
 
   _onInstanceClicked = (instance: gdInitialInstance) => {
     this.fpsLimiter.notifyInteractionHappened();
-    this.pixiRenderer.view.focus();
+    this.pixiRenderer.canvas.focus();
   };
 
   _onInstanceRightClicked = (coordinates: {|

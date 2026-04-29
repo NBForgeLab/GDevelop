@@ -1,5 +1,5 @@
 // @flow
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 import * as THREE from 'three';
 import PixiResourcesLoader from '../PixiResourcesLoader';
 
@@ -18,7 +18,7 @@ export default class Rendered3DInstance {
   _threeGroup: THREE.Group;
   _pixiResourcesLoader: Class<PixiResourcesLoader>;
   // $FlowFixMe[value-as-type]
-  _pixiObject: PIXI.DisplayObject;
+  _pixiObject: PIXI.Container;
   // $FlowFixMe[value-as-type]
   _threeObject: THREE.Object3D | null;
   wasUsed: boolean;

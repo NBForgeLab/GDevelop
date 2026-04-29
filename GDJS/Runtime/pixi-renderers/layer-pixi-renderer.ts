@@ -1026,13 +1026,12 @@ namespace gdjs {
         // onScreenPosition = floor(780.75)
         // onScreenPosition = 780
 
-        if (
-          this._layer
-            .getRuntimeScene()
-            .getGame()
-            .getRenderer()
-            .getPIXIRenderer() instanceof PIXI.Renderer
-        ) {
+        const pixiRenderer = this._layer
+          .getRuntimeScene()
+          .getGame()
+          .getRenderer()
+          .getPIXIRenderer();
+        if (pixiRenderer && pixiRenderer.name === 'webgl') {
           // TODO Revert from `round` to `ceil` when the issue is fixed in Pixi.
           // Since the upgrade to Pixi 7, sprites are rounded with `round`
           // instead of `floor`.
@@ -1158,7 +1157,7 @@ namespace gdjs {
      * @param zOrder The z order of the associated object.
      */
     addRendererObject(pixiChild, zOrder: float): void {
-      const child = pixiChild as PIXI.DisplayObject;
+      const child = pixiChild as PIXI.Container;
       child.zIndex = zOrder || LayerPixiRenderer.zeroZOrderForPixi;
       this._pixiContainer.addChild(child);
     }
@@ -1170,7 +1169,7 @@ namespace gdjs {
      * @param newZOrder The z order of the associated object.
      */
     changeRendererObjectZOrder(pixiChild, newZOrder: float): void {
-      const child = pixiChild as PIXI.DisplayObject;
+      const child = pixiChild as PIXI.Container;
       child.zIndex = newZOrder;
     }
 
@@ -1215,7 +1214,7 @@ namespace gdjs {
      * so it can then be consumed by Three.js to render it in 3D.
      */
     private _createPixiRenderTexture(pixiRenderer: PIXI.Renderer | null): void {
-      if (!pixiRenderer || pixiRenderer.type !== PIXI.RENDERER_TYPE.WEBGL) {
+      if (!pixiRenderer || pixiRenderer.name !== 'webgl') {
         return;
       }
       if (this._renderTexture) {
@@ -1236,7 +1235,7 @@ namespace gdjs {
         height: height || 100,
         resolution,
       });
-      this._renderTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.LINEAR;
+      this._renderTexture.source.scaleMode = 'linear';
       logger.info(`RenderTexture created for layer ${this._layer.getName()}.`);
     }
 
@@ -1260,24 +1259,20 @@ namespace gdjs {
         this._oldWidth = pixiRenderer.screen.width;
         this._oldHeight = pixiRenderer.screen.height;
       }
-      const oldRenderTexture = pixiRenderer.renderTexture.current || undefined;
-      const oldSourceFrame = pixiRenderer.renderTexture.sourceFrame;
-      pixiRenderer.renderTexture.bind(this._renderTexture);
-
       // The background is the ambient color for lighting layers
       // and transparent for 2D+3D layers.
       this._clearColor[3] = this._isLightingLayer ? 1 : 0;
-      pixiRenderer.renderTexture.clear(this._clearColor);
+      pixiRenderer.clear({
+        target: this._renderTexture,
+        clearColor: this._clearColor,
+        clear: true,
+      });
 
-      pixiRenderer.render(this._pixiContainer, {
-        renderTexture: this._renderTexture,
+      pixiRenderer.render({
+        container: this._pixiContainer,
+        target: this._renderTexture,
         clear: false,
       });
-      pixiRenderer.renderTexture.bind(
-        oldRenderTexture,
-        oldSourceFrame,
-        undefined
-      );
     }
 
     /**
@@ -1293,12 +1288,14 @@ namespace gdjs {
       }
 
       const glTexture =
-        this._renderTexture.baseTexture._glTextures[pixiRenderer.CONTEXT_UID];
+        (this._renderTexture.source as any)._gpuData[pixiRenderer.uid];
       if (glTexture) {
         // "Hack" into the Three.js renderer by getting the internal WebGL texture for the PixiJS plane,
         // and set it so that it's the same as the WebGL texture for the PixiJS RenderTexture.
         // This works because PixiJS and Three.js are using the same WebGL context.
-        const texture = threeRenderer.properties.get(this._threePlaneTexture);
+        const texture = threeRenderer.properties.get(
+          this._threePlaneTexture
+        ) as any;
         texture.__webglTexture = glTexture.texture;
       }
     }
@@ -1318,8 +1315,10 @@ namespace gdjs {
         return;
       }
 
-      this._lightingSprite = new PIXI.Sprite(this._renderTexture);
-      this._lightingSprite.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+      this._lightingSprite = new PIXI.Sprite({
+        texture: this._renderTexture,
+      });
+      this._lightingSprite.blendMode = 'multiply';
       const parentPixiContainer =
         runtimeInstanceContainerRenderer.getRendererObject();
       if (parentPixiContainer) {

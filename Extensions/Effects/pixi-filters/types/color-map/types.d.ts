@@ -1,15 +1,13 @@
 declare namespace PIXI.filters {
+  export interface ColorMapFilterOptions {
+    colorMap: PIXI.Texture | PIXI.TextureSource;
+    nearest?: boolean;
+    mix?: number;
+  }
+
   export class ColorMapFilter extends PIXI.Filter {
-    constructor(
-      colorMap?:
-        | HTMLImageElement
-        | HTMLCanvasElement
-        | PIXI.BaseTexture
-        | PIXI.Texture,
-      nearest?: boolean,
-      mix?: number
-    );
-    colorMap: PIXI.Texture;
+    constructor(options: ColorMapFilterOptions);
+    colorMap: PIXI.Texture | PIXI.TextureSource;
     nearest: boolean;
     mix: number;
     readonly colorSize: number;
@@ -18,4 +16,5 @@ declare namespace PIXI.filters {
 
 declare module '@pixi/filter-color-map' {
   export import ColorMapFilter = PIXI.filters.ColorMapFilter;
+  export import ColorMapFilterOptions = PIXI.filters.ColorMapFilterOptions;
 }

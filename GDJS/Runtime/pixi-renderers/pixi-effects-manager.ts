@@ -127,7 +127,7 @@ namespace gdjs {
      * Remove all effects from a PixiJS DisplayObject.
      * @param rendererObject The renderer object.
      */
-    clearEffects(rendererObject: PIXI.DisplayObject): boolean {
+    clearEffects(rendererObject: PIXI.Container): boolean {
       if (rendererObject) {
         rendererObject.filters = [];
       }
@@ -143,7 +143,7 @@ namespace gdjs {
       effectsData: EffectData[]
     ): boolean {
       const rendererObject = target.getRendererObject() as
-        | PIXI.DisplayObject
+        | PIXI.Container
         | null
         | undefined;
       if (!rendererObject) {
@@ -166,7 +166,8 @@ namespace gdjs {
         }
       }
 
-      const existingFilters: PIXI.Filter[] = rendererObject.filters || [];
+      const existingFilters: readonly PIXI.Filter[] =
+        rendererObject.filters || [];
       const extraFilters = existingFilters.filter(
         (filter) => !knownPixiFilters.has(filter)
       );

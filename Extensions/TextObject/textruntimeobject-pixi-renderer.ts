@@ -11,7 +11,10 @@ namespace gdjs {
     ) {
       this._object = runtimeObject;
       this._fontManager = instanceContainer.getGame().getFontManager();
-      this._text = new PIXI.Text(' ', { align: 'left' });
+      this._text = new PIXI.Text({
+        text: ' ',
+        style: { align: 'left' },
+      });
       this._text.anchor.x = 0.5;
       this._text.anchor.y = 0.5;
       instanceContainer
@@ -32,9 +35,6 @@ namespace gdjs {
 
     ensureUpToDate() {
       if (this._justCreated) {
-        //Work around a PIXI.js bug:
-        this._text.updateText(false);
-
         //Width seems not to be correct when text is not rendered yet.
         this.updatePosition();
         this._justCreated = false;
@@ -50,52 +50,46 @@ namespace gdjs {
       style.fontSize = this._object._characterSize;
       style.fontFamily = fontName;
       if (this._object._useGradient) {
-        style.fill = this._getGradientHex();
+        style.fill = this._getGradientFill();
       } else {
         style.fill = this._getColorHex();
-      }
-      if (this._object._gradientType === 'LINEAR_VERTICAL') {
-        style.fillGradientType = PIXI.TEXT_GRADIENT.LINEAR_VERTICAL;
-      } else {
-        style.fillGradientType = PIXI.TEXT_GRADIENT.LINEAR_HORIZONTAL;
       }
       // @ts-ignore
       style.align = this._object._textAlign;
       style.wordWrap = this._object._wrapping;
       style.wordWrapWidth = this._object._wrappingWidth;
       style.breakWords = true;
-      style.stroke = gdjs.rgbToHexNumber(
-        this._object._outlineColor[0],
-        this._object._outlineColor[1],
-        this._object._outlineColor[2]
-      );
-      style.strokeThickness = this._object._isOutlineEnabled
-        ? this._object._outlineThickness
-        : 0;
-      style.dropShadow = this._object._shadow;
-      style.dropShadowColor = gdjs.rgbToHexNumber(
-        this._object._shadowColor[0],
-        this._object._shadowColor[1],
-        this._object._shadowColor[2]
-      );
-      style.dropShadowAlpha = this._object._shadowOpacity / 255;
-      style.dropShadowBlur = this._object._shadowBlur;
-      style.dropShadowAngle = gdjs.toRad(this._object._shadowAngle);
-      style.dropShadowDistance = this._object._shadowDistance;
-      const extraPaddingForShadow = style.dropShadow
-        ? style.dropShadowDistance + style.dropShadowBlur
+      style.stroke = {
+        color: gdjs.rgbToHexNumber(
+          this._object._outlineColor[0],
+          this._object._outlineColor[1],
+          this._object._outlineColor[2]
+        ),
+        width: this._object._isOutlineEnabled
+          ? this._object._outlineThickness
+          : 0,
+        join: 'miter',
+        miterLimit: 3,
+      };
+      style.dropShadow = this._object._shadow
+        ? {
+            color: gdjs.rgbToHexNumber(
+              this._object._shadowColor[0],
+              this._object._shadowColor[1],
+              this._object._shadowColor[2]
+            ),
+            alpha: this._object._shadowOpacity / 255,
+            blur: this._object._shadowBlur,
+            angle: gdjs.toRad(this._object._shadowAngle),
+            distance: this._object._shadowDistance,
+          }
+        : false;
+      const extraPaddingForShadow = this._object._shadow
+        ? this._object._shadowDistance + this._object._shadowBlur
         : 0;
       style.padding = Math.ceil(this._object._padding + extraPaddingForShadow);
       style.lineHeight = this._object._lineHeight;
-
-      // Prevent spikey outlines by adding a miter limit
-      style.miterLimit = 3;
       this.updatePosition();
-
-      // Manually ask the PIXI object to re-render as we changed a style property
-      // see http://www.html5gamedevs.com/topic/16924-change-text-style-post-render/
-      // @ts-ignore
-      this._text.dirty = true;
     }
 
     updatePosition(): void {
@@ -141,9 +135,6 @@ namespace gdjs {
     updateString(): void {
       this._text.text =
         this._object._str.length === 0 ? ' ' : this._object._str;
-
-      //Work around a PIXI.js bug.
-      this._text.updateText(false);
     }
 
     getWidth(): float {
@@ -162,23 +153,25 @@ namespace gdjs {
       );
     }
 
-    _getGradientHex() {
-      const gradient: Array<string> = [];
-      for (
-        let colorIndex = 0;
-        colorIndex < this._object._gradient.length;
-        colorIndex++
-      ) {
-        gradient.push(
-          '#' +
-            gdjs.rgbToHex(
-              this._object._gradient[colorIndex][0],
-              this._object._gradient[colorIndex][1],
-              this._object._gradient[colorIndex][2]
-            )
-        );
+    _getGradientFill() {
+      const lastColorIndex = this._object._gradient.length - 1;
+      if (lastColorIndex <= 0) {
+        const color = this._object._gradient[0] || this._object._color;
+        return gdjs.rgbToHexNumber(color[0], color[1], color[2]);
       }
-      return gradient;
+      return new PIXI.FillGradient({
+        type: 'linear',
+        start: { x: 0, y: 0 },
+        end:
+          this._object._gradientType === 'LINEAR_VERTICAL'
+            ? { x: 0, y: 1 }
+            : { x: 1, y: 0 },
+        colorStops: this._object._gradient.map((color, index) => ({
+          offset: index / lastColorIndex,
+          color: gdjs.rgbToHexNumber(color[0], color[1], color[2]),
+        })),
+        textureSpace: 'local',
+      });
     }
 
     /**
@@ -221,7 +214,7 @@ namespace gdjs {
     }
 
     destroy() {
-      this._text.destroy(true);
+      this._text.destroy({ texture: true, textureSource: true });
     }
   }
 

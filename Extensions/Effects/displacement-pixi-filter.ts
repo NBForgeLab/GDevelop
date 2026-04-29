@@ -12,8 +12,10 @@ namespace gdjs {
           .getGame()
           .getImageManager()
           .getPIXITexture(effectData.stringParameters.displacementMapTexture);
-        displacementMapTexture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
-        const displacementSprite = new PIXI.Sprite(displacementMapTexture);
+        displacementMapTexture.source.wrapMode = 'repeat';
+        const displacementSprite = new PIXI.Sprite({
+          texture: displacementMapTexture,
+        });
         const displacementFilter = new PIXI.DisplacementFilter(
           displacementSprite
         );

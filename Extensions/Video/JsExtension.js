@@ -557,7 +557,9 @@ module.exports = {
         this._videoResource = undefined;
 
         //Setup the PIXI object:
-        this._pixiObject = new PIXI.Sprite(this._getVideoTexture());
+        this._pixiObject = new PIXI.Sprite({
+          texture: this._getVideoTexture(),
+        });
         this._pixiObject.anchor.x = 0.5;
         this._pixiObject.anchor.y = 0.5;
         this._pixiContainer.addChild(this._pixiObject);
@@ -607,12 +609,15 @@ module.exports = {
           this._videoResource = videoResource;
           this._pixiObject.texture = this._getVideoTexture();
 
-          if (!this._pixiObject.texture.baseTexture.valid) {
+          if (
+            !this._pixiObject.texture.source ||
+            this._pixiObject.texture.source.width === 0 ||
+            this._pixiObject.texture.source.height === 0
+          ) {
             var that = this;
 
-            that._pixiObject.texture.on('error', function () {
-              that._pixiObject.texture.off('error', this);
-              if (this._wasDestroyed) return;
+            that._pixiObject.texture.source.once('error', function () {
+              if (that._wasDestroyed) return;
 
               that._pixiObject.texture =
                 that._pixiResourcesLoader.getInvalidPIXITexture();

@@ -18,7 +18,11 @@ namespace gdjs {
     'Shockwave',
     new (class extends gdjs.PixiFiltersTools.PixiFilterCreator {
       makePIXIFilter(target: EffectsTarget, effectData) {
-        const shockwaveFilter = new PIXI.filters.ShockwaveFilter([0.5, 0.5]);
+        const shockwaveFilter = new PIXI.filters.ShockwaveFilter({
+          center: { x: 0.5, y: 0.5 },
+        }) as PIXI.filters.ShockwaveFilter & ShockwaveFilterExtra;
+        shockwaveFilter._centerX = 0.5;
+        shockwaveFilter._centerY = 0.5;
         return shockwaveFilter;
       }
       updatePreRender(filter: PIXI.Filter, target: EffectsTarget) {
@@ -28,12 +32,10 @@ namespace gdjs {
         if (shockwaveFilter.speed !== 0) {
           shockwaveFilter.time += target.getElapsedTime() / 1000;
         }
-        shockwaveFilter.center[0] = Math.round(
-          shockwaveFilter._centerX * target.getWidth()
-        );
-        shockwaveFilter.center[1] = Math.round(
-          shockwaveFilter._centerY * target.getHeight()
-        );
+        shockwaveFilter.center = {
+          x: Math.round(shockwaveFilter._centerX * target.getWidth()),
+          y: Math.round(shockwaveFilter._centerY * target.getHeight()),
+        };
       }
       updateDoubleParameter(
         filter: PIXI.Filter,

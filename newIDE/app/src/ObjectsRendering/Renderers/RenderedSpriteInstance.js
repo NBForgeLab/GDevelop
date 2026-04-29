@@ -2,7 +2,7 @@
 import RenderedInstance from './RenderedInstance';
 import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
 import ResourcesLoader from '../../ResourcesLoader';
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 const gd: libGDevelop = global.gd;
 
 /**
@@ -43,9 +43,9 @@ export default class RenderedSpriteInstance extends RenderedInstance {
     this._originY = 0;
 
     //Setup the PIXI object:
-    this._pixiObject = new PIXI.Sprite(
-      this._pixiResourcesLoader.getInvalidPIXITexture()
-    );
+    this._pixiObject = new PIXI.Sprite({
+      texture: this._pixiResourcesLoader.getInvalidPIXITexture(),
+    });
     this._pixiContainer.addChild(this._pixiObject);
     this.updatePIXITextureAndSprite();
   }
@@ -185,7 +185,9 @@ export default class RenderedSpriteInstance extends RenderedInstance {
       if (
         !this._pixiObject.texture ||
         !this._pixiObject.texture.orig ||
-        !this._pixiObject.texture.baseTexture
+        !this._pixiObject.texture.source ||
+        this._pixiObject.texture.destroyed ||
+        this._pixiObject.texture.source.destroyed
       ) {
         this._pixiObject.texture = this._pixiResourcesLoader.getInvalidPIXITexture();
       }
@@ -198,7 +200,16 @@ export default class RenderedSpriteInstance extends RenderedInstance {
     );
     this._pixiObject.texture = texture;
 
-    if (!texture.baseTexture || !texture.baseTexture.valid) {
+    const isLoadingTexture =
+      texture.source ===
+      this._pixiResourcesLoader.getLoadingPIXITexture().source;
+    if (
+      isLoadingTexture ||
+      !texture.source ||
+      texture.source.destroyed ||
+      texture.source.width === 0 ||
+      texture.source.height === 0
+    ) {
       // Post pone texture update if texture is not loaded.
       texture.once('update', () => {
         if (this._wasDestroyed) return;
@@ -230,7 +241,11 @@ export default class RenderedSpriteInstance extends RenderedInstance {
     // Extra safety check.
     const currentTexture = this._pixiObject.texture;
     const isCurrentTextureDestroyed =
-      !currentTexture || !currentTexture.orig || !currentTexture.baseTexture;
+      !currentTexture ||
+      !currentTexture.orig ||
+      !currentTexture.source ||
+      currentTexture.destroyed ||
+      currentTexture.source.destroyed;
     if (isCurrentTextureDestroyed) {
       console.warn(
         'Current texture for a RenderedSpriteInstance is destroyed. This should never happen - verify how resources are (re)loaded.'

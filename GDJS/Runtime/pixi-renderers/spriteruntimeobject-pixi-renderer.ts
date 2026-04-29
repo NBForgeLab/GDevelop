@@ -1,4 +1,17 @@
 namespace gdjs {
+  const toPixiBlendMode = (blendMode: number): PIXI.BLEND_MODES => {
+    switch (blendMode) {
+      case 1:
+        return 'add';
+      case 2:
+        return 'multiply';
+      case 3:
+        return 'screen';
+      default:
+        return 'normal';
+    }
+  };
+
   export interface PixiImageManager {
     _pixiAnimationFrameTextureManager: PixiAnimationFrameTextureManager;
   }
@@ -24,7 +37,9 @@ namespace gdjs {
     ) {
       this._object = runtimeObject;
       const imageManager = instanceContainer.getGame().getImageManager();
-      this._sprite = new PIXI.Sprite(imageManager.getInvalidPIXITexture());
+      this._sprite = new PIXI.Sprite({
+        texture: imageManager.getInvalidPIXITexture(),
+      });
       const layer = instanceContainer.getLayer('');
       if (layer) {
         layer
@@ -95,7 +110,7 @@ namespace gdjs {
         this._object.y + (centerY - originY) * Math.abs(scaleY);
       this._sprite.rotation = gdjs.toRad(this._object.angle);
       this._sprite.visible = !this._object.hidden;
-      this._sprite.blendMode = this._object._blendMode;
+      this._sprite.blendMode = toPixiBlendMode(this._object._blendMode);
       this._sprite.alpha = this._object.opacity / 255;
       this._sprite.scale.x = scaleX;
       this._sprite.scale.y = scaleY;

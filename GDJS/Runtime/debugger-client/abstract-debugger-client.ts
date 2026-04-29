@@ -721,8 +721,6 @@ namespace gdjs {
         '_imageManager',
         '_rendererEffects',
         // Exclude PIXI textures:
-        'baseTexture',
-        '_baseTexture',
         '_invalidTexture',
       ];
       const stringifiedMessage = circularSafeStringify(

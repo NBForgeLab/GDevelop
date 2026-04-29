@@ -11,7 +11,7 @@ import {
   type LayoutedParent,
 } from './CustomObjectLayoutingModel';
 import { mapVector } from '../../Utils/MapFor';
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 import * as THREE from 'three';
 
 const gd: libGDevelop = global.gd;
@@ -187,7 +187,7 @@ export default class RenderedCustomObjectInstance extends Rendered3DInstance
       if (!renderedInstance) return;
 
       // $FlowFixMe[value-as-type]
-      const pixiObject: PIXI.DisplayObject | null = renderedInstance.getPixiObject();
+      const pixiObject: PIXI.Container | null = renderedInstance.getPixiObject();
       if (pixiObject) {
         if (renderedInstance.isRenderedIn3D()) {
           pixiObject.zOrder = instance.getZ() + renderedInstance.getDepth();

@@ -42,11 +42,14 @@
   // Exclude pre-built js code
   "exclude": [
     "GDJS/Runtime/pixi-renderers/pixi.js",
+    "GDJS/Runtime/pixi-renderers/three.js",
+    "GDJS/Runtime/pixi-renderers/three-debug.js",
+    "GDJS/Runtime/pixi-renderers/ThreeAddons.js",
     "GDJS/Runtime/Cordova",
     "GDJS/Runtime/Electron",
     "GDJS/Runtime/FacebookInstantGames",
     "GDJS/Runtime/libs/CocoonJS",
-    "Extensions/Effects/pixi-filters/filter-alpha.js",
+    "Extensions/Effects/pixi-filters/pixi-filters.js",
     "SharedLibs/TileMapHelper/**/*",
     "Extensions/Spine/pixi-spine/pixi-spine.js",
     "Extensions/P2P/A_peer.js",

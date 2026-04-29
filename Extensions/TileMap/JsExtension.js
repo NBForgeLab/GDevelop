@@ -1610,10 +1610,7 @@ module.exports = {
     const RenderedInstance = objectsRenderingService.RenderedInstance;
     const PIXI = objectsRenderingService.PIXI;
 
-    const Tilemap = objectsRenderingService.requireModule(
-      __dirname,
-      'pixi-tilemap/dist/pixi-tilemap.umd'
-    );
+    const Tilemap = PIXI.tilemap;
     const TilemapHelper = objectsRenderingService.requireModule(
       __dirname,
       'helper/TileMapHelper'
@@ -1623,15 +1620,6 @@ module.exports = {
       __dirname,
       'pako/dist/pako.min'
     );
-
-    // When on the webapp, and using webpack, the extension does not seem to
-    // be able to register itself properly. So we do it manually.
-    // (This should be done here https://github.com/pixijs/tilemap/blob/master/src/index.ts#L43-L47)
-    PIXI.extensions.add({
-      name: 'tilemap',
-      type: PIXI.ExtensionType.RendererPlugin,
-      ref: Tilemap.TileRenderer,
-    });
 
     /**
      * Renderer for instances of TileMap inside the IDE.
@@ -1708,7 +1696,9 @@ module.exports = {
       _onLoadingError() {
         this.errorPixiObject =
           this.errorPixiObject ||
-          new PIXI.Sprite(this._pixiResourcesLoader.getInvalidPIXITexture());
+          new PIXI.Sprite({
+            texture: this._pixiResourcesLoader.getInvalidPIXITexture(),
+          });
 
         this._replacePixiObject(this.errorPixiObject);
       }
@@ -1786,7 +1776,7 @@ module.exports = {
                   this._pixiResourcesLoader.getPIXITexture(
                     this._project,
                     mapping[textureName] || textureName
-                  ),
+                  ).source,
                 tilemapAtlasImage,
                 tilemapJsonFile,
                 tilesetJsonFile,
@@ -1820,7 +1810,11 @@ module.exports = {
           );
         };
 
-        if (atlasTexture.valid) {
+        if (
+          atlasTexture.source &&
+          atlasTexture.source !== PIXI.Texture.WHITE.source &&
+          atlasTexture.source !== PIXI.Texture.EMPTY.source
+        ) {
           loadTileMap();
         } else {
           // Wait for the atlas image to load.
@@ -1866,7 +1860,7 @@ module.exports = {
             this._pixiResourcesLoader.getPIXITexture(
               this._project,
               mapping[textureName] || textureName
-            ),
+            ).source,
           tilemapAtlasImage,
           tilemapJsonFile,
           tilesetJsonFile,
@@ -2056,20 +2050,20 @@ module.exports = {
     class RenderedSimpleTileMapInstance extends RenderedInstance {
       _getStartedText = 'Select this instance\nto start painting';
       _noAtlasText = 'Set up an atlas image\nin the tilemap object.';
-      _placeholderTextPixiObject = new PIXI.Text(
-        '',
-        new PIXI.TextStyle({
+      _placeholderTextPixiObject = new PIXI.Text({
+        text: '',
+        style: new PIXI.TextStyle({
           fontFamily: 'Arial',
           fontSize: 16,
           align: 'center',
           padding: 5,
-        })
-      );
-      _placeholderImagePixiObject = new PIXI.Sprite(
-        PIXI.Texture.from(
+        }),
+      });
+      _placeholderImagePixiObject = new PIXI.Sprite({
+        texture: PIXI.Texture.from(
           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgAgMAAAAOFJJnAAAADFBMVEUAAAAkMoYsfqH///8FP6xgAAAAAXRSTlMAQObYZgAAAAFiS0dEAxEMTPIAAAAjSURBVBjTpcYxAQAADIMwTGISlTsmoVcCQClzSmvNo2ueGnMajGpBwI5BnwAAAABJRU5ErkJggg=='
-        )
-      );
+        ),
+      });
       _placeholderPixiObject = new PIXI.Container();
 
       constructor(
@@ -2166,7 +2160,9 @@ module.exports = {
       _onLoadingError() {
         this.errorPixiObject =
           this.errorPixiObject ||
-          new PIXI.Sprite(this._pixiResourcesLoader.getInvalidPIXITexture());
+          new PIXI.Sprite({
+            texture: this._pixiResourcesLoader.getInvalidPIXITexture(),
+          });
 
         this._replacePixiObject(this.errorPixiObject);
       }
@@ -2251,7 +2247,7 @@ module.exports = {
                     this._pixiResourcesLoader.getPIXITexture(
                       this._project,
                       textureName
-                    ),
+                    ).source,
                   atlasImageResourceName,
                   tileSize,
                   columnCount,
@@ -2287,7 +2283,11 @@ module.exports = {
           }
         };
 
-        if (atlasTexture.valid) {
+        if (
+          atlasTexture.source &&
+          atlasTexture.source !== PIXI.Texture.WHITE.source &&
+          atlasTexture.source !== PIXI.Texture.EMPTY.source
+        ) {
           loadTileMap();
         } else {
           // Wait for the atlas image to load.
@@ -2320,7 +2320,7 @@ module.exports = {
             this._pixiResourcesLoader.getPIXITexture(
               this._project,
               textureName
-            ),
+            ).source,
           atlasImageResourceName,
           tileSize,
           columnCount,
@@ -2535,7 +2535,9 @@ module.exports = {
       _onLoadingError() {
         this.errorPixiObject =
           this.errorPixiObject ||
-          new PIXI.Sprite(this._pixiResourcesLoader.getInvalidPIXITexture());
+          new PIXI.Sprite({
+            texture: this._pixiResourcesLoader.getInvalidPIXITexture(),
+          });
 
         this._replacePixiObject(this.errorPixiObject);
       }

@@ -6,6 +6,8 @@ namespace gdjs {
   export class BitmapTextRuntimeObjectPixiRenderer {
     _object: gdjs.BitmapTextRuntimeObject;
     _pixiObject: PIXI.BitmapText;
+    _bitmapFontInstallKey: string;
+    _bitmapFontSize: number;
 
     /**
      * @param runtimeObject The object to render
@@ -25,9 +27,14 @@ namespace gdjs {
           runtimeObject._bitmapFontResourceName,
           runtimeObject._textureAtlasResourceName
         );
-      this._pixiObject = new PIXI.BitmapText(runtimeObject._text, {
-        fontName: bitmapFont.font,
-        fontSize: bitmapFont.size,
+      this._bitmapFontInstallKey = bitmapFont.fontFamily;
+      this._bitmapFontSize = bitmapFont.fontMetrics.fontSize;
+      this._pixiObject = new PIXI.BitmapText({
+        text: runtimeObject._text,
+        style: {
+          fontFamily: this._bitmapFontInstallKey,
+          fontSize: this._bitmapFontSize,
+        },
       });
 
       // Set the object on the scene
@@ -50,10 +57,8 @@ namespace gdjs {
     }
 
     onDestroy() {
-      // Save the font name before destroying the PIXI object.
-      const fontName = this._pixiObject.fontName;
       // Destroy the PIXI object first, while the font is still available in
-      // PIXI.BitmapFont.available (PIXI.BitmapText.destroy accesses font
+      // Pixi's bitmap font cache (PIXI.BitmapText.destroy accesses font
       // properties like distanceFieldType during cleanup).
       this._pixiObject.destroy();
       // Then mark the font as not used anymore (which may uninstall it if
@@ -62,11 +67,11 @@ namespace gdjs {
         .getInstanceContainer()
         .getGame()
         .getBitmapFontManager()
-        .releaseBitmapFont(fontName);
+        .releaseBitmapFont(this._bitmapFontInstallKey);
     }
 
     getFontSize() {
-      return this._pixiObject.fontSize;
+      return this._bitmapFontSize;
     }
 
     updateFont(): void {
@@ -80,12 +85,14 @@ namespace gdjs {
           this._object._textureAtlasResourceName
         );
 
-      const oldFontName = this._pixiObject.fontName;
+      const oldFontName = this._bitmapFontInstallKey;
 
       // Update the font on the PIXI object first, so that if releasing the
       // old font uninstalls it, the PIXI object already references the new one.
-      this._pixiObject.fontName = bitmapFont.font;
-      this._pixiObject.fontSize = bitmapFont.size;
+      this._bitmapFontInstallKey = bitmapFont.fontFamily;
+      this._bitmapFontSize = bitmapFont.fontMetrics.fontSize;
+      this._pixiObject.style.fontFamily = this._bitmapFontInstallKey;
+      this._pixiObject.style.fontSize = this._bitmapFontSize;
 
       // Mark the old font as not used anymore.
       this._object
@@ -103,7 +110,6 @@ namespace gdjs {
         this._object._tint[1],
         this._object._tint[2]
       );
-      this._pixiObject.dirty = true;
     }
 
     /**
@@ -134,12 +140,12 @@ namespace gdjs {
 
     updateWrappingWidth(): void {
       if (this._object._wrapping) {
-        this._pixiObject.maxWidth =
+        this._pixiObject.style.wordWrap = true;
+        this._pixiObject.style.wordWrapWidth =
           this._object._wrappingWidth / this._object._scaleX;
-        this._pixiObject.dirty = true;
       } else {
-        this._pixiObject.maxWidth = 0;
-        this._pixiObject.dirty = true;
+        this._pixiObject.style.wordWrap = false;
+        this._pixiObject.style.wordWrapWidth = 0;
       }
       this.updatePosition();
     }
@@ -150,8 +156,8 @@ namespace gdjs {
     }
 
     updateAlignment(): void {
-      // @ts-ignore - assume align is always a valid value.
-      this._pixiObject.align = this._object._textAlign;
+      this._pixiObject.style.align = this._object
+        ._textAlign as PIXI.TextStyleAlign;
       this.updatePosition();
     }
 
@@ -197,11 +203,11 @@ namespace gdjs {
     }
 
     getWidth(): float {
-      return this._pixiObject.textWidth * this.getScale();
+      return this._pixiObject.width;
     }
 
     getHeight(): float {
-      return this._pixiObject.textHeight * this.getScale();
+      return this._pixiObject.height;
     }
   }
 

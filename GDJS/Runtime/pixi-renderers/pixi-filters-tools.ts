@@ -5,6 +5,64 @@ namespace gdjs {
    * @category Core Engine > Effects
    */
   export namespace PixiFiltersTools {
+    export const defaultFilterVertexShader = [
+      'in vec2 aPosition;',
+      'out vec2 vTextureCoord;',
+      '',
+      'uniform vec4 uInputSize;',
+      'uniform vec4 uOutputFrame;',
+      'uniform vec4 uOutputTexture;',
+      '',
+      'vec4 filterVertexPosition(void)',
+      '{',
+      '  vec2 position = aPosition * uOutputFrame.zw + uOutputFrame.xy;',
+      '  position.x = position.x * (2.0 / uOutputTexture.x) - 1.0;',
+      '  position.y = position.y * (2.0 * uOutputTexture.z / uOutputTexture.y) - uOutputTexture.z;',
+      '  return vec4(position, 0.0, 1.0);',
+      '}',
+      '',
+      'vec2 filterTextureCoord(void)',
+      '{',
+      '  return aPosition * (uOutputFrame.zw * uInputSize.zw);',
+      '}',
+      '',
+      'void main(void)',
+      '{',
+      '  gl_Position = filterVertexPosition();',
+      '  vTextureCoord = filterTextureCoord();',
+      '}',
+    ].join('\n');
+
+    export const toPixiBlendMode = function (
+      blendMode: number
+    ): PIXI.BLEND_MODES {
+      switch (blendMode) {
+        case 1:
+          return 'add';
+        case 2:
+          return 'multiply';
+        case 3:
+          return 'screen';
+        default:
+          return 'normal';
+      }
+    };
+
+    export const toGDevelopBlendMode = function (
+      blendMode: PIXI.BLEND_MODES
+    ): number {
+      switch (blendMode) {
+        case 'add':
+          return 1;
+        case 'multiply':
+          return 2;
+        case 'screen':
+          return 3;
+        default:
+          return 0;
+      }
+    };
+
     export const clampValue = function (value, min, max) {
       return Math.max(min, Math.min(max, value));
     };
@@ -112,7 +170,7 @@ namespace gdjs {
       makeFilter(target: EffectsTarget, effectData: EffectData): Filter {
         const pixiFilter = this.makePIXIFilter(target, effectData);
         if (target.isLightingLayer && target.isLightingLayer()) {
-          pixiFilter.blendMode = PIXI.BLEND_MODES.ADD;
+          pixiFilter.blendMode = 'add';
         }
         return new PixiFilter(pixiFilter, this);
       }
@@ -191,7 +249,7 @@ namespace gdjs {
 
       applyEffect(target: EffectsTarget): boolean {
         const rendererObject = target.getRendererObject() as
-          | PIXI.DisplayObject
+          | PIXI.Container
           | null
           | undefined;
         if (!rendererObject) {
@@ -205,7 +263,7 @@ namespace gdjs {
 
       removeEffect(target: EffectsTarget): boolean {
         const rendererObject = target.getRendererObject() as
-          | PIXI.DisplayObject
+          | PIXI.Container
           | null
           | undefined;
         if (!rendererObject) {

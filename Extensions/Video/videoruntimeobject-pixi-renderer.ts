@@ -21,12 +21,12 @@ namespace gdjs {
       instanceContainer: gdjs.RuntimeInstanceContainer
     ) {
       this._object = runtimeObject;
-      this._pixiObject = new PIXI.Sprite(
-        instanceContainer
+      this._pixiObject = new PIXI.Sprite({
+        texture: instanceContainer
           .getGame()
           .getImageManager()
-          .getPIXIVideoTexture(this._object._videoResource)
-      );
+          .getPIXIVideoTexture(this._object._videoResource),
+      });
 
       // Will be set to true when video texture is loaded.
       instanceContainer
@@ -64,7 +64,8 @@ namespace gdjs {
       if (
         !this._textureWasValid &&
         this._pixiObject.texture &&
-        this._pixiObject.texture.valid
+        this._pixiObject.texture.source.width > 0 &&
+        this._pixiObject.texture.source.height > 0
       ) {
         this.updatePosition();
         this._textureWasValid = true;
@@ -78,13 +79,17 @@ namespace gdjs {
     }
 
     updateLoop(): void {
-      this._pixiObject._texture.baseTexture.resource.source.loop =
-        this._object._loop;
+      const source = this._getHTMLVideoElementSource();
+      if (source) {
+        source.loop = this._object._loop;
+      }
     }
 
     updateVolume(): void {
-      this._pixiObject._texture.baseTexture.resource.source.volume =
-        this._object._volume / 100;
+      const source = this._getHTMLVideoElementSource();
+      if (source) {
+        source.volume = this._object._volume / 100;
+      }
     }
 
     updateAngle(): void {
@@ -132,11 +137,11 @@ namespace gdjs {
     _getHTMLVideoElementSource(): HTMLVideoElement | null {
       if (
         !this._pixiObject.texture ||
-        !this._pixiObject.texture.baseTexture.resource.source
+        !this._pixiObject.texture.source.resource
       ) {
         return null;
       }
-      const source = this._pixiObject.texture.baseTexture.resource.source;
+      const source = this._pixiObject.texture.source.resource;
       if (!(source instanceof HTMLVideoElement)) {
         return null;
       }
@@ -210,7 +215,7 @@ namespace gdjs {
       if (!source) {
         return;
       }
-      this._pixiObject._texture.baseTexture.resource.source.muted = enable;
+      source.muted = enable;
     }
 
     /**

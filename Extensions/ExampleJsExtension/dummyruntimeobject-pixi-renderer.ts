@@ -22,13 +22,16 @@ namespace gdjs {
 
       // Here we're going to create a dummy text as an example.
       if (this._text === undefined) {
-        this._text = new PIXI.Text(runtimeObject.getText(), { align: 'left' });
+        this._text = new PIXI.Text({
+          text: runtimeObject.getText(),
+          style: { align: 'left' },
+        });
       }
 
       // You can also create a PIXI sprite or other PIXI object
       // this._imageManager = instanceContainer.getGame().getImageManager();
       // if ( this._sprite === undefined )
-      //     this._sprite = new PIXI.Sprite(this._imageManager.getInvalidPIXITexture());
+      //     this._sprite = new PIXI.Sprite({ texture: this._imageManager.getInvalidPIXITexture() });
       this._text.anchor.x = 0.5;
       this._text.anchor.y = 0.5;
       instanceContainer

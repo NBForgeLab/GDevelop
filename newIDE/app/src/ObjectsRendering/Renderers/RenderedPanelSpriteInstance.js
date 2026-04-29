@@ -2,11 +2,36 @@
 import RenderedInstance from './RenderedInstance';
 import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
 import ResourcesLoader from '../../ResourcesLoader';
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 const gd: libGDevelop = global.gd;
 
 // $FlowFixMe[value-as-type]
 type StretchedSprite = PIXI.Sprite | PIXI.TilingSprite;
+
+const isTextureReady = (texture: PIXI.Texture): boolean =>
+  !!(
+    texture &&
+    !texture.destroyed &&
+    texture.source &&
+    !texture.source.destroyed &&
+    texture.source.width > 0 &&
+    texture.source.height > 0
+  );
+
+const createPanelSpriteTexture = (
+  texture: PIXI.Texture,
+  frame?: PIXI.Rectangle
+): PIXI.Texture =>
+  new PIXI.Texture({
+    source: texture.source,
+    frame,
+  });
+
+const createStretchedSprite = (
+  tiled: boolean,
+  texture: PIXI.Texture
+): StretchedSprite =>
+  tiled ? new PIXI.TilingSprite({ texture }) : new PIXI.Sprite({ texture });
 
 /**
  * Renderer for gd.PanelSpriteObject
@@ -102,7 +127,6 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
     const texture = PixiResourcesLoader.getLoadingPIXITexture();
 
     this._tiled = panelSprite.isTiled();
-    var StretchedSprite = !this._tiled ? PIXI.Sprite : PIXI.TilingSprite;
 
     if (!this._pixiObject) {
       this._pixiObject = new PIXI.Container();
@@ -112,16 +136,19 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
     // All these textures are going to be replaced in the call to updateTextures.
     // But to be safe and preserve the invariant that "these objects own their own
     // textures", we create a new texture for each sprite.
-    this._centerSprite = new StretchedSprite(new PIXI.Texture(texture));
+    this._centerSprite = createStretchedSprite(
+      this._tiled,
+      createPanelSpriteTexture(texture)
+    );
     this._borderSprites = [
-      new StretchedSprite(new PIXI.Texture(texture)), //Right
-      new PIXI.Sprite(new PIXI.Texture(texture)), //Top-Right
-      new StretchedSprite(new PIXI.Texture(texture)), //Top
-      new PIXI.Sprite(new PIXI.Texture(texture)), //Top-Left
-      new StretchedSprite(new PIXI.Texture(texture)), //Left
-      new PIXI.Sprite(new PIXI.Texture(texture)), //Bottom-Left
-      new StretchedSprite(new PIXI.Texture(texture)), //Bottom
-      new PIXI.Sprite(new PIXI.Texture(texture)), //Bottom-Right
+      createStretchedSprite(this._tiled, createPanelSpriteTexture(texture)), //Right
+      new PIXI.Sprite({ texture: createPanelSpriteTexture(texture) }), //Top-Right
+      createStretchedSprite(this._tiled, createPanelSpriteTexture(texture)), //Top
+      new PIXI.Sprite({ texture: createPanelSpriteTexture(texture) }), //Top-Left
+      createStretchedSprite(this._tiled, createPanelSpriteTexture(texture)), //Left
+      new PIXI.Sprite({ texture: createPanelSpriteTexture(texture) }), //Bottom-Left
+      createStretchedSprite(this._tiled, createPanelSpriteTexture(texture)), //Bottom
+      new PIXI.Sprite({ texture: createPanelSpriteTexture(texture) }), //Bottom-Right
     ];
 
     this._pixiObject.removeChildren();
@@ -227,7 +254,7 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
     this._borderSprites[7].width = rightMargin;
     this._borderSprites[7].height = bottomMargin;
 
-    this._pixiObject.cacheAsBitmap = false;
+    this._pixiObject.cacheAsTexture(false);
 
     const leftBorder = leftMargin;
     const topBorder = topMargin;
@@ -287,7 +314,7 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
       this._project,
       this._textureName
     );
-    if (!texture.baseTexture.valid) {
+    if (!isTextureReady(texture)) {
       // Post pone texture update if texture is not loaded.
       texture.once('update', () => {
         if (this._wasDestroyed) return;
@@ -312,9 +339,9 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
       return rect;
     }
 
-    if (this._centerSprite.texture.valid)
+    if (!this._centerSprite.texture.destroyed)
       this._centerSprite.texture.destroy(false);
-    this._centerSprite.texture = new PIXI.Texture(
+    this._centerSprite.texture = createPanelSpriteTexture(
       texture,
       makeInsideTexture(
         new PIXI.Rectangle(
@@ -331,9 +358,9 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
     );
 
     //Right
-    if (this._borderSprites[0].texture.valid)
+    if (!this._borderSprites[0].texture.destroyed)
       this._borderSprites[0].texture.destroy(false);
-    this._borderSprites[0].texture = new PIXI.Texture(
+    this._borderSprites[0].texture = createPanelSpriteTexture(
       texture,
       makeInsideTexture(
         new PIXI.Rectangle(
@@ -348,9 +375,9 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
     );
 
     //Top-right
-    if (this._borderSprites[1].texture.valid)
+    if (!this._borderSprites[1].texture.destroyed)
       this._borderSprites[1].texture.destroy(false);
-    this._borderSprites[1].texture = new PIXI.Texture(
+    this._borderSprites[1].texture = createPanelSpriteTexture(
       texture,
       makeInsideTexture(
         new PIXI.Rectangle(
@@ -363,9 +390,9 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
     );
 
     //Top
-    if (this._borderSprites[2].texture.valid)
+    if (!this._borderSprites[2].texture.destroyed)
       this._borderSprites[2].texture.destroy(false);
-    this._borderSprites[2].texture = new PIXI.Texture(
+    this._borderSprites[2].texture = createPanelSpriteTexture(
       texture,
       makeInsideTexture(
         new PIXI.Rectangle(
@@ -380,9 +407,9 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
     );
 
     //Top-Left
-    if (this._borderSprites[3].texture.valid)
+    if (!this._borderSprites[3].texture.destroyed)
       this._borderSprites[3].texture.destroy(false);
-    this._borderSprites[3].texture = new PIXI.Texture(
+    this._borderSprites[3].texture = createPanelSpriteTexture(
       texture,
       makeInsideTexture(
         new PIXI.Rectangle(
@@ -395,9 +422,9 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
     );
 
     //Left
-    if (this._borderSprites[4].texture.valid)
+    if (!this._borderSprites[4].texture.destroyed)
       this._borderSprites[4].texture.destroy(false);
-    this._borderSprites[4].texture = new PIXI.Texture(
+    this._borderSprites[4].texture = createPanelSpriteTexture(
       texture,
       makeInsideTexture(
         new PIXI.Rectangle(
@@ -412,9 +439,9 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
     );
 
     //Bottom-Left
-    if (this._borderSprites[5].texture.valid)
+    if (!this._borderSprites[5].texture.destroyed)
       this._borderSprites[5].texture.destroy(false);
-    this._borderSprites[5].texture = new PIXI.Texture(
+    this._borderSprites[5].texture = createPanelSpriteTexture(
       texture,
       makeInsideTexture(
         new PIXI.Rectangle(
@@ -427,9 +454,9 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
     );
 
     //Bottom
-    if (this._borderSprites[6].texture.valid)
+    if (!this._borderSprites[6].texture.destroyed)
       this._borderSprites[6].texture.destroy(false);
-    this._borderSprites[6].texture = new PIXI.Texture(
+    this._borderSprites[6].texture = createPanelSpriteTexture(
       texture,
       makeInsideTexture(
         new PIXI.Rectangle(
@@ -444,9 +471,9 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance {
     );
 
     //Bottom-Right
-    if (this._borderSprites[7].texture.valid)
+    if (!this._borderSprites[7].texture.destroyed)
       this._borderSprites[7].texture.destroy(false);
-    this._borderSprites[7].texture = new PIXI.Texture(
+    this._borderSprites[7].texture = createPanelSpriteTexture(
       texture,
       makeInsideTexture(
         new PIXI.Rectangle(

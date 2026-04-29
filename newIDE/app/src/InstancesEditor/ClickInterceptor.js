@@ -1,6 +1,6 @@
 // @flow
 
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 import ViewPosition from './ViewPosition';
 import { type TileMapTileSelection } from './TileSetVisualizer';
 import panable, { type PanMoveEvent } from '../Utils/PixiSimpleGesture/pan';
@@ -30,7 +30,7 @@ class ClickInterceptor {
   // $FlowFixMe[value-as-type]
   pixiContainer: PIXI.Container;
   // $FlowFixMe[value-as-type]
-  interceptingSprite: PIXI.sprite;
+  interceptingSprite: PIXI.Sprite;
 
   constructor({
     viewPosition,
@@ -53,8 +53,8 @@ class ClickInterceptor {
       this.onPanMove(
         event.deltaX,
         event.deltaY,
-        event.data.global.x,
-        event.data.global.y
+        event.pointerEvent.global.x,
+        event.pointerEvent.global.y
       )
     );
 
@@ -72,10 +72,7 @@ class ClickInterceptor {
         } else if (e.pointerType === 'mouse') {
           if (e.button !== 0) return;
         }
-        this._startClickInterception(
-          e.originalEvent.globalX,
-          e.originalEvent.globalY
-        );
+        this._startClickInterception(e.global.x, e.global.y);
       }
     );
     this.interceptingSprite.addEventListener(

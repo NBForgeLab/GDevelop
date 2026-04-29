@@ -2,7 +2,7 @@
 import RenderedInstance from './RenderedInstance';
 import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
 import ResourcesLoader from '../../ResourcesLoader';
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 import { rgbOrHexToHexNumber } from '../../Utils/ColorTransformer';
 const gd: libGDevelop = global.gd;
 
@@ -68,30 +68,23 @@ export default class RenderedParticleEmitterInstance extends RenderedInstance {
     const line2Angle = emitterAngle + (sprayConeAngle / 2.0 / 180.0) * 3.14159;
     const length = 64;
 
-    this._pixiObject.beginFill(0, 0);
-    this._pixiObject.lineStyle(
-      3,
-      rgbOrHexToHexNumber(particleEmitterConfiguration.getParticleColor2()),
-      1
-    );
-    this._pixiObject.moveTo(0, 0);
-    this._pixiObject.lineTo(
-      Math.cos(line1Angle) * length,
-      Math.sin(line1Angle) * length
-    );
-    this._pixiObject.moveTo(0, 0);
-    this._pixiObject.lineTo(
-      Math.cos(line2Angle) * length,
-      Math.sin(line2Angle) * length
-    );
-    this._pixiObject.endFill();
+    this._pixiObject
+      .moveTo(0, 0)
+      .lineTo(Math.cos(line1Angle) * length, Math.sin(line1Angle) * length)
+      .moveTo(0, 0)
+      .lineTo(Math.cos(line2Angle) * length, Math.sin(line2Angle) * length)
+      .stroke({
+        width: 3,
+        color: rgbOrHexToHexNumber(
+          particleEmitterConfiguration.getParticleColor2()
+        ),
+      });
 
-    this._pixiObject.lineStyle(0, 0x000000, 1);
-    this._pixiObject.beginFill(
-      rgbOrHexToHexNumber(particleEmitterConfiguration.getParticleColor1())
-    );
-    this._pixiObject.drawCircle(0, 0, 8);
-    this._pixiObject.endFill();
+    this._pixiObject.circle(0, 0, 8).fill({
+      color: rgbOrHexToHexNumber(
+        particleEmitterConfiguration.getParticleColor1()
+      ),
+    });
   }
 
   getDefaultWidth(): any {

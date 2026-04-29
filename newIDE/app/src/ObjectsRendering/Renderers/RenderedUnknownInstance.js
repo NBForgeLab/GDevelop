@@ -2,7 +2,7 @@
 import RenderedInstance from './RenderedInstance';
 import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
 import ResourcesLoader from '../../ResourcesLoader';
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 
 /**
  * Objects with an unknown type are rendered with a placeholder rectangle.
@@ -26,9 +26,9 @@ export default class RenderedUnknownInstance extends RenderedInstance {
     );
 
     //This renderer show a placeholder for the object:
-    this._pixiObject = new PIXI.Sprite(
-      this._pixiResourcesLoader.getInvalidPIXITexture()
-    );
+    this._pixiObject = new PIXI.Sprite({
+      texture: this._pixiResourcesLoader.getInvalidPIXITexture(),
+    });
     this._pixiContainer.addChild(this._pixiObject);
   }
 

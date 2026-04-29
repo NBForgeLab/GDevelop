@@ -1,10 +1,10 @@
 // @flow
-import 'pixi-spine';
+import '@esotericsoftware/spine-pixi-v8';
 import slugs from 'slugs';
 import axios from 'axios';
-import * as PIXI from 'pixi.js-legacy';
-import * as PIXI_SPINE from 'pixi-spine';
-import { ISkeleton, TextureAtlas } from 'pixi-spine';
+import * as PIXI from 'pixi.js';
+import * as PIXI_SPINE from '@esotericsoftware/spine-pixi-v8';
+import { SkeletonData, TextureAtlas } from '@esotericsoftware/spine-pixi-v8';
 import * as THREE from 'three';
 import { GLTFLoader, GLTF } from 'three/addons/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader';
@@ -27,7 +27,7 @@ type SpineTextureAtlasOrLoadingError = {|
 
 export type SpineDataOrLoadingError = {|
   // $FlowFixMe[value-as-type]
-  skeleton: ?ISkeleton,
+  skeleton: ?SkeletonData,
   loadingError: ?Error,
   loadingErrorReason:
     | null
@@ -45,10 +45,8 @@ type ResourcePromise<T> = { [resourceName: string]: Promise<T> };
 let loadedBitmapFonts = {};
 let loadedFontFamilies = {};
 let loadedTextures: { [string]: any } = {};
-const invalidTexture = PIXI.Texture.from('res/invalid_texture.png');
-const loadingTexture = PIXI.Texture.from(
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAAA1BMVEXX19f5cgrAAAAAAXRSTlMz/za5cAAAAApJREFUCNdjQAMAABAAAbSqgB8AAAAASUVORK5CYII='
-);
+const invalidTexture = PIXI.Texture.EMPTY;
+const loadingTexture = PIXI.Texture.WHITE;
 // $FlowFixMe[value-as-type]
 let loadedOrLoadingThreeTextures: ResourcePromise<THREE.Texture> = {};
 // $FlowFixMe[value-as-type]
@@ -164,12 +162,80 @@ const determineCrossOrigin = (url: string) => {
   return 'anonymous';
 };
 
+const isTextureDestroyed = (texture: any): boolean =>
+  !texture || texture.destroyed || !texture.source || texture.source.destroyed;
+
+const createLoadingTexture = () =>
+  new PIXI.Texture({ source: loadingTexture.source, dynamic: true });
+
+const clonePixiRectangle = (rectangle: any): any =>
+  rectangle && typeof rectangle.clone === 'function'
+    ? rectangle.clone()
+    : rectangle;
+
+const copyTextureIntoCachedTexture = (cachedTexture: any, texture: any) => {
+  // PixiJS v8 emits a texture "update" immediately from the public `source`
+  // setter. Existing sprite renderers listen to this event to refresh their
+  // geometry, so update the texture metadata first and emit exactly once after
+  // the texture is coherent.
+  if (cachedTexture.source && cachedTexture.source.off) {
+    cachedTexture.source.off('resize', cachedTexture.update, cachedTexture);
+  }
+
+  // $FlowFixMe[prop-missing] PixiJS v8 stores the source internally.
+  cachedTexture._source = texture.source;
+  if (cachedTexture.source && cachedTexture.source.on) {
+    cachedTexture.source.on('resize', cachedTexture.update, cachedTexture);
+  }
+
+  cachedTexture.noFrame = texture.noFrame;
+  cachedTexture.frame.copyFrom(texture.frame);
+  cachedTexture.orig =
+    texture.orig === texture.frame
+      ? cachedTexture.frame
+      : clonePixiRectangle(texture.orig);
+  cachedTexture.trim = clonePixiRectangle(texture.trim);
+  cachedTexture.rotate = texture.rotate;
+  cachedTexture.defaultAnchor = texture.defaultAnchor;
+  cachedTexture.defaultBorders = texture.defaultBorders;
+  cachedTexture.dynamic = true;
+  cachedTexture.update();
+};
+
+const updateCachedTexture = (resourceName: string, loadedTexture: any) => {
+  const cachedTexture = loadedTextures[resourceName];
+  if (
+    cachedTexture &&
+    cachedTexture !== invalidTexture &&
+    cachedTexture !== loadingTexture &&
+    cachedTexture !== loadedTexture &&
+    !isTextureDestroyed(cachedTexture)
+  ) {
+    copyTextureIntoCachedTexture(cachedTexture, loadedTexture);
+    return cachedTexture;
+  }
+
+  return loadedTexture;
+};
+
+const getResourcePixiUrl = (
+  project: gdProject,
+  resourceName: string
+): string | null => {
+  const resourcesManager = project.getResourcesManager();
+  if (!resourcesManager.hasResource(resourceName)) return null;
+
+  return ResourcesLoader.getResourceFullUrl(project, resourceName, {
+    isResourceForPixi: true,
+  });
+};
+
 const applyPixiTextureSettings = (resource: gdResource, texture: any) => {
   if (resource.getKind() !== 'image') return;
 
   const imageResource = gd.asImageResource(resource);
   if (!imageResource.isSmooth()) {
-    texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+    texture.source.scaleMode = 'nearest';
   }
 };
 
@@ -329,19 +395,23 @@ export default class PixiResourcesLoader {
     const loadedTexture = loadedTextures[resourceName];
     if (loadedTexture) {
       // Remove the cached texture BEFORE awaiting the unload.
-      // PIXI.Assets.unload destroys the BaseTexture synchronously, which sets
-      // baseTexture to null on the texture. If getPIXITexture is called before
-      // the cache entry is removed, it would return the destroyed texture.
+      // PIXI.Assets.unload destroys the texture source synchronously. If
+      // getPIXITexture is called before the cache entry is removed, it would
+      // return the destroyed texture.
       // $FlowFixMe[prop-missing]
       delete loadedTextures[resourceName];
 
-      // Check if another resource still references the same texture object
+      // Check if another resource still references the same texture source
       // (happens when multiple resources point to the same file/URL).
-      // If so, skip PIXI.Assets.unload to avoid destroying the shared
-      // BaseTexture — the other resource's entry still needs it.
+      // If so, skip PIXI.Assets.unload to avoid destroying the shared source.
+      const loadedTextureSource = loadedTexture.source;
       const otherResourcesWithSameLoadedTexture = Object.keys(
         loadedTextures
-      ).filter(otherName => loadedTextures[otherName] === loadedTexture);
+      ).filter(
+        otherName =>
+          loadedTextures[otherName] &&
+          loadedTextures[otherName].source === loadedTextureSource
+      );
 
       if (otherResourcesWithSameLoadedTexture.length > 0) {
         console.info(
@@ -353,20 +423,24 @@ export default class PixiResourcesLoader {
       } else {
         // Texture should be unloaded.
         if (
-          loadedTexture.textureCacheIds &&
           loadedTexture !== invalidTexture &&
-          loadedTexture !== loadingTexture
+          loadedTexture !== loadingTexture &&
+          !isTextureDestroyed(loadedTexture)
         ) {
           console.info(
             `Unloading texture cache for resource "${resourceName}".`
           );
-          // The property textureCacheIds indicates that the PIXI.Texture object has some
-          // items cached in PIXI caches (PIXI.utils.BaseTextureCache and PIXI.utils.TextureCache).
-          // PIXI.Assets.unload will handle the clearing of those caches.
-          await PIXI.Assets.unload(loadedTexture.textureCacheIds);
+          const url = getResourcePixiUrl(project, resourceName);
+          if (url) {
+            await PIXI.Assets.unload(url).catch(() => {
+              loadedTexture.destroy(true);
+            });
+          } else {
+            loadedTexture.destroy(true);
+          }
         } else {
           console.info(
-            `Texture for resource "${resourceName}" was invalid or has no textureCacheIds (so nothing to unload).`
+            `Texture for resource "${resourceName}" was invalid or already destroyed (so nothing to unload).`
           );
         }
       }
@@ -399,14 +473,9 @@ export default class PixiResourcesLoader {
       // TODO: only unload if no other resources pointing to the same Spine Atlas?
 
       await PIXI.Assets.unload(resourceName).catch(async () => {
-        // Workaround:
-        // This is an expected error due to https://github.com/pixijs/spine/issues/537 issue (read comments
-        // and search the other mentions to this issue in the codebase):
-        // A string, instead of a TextureAtlas, is stored as the loaded atlas resource (which is the root cause of this exception).
-        // pixi-spine considers it acts on a TextureAtlas and tries to call dispose on it that causes a TypeError.
         const { textureAtlas } = await spineAtlasPromises[resourceName];
         if (textureAtlas) {
-          textureAtlas.dispose(); // Workaround by doing `dispose` ourselves.
+          textureAtlas.dispose();
         }
       });
       delete spineAtlasPromises[resourceName];
@@ -553,11 +622,17 @@ export default class PixiResourcesLoader {
             );
           }
 
-          loadedTextures[resourceName] = loadedTexture;
           // TODO What if 2 assets share the same file with different settings?
           applyPixiTextureSettings(resource, loadedTexture);
+          loadedTextures[resourceName] = updateCachedTexture(
+            resourceName,
+            loadedTexture
+          );
         } catch (error) {
-          loadedTextures[resourceName] = invalidTexture;
+          loadedTextures[resourceName] = updateCachedTexture(
+            resourceName,
+            invalidTexture
+          );
           console.error(
             `Unable to load file ${resource.getFile()} for image resource ${resourceName}:`,
             error ? error : '(unknown error)'
@@ -575,33 +650,42 @@ export default class PixiResourcesLoader {
             }
           );
 
-          loadedTextures[resourceName] = PIXI.Texture.from(url, {
-            scaleMode: PIXI.SCALE_MODES.LINEAR,
-            resourceOptions: {
-              autoPlay: false,
-              // If autoLoad is set to false (instinctive choice given that the code
-              // calls the load method on the base texture), the video is displayed
-              // as a black rectangle.
-              autoLoad: true,
-              // crossorigin does not have a typo (with regards to PIXI.Assets.setPreferences that
-              // uses a crossOrigin parameter). See https://pixijs.download/dev/docs/PIXI.html#autoDetectResource.
-              crossorigin: determineCrossOrigin(url),
-            },
+          const videoElement = document.createElement('video');
+          videoElement.crossOrigin = determineCrossOrigin(url);
+          videoElement.preload = 'auto';
+          videoElement.playsInline = true;
+          videoElement.src = url;
+
+          const loadedTexture = PIXI.Texture.from({
+            resource: videoElement,
+            scaleMode: 'linear',
+            autoPlay: false,
+            autoLoad: true,
+            crossorigin: determineCrossOrigin(url),
           });
-          if (!loadedTextures[resourceName]) {
+          if (!loadedTexture) {
             console.error(`Texture loading for ${url} returned nothing`);
-            loadedTextures[resourceName] = invalidTexture;
+            loadedTextures[resourceName] = updateCachedTexture(
+              resourceName,
+              invalidTexture
+            );
+            return;
           }
 
-          loadedTextures[resourceName].baseTexture.resource
-            .load()
-            .catch(error => {
-              console.error(
-                `Unable to load video texture from url ${url}:`,
-                error
-              );
-              loadedTextures[resourceName] = invalidTexture;
-            });
+          loadedTextures[resourceName] = updateCachedTexture(
+            resourceName,
+            loadedTexture
+          );
+          loadedTextures[resourceName].source.load().catch(error => {
+            console.error(
+              `Unable to load video texture from url ${url}:`,
+              error
+            );
+            loadedTextures[resourceName] = updateCachedTexture(
+              resourceName,
+              invalidTexture
+            );
+          });
         } catch (error) {
           console.error(
             `Unable to load file ${resource.getFile()} for video resource ${resourceName}:`,
@@ -622,12 +706,9 @@ export default class PixiResourcesLoader {
   static getPIXITexture(project: gdProject, resourceName: string): any {
     // $FlowFixMe[invalid-computed-prop]
     if (loadedTextures[resourceName]) {
-      // Extra safety: If the texture's baseTexture was destroyed somehow,
+      // Extra safety: If the texture source was destroyed somehow,
       // evict it from the cache and recreate it below.
-      if (
-        !loadedTextures[resourceName].baseTexture ||
-        loadedTextures[resourceName].baseTexture.destroyed
-      ) {
+      if (isTextureDestroyed(loadedTextures[resourceName])) {
         console.warn(
           `Texture for resource "${resourceName}" was requested but destroyed. Evicting it from the cache and recreating it.`
         );
@@ -648,36 +729,17 @@ export default class PixiResourcesLoader {
     const resource = project.getResourcesManager().getResource(resourceName);
     if (resource.getKind() !== 'image') return invalidTexture;
 
-    const url = ResourcesLoader.getResourceFullUrl(project, resourceName, {
-      isResourceForPixi: true,
-    });
-    loadedTextures[resourceName] = PIXI.Texture.from(url, {
-      resourceOptions: {
-        crossorigin: determineCrossOrigin(url),
-        autoLoad: false,
-      },
-    });
-    if (!loadedTextures[resourceName]) {
-      console.error(`Texture loading for ${url} returned nothing`);
-      loadedTextures[resourceName] = invalidTexture;
-      return loadedTextures[resourceName];
-    }
-    loadedTextures[resourceName].baseTexture.resource.load().catch(error => {
-      console.error(`Unable to load texture from url ${url}:`, error);
-      loadedTextures[resourceName] = invalidTexture;
-    });
-
-    applyPixiTextureSettings(resource, loadedTextures[resourceName]);
-
-    if (
-      !loadedTextures[resourceName].baseTexture ||
-      loadedTextures[resourceName].baseTexture.destroyed
-    ) {
+    loadedTextures[resourceName] = createLoadingTexture();
+    PixiResourcesLoader.loadTextures(project, [resourceName]).catch(error => {
       console.error(
-        `Texture for resource "${resourceName}" was requested, loaded, but still has no baseTexture.`
+        `Unable to load texture for resource "${resourceName}":`,
+        error
       );
-      return invalidTexture;
-    }
+      loadedTextures[resourceName] = updateCachedTexture(
+        resourceName,
+        invalidTexture
+      );
+    });
 
     // $FlowFixMe[invalid-computed-prop]
     return loadedTextures[resourceName];
@@ -707,21 +769,20 @@ export default class PixiResourcesLoader {
       resourceName
     );
 
-    if (!pixiTexture.baseTexture.valid) {
+    if (pixiTexture.source === invalidTexture.source) {
+      throw new Error(
+        `Can't load texture for resource "${resourceName}" as it could not be loaded by PixiJS.`
+      );
+    }
+
+    const image = pixiTexture.source && pixiTexture.source.resource;
+    if (!(image instanceof HTMLImageElement)) {
       // Post pone texture update if texture is not loaded.
       return new Promise(resolve => {
         pixiTexture.once('update', () =>
           resolve(this.getThreeTexture(project, resourceName))
         );
       });
-    }
-
-    // @ts-ignore - source does exist on resource.
-    const image = pixiTexture.baseTexture.resource.source;
-    if (!(image instanceof HTMLImageElement)) {
-      throw new Error(
-        `Can't load texture for resource "${resourceName}" as it's not an image.`
-      );
     }
 
     const threeTexture = new THREE.Texture(image);
@@ -853,22 +914,33 @@ export default class PixiResourcesLoader {
       };
     }
 
-    const images = textureAtlasMappingEntries.reduce(
-      (imagesMapping, [relatedPath, resourceName]) => {
-        // flow check
+    const loadingPromise = (async () => {
+      const textureResourceNames = [];
+      textureAtlasMappingEntries.forEach(([, resourceName]) => {
         if (typeof resourceName === 'string') {
-          imagesMapping[relatedPath] = this.getPIXITexture(
-            project,
-            resourceName
-          );
+          textureResourceNames.push(resourceName);
         }
+      });
 
-        return imagesMapping;
-      },
-      {}
-    );
+      await this.loadTextures(project, textureResourceNames);
 
-    return (spineAtlasPromises[spineTextureAtlasName] = new Promise(resolve => {
+      const images = textureAtlasMappingEntries.reduce(
+        (imagesMapping, [relatedPath, resourceName]) => {
+          // flow check
+          if (typeof resourceName === 'string') {
+            const loadedTexture =
+              loadedTextures[resourceName] ||
+              this.getPIXITexture(project, resourceName);
+            if (!isTextureDestroyed(loadedTexture)) {
+              imagesMapping[relatedPath] = loadedTexture.source;
+            }
+          }
+
+          return imagesMapping;
+        },
+        {}
+      );
+
       const atlasUrl = ResourcesLoader.getResourceFullUrl(
         project,
         spineTextureAtlasName,
@@ -887,46 +959,26 @@ export default class PixiResourcesLoader {
         src: atlasUrl,
         data: { images },
       });
-      PIXI.Assets.load(spineTextureAtlasName).then(
-        atlas => {
-          // Ideally atlas of type `TextureAtlas` should be passed here.
-          // But there is a known issue in case of preloaded images (see https://github.com/pixijs/spine/issues/537
-          // and search the other mentions to this issue in the codebase).
-          //
-          // This branching covers all possible ways to make it work fine,
-          // if issue is fixed in pixi-spine or after migration to spine-pixi.
-          if (typeof atlas === 'string') {
-            new PIXI_SPINE.TextureAtlas(
-              atlas,
-              (textureName, textureCb) =>
-                textureCb(images[textureName].baseTexture),
-              textureAtlas =>
-                resolve({
-                  textureAtlas,
-                  loadingError: null,
-                  loadingErrorReason: null,
-                })
-            );
-          } else {
-            resolve({
-              textureAtlas: atlas,
-              loadingError: null,
-              loadingErrorReason: null,
-            });
-          }
-        },
-        err => {
-          console.error(
-            `Error while loading Spine atlas "${spineTextureAtlasName}": ${err}.\nCheck if you selected the correct pair of atlas and image files.`
-          );
-          resolve({
-            textureAtlas: null,
-            loadingError: err,
-            loadingErrorReason: 'atlas-resource-loading-error',
-          });
-        }
-      );
-    }));
+      try {
+        const atlas = await PIXI.Assets.load(spineTextureAtlasName);
+        return {
+          textureAtlas: atlas,
+          loadingError: null,
+          loadingErrorReason: null,
+        };
+      } catch (err) {
+        console.error(
+          `Error while loading Spine atlas "${spineTextureAtlasName}": ${err}.\nCheck if you selected the correct pair of atlas and image files.`
+        );
+        return {
+          textureAtlas: null,
+          loadingError: err,
+          loadingErrorReason: 'atlas-resource-loading-error',
+        };
+      }
+    })();
+
+    return (spineAtlasPromises[spineTextureAtlasName] = loadingPromise);
   }
 
   /**
@@ -973,59 +1025,59 @@ export default class PixiResourcesLoader {
       };
     }
 
-    return (spineDataPromises[spineName] = new Promise(resolve => {
-      this._getSpineTextureAtlas(project, spineTextureAtlasName).then(
-        textureAtlasOrLoadingError => {
-          if (!textureAtlasOrLoadingError.textureAtlas) {
-            return resolve({
-              skeleton: null,
-              loadingError: textureAtlasOrLoadingError.loadingError,
-              loadingErrorReason: textureAtlasOrLoadingError.loadingErrorReason,
-            });
-          }
-
-          const spineUrl = ResourcesLoader.getResourceFullUrl(
-            project,
-            spineName,
-            {
-              isResourceForPixi: true,
-            }
-          );
-          PIXI.Assets.setPreferences({
-            preferWorkers: false,
-            crossOrigin: checkIfCredentialsRequired(spineUrl)
-              ? 'use-credentials'
-              : 'anonymous',
-          });
-          PIXI.Assets.add({
-            alias: spineName,
-            src: spineUrl,
-            data: {
-              spineAtlas: textureAtlasOrLoadingError.textureAtlas,
-            },
-          });
-          PIXI.Assets.load(spineName).then(
-            jsonData => {
-              resolve({
-                skeleton: jsonData.spineData,
-                loadingError: null,
-                loadingErrorReason: null,
-              });
-            },
-            err => {
-              console.error(
-                `Error while loading Spine data "${spineName}": ${err}.\nCheck if you selected correct files.`
-              );
-              resolve({
-                skeleton: null,
-                loadingError: err,
-                loadingErrorReason: 'spine-resource-loading-error',
-              });
-            }
-          );
-        }
+    const loadingPromise = (async () => {
+      const textureAtlasOrLoadingError = await this._getSpineTextureAtlas(
+        project,
+        spineTextureAtlasName
       );
-    }));
+      if (!textureAtlasOrLoadingError.textureAtlas) {
+        return {
+          skeleton: null,
+          loadingError: textureAtlasOrLoadingError.loadingError,
+          loadingErrorReason: textureAtlasOrLoadingError.loadingErrorReason,
+        };
+      }
+
+      const spineUrl = ResourcesLoader.getResourceFullUrl(project, spineName, {
+        isResourceForPixi: true,
+      });
+      PIXI.Assets.setPreferences({
+        preferWorkers: false,
+        crossOrigin: checkIfCredentialsRequired(spineUrl)
+          ? 'use-credentials'
+          : 'anonymous',
+      });
+      PIXI.Assets.add({
+        alias: spineName,
+        src: spineUrl,
+      });
+
+      try {
+        await PIXI.Assets.load(spineName);
+        const spine = PIXI_SPINE.Spine.from({
+          skeleton: spineName,
+          atlas: spineTextureAtlasName,
+        });
+        const skeleton = spine.skeleton.data;
+        spine.destroy();
+        return {
+          skeleton,
+          loadingError: null,
+          loadingErrorReason: null,
+        };
+      } catch (err) {
+        console.error(
+          `Error while loading Spine data "${spineName}": ${err}.\nCheck if you selected correct files.`
+        );
+        return {
+          skeleton: null,
+          loadingError: err,
+          loadingErrorReason: 'spine-resource-loading-error',
+        };
+      }
+    })();
+
+    return (spineDataPromises[spineName] = loadingPromise);
   }
 
   /**
@@ -1037,12 +1089,9 @@ export default class PixiResourcesLoader {
    */
   static getPIXIVideoTexture(project: gdProject, resourceName: string): any {
     if (loadedTextures[resourceName]) {
-      // Extra safety: If the texture's baseTexture was destroyed somehow,
+      // Extra safety: If the texture source was destroyed somehow,
       // evict it from the cache and recreate it below.
-      if (
-        !loadedTextures[resourceName].baseTexture ||
-        loadedTextures[resourceName].baseTexture.destroyed
-      ) {
+      if (isTextureDestroyed(loadedTextures[resourceName])) {
         console.warn(
           `Texture for resource "${resourceName}" was requested but destroyed. Evicting it from the cache and recreating it.`
         );
@@ -1064,35 +1113,16 @@ export default class PixiResourcesLoader {
     const resource = project.getResourcesManager().getResource(resourceName);
     if (resource.getKind() !== 'video') return invalidTexture;
 
-    const url = ResourcesLoader.getResourceFullUrl(project, resourceName, {
-      isResourceForPixi: true,
-    });
-
-    // $FlowFixMe[prop-missing]
-    loadedTextures[resourceName] = PIXI.Texture.from(url, {
-      scaleMode: PIXI.SCALE_MODES.LINEAR,
-      resourceOptions: {
-        autoPlay: false,
-        // If autoLoad is set to false (instinctive choice given that the code
-        // calls the load method on the base texture), the video is displayed
-        // as a black rectangle.
-        autoLoad: true,
-        crossorigin: determineCrossOrigin(url),
-      },
-    });
-    // $FlowFixMe[invalid-computed-prop]
-    if (!loadedTextures[resourceName]) {
-      console.error(`Texture loading for ${url} returned nothing`);
-      // $FlowFixMe[prop-missing]
-      loadedTextures[resourceName] = invalidTexture;
-      // $FlowFixMe[invalid-computed-prop]
-      return loadedTextures[resourceName];
-    }
-
-    loadedTextures[resourceName].baseTexture.resource.load().catch(error => {
-      console.error(`Unable to load video texture from url ${url}:`, error);
-      // $FlowFixMe[prop-missing]
-      loadedTextures[resourceName] = invalidTexture;
+    loadedTextures[resourceName] = createLoadingTexture();
+    PixiResourcesLoader.loadTextures(project, [resourceName]).catch(error => {
+      console.error(
+        `Unable to load video texture for resource "${resourceName}":`,
+        error
+      );
+      loadedTextures[resourceName] = updateCachedTexture(
+        resourceName,
+        invalidTexture
+      );
     });
 
     // $FlowFixMe[invalid-computed-prop]

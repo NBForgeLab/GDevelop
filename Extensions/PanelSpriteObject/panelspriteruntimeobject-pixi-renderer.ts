@@ -1,4 +1,9 @@
 namespace gdjs {
+  const createPanelSpriteTexture = (
+    texture: PIXI.Texture,
+    frame?: PIXI.Rectangle
+  ): PIXI.Texture => new PIXI.Texture({ source: texture.source, frame });
+
   class PanelSpriteRuntimeObjectPixiRenderer {
     _object: gdjs.PanelSpriteRuntimeObject;
     /**
@@ -8,7 +13,7 @@ namespace gdjs {
      */
     _wrapperContainer: PIXI.Container;
     /**
-     * The _spritesContainer is used to create the sprites and apply cacheAsBitmap only.
+     * The _spritesContainer is used to create the sprites and apply cacheAsTexture only.
      */
     _spritesContainer: PIXI.Container;
     _centerSprite: PIXI.Sprite | PIXI.TilingSprite;
@@ -28,33 +33,38 @@ namespace gdjs {
       const texture = (
         instanceContainer.getGame().getImageManager() as gdjs.PixiImageManager
       ).getPIXITexture(textureName);
-      const StretchedSprite = !tiled ? PIXI.Sprite : PIXI.TilingSprite;
+      const createStretchedSprite = (): PIXI.Sprite | PIXI.TilingSprite =>
+        tiled
+          ? new PIXI.TilingSprite({
+              texture: createPanelSpriteTexture(texture),
+            })
+          : new PIXI.Sprite({ texture: createPanelSpriteTexture(texture) });
+      const createSprite = (): PIXI.Sprite =>
+        new PIXI.Sprite({ texture: createPanelSpriteTexture(texture) });
       this._spritesContainer = new PIXI.Container();
       this._wrapperContainer = new PIXI.Container();
 
       // All these textures are going to be replaced in the call to `setTexture`.
       // But to be safe and preserve the invariant that "these objects own their own
       // textures", we create a new texture for each sprite.
-      this._centerSprite = new StretchedSprite(
-        new PIXI.Texture(texture.baseTexture)
-      );
+      this._centerSprite = createStretchedSprite();
       this._borderSprites = [
         // Right
-        new StretchedSprite(new PIXI.Texture(texture.baseTexture)),
+        createStretchedSprite(),
         // Top-Right
-        new PIXI.Sprite(new PIXI.Texture(texture.baseTexture)),
+        createSprite(),
         // Top
-        new StretchedSprite(new PIXI.Texture(texture.baseTexture)),
+        createStretchedSprite(),
         // Top-Left
-        new PIXI.Sprite(new PIXI.Texture(texture.baseTexture)),
+        createSprite(),
         // Left
-        new StretchedSprite(new PIXI.Texture(texture.baseTexture)),
+        createStretchedSprite(),
         // Bottom-Left
-        new PIXI.Sprite(new PIXI.Texture(texture.baseTexture)),
+        createSprite(),
         // Bottom
-        new StretchedSprite(new PIXI.Texture(texture.baseTexture)),
+        createStretchedSprite(),
         // Bottom-Right
-        new PIXI.Sprite(new PIXI.Texture(texture.baseTexture)),
+        createSprite(),
       ];
 
       this.setTexture(textureName, instanceContainer);
@@ -76,26 +86,23 @@ namespace gdjs {
 
     ensureUpToDate() {
       if (this._spritesContainer.visible && this._wasRendered) {
-        // PIXI uses PIXI.SCALE_MODES.LINEAR for the cached image:
-        // this._spritesContainer._cacheData.sprite._texture.baseTexture.scaleMode
+        // PixiJS uses linear scaling for the cached image.
         // There seems to be no way to configure this so the optimization is disabled.
-        if (
-          this._centerSprite.texture.baseTexture.scaleMode !==
-          PIXI.SCALE_MODES.NEAREST
-        ) {
+        if (this._centerSprite.texture.source.scaleMode !== 'nearest') {
+          const worldAlpha = this._spritesContainer.getGlobalAlpha(true);
           // This allows to detect opacity changes of a parent custom object.
-          if (this._cachedWorldAlpha !== this._spritesContainer.worldAlpha) {
+          if (this._cachedWorldAlpha !== worldAlpha) {
             // When the opacity is updated, the cache must be invalidated, otherwise
             // there is a risk of the panel sprite has been cached previously with a
             // different opacity (and cannot be updated anymore).
-            this._spritesContainer.cacheAsBitmap = false;
+            this._spritesContainer.cacheAsTexture(false);
           }
-          // Cache the rendered sprites as a bitmap to speed up rendering when
+          // Cache the rendered sprites as a texture to speed up rendering when
           // lots of panel sprites are on the scene.
           // Sadly, because of this, we need a wrapper container to workaround
           // a PixiJS issue with alpha (see updateOpacity).
-          this._spritesContainer.cacheAsBitmap = true;
-          this._cachedWorldAlpha = this._spritesContainer.worldAlpha;
+          this._spritesContainer.cacheAsTexture(true);
+          this._cachedWorldAlpha = worldAlpha;
         }
       }
       this._wasRendered = true;
@@ -103,7 +110,7 @@ namespace gdjs {
 
     updateOpacity(): void {
       // The alpha is updated on a wrapper around the sprite because a known bug
-      // in Pixi will create a flicker when cacheAsBitmap is set to true.
+      // in Pixi will create a flicker when cacheAsTexture is enabled.
       // (see https://github.com/pixijs/pixijs/issues/4610)
       this._wrapperContainer.alpha = this._object.opacity / 255;
     }
@@ -191,7 +198,7 @@ namespace gdjs {
       this._borderSprites[7].height = bottomMargin;
 
       this._wasRendered = true;
-      this._spritesContainer.cacheAsBitmap = false;
+      this._spritesContainer.cacheAsTexture(false);
 
       const leftBorder = leftMargin;
       const topBorder = topMargin;
@@ -242,11 +249,11 @@ namespace gdjs {
       const texture = instanceContainer
         .getGame()
         .getImageManager()
-        .getPIXITexture(textureName).baseTexture;
+        .getPIXITexture(textureName);
       this._textureWidth = texture.width;
       this._textureHeight = texture.height;
 
-      function makeInsideTexture(rect) {
+      function makeInsideTexture(rect: PIXI.Rectangle): PIXI.Rectangle {
         if (rect.width < 0) {
           rect.width = 0;
         }
@@ -273,107 +280,85 @@ namespace gdjs {
         }
         return rect;
       }
+      const makeTexture = (rect: PIXI.Rectangle) =>
+        createPanelSpriteTexture(texture, makeInsideTexture(rect));
+
       this._centerSprite.texture.destroy(false);
-      this._centerSprite.texture = new PIXI.Texture(
-        texture,
-        makeInsideTexture(
-          new PIXI.Rectangle(
-            obj._lBorder,
-            obj._tBorder,
-            texture.width - obj._lBorder - obj._rBorder,
-            texture.height - obj._tBorder - obj._bBorder
-          )
+      this._centerSprite.texture = makeTexture(
+        new PIXI.Rectangle(
+          obj._lBorder,
+          obj._tBorder,
+          texture.width - obj._lBorder - obj._rBorder,
+          texture.height - obj._tBorder - obj._bBorder
         )
       );
 
       //Top, Bottom, Right, Left borders:
       this._borderSprites[0].texture.destroy(false);
-      this._borderSprites[0].texture = new PIXI.Texture(
-        texture,
-        makeInsideTexture(
-          new PIXI.Rectangle(
-            texture.width - obj._rBorder,
-            obj._tBorder,
-            obj._rBorder,
-            texture.height - obj._tBorder - obj._bBorder
-          )
+      this._borderSprites[0].texture = makeTexture(
+        new PIXI.Rectangle(
+          texture.width - obj._rBorder,
+          obj._tBorder,
+          obj._rBorder,
+          texture.height - obj._tBorder - obj._bBorder
         )
       );
       this._borderSprites[2].texture.destroy(false);
-      this._borderSprites[2].texture = new PIXI.Texture(
-        texture,
-        makeInsideTexture(
-          new PIXI.Rectangle(
-            obj._lBorder,
-            0,
-            texture.width - obj._lBorder - obj._rBorder,
-            obj._tBorder
-          )
+      this._borderSprites[2].texture = makeTexture(
+        new PIXI.Rectangle(
+          obj._lBorder,
+          0,
+          texture.width - obj._lBorder - obj._rBorder,
+          obj._tBorder
         )
       );
       this._borderSprites[4].texture.destroy(false);
-      this._borderSprites[4].texture = new PIXI.Texture(
-        texture,
-        makeInsideTexture(
-          new PIXI.Rectangle(
-            0,
-            obj._tBorder,
-            obj._lBorder,
-            texture.height - obj._tBorder - obj._bBorder
-          )
+      this._borderSprites[4].texture = makeTexture(
+        new PIXI.Rectangle(
+          0,
+          obj._tBorder,
+          obj._lBorder,
+          texture.height - obj._tBorder - obj._bBorder
         )
       );
       this._borderSprites[6].texture.destroy(false);
-      this._borderSprites[6].texture = new PIXI.Texture(
-        texture,
-        makeInsideTexture(
-          new PIXI.Rectangle(
-            obj._lBorder,
-            texture.height - obj._bBorder,
-            texture.width - obj._lBorder - obj._rBorder,
-            obj._bBorder
-          )
+      this._borderSprites[6].texture = makeTexture(
+        new PIXI.Rectangle(
+          obj._lBorder,
+          texture.height - obj._bBorder,
+          texture.width - obj._lBorder - obj._rBorder,
+          obj._bBorder
         )
       );
       this._borderSprites[1].texture.destroy(false);
-      this._borderSprites[1].texture = new PIXI.Texture(
-        texture,
-        makeInsideTexture(
-          new PIXI.Rectangle(
-            texture.width - obj._rBorder,
-            0,
-            obj._rBorder,
-            obj._tBorder
-          )
+      this._borderSprites[1].texture = makeTexture(
+        new PIXI.Rectangle(
+          texture.width - obj._rBorder,
+          0,
+          obj._rBorder,
+          obj._tBorder
         )
       );
       this._borderSprites[3].texture.destroy(false);
-      this._borderSprites[3].texture = new PIXI.Texture(
-        texture,
-        makeInsideTexture(new PIXI.Rectangle(0, 0, obj._lBorder, obj._tBorder))
+      this._borderSprites[3].texture = makeTexture(
+        new PIXI.Rectangle(0, 0, obj._lBorder, obj._tBorder)
       );
       this._borderSprites[5].texture.destroy(false);
-      this._borderSprites[5].texture = new PIXI.Texture(
-        texture,
-        makeInsideTexture(
-          new PIXI.Rectangle(
-            0,
-            texture.height - obj._bBorder,
-            obj._lBorder,
-            obj._bBorder
-          )
+      this._borderSprites[5].texture = makeTexture(
+        new PIXI.Rectangle(
+          0,
+          texture.height - obj._bBorder,
+          obj._lBorder,
+          obj._bBorder
         )
       );
       this._borderSprites[7].texture.destroy(false);
-      this._borderSprites[7].texture = new PIXI.Texture(
-        texture,
-        makeInsideTexture(
-          new PIXI.Rectangle(
-            texture.width - obj._rBorder,
-            texture.height - obj._bBorder,
-            obj._rBorder,
-            obj._bBorder
-          )
+      this._borderSprites[7].texture = makeTexture(
+        new PIXI.Rectangle(
+          texture.width - obj._rBorder,
+          texture.height - obj._bBorder,
+          obj._rBorder,
+          obj._bBorder
         )
       );
       this._updateLocalPositions();
@@ -404,7 +389,7 @@ namespace gdjs {
       ) {
         this._borderSprites[borderCounter].tint = tint;
       }
-      this._spritesContainer.cacheAsBitmap = false;
+      this._spritesContainer.cacheAsTexture(false);
     }
 
     getColor() {

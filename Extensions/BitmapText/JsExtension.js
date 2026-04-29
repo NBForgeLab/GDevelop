@@ -496,13 +496,46 @@ module.exports = {
      * For example, 2 resources can use the same font, or we can have multiple objects with the same
      * font data and different textures).
      */
-    const patchBitmapFont = (bitmapFont, bitmapFontInstallKey) => {
-      const defaultName = bitmapFont.font;
-      bitmapFont.font = bitmapFontInstallKey;
-      PIXI.BitmapFont.available[bitmapFontInstallKey] = bitmapFont;
+    const getBitmapFontCacheKey = (bitmapFontInstallKey) =>
+      bitmapFontInstallKey + '-bitmap';
 
-      delete PIXI.BitmapFont.available[defaultName];
-      return PIXI.BitmapFont.available[bitmapFontInstallKey];
+    const getInstalledBitmapFont = (bitmapFontInstallKey) => {
+      const cacheKey = getBitmapFontCacheKey(bitmapFontInstallKey);
+      return PIXI.Cache.has(cacheKey) ? PIXI.Cache.get(cacheKey) : undefined;
+    };
+
+    const installBitmapFont = (bitmapFontInstallKey, bitmapFont) => {
+      bitmapFont.destroy = () => {
+        PIXI.AbstractBitmapFont.prototype.destroy.call(bitmapFont, false);
+        bitmapFont.pages = null;
+      };
+      const cacheKey = getBitmapFontCacheKey(bitmapFontInstallKey);
+      PIXI.Cache.set(cacheKey, bitmapFont);
+      bitmapFont.once('destroy', () => PIXI.Cache.remove(cacheKey));
+      return bitmapFont;
+    };
+
+    const parseBitmapFontData = (fontData) =>
+      PIXI.bitmapFontXMLStringParser.test(fontData)
+        ? PIXI.bitmapFontXMLStringParser.parse(fontData)
+        : PIXI.bitmapFontTextParser.parse(fontData);
+
+    const isTextureReady = (texture) =>
+      !!(
+        texture &&
+        !texture.destroyed &&
+        texture.source &&
+        !texture.source.destroyed &&
+        texture.source.width > 0 &&
+        texture.source.height > 0
+      );
+
+    const waitForTextureReady = (texture, callback) => {
+      if (texture.source && texture.source.once) {
+        texture.source.once('update', callback);
+      } else {
+        texture.once('update', callback);
+      }
     };
 
     /**
@@ -521,18 +554,13 @@ module.exports = {
         lineHeight: 20,
       });
 
-      defaultBitmapFont = patchBitmapFont(
-        PIXI.BitmapFont.from(
-          defaultBitmapFontStyle.fontFamily,
-          defaultBitmapFontStyle,
-          {
-            chars: [
-              [' ', '~'], // All the printable ASCII characters
-            ],
-          }
-        ),
-        defaultBitmapFontInstallKey
-      );
+      defaultBitmapFont = PIXI.BitmapFontManager.install({
+        name: defaultBitmapFontInstallKey,
+        style: defaultBitmapFontStyle,
+        chars: [
+          [' ', '~'], // All the printable ASCII characters
+        ],
+      });
       return defaultBitmapFont;
     };
 
@@ -546,13 +574,13 @@ module.exports = {
      * invalidation automatically. Until then, we detect stale textures here.
      */
     const isBitmapFontTextureStale = (bitmapFont, currentTexture) => {
-      const pageTextures = bitmapFont.pageTextures;
+      const pages = bitmapFont.pages;
       return (
-        pageTextures &&
-        Object.values(pageTextures).some(
-          (tex) =>
-            (tex.baseTexture && tex.baseTexture.destroyed) ||
-            tex.baseTexture !== currentTexture.baseTexture
+        pages &&
+        pages.some(
+          (page) =>
+            page.texture.destroyed ||
+            page.texture.source !== currentTexture.source
         )
       );
     };
@@ -578,9 +606,9 @@ module.exports = {
         bitmapFontResourceName + '@' + textureAtlasResourceName;
 
       if (
-        PIXI.BitmapFont.available[bitmapFontInstallKey] &&
+        getInstalledBitmapFont(bitmapFontInstallKey) &&
         isBitmapFontTextureStale(
-          PIXI.BitmapFont.available[bitmapFontInstallKey],
+          getInstalledBitmapFont(bitmapFontInstallKey),
           pixiResourcesLoader.getPIXITexture(project, textureAtlasResourceName)
         )
       ) {
@@ -589,10 +617,11 @@ module.exports = {
         PIXI.BitmapFont.uninstall(bitmapFontInstallKey);
       }
 
-      if (PIXI.BitmapFont.available[bitmapFontInstallKey]) {
+      const installedBitmapFont = getInstalledBitmapFont(bitmapFontInstallKey);
+      if (installedBitmapFont) {
         bitmapFontUsageCount[bitmapFontInstallKey] =
           (bitmapFontUsageCount[bitmapFontInstallKey] || 0) + 1;
-        return Promise.resolve(PIXI.BitmapFont.available[bitmapFontInstallKey]);
+        return Promise.resolve(installedBitmapFont);
       }
 
       // Get the atlas texture, the bitmap font data and install the font:
@@ -605,14 +634,19 @@ module.exports = {
         pixiResourcesLoader
           .getBitmapFontData(project, bitmapFontResourceName)
           .then((fontData) => {
-            if (!texture.valid)
+            if (!isTextureReady(texture))
               throw new Error(
                 'Tried to install a BitmapFont with an invalid texture.'
               );
 
-            const bitmapFont = patchBitmapFont(
-              PIXI.BitmapFont.install(fontData, texture),
-              bitmapFontInstallKey
+            const bitmapFontData = parseBitmapFontData(fontData);
+            bitmapFontData.fontFamily = bitmapFontInstallKey;
+            const bitmapFont = installBitmapFont(
+              bitmapFontInstallKey,
+              new PIXI.BitmapFont({
+                data: bitmapFontData,
+                textures: [texture],
+              })
             );
             bitmapFontUsageCount[bitmapFontInstallKey] =
               (bitmapFontUsageCount[bitmapFontInstallKey] || 0) + 1;
@@ -629,12 +663,12 @@ module.exports = {
             return bitmapFont;
           });
 
-      if (!texture.valid) {
+      if (!isTextureReady(texture)) {
         // Post pone texture update if texture is not loaded.
         // (otherwise, the bitmap font would not get updated when the
         // texture is loaded and updated).
         return new Promise((resolve) => {
-          texture.once('update', () => {
+          waitForTextureReady(texture, () => {
             resolve(loadBitmapFont());
           });
         });
@@ -668,7 +702,9 @@ module.exports = {
       bitmapFontUsageCount[bitmapFontInstallKey]--;
 
       if (bitmapFontUsageCount[bitmapFontInstallKey] === 0) {
-        PIXI.BitmapFont.uninstall(bitmapFontInstallKey);
+        if (getInstalledBitmapFont(bitmapFontInstallKey)) {
+          PIXI.BitmapFont.uninstall(bitmapFontInstallKey);
+        }
         console.info(
           'Uninstalled BitmapFont "' + bitmapFontInstallKey + '" from memory.'
         );
@@ -705,9 +741,12 @@ module.exports = {
         this._currentBitmapFontResourceName = '';
         this._currentTextureAtlasResourceName = '';
 
-        this._pixiObject = new PIXI.BitmapText('', {
+        this._pixiObject = new PIXI.BitmapText({
+          text: '',
           // Use a default font. The proper font will be loaded in `update` method.
-          fontName: getDefaultBitmapFont().font,
+          style: {
+            fontFamily: getDefaultBitmapFont().fontFamily,
+          },
         });
 
         this._pixiObject.anchor.x = 0.5;
@@ -731,7 +770,7 @@ module.exports = {
             : object.content.text;
 
         const align = object.content.align;
-        this._pixiObject.align = align;
+        this._pixiObject.style.align = align;
 
         const color = object.content.tint;
         this._pixiObject.tint =
@@ -750,17 +789,17 @@ module.exports = {
           this._currentTextureAtlasResourceName !== textureAtlasResourceName ||
           // Belt & suspenders: also reload if the font was externally
           // uninstalled (e.g. by clearCache after a resource reload).
-          !PIXI.BitmapFont.available[this._pixiObject.fontName]
+          !getInstalledBitmapFont(this._pixiObject.style.fontFamily)
         ) {
-          const oldFontName = this._pixiObject.fontName;
+          const oldFontName = this._pixiObject.style.fontFamily;
 
           // Temporarily go back to the default font, as the PIXI.BitmapText
           // object does not support being displayed with a font not installed at all.
           // It will be replaced as soon as the proper font is loaded.
-          this._pixiObject.fontName = getDefaultBitmapFont().font;
+          this._pixiObject.style.fontFamily = getDefaultBitmapFont().fontFamily;
 
           // Release the old font (if it's still installed).
-          if (PIXI.BitmapFont.available[oldFontName]) {
+          if (getInstalledBitmapFont(oldFontName)) {
             releaseBitmapFont(oldFontName);
           }
 
@@ -774,20 +813,18 @@ module.exports = {
           ).then((bitmapFont) => {
             if (this._wasDestroyed) return;
 
-            this._pixiObject.fontName = bitmapFont.font;
-            this._pixiObject.fontSize = bitmapFont.size;
-            this._pixiObject.dirty = true;
+            this._pixiObject.style.fontFamily = bitmapFont.fontFamily;
+            this._pixiObject.style.fontSize = bitmapFont.fontMetrics.fontSize;
           });
         }
 
         // Set up the wrapping width if enabled.
-        const oldMaxWidth = this._pixiObject.maxWidth;
-        this._pixiObject.maxWidth = this._instance.hasCustomSize()
+        const wordWrapWidth = this._instance.hasCustomSize()
           ? this.getCustomWidth() / this._pixiObject.scale.x
           : 0;
-        if (oldMaxWidth !== this._pixiObject.maxWidth) {
-          this._pixiObject.dirty = true;
-        }
+        this._pixiObject.style.wordWrap = wordWrapWidth > 0;
+        this._pixiObject.style.wordWrapWidth = wordWrapWidth;
+        this._pixiObject.style.breakWords = wordWrapWidth > 0;
 
         if (this._instance.hasCustomSize() && this.getDefaultWidth() !== 0) {
           const alignmentX =
@@ -835,24 +872,24 @@ module.exports = {
       onRemovedFromScene() {
         RenderedInstance.prototype.onRemovedFromScene.call(this);
 
-        const fontName = this._pixiObject.fontName;
+        const fontName = this._pixiObject.style.fontFamily;
         // Belt & suspenders: if the font was already uninstalled (e.g. by
         // clearCache), switch to default before destroy to avoid a PIXI crash.
-        if (!PIXI.BitmapFont.available[fontName]) {
-          this._pixiObject.fontName = getDefaultBitmapFont().font;
+        if (!getInstalledBitmapFont(fontName)) {
+          this._pixiObject.style.fontFamily = getDefaultBitmapFont().fontFamily;
         }
         this._pixiObject.destroy();
-        if (PIXI.BitmapFont.available[fontName]) {
+        if (getInstalledBitmapFont(fontName)) {
           releaseBitmapFont(fontName);
         }
       }
 
       getDefaultWidth() {
-        return this._pixiObject.textWidth * this._pixiObject.scale.x;
+        return this._pixiObject.width;
       }
 
       getDefaultHeight() {
-        return this._pixiObject.textHeight * this._pixiObject.scale.y;
+        return this._pixiObject.height;
       }
 
       getOriginY() {

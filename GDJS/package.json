@@ -6,6 +6,8 @@
   "homepage": "https://gdevelop.io",
   "//": "We use esbuild for a near instant build (important for quick feedback loop when developing). Typechecking is a separate process as much longer.",
   "devDependencies": {
+    "@esotericsoftware/spine-pixi-v8": "4.2.113",
+    "@pixi/tilemap": "^5.0.2",
     "@types/expect.js": "^0.3.29",
     "@types/mocha": "^5.2.7",
     "@types/node": "^14.11.1",
@@ -15,14 +17,13 @@
     "lebab": "^3.1.0",
     "minimist": "^1.2.5",
     "patch-package": "^6.4.7",
-    "pixi-spine": "4.0.4",
-    "pixi.js": "^7.4.3",
+    "pixi.js": "^8.18.1",
     "prettier": "3.4.2",
     "recursive-readdir": "^2.2.2",
     "shelljs": "^0.8.4",
-    "typedoc": "^0.25.13",
+    "typedoc": "^0.28.19",
     "typedoc-plugin-reference-excluder": "^1.1.3",
-    "typescript": "5.4.5"
+    "typescript": "5.9.3"
   },
   "scripts": {
     "postinstall": "patch-package",
@@ -34,4 +35,3 @@
     "generate-doc": "typedoc --options docs/typedoc.json --plugin typedoc-plugin-reference-excluder"
   }
 }
-

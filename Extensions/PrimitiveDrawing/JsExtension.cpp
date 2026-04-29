@@ -26,9 +26,6 @@ class PrimitiveDrawingJsExtension : public gd::PlatformExtension {
         .SetIncludeFile(
             "Extensions/PrimitiveDrawing/shapepainterruntimeobject.js")
         .AddIncludeFile(
-            "Extensions/PrimitiveDrawing/pixi-graphics-extras/"
-            "graphics-extras.min.js")
-        .AddIncludeFile(
             "Extensions/PrimitiveDrawing/"
             "shapepainterruntimeobject-pixi-renderer.js");
 

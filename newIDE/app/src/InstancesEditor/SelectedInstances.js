@@ -1,7 +1,7 @@
 // @flow
 import panable, { type PanMoveEvent } from '../Utils/PixiSimpleGesture/pan';
 import transformRect from '../Utils/TransformRect';
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 import { type ScreenType } from '../UI/Responsive/ScreenTypeMeasurer';
 import InstancesSelection from './InstancesSelection';
 import {
@@ -157,8 +157,8 @@ export default class SelectedInstances {
           this.onPanMove(
             event.deltaX,
             event.deltaY,
-            event.data.global.x,
-            event.data.global.y
+            event.pointerEvent.global.x,
+            event.pointerEvent.global.y
           );
         },
         onPanEnd: () => {
@@ -180,8 +180,8 @@ export default class SelectedInstances {
         this.onPanMove(
           event.deltaX,
           event.deltaY,
-          event.data.global.x,
-          event.data.global.y
+          event.pointerEvent.global.x,
+          event.pointerEvent.global.y
         );
       },
       onPanEnd: () => {
@@ -212,7 +212,6 @@ export default class SelectedInstances {
     cursor: string,
   }) {
     objectButton.eventMode = 'static';
-    objectButton.buttonMode = true;
     objectButton.cursor = cursor;
     panable(objectButton);
 
@@ -268,20 +267,19 @@ export default class SelectedInstances {
       return;
     }
 
-    buttonObject.beginFill(0xffffff);
-    buttonObject.lineStyle(1, 0x6868e8, 1);
-    buttonObject.fill.alpha = 0.9;
     if (shape === RECTANGLE_BUTTON_SHAPE) {
-      buttonObject.drawRect(canvasPosition[0], canvasPosition[1], size, size);
+      buttonObject.rect(canvasPosition[0], canvasPosition[1], size, size);
     } else if (shape === CIRCLE_BUTTON_SHAPE) {
-      buttonObject.drawCircle(
+      buttonObject.circle(
         canvasPosition[0] + size / 2,
         canvasPosition[1] + size / 2,
         size / 2
       );
     }
 
-    buttonObject.endFill();
+    buttonObject
+      .fill({ color: 0xffffff, alpha: 0.9 })
+      .stroke({ width: 1, color: 0x6868e8 });
     buttonObject.hitArea = new PIXI.Rectangle(
       canvasPosition[0] - hitAreaPadding,
       canvasPosition[1] - hitAreaPadding,
@@ -346,17 +344,16 @@ export default class SelectedInstances {
 
       this.selectedRectangles[i].clear();
       const { color, alpha } = this.getFillColor(instance.isLocked());
-      this.selectedRectangles[i].beginFill(color, alpha);
-      this.selectedRectangles[i].lineStyle(1, color, 1);
-      this.selectedRectangles[i].fill.alpha = 0.3;
       this.selectedRectangles[i].alpha = 0.8;
-      this.selectedRectangles[i].drawRect(
-        selectionRectangle.left,
-        selectionRectangle.top,
-        selectionRectangle.width(),
-        selectionRectangle.height()
-      );
-      this.selectedRectangles[i].endFill();
+      this.selectedRectangles[i]
+        .rect(
+          selectionRectangle.left,
+          selectionRectangle.top,
+          selectionRectangle.width(),
+          selectionRectangle.height()
+        )
+        .fill({ color, alpha: Math.min(alpha, 0.3) })
+        .stroke({ width: 1, color });
 
       if (instance.isLocked()) {
         continue;

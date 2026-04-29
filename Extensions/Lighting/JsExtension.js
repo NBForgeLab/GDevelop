@@ -264,9 +264,9 @@ module.exports = {
         );
 
         // The icon in the middle.
-        const lightIconSprite = new PIXI.Sprite(
-          PIXI.Texture.from('CppPlatform/Extensions/lightIcon32.png')
-        );
+        const lightIconSprite = new PIXI.Sprite({
+          texture: PIXI.Texture.from('CppPlatform/Extensions/lightIcon32.png'),
+        });
         lightIconSprite.anchor.x = 0.5;
         lightIconSprite.anchor.y = 0.5;
 
@@ -323,13 +323,10 @@ module.exports = {
 
         if (radiusGraphicsDirty) {
           const radiusBorderWidth = 2;
-          this._radiusGraphics.clear();
-          this._radiusGraphics.lineStyle(radiusBorderWidth, color, 0.8);
-          this._radiusGraphics.drawCircle(
-            0,
-            0,
-            Math.max(1, this._radius - radiusBorderWidth)
-          );
+          this._radiusGraphics
+            .clear()
+            .circle(0, 0, Math.max(1, this._radius - radiusBorderWidth))
+            .stroke({ width: radiusBorderWidth, color, alpha: 0.8 });
         }
       }
 

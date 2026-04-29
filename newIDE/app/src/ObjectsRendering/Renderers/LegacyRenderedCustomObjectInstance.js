@@ -16,7 +16,7 @@ import {
   getProportionalPositionY,
   getProportionalPositionZ,
 } from './LegacyCustomObjectLayoutingModel';
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 import * as THREE from 'three';
 
 const gd: libGDevelop = global.gd;
@@ -177,9 +177,9 @@ export default class LegacyRenderedCustomObjectInstance
 
     if (this.childrenRenderedInstances.length === 0) {
       // Show a placeholder.
-      this._pixiObject = new PIXI.Sprite(
-        PixiResourcesLoader.getInvalidPIXITexture()
-      );
+      this._pixiObject = new PIXI.Sprite({
+        texture: PixiResourcesLoader.getInvalidPIXITexture(),
+      });
       this._pixiContainer.addChild(this._pixiObject);
     }
   }

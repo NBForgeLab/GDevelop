@@ -1,6 +1,6 @@
 // @flow
 import transformRect from '../Utils/TransformRect';
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 import { type InstanceMeasurer } from './InstancesRenderer';
 import Rectangle from '../Utils/Rectangle';
 
@@ -11,11 +11,13 @@ export default class HighlightedInstance {
   highlightedInstance: gdInitialInstance | null;
   isHighlightedInstanceOf3DObject: boolean;
   // $FlowFixMe[value-as-type]
-  highlightRectangle: PIXI.Container;
+  highlightContainer: PIXI.Container;
   // $FlowFixMe[value-as-type]
-  tooltipBackground: PIXI.Container;
+  highlightRectangle: PIXI.Graphics;
   // $FlowFixMe[value-as-type]
-  tooltipText: PIXI.Container;
+  tooltipBackground: PIXI.Graphics;
+  // $FlowFixMe[value-as-type]
+  tooltipText: PIXI.Text;
 
   constructor({
     instanceMeasurer,
@@ -32,17 +34,22 @@ export default class HighlightedInstance {
 
     this.highlightedInstance = null;
     this.isHighlightedInstanceOf3DObject = false;
+    this.highlightContainer = new PIXI.Container();
     this.highlightRectangle = new PIXI.Graphics();
     this.highlightRectangle.hitArea = new PIXI.Rectangle(0, 0, 0, 0);
 
     this.tooltipBackground = new PIXI.Graphics();
-    this.tooltipText = new PIXI.Text('', {
-      fontSize: 15,
-      fill: 0xffffff,
-      align: 'center',
+    this.tooltipText = new PIXI.Text({
+      text: '',
+      style: {
+        fontSize: 15,
+        fill: 0xffffff,
+        align: 'center',
+      },
     });
-    this.highlightRectangle.addChild(this.tooltipBackground);
-    this.highlightRectangle.addChild(this.tooltipText);
+    this.highlightContainer.addChild(this.highlightRectangle);
+    this.highlightContainer.addChild(this.tooltipBackground);
+    this.highlightContainer.addChild(this.tooltipText);
   }
 
   setInstance(instance: gdInitialInstance | null) {
@@ -58,13 +65,13 @@ export default class HighlightedInstance {
 
   // $FlowFixMe[value-as-type]
   getPixiObject(): PIXI.Container {
-    return this.highlightRectangle;
+    return this.highlightContainer;
   }
 
   render() {
     const { highlightedInstance } = this;
     if (highlightedInstance === null) {
-      this.highlightRectangle.visible = false;
+      this.highlightContainer.visible = false;
       return;
     }
 
@@ -76,19 +83,18 @@ export default class HighlightedInstance {
       )
     );
 
-    this.highlightRectangle.visible = true;
+    this.highlightContainer.visible = true;
     this.highlightRectangle.clear();
-    this.highlightRectangle.beginFill(0xeeeeff);
-    this.highlightRectangle.fill.alpha = 0.1;
-    this.highlightRectangle.alpha = 0.8;
-    this.highlightRectangle.lineStyle(1, 0x000000, 1);
-    this.highlightRectangle.drawRect(
-      highlightRectangle.left,
-      highlightRectangle.top,
-      highlightRectangle.width(),
-      highlightRectangle.height()
-    );
-    this.highlightRectangle.endFill();
+    this.highlightContainer.alpha = 0.8;
+    this.highlightRectangle
+      .rect(
+        highlightRectangle.left,
+        highlightRectangle.top,
+        highlightRectangle.width(),
+        highlightRectangle.height()
+      )
+      .fill({ color: 0xeeeeff, alpha: 0.1 })
+      .stroke({ width: 1, color: 0x000000 });
 
     const tooltipInfo =
       highlightedInstance.getObjectName() +
@@ -122,15 +128,15 @@ export default class HighlightedInstance {
     );
 
     const padding = 5;
-    this.tooltipBackground.clear();
-    this.tooltipBackground.beginFill(0x000000, 0.8);
-    this.tooltipBackground.drawRoundedRect(
-      this.tooltipText.x - padding,
-      this.tooltipText.y - padding,
-      this.tooltipText.width + padding * 2,
-      this.tooltipText.height - padding,
-      4
-    );
-    this.tooltipBackground.endFill();
+    this.tooltipBackground
+      .clear()
+      .roundRect(
+        this.tooltipText.x - padding,
+        this.tooltipText.y - padding,
+        this.tooltipText.width + padding * 2,
+        this.tooltipText.height - padding,
+        4
+      )
+      .fill({ color: 0x000000, alpha: 0.8 });
   }
 }

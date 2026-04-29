@@ -4,6 +4,12 @@ Copyright (c) 2010-2016 Florian Rival (Florian.Rival@gmail.com)
 This project is released under the MIT License.
 */
 namespace gdjs {
+  const isParticleTextureReady = (pixiTexture: PIXI.Texture): boolean =>
+    !pixiTexture.destroyed &&
+    !pixiTexture.source.destroyed &&
+    pixiTexture.width > 0 &&
+    pixiTexture.height > 0;
+
   const setBoundsValues = (list: any, startValue: float, endValue: float) => {
     const first = list.first;
     first.value = startValue;
@@ -246,30 +252,19 @@ namespace gdjs {
         const line2Angle = emitterAngle + sprayConeAngle / 2;
         const length = 64;
 
-        this.helperGraphics.beginFill(0, 0);
-        this.helperGraphics.lineStyle(
-          3,
-          this.runtimeObject.getParticleColorEnd(),
-          1
-        );
-        this.helperGraphics.moveTo(0, 0);
-        this.helperGraphics.lineTo(
-          Math.cos(line1Angle) * length,
-          Math.sin(line1Angle) * length
-        );
-        this.helperGraphics.moveTo(0, 0);
-        this.helperGraphics.lineTo(
-          Math.cos(line2Angle) * length,
-          Math.sin(line2Angle) * length
-        );
-        this.helperGraphics.endFill();
+        this.helperGraphics
+          .moveTo(0, 0)
+          .lineTo(Math.cos(line1Angle) * length, Math.sin(line1Angle) * length)
+          .moveTo(0, 0)
+          .lineTo(Math.cos(line2Angle) * length, Math.sin(line2Angle) * length)
+          .stroke({
+            width: 3,
+            color: this.runtimeObject.getParticleColorEnd(),
+          });
 
-        this.helperGraphics.lineStyle(0, 0x000000, 1);
-        this.helperGraphics.beginFill(
-          this.runtimeObject.getParticleColorStart()
-        );
-        this.helperGraphics.drawCircle(0, 0, 8);
-        this.helperGraphics.endFill();
+        this.helperGraphics
+          .circle(0, 0, 8)
+          .fill({ color: this.runtimeObject.getParticleColorStart() });
       }
     }
 
@@ -418,7 +413,9 @@ namespace gdjs {
         .getGame()
         .getImageManager()
         .getPIXITexture(texture);
-      return pixiTexture.valid && pixiTexture !== invalidPixiTexture;
+      return (
+        isParticleTextureReady(pixiTexture) && pixiTexture !== invalidPixiTexture
+      );
     }
 
     setTextureName(
@@ -433,7 +430,10 @@ namespace gdjs {
         .getGame()
         .getImageManager()
         .getPIXITexture(texture);
-      if (pixiTexture.valid && pixiTexture !== invalidPixiTexture) {
+      if (
+        isParticleTextureReady(pixiTexture) &&
+        pixiTexture !== invalidPixiTexture
+      ) {
         // Access private members of the behavior to apply changes right away.
         const behavior: any = this.emitter.getBehavior('textureSingle');
         behavior.texture = pixiTexture;

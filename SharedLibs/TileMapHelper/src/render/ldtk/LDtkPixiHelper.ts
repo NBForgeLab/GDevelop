@@ -2,8 +2,8 @@ import { TileTextureCache } from "../TileTextureCache";
 import { LDtkTileMap, LDtkTilesetDef } from "../../load/ldtk/LDtkFormat";
 import { getLDtkTileId } from "../../load/ldtk/LDtkTileMapLoaderHelper";
 
-type Texture = PIXI.BaseTexture<PIXI.Resource>;
-type TextureLoader = (textureName: string) => PIXI.BaseTexture<PIXI.Resource>;
+type Texture = PIXI.TextureSource;
+type TextureLoader = (textureName: string) => PIXI.TextureSource;
 
 function getAtlasTexture(
   atlasTextures: Record<number, Texture | null>,
@@ -20,13 +20,6 @@ function getAtlasTexture(
   const tileset = tilesetCache[tilesetId];
   if (tileset?.relPath) {
     texture = getTexture(tileset.relPath);
-
-    // @ts-ignore
-    if (texture.baseTexture?.cacheId === "res/invalid_texture.png") {
-      console.error(`The atlas texture "${tileset.relPath}" can't be loaded`);
-
-      texture = null;
-    }
   } else {
     console.error(
       `The tileset "${tileset.identifier}" doesn't seems to contain an atlas texture`
@@ -113,7 +106,7 @@ export namespace LDtkPixiHelper {
           const [x, y] = tile.src;
           const rect = new PIXI.Rectangle(x, y, gridSize, gridSize);
 
-          const texture = new PIXI.Texture(atlasTexture, rect);
+          const texture = new PIXI.Texture({ source: atlasTexture, frame: rect });
 
           textureCache.setTexture(tileId, texture);
         } catch (error) {
@@ -131,7 +124,7 @@ export namespace LDtkPixiHelper {
     if (level.bgRelPath) {
       const atlasTexture = getTexture(level.bgRelPath);
       const rect = new PIXI.Rectangle(0, 0, level.pxWid, level.pxHei);
-      const texture = new PIXI.Texture(atlasTexture!, rect);
+      const texture = new PIXI.Texture({ source: atlasTexture, frame: rect });
 
       textureCache.setLevelBackgroundTexture(level.bgRelPath, texture);
     }

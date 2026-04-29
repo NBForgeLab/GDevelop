@@ -16,19 +16,21 @@ namespace gdjs {
     'RadialBlur',
     new (class extends gdjs.PixiFiltersTools.PixiFilterCreator {
       makePIXIFilter(target: EffectsTarget, effectData) {
-        const radialBlurFilter = new PIXI.filters.RadialBlurFilter();
+        const radialBlurFilter = new PIXI.filters.RadialBlurFilter({
+          center: { x: 0.5, y: 0.5 },
+        }) as PIXI.filters.RadialBlurFilter & RadialBlurFilterExtra;
+        radialBlurFilter._centerX = 0.5;
+        radialBlurFilter._centerY = 0.5;
         return radialBlurFilter;
       }
       updatePreRender(filter: PIXI.Filter, target: EffectsTarget) {
         const radialBlurFilter =
           filter as unknown as PIXI.filters.RadialBlurFilter &
             RadialBlurFilterExtra;
-        radialBlurFilter.center[0] = Math.round(
-          radialBlurFilter._centerX * target.getWidth()
-        );
-        radialBlurFilter.center[1] = Math.round(
-          radialBlurFilter._centerY * target.getHeight()
-        );
+        radialBlurFilter.center = {
+          x: Math.round(radialBlurFilter._centerX * target.getWidth()),
+          y: Math.round(radialBlurFilter._centerY * target.getHeight()),
+        };
       }
       updateDoubleParameter(
         filter: PIXI.Filter,
@@ -61,22 +63,22 @@ namespace gdjs {
           filter as unknown as PIXI.filters.RadialBlurFilter &
             RadialBlurFilterExtra;
         if (parameterName === 'radius') {
-          radialBlurFilter.radius;
+          return radialBlurFilter.radius;
         }
         if (parameterName === 'angle') {
-          radialBlurFilter.angle;
+          return radialBlurFilter.angle;
         }
         if (parameterName === 'kernelSize') {
-          radialBlurFilter.kernelSize;
+          return radialBlurFilter.kernelSize;
         }
         if (parameterName === 'centerX') {
-          radialBlurFilter._centerX;
+          return radialBlurFilter._centerX;
         }
         if (parameterName === 'centerY') {
-          radialBlurFilter._centerY;
+          return radialBlurFilter._centerY;
         }
         if (parameterName === 'padding') {
-          radialBlurFilter.padding;
+          return radialBlurFilter.padding;
         }
         return 0;
       }

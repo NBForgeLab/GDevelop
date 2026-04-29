@@ -267,16 +267,16 @@ declare namespace PIXI {
       /**
        * Gets a blend mode, ensuring that it is valid.
        * @param name The name of the blend mode to get.
-       * @return The blend mode as specified in the PIXI.BLEND_MODES enumeration.
+       * @return The blend mode as a PixiJS v8 string blend mode.
        */
-      function getBlendMode(name: string): number;
+      function getBlendMode(name: string): PIXI.BLEND_MODES;
       /**
        * Converts a list of {value, time} objects starting at time 0 and ending at time 1 into an evenly
        * spaced stepped list of PropertyNodes for color values. This is primarily to handle conversion of
        * linear gradients to fewer colors, allowing for some optimization for Canvas2d fallbacks.
        * @param list The list of data to convert.
        * @param [numSteps=10] The number of steps to use.
-       * @return The blend mode as specified in the PIXI.blendModes enumeration.
+       * @return The stepped color gradient.
        */
       function createSteppedGradient(
         list: ValueStep<string>[],
@@ -555,7 +555,7 @@ declare namespace PIXI {
       destroy(): void;
     }
     /** Interface for a child of a LinkedListContainer (has the prev/next properties added) */
-    export interface LinkedListChild extends PIXI.DisplayObject {
+    export interface LinkedListChild extends PIXI.Container {
       nextChild: LinkedListChild | null;
       prevChild: LinkedListChild | null;
     }
@@ -573,8 +573,8 @@ declare namespace PIXI {
       get firstChild(): LinkedListChild;
       get lastChild(): LinkedListChild;
       get childCount(): number;
-      addChild<T extends PIXI.DisplayObject[]>(...children: T): T[0];
-      addChildAt<T extends PIXI.DisplayObject>(child: T, index: number): T;
+      addChild<T extends PIXI.Container[]>(...children: T): T[0];
+      addChildAt<T extends PIXI.Container>(child: T, index: number): T;
       /**
        * Adds a child to the container to be rendered below another child.
        *
@@ -582,9 +582,9 @@ declare namespace PIXI {
        * @param relative - The current child to add the new child relative to.
        * @return The child that was added.
        */
-      addChildBelow<T extends PIXI.DisplayObject>(
+      addChildBelow<T extends PIXI.Container>(
         child: T,
-        relative: PIXI.DisplayObject
+        relative: PIXI.Container
       ): T;
       /**
        * Adds a child to the container to be rendered above another child.
@@ -593,20 +593,20 @@ declare namespace PIXI {
        * @param relative - The current child to add the new child relative to.
        * @return The child that was added.
        */
-      addChildAbove<T extends PIXI.DisplayObject>(
+      addChildAbove<T extends PIXI.Container>(
         child: T,
-        relative: PIXI.DisplayObject
+        relative: PIXI.Container
       ): T;
-      swapChildren(child: PIXI.DisplayObject, child2: PIXI.DisplayObject): void;
-      getChildIndex(child: PIXI.DisplayObject): number;
-      setChildIndex(child: PIXI.DisplayObject, index: number): void;
-      removeChild<T extends PIXI.DisplayObject[]>(...children: T): T[0];
-      getChildAt(index: number): PIXI.DisplayObject;
-      removeChildAt(index: number): PIXI.DisplayObject;
+      swapChildren(child: PIXI.Container, child2: PIXI.Container): void;
+      getChildIndex(child: PIXI.Container): number;
+      setChildIndex(child: PIXI.Container, index: number): void;
+      removeChild<T extends PIXI.Container[]>(...children: T): T[0];
+      getChildAt(index: number): PIXI.Container;
+      removeChildAt(index: number): PIXI.Container;
       removeChildren(
         beginIndex?: number,
         endIndex?: number
-      ): PIXI.DisplayObject[];
+      ): PIXI.Container[];
       /**
        * Updates the transform on all children of this container for rendering.
        * Copied from and overrides PixiJS v5 method (v4 method is identical)

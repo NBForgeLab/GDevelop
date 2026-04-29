@@ -15,19 +15,21 @@ namespace gdjs {
     'ZoomBlur',
     new (class extends gdjs.PixiFiltersTools.PixiFilterCreator {
       makePIXIFilter(target: EffectsTarget, effectData) {
-        const zoomBlurFilter = new PIXI.filters.ZoomBlurFilter();
+        const zoomBlurFilter = new PIXI.filters.ZoomBlurFilter({
+          center: { x: 0.5, y: 0.5 },
+        }) as PIXI.filters.ZoomBlurFilter & ZoomBlurFilterExtra;
+        zoomBlurFilter._centerX = 0.5;
+        zoomBlurFilter._centerY = 0.5;
         return zoomBlurFilter;
       }
       updatePreRender(filter: PIXI.Filter, target: EffectsTarget) {
         const zoomBlurFilter =
           filter as unknown as PIXI.filters.ZoomBlurFilter &
             ZoomBlurFilterExtra;
-        zoomBlurFilter.center[0] = Math.round(
-          zoomBlurFilter._centerX * target.getWidth()
-        );
-        zoomBlurFilter.center[1] = Math.round(
-          zoomBlurFilter._centerY * target.getHeight()
-        );
+        zoomBlurFilter.center = {
+          x: Math.round(zoomBlurFilter._centerX * target.getWidth()),
+          y: Math.round(zoomBlurFilter._centerY * target.getHeight()),
+        };
       }
       updateDoubleParameter(
         filter: PIXI.Filter,

@@ -1,5 +1,5 @@
 // @flow
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 
 type Props = {
   getLastCursorSceneCoordinates: () => [number, number] | null,
@@ -24,10 +24,13 @@ export default class StatusBar {
     this._statusBarContainer.alpha = 0.8;
     this._statusBarContainer.hitArea = new PIXI.Rectangle(0, 0, 0, 0);
     this._statusBarBackground = new PIXI.Graphics();
-    this._statusBarText = new PIXI.Text('', {
-      fontSize: 15,
-      fill: 0xffffff,
-      align: 'left',
+    this._statusBarText = new PIXI.Text({
+      text: '',
+      style: {
+        fontSize: 15,
+        fill: 0xffffff,
+        align: 'left',
+      },
     });
     this._statusBarContainer.addChild(this._statusBarBackground);
     this._statusBarContainer.addChild(this._statusBarText);
@@ -75,15 +78,15 @@ export default class StatusBar {
     const statusBarWidth = this._statusBarText.width + textPadding * 2;
     const statusBarHeight = this._statusBarText.height + textPadding * 2;
 
-    this._statusBarBackground.clear();
-    this._statusBarBackground.beginFill(0x000000, 0.8);
-    this._statusBarBackground.drawRoundedRect(
-      statusBarXPosition,
-      statusBarYPosition,
-      statusBarWidth,
-      statusBarHeight,
-      borderRadius
-    );
-    this._statusBarBackground.endFill();
+    this._statusBarBackground
+      .clear()
+      .roundRect(
+        statusBarXPosition,
+        statusBarYPosition,
+        statusBarWidth,
+        statusBarHeight,
+        borderRadius
+      )
+      .fill({ color: 0x000000, alpha: 0.8 });
   }
 }

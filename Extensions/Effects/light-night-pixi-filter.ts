@@ -3,34 +3,55 @@ namespace gdjs {
   export interface LightNightFilterExtra {
     o: number;
   }
+  type LightNightFilterUniforms = {
+    opacity: number;
+  };
+  type LightNightFilter = PIXI.Filter & {
+    resources: {
+      uniforms: {
+        uniforms: LightNightFilterUniforms;
+      };
+    };
+  };
+
+  const getLightNightFilterUniforms = (
+    filter: PIXI.Filter
+  ): LightNightFilterUniforms =>
+    (filter as LightNightFilter).resources.uniforms.uniforms;
+
   /** @internal - should not have been exported? */
-  export class LightNightPixiFilter extends PIXI.Filter {
-    constructor() {
-      const vertexShader = undefined;
-      const fragmentShader = [
-        'precision mediump float;',
-        '',
-        'varying vec2 vTextureCoord;',
-        'uniform sampler2D uSampler;',
-        'uniform float opacity;',
-        '',
-        'void main(void)',
-        '{',
-        '   mat3 nightMatrix = mat3(0.6, 0, 0, 0, 0.7, 0, 0, 0, 1.3);',
-        '   gl_FragColor = texture2D(uSampler, vTextureCoord);',
-        '   gl_FragColor.rgb = mix(gl_FragColor.rgb, nightMatrix * gl_FragColor.rgb, opacity);',
-        '}',
-      ].join('\n');
-      const uniforms = { opacity: { type: '1f', value: 1 } };
-      super(vertexShader, fragmentShader, uniforms);
-    }
-  }
-  LightNightPixiFilter.prototype.constructor = gdjs.LightNightPixiFilter;
+  export const makeLightNightPixiFilter = (): PIXI.Filter => {
+    const fragmentShader = [
+      'in vec2 vTextureCoord;',
+      'uniform sampler2D uTexture;',
+      'uniform float opacity;',
+      'out vec4 finalColor;',
+      '',
+      'void main(void)',
+      '{',
+      '   mat3 nightMatrix = mat3(0.6, 0, 0, 0, 0.7, 0, 0, 0, 1.3);',
+      '   vec4 color = texture(uTexture, vTextureCoord);',
+      '   color.rgb = mix(color.rgb, nightMatrix * color.rgb, opacity);',
+      '   finalColor = color;',
+      '}',
+    ].join('\n');
+    return PIXI.Filter.from({
+      gl: {
+        vertex: gdjs.PixiFiltersTools.defaultFilterVertexShader,
+        fragment: fragmentShader,
+      },
+      resources: {
+        uniforms: {
+          opacity: { value: 1, type: 'f32' },
+        },
+      },
+    });
+  };
   gdjs.PixiFiltersTools.registerFilterCreator(
     'LightNight',
     new (class extends gdjs.PixiFiltersTools.PixiFilterCreator {
       makePIXIFilter(target: EffectsTarget, effectData) {
-        const filter = new gdjs.LightNightPixiFilter();
+        const filter = gdjs.makeLightNightPixiFilter();
         return filter;
       }
       updatePreRender(filter: PIXI.Filter, target: EffectsTarget) {}
@@ -40,16 +61,17 @@ namespace gdjs {
         value: number
       ) {
         if (parameterName === 'opacity') {
-          filter.uniforms.opacity = gdjs.PixiFiltersTools.clampValue(
-            value,
-            0,
-            1
-          );
+          getLightNightFilterUniforms(filter).opacity =
+            gdjs.PixiFiltersTools.clampValue(
+              value,
+              0,
+              1
+            );
         }
       }
       getDoubleParameter(filter: PIXI.Filter, parameterName: string): number {
         if (parameterName === 'opacity') {
-          return filter.uniforms.opacity;
+          return getLightNightFilterUniforms(filter).opacity;
         }
         return 0;
       }
@@ -73,14 +95,14 @@ namespace gdjs {
       ) {}
       getNetworkSyncData(filter: PIXI.Filter): LightNightFilterExtra {
         return {
-          o: filter.uniforms.opacity,
+          o: getLightNightFilterUniforms(filter).opacity,
         };
       }
       updateFromNetworkSyncData(
         filter: PIXI.Filter,
         data: LightNightFilterExtra
       ) {
-        filter.uniforms.opacity = data.o;
+        getLightNightFilterUniforms(filter).opacity = data.o;
       }
     })()
   );

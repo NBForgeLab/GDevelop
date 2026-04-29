@@ -1,5 +1,5 @@
 // @flow
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 import {
   getBasicProfilingCountersText,
   type BasicProfilingCounters,
@@ -18,10 +18,13 @@ export default class ProfilerBar {
     this._profilerBarContainer.alpha = 0.8;
     this._profilerBarContainer.hitArea = new PIXI.Rectangle(0, 0, 0, 0);
     this._profilerBarBackground = new PIXI.Graphics();
-    this._profilerBarText = new PIXI.Text('', {
-      fontSize: 12,
-      fill: 0xffffff,
-      align: 'left',
+    this._profilerBarText = new PIXI.Text({
+      text: '',
+      style: {
+        fontSize: 12,
+        fill: 0xffffff,
+        align: 'left',
+      },
     });
     this._profilerBarContainer.addChild(this._profilerBarBackground);
     this._profilerBarContainer.addChild(this._profilerBarText);
@@ -62,15 +65,15 @@ export default class ProfilerBar {
     const profilerBarWidth = this._profilerBarText.width + textPadding * 2;
     const profilerBarHeight = this._profilerBarText.height + textPadding * 2;
 
-    this._profilerBarBackground.clear();
-    this._profilerBarBackground.beginFill(0x000000, 0.8);
-    this._profilerBarBackground.drawRoundedRect(
-      profilerBarXPosition,
-      profilerBarYPosition,
-      profilerBarWidth,
-      profilerBarHeight,
-      borderRadius
-    );
-    this._profilerBarBackground.endFill();
+    this._profilerBarBackground
+      .clear()
+      .roundRect(
+        profilerBarXPosition,
+        profilerBarYPosition,
+        profilerBarWidth,
+        profilerBarHeight,
+        borderRadius
+      )
+      .fill({ color: 0x000000, alpha: 0.8 });
   }
 }

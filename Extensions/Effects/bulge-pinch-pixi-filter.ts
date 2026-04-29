@@ -21,9 +21,9 @@ namespace gdjs {
         const bulgePinchFilter =
           filter as unknown as PIXI.filters.BulgePinchFilter;
         if (parameterName === 'centerX') {
-          bulgePinchFilter.center[0] = value;
+          bulgePinchFilter.centerX = value;
         } else if (parameterName === 'centerY') {
-          bulgePinchFilter.center[1] = value;
+          bulgePinchFilter.centerY = value;
         } else if (parameterName === 'radius') {
           bulgePinchFilter.radius = value;
         } else if (parameterName === 'strength') {
@@ -38,10 +38,10 @@ namespace gdjs {
         const bulgePinchFilter =
           filter as unknown as PIXI.filters.BulgePinchFilter;
         if (parameterName === 'centerX') {
-          return bulgePinchFilter.center[0];
+          return bulgePinchFilter.centerX;
         }
         if (parameterName === 'centerY') {
-          return bulgePinchFilter.center[1];
+          return bulgePinchFilter.centerY;
         }
         if (parameterName === 'radius') {
           return bulgePinchFilter.radius;
@@ -73,8 +73,8 @@ namespace gdjs {
         const bulgePinchFilter =
           filter as unknown as PIXI.filters.BulgePinchFilter;
         return {
-          cx: bulgePinchFilter.center[0],
-          cy: bulgePinchFilter.center[1],
+          cx: bulgePinchFilter.centerX,
+          cy: bulgePinchFilter.centerY,
           r: bulgePinchFilter.radius,
           s: bulgePinchFilter.strength,
         };
@@ -85,8 +85,8 @@ namespace gdjs {
       ) {
         const bulgePinchFilter =
           filter as unknown as PIXI.filters.BulgePinchFilter;
-        bulgePinchFilter.center[0] = data.cx;
-        bulgePinchFilter.center[1] = data.cy;
+        bulgePinchFilter.centerX = data.cx;
+        bulgePinchFilter.centerY = data.cy;
         bulgePinchFilter.radius = data.r;
         bulgePinchFilter.strength = data.s;
       }

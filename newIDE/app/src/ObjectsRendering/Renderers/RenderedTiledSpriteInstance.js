@@ -2,7 +2,7 @@
 import RenderedInstance from './RenderedInstance';
 import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
 import ResourcesLoader from '../../ResourcesLoader';
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 const gd: libGDevelop = global.gd;
 
 /**
@@ -33,11 +33,14 @@ export default class RenderedTiledSpriteInstance extends RenderedInstance {
       associatedObjectConfiguration
     );
     this._texture = tiledSprite.getTexture();
-    this._pixiObject = new PIXI.TilingSprite(
-      PixiResourcesLoader.getPIXITexture(project, tiledSprite.getTexture()),
-      tiledSprite.getWidth(),
-      tiledSprite.getHeight()
-    );
+    this._pixiObject = new PIXI.TilingSprite({
+      texture: PixiResourcesLoader.getPIXITexture(
+        project,
+        tiledSprite.getTexture()
+      ),
+      width: tiledSprite.getWidth(),
+      height: tiledSprite.getHeight(),
+    });
     this._pixiObject.anchor.x = 0.5;
     this._pixiObject.anchor.y = 0.5;
     this._pixiContainer.addChild(this._pixiObject);
@@ -81,7 +84,11 @@ export default class RenderedTiledSpriteInstance extends RenderedInstance {
     // Extra safety check.
     const currentTexture = this._pixiObject.texture;
     const isCurrentTextureDestroyed =
-      !currentTexture || !currentTexture.orig || !currentTexture.baseTexture;
+      !currentTexture ||
+      !currentTexture.orig ||
+      !currentTexture.source ||
+      currentTexture.destroyed ||
+      currentTexture.source.destroyed;
     if (isCurrentTextureDestroyed) {
       console.warn(
         'Current texture for a RenderedSpriteInstance is destroyed. This should never happen - verify how resources are (re)loaded.'

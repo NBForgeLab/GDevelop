@@ -1,5 +1,28 @@
 // @flow
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
+
+const transparentBackgroundTexturePath = 'res/transparentback.png';
+let transparentBackgroundTexturePromise: Promise<any> | null = null;
+
+const getLoadedTransparentBackgroundTexture = () => {
+  // $FlowFixMe[prop-missing] PixiJS v8 exposes Cache, but the Flow typedefs used here are partial.
+  return PIXI.Cache.has(transparentBackgroundTexturePath)
+    ? PIXI.Assets.get(transparentBackgroundTexturePath)
+    : null;
+};
+
+const loadTransparentBackgroundTexture = () => {
+  if (!transparentBackgroundTexturePromise) {
+    transparentBackgroundTexturePromise = PIXI.Assets.load(
+      transparentBackgroundTexturePath
+    ).catch(error => {
+      transparentBackgroundTexturePromise = null;
+      throw error;
+    });
+  }
+
+  return transparentBackgroundTexturePromise;
+};
 
 type Props = {
   width: number,
@@ -12,13 +35,29 @@ export default class Background {
   _checkeredBackground: PIXI.TilingSprite;
 
   constructor({ width, height, layout }: Props) {
-    this._checkeredBackground = new PIXI.TilingSprite(
-      new PIXI.Texture(PIXI.Texture.from('res/transparentback.png')),
+    const texture = getLoadedTransparentBackgroundTexture();
+    this._checkeredBackground = new PIXI.TilingSprite({
+      texture: texture || PIXI.Texture.EMPTY,
       width,
-      height
-    );
+      height,
+    });
     this._checkeredBackground.tint = 0x444444;
     this._checkeredBackground.visible = !layout;
+
+    if (!texture && !layout) {
+      loadTransparentBackgroundTexture()
+        .then(texture => {
+          if (!this._checkeredBackground.destroyed) {
+            this._checkeredBackground.texture = texture;
+          }
+        })
+        .catch(error => {
+          console.error(
+            `Unable to load editor background texture "${transparentBackgroundTexturePath}":`,
+            error
+          );
+        });
+    }
   }
 
   resize(width: number, height: number) {

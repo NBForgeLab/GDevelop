@@ -1,5 +1,5 @@
 // @flow
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
 
 /**
@@ -14,7 +14,7 @@ export default class RenderedInstance {
   _pixiContainer: PIXI.Container;
   _pixiResourcesLoader: Class<PixiResourcesLoader>;
   // $FlowFixMe[value-as-type]
-  _pixiObject: PIXI.DisplayObject;
+  _pixiObject: PIXI.Container;
   wasUsed: boolean;
   _wasDestroyed: boolean;
   _getPropertyOverridings: (() => Map<string, string>) | null;
@@ -58,7 +58,7 @@ export default class RenderedInstance {
   }
 
   // $FlowFixMe[value-as-type]
-  getPixiObject(): PIXI.DisplayObject | null {
+  getPixiObject(): PIXI.Container | null {
     return this._pixiObject;
   }
 

@@ -1,8 +1,4 @@
 namespace gdjs {
-  interface MotionBlurFilterExtra {
-    /**Use the private member avoids to instantiate Arrays.*/
-    _velocity: PIXI.Point;
-  }
   interface MotionBlurFilterNetworkSyncData {
     vx: number;
     vy: number;
@@ -13,7 +9,9 @@ namespace gdjs {
     'MotionBlur',
     new (class extends gdjs.PixiFiltersTools.PixiFilterCreator {
       makePIXIFilter(target: EffectsTarget, effectData) {
-        const motionBlurFilter = new PIXI.filters.MotionBlurFilter([0, 0]);
+        const motionBlurFilter = new PIXI.filters.MotionBlurFilter({
+          velocity: { x: 0, y: 0 },
+        });
         return motionBlurFilter;
       }
       updatePreRender(filter: PIXI.Filter, target: EffectsTarget) {}
@@ -22,12 +20,11 @@ namespace gdjs {
         parameterName: string,
         value: number
       ) {
-        const motionBlurFilter = filter as PIXI.filters.MotionBlurFilter &
-          MotionBlurFilterExtra;
+        const motionBlurFilter = filter as PIXI.filters.MotionBlurFilter;
         if (parameterName === 'velocityX') {
-          motionBlurFilter._velocity.x = value;
+          motionBlurFilter.velocityX = value;
         } else if (parameterName === 'velocityY') {
-          motionBlurFilter._velocity.y = value;
+          motionBlurFilter.velocityY = value;
         } else if (parameterName === 'kernelSize') {
           motionBlurFilter.kernelSize = value;
         } else if (parameterName === 'offset') {
@@ -35,13 +32,12 @@ namespace gdjs {
         }
       }
       getDoubleParameter(filter: PIXI.Filter, parameterName: string): number {
-        const motionBlurFilter = filter as PIXI.filters.MotionBlurFilter &
-          MotionBlurFilterExtra;
+        const motionBlurFilter = filter as PIXI.filters.MotionBlurFilter;
         if (parameterName === 'velocityX') {
-          return motionBlurFilter._velocity.x;
+          return motionBlurFilter.velocityX;
         }
         if (parameterName === 'velocityY') {
-          return motionBlurFilter._velocity.y;
+          return motionBlurFilter.velocityY;
         }
         if (parameterName === 'kernelSize') {
           return motionBlurFilter.kernelSize;
@@ -70,11 +66,10 @@ namespace gdjs {
         value: boolean
       ) {}
       getNetworkSyncData(filter: PIXI.Filter): MotionBlurFilterNetworkSyncData {
-        const motionBlurFilter = filter as PIXI.filters.MotionBlurFilter &
-          MotionBlurFilterExtra;
+        const motionBlurFilter = filter as PIXI.filters.MotionBlurFilter;
         return {
-          vx: motionBlurFilter._velocity.x,
-          vy: motionBlurFilter._velocity.y,
+          vx: motionBlurFilter.velocityX,
+          vy: motionBlurFilter.velocityY,
           ks: motionBlurFilter.kernelSize,
           o: motionBlurFilter.offset,
         };
@@ -83,10 +78,9 @@ namespace gdjs {
         filter: PIXI.Filter,
         data: MotionBlurFilterNetworkSyncData
       ) {
-        const motionBlurFilter = filter as PIXI.filters.MotionBlurFilter &
-          MotionBlurFilterExtra;
-        motionBlurFilter._velocity.x = data.vx;
-        motionBlurFilter._velocity.y = data.vy;
+        const motionBlurFilter = filter as PIXI.filters.MotionBlurFilter;
+        motionBlurFilter.velocityX = data.vx;
+        motionBlurFilter.velocityY = data.vy;
         motionBlurFilter.kernelSize = data.ks;
         motionBlurFilter.offset = data.o;
       }

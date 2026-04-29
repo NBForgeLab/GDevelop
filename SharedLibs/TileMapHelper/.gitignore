@@ -1,4 +1,5 @@
 /dist/
+/dts/
 /coverage/
 /node_modules/
 /package-lock.json

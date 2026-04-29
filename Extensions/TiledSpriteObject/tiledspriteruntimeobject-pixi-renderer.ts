@@ -13,7 +13,11 @@ namespace gdjs {
         .getGame()
         .getImageManager()
         .getPIXITexture(textureName);
-      this._tiledSprite = new PIXI.TilingSprite(texture, 1024, 1024);
+      this._tiledSprite = new PIXI.TilingSprite({
+        texture,
+        width: 1024,
+        height: 1024,
+      });
 
       instanceContainer
         .getLayer('')
