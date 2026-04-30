@@ -1,4 +1,3 @@
-/*
  * GDevelop JS Platform
  * Copyright 2013-2016 Florian Rival (Florian.Rival@gmail.com). All rights reserved.
  * This project is released under the MIT License.
@@ -1075,103 +1074,6 @@ namespace gdjs {
       );
     }
 
-    getCameraRotationY(): number {
-      return this._threeCamera
-        ? gdjs.toDegrees(this._threeCamera.rotation.y)
-        : 0;
-    }
-
-    setCameraRotationY(rotationY: float): void {
-      if (!this._threeCamera) {
-        return;
-      }
-      this._threeCamera.rotation.y = gdjs.toRad(rotationY);
-      this.invalidateRotation();
-    }
-
-    getCameraRotationX(): number {
-      return this._threeCamera
-        ? gdjs.toDegrees(this._threeCamera.rotation.x)
-        : 0;
-    }
-
-    setCameraRotationX(rotationX: float): void {
-      if (!this._threeCamera) {
-        return;
-      }
-      this._threeCamera.rotation.x = gdjs.toRad(rotationX);
-      this.invalidateRotation();
-    }
-
-    invalidateRotation(): void {
-      if (this._basis) {
-        this._basis.isDirty = true;
-      }
-    }
-
-    getCameraForwardX(): number {
-      return this.getBasis().forwardX;
-    }
-
-    getCameraForwardY(): number {
-      return this.getBasis().forwardY;
-    }
-
-    getCameraForwardZ(): number {
-      return this.getBasis().forwardZ;
-    }
-
-    getCameraUpX(): number {
-      return this.getBasis().upX;
-    }
-
-    getCameraUpY(): number {
-      return this.getBasis().upY;
-    }
-
-    getCameraUpZ(): number {
-      return this.getBasis().upZ;
-    }
-
-    getCameraRightX(): number {
-      return this.getBasis().rightX;
-    }
-
-    getCameraRightY(): number {
-      return this.getBasis().rightY;
-    }
-
-    getCameraRightZ(): number {
-      return this.getBasis().rightZ;
-    }
-
-    private getBasis(): Basis {
-      if (!this._basis) {
-        this._basis = new Basis();
-      }
-      if (!this._basis.isDirty || !this._threeCamera) {
-        return this._basis;
-      }
-
-      const rotationMatrix = gdjs.LayerPixiRenderer.matrix4;
-      rotationMatrix.makeRotationFromEuler(this._threeCamera.rotation);
-      const elements = rotationMatrix.elements;
-
-      this._basis.forwardX = -elements[8];
-      this._basis.forwardY = elements[9];
-      this._basis.forwardZ = -elements[10];
-
-      this._basis.rightX = elements[0];
-      this._basis.rightY = -elements[1];
-      this._basis.rightZ = elements[2];
-
-      this._basis.upX = elements[4];
-      this._basis.upY = -elements[5];
-      this._basis.upZ = elements[6];
-
-      return this._basis;
-    }
-
     transformTo3DWorld(
       screenX: float,
       screenY: float,
@@ -1427,19 +1329,6 @@ namespace gdjs {
         parentPixiContainer.removeChild(this._pixiContainer);
       }
     }
-  }
-
-  class Basis {
-    isDirty = true;
-    forwardX: float = 0;
-    forwardY: float = 0;
-    forwardZ: float = 0;
-    upX: float = 0;
-    upY: float = 0;
-    upZ: float = 0;
-    rightX: float = 0;
-    rightY: float = 0;
-    rightZ: float = 0;
   }
 
   //Register the class to let the engine use it.
