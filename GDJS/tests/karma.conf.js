@@ -1,4 +1,4 @@
-module.exports = function (config) {
+module.exports = function(config) {
   const testFiles = [
     './Extensions/**/tests/**.spec.js',
     './GDJS/tests/tests/**/*.js',
@@ -128,6 +128,24 @@ module.exports = function (config) {
       './newIDE/app/resources/GDJS/Runtime/Extensions/Physics2Behavior/Box2D_v2.3.1_min.wasm.js',
       './newIDE/app/resources/GDJS/Runtime/Extensions/Physics2Behavior/physics2runtimebehavior.js',
       './newIDE/app/resources/GDJS/Runtime/Extensions/Physics2Behavior/physics2tools.js',
+      {
+        pattern:
+          './newIDE/app/resources/GDJS/Runtime/Extensions/Physics3DBehavior/jolt-physics.wasm.wasm',
+        watched: true,
+        included: false,
+        served: true,
+        nocache: false,
+      },
+      {
+        pattern:
+          './newIDE/app/resources/GDJS/Runtime/Extensions/Physics3DBehavior/jolt-physics.wasm.js',
+        watched: true,
+        included: false,
+        served: true,
+        nocache: false,
+      },
+      './newIDE/app/resources/GDJS/Runtime/Extensions/Physics3DBehavior/Physics3DRuntimeBehavior.js',
+      './newIDE/app/resources/GDJS/Runtime/Extensions/Physics3DBehavior/Physics3DTools.js',
       './newIDE/app/resources/GDJS/Runtime/Extensions/Leaderboards/leaderboardstools.js',
       './newIDE/app/resources/GDJS/Runtime/Extensions/PlayerAuthentication/playerauthenticationtools.js',
       './newIDE/app/resources/GDJS/Runtime/Extensions/PlayerAuthentication/playerauthenticationcomponents.js',

@@ -10,6 +10,7 @@ import Text from '../../../UI/Text';
 import DismissableAlertMessage from '../../../UI/DismissableAlertMessage';
 import { ResponsiveLineStackLayout } from '../../../UI/Layout';
 import useForceUpdate from '../../../Utils/UseForceUpdate';
+import FlatButton from '../../../UI/FlatButton';
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import {
@@ -25,13 +26,34 @@ import {
 import { mapFor } from '../../../Utils/MapFor';
 import ResourceSelectorWithThumbnail from '../../../ResourcesList/ResourceSelectorWithThumbnail';
 import PixiResourcesLoader from '../../../ObjectsRendering/PixiResourcesLoader';
+// $FlowFixMe[cannot-resolve-module] Three.js addons are provided by the bundled three package.
 import { type GLTF } from 'three/addons/loaders/GLTFLoader';
 import * as THREE from 'three';
 import AlertMessage from '../../../UI/AlertMessage';
+import Physics3DShapeEditorDialog from './Physics3DShapeEditorDialog';
 
 const gd: libGDevelop = global.gd;
 
 type Props = BehaviorEditorProps;
+
+const styles = {
+  shapeField: {
+    flex: 1,
+    minWidth: 200,
+  },
+};
+
+const editShapeButtonStyle: {|
+  marginTop?: number,
+  marginBottom?: number,
+  marginLeft?: number,
+  marginRight?: number,
+  margin?: number,
+  flexShrink?: 0,
+|} = {
+  marginTop: 16,
+  flexShrink: 0,
+};
 
 const areAdvancedPropertiesModified = (
   propertiesValues: gdMapStringPropertyDescriptor,
@@ -101,6 +123,7 @@ const Physics3DEditor = (props: Props): React.Node => {
     resourceManagementProps,
   } = props;
   const forceUpdate = useForceUpdate();
+  const [shapeEditorOpen, setShapeEditorOpen] = React.useState(false);
 
   const areAdvancedPropertiesExpandedByDefault = React.useMemo(
     () => {
@@ -142,7 +165,8 @@ const Physics3DEditor = (props: Props): React.Node => {
 
   const canShapeBeOriented =
     properties.get('shape').getValue() !== 'Sphere' &&
-    properties.get('shape').getValue() !== 'Box';
+    properties.get('shape').getValue() !== 'Box' &&
+    properties.get('shape').getValue() !== 'Triangle';
 
   // $FlowFixMe[value-as-type]
   const [gltf, setGltf] = React.useState<GLTF | null>(null);
@@ -193,373 +217,406 @@ const Physics3DEditor = (props: Props): React.Node => {
   );
 
   return (
-    <Column
-      expand
-      // Avoid overflow on small screens
-      noOverflowParent
-    >
-      <Line>
-        <ChoiceProperty
-          id="physics3d-parameter-body-type"
-          properties={properties}
-          propertyName={'bodyType'}
-          onUpdate={(e, i, newValue: string) => {
-            updateBehaviorProperty('bodyType', newValue);
-          }}
-        />
-      </Line>
-      <ResponsiveLineStackLayout>
-        <Checkbox
-          label={properties.get('bullet').getLabel()}
-          checked={properties.get('bullet').getValue() === 'true'}
-          onCheck={(e, checked) =>
-            updateBehaviorProperty('bullet', checked ? '1' : '0')
-          }
-        />
-        <Checkbox
-          label={properties.get('fixedRotation').getLabel()}
-          checked={properties.get('fixedRotation').getValue() === 'true'}
-          onCheck={(e, checked) =>
-            updateBehaviorProperty('fixedRotation', checked ? '1' : '0')
-          }
-        />
-      </ResponsiveLineStackLayout>
-      <Line>
-        <DismissableAlertMessage
-          identifier="physics2-shape-collisions"
-          kind="info"
-        >
-          <Trans>
-            The shape used in the Physics behavior is independent from the
-            collision mask of the object. Be sure to use the "Collision"
-            condition provided by the Physics behavior in the events. The usual
-            "Collision" condition won't take into account the shape that you've
-            set up here.
-          </Trans>
-        </DismissableAlertMessage>
-      </Line>
-      <ResponsiveLineStackLayout>
-        <ChoiceProperty
-          id="physics3d-parameter-shape"
-          properties={properties}
-          propertyName={'shape'}
-          onUpdate={(e, i, newValue: string) => {
-            updateBehaviorProperty('shape', newValue);
-          }}
-        />
-        {shape !== 'Mesh' && (
-          <ChoiceProperty
-            id="physics3d-parameter-shape-orientation"
-            properties={properties}
-            propertyName={'shapeOrientation'}
-            value={
-              canShapeBeOriented
-                ? properties.get('shapeOrientation').getValue()
-                : 'Z'
-            }
-            onUpdate={(e, i, newValue: string) =>
-              updateBehaviorProperty('shapeOrientation', newValue)
-            }
-            disabled={!canShapeBeOriented}
-          />
-        )}
-      </ResponsiveLineStackLayout>
-      {shape === 'Mesh' && object.getType() !== 'Scene3D::Model3DObject' && (
+    <React.Fragment>
+      <Column
+        expand
+        // Avoid overflow on small screens
+        noOverflowParent
+      >
         <Line>
-          <AlertMessage kind="error">
-            <Trans>Mesh shapes are only supported for 3D model objects.</Trans>
-          </AlertMessage>
+          <ChoiceProperty
+            id="physics3d-parameter-body-type"
+            properties={properties}
+            propertyName={'bodyType'}
+            onUpdate={(e, i, newValue: string) => {
+              updateBehaviorProperty('bodyType', newValue);
+            }}
+          />
         </Line>
-      )}
-      {shape !== 'Mesh' && (
         <ResponsiveLineStackLayout>
-          <SemiControlledTextField
-            fullWidth
-            value={properties.get('shapeDimensionA').getValue()}
-            key={'shapeDimensionA'}
-            floatingLabelText={
-              shape === 'Box' ? <Trans>Width</Trans> : <Trans>Radius</Trans>
-            }
-            min={0}
-            onChange={newValue =>
-              updateBehaviorProperty('shapeDimensionA', newValue)
-            }
-            type="number"
-            endAdornment={
-              <UnitAdornment property={properties.get('shapeDimensionA')} />
+          <Checkbox
+            label={properties.get('bullet').getLabel()}
+            checked={properties.get('bullet').getValue() === 'true'}
+            onCheck={(e, checked) =>
+              updateBehaviorProperty('bullet', checked ? '1' : '0')
             }
           />
-          {shape !== 'Sphere' && (
-            <SemiControlledTextField
-              fullWidth
-              value={properties.get('shapeDimensionB').getValue()}
-              key={'shapeDimensionB'}
-              floatingLabelText={
-                shape === 'Box' ? <Trans>Height</Trans> : <Trans>Depth</Trans>
-              }
-              min={0}
-              onChange={newValue =>
-                updateBehaviorProperty('shapeDimensionB', newValue)
-              }
-              type="number"
-              endAdornment={
-                <UnitAdornment property={properties.get('shapeDimensionB')} />
-              }
+          <Checkbox
+            label={properties.get('fixedRotation').getLabel()}
+            checked={properties.get('fixedRotation').getValue() === 'true'}
+            onCheck={(e, checked) =>
+              updateBehaviorProperty('fixedRotation', checked ? '1' : '0')
+            }
+          />
+        </ResponsiveLineStackLayout>
+        <Line>
+          <DismissableAlertMessage
+            identifier="physics2-shape-collisions"
+            kind="info"
+          >
+            <Trans>
+              The shape used in the Physics behavior is independent from the
+              collision mask of the object. Be sure to use the "Collision"
+              condition provided by the Physics behavior in the events. The
+              usual "Collision" condition won't take into account the shape that
+              you've set up here.
+            </Trans>
+          </DismissableAlertMessage>
+        </Line>
+        <ResponsiveLineStackLayout alignItems="flex-start">
+          <div style={styles.shapeField}>
+            <ChoiceProperty
+              id="physics3d-parameter-shape"
+              properties={properties}
+              propertyName={'shape'}
+              onUpdate={(e, i, newValue: string) => {
+                updateBehaviorProperty('shape', newValue);
+              }}
             />
-          )}
-          {shape === 'Box' && (
-            <SemiControlledTextField
-              fullWidth
-              value={properties.get('shapeDimensionC').getValue()}
-              key={'shapeDimensionC'}
-              floatingLabelText={<Trans>Depth</Trans>}
-              min={0}
-              onChange={newValue =>
-                updateBehaviorProperty('shapeDimensionC', newValue)
-              }
-              type="number"
-              endAdornment={
-                <UnitAdornment property={properties.get('shapeDimensionC')} />
-              }
-            />
+          </div>
+          <FlatButton
+            id="physics3d-edit-shape-visually"
+            label={<Trans>Edit visually</Trans>}
+            onClick={() => setShapeEditorOpen(true)}
+            style={editShapeButtonStyle}
+          />
+          {shape !== 'Mesh' && (
+            <div style={styles.shapeField}>
+              <ChoiceProperty
+                id="physics3d-parameter-shape-orientation"
+                properties={properties}
+                propertyName={'shapeOrientation'}
+                value={
+                  canShapeBeOriented
+                    ? properties.get('shapeOrientation').getValue()
+                    : 'Z'
+                }
+                onUpdate={(e, i, newValue: string) =>
+                  updateBehaviorProperty('shapeOrientation', newValue)
+                }
+                disabled={!canShapeBeOriented}
+              />
+            </div>
           )}
         </ResponsiveLineStackLayout>
-      )}
-      {shape === 'Mesh' && (
-        <React.Fragment>
-          <ResourceSelectorWithThumbnail
-            project={project}
-            resourceKind="model3D"
-            floatingLabelText={properties
-              .get('meshShapeResourceName')
-              .getLabel()}
-            resourceManagementProps={resourceManagementProps}
-            projectScopedContainersAccessor={projectScopedContainersAccessor}
-            resourceName={properties.get('meshShapeResourceName').getValue()}
-            onChange={newValue => {
-              updateBehaviorProperty('meshShapeResourceName', newValue);
-              loadGltf(newValue);
-              forceUpdate();
-            }}
-            id={`physics3d-parameter-mesh-shape-resource-name`}
+        {shape === 'Mesh' && object.getType() !== 'Scene3D::Model3DObject' && (
+          <Line>
+            <AlertMessage kind="error">
+              <Trans>
+                Mesh shapes are only supported for 3D model objects.
+              </Trans>
+            </AlertMessage>
+          </Line>
+        )}
+        {shape !== 'Mesh' && (
+          <ResponsiveLineStackLayout>
+            <SemiControlledTextField
+              fullWidth
+              value={properties.get('shapeDimensionA').getValue()}
+              key={'shapeDimensionA'}
+              floatingLabelText={
+                shape === 'Box' || shape === 'Triangle' ? (
+                  <Trans>Width</Trans>
+                ) : (
+                  <Trans>Radius</Trans>
+                )
+              }
+              min={0}
+              onChange={newValue =>
+                updateBehaviorProperty('shapeDimensionA', newValue)
+              }
+              type="number"
+              endAdornment={
+                <UnitAdornment property={properties.get('shapeDimensionA')} />
+              }
+            />
+            {shape !== 'Sphere' && (
+              <SemiControlledTextField
+                fullWidth
+                value={properties.get('shapeDimensionB').getValue()}
+                key={'shapeDimensionB'}
+                floatingLabelText={
+                  shape === 'Box' || shape === 'Triangle' ? (
+                    <Trans>Height</Trans>
+                  ) : (
+                    <Trans>Depth</Trans>
+                  )
+                }
+                min={0}
+                onChange={newValue =>
+                  updateBehaviorProperty('shapeDimensionB', newValue)
+                }
+                type="number"
+                endAdornment={
+                  <UnitAdornment property={properties.get('shapeDimensionB')} />
+                }
+              />
+            )}
+            {(shape === 'Box' || shape === 'Triangle') && (
+              <SemiControlledTextField
+                fullWidth
+                value={properties.get('shapeDimensionC').getValue()}
+                key={'shapeDimensionC'}
+                floatingLabelText={<Trans>Depth</Trans>}
+                min={0}
+                onChange={newValue =>
+                  updateBehaviorProperty('shapeDimensionC', newValue)
+                }
+                type="number"
+                endAdornment={
+                  <UnitAdornment property={properties.get('shapeDimensionC')} />
+                }
+              />
+            )}
+          </ResponsiveLineStackLayout>
+        )}
+        {shape === 'Mesh' && (
+          <React.Fragment>
+            <ResourceSelectorWithThumbnail
+              project={project}
+              resourceKind="model3D"
+              floatingLabelText={properties
+                .get('meshShapeResourceName')
+                .getLabel()}
+              resourceManagementProps={resourceManagementProps}
+              projectScopedContainersAccessor={projectScopedContainersAccessor}
+              resourceName={properties.get('meshShapeResourceName').getValue()}
+              onChange={newValue => {
+                updateBehaviorProperty('meshShapeResourceName', newValue);
+                loadGltf(newValue);
+                forceUpdate();
+              }}
+              id={`physics3d-parameter-mesh-shape-resource-name`}
+            />
+            {meshShapeTrianglesCount > 10000 && (
+              <Line>
+                <AlertMessage kind="warning">
+                  <Trans>
+                    The model has {meshShapeTrianglesCount} triangles. To keep
+                    good performance, consider making a simplified model with a
+                    modeling tool.
+                  </Trans>
+                </AlertMessage>
+              </Line>
+            )}
+          </React.Fragment>
+        )}
+        <ResponsiveLineStackLayout>
+          <NumericProperty
+            id="physics3d-parameter-density"
+            properties={properties}
+            propertyName={'density'}
+            step={0.1}
+            onUpdate={newValue =>
+              updateBehaviorProperty(
+                'density',
+                parseFloat(newValue) > 0 ? newValue : '0'
+              )
+            }
           />
-          {meshShapeTrianglesCount > 10000 && (
-            <Line>
-              <AlertMessage kind="warning">
-                <Trans>
-                  The model has {meshShapeTrianglesCount} triangles. To keep
-                  good performance, consider making a simplified model with a
-                  modeling tool.
-                </Trans>
-              </AlertMessage>
-            </Line>
-          )}
-        </React.Fragment>
-      )}
-      <ResponsiveLineStackLayout>
-        <NumericProperty
-          id="physics3d-parameter-density"
-          properties={properties}
-          propertyName={'density'}
-          step={0.1}
-          onUpdate={newValue =>
-            updateBehaviorProperty(
-              'density',
-              parseFloat(newValue) > 0 ? newValue : '0'
-            )
-          }
-        />
-        <NumericProperty
-          id="physics3d-parameter-mass-override"
-          properties={properties}
-          propertyName={'massOverride'}
-          step={0.1}
-          onUpdate={newValue =>
-            updateBehaviorProperty(
-              'massOverride',
-              parseFloat(newValue) > 0 ? newValue : '0'
-            )
-          }
-        />
-        <NumericProperty
-          properties={properties}
-          propertyName={'gravityScale'}
-          step={0.1}
-          onUpdate={newValue =>
-            updateBehaviorProperty('gravityScale', newValue)
-          }
-        />
-      </ResponsiveLineStackLayout>
-      <ResponsiveLineStackLayout>
-        <NumericProperty
-          properties={properties}
-          propertyName={'friction'}
-          step={0.1}
-          onUpdate={newValue =>
-            updateBehaviorProperty(
-              'friction',
-              parseFloat(newValue) > 0 ? newValue : '0'
-            )
-          }
-        />
-        <NumericProperty
-          properties={properties}
-          propertyName={'restitution'}
-          step={0.1}
-          onUpdate={newValue =>
-            updateBehaviorProperty(
-              'restitution',
-              parseFloat(newValue) > 0 ? newValue : '0'
-            )
-          }
-        />
-      </ResponsiveLineStackLayout>
-      <ResponsiveLineStackLayout>
-        <NumericProperty
-          properties={properties}
-          propertyName={'linearDamping'}
-          step={0.05}
-          onUpdate={newValue =>
-            updateBehaviorProperty('linearDamping', newValue)
-          }
-        />
-        <NumericProperty
-          id="physics3d-parameter-angular-damping"
-          properties={properties}
-          propertyName={'angularDamping'}
-          step={0.05}
-          onUpdate={newValue =>
-            updateBehaviorProperty('angularDamping', newValue)
-          }
-        />
-      </ResponsiveLineStackLayout>
-      <Line>
-        <Text style={{ marginRight: 10 }}>
-          {properties.get('layers').getLabel()}
-        </Text>
-        <BitGroupEditor
-          key={'static-layers'}
-          firstIndex={0}
-          bits={staticBits.map(
-            (_, index) => isBitEnabled(layersValues, index) && isStatic
-          )}
-          onChange={(index, value) => {
-            const newValue = enableBit(layersValues, index, value);
-            updateBehaviorProperty('layers', newValue.toString(10));
-          }}
-          disabled={!isStatic}
-        />
-        <Spacer />
-        <BitGroupEditor
-          key={'dynamic-layers'}
-          firstIndex={4}
-          bits={dynamicBits.map(
-            (_, index) => isBitEnabled(layersValues, index + 4) && !isStatic
-          )}
-          onChange={(index, value) => {
-            const newValue = enableBit(layersValues, index, value);
-            updateBehaviorProperty('layers', newValue.toString(10));
-          }}
-          disabled={isStatic}
-        />
-      </Line>
-      <Line>
-        <Text style={{ marginRight: 10 }}>
-          {properties.get('masks').getLabel()}
-        </Text>
-        <BitGroupEditor
-          key={'static-mask'}
-          firstIndex={0}
-          bits={staticBits.map(
-            (_, index) => isBitEnabled(masksValues, index) || isStatic
-          )}
-          onChange={(index, value) => {
-            const newValue = enableBit(masksValues, index, value);
-            updateBehaviorProperty('masks', newValue.toString(10));
-          }}
-          disabled={isStatic}
-        />
-        <Spacer />
-        <BitGroupEditor
-          key={'dynamic-mask'}
-          firstIndex={4}
-          bits={dynamicBits.map(
-            (_, index) => isBitEnabled(masksValues, index + 4) || isStatic
-          )}
-          onChange={(index, value) => {
-            const newValue = enableBit(masksValues, index, value);
-            updateBehaviorProperty('masks', newValue.toString(10));
-          }}
-          disabled={isStatic}
-        />
-      </Line>
-      <Accordion
-        defaultExpanded={areAdvancedPropertiesExpandedByDefault}
-        noMargin
-      >
-        <AccordionHeader noMargin>
-          <Text size="sub-title">
-            <Trans>Advanced properties</Trans>
+          <NumericProperty
+            id="physics3d-parameter-mass-override"
+            properties={properties}
+            propertyName={'massOverride'}
+            step={0.1}
+            onUpdate={newValue =>
+              updateBehaviorProperty(
+                'massOverride',
+                parseFloat(newValue) > 0 ? newValue : '0'
+              )
+            }
+          />
+          <NumericProperty
+            properties={properties}
+            propertyName={'gravityScale'}
+            step={0.1}
+            onUpdate={newValue =>
+              updateBehaviorProperty('gravityScale', newValue)
+            }
+          />
+        </ResponsiveLineStackLayout>
+        <ResponsiveLineStackLayout>
+          <NumericProperty
+            properties={properties}
+            propertyName={'friction'}
+            step={0.1}
+            onUpdate={newValue =>
+              updateBehaviorProperty(
+                'friction',
+                parseFloat(newValue) > 0 ? newValue : '0'
+              )
+            }
+          />
+          <NumericProperty
+            properties={properties}
+            propertyName={'restitution'}
+            step={0.1}
+            onUpdate={newValue =>
+              updateBehaviorProperty(
+                'restitution',
+                parseFloat(newValue) > 0 ? newValue : '0'
+              )
+            }
+          />
+        </ResponsiveLineStackLayout>
+        <ResponsiveLineStackLayout>
+          <NumericProperty
+            properties={properties}
+            propertyName={'linearDamping'}
+            step={0.05}
+            onUpdate={newValue =>
+              updateBehaviorProperty('linearDamping', newValue)
+            }
+          />
+          <NumericProperty
+            id="physics3d-parameter-angular-damping"
+            properties={properties}
+            propertyName={'angularDamping'}
+            step={0.05}
+            onUpdate={newValue =>
+              updateBehaviorProperty('angularDamping', newValue)
+            }
+          />
+        </ResponsiveLineStackLayout>
+        <Line>
+          <Text style={{ marginRight: 10 }}>
+            {properties.get('layers').getLabel()}
           </Text>
-        </AccordionHeader>
-        <AccordionBody disableGutters>
-          <Column expand noMargin>
-            <ResponsiveLineStackLayout>
-              <NumericProperty
-                properties={properties}
-                propertyName={'shapeOffsetX'}
-                step={1}
-                onUpdate={newValue =>
-                  updateBehaviorProperty('shapeOffsetX', newValue)
-                }
-              />
-              <NumericProperty
-                properties={properties}
-                propertyName={'shapeOffsetY'}
-                step={1}
-                onUpdate={newValue =>
-                  updateBehaviorProperty('shapeOffsetY', newValue)
-                }
-              />
-              <NumericProperty
-                properties={properties}
-                propertyName={'shapeOffsetZ'}
-                step={1}
-                onUpdate={newValue =>
-                  updateBehaviorProperty('shapeOffsetZ', newValue)
-                }
-              />
-            </ResponsiveLineStackLayout>
-            <ResponsiveLineStackLayout>
-              <NumericProperty
-                properties={properties}
-                propertyName={'massCenterOffsetX'}
-                step={1}
-                onUpdate={newValue =>
-                  updateBehaviorProperty('massCenterOffsetX', newValue)
-                }
-              />
-              <NumericProperty
-                properties={properties}
-                propertyName={'massCenterOffsetY'}
-                step={1}
-                onUpdate={newValue =>
-                  updateBehaviorProperty('massCenterOffsetY', newValue)
-                }
-              />
-              <NumericProperty
-                properties={properties}
-                propertyName={'massCenterOffsetZ'}
-                step={1}
-                onUpdate={newValue =>
-                  updateBehaviorProperty('massCenterOffsetZ', newValue)
-                }
-              />
-            </ResponsiveLineStackLayout>
-          </Column>
-        </AccordionBody>
-      </Accordion>
-    </Column>
+          <BitGroupEditor
+            key={'static-layers'}
+            firstIndex={0}
+            bits={staticBits.map(
+              (_, index) => isBitEnabled(layersValues, index) && isStatic
+            )}
+            onChange={(index, value) => {
+              const newValue = enableBit(layersValues, index, value);
+              updateBehaviorProperty('layers', newValue.toString(10));
+            }}
+            disabled={!isStatic}
+          />
+          <Spacer />
+          <BitGroupEditor
+            key={'dynamic-layers'}
+            firstIndex={4}
+            bits={dynamicBits.map(
+              (_, index) => isBitEnabled(layersValues, index + 4) && !isStatic
+            )}
+            onChange={(index, value) => {
+              const newValue = enableBit(layersValues, index, value);
+              updateBehaviorProperty('layers', newValue.toString(10));
+            }}
+            disabled={isStatic}
+          />
+        </Line>
+        <Line>
+          <Text style={{ marginRight: 10 }}>
+            {properties.get('masks').getLabel()}
+          </Text>
+          <BitGroupEditor
+            key={'static-mask'}
+            firstIndex={0}
+            bits={staticBits.map(
+              (_, index) => isBitEnabled(masksValues, index) || isStatic
+            )}
+            onChange={(index, value) => {
+              const newValue = enableBit(masksValues, index, value);
+              updateBehaviorProperty('masks', newValue.toString(10));
+            }}
+            disabled={isStatic}
+          />
+          <Spacer />
+          <BitGroupEditor
+            key={'dynamic-mask'}
+            firstIndex={4}
+            bits={dynamicBits.map(
+              (_, index) => isBitEnabled(masksValues, index + 4) || isStatic
+            )}
+            onChange={(index, value) => {
+              const newValue = enableBit(masksValues, index, value);
+              updateBehaviorProperty('masks', newValue.toString(10));
+            }}
+            disabled={isStatic}
+          />
+        </Line>
+        <Accordion
+          defaultExpanded={areAdvancedPropertiesExpandedByDefault}
+          noMargin
+        >
+          <AccordionHeader noMargin>
+            <Text size="sub-title">
+              <Trans>Advanced properties</Trans>
+            </Text>
+          </AccordionHeader>
+          <AccordionBody disableGutters>
+            <Column expand noMargin>
+              <ResponsiveLineStackLayout>
+                <NumericProperty
+                  properties={properties}
+                  propertyName={'shapeOffsetX'}
+                  step={1}
+                  onUpdate={newValue =>
+                    updateBehaviorProperty('shapeOffsetX', newValue)
+                  }
+                />
+                <NumericProperty
+                  properties={properties}
+                  propertyName={'shapeOffsetY'}
+                  step={1}
+                  onUpdate={newValue =>
+                    updateBehaviorProperty('shapeOffsetY', newValue)
+                  }
+                />
+                <NumericProperty
+                  properties={properties}
+                  propertyName={'shapeOffsetZ'}
+                  step={1}
+                  onUpdate={newValue =>
+                    updateBehaviorProperty('shapeOffsetZ', newValue)
+                  }
+                />
+              </ResponsiveLineStackLayout>
+              <ResponsiveLineStackLayout>
+                <NumericProperty
+                  properties={properties}
+                  propertyName={'massCenterOffsetX'}
+                  step={1}
+                  onUpdate={newValue =>
+                    updateBehaviorProperty('massCenterOffsetX', newValue)
+                  }
+                />
+                <NumericProperty
+                  properties={properties}
+                  propertyName={'massCenterOffsetY'}
+                  step={1}
+                  onUpdate={newValue =>
+                    updateBehaviorProperty('massCenterOffsetY', newValue)
+                  }
+                />
+                <NumericProperty
+                  properties={properties}
+                  propertyName={'massCenterOffsetZ'}
+                  step={1}
+                  onUpdate={newValue =>
+                    updateBehaviorProperty('massCenterOffsetZ', newValue)
+                  }
+                />
+              </ResponsiveLineStackLayout>
+            </Column>
+          </AccordionBody>
+        </Accordion>
+      </Column>
+      {shapeEditorOpen && (
+        <Physics3DShapeEditorDialog
+          object={object}
+          project={project}
+          properties={properties}
+          resourceManagementProps={resourceManagementProps}
+          projectScopedContainersAccessor={projectScopedContainersAccessor}
+          updateBehaviorProperty={updateBehaviorProperty}
+          onClose={() => setShapeEditorOpen(false)}
+        />
+      )}
+    </React.Fragment>
   );
 };
 

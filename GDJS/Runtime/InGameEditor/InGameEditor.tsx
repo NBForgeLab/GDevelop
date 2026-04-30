@@ -849,10 +849,8 @@ namespace gdjs {
     private _selection = new Selection();
     private _selectionBoxes: Map<RuntimeObject, ObjectSelectionBoxHelper> =
       new Map();
-    private _physics3DCollisionShapes: Map<
-      any,
-      Physics3DCollisionShapeHelper
-    > = new Map();
+    private _physics3DCollisionShapes: Map<any, Physics3DCollisionShapeHelper> =
+      new Map();
     private _axesHelper: THREE.AxesHelper | null = null;
     private _axesHelperSize: number | null = null;
     private _objectMover = new ObjectMover(this);
@@ -974,7 +972,7 @@ namespace gdjs {
         this._unregisterContextLostListener();
         this._unregisterContextLostListener = null;
       }
-      
+
       this._clearPhysics3DCollisionShapes();
       this._clearAxesHelper();
     }
@@ -4294,7 +4292,6 @@ namespace gdjs {
     }
 
     step(): void {
-
       const runtimeGame = this.editor.getRuntimeGame();
       const inputManager = runtimeGame.getInputManager();
 
@@ -5244,26 +5241,27 @@ namespace gdjs {
 
   class Physics3DCollisionShapeHelper {
     behavior: any;
-    container: THREE.Group;
-    private _shapeRoot: THREE.Group;
-    private _shapeContent: THREE.Group;
-    private _shapeObject: THREE.Object3D | null = null;
+    container: any;
+    private _shapeRoot: any;
+    private _shapeContent: any;
+    private _shapeObject: any | null = null;
     private _signature: string | null = null;
-    private _lineMaterial: THREE.LineBasicMaterial;
+    private _lineMaterial: any;
 
     constructor(behavior: any) {
+      const three = THREE as any;
       this.behavior = behavior;
-      this.container = new THREE.Group();
+      this.container = new three.Group();
       this.container.rotation.order = 'ZYX';
       this.container.userData.isCollisionShapeHelper = true;
 
-      this._shapeRoot = new THREE.Group();
+      this._shapeRoot = new three.Group();
       this._shapeRoot.rotation.order = 'ZYX';
 
-      this._shapeContent = new THREE.Group();
+      this._shapeContent = new three.Group();
       this._shapeContent.rotation.order = 'ZYX';
 
-      this._lineMaterial = new THREE.LineBasicMaterial({
+      this._lineMaterial = new three.LineBasicMaterial({
         color: 0x43c1ff,
         transparent: true,
         opacity: 0.7,
@@ -5293,8 +5291,19 @@ namespace gdjs {
       const shapeOffsetZ = (behavior.shapeOffsetZ || 0) * shapeScale;
 
       const rawShape: string = behavior._shape || 'Sphere';
+      const meshResourceName =
+        behavior.meshShapeResourceName || owner3D._modelResourceName || '';
+      const isSupportedMeshShape =
+        rawShape === 'Mesh' && !!meshResourceName;
+      const shape = isSupportedMeshShape
+        ? rawShape
+        : rawShape === 'Mesh'
+          ? 'Sphere'
+          : rawShape;
       const shapeOrientation: string =
-        rawShape === 'Box' ? 'Z' : behavior.shapeOrientation || 'Z';
+        shape === 'Box' || shape === 'Sphere' || shape === 'Triangle'
+          ? 'Z'
+          : behavior.shapeOrientation || 'Z';
 
       let width = owner3D.getWidth();
       let height = owner3D.getHeight();
@@ -5313,9 +5322,10 @@ namespace gdjs {
       const shapeDimensionB = (behavior.shapeDimensionB || 0) * shapeScale;
       const shapeDimensionC = (behavior.shapeDimensionC || 0) * shapeScale;
       const onePixel = 1;
+      const format = (value: number) => value.toFixed(4);
 
       let signature = '';
-      if (rawShape === 'Mesh') {
+      if (shape === 'Mesh') {
         const meshSignatureParts: Array<string> = [];
         object3D.traverse((child) => {
           if (child && child.isMesh && child.geometry) {
@@ -5326,7 +5336,6 @@ namespace gdjs {
             );
           }
         });
-        const meshResourceName = behavior.meshShapeResourceName || '';
         let meshResourceReady = false;
         if (meshResourceName && owner3D && owner3D.getInstanceContainer) {
           const model = owner3D
@@ -5336,11 +5345,10 @@ namespace gdjs {
             .getModel(meshResourceName);
           meshResourceReady = !!model;
         }
-        signature = `mesh|${meshResourceName}|${meshResourceReady}|${meshSignatureParts.join(',')}`;
+        signature = `mesh|${shapeOrientation}|${format(width)}|${format(height)}|${format(depth)}|${meshResourceName}|${meshResourceReady}|${meshSignatureParts.join(',')}`;
       } else {
-        const format = (value: number) => value.toFixed(4);
         signature = [
-          rawShape,
+          shape,
           shapeOrientation,
           format(shapeScale),
           format(shapeDimensionA),
@@ -5354,7 +5362,7 @@ namespace gdjs {
 
       if (signature !== this._signature) {
         this._rebuildShapeObject({
-          shape: rawShape,
+          shape,
           width,
           height,
           depth,
@@ -5375,19 +5383,20 @@ namespace gdjs {
         owner3D.getCenterZInScene()
       );
       this._shapeRoot.quaternion.copy(object3D.quaternion);
-      if (rawShape === 'Mesh') {
-        this._shapeRoot.scale.copy(object3D.scale);
-      } else {
-        this._shapeRoot.scale.set(1, 1, 1);
-      }
+      this._shapeRoot.scale.set(1, 1, 1);
 
-      this._shapeContent.position.set(
-        shapeOffsetX,
-        shapeOffsetY,
-        shapeOffsetZ
-      );
+      this._shapeContent.position.set(shapeOffsetX, shapeOffsetY, shapeOffsetZ);
+      if (shape === 'Mesh') {
+        this._shapeContent.scale.set(
+          owner3D.isFlippedX() ? -width : width,
+          owner3D.isFlippedY() ? -height : height,
+          owner3D.isFlippedZ() ? -depth : depth
+        );
+      } else {
+        this._shapeContent.scale.set(1, 1, 1);
+      }
       this._shapeContent.rotation.set(0, 0, 0);
-      if (rawShape === 'Capsule' || rawShape === 'Cylinder') {
+      if (shape === 'Capsule' || shape === 'Cylinder') {
         if (shapeOrientation === 'X') {
           this._shapeContent.rotation.z = -Math.PI / 2;
         } else if (shapeOrientation === 'Z') {
@@ -5417,13 +5426,14 @@ namespace gdjs {
       shapeDimensionB: number;
       shapeDimensionC: number;
       onePixel: number;
-      object3D: THREE.Object3D;
+      object3D: any;
       owner3D: any;
       behavior: any;
     }): void {
+      const three = THREE as any;
       this._disposeShapeObject();
 
-      let shapeObject: THREE.Object3D;
+      let shapeObject: any;
       if (shape === 'Mesh') {
         shapeObject = this._buildMeshWireframeFromBehavior(
           object3D,
@@ -5431,8 +5441,8 @@ namespace gdjs {
           behavior
         );
       } else {
-        let geometry: THREE.BufferGeometry;
-        if (shape === 'Box') {
+        let geometry: any;
+        if (shape === 'Box' || shape === 'Triangle') {
           const boxWidth =
             shapeDimensionA > 0
               ? shapeDimensionA
@@ -5451,7 +5461,14 @@ namespace gdjs {
               : depth > 0
                 ? depth
                 : onePixel;
-          geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+          geometry =
+            shape === 'Triangle'
+              ? this._createTriangularPrismGeometry(
+                  boxWidth,
+                  boxHeight,
+                  boxDepth
+                )
+              : new three.BoxGeometry(boxWidth, boxHeight, boxDepth);
         } else if (shape === 'Capsule') {
           const radius =
             shapeDimensionA > 0
@@ -5465,7 +5482,7 @@ namespace gdjs {
               : depth > 0
                 ? depth
                 : onePixel;
-          geometry = new THREE.CapsuleGeometry(
+          geometry = new three.CapsuleGeometry(
             radius,
             Math.max(0, capsuleDepth - 2 * radius),
             6,
@@ -5484,7 +5501,7 @@ namespace gdjs {
               : depth > 0
                 ? depth
                 : onePixel;
-          geometry = new THREE.CylinderGeometry(
+          geometry = new three.CylinderGeometry(
             radius,
             radius,
             cylinderDepth,
@@ -5495,13 +5512,13 @@ namespace gdjs {
             shapeDimensionA > 0
               ? shapeDimensionA
               : width > 0
-                ? Math.sqrt(width * height) / 2
+                ? Math.pow(width * height * depth, 1 / 3) / 2
                 : onePixel;
-          geometry = new THREE.SphereGeometry(radius, 16, 12);
+          geometry = new three.SphereGeometry(radius, 16, 12);
         }
 
-        const wireframeGeometry = new THREE.WireframeGeometry(geometry);
-        shapeObject = new THREE.LineSegments(
+        const wireframeGeometry = new three.WireframeGeometry(geometry);
+        shapeObject = new three.LineSegments(
           wireframeGeometry,
           this._lineMaterial
         );
@@ -5514,12 +5531,103 @@ namespace gdjs {
       this._shapeContent.add(shapeObject);
     }
 
+    private _createTriangularPrismGeometry(
+      width: number,
+      height: number,
+      depth: number
+    ): any {
+      const three = THREE as any;
+      const halfWidth = width / 2;
+      const halfHeight = height / 2;
+      const halfDepth = depth / 2;
+      const vertices = new Float32Array([
+        -halfWidth,
+        halfHeight,
+        -halfDepth,
+        0,
+        -halfHeight,
+        -halfDepth,
+        halfWidth,
+        halfHeight,
+        -halfDepth,
+        -halfWidth,
+        halfHeight,
+        halfDepth,
+        halfWidth,
+        halfHeight,
+        halfDepth,
+        0,
+        -halfHeight,
+        halfDepth,
+        -halfWidth,
+        halfHeight,
+        -halfDepth,
+        halfWidth,
+        halfHeight,
+        -halfDepth,
+        halfWidth,
+        halfHeight,
+        halfDepth,
+        -halfWidth,
+        halfHeight,
+        -halfDepth,
+        halfWidth,
+        halfHeight,
+        halfDepth,
+        -halfWidth,
+        halfHeight,
+        halfDepth,
+        halfWidth,
+        halfHeight,
+        -halfDepth,
+        0,
+        -halfHeight,
+        -halfDepth,
+        0,
+        -halfHeight,
+        halfDepth,
+        halfWidth,
+        halfHeight,
+        -halfDepth,
+        0,
+        -halfHeight,
+        halfDepth,
+        halfWidth,
+        halfHeight,
+        halfDepth,
+        0,
+        -halfHeight,
+        -halfDepth,
+        -halfWidth,
+        halfHeight,
+        -halfDepth,
+        -halfWidth,
+        halfHeight,
+        halfDepth,
+        0,
+        -halfHeight,
+        -halfDepth,
+        -halfWidth,
+        halfHeight,
+        halfDepth,
+        0,
+        -halfHeight,
+        halfDepth,
+      ]);
+      const geometry = new three.BufferGeometry();
+      geometry.setAttribute('position', new three.BufferAttribute(vertices, 3));
+      geometry.computeVertexNormals();
+      return geometry;
+    }
+
     private _buildMeshWireframeFromBehavior(
-      object3D: THREE.Object3D,
+      object3D: any,
       owner3D: any,
       behavior: any
-    ): THREE.Object3D {
-      const meshShapeResourceName = behavior.meshShapeResourceName || '';
+    ): any {
+      const three = THREE as any;
+      const meshShapeResourceName =
+        behavior.meshShapeResourceName || owner3D._modelResourceName || '';
       if (
         meshShapeResourceName &&
         owner3D &&
@@ -5533,9 +5641,11 @@ namespace gdjs {
           .getModel3DManager()
           .getModel(meshShapeResourceName);
         if (originalModel) {
-          const modelInCube = new THREE.Group();
+          const modelInCube = new three.Group();
           modelInCube.rotation.order = 'ZYX';
-          const root = THREE_ADDONS.SkeletonUtils.clone(originalModel.scene);
+          const root = (THREE_ADDONS as any).SkeletonUtils.clone(
+            originalModel.scene
+          );
           modelInCube.add(root);
 
           owner3D._renderer.stretchModelIntoUnitaryCube(
@@ -5545,36 +5655,29 @@ namespace gdjs {
             owner3D._data.content.rotationZ
           );
 
-          const threeObject = new THREE.Group();
-          threeObject.rotation.order = 'ZYX';
-          threeObject.add(modelInCube);
-          threeObject.scale.set(
-            owner3D.isFlippedX() ? -owner3D.getWidth() : owner3D.getWidth(),
-            owner3D.isFlippedY() ? -owner3D.getHeight() : owner3D.getHeight(),
-            owner3D.isFlippedZ() ? -owner3D.getDepth() : owner3D.getDepth()
-          );
-          threeObject.updateMatrixWorld(true);
-          return this._buildMeshWireframe(threeObject);
+          modelInCube.updateMatrixWorld(true);
+          return this._buildMeshWireframe(modelInCube, null);
         }
       }
 
-      return this._buildMeshWireframe(object3D);
+      return this._buildMeshWireframe(object3D, object3D);
     }
 
-    private _buildMeshWireframe(object3D: THREE.Object3D): THREE.Object3D {
-      const group = new THREE.Group();
-      const rootInverse = new THREE.Matrix4()
-        .copy(object3D.matrixWorld)
-        .invert();
+    private _buildMeshWireframe(object3D: any, rootToCancel: any | null): any {
+      const three = THREE as any;
+      const group = new three.Group();
+      const rootInverse = rootToCancel
+        ? new three.Matrix4().copy(rootToCancel.matrixWorld).invert()
+        : new three.Matrix4();
 
       object3D.traverse((child) => {
         if (!child || !child.isMesh || !child.geometry) return;
-        const wireframeGeometry = new THREE.WireframeGeometry(child.geometry);
-        const lines = new THREE.LineSegments(
+        const wireframeGeometry = new three.WireframeGeometry(child.geometry);
+        const lines = new three.LineSegments(
           wireframeGeometry,
           this._lineMaterial
         );
-        const relativeMatrix = new THREE.Matrix4().multiplyMatrices(
+        const relativeMatrix = new three.Matrix4().multiplyMatrices(
           rootInverse,
           child.matrixWorld
         );
@@ -5591,8 +5694,10 @@ namespace gdjs {
       this._shapeObject.traverse((object) => {
         if (object.geometry) object.geometry.dispose();
         if (object.material && Array.isArray(object.material)) {
-          object.material.forEach((material) => material.dispose());
-        } else if (object.material) {
+          object.material.forEach((material) => {
+            if (material !== this._lineMaterial) material.dispose();
+          });
+        } else if (object.material && object.material !== this._lineMaterial) {
           object.material.dispose();
         }
       });
@@ -5606,7 +5711,7 @@ namespace gdjs {
       });
     }
 
-    setColor(color: THREE.ColorRepresentation): void {
+    setColor(color: any): void {
       this._lineMaterial.color.set(color);
       this._lineMaterial.needsUpdate = true;
     }

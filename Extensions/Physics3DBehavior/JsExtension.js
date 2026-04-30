@@ -15,7 +15,7 @@
 
 /** @type {ExtensionModule} */
 module.exports = {
-  createExtension: function (_, gd) {
+  createExtension: function(_, gd) {
     const extension = new gd.PlatformExtension();
     extension
       .setExtensionInformation(
@@ -41,7 +41,7 @@ module.exports = {
       .setIcon('JsPlatform/Extensions/physics3d.svg');
     {
       const behavior = new gd.BehaviorJsImplementation();
-      behavior.updateProperty = function (
+      behavior.updateProperty = function(
         behaviorContent,
         propertyName,
         newValue
@@ -60,13 +60,6 @@ module.exports = {
           else return false;
 
           behaviorContent.getChild('bodyType').setStringValue(bodyTypeValue);
-          if (
-            bodyTypeValue !== 'Static' &&
-            behaviorContent.getChild('shape').getStringValue().toLowerCase() ===
-              'mesh'
-          ) {
-            behaviorContent.getChild('shape').setStringValue('Box');
-          }
           return true;
         }
 
@@ -89,13 +82,11 @@ module.exports = {
           else if (normalizedValue === 'capsule') shapeValue = 'Capsule';
           else if (normalizedValue === 'sphere') shapeValue = 'Sphere';
           else if (normalizedValue === 'cylinder') shapeValue = 'Cylinder';
+          else if (normalizedValue === 'triangle') shapeValue = 'Triangle';
           else if (normalizedValue === 'mesh') shapeValue = 'Mesh';
           else return false;
 
           behaviorContent.getChild('shape').setStringValue(shapeValue);
-          if (shapeValue === 'Mesh') {
-            behaviorContent.getChild('bodyType').setStringValue('Static');
-          }
           return true;
         }
 
@@ -272,7 +263,7 @@ module.exports = {
 
         return false;
       };
-      behavior.getProperties = function (behaviorContent) {
+      behavior.getProperties = function(behaviorContent) {
         const behaviorProperties = new gd.MapStringPropertyDescriptor();
 
         behaviorProperties
@@ -339,7 +330,8 @@ module.exports = {
           .addChoice('Capsule', _('Capsule'))
           .addChoice('Sphere', _('Sphere'))
           .addChoice('Cylinder', _('Cylinder'))
-          .addChoice('Mesh', _('Mesh (works for Static only)'));
+          .addChoice('Triangle', _('Triangle'))
+          .addChoice('Mesh', _('Mesh'));
         behaviorProperties
           .getOrCreate('meshShapeResourceName')
           .setValue(
@@ -505,7 +497,10 @@ module.exports = {
         behaviorProperties
           .getOrCreate('density')
           .setValue(
-            behaviorContent.getChild('density').getDoubleValue().toString(10)
+            behaviorContent
+              .getChild('density')
+              .getDoubleValue()
+              .toString(10)
           )
           .setType('Number')
           .setLabel(_('Density'))
@@ -532,7 +527,10 @@ module.exports = {
         behaviorProperties
           .getOrCreate('friction')
           .setValue(
-            behaviorContent.getChild('friction').getDoubleValue().toString(10)
+            behaviorContent
+              .getChild('friction')
+              .getDoubleValue()
+              .toString(10)
           )
           .setType('Number')
           .setLabel(_('Friction'))
@@ -614,7 +612,10 @@ module.exports = {
         behaviorProperties
           .getOrCreate('layers')
           .setValue(
-            behaviorContent.getChild('layers').getIntValue().toString(10)
+            behaviorContent
+              .getChild('layers')
+              .getIntValue()
+              .toString(10)
           )
           .setType('Number')
           .setLabel('Layers')
@@ -623,7 +624,10 @@ module.exports = {
         behaviorProperties
           .getOrCreate('masks')
           .setValue(
-            behaviorContent.getChild('masks').getIntValue().toString(10)
+            behaviorContent
+              .getChild('masks')
+              .getIntValue()
+              .toString(10)
           )
           .setType('Number')
           .setLabel('Masks')
@@ -633,7 +637,7 @@ module.exports = {
         return behaviorProperties;
       };
 
-      behavior.initializeContent = function (behaviorContent) {
+      behavior.initializeContent = function(behaviorContent) {
         behaviorContent.addChild('object3D').setStringValue('');
         behaviorContent.addChild('bodyType').setStringValue('Dynamic');
         behaviorContent.addChild('bullet').setBoolValue(false);
@@ -662,7 +666,7 @@ module.exports = {
       };
 
       const sharedData = new gd.BehaviorSharedDataJsImplementation();
-      sharedData.updateProperty = function (
+      sharedData.updateProperty = function(
         sharedContent,
         propertyName,
         newValue
@@ -699,27 +703,36 @@ module.exports = {
         }
         return false;
       };
-      sharedData.getProperties = function (sharedContent) {
+      sharedData.getProperties = function(sharedContent) {
         const sharedProperties = new gd.MapStringPropertyDescriptor();
 
         sharedProperties
           .getOrCreate('gravityX')
           .setValue(
-            sharedContent.getChild('gravityX').getDoubleValue().toString(10)
+            sharedContent
+              .getChild('gravityX')
+              .getDoubleValue()
+              .toString(10)
           )
           .setType('Number')
           .setMeasurementUnit(gd.MeasurementUnit.getNewton());
         sharedProperties
           .getOrCreate('gravityY')
           .setValue(
-            sharedContent.getChild('gravityY').getDoubleValue().toString(10)
+            sharedContent
+              .getChild('gravityY')
+              .getDoubleValue()
+              .toString(10)
           )
           .setType('Number')
           .setMeasurementUnit(gd.MeasurementUnit.getNewton());
         sharedProperties
           .getOrCreate('gravityZ')
           .setValue(
-            sharedContent.getChild('gravityZ').getDoubleValue().toString(10)
+            sharedContent
+              .getChild('gravityZ')
+              .getDoubleValue()
+              .toString(10)
           )
           .setType('Number')
           .setMeasurementUnit(gd.MeasurementUnit.getNewton());
@@ -727,13 +740,16 @@ module.exports = {
         sharedProperties
           .getOrCreate('worldScale')
           .setValue(
-            sharedContent.getChild('worldScale').getDoubleValue().toString(10)
+            sharedContent
+              .getChild('worldScale')
+              .getDoubleValue()
+              .toString(10)
           )
           .setType('Number');
 
         return sharedProperties;
       };
-      sharedData.initializeContent = function (behaviorContent) {
+      sharedData.initializeContent = function(behaviorContent) {
         behaviorContent.addChild('gravityX').setDoubleValue(0);
         behaviorContent.addChild('gravityY').setDoubleValue(0);
         behaviorContent.addChild('gravityZ').setDoubleValue(-9.8);
@@ -964,6 +980,40 @@ module.exports = {
         .setDefaultValue('false')
         .getCodeExtraInformation()
         .setFunctionName('setFixedRotation');
+
+      aut
+        .addScopedCondition(
+          'CollisionShapeVisible',
+          _('Collision shape visible'),
+          _('Check if the 3D physics collision shape is visible in the game.'),
+          _('_PARAM0_ collision shape is visible'),
+          _('Debugging'),
+          'JsPlatform/Extensions/physics3d.svg',
+          'JsPlatform/Extensions/physics3d.svg'
+        )
+        .addParameter('object', _('Object'), '', false)
+        .addParameter('behavior', _('Behavior'), 'Physics3DBehavior')
+        .getCodeExtraInformation()
+        .setFunctionName('isCollisionShapeVisible');
+
+      aut
+        .addScopedAction(
+          'ShowCollisionShape',
+          _('Show collision shape'),
+          _(
+            'Show or hide the 3D physics collision shape of the object during the game. This is useful to debug collisions.'
+          ),
+          _('Show _PARAM0_ collision shape: _PARAM2_'),
+          _('Debugging'),
+          'JsPlatform/Extensions/physics3d.svg',
+          'JsPlatform/Extensions/physics3d.svg'
+        )
+        .addParameter('object', _('Object'), '', false)
+        .addParameter('behavior', _('Behavior'), 'Physics3DBehavior')
+        .addParameter('yesorno', _('Show'), '', false)
+        .setDefaultValue('true')
+        .getCodeExtraInformation()
+        .setFunctionName('setCollisionShapeVisible');
 
       // Body settings
       aut
@@ -1756,7 +1806,7 @@ module.exports = {
 
     {
       const behavior = new gd.BehaviorJsImplementation();
-      behavior.updateProperty = function (
+      behavior.updateProperty = function(
         behaviorContent,
         propertyName,
         newValue
@@ -1888,7 +1938,7 @@ module.exports = {
 
         return false;
       };
-      behavior.getProperties = function (behaviorContent) {
+      behavior.getProperties = function(behaviorContent) {
         const behaviorProperties = new gd.MapStringPropertyDescriptor();
 
         behaviorProperties
@@ -1906,7 +1956,10 @@ module.exports = {
           .setType('Number')
           .setMeasurementUnit(gd.MeasurementUnit.getPixel())
           .setValue(
-            behaviorContent.getChild('jumpHeight').getDoubleValue().toString(10)
+            behaviorContent
+              .getChild('jumpHeight')
+              .getDoubleValue()
+              .toString(10)
           );
 
         behaviorProperties
@@ -1935,7 +1988,10 @@ module.exports = {
           .setType('Number')
           .setMeasurementUnit(gd.MeasurementUnit.getPixelAcceleration())
           .setValue(
-            behaviorContent.getChild('gravity').getDoubleValue().toString(10)
+            behaviorContent
+              .getChild('gravity')
+              .getDoubleValue()
+              .toString(10)
           );
 
         behaviorProperties
@@ -2099,7 +2155,7 @@ module.exports = {
         return behaviorProperties;
       };
 
-      behavior.initializeContent = function (behaviorContent) {
+      behavior.initializeContent = function(behaviorContent) {
         behaviorContent.addChild('physics3D').setStringValue('');
         behaviorContent.addChild('jumpHeight').setDoubleValue(200);
         behaviorContent.addChild('jumpSustainTime').setDoubleValue(0.2);
@@ -2787,7 +2843,7 @@ module.exports = {
 
     {
       const behavior = new gd.BehaviorJsImplementation();
-      behavior.updateProperty = function (
+      behavior.updateProperty = function(
         behaviorContent,
         propertyName,
         newValue
@@ -3020,7 +3076,7 @@ module.exports = {
 
         return false;
       };
-      behavior.getProperties = function (behaviorContent) {
+      behavior.getProperties = function(behaviorContent) {
         const behaviorProperties = new gd.MapStringPropertyDescriptor();
 
         behaviorProperties
@@ -3133,7 +3189,10 @@ module.exports = {
           .setGroup(_('Speed'))
           .setType('Number')
           .setValue(
-            behaviorContent.getChild('gearRatio1').getDoubleValue().toString(10)
+            behaviorContent
+              .getChild('gearRatio1')
+              .getDoubleValue()
+              .toString(10)
           )
           .setAdvanced(true)
           .setQuickCustomizationVisibility(gd.QuickCustomization.Hidden);
@@ -3144,7 +3203,10 @@ module.exports = {
           .setGroup(_('Speed'))
           .setType('Number')
           .setValue(
-            behaviorContent.getChild('gearRatio2').getDoubleValue().toString(10)
+            behaviorContent
+              .getChild('gearRatio2')
+              .getDoubleValue()
+              .toString(10)
           )
           .setAdvanced(true)
           .setQuickCustomizationVisibility(gd.QuickCustomization.Hidden);
@@ -3155,7 +3217,10 @@ module.exports = {
           .setGroup(_('Speed'))
           .setType('Number')
           .setValue(
-            behaviorContent.getChild('gearRatio3').getDoubleValue().toString(10)
+            behaviorContent
+              .getChild('gearRatio3')
+              .getDoubleValue()
+              .toString(10)
           )
           .setAdvanced(true)
           .setQuickCustomizationVisibility(gd.QuickCustomization.Hidden);
@@ -3166,7 +3231,10 @@ module.exports = {
           .setGroup(_('Speed'))
           .setType('Number')
           .setValue(
-            behaviorContent.getChild('gearRatio4').getDoubleValue().toString(10)
+            behaviorContent
+              .getChild('gearRatio4')
+              .getDoubleValue()
+              .toString(10)
           )
           .setAdvanced(true)
           .setQuickCustomizationVisibility(gd.QuickCustomization.Hidden);
@@ -3177,7 +3245,10 @@ module.exports = {
           .setGroup(_('Speed'))
           .setType('Number')
           .setValue(
-            behaviorContent.getChild('gearRatio5').getDoubleValue().toString(10)
+            behaviorContent
+              .getChild('gearRatio5')
+              .getDoubleValue()
+              .toString(10)
           )
           .setAdvanced(true)
           .setQuickCustomizationVisibility(gd.QuickCustomization.Hidden);
@@ -3188,7 +3259,10 @@ module.exports = {
           .setGroup(_('Speed'))
           .setType('Number')
           .setValue(
-            behaviorContent.getChild('gearRatio6').getDoubleValue().toString(10)
+            behaviorContent
+              .getChild('gearRatio6')
+              .getDoubleValue()
+              .toString(10)
           )
           .setAdvanced(true)
           .setQuickCustomizationVisibility(gd.QuickCustomization.Hidden);
@@ -3214,7 +3288,10 @@ module.exports = {
           .setType('Number')
           .setMeasurementUnit(gd.MeasurementUnit.getPixel())
           .setValue(
-            behaviorContent.getChild('wheelWidth').getDoubleValue().toString(10)
+            behaviorContent
+              .getChild('wheelWidth')
+              .getDoubleValue()
+              .toString(10)
           )
           .setQuickCustomizationVisibility(gd.QuickCustomization.Hidden);
 
@@ -3354,7 +3431,7 @@ module.exports = {
         return behaviorProperties;
       };
 
-      behavior.initializeContent = function (behaviorContent) {
+      behavior.initializeContent = function(behaviorContent) {
         behaviorContent.addChild('physics3D').setStringValue('');
         behaviorContent.addChild('steerAngleMax').setDoubleValue(70);
         behaviorContent.addChild('beginningSteerSpeed').setDoubleValue(140);
@@ -3670,7 +3747,7 @@ module.exports = {
     return extension;
   },
 
-  runExtensionSanityTests: function (gd, extension) {
+  runExtensionSanityTests: function(gd, extension) {
     const dummyBehavior = extension
       .getBehaviorMetadata('Physics3D::Physics3DBehavior')
       .get();

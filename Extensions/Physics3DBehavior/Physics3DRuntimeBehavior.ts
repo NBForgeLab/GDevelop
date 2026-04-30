@@ -54,6 +54,30 @@ namespace gdjs {
     props: Physics3DNetworkSyncDataType;
   }
 
+  type Physics3DBehaviorData = BehaviorData & {
+    bullet?: boolean;
+    fixedRotation?: boolean;
+    shape?: string;
+    meshShapeResourceName?: string;
+    shapeOrientation?: string;
+    shapeDimensionA?: number;
+    shapeDimensionB?: number;
+    shapeDimensionC?: number;
+    shapeOffsetX?: number;
+    shapeOffsetY?: number;
+    shapeOffsetZ?: number;
+    shapeScale?: number;
+    density?: number;
+    massOverride?: number;
+    friction?: number;
+    restitution?: number;
+    linearDamping?: number;
+    angularDamping?: number;
+    gravityScale?: number;
+    layers?: number;
+    masks?: number;
+  };
+
   const isModel3D = (
     object: gdjs.RuntimeObject
   ): object is gdjs.Model3DRuntimeObject => {
@@ -337,6 +361,9 @@ namespace gdjs {
     private layers: integer;
     private masks: integer;
     shapeScale: number = 1;
+    private _isCollisionShapeVisible: boolean = false;
+    private _collisionShapeDebugObject: any | null = null;
+    private _collisionShapeDebugObjectKey: string = '';
 
     /**
      * Array containing the beginning of contacts reported by onContactBegin. Each contact
@@ -415,7 +442,9 @@ namespace gdjs {
       this._shape = behaviorData.shape;
       this.meshShapeResourceName = behaviorData.meshShapeResourceName || '';
       this.shapeOrientation =
-        behaviorData.shape === 'Box' ? 'Z' : behaviorData.shapeOrientation;
+        behaviorData.shape === 'Box' || behaviorData.shape === 'Triangle'
+          ? 'Z'
+          : behaviorData.shapeOrientation;
       this.shapeDimensionA = behaviorData.shapeDimensionA;
       this.shapeDimensionB = behaviorData.shapeDimensionB;
       this.shapeDimensionC = behaviorData.shapeDimensionC;
@@ -445,25 +474,27 @@ namespace gdjs {
       oldBehaviorData: BehaviorData,
       newBehaviorData: BehaviorData
     ): boolean {
-      const behaviorDiff: BehaviorData = {
+      const oldPhysicsBehaviorData = oldBehaviorData as Physics3DBehaviorData;
+      const newPhysicsBehaviorData = newBehaviorData as Physics3DBehaviorData;
+      const behaviorDiff: Physics3DBehaviorData = {
         name: newBehaviorData.name,
         type: newBehaviorData.type,
       };
 
-      const oldShape = oldBehaviorData.shape;
-      const newShape = newBehaviorData.shape;
+      const oldShape = oldPhysicsBehaviorData.shape;
+      const newShape = newPhysicsBehaviorData.shape;
       if (oldShape !== newShape && newShape !== undefined) {
         behaviorDiff.shape = newShape;
       }
 
       const oldShapeOrientation =
-        oldShape === 'Box'
+        oldShape === 'Box' || oldShape === 'Triangle'
           ? 'Z'
-          : oldBehaviorData.shapeOrientation || undefined;
+          : oldPhysicsBehaviorData.shapeOrientation || undefined;
       const newShapeOrientation =
-        newShape === 'Box'
+        newShape === 'Box' || newShape === 'Triangle'
           ? 'Z'
-          : newBehaviorData.shapeOrientation || undefined;
+          : newPhysicsBehaviorData.shapeOrientation || undefined;
       if (
         oldShapeOrientation !== newShapeOrientation &&
         newShapeOrientation !== undefined
@@ -471,97 +502,103 @@ namespace gdjs {
         behaviorDiff.shapeOrientation = newShapeOrientation;
       }
 
-      const oldMeshShapeResourceName = oldBehaviorData.meshShapeResourceName || '';
-      const newMeshShapeResourceName = newBehaviorData.meshShapeResourceName || '';
+      const oldMeshShapeResourceName =
+        oldPhysicsBehaviorData.meshShapeResourceName || '';
+      const newMeshShapeResourceName =
+        newPhysicsBehaviorData.meshShapeResourceName || '';
       if (oldMeshShapeResourceName !== newMeshShapeResourceName) {
         behaviorDiff.meshShapeResourceName = newMeshShapeResourceName;
       }
 
-      const oldShapeDimensionA = oldBehaviorData.shapeDimensionA ?? 0;
-      const newShapeDimensionA = newBehaviorData.shapeDimensionA ?? 0;
+      const oldShapeDimensionA = oldPhysicsBehaviorData.shapeDimensionA ?? 0;
+      const newShapeDimensionA = newPhysicsBehaviorData.shapeDimensionA ?? 0;
       if (oldShapeDimensionA !== newShapeDimensionA) {
         behaviorDiff.shapeDimensionA = newShapeDimensionA;
       }
-      const oldShapeDimensionB = oldBehaviorData.shapeDimensionB ?? 0;
-      const newShapeDimensionB = newBehaviorData.shapeDimensionB ?? 0;
+      const oldShapeDimensionB = oldPhysicsBehaviorData.shapeDimensionB ?? 0;
+      const newShapeDimensionB = newPhysicsBehaviorData.shapeDimensionB ?? 0;
       if (oldShapeDimensionB !== newShapeDimensionB) {
         behaviorDiff.shapeDimensionB = newShapeDimensionB;
       }
-      const oldShapeDimensionC = oldBehaviorData.shapeDimensionC ?? 0;
-      const newShapeDimensionC = newBehaviorData.shapeDimensionC ?? 0;
+      const oldShapeDimensionC = oldPhysicsBehaviorData.shapeDimensionC ?? 0;
+      const newShapeDimensionC = newPhysicsBehaviorData.shapeDimensionC ?? 0;
       if (oldShapeDimensionC !== newShapeDimensionC) {
         behaviorDiff.shapeDimensionC = newShapeDimensionC;
       }
 
-      const oldShapeOffsetX = oldBehaviorData.shapeOffsetX ?? 0;
-      const newShapeOffsetX = newBehaviorData.shapeOffsetX ?? 0;
+      const oldShapeOffsetX = oldPhysicsBehaviorData.shapeOffsetX ?? 0;
+      const newShapeOffsetX = newPhysicsBehaviorData.shapeOffsetX ?? 0;
       if (oldShapeOffsetX !== newShapeOffsetX) {
         behaviorDiff.shapeOffsetX = newShapeOffsetX;
       }
-      const oldShapeOffsetY = oldBehaviorData.shapeOffsetY ?? 0;
-      const newShapeOffsetY = newBehaviorData.shapeOffsetY ?? 0;
+      const oldShapeOffsetY = oldPhysicsBehaviorData.shapeOffsetY ?? 0;
+      const newShapeOffsetY = newPhysicsBehaviorData.shapeOffsetY ?? 0;
       if (oldShapeOffsetY !== newShapeOffsetY) {
         behaviorDiff.shapeOffsetY = newShapeOffsetY;
       }
-      const oldShapeOffsetZ = oldBehaviorData.shapeOffsetZ ?? 0;
-      const newShapeOffsetZ = newBehaviorData.shapeOffsetZ ?? 0;
+      const oldShapeOffsetZ = oldPhysicsBehaviorData.shapeOffsetZ ?? 0;
+      const newShapeOffsetZ = newPhysicsBehaviorData.shapeOffsetZ ?? 0;
       if (oldShapeOffsetZ !== newShapeOffsetZ) {
         behaviorDiff.shapeOffsetZ = newShapeOffsetZ;
       }
 
-      const oldShapeScale = oldBehaviorData.shapeScale ?? 1;
-      const newShapeScale = newBehaviorData.shapeScale ?? 1;
+      const oldShapeScale = oldPhysicsBehaviorData.shapeScale ?? 1;
+      const newShapeScale = newPhysicsBehaviorData.shapeScale ?? 1;
       if (oldShapeScale !== newShapeScale) {
         behaviorDiff.shapeScale = newShapeScale;
       }
 
-      const oldBullet = oldBehaviorData.bullet ?? false;
-      const newBullet = newBehaviorData.bullet ?? false;
+      const oldBullet = oldPhysicsBehaviorData.bullet ?? false;
+      const newBullet = newPhysicsBehaviorData.bullet ?? false;
       if (oldBullet !== newBullet) {
         behaviorDiff.bullet = newBullet;
       }
 
-      const oldFixedRotation = oldBehaviorData.fixedRotation ?? false;
-      const newFixedRotation = newBehaviorData.fixedRotation ?? false;
+      const oldFixedRotation = oldPhysicsBehaviorData.fixedRotation ?? false;
+      const newFixedRotation = newPhysicsBehaviorData.fixedRotation ?? false;
       if (oldFixedRotation !== newFixedRotation) {
         behaviorDiff.fixedRotation = newFixedRotation;
       }
 
       if (
-        oldBehaviorData.density !== newBehaviorData.density &&
-        newBehaviorData.density !== undefined
+        oldPhysicsBehaviorData.density !== newPhysicsBehaviorData.density &&
+        newPhysicsBehaviorData.density !== undefined
       ) {
-        behaviorDiff.density = newBehaviorData.density;
+        behaviorDiff.density = newPhysicsBehaviorData.density;
       }
       if (
-        oldBehaviorData.friction !== newBehaviorData.friction &&
-        newBehaviorData.friction !== undefined
+        oldPhysicsBehaviorData.friction !== newPhysicsBehaviorData.friction &&
+        newPhysicsBehaviorData.friction !== undefined
       ) {
-        behaviorDiff.friction = newBehaviorData.friction;
+        behaviorDiff.friction = newPhysicsBehaviorData.friction;
       }
       if (
-        oldBehaviorData.restitution !== newBehaviorData.restitution &&
-        newBehaviorData.restitution !== undefined
+        oldPhysicsBehaviorData.restitution !==
+          newPhysicsBehaviorData.restitution &&
+        newPhysicsBehaviorData.restitution !== undefined
       ) {
-        behaviorDiff.restitution = newBehaviorData.restitution;
+        behaviorDiff.restitution = newPhysicsBehaviorData.restitution;
       }
       if (
-        oldBehaviorData.linearDamping !== newBehaviorData.linearDamping &&
-        newBehaviorData.linearDamping !== undefined
+        oldPhysicsBehaviorData.linearDamping !==
+          newPhysicsBehaviorData.linearDamping &&
+        newPhysicsBehaviorData.linearDamping !== undefined
       ) {
-        behaviorDiff.linearDamping = newBehaviorData.linearDamping;
+        behaviorDiff.linearDamping = newPhysicsBehaviorData.linearDamping;
       }
       if (
-        oldBehaviorData.angularDamping !== newBehaviorData.angularDamping &&
-        newBehaviorData.angularDamping !== undefined
+        oldPhysicsBehaviorData.angularDamping !==
+          newPhysicsBehaviorData.angularDamping &&
+        newPhysicsBehaviorData.angularDamping !== undefined
       ) {
-        behaviorDiff.angularDamping = newBehaviorData.angularDamping;
+        behaviorDiff.angularDamping = newPhysicsBehaviorData.angularDamping;
       }
       if (
-        oldBehaviorData.gravityScale !== newBehaviorData.gravityScale &&
-        newBehaviorData.gravityScale !== undefined
+        oldPhysicsBehaviorData.gravityScale !==
+          newPhysicsBehaviorData.gravityScale &&
+        newPhysicsBehaviorData.gravityScale !== undefined
       ) {
-        behaviorDiff.gravityScale = newBehaviorData.gravityScale;
+        behaviorDiff.gravityScale = newPhysicsBehaviorData.gravityScale;
       }
 
       return this.applyBehaviorOverriding(behaviorDiff);
@@ -596,7 +633,9 @@ namespace gdjs {
         this._shape = behaviorData.shape;
         this.meshShapeResourceName = behaviorData.meshShapeResourceName || '';
         this.shapeOrientation =
-          behaviorData.shape === 'Box' ? 'Z' : behaviorData.shapeOrientation;
+          behaviorData.shape === 'Box' || behaviorData.shape === 'Triangle'
+            ? 'Z'
+            : behaviorData.shapeOrientation;
         this._needToRecreateShape = true;
       }
       if (behaviorData.meshShapeResourceName !== undefined) {
@@ -605,7 +644,7 @@ namespace gdjs {
       }
       if (behaviorData.shapeOrientation !== undefined) {
         this.shapeOrientation =
-          behaviorData.shape === 'Box'
+          behaviorData.shape === 'Box' || behaviorData.shape === 'Triangle'
             ? 'Z'
             : behaviorData.shapeOrientation || this.shapeOrientation;
         this._needToRecreateShape = true;
@@ -808,10 +847,14 @@ namespace gdjs {
     override onDeActivate() {
       this._sharedData.removeFromBehaviorsList(this);
       this._destroyBody();
+      this._destroyCollisionShapeDebugObject();
     }
 
     override onActivate() {
       this._sharedData.addToBehaviorsList(this);
+      if (this._isCollisionShapeVisible) {
+        this._updateCollisionShapeDebugObject();
+      }
     }
 
     override onDestroy() {
@@ -870,6 +913,50 @@ namespace gdjs {
       return shape;
     }
 
+    private _createConvexHullShapeSettingsFromPointCoordinates(
+      pointCoordinates: Array<[float, float, float]>
+    ): Jolt.ConvexHullShapeSettings | null {
+      if (pointCoordinates.length < 4) {
+        return null;
+      }
+
+      const pointList = new Jolt.ArrayVec3();
+      pointList.reserve(pointCoordinates.length);
+      const point = new Jolt.Vec3();
+      for (let index = 0; index < pointCoordinates.length; index++) {
+        const pointCoordinate = pointCoordinates[index];
+        point.Set(pointCoordinate[0], pointCoordinate[1], pointCoordinate[2]);
+        pointList.push_back(point);
+      }
+
+      const convexHullShapeSettings = new Jolt.ConvexHullShapeSettings();
+      convexHullShapeSettings.mPoints = pointList;
+      convexHullShapeSettings.mMaxConvexRadius = 0;
+
+      Jolt.destroy(point);
+      Jolt.destroy(pointList);
+
+      return convexHullShapeSettings;
+    }
+
+    private _createTriangularPrismShapeSettings(
+      width: float,
+      height: float,
+      depth: float
+    ): Jolt.ConvexHullShapeSettings | null {
+      const halfWidth = width / 2;
+      const halfHeight = height / 2;
+      const halfDepth = depth / 2;
+      return this._createConvexHullShapeSettingsFromPointCoordinates([
+        [-halfWidth, halfHeight, -halfDepth],
+        [halfWidth, halfHeight, -halfDepth],
+        [0, -halfHeight, -halfDepth],
+        [-halfWidth, halfHeight, halfDepth],
+        [halfWidth, halfHeight, halfDepth],
+        [0, -halfHeight, halfDepth],
+      ]);
+    }
+
     private _createNewShapeSettingsWithoutMassCenterOffset(): Jolt.RotatedTranslatedShapeSettings {
       let width = this.owner3D.getWidth() * this._sharedData.worldInvScale;
       let height = this.owner3D.getHeight() * this._sharedData.worldInvScale;
@@ -895,39 +982,64 @@ namespace gdjs {
       let shapeSettings: Jolt.ShapeSettings;
       /** This is fine only because no other Quat is used locally. */
       let quat: Jolt.Quat;
-      if (
-        this._shape === 'Mesh' &&
-        this.bodyType === 'Static' &&
-        isModel3D(this.owner)
-      ) {
-        const meshShapeSettings: Array<Jolt.MeshShapeSettings> =
-          gdjs.staticArray(
-            Physics3DRuntimeBehavior.prototype
-              ._createNewShapeSettingsWithoutMassCenterOffset
-          );
-        this.getMeshShapeSettings(
-          this.owner,
-          width,
-          height,
-          depth,
-          meshShapeSettings
-        );
-        if (meshShapeSettings.length === 1) {
-          shapeSettings = meshShapeSettings[0];
-        } else {
-          const compoundShapeSettings = new Jolt.StaticCompoundShapeSettings();
-          for (let index = 0; index < meshShapeSettings.length; index++) {
-            compoundShapeSettings.AddShapeShapeSettings(
-              this.getVec3(0, 0, 0),
-              this.getQuat(0, 0, 0, 1),
-              meshShapeSettings[index],
-              index
+      if (this._shape === 'Mesh' && isModel3D(this.owner)) {
+        if (this.bodyType === 'Static') {
+          const meshShapeSettings: Array<Jolt.MeshShapeSettings> =
+            gdjs.staticArray(
+              Physics3DRuntimeBehavior.prototype
+                ._createNewShapeSettingsWithoutMassCenterOffset
             );
+          this.getMeshShapeSettings(
+            this.owner,
+            width,
+            height,
+            depth,
+            meshShapeSettings
+          );
+          if (meshShapeSettings.length === 1) {
+            shapeSettings = meshShapeSettings[0];
+          } else if (meshShapeSettings.length > 1) {
+            const compoundShapeSettings =
+              new Jolt.StaticCompoundShapeSettings();
+            for (let index = 0; index < meshShapeSettings.length; index++) {
+              compoundShapeSettings.AddShapeShapeSettings(
+                this.getVec3(0, 0, 0),
+                this.getQuat(0, 0, 0, 1),
+                meshShapeSettings[index],
+                index
+              );
+            }
+            shapeSettings = compoundShapeSettings;
+          } else {
+            const fallbackShapeSettings = new Jolt.SphereShapeSettings(
+              onePixel
+            );
+            fallbackShapeSettings.mDensity = this.density;
+            shapeSettings = fallbackShapeSettings;
           }
-          shapeSettings = compoundShapeSettings;
+          meshShapeSettings.length = 0;
+        } else {
+          const convexHullShapeSettings = this.getMeshConvexHullShapeSettings(
+            this.owner,
+            width,
+            height,
+            depth
+          );
+          if (convexHullShapeSettings) {
+            convexHullShapeSettings.mDensity = this.density;
+            shapeSettings = convexHullShapeSettings;
+          } else {
+            const fallbackShapeSettings = new Jolt.SphereShapeSettings(
+              onePixel
+            );
+            fallbackShapeSettings.mDensity = this.density;
+            shapeSettings = fallbackShapeSettings;
+          }
         }
-        meshShapeSettings.length = 0;
         quat = this.getQuat(0, 0, 0, 1);
+        this._shapeHalfWidth = Math.abs(width) / 2;
+        this._shapeHalfHeight = Math.abs(height) / 2;
+        this._shapeHalfDepth = Math.abs(depth) / 2;
       } else {
         let convexShapeSettings: Jolt.ConvexShapeSettings;
         if (this._shape === 'Box') {
@@ -962,6 +1074,35 @@ namespace gdjs {
           this._shapeHalfWidth = boxWidth / 2;
           this._shapeHalfHeight = boxHeight / 2;
           this._shapeHalfDepth = boxDepth / 2;
+        } else if (this._shape === 'Triangle') {
+          const triangleWidth =
+            shapeDimensionA > 0
+              ? shapeDimensionA
+              : width > 0
+                ? width
+                : onePixel;
+          const triangleHeight =
+            shapeDimensionB > 0
+              ? shapeDimensionB
+              : height > 0
+                ? height
+                : onePixel;
+          const triangleDepth =
+            shapeDimensionC > 0
+              ? shapeDimensionC
+              : depth > 0
+                ? depth
+                : onePixel;
+          convexShapeSettings =
+            this._createTriangularPrismShapeSettings(
+              triangleWidth,
+              triangleHeight,
+              triangleDepth
+            ) || new Jolt.SphereShapeSettings(onePixel);
+          quat = this.getQuat(0, 0, 0, 1);
+          this._shapeHalfWidth = triangleWidth / 2;
+          this._shapeHalfHeight = triangleHeight / 2;
+          this._shapeHalfDepth = triangleDepth / 2;
         } else if (this._shape === 'Capsule') {
           const radius =
             shapeDimensionA > 0
@@ -1044,13 +1185,12 @@ namespace gdjs {
       );
     }
 
-    private getMeshShapeSettings(
+    private _createMeshShapeObject(
       model3DRuntimeObject: gdjs.Model3DRuntimeObject,
       width: float,
       height: float,
-      depth: float,
-      meshes: Array<Jolt.MeshShapeSettings>
-    ): void {
+      depth: float
+    ): THREE.Group | null {
       const originalModel = this.owner
         .getInstanceContainer()
         .getGame()
@@ -1060,6 +1200,9 @@ namespace gdjs {
             model3DRuntimeObject._modelResourceName ||
             ''
         );
+      if (!originalModel || !originalModel.scene) {
+        return null;
+      }
 
       const modelInCube = new THREE.Group();
       modelInCube.rotation.order = 'ZYX';
@@ -1085,6 +1228,87 @@ namespace gdjs {
       );
 
       threeObject.updateMatrixWorld();
+      return threeObject;
+    }
+
+    private getMeshConvexHullShapeSettings(
+      model3DRuntimeObject: gdjs.Model3DRuntimeObject,
+      width: float,
+      height: float,
+      depth: float
+    ): Jolt.ConvexHullShapeSettings | null {
+      const threeObject = this._createMeshShapeObject(
+        model3DRuntimeObject,
+        width,
+        height,
+        depth
+      );
+      if (!threeObject) {
+        return null;
+      }
+
+      const vector3 = new THREE.Vector3();
+      const point = new Jolt.Vec3();
+      const pointList = new Jolt.ArrayVec3();
+      const pointKeys = new Set<string>();
+
+      threeObject.traverse((object3d) => {
+        const mesh = object3d as THREE.Mesh;
+        if (!mesh.isMesh || !mesh.geometry) {
+          return;
+        }
+        const positionAttribute = mesh.geometry.getAttribute('position');
+        if (!positionAttribute) {
+          return;
+        }
+        pointList.reserve(pointList.size() + positionAttribute.count);
+        for (let index = 0; index < positionAttribute.count; index++) {
+          vector3.fromBufferAttribute(positionAttribute, index);
+          object3d.localToWorld(vector3);
+          const pointKey = `${vector3.x.toFixed(6)};${vector3.y.toFixed(
+            6
+          )};${vector3.z.toFixed(6)}`;
+          if (pointKeys.has(pointKey)) {
+            continue;
+          }
+          pointKeys.add(pointKey);
+          point.Set(vector3.x, vector3.y, vector3.z);
+          pointList.push_back(point);
+        }
+      });
+
+      if (pointList.size() < 4) {
+        Jolt.destroy(point);
+        Jolt.destroy(pointList);
+        return null;
+      }
+
+      const convexHullShapeSettings = new Jolt.ConvexHullShapeSettings();
+      convexHullShapeSettings.mPoints = pointList;
+      convexHullShapeSettings.mMaxConvexRadius = 0;
+
+      Jolt.destroy(point);
+      Jolt.destroy(pointList);
+
+      return convexHullShapeSettings;
+    }
+
+    private getMeshShapeSettings(
+      model3DRuntimeObject: gdjs.Model3DRuntimeObject,
+      width: float,
+      height: float,
+      depth: float,
+      meshes: Array<Jolt.MeshShapeSettings>
+    ): void {
+      const threeObject = this._createMeshShapeObject(
+        model3DRuntimeObject,
+        width,
+        height,
+        depth
+      );
+      if (!threeObject) {
+        return;
+      }
 
       // For indexed triangles
       const vector3 = new THREE.Vector3();
@@ -1392,6 +1616,9 @@ namespace gdjs {
       }
 
       this.bodyUpdater.updateBodyFromObject();
+      if (this._isCollisionShapeVisible) {
+        this._updateCollisionShapeDebugObject();
+      }
     }
 
     hasCustomShapeDimension() {
@@ -1400,6 +1627,444 @@ namespace gdjs {
         this.shapeDimensionB > 0 ||
         this.shapeDimensionC > 0
       );
+    }
+
+    setCollisionShapeVisible(enable: boolean): void {
+      this._isCollisionShapeVisible = enable;
+      if (enable) {
+        this._updateCollisionShapeDebugObject();
+      } else {
+        this._destroyCollisionShapeDebugObject();
+      }
+    }
+
+    isCollisionShapeVisible(): boolean {
+      return !!this._isCollisionShapeVisible;
+    }
+
+    private _destroyCollisionShapeDebugObject(): void {
+      const debugObject = this._collisionShapeDebugObject;
+      if (!debugObject) {
+        return;
+      }
+
+      if (debugObject.parent) {
+        debugObject.parent.remove(debugObject);
+      }
+      debugObject.traverse((child) => {
+        const mesh = child as any;
+        if (mesh.geometry) {
+          mesh.geometry.dispose();
+        }
+        const material = mesh.material;
+        if (Array.isArray(material)) {
+          material.forEach((material) => material.dispose());
+        } else if (material) {
+          material.dispose();
+        }
+      });
+      this._collisionShapeDebugObject = null;
+      this._collisionShapeDebugObjectKey = '';
+    }
+
+    private _getSignedObjectWidth(): float {
+      return this.owner3D.isFlippedX()
+        ? -this.owner3D.getWidth()
+        : this.owner3D.getWidth();
+    }
+
+    private _getSignedObjectHeight(): float {
+      return this.owner3D.isFlippedY()
+        ? -this.owner3D.getHeight()
+        : this.owner3D.getHeight();
+    }
+
+    private _getSignedObjectDepth(): float {
+      return this.owner3D.isFlippedZ()
+        ? -this.owner3D.getDepth()
+        : this.owner3D.getDepth();
+    }
+
+    private _getSafeObjectScale(value: float): float {
+      return Math.abs(value) < epsilon ? 1 : value;
+    }
+
+    private _getCollisionShapeDebugDimensions(): {
+      radius: float;
+      width: float;
+      height: float;
+      depth: float;
+    } {
+      const ownerWidth = Math.abs(
+        this._getSafeObjectScale(this.owner3D.getWidth())
+      );
+      const ownerHeight = Math.abs(
+        this._getSafeObjectScale(this.owner3D.getHeight())
+      );
+      const ownerDepth = Math.abs(
+        this._getSafeObjectScale(this.owner3D.getDepth())
+      );
+      let width = ownerWidth;
+      let height = ownerHeight;
+      let depth = ownerDepth;
+      if (this.shapeOrientation === 'X') {
+        const swap = depth;
+        depth = width;
+        width = swap;
+      } else if (this.shapeOrientation === 'Y') {
+        const swap = depth;
+        depth = height;
+        height = swap;
+      }
+
+      if (this._shape === 'Box' || this._shape === 'Triangle') {
+        return {
+          radius: 0,
+          width:
+            this.shapeDimensionA > 0
+              ? this.shapeDimensionA * this.shapeScale
+              : ownerWidth,
+          height:
+            this.shapeDimensionB > 0
+              ? this.shapeDimensionB * this.shapeScale
+              : ownerHeight,
+          depth:
+            this.shapeDimensionC > 0
+              ? this.shapeDimensionC * this.shapeScale
+              : ownerDepth,
+        };
+      }
+
+      if (this._shape === 'Mesh' && isModel3D(this.owner)) {
+        return { radius: 0, width, height, depth };
+      }
+
+      if (this._shape === 'Sphere' || this._shape === 'Mesh') {
+        const radius =
+          this.shapeDimensionA > 0
+            ? this.shapeDimensionA * this.shapeScale
+            : Math.pow(ownerWidth * ownerHeight * ownerDepth, 1 / 3) / 2;
+        return {
+          radius,
+          width: radius * 2,
+          height: radius * 2,
+          depth: radius * 2,
+        };
+      }
+
+      const radius =
+        this.shapeDimensionA > 0
+          ? this.shapeDimensionA * this.shapeScale
+          : Math.sqrt(width * height) / 2;
+      const shapeDepth =
+        this.shapeDimensionB > 0
+          ? this.shapeDimensionB * this.shapeScale
+          : depth;
+      return {
+        radius,
+        width: this.shapeOrientation === 'X' ? shapeDepth : radius * 2,
+        height: this.shapeOrientation === 'Y' ? shapeDepth : radius * 2,
+        depth: this.shapeOrientation === 'Z' ? shapeDepth : radius * 2,
+      };
+    }
+
+    private _createTriangularPrismDebugGeometry(dimensions: {
+      width: float;
+      height: float;
+      depth: float;
+    }): any {
+      const three = THREE as any;
+      const halfWidth = dimensions.width / 2;
+      const halfHeight = dimensions.height / 2;
+      const halfDepth = dimensions.depth / 2;
+      const vertices = new Float32Array([
+        -halfWidth,
+        halfHeight,
+        -halfDepth,
+        0,
+        -halfHeight,
+        -halfDepth,
+        halfWidth,
+        halfHeight,
+        -halfDepth,
+        -halfWidth,
+        halfHeight,
+        halfDepth,
+        halfWidth,
+        halfHeight,
+        halfDepth,
+        0,
+        -halfHeight,
+        halfDepth,
+        -halfWidth,
+        halfHeight,
+        -halfDepth,
+        halfWidth,
+        halfHeight,
+        -halfDepth,
+        halfWidth,
+        halfHeight,
+        halfDepth,
+        -halfWidth,
+        halfHeight,
+        -halfDepth,
+        halfWidth,
+        halfHeight,
+        halfDepth,
+        -halfWidth,
+        halfHeight,
+        halfDepth,
+        halfWidth,
+        halfHeight,
+        -halfDepth,
+        0,
+        -halfHeight,
+        -halfDepth,
+        0,
+        -halfHeight,
+        halfDepth,
+        halfWidth,
+        halfHeight,
+        -halfDepth,
+        0,
+        -halfHeight,
+        halfDepth,
+        halfWidth,
+        halfHeight,
+        halfDepth,
+        0,
+        -halfHeight,
+        -halfDepth,
+        -halfWidth,
+        halfHeight,
+        -halfDepth,
+        -halfWidth,
+        halfHeight,
+        halfDepth,
+        0,
+        -halfHeight,
+        -halfDepth,
+        -halfWidth,
+        halfHeight,
+        halfDepth,
+        0,
+        -halfHeight,
+        halfDepth,
+      ]);
+      const geometry = new three.BufferGeometry();
+      geometry.setAttribute('position', new three.BufferAttribute(vertices, 3));
+      geometry.computeVertexNormals();
+      return geometry;
+    }
+
+    private _createCollisionShapeDebugGeometry(dimensions: {
+      radius: float;
+      width: float;
+      height: float;
+      depth: float;
+    }): any {
+      const three = THREE as any;
+      if (this._shape === 'Sphere') {
+        return new three.SphereGeometry(dimensions.radius, 24, 12);
+      }
+      if (this._shape === 'Capsule') {
+        const depth =
+          this.shapeOrientation === 'X'
+            ? dimensions.width
+            : this.shapeOrientation === 'Y'
+              ? dimensions.height
+              : dimensions.depth;
+        return new three.CapsuleGeometry(
+          dimensions.radius,
+          Math.max(0, depth - dimensions.radius * 2),
+          8,
+          16
+        );
+      }
+      if (this._shape === 'Cylinder') {
+        const depth =
+          this.shapeOrientation === 'X'
+            ? dimensions.width
+            : this.shapeOrientation === 'Y'
+              ? dimensions.height
+              : dimensions.depth;
+        return new three.CylinderGeometry(
+          dimensions.radius,
+          dimensions.radius,
+          depth,
+          32,
+          1,
+          false
+        );
+      }
+      if (this._shape === 'Triangle') {
+        return this._createTriangularPrismDebugGeometry(dimensions);
+      }
+      if (this._shape === 'Box' || (this._shape === 'Mesh' && isModel3D(this.owner))) {
+        return new three.BoxGeometry(
+          dimensions.width,
+          dimensions.height,
+          dimensions.depth
+        );
+      }
+      return new three.SphereGeometry(dimensions.radius, 24, 12);
+    }
+
+    private _createMeshCollisionShapeDebugObject(dimensions: {
+      width: float;
+      height: float;
+      depth: float;
+    }): any | null {
+      if (
+        this._shape !== 'Mesh' ||
+        !isModel3D(this.owner)
+      ) {
+        return null;
+      }
+
+      const model3DRuntimeObject = this.owner;
+      const originalModel = this.owner
+        .getInstanceContainer()
+        .getGame()
+        .getModel3DManager()
+        .getModel(
+          this.meshShapeResourceName ||
+            model3DRuntimeObject._modelResourceName ||
+            ''
+        );
+      if (!originalModel || !originalModel.scene) {
+        return null;
+      }
+
+      const three = THREE as any;
+      const modelInCube = new three.Group();
+      modelInCube.rotation.order = 'ZYX';
+      modelInCube.add(
+        (THREE_ADDONS as any).SkeletonUtils.clone(originalModel.scene)
+      );
+
+      const data = model3DRuntimeObject._data.content;
+      model3DRuntimeObject._renderer.stretchModelIntoUnitaryCube(
+        modelInCube,
+        data.rotationX,
+        data.rotationY,
+        data.rotationZ
+      );
+
+      const meshDebugObject = new three.Group();
+      meshDebugObject.rotation.order = 'ZYX';
+      meshDebugObject.scale.set(
+        this.owner3D.isFlippedX() ? -dimensions.width : dimensions.width,
+        this.owner3D.isFlippedY() ? -dimensions.height : dimensions.height,
+        this.owner3D.isFlippedZ() ? -dimensions.depth : dimensions.depth
+      );
+      meshDebugObject.add(modelInCube);
+
+      meshDebugObject.traverse((object3d) => {
+        const mesh = object3d as any;
+        if (!mesh.isMesh) {
+          return;
+        }
+        if (mesh.geometry && mesh.geometry.clone) {
+          mesh.geometry = mesh.geometry.clone();
+        }
+        mesh.material = new three.MeshBasicMaterial({
+          color: 0x00ffff,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.9,
+          depthTest: false,
+        });
+      });
+
+      return meshDebugObject;
+    }
+
+    private _createCollisionShapeDebugObject(dimensions: {
+      radius: float;
+      width: float;
+      height: float;
+      depth: float;
+    }): any {
+      const three = THREE as any;
+      const debugObject = new three.Group();
+      debugObject.renderOrder = 1000000;
+
+      const meshDebugObject =
+        this._createMeshCollisionShapeDebugObject(dimensions);
+      if (meshDebugObject) {
+        debugObject.add(meshDebugObject);
+        return debugObject;
+      }
+
+      const geometry = this._createCollisionShapeDebugGeometry(dimensions);
+      const material = new three.MeshBasicMaterial({
+        color: 0x00ffff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.9,
+        depthTest: false,
+      });
+      const mesh = new three.Mesh(geometry, material);
+      if (this._shape === 'Capsule' || this._shape === 'Cylinder') {
+        if (this.shapeOrientation === 'X') {
+          mesh.rotation.z = -Math.PI / 2;
+        } else if (this.shapeOrientation === 'Z') {
+          mesh.rotation.x = Math.PI / 2;
+        }
+      }
+
+      debugObject.add(mesh);
+      return debugObject;
+    }
+
+    private _updateCollisionShapeDebugObject(): void {
+      const dimensions = this._getCollisionShapeDebugDimensions();
+      const debugObjectKey = [
+        this._shape,
+        this.shapeOrientation,
+        this.meshShapeResourceName,
+        this.bodyType,
+        dimensions.radius,
+        dimensions.width,
+        dimensions.height,
+        dimensions.depth,
+      ].join(';');
+
+      if (
+        !this._collisionShapeDebugObject ||
+        this._collisionShapeDebugObjectKey !== debugObjectKey
+      ) {
+        this._destroyCollisionShapeDebugObject();
+        const debugObject = this._createCollisionShapeDebugObject(dimensions);
+        this.owner3D.get3DRendererObject().add(debugObject);
+        this._collisionShapeDebugObject = debugObject;
+        this._collisionShapeDebugObjectKey = debugObjectKey;
+      }
+
+      const debugObject = this._collisionShapeDebugObject;
+      if (!debugObject) {
+        return;
+      }
+
+      const objectWidth = this._getSafeObjectScale(
+        this._getSignedObjectWidth()
+      );
+      const objectHeight = this._getSafeObjectScale(
+        this._getSignedObjectHeight()
+      );
+      const objectDepth = this._getSafeObjectScale(
+        this._getSignedObjectDepth()
+      );
+      debugObject.position.set(
+        (this.shapeOffsetX * this.shapeScale) / objectWidth,
+        (this.shapeOffsetY * this.shapeScale) / objectHeight,
+        (this.shapeOffsetZ * this.shapeScale) / objectDepth
+      );
+      // The debug object is a child of the runtime object's renderer object to
+      // inherit the object rotation, but it cancels the parent scale so the
+      // geometry can be expressed in scene units.
+      debugObject.scale.set(1 / objectWidth, 1 / objectHeight, 1 / objectDepth);
     }
 
     _getPhysicsPosition(result: Jolt.RVec3): Jolt.RVec3 {
