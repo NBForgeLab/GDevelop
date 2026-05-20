@@ -5241,27 +5241,26 @@ namespace gdjs {
 
   class Physics3DCollisionShapeHelper {
     behavior: any;
-    container: any;
-    private _shapeRoot: any;
-    private _shapeContent: any;
-    private _shapeObject: any | null = null;
+    container: THREE.Group;
+    private _shapeRoot: THREE.Group;
+    private _shapeContent: THREE.Group;
+    private _shapeObject: THREE.Object3D | null = null;
     private _signature: string | null = null;
-    private _lineMaterial: any;
+    private _lineMaterial: THREE.LineBasicMaterial;
 
     constructor(behavior: any) {
-      const three = THREE as any;
       this.behavior = behavior;
-      this.container = new three.Group();
+      this.container = new THREE.Group();
       this.container.rotation.order = 'ZYX';
       this.container.userData.isCollisionShapeHelper = true;
 
-      this._shapeRoot = new three.Group();
+      this._shapeRoot = new THREE.Group();
       this._shapeRoot.rotation.order = 'ZYX';
 
-      this._shapeContent = new three.Group();
+      this._shapeContent = new THREE.Group();
       this._shapeContent.rotation.order = 'ZYX';
 
-      this._lineMaterial = new three.LineBasicMaterial({
+      this._lineMaterial = new THREE.LineBasicMaterial({
         color: 0x43c1ff,
         transparent: true,
         opacity: 0.7,
@@ -5430,10 +5429,9 @@ namespace gdjs {
       owner3D: any;
       behavior: any;
     }): void {
-      const three = THREE as any;
       this._disposeShapeObject();
 
-      let shapeObject: any;
+      let shapeObject: THREE.Object3D;
       if (shape === 'Mesh') {
         shapeObject = this._buildMeshWireframeFromBehavior(
           object3D,
@@ -5441,7 +5439,7 @@ namespace gdjs {
           behavior
         );
       } else {
-        let geometry: any;
+        let geometry: THREE.BufferGeometry;
         if (shape === 'Box' || shape === 'Triangle') {
           const boxWidth =
             shapeDimensionA > 0
@@ -5468,7 +5466,7 @@ namespace gdjs {
                   boxHeight,
                   boxDepth
                 )
-              : new three.BoxGeometry(boxWidth, boxHeight, boxDepth);
+              : new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
         } else if (shape === 'Capsule') {
           const radius =
             shapeDimensionA > 0
@@ -5482,7 +5480,7 @@ namespace gdjs {
               : depth > 0
                 ? depth
                 : onePixel;
-          geometry = new three.CapsuleGeometry(
+          geometry = new THREE.CapsuleGeometry(
             radius,
             Math.max(0, capsuleDepth - 2 * radius),
             6,
@@ -5501,7 +5499,7 @@ namespace gdjs {
               : depth > 0
                 ? depth
                 : onePixel;
-          geometry = new three.CylinderGeometry(
+          geometry = new THREE.CylinderGeometry(
             radius,
             radius,
             cylinderDepth,
@@ -5514,11 +5512,11 @@ namespace gdjs {
               : width > 0
                 ? Math.pow(width * height * depth, 1 / 3) / 2
                 : onePixel;
-          geometry = new three.SphereGeometry(radius, 16, 12);
+          geometry = new THREE.SphereGeometry(radius, 16, 12);
         }
 
-        const wireframeGeometry = new three.WireframeGeometry(geometry);
-        shapeObject = new three.LineSegments(
+        const wireframeGeometry = new THREE.WireframeGeometry(geometry);
+        shapeObject = new THREE.LineSegments(
           wireframeGeometry,
           this._lineMaterial
         );
@@ -5535,97 +5533,17 @@ namespace gdjs {
       width: number,
       height: number,
       depth: number
-    ): any {
-      const three = THREE as any;
-      const halfWidth = width / 2;
-      const halfHeight = height / 2;
-      const halfDepth = depth / 2;
-      const vertices = new Float32Array([
-        -halfWidth,
-        halfHeight,
-        -halfDepth,
-        0,
-        -halfHeight,
-        -halfDepth,
-        halfWidth,
-        halfHeight,
-        -halfDepth,
-        -halfWidth,
-        halfHeight,
-        halfDepth,
-        halfWidth,
-        halfHeight,
-        halfDepth,
-        0,
-        -halfHeight,
-        halfDepth,
-        -halfWidth,
-        halfHeight,
-        -halfDepth,
-        halfWidth,
-        halfHeight,
-        -halfDepth,
-        halfWidth,
-        halfHeight,
-        halfDepth,
-        -halfWidth,
-        halfHeight,
-        -halfDepth,
-        halfWidth,
-        halfHeight,
-        halfDepth,
-        -halfWidth,
-        halfHeight,
-        halfDepth,
-        halfWidth,
-        halfHeight,
-        -halfDepth,
-        0,
-        -halfHeight,
-        -halfDepth,
-        0,
-        -halfHeight,
-        halfDepth,
-        halfWidth,
-        halfHeight,
-        -halfDepth,
-        0,
-        -halfHeight,
-        halfDepth,
-        halfWidth,
-        halfHeight,
-        halfDepth,
-        0,
-        -halfHeight,
-        -halfDepth,
-        -halfWidth,
-        halfHeight,
-        -halfDepth,
-        -halfWidth,
-        halfHeight,
-        halfDepth,
-        0,
-        -halfHeight,
-        -halfDepth,
-        -halfWidth,
-        halfHeight,
-        halfDepth,
-        0,
-        -halfHeight,
-        halfDepth,
-      ]);
-      const geometry = new three.BufferGeometry();
-      geometry.setAttribute('position', new three.BufferAttribute(vertices, 3));
-      geometry.computeVertexNormals();
-      return geometry;
+    ): THREE.BufferGeometry {
+      // Delegates to the shared module-level helper so the vertex data is
+      // defined in exactly one place (Physics3DRuntimeBehavior.ts).
+      return createTriangularPrismDebugGeometry(width, height, depth);
     }
 
     private _buildMeshWireframeFromBehavior(
-      object3D: any,
+      object3D: THREE.Object3D,
       owner3D: any,
       behavior: any
-    ): any {
-      const three = THREE as any;
+    ): THREE.Object3D {
       const meshShapeResourceName =
         behavior.meshShapeResourceName || owner3D._modelResourceName || '';
       if (
@@ -5641,7 +5559,7 @@ namespace gdjs {
           .getModel3DManager()
           .getModel(meshShapeResourceName);
         if (originalModel) {
-          const modelInCube = new three.Group();
+          const modelInCube = new THREE.Group();
           modelInCube.rotation.order = 'ZYX';
           const root = (THREE_ADDONS as any).SkeletonUtils.clone(
             originalModel.scene
@@ -5663,21 +5581,23 @@ namespace gdjs {
       return this._buildMeshWireframe(object3D, object3D);
     }
 
-    private _buildMeshWireframe(object3D: any, rootToCancel: any | null): any {
-      const three = THREE as any;
-      const group = new three.Group();
+    private _buildMeshWireframe(
+      object3D: THREE.Object3D,
+      rootToCancel: THREE.Object3D | null
+    ): THREE.Object3D {
+      const group = new THREE.Group();
       const rootInverse = rootToCancel
-        ? new three.Matrix4().copy(rootToCancel.matrixWorld).invert()
-        : new three.Matrix4();
+        ? new THREE.Matrix4().copy(rootToCancel.matrixWorld).invert()
+        : new THREE.Matrix4();
 
       object3D.traverse((child) => {
         if (!child || !child.isMesh || !child.geometry) return;
-        const wireframeGeometry = new three.WireframeGeometry(child.geometry);
-        const lines = new three.LineSegments(
+        const wireframeGeometry = new THREE.WireframeGeometry(child.geometry);
+        const lines = new THREE.LineSegments(
           wireframeGeometry,
           this._lineMaterial
         );
-        const relativeMatrix = new three.Matrix4().multiplyMatrices(
+        const relativeMatrix = new THREE.Matrix4().multiplyMatrices(
           rootInverse,
           child.matrixWorld
         );
@@ -5711,7 +5631,7 @@ namespace gdjs {
       });
     }
 
-    setColor(color: any): void {
+    setColor(color: THREE.ColorRepresentation): void {
       this._lineMaterial.color.set(color);
       this._lineMaterial.needsUpdate = true;
     }

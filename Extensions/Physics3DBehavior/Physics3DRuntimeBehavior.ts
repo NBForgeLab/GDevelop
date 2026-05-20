@@ -329,6 +329,40 @@ namespace gdjs {
   });
 
   /**
+   * Build the triangular-prism BufferGeometry used by the collision shape
+   * debug overlay.  Kept at module level so InGameEditor can share it without
+   * going through the behavior instance.
+   */
+  export function createTriangularPrismDebugGeometry(
+    width: float,
+    height: float,
+    depth: float
+  ): THREE.BufferGeometry {
+    const hw = width / 2;
+    const hh = height / 2;
+    const hd = depth / 2;
+    const vertices = new Float32Array([
+      // Front face (z = -hd)
+      -hw,  hh, -hd,   0, -hh, -hd,   hw,  hh, -hd,
+      // Back face (z = +hd)
+      -hw,  hh,  hd,   hw,  hh,  hd,   0, -hh,  hd,
+      // Top face
+      -hw,  hh, -hd,   hw,  hh, -hd,   hw,  hh,  hd,
+      -hw,  hh, -hd,   hw,  hh,  hd,  -hw,  hh,  hd,
+      // Right face
+       hw,  hh, -hd,   0, -hh, -hd,   0, -hh,  hd,
+       hw,  hh, -hd,   0, -hh,  hd,   hw,  hh,  hd,
+      // Left face
+        0, -hh, -hd,  -hw,  hh, -hd,  -hw,  hh,  hd,
+        0, -hh, -hd,  -hw,  hh,  hd,   0, -hh,  hd,
+    ]);
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    geometry.computeVertexNormals();
+    return geometry;
+  }
+
+  /**
    * @category Behaviors > Physics 3D
    */
   export class Physics3DRuntimeBehavior extends gdjs.RuntimeBehavior {
@@ -1772,89 +1806,12 @@ namespace gdjs {
       width: float;
       height: float;
       depth: float;
-    }): any {
-      const three = THREE as any;
-      const halfWidth = dimensions.width / 2;
-      const halfHeight = dimensions.height / 2;
-      const halfDepth = dimensions.depth / 2;
-      const vertices = new Float32Array([
-        -halfWidth,
-        halfHeight,
-        -halfDepth,
-        0,
-        -halfHeight,
-        -halfDepth,
-        halfWidth,
-        halfHeight,
-        -halfDepth,
-        -halfWidth,
-        halfHeight,
-        halfDepth,
-        halfWidth,
-        halfHeight,
-        halfDepth,
-        0,
-        -halfHeight,
-        halfDepth,
-        -halfWidth,
-        halfHeight,
-        -halfDepth,
-        halfWidth,
-        halfHeight,
-        -halfDepth,
-        halfWidth,
-        halfHeight,
-        halfDepth,
-        -halfWidth,
-        halfHeight,
-        -halfDepth,
-        halfWidth,
-        halfHeight,
-        halfDepth,
-        -halfWidth,
-        halfHeight,
-        halfDepth,
-        halfWidth,
-        halfHeight,
-        -halfDepth,
-        0,
-        -halfHeight,
-        -halfDepth,
-        0,
-        -halfHeight,
-        halfDepth,
-        halfWidth,
-        halfHeight,
-        -halfDepth,
-        0,
-        -halfHeight,
-        halfDepth,
-        halfWidth,
-        halfHeight,
-        halfDepth,
-        0,
-        -halfHeight,
-        -halfDepth,
-        -halfWidth,
-        halfHeight,
-        -halfDepth,
-        -halfWidth,
-        halfHeight,
-        halfDepth,
-        0,
-        -halfHeight,
-        -halfDepth,
-        -halfWidth,
-        halfHeight,
-        halfDepth,
-        0,
-        -halfHeight,
-        halfDepth,
-      ]);
-      const geometry = new three.BufferGeometry();
-      geometry.setAttribute('position', new three.BufferAttribute(vertices, 3));
-      geometry.computeVertexNormals();
-      return geometry;
+    }): THREE.BufferGeometry {
+      return createTriangularPrismDebugGeometry(
+        dimensions.width,
+        dimensions.height,
+        dimensions.depth
+      );
     }
 
     private _createCollisionShapeDebugGeometry(dimensions: {
@@ -1862,10 +1819,9 @@ namespace gdjs {
       width: float;
       height: float;
       depth: float;
-    }): any {
-      const three = THREE as any;
+    }): THREE.BufferGeometry {
       if (this._shape === 'Sphere') {
-        return new three.SphereGeometry(dimensions.radius, 24, 12);
+        return new THREE.SphereGeometry(dimensions.radius, 24, 12);
       }
       if (this._shape === 'Capsule') {
         const depth =
@@ -1874,7 +1830,7 @@ namespace gdjs {
             : this.shapeOrientation === 'Y'
               ? dimensions.height
               : dimensions.depth;
-        return new three.CapsuleGeometry(
+        return new THREE.CapsuleGeometry(
           dimensions.radius,
           Math.max(0, depth - dimensions.radius * 2),
           8,
@@ -1888,7 +1844,7 @@ namespace gdjs {
             : this.shapeOrientation === 'Y'
               ? dimensions.height
               : dimensions.depth;
-        return new three.CylinderGeometry(
+        return new THREE.CylinderGeometry(
           dimensions.radius,
           dimensions.radius,
           depth,
@@ -1901,20 +1857,20 @@ namespace gdjs {
         return this._createTriangularPrismDebugGeometry(dimensions);
       }
       if (this._shape === 'Box' || (this._shape === 'Mesh' && isModel3D(this.owner))) {
-        return new three.BoxGeometry(
+        return new THREE.BoxGeometry(
           dimensions.width,
           dimensions.height,
           dimensions.depth
         );
       }
-      return new three.SphereGeometry(dimensions.radius, 24, 12);
+      return new THREE.SphereGeometry(dimensions.radius, 24, 12);
     }
 
     private _createMeshCollisionShapeDebugObject(dimensions: {
       width: float;
       height: float;
       depth: float;
-    }): any | null {
+    }): THREE.Object3D | null {
       if (
         this._shape !== 'Mesh' ||
         !isModel3D(this.owner)
@@ -1936,8 +1892,7 @@ namespace gdjs {
         return null;
       }
 
-      const three = THREE as any;
-      const modelInCube = new three.Group();
+      const modelInCube = new THREE.Group();
       modelInCube.rotation.order = 'ZYX';
       modelInCube.add(
         (THREE_ADDONS as any).SkeletonUtils.clone(originalModel.scene)
@@ -1951,7 +1906,7 @@ namespace gdjs {
         data.rotationZ
       );
 
-      const meshDebugObject = new three.Group();
+      const meshDebugObject = new THREE.Group();
       meshDebugObject.rotation.order = 'ZYX';
       meshDebugObject.scale.set(
         this.owner3D.isFlippedX() ? -dimensions.width : dimensions.width,
@@ -1968,7 +1923,7 @@ namespace gdjs {
         if (mesh.geometry && mesh.geometry.clone) {
           mesh.geometry = mesh.geometry.clone();
         }
-        mesh.material = new three.MeshBasicMaterial({
+        mesh.material = new THREE.MeshBasicMaterial({
           color: 0x00ffff,
           wireframe: true,
           transparent: true,
@@ -1985,9 +1940,9 @@ namespace gdjs {
       width: float;
       height: float;
       depth: float;
-    }): any {
-      const three = THREE as any;
-      const debugObject = new three.Group();
+    }): THREE.Object3D {
+      const debugObject = new THREE.Group();
+      // Render above everything so the wireframe is always visible during debugging.
       debugObject.renderOrder = 1000000;
 
       const meshDebugObject =
@@ -1998,14 +1953,14 @@ namespace gdjs {
       }
 
       const geometry = this._createCollisionShapeDebugGeometry(dimensions);
-      const material = new three.MeshBasicMaterial({
+      const material = new THREE.MeshBasicMaterial({
         color: 0x00ffff,
         wireframe: true,
         transparent: true,
         opacity: 0.9,
         depthTest: false,
       });
-      const mesh = new three.Mesh(geometry, material);
+      const mesh = new THREE.Mesh(geometry, material);
       if (this._shape === 'Capsule' || this._shape === 'Cylinder') {
         if (this.shapeOrientation === 'X') {
           mesh.rotation.z = -Math.PI / 2;

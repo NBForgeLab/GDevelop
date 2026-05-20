@@ -41,7 +41,103 @@ export type Model3DDefaultTransform = {|
   centerLocation: string,
 |};
 
-const epsilon = 1e-12;
+export const epsilon = 1e-12;
+
+/**
+ * Build the triangular-prism vertex buffer shared by the IDE preview and the
+ * runtime debug overlay. The prism has an isosceles triangular cross-section
+ * with the apex at the bottom, extruded along the Z axis.
+ */
+export const createTriangularPrismVertices = (
+  width: number,
+  height: number,
+  depth: number
+): Float32Array => {
+  const hw = width / 2;
+  const hh = height / 2;
+  const hd = depth / 2;
+  // 2 triangular faces + 3 rectangular faces split into 2 triangles each.
+  // Listed explicitly so the winding order is correct for computeVertexNormals.
+  return new Float32Array([
+    // Front face (z = -hd)
+    -hw,
+    hh,
+    -hd,
+    0,
+    -hh,
+    -hd,
+    hw,
+    hh,
+    -hd,
+    // Back face (z = +hd)
+    -hw,
+    hh,
+    hd,
+    hw,
+    hh,
+    hd,
+    0,
+    -hh,
+    hd,
+    // Top face
+    -hw,
+    hh,
+    -hd,
+    hw,
+    hh,
+    -hd,
+    hw,
+    hh,
+    hd,
+    -hw,
+    hh,
+    -hd,
+    hw,
+    hh,
+    hd,
+    -hw,
+    hh,
+    hd,
+    // Right face
+    hw,
+    hh,
+    -hd,
+    0,
+    -hh,
+    -hd,
+    0,
+    -hh,
+    hd,
+    hw,
+    hh,
+    -hd,
+    0,
+    -hh,
+    hd,
+    hw,
+    hh,
+    hd,
+    // Left face
+    0,
+    -hh,
+    -hd,
+    -hw,
+    hh,
+    -hd,
+    -hw,
+    hh,
+    hd,
+    0,
+    -hh,
+    -hd,
+    -hw,
+    hh,
+    hd,
+    0,
+    -hh,
+    hd,
+  ]);
+};
 
 const parsePropertyNumber = (
   properties: gdMapStringPropertyDescriptor,

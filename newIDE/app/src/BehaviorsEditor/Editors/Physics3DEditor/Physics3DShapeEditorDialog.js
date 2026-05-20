@@ -26,6 +26,8 @@ import ResourceSelectorWithThumbnail from '../../../ResourcesList/ResourceSelect
 import PixiResourcesLoader from '../../../ObjectsRendering/PixiResourcesLoader';
 import { NumericProperty, ChoiceProperty } from '../Physics2Editor';
 import {
+  createTriangularPrismVertices,
+  epsilon,
   getEffectiveShapeDimensions,
   getModel3DPointForLocation,
   getRuntimeObjectDimensions,
@@ -52,9 +54,6 @@ type PreviewColors = {|
   collider: string,
   colliderWire: string,
 |};
-
-const epsilon = 1e-12;
-
 const styles = {
   body: {
     display: 'flex',
@@ -217,85 +216,9 @@ const createTriangularPrismGeometry = ({
   width: number,
   height: number,
   depth: number,
-|}) => {
-  const halfWidth = width / 2;
-  const halfHeight = height / 2;
-  const halfDepth = depth / 2;
-  const vertices = new Float32Array([
-    -halfWidth,
-    halfHeight,
-    -halfDepth,
-    0,
-    -halfHeight,
-    -halfDepth,
-    halfWidth,
-    halfHeight,
-    -halfDepth,
-    -halfWidth,
-    halfHeight,
-    halfDepth,
-    halfWidth,
-    halfHeight,
-    halfDepth,
-    0,
-    -halfHeight,
-    halfDepth,
-    -halfWidth,
-    halfHeight,
-    -halfDepth,
-    halfWidth,
-    halfHeight,
-    -halfDepth,
-    halfWidth,
-    halfHeight,
-    halfDepth,
-    -halfWidth,
-    halfHeight,
-    -halfDepth,
-    halfWidth,
-    halfHeight,
-    halfDepth,
-    -halfWidth,
-    halfHeight,
-    halfDepth,
-    halfWidth,
-    halfHeight,
-    -halfDepth,
-    0,
-    -halfHeight,
-    -halfDepth,
-    0,
-    -halfHeight,
-    halfDepth,
-    halfWidth,
-    halfHeight,
-    -halfDepth,
-    0,
-    -halfHeight,
-    halfDepth,
-    halfWidth,
-    halfHeight,
-    halfDepth,
-    0,
-    -halfHeight,
-    -halfDepth,
-    -halfWidth,
-    halfHeight,
-    -halfDepth,
-    -halfWidth,
-    halfHeight,
-    halfDepth,
-    0,
-    -halfHeight,
-    -halfDepth,
-    -halfWidth,
-    halfHeight,
-    halfDepth,
-    0,
-    -halfHeight,
-    halfDepth,
-  ]);
+|}): THREE.BufferGeometry => {
   const geometry = new THREE.BufferGeometry();
+  const vertices = createTriangularPrismVertices(width, height, depth);
   geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
   geometry.computeVertexNormals();
   return geometry;
@@ -578,6 +501,10 @@ const Physics3DShapeEditorDialog = ({
   const containerRef = React.useRef<?HTMLDivElement>(null);
   const transformControlsRef = React.useRef<any>(null);
   const colliderRef = React.useRef<any>(null);
+  const cameraViewRef = React.useRef<?{|
+    position: THREE.Vector3,
+    target: THREE.Vector3,
+  |}>(null);
   const [transformMode, setTransformMode] = React.useState<TransformMode>(
     'translate'
   );
@@ -948,13 +875,20 @@ const Physics3DShapeEditorDialog = ({
       bounds.getSize(size);
       bounds.getCenter(center);
       const maxDimension = Math.max(size.x, size.y, size.z, 100);
-      controls.target.copy(center);
-      camera.position.set(
-        center.x + maxDimension * 1.3,
-        center.y + maxDimension * 1.1,
-        center.z + maxDimension * 1.5
-      );
-      camera.lookAt(center);
+      const cameraView = cameraViewRef.current;
+      if (cameraView) {
+        controls.target.copy(cameraView.target);
+        camera.position.copy(cameraView.position);
+        camera.lookAt(cameraView.target);
+      } else {
+        controls.target.copy(center);
+        camera.position.set(
+          center.x + maxDimension * 1.3,
+          center.y + maxDimension * 1.1,
+          center.z + maxDimension * 1.5
+        );
+        camera.lookAt(center);
+      }
 
       const resize = () => {
         const width = Math.max(container.clientWidth, 1);
@@ -980,6 +914,10 @@ const Physics3DShapeEditorDialog = ({
       render();
 
       return () => {
+        cameraViewRef.current = {
+          position: camera.position.clone(),
+          target: controls.target.clone(),
+        };
         if (animationFrameId !== null) {
           cancelAnimationFrame(animationFrameId);
         }
