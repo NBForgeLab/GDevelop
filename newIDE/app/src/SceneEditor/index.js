@@ -2911,6 +2911,7 @@ export default class SceneEditor extends React.Component<Props, State> {
       eventsFunctionsExtension,
       eventsBasedObject,
       eventsBasedObjectVariant,
+      layersContainer,
       initialInstances,
       resourceManagementProps,
       isActive,
@@ -3136,6 +3137,7 @@ export default class SceneEditor extends React.Component<Props, State> {
                         layout={layout}
                         eventsFunctionsExtension={eventsFunctionsExtension}
                         eventsBasedObject={eventsBasedObject}
+                        layersContainer={layersContainer}
                         projectScopedContainersAccessor={
                           projectScopedContainersAccessor
                         }
@@ -3365,6 +3367,7 @@ export default class SceneEditor extends React.Component<Props, State> {
                           this.props.hotReloadPreviewButtonProps
                         }
                         isListLocked={true}
+                        initiallySelectedVariable={null}
                       />
                     )}
                   {!!this.state.layerRemoved &&
@@ -3480,6 +3483,7 @@ export default class SceneEditor extends React.Component<Props, State> {
                         this.props.hotReloadPreviewButtonProps
                       }
                       isListLocked={false}
+                      initiallySelectedVariable={null}
                     />
                   )}
                   <React.Fragment>
