@@ -161,6 +161,18 @@ export const getPhysics3DPreviewCameraFrameKey = ({
     modelDefaultTransform.centerLocation,
   ].join(';');
 
+export const getPhysics3DPreviewCameraPosition = ({
+  center,
+  maxDimension,
+}: {|
+  center: Vector3Like,
+  maxDimension: number,
+|}): Vector3Like => ({
+  x: center.x + maxDimension * 1.3,
+  y: center.y - maxDimension * 1.5,
+  z: center.z + maxDimension * 1.1,
+});
+
 const parsePropertyNumber = (
   properties: gdMapStringPropertyDescriptor,
   propertyName: string,

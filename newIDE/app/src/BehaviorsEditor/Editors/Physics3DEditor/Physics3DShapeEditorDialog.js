@@ -31,6 +31,7 @@ import {
   getEffectiveShapeDimensions,
   getModel3DPointForLocation,
   getPhysics3DPreviewCameraFrameKey,
+  getPhysics3DPreviewCameraPosition,
   getRuntimeObjectDimensions,
   getUpdatedShapeValuesFromTransform,
   type EffectiveShapeDimensions,
@@ -453,12 +454,13 @@ const frameCameraToBounds = ({
   bounds.getSize(size);
   bounds.getCenter(center);
   const maxDimension = Math.max(size.x, size.y, size.z, 100);
+  const cameraPosition = getPhysics3DPreviewCameraPosition({
+    center,
+    maxDimension,
+  });
   controls.target.copy(center);
-  camera.position.set(
-    center.x + maxDimension * 1.3,
-    center.y + maxDimension * 1.1,
-    center.z + maxDimension * 1.5
-  );
+  camera.up.set(0, 0, 1);
+  camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
   camera.lookAt(center);
 };
 
@@ -818,6 +820,7 @@ const Physics3DShapeEditorDialog = ({
 
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100000);
+      camera.up.set(0, 0, 1);
       const renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true,
@@ -947,6 +950,7 @@ const Physics3DShapeEditorDialog = ({
         previewColors.gridCenter,
         previewColors.grid
       );
+      grid.rotation.x = Math.PI / 2;
       previewObjectsGroup.add(grid);
       generatedObjects.push(grid);
 

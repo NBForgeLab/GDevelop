@@ -3,6 +3,7 @@ import {
   createTriangularPrismVertices,
   getEffectiveShapeDimensions,
   getPhysics3DPreviewCameraFrameKey,
+  getPhysics3DPreviewCameraPosition,
   getModel3DDefaultTransformFromProperties,
   getModel3DPointForLocation,
   getRuntimeObjectDimensions,
@@ -491,6 +492,19 @@ describe('Physics3DShapeEditorHelpers', () => {
       { modelDefaultTransform: { centerLocation: 'BottomCenterZ' } },
     ].forEach(overrides => {
       expect(getFrameKey(overrides)).not.toBe(frameKey);
+    });
+  });
+
+  it('frames the preview with the GDevelop scene plane using Z as the vertical axis', () => {
+    expect(
+      getPhysics3DPreviewCameraPosition({
+        center: { x: 10, y: 20, z: 30 },
+        maxDimension: 100,
+      })
+    ).toStrictEqual({
+      x: 140,
+      y: -130,
+      z: 140,
     });
   });
 });
