@@ -139,6 +139,28 @@ export const createTriangularPrismVertices = (
   ]);
 };
 
+export const getPhysics3DPreviewCameraFrameKey = ({
+  modelResourceName,
+  objectDimensions,
+  modelDefaultTransform,
+}: {|
+  modelResourceName: string,
+  objectDimensions: ObjectDimensions,
+  modelDefaultTransform: Model3DDefaultTransform,
+|}): string =>
+  [
+    modelResourceName,
+    objectDimensions.width,
+    objectDimensions.height,
+    objectDimensions.depth,
+    modelDefaultTransform.rotationX,
+    modelDefaultTransform.rotationY,
+    modelDefaultTransform.rotationZ,
+    modelDefaultTransform.keepAspectRatio ? '1' : '0',
+    modelDefaultTransform.originLocation,
+    modelDefaultTransform.centerLocation,
+  ].join(';');
+
 const parsePropertyNumber = (
   properties: gdMapStringPropertyDescriptor,
   propertyName: string,

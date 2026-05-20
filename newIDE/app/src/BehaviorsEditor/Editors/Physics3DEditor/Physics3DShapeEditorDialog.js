@@ -30,6 +30,7 @@ import {
   epsilon,
   getEffectiveShapeDimensions,
   getModel3DPointForLocation,
+  getPhysics3DPreviewCameraFrameKey,
   getRuntimeObjectDimensions,
   getUpdatedShapeValuesFromTransform,
   type EffectiveShapeDimensions,
@@ -53,6 +54,14 @@ type PreviewColors = {|
   objectBounds: string,
   collider: string,
   colliderWire: string,
+|};
+type PreviewContext = {|
+  camera: any,
+  renderer: any,
+  controls: any,
+  previewObjectsGroup: any,
+  transformControls: any,
+  transformControlsHelper: any,
 |};
 const styles = {
   body: {
@@ -109,85 +118,9 @@ const getObjectDimensionFromProperties = (
   return value > 0 ? value : 100;
 };
 
-const getDefaultModel3DDefaultTransform = (): Model3DDefaultTransform => ({
-  rotationX: 0,
-  rotationY: 0,
-  rotationZ: 0,
-  keepAspectRatio: false,
-  originLocation: 'ModelOrigin',
-  centerLocation: 'CenteredOnZ',
-});
-
 const getModel3DConfiguration = (object: gdObject): any | null => {
   if (object.getType() !== 'Scene3D::Model3DObject') return null;
   return gd.asModel3DConfiguration(object.getConfiguration());
-};
-
-const getObjectDimensions = (object: gdObject): ObjectDimensions => {
-  const model3DConfiguration = getModel3DConfiguration(object);
-  if (model3DConfiguration) {
-    return {
-      width:
-        model3DConfiguration.getWidth() > 0
-          ? model3DConfiguration.getWidth()
-          : 100,
-      height:
-        model3DConfiguration.getHeight() > 0
-          ? model3DConfiguration.getHeight()
-          : 100,
-      depth:
-        model3DConfiguration.getDepth() > 0
-          ? model3DConfiguration.getDepth()
-          : 100,
-    };
-  }
-
-  const objectProperties = object.getConfiguration().getProperties();
-  return {
-    width: getObjectDimensionFromProperties(objectProperties, 'width'),
-    height: getObjectDimensionFromProperties(objectProperties, 'height'),
-    depth: getObjectDimensionFromProperties(objectProperties, 'depth'),
-  };
-};
-
-const getModel3DDefaultTransform = (
-  object: gdObject
-): Model3DDefaultTransform => {
-  const model3DConfiguration = getModel3DConfiguration(object);
-  if (!model3DConfiguration) return getDefaultModel3DDefaultTransform();
-
-  return {
-    rotationX: model3DConfiguration.getRotationX(),
-    rotationY: model3DConfiguration.getRotationY(),
-    rotationZ: model3DConfiguration.getRotationZ(),
-    keepAspectRatio: model3DConfiguration.shouldKeepAspectRatio(),
-    originLocation: model3DConfiguration.getOriginLocation(),
-    centerLocation: model3DConfiguration.getCenterLocation(),
-  };
-};
-
-const getModelResourceName = (object: gdObject) => {
-  const model3DConfiguration = getModel3DConfiguration(object);
-  return model3DConfiguration
-    ? model3DConfiguration.getModelResourceName()
-    : '';
-};
-
-const getModel3DConfigurationKey = (object: gdObject) => {
-  const model3DConfiguration = getModel3DConfiguration(object);
-  if (!model3DConfiguration) return object.getType();
-  return [
-    model3DConfiguration.getModelResourceName(),
-    model3DConfiguration.getWidth(),
-    model3DConfiguration.getHeight(),
-    model3DConfiguration.getDepth(),
-    model3DConfiguration.getRotationX(),
-    model3DConfiguration.getRotationY(),
-    model3DConfiguration.getRotationZ(),
-    model3DConfiguration.shouldKeepAspectRatio(),
-    model3DConfiguration.getOriginLocation(),
-    model3DConfiguration.getCenterLocation(),
-  ].join(';');
 };
 
 const formatNumber = (value: number) => {
@@ -212,11 +145,12 @@ const createTriangularPrismGeometry = ({
   width,
   height,
   depth,
-}: {|
+}: {
   width: number,
   height: number,
   depth: number,
-|}): THREE.BufferGeometry => {
+  ...
+}) => {
   const geometry = new THREE.BufferGeometry();
   const vertices = createTriangularPrismVertices(width, height, depth);
   geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
@@ -478,6 +412,56 @@ const disposePreviewModel = (model: any) => {
   });
 };
 
+const disposeGeneratedObject = (object: any) => {
+  object.traverse(child => {
+    // $FlowFixMe[prop-missing] Three.js generated helpers expose geometry.
+    if (child.geometry) child.geometry.dispose();
+    // $FlowFixMe[prop-missing] Three.js generated helpers expose material.
+    const material = child.material;
+    if (Array.isArray(material)) {
+      material.forEach(material => material.dispose());
+    } else if (material) {
+      material.dispose();
+    }
+  });
+};
+
+const frameCameraToBounds = ({
+  camera,
+  controls,
+  bounds,
+  objectDimensions,
+}: {|
+  camera: any,
+  controls: any,
+  bounds: any,
+  objectDimensions: ObjectDimensions,
+|}) => {
+  if (bounds.isEmpty()) {
+    bounds.setFromCenterAndSize(
+      new THREE.Vector3(),
+      new THREE.Vector3(
+        objectDimensions.width,
+        objectDimensions.height,
+        objectDimensions.depth
+      )
+    );
+  }
+
+  const size = new THREE.Vector3();
+  const center = new THREE.Vector3();
+  bounds.getSize(size);
+  bounds.getCenter(center);
+  const maxDimension = Math.max(size.x, size.y, size.z, 100);
+  controls.target.copy(center);
+  camera.position.set(
+    center.x + maxDimension * 1.3,
+    center.y + maxDimension * 1.1,
+    center.z + maxDimension * 1.5
+  );
+  camera.lookAt(center);
+};
+
 type Props = {|
   object: gdObject,
   project: gdProject,
@@ -498,13 +482,16 @@ const Physics3DShapeEditorDialog = ({
   onClose,
 }: Props): React.Node => {
   const gdevelopTheme = React.useContext(GDevelopThemeContext);
-  const containerRef = React.useRef<?HTMLDivElement>(null);
   const transformControlsRef = React.useRef<any>(null);
   const colliderRef = React.useRef<any>(null);
-  const cameraViewRef = React.useRef<?{|
-    position: THREE.Vector3,
-    target: THREE.Vector3,
-  |}>(null);
+  const commitTransformRef = React.useRef<() => void>(() => {});
+  const lastCameraFrameKeyRef = React.useRef<?string>(null);
+  const [canvasContainer, setCanvasContainer] = React.useState<?HTMLDivElement>(
+    null
+  );
+  const [previewContext, setPreviewContext] = React.useState<?PreviewContext>(
+    null
+  );
   const [transformMode, setTransformMode] = React.useState<TransformMode>(
     'translate'
   );
@@ -516,11 +503,44 @@ const Physics3DShapeEditorDialog = ({
   const [meshShape3D, setMeshShape3D] = React.useState<any>(null);
 
   const shape: Physics3DShape = (properties.get('shape').getValue(): any);
-  const model3DConfigurationKey = getModel3DConfigurationKey(object);
-  const modelResourceName = React.useMemo(() => getModelResourceName(object), [
-    object,
-    model3DConfigurationKey,
-  ]);
+  const model3DConfiguration = getModel3DConfiguration(object);
+  const objectProperties = object.getConfiguration().getProperties();
+  const modelResourceName = model3DConfiguration
+    ? model3DConfiguration.getModelResourceName()
+    : '';
+  const configuredObjectWidth = model3DConfiguration
+    ? model3DConfiguration.getWidth() > 0
+      ? model3DConfiguration.getWidth()
+      : 100
+    : getObjectDimensionFromProperties(objectProperties, 'width');
+  const configuredObjectHeight = model3DConfiguration
+    ? model3DConfiguration.getHeight() > 0
+      ? model3DConfiguration.getHeight()
+      : 100
+    : getObjectDimensionFromProperties(objectProperties, 'height');
+  const configuredObjectDepth = model3DConfiguration
+    ? model3DConfiguration.getDepth() > 0
+      ? model3DConfiguration.getDepth()
+      : 100
+    : getObjectDimensionFromProperties(objectProperties, 'depth');
+  const modelRotationX = model3DConfiguration
+    ? model3DConfiguration.getRotationX()
+    : 0;
+  const modelRotationY = model3DConfiguration
+    ? model3DConfiguration.getRotationY()
+    : 0;
+  const modelRotationZ = model3DConfiguration
+    ? model3DConfiguration.getRotationZ()
+    : 0;
+  const modelKeepAspectRatio = model3DConfiguration
+    ? model3DConfiguration.shouldKeepAspectRatio()
+    : false;
+  const modelOriginLocation = model3DConfiguration
+    ? model3DConfiguration.getOriginLocation()
+    : 'ModelOrigin';
+  const modelCenterLocation = model3DConfiguration
+    ? model3DConfiguration.getCenterLocation()
+    : 'CenteredOnZ';
   const configuredMeshShapeResourceName = properties
     .get('meshShapeResourceName')
     .getValue();
@@ -544,17 +564,44 @@ const Physics3DShapeEditorDialog = ({
   const shapeOffsetX = parsePropertyNumber(properties, 'shapeOffsetX');
   const shapeOffsetY = parsePropertyNumber(properties, 'shapeOffsetY');
   const shapeOffsetZ = parsePropertyNumber(properties, 'shapeOffsetZ');
-  const configuredObjectDimensions = React.useMemo(
-    () => getObjectDimensions(object),
-    [object, model3DConfigurationKey]
+  const configuredObjectDimensions = React.useMemo<ObjectDimensions>(
+    () => ({
+      width: configuredObjectWidth,
+      height: configuredObjectHeight,
+      depth: configuredObjectDepth,
+    }),
+    [configuredObjectDepth, configuredObjectHeight, configuredObjectWidth]
   );
   const objectDimensions = preparedModel3D
     ? preparedModel3D.objectDimensions
     : configuredObjectDimensions;
   const meshShapeObjectDimensions = objectDimensions;
-  const modelDefaultTransform = React.useMemo(
-    () => getModel3DDefaultTransform(object),
-    [object, model3DConfigurationKey]
+  const modelDefaultTransform = React.useMemo<Model3DDefaultTransform>(
+    () => ({
+      rotationX: modelRotationX,
+      rotationY: modelRotationY,
+      rotationZ: modelRotationZ,
+      keepAspectRatio: modelKeepAspectRatio,
+      originLocation: modelOriginLocation,
+      centerLocation: modelCenterLocation,
+    }),
+    [
+      modelCenterLocation,
+      modelKeepAspectRatio,
+      modelOriginLocation,
+      modelRotationX,
+      modelRotationY,
+      modelRotationZ,
+    ]
+  );
+  const previewCameraFrameKey = React.useMemo(
+    () =>
+      getPhysics3DPreviewCameraFrameKey({
+        modelResourceName,
+        objectDimensions,
+        modelDefaultTransform,
+      }),
+    [modelDefaultTransform, modelResourceName, objectDimensions]
   );
   const previewColors = React.useMemo<PreviewColors>(
     () => ({
@@ -759,7 +806,14 @@ const Physics3DShapeEditorDialog = ({
 
   React.useEffect(
     () => {
-      const container = containerRef.current;
+      commitTransformRef.current = commitTransform;
+    },
+    [commitTransform]
+  );
+
+  React.useEffect(
+    () => {
+      const container = canvasContainer;
       if (!container) return;
 
       const scene = new THREE.Scene();
@@ -769,126 +823,36 @@ const Physics3DShapeEditorDialog = ({
         alpha: true,
       });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.setClearColor(previewColors.background, 1);
       container.appendChild(renderer.domElement);
 
-      const contentGroup = new THREE.Group();
-      scene.add(contentGroup);
       const previewObjectsGroup = new THREE.Group();
-      contentGroup.add(previewObjectsGroup);
+      scene.add(previewObjectsGroup);
 
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
       scene.add(ambientLight);
       const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
       directionalLight.position.set(1, 2, 3);
       scene.add(directionalLight);
-      const grid = new THREE.GridHelper(
-        Math.max(
-          objectDimensions.width,
-          objectDimensions.height,
-          objectDimensions.depth,
-          100
-        ) * 1.5,
-        10,
-        previewColors.gridCenter,
-        previewColors.grid
-      );
-      contentGroup.add(grid);
-
-      if (preparedModel3D) {
-        previewObjectsGroup.add(preparedModel3D.model);
-      } else {
-        const objectBox = new THREE.Box3(
-          new THREE.Vector3(
-            -objectDimensions.width / 2,
-            -objectDimensions.height / 2,
-            -objectDimensions.depth / 2
-          ),
-          new THREE.Vector3(
-            objectDimensions.width / 2,
-            objectDimensions.height / 2,
-            objectDimensions.depth / 2
-          )
-        );
-        previewObjectsGroup.add(
-          new THREE.Box3Helper(objectBox, previewColors.objectBounds)
-        );
-      }
 
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
 
-      let colliderDispose = null;
-      if (shape === 'Mesh' && meshShape3D) {
-        meshShape3D.position.set(shapeOffsetX, shapeOffsetY, shapeOffsetZ);
-        previewObjectsGroup.add(meshShape3D);
-        colliderRef.current = null;
-      } else if (shape !== 'Mesh' || !isMeshShapeSupported) {
-        const collider = createColliderMesh({
-          shape: previewShape,
-          orientation,
-          dimensions: effectiveDimensions,
-          colors: previewColors,
-        });
-        colliderDispose = collider.dispose;
-        collider.group.position.set(shapeOffsetX, shapeOffsetY, shapeOffsetZ);
-        previewObjectsGroup.add(collider.group);
-        colliderRef.current = collider.group;
-
-        if (shape !== 'Mesh') {
-          const transformControls = new TransformControls(
-            camera,
-            renderer.domElement
-          );
-          transformControls.setMode(transformModeRef.current);
-          transformControls.setSpace('local');
-          transformControls.attach(collider.group);
-          transformControls.addEventListener('dragging-changed', event => {
-            controls.enabled = !event.value;
-            if (!event.value) commitTransform();
-          });
-          const transformControlsHelper = transformControls.getHelper();
-          transformControlsHelper.rotation.order = 'ZYX';
-          scene.add(transformControlsHelper);
-          transformControlsRef.current = transformControls;
-        } else {
-          transformControlsRef.current = null;
-        }
-      } else {
-        colliderRef.current = null;
-      }
-
-      const bounds = new THREE.Box3().setFromObject(previewObjectsGroup);
-      if (bounds.isEmpty()) {
-        bounds.setFromCenterAndSize(
-          new THREE.Vector3(),
-          new THREE.Vector3(
-            objectDimensions.width,
-            objectDimensions.height,
-            objectDimensions.depth
-          )
-        );
-      }
-      const size = new THREE.Vector3();
-      const center = new THREE.Vector3();
-      bounds.getSize(size);
-      bounds.getCenter(center);
-      const maxDimension = Math.max(size.x, size.y, size.z, 100);
-      const cameraView = cameraViewRef.current;
-      if (cameraView) {
-        controls.target.copy(cameraView.target);
-        camera.position.copy(cameraView.position);
-        camera.lookAt(cameraView.target);
-      } else {
-        controls.target.copy(center);
-        camera.position.set(
-          center.x + maxDimension * 1.3,
-          center.y + maxDimension * 1.1,
-          center.z + maxDimension * 1.5
-        );
-        camera.lookAt(center);
-      }
+      const transformControls = new TransformControls(
+        camera,
+        renderer.domElement
+      );
+      transformControls.setMode(transformModeRef.current);
+      transformControls.setSpace('local');
+      transformControls.addEventListener('dragging-changed', event => {
+        controls.enabled = !event.value;
+        if (!event.value) commitTransformRef.current();
+      });
+      const transformControlsHelper = transformControls.getHelper();
+      transformControlsHelper.rotation.order = 'ZYX';
+      transformControlsHelper.visible = false;
+      scene.add(transformControlsHelper);
+      transformControlsRef.current = transformControls;
 
       const resize = () => {
         const width = Math.max(container.clientWidth, 1);
@@ -913,39 +877,163 @@ const Physics3DShapeEditorDialog = ({
       };
       render();
 
+      const newPreviewContext = {
+        camera,
+        renderer,
+        controls,
+        previewObjectsGroup,
+        transformControls,
+        transformControlsHelper,
+      };
+      setPreviewContext(newPreviewContext);
+
       return () => {
-        cameraViewRef.current = {
-          position: camera.position.clone(),
-          target: controls.target.clone(),
-        };
+        setPreviewContext(currentPreviewContext =>
+          currentPreviewContext === newPreviewContext
+            ? null
+            : currentPreviewContext
+        );
+        lastCameraFrameKeyRef.current = null;
         if (animationFrameId !== null) {
           cancelAnimationFrame(animationFrameId);
         }
         if (resizeObserver) resizeObserver.disconnect();
         else window.removeEventListener('resize', resize);
         controls.dispose();
-        const transformControls = transformControlsRef.current;
-        if (transformControls) {
-          transformControls.detach();
-          transformControls.dispose();
-          transformControlsRef.current = null;
-        }
-        if (colliderDispose) colliderDispose();
+        transformControls.detach();
+        transformControls.dispose();
+        transformControlsRef.current = null;
+        previewObjectsGroup.clear();
         renderer.dispose();
         if (renderer.domElement.parentNode === container) {
           container.removeChild(renderer.domElement);
         }
       };
     },
+    [canvasContainer]
+  );
+
+  React.useEffect(
+    () => {
+      if (!previewContext) return;
+
+      previewContext.renderer.setClearColor(previewColors.background, 1);
+    },
+    [previewColors.background, previewContext]
+  );
+
+  React.useEffect(
+    () => {
+      if (!previewContext) return;
+
+      const {
+        camera,
+        controls,
+        previewObjectsGroup,
+        transformControls,
+        transformControlsHelper,
+      } = previewContext;
+      const generatedObjects = [];
+      let colliderDispose = null;
+
+      const grid = new THREE.GridHelper(
+        Math.max(
+          objectDimensions.width,
+          objectDimensions.height,
+          objectDimensions.depth,
+          100
+        ) * 1.5,
+        10,
+        previewColors.gridCenter,
+        previewColors.grid
+      );
+      previewObjectsGroup.add(grid);
+      generatedObjects.push(grid);
+
+      if (preparedModel3D) {
+        previewObjectsGroup.add(preparedModel3D.model);
+      } else {
+        const objectBox = new THREE.Box3(
+          new THREE.Vector3(
+            -objectDimensions.width / 2,
+            -objectDimensions.height / 2,
+            -objectDimensions.depth / 2
+          ),
+          new THREE.Vector3(
+            objectDimensions.width / 2,
+            objectDimensions.height / 2,
+            objectDimensions.depth / 2
+          )
+        );
+        const objectBoundsHelper = new THREE.Box3Helper(
+          objectBox,
+          previewColors.objectBounds
+        );
+        previewObjectsGroup.add(objectBoundsHelper);
+        generatedObjects.push(objectBoundsHelper);
+      }
+
+      if (shape === 'Mesh' && meshShape3D) {
+        meshShape3D.position.set(shapeOffsetX, shapeOffsetY, shapeOffsetZ);
+        previewObjectsGroup.add(meshShape3D);
+        colliderRef.current = null;
+        transformControls.detach();
+        transformControlsHelper.visible = false;
+      } else if (shape !== 'Mesh' || !isMeshShapeSupported) {
+        const collider = createColliderMesh({
+          shape: previewShape,
+          orientation,
+          dimensions: effectiveDimensions,
+          colors: previewColors,
+        });
+        colliderDispose = collider.dispose;
+        collider.group.position.set(shapeOffsetX, shapeOffsetY, shapeOffsetZ);
+        previewObjectsGroup.add(collider.group);
+        colliderRef.current = collider.group;
+
+        if (shape !== 'Mesh') {
+          transformControls.setMode(transformModeRef.current);
+          transformControls.attach(collider.group);
+          transformControlsHelper.visible = true;
+        } else {
+          transformControls.detach();
+          transformControlsHelper.visible = false;
+        }
+      } else {
+        colliderRef.current = null;
+        transformControls.detach();
+        transformControlsHelper.visible = false;
+      }
+
+      if (lastCameraFrameKeyRef.current !== previewCameraFrameKey) {
+        frameCameraToBounds({
+          camera,
+          controls,
+          bounds: new THREE.Box3().setFromObject(previewObjectsGroup),
+          objectDimensions,
+        });
+        lastCameraFrameKeyRef.current = previewCameraFrameKey;
+      }
+
+      return () => {
+        transformControls.detach();
+        transformControlsHelper.visible = false;
+        colliderRef.current = null;
+        previewObjectsGroup.clear();
+        if (colliderDispose) colliderDispose();
+        generatedObjects.forEach(disposeGeneratedObject);
+      };
+    },
     [
-      commitTransform,
       effectiveDimensions,
       isMeshShapeSupported,
       meshShape3D,
       objectDimensions,
       orientation,
       preparedModel3D,
+      previewCameraFrameKey,
       previewColors,
+      previewContext,
       previewShape,
       shape,
       shapeOffsetX,
@@ -988,7 +1076,7 @@ const Physics3DShapeEditorDialog = ({
               disabled={shape === 'Mesh'}
             />
           </div>
-          <div ref={containerRef} style={styles.canvasContainer} />
+          <div ref={setCanvasContainer} style={styles.canvasContainer} />
         </Paper>
         <Paper background="medium" square style={sidePanelStyle}>
           <ScrollView>
