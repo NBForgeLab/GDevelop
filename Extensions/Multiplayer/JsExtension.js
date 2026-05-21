@@ -1390,6 +1390,132 @@ module.exports = {
 
     behavior
       .addScopedAction(
+        'RequestObjectControl',
+        _('Request control of object'),
+        _(
+          'Request temporary control of the object, so the current player can update it for a short time without changing its ownership.'
+        ),
+        _('Request control of _PARAM0_ for _PARAM2_ seconds'),
+        _('Multiplayer'),
+        'JsPlatform/Extensions/multiplayer.svg',
+        'JsPlatform/Extensions/multiplayer.svg'
+      )
+      .addParameter('object', _('Object'), '', false)
+      .addParameter(
+        'behavior',
+        _('Behavior'),
+        'MultiplayerObjectBehavior',
+        false
+      )
+      .addParameter('number', _('Duration in seconds'), '', false)
+      .setFunctionName('requestObjectControl');
+
+    behavior
+      .addScopedAction(
+        'KeepObjectControl',
+        _('Keep control of object'),
+        _(
+          'Extend temporary control of the object. This can be called every frame while moving or driving an object.'
+        ),
+        _('Keep control of _PARAM0_ for _PARAM2_ seconds'),
+        _('Multiplayer'),
+        'JsPlatform/Extensions/multiplayer.svg',
+        'JsPlatform/Extensions/multiplayer.svg'
+      )
+      .addParameter('object', _('Object'), '', false)
+      .addParameter(
+        'behavior',
+        _('Behavior'),
+        'MultiplayerObjectBehavior',
+        false
+      )
+      .addParameter('number', _('Duration in seconds'), '', false)
+      .setFunctionName('keepObjectControl');
+
+    behavior
+      .addScopedAction(
+        'ReleaseObjectControl',
+        _('Release control of object'),
+        _('Release temporary control of the object.'),
+        _('Release control of _PARAM0_'),
+        _('Multiplayer'),
+        'JsPlatform/Extensions/multiplayer.svg',
+        'JsPlatform/Extensions/multiplayer.svg'
+      )
+      .addParameter('object', _('Object'), '', false)
+      .addParameter(
+        'behavior',
+        _('Behavior'),
+        'MultiplayerObjectBehavior',
+        false
+      )
+      .setFunctionName('releaseObjectControl');
+
+    behavior
+      .addScopedCondition(
+        'IsObjectControlledByCurrentPlayer',
+        _('Current player controls object'),
+        _(
+          'Check if the current player can update the object, either because they own it or have temporary control.'
+        ),
+        _('Current player controls _PARAM0_'),
+        _('Multiplayer'),
+        'JsPlatform/Extensions/multiplayer.svg',
+        'JsPlatform/Extensions/multiplayer.svg'
+      )
+      .addParameter('object', _('Object'), '', false)
+      .addParameter(
+        'behavior',
+        _('Behavior'),
+        'MultiplayerObjectBehavior',
+        false
+      )
+      .setFunctionName('isObjectControlledByCurrentPlayer');
+
+    behavior
+      .addScopedCondition(
+        'HasCurrentPlayerJustGotObjectControl',
+        _('Current player just got control of object'),
+        _(
+          'Check if the current player has just received temporary control of the object. True for one frame.'
+        ),
+        _('Current player just got control of _PARAM0_'),
+        _('Multiplayer'),
+        'JsPlatform/Extensions/multiplayer.svg',
+        'JsPlatform/Extensions/multiplayer.svg'
+      )
+      .addParameter('object', _('Object'), '', false)
+      .addParameter(
+        'behavior',
+        _('Behavior'),
+        'MultiplayerObjectBehavior',
+        false
+      )
+      .setFunctionName('hasCurrentPlayerJustGotObjectControl');
+
+    behavior
+      .addScopedCondition(
+        'WasObjectControlRequestRefused',
+        _('Control request was refused'),
+        _(
+          'Check if the latest request to control the object was refused. True for one frame.'
+        ),
+        _('Control request for _PARAM0_ was refused'),
+        _('Multiplayer'),
+        'JsPlatform/Extensions/multiplayer.svg',
+        'JsPlatform/Extensions/multiplayer.svg'
+      )
+      .addParameter('object', _('Object'), '', false)
+      .addParameter(
+        'behavior',
+        _('Behavior'),
+        'MultiplayerObjectBehavior',
+        false
+      )
+      .setFunctionName('wasObjectControlRequestRefused');
+
+    behavior
+      .addScopedAction(
         'TakeObjectOwnership',
         _('Take ownership of object'),
         _(

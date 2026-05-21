@@ -71,6 +71,25 @@ namespace gdjs {
     _destroyInstanceTimeoutId: NodeJS.Timeout | null = null;
     _timeBeforeDestroyingObjectWithoutNetworkIdInMs = 500;
 
+    // A temporary controller can be allowed to update the object without
+    // changing its persistent owner. This is meant for short interactions like
+    // dragging, looting or using a shared object.
+    _controllerPlayerNumber: number | null = null;
+    _controlLeaseId: string = '';
+    _controlLeaseExpiresAt: number = 0;
+    _controlRequestPending: boolean = false;
+    _controlRequestId: string = '';
+    _controlRequestSentAt: number = 0;
+    _controlRequestTimeoutInMs: number = 1000;
+    _justGotControl: boolean = false;
+    _controlRequestRefused: boolean = false;
+    _controlReleasePending: boolean = false;
+    _lastControlKeepSentAt: number = 0;
+    _controlKeepMinIntervalInMs: number = 100;
+    // Track the last controller and lease id sent to peers to force immediate sync on change.
+    _lastSentControllerPlayerNumber: number | null = null;
+    _lastSentControlLeaseId: string = '';
+
     constructor(
       instanceContainer: gdjs.RuntimeInstanceContainer,
       behaviorData,
@@ -128,6 +147,105 @@ namespace gdjs {
         (isHost && this.playerNumber === 0); // Host as owner.
 
       return isOwnerOfObject;
+    }
+
+    private _isCurrentPlayerNumberOrHostForPlayer(playerNumber: number) {
+      const currentPlayerNumber = gdjs.multiplayer.getCurrentPlayerNumber();
+      return (
+        currentPlayerNumber === playerNumber ||
+        (gdjs.multiplayer.isCurrentPlayerHost() && playerNumber === 0)
+      );
+    }
+
+    private _getEffectiveControllerPlayerNumber() {
+      this._clearExpiredControlLease();
+      return this._controllerPlayerNumber !== null
+        ? this._controllerPlayerNumber
+        : this.playerNumber;
+    }
+
+    private _isControlLeaseActive() {
+      this._clearExpiredControlLease();
+      return (
+        this._controllerPlayerNumber !== null &&
+        !!this._controlLeaseId
+      );
+    }
+
+    private _clearExpiredControlLease() {
+      if (this._controllerPlayerNumber === null) {
+        return;
+      }
+      const now = getTimeNow();
+      let expirationTime = this._controlLeaseExpiresAt;
+      if (
+        gdjs.multiplayer.isCurrentPlayerHost() &&
+        this._controllerPlayerNumber !== 0 &&
+        this._controllerPlayerNumber !== gdjs.multiplayer.getCurrentPlayerNumber()
+      ) {
+        // Add a 300ms grace period for remote players on the host to tolerate latency.
+        expirationTime += 300;
+      }
+      if (now >= expirationTime) {
+        this._clearObjectControlLease();
+      }
+    }
+
+    private _canCurrentPlayerSynchronizeObject() {
+      return this._isCurrentPlayerNumberOrHostForPlayer(
+        this._getEffectiveControllerPlayerNumber()
+      );
+    }
+
+    private _hasControlRequestTimedOut() {
+      return (
+        this._controlRequestPending &&
+        getTimeNow() - this._controlRequestSentAt >=
+          this._controlRequestTimeoutInMs
+      );
+    }
+
+    private _getValidControlDurationInMs(durationInSeconds: number) {
+      let durationInMs = durationInSeconds * 1000;
+      if (!Number.isFinite(durationInMs) || durationInMs <= 0) {
+        logger.error(
+          'Cannot request or keep control of an object for a non-positive or invalid duration.'
+        );
+        return null;
+      }
+      if (durationInMs > 10000) {
+        durationInMs = 10000;
+      }
+      return durationInMs;
+    }
+
+    private _clearOneFrameControlFlags() {
+      this._justGotControl = false;
+      this._controlRequestRefused = false;
+    }
+
+    private _sendPendingObjectControlRelease() {
+      if (!this._controlReleasePending) {
+        return;
+      }
+
+      const sceneNetworkId = this.owner.getRuntimeScene().networkId;
+      const instanceNetworkId = this.owner.networkId;
+      const controllerPlayerNumber = this._getEffectiveControllerPlayerNumber();
+      const leaseId = this._controlLeaseId;
+
+      this._controlReleasePending = false;
+      this._clearObjectControlLease();
+
+      if (!sceneNetworkId || !instanceNetworkId) return;
+
+      gdjs.multiplayerMessageManager.sendReleaseObjectControlMessage({
+        objectName: this.owner.getName(),
+        instanceNetworkId,
+        sceneNetworkId,
+        controllerPlayerNumber,
+        leaseId,
+      });
     }
 
     private _hasObjectBeenSyncedWithinMaxRate() {
@@ -248,161 +366,188 @@ namespace gdjs {
     }
 
     doStepPostEvents() {
-      // Before doing anything, check if the game is running, if not, return.
       if (!gdjs.multiplayer.isLobbyGameRunning()) {
         return;
       }
+      try {
+        // If game is running and the object belongs to a player who is not connected, destroy the object.
+        // As the game may create objects before the lobby game starts, we don't want to destroy them if it's not running.
+        if (
+          this.actionOnPlayerDisconnect !== 'DoNothing' && // Should not delete if flagged as such.
+          this.playerNumber !== 0 && // Host is always connected.
+          !gdjs.multiplayerMessageManager.isPlayerConnected(this.playerNumber)
+        ) {
+          debugLogger.info(
+            `Player number ${this.playerNumber} does not exist in the lobby at the moment. Destroying the object.`
+          );
+          this.owner.deleteFromScene();
+          return;
+        }
 
-      // If game is running and the object belongs to a player who is not connected, destroy the object.
-      // As the game may create objects before the lobby game starts, we don't want to destroy them if it's not running.
-      if (
-        this.actionOnPlayerDisconnect !== 'DoNothing' && // Should not delete if flagged as such.
-        this.playerNumber !== 0 && // Host is always connected.
-        !gdjs.multiplayerMessageManager.isPlayerConnected(this.playerNumber)
-      ) {
-        debugLogger.info(
-          `Player number ${this.playerNumber} does not exist in the lobby at the moment. Destroying the object.`
-        );
-        this.owner.deleteFromScene();
-        return;
-      }
+        if (!this._canCurrentPlayerSynchronizeObject()) {
+          return;
+        }
 
-      if (!this._isOwnerAsPlayerOrHost()) {
-        return;
-      }
+        const currentController = this._getEffectiveControllerPlayerNumber();
+        const currentLeaseId = this._controlLeaseId;
+        if (
+          currentController !== this._lastSentControllerPlayerNumber ||
+          currentLeaseId !== this._lastSentControlLeaseId
+        ) {
+          this._numberOfForcedBasicObjectUpdates = Math.max(
+            this._numberOfForcedBasicObjectUpdates,
+            3
+          );
+        }
 
-      // If the object has been synchronized recently at the max rate, then return.
-      // This is to avoid sending data on every frame, which would be too much.
-      if (this._hasObjectBeenSyncedWithinMaxRate()) {
-        return;
-      }
+        // If the object has been synchronized recently at the max rate, then return.
+        // This is to avoid sending data on every frame, which would be too much.
+        if (
+          !this._controlReleasePending &&
+          this._hasObjectBeenSyncedWithinMaxRate()
+        ) {
+          return;
+        }
 
-      const instanceNetworkId = this._getOrCreateInstanceNetworkId();
-      const objectName = this.owner.getName();
-      const objectNetworkSyncData = this.owner.getNetworkSyncData({});
+        const instanceNetworkId = this._getOrCreateInstanceNetworkId();
+        const objectName = this.owner.getName();
+        const objectNetworkSyncData = this.owner.getNetworkSyncData({});
+        (objectNetworkSyncData as any)._controller =
+          this._getEffectiveControllerPlayerNumber();
+        if (this._controlLeaseId) {
+          (objectNetworkSyncData as any)._controlLeaseId = this._controlLeaseId;
+        }
 
-      // this._logToConsoleWithThrottle(
-      //   `Synchronizing object ${this.owner.getName()} (instance ${
-      //     this.owner.networkId
-      //   }) with player ${this.playerNumber} and data ${JSON.stringify(
-      //     objectNetworkSyncData
-      //   )}`
-      // );
+        // this._logToConsoleWithThrottle(
+        //   `Synchronizing object ${this.owner.getName()} (instance ${
+        //     this.owner.networkId
+        //   }) with player ${this.playerNumber} and data ${JSON.stringify(
+        //     objectNetworkSyncData
+        //   )}`
+        // );
 
-      const areBasicObjectNetworkSyncDataDifferent =
-        this._isBasicObjectNetworkSyncDataDifferentFromLastSync({
-          x: objectNetworkSyncData.x,
-          y: objectNetworkSyncData.y,
-          z: objectNetworkSyncData.z,
-          w: objectNetworkSyncData.w,
-          h: objectNetworkSyncData.h,
-          zo: objectNetworkSyncData.zo,
-          a: objectNetworkSyncData.a,
-          hid: objectNetworkSyncData.hid,
-          lay: objectNetworkSyncData.lay,
-          if: objectNetworkSyncData.if,
-          pfx: objectNetworkSyncData.pfx,
-          pfy: objectNetworkSyncData.pfy,
-        });
-      const shouldSyncObjectBasicInfo =
-        !this._hasObjectBasicInfoBeenSyncedRecently() ||
-        areBasicObjectNetworkSyncDataDifferent ||
-        this._numberOfForcedBasicObjectUpdates > 0;
-      if (areBasicObjectNetworkSyncDataDifferent) {
-        this._numberOfForcedBasicObjectUpdates = 3;
-      }
-      if (!shouldSyncObjectBasicInfo) {
-        // If the basic info has not changed, assume we don't need to sync the whole object data at a high rate.
-        // TODO: allow sending the variables, behaviors and effects still?
-        return;
-      }
+        const areBasicObjectNetworkSyncDataDifferent =
+          this._isBasicObjectNetworkSyncDataDifferentFromLastSync({
+            x: objectNetworkSyncData.x,
+            y: objectNetworkSyncData.y,
+            z: objectNetworkSyncData.z,
+            w: objectNetworkSyncData.w,
+            h: objectNetworkSyncData.h,
+            zo: objectNetworkSyncData.zo,
+            a: objectNetworkSyncData.a,
+            hid: objectNetworkSyncData.hid,
+            lay: objectNetworkSyncData.lay,
+            if: objectNetworkSyncData.if,
+            pfx: objectNetworkSyncData.pfx,
+            pfy: objectNetworkSyncData.pfy,
+          });
+        const shouldSyncObjectBasicInfo =
+          !this._hasObjectBasicInfoBeenSyncedRecently() ||
+          areBasicObjectNetworkSyncDataDifferent ||
+          this._numberOfForcedBasicObjectUpdates > 0;
+        if (areBasicObjectNetworkSyncDataDifferent) {
+          this._numberOfForcedBasicObjectUpdates = 3;
+        }
+        if (!shouldSyncObjectBasicInfo) {
+          // If the basic info has not changed, assume we don't need to sync the whole object data at a high rate.
+          // TODO: allow sending the variables, behaviors and effects still?
+          return;
+        }
 
-      const areVariablesDifferent =
-        objectNetworkSyncData.var &&
-        this._areVariablesDifferentFromLastSync(objectNetworkSyncData.var);
-      const shouldSyncVariables =
-        !this._haveVariablesBeenSyncedRecently() ||
-        areVariablesDifferent ||
-        this._numberOfForcedVariablesUpdates > 0;
-      if (areVariablesDifferent) {
-        this._numberOfForcedVariablesUpdates = 3;
-      }
-      if (!shouldSyncVariables) {
-        delete objectNetworkSyncData.var;
-      }
+        const areVariablesDifferent =
+          objectNetworkSyncData.var &&
+          this._areVariablesDifferentFromLastSync(objectNetworkSyncData.var);
+        const shouldSyncVariables =
+          !this._haveVariablesBeenSyncedRecently() ||
+          areVariablesDifferent ||
+          this._numberOfForcedVariablesUpdates > 0;
+        if (areVariablesDifferent) {
+          this._numberOfForcedVariablesUpdates = 3;
+        }
+        if (!shouldSyncVariables) {
+          delete objectNetworkSyncData.var;
+        }
 
-      const areEffectsDifferent =
-        objectNetworkSyncData.eff &&
-        this._areEffectsDifferentFromLastSync(objectNetworkSyncData.eff);
-      const shoundSyncEffects =
-        !this._haveEffectsBeenSyncedRecently() ||
-        areEffectsDifferent ||
-        this._numberOfForcedEffectsUpdates > 0;
-      if (areEffectsDifferent) {
-        this._numberOfForcedEffectsUpdates = 3;
-      }
-      if (!shoundSyncEffects) {
-        delete objectNetworkSyncData.eff;
-      }
+        const areEffectsDifferent =
+          objectNetworkSyncData.eff &&
+          this._areEffectsDifferentFromLastSync(objectNetworkSyncData.eff);
+        const shoundSyncEffects =
+          !this._haveEffectsBeenSyncedRecently() ||
+          areEffectsDifferent ||
+          this._numberOfForcedEffectsUpdates > 0;
+        if (areEffectsDifferent) {
+          this._numberOfForcedEffectsUpdates = 3;
+        }
+        if (!shoundSyncEffects) {
+          delete objectNetworkSyncData.eff;
+        }
 
-      const sceneNetworkId = this.owner.getRuntimeScene().networkId;
-      if (!sceneNetworkId) {
-        // No networkId for the scene yet, it will be set soon, let's not sync the object yet.
-        return;
-      }
+        const sceneNetworkId = this.owner.getRuntimeScene().networkId;
+        if (!sceneNetworkId) {
+          // No networkId for the scene yet, it will be set soon, let's not sync the object yet.
+          return;
+        }
 
-      const { messageName: updateMessageName, messageData: updateMessageData } =
-        gdjs.multiplayerMessageManager.createUpdateInstanceMessage({
+        const {
+          messageName: updateMessageName,
+          messageData: updateMessageData,
+        } = gdjs.multiplayerMessageManager.createUpdateInstanceMessage({
           objectOwner: this.playerNumber,
           objectName,
           instanceNetworkId,
           objectNetworkSyncData,
           sceneNetworkId,
         });
-      this._sendDataToPeersWithIncreasedClock(
-        updateMessageName,
-        updateMessageData
-      );
+        this._sendDataToPeersWithIncreasedClock(
+          updateMessageName,
+          updateMessageData
+        );
 
-      const now = getTimeNow();
+        const now = getTimeNow();
 
-      this._lastObjectSyncTimestamp = now;
-      if (shouldSyncObjectBasicInfo) {
-        this._lastBasicObjectSyncTimestamp = now;
-        this._lastSentBasicObjectSyncData = {
-          x: objectNetworkSyncData.x,
-          y: objectNetworkSyncData.y,
-          z: objectNetworkSyncData.z,
-          w: objectNetworkSyncData.w,
-          h: objectNetworkSyncData.h,
-          zo: objectNetworkSyncData.zo,
-          a: objectNetworkSyncData.a,
-          hid: objectNetworkSyncData.hid,
-          lay: objectNetworkSyncData.lay,
-          if: objectNetworkSyncData.if,
-          pfx: objectNetworkSyncData.pfx,
-          pfy: objectNetworkSyncData.pfy,
-        };
-        this._numberOfForcedBasicObjectUpdates = Math.max(
-          this._numberOfForcedBasicObjectUpdates - 1,
-          0
-        );
-      }
-      if (shouldSyncVariables) {
-        this._lastVariablesSyncTimestamp = now;
-        this._lastSentVariableSyncData = objectNetworkSyncData.var;
-        this._numberOfForcedVariablesUpdates = Math.max(
-          this._numberOfForcedVariablesUpdates - 1,
-          0
-        );
-      }
-      if (shoundSyncEffects) {
-        this._lastEffectsSyncTimestamp = now;
-        this._lastSentEffectSyncData = objectNetworkSyncData.eff;
-        this._numberOfForcedEffectsUpdates = Math.max(
-          this._numberOfForcedEffectsUpdates - 1,
-          0
-        );
+        this._lastObjectSyncTimestamp = now;
+        if (shouldSyncObjectBasicInfo) {
+          this._lastBasicObjectSyncTimestamp = now;
+          this._lastSentControllerPlayerNumber = currentController;
+          this._lastSentControlLeaseId = currentLeaseId;
+          this._lastSentBasicObjectSyncData = {
+            x: objectNetworkSyncData.x,
+            y: objectNetworkSyncData.y,
+            z: objectNetworkSyncData.z,
+            w: objectNetworkSyncData.w,
+            h: objectNetworkSyncData.h,
+            zo: objectNetworkSyncData.zo,
+            a: objectNetworkSyncData.a,
+            hid: objectNetworkSyncData.hid,
+            lay: objectNetworkSyncData.lay,
+            if: objectNetworkSyncData.if,
+            pfx: objectNetworkSyncData.pfx,
+            pfy: objectNetworkSyncData.pfy,
+          };
+          this._numberOfForcedBasicObjectUpdates = Math.max(
+            this._numberOfForcedBasicObjectUpdates - 1,
+            0
+          );
+        }
+        if (shouldSyncVariables) {
+          this._lastVariablesSyncTimestamp = now;
+          this._lastSentVariableSyncData = objectNetworkSyncData.var;
+          this._numberOfForcedVariablesUpdates = Math.max(
+            this._numberOfForcedVariablesUpdates - 1,
+            0
+          );
+        }
+        if (shoundSyncEffects) {
+          this._lastEffectsSyncTimestamp = now;
+          this._lastSentEffectSyncData = objectNetworkSyncData.eff;
+          this._numberOfForcedEffectsUpdates = Math.max(
+            this._numberOfForcedEffectsUpdates - 1,
+            0
+          );
+        }
+      } finally {
+        this._sendPendingObjectControlRelease();
+        this._clearOneFrameControlFlags();
       }
     }
 
@@ -411,6 +556,9 @@ namespace gdjs {
         clearTimeout(this._destroyInstanceTimeoutId);
         this._destroyInstanceTimeoutId = null;
       }
+
+      const instanceNetworkId = this.owner.networkId;
+      const sceneNetworkId = this.owner.getRuntimeScene().networkId;
 
       // If the lobby game is not running, no need to send a message to destroy the object.
       if (!gdjs.multiplayer.isLobbyGameRunning()) {
@@ -426,7 +574,6 @@ namespace gdjs {
         return;
       }
 
-      const instanceNetworkId = this.owner.networkId;
       const objectName = this.owner.getName();
 
       // If it had no networkId, then it was not synchronized and we don't need to send a message.
@@ -437,7 +584,6 @@ namespace gdjs {
         return;
       }
 
-      const sceneNetworkId = this.owner.getRuntimeScene().networkId;
       if (!sceneNetworkId) {
         // No networkId for the scene yet, it will be set soon, let's not sync the object yet.
         return;
@@ -623,6 +769,211 @@ namespace gdjs {
 
     isObjectOwnedByCurrentPlayer(): boolean {
       return this._isOwnerAsPlayerOrHost();
+    }
+
+    isObjectControlledByCurrentPlayer(): boolean {
+      return (
+        !this._controlReleasePending &&
+        this._canCurrentPlayerSynchronizeObject()
+      );
+    }
+
+    hasCurrentPlayerJustGotObjectControl(): boolean {
+      return this._justGotControl;
+    }
+
+    wasObjectControlRequestRefused(): boolean {
+      return this._controlRequestRefused;
+    }
+
+    getPlayerObjectController(): number {
+      return this._getEffectiveControllerPlayerNumber();
+    }
+
+    requestObjectControl(durationInSeconds: number) {
+      const durationInMs =
+        this._getValidControlDurationInMs(durationInSeconds);
+      if (durationInMs === null) {
+        return;
+      }
+
+      if (!gdjs.multiplayer.isLobbyGameRunning()) {
+        this._applyObjectControlGrant({
+          controllerPlayerNumber: gdjs.multiplayer.getCurrentPlayerNumber(),
+          leaseId: gdjs.makeUuid().substring(0, 8),
+          durationInMs,
+          requestId: '',
+        });
+        return;
+      }
+
+      const currentPlayerNumber = gdjs.multiplayer.getCurrentPlayerNumber();
+      if (this._canCurrentPlayerSynchronizeObject()) {
+        this._applyObjectControlGrant({
+          controllerPlayerNumber: currentPlayerNumber,
+          leaseId: this._controlLeaseId || gdjs.makeUuid().substring(0, 8),
+          durationInMs,
+          requestId: '',
+        });
+        return;
+      }
+
+      if (this._controlRequestPending && !this._hasControlRequestTimedOut()) {
+        return;
+      }
+
+      const sceneNetworkId = this.owner.getRuntimeScene().networkId;
+      if (!sceneNetworkId) return;
+
+      const instanceNetworkId = this.owner.networkId;
+      if (!instanceNetworkId) {
+        logger.error(
+          `Cannot request control of object ${this.owner.getName()} because it has no networkId.`
+        );
+        return;
+      }
+
+      const requestId = gdjs.makeUuid().substring(0, 8);
+      this._controlRequestPending = true;
+      this._controlRequestId = requestId;
+      this._controlRequestSentAt = getTimeNow();
+      this._controlRequestRefused = false;
+      gdjs.multiplayerMessageManager.sendRequestObjectControlMessage({
+        objectName: this.owner.getName(),
+        instanceNetworkId,
+        sceneNetworkId,
+        requesterPlayerNumber: currentPlayerNumber,
+        requestId,
+        durationInMs,
+        instanceX: this.owner.getX(),
+        instanceY: this.owner.getY(),
+      });
+    }
+
+    keepObjectControl(durationInSeconds: number) {
+      const durationInMs =
+        this._getValidControlDurationInMs(durationInSeconds);
+      if (
+        durationInMs === null ||
+        !this._isControlLeaseActive() ||
+        !this._canCurrentPlayerSynchronizeObject()
+      ) {
+        return;
+      }
+
+      const now = getTimeNow();
+      if (
+        now - this._lastControlKeepSentAt <
+        this._controlKeepMinIntervalInMs
+      ) {
+        return;
+      }
+      this._lastControlKeepSentAt = now;
+      this._controlLeaseExpiresAt = now + durationInMs;
+
+      const sceneNetworkId = this.owner.getRuntimeScene().networkId;
+      const instanceNetworkId = this.owner.networkId;
+      if (!sceneNetworkId || !instanceNetworkId) return;
+
+      gdjs.multiplayerMessageManager.sendKeepObjectControlMessage({
+        objectName: this.owner.getName(),
+        instanceNetworkId,
+        sceneNetworkId,
+        controllerPlayerNumber: this._getEffectiveControllerPlayerNumber(),
+        leaseId: this._controlLeaseId,
+        durationInMs,
+      });
+    }
+
+    releaseObjectControl() {
+      if (
+        !this._isControlLeaseActive() ||
+        !this._canCurrentPlayerSynchronizeObject()
+      ) {
+        return;
+      }
+
+      this._controlReleasePending = true;
+      this._numberOfForcedBasicObjectUpdates = Math.max(
+        this._numberOfForcedBasicObjectUpdates,
+        1
+      );
+    }
+
+    _applyObjectControlGrant({
+      controllerPlayerNumber,
+      leaseId,
+      durationInMs,
+      requestId,
+    }: {
+      controllerPlayerNumber: number;
+      leaseId: string;
+      durationInMs: number;
+      requestId: string;
+    }) {
+      this._controllerPlayerNumber = controllerPlayerNumber;
+      this._controlLeaseId = leaseId;
+      this._controlLeaseExpiresAt = getTimeNow() + durationInMs;
+      if (!requestId || requestId === this._controlRequestId) {
+        this._controlRequestPending = false;
+        this._controlRequestId = '';
+        this._controlRequestSentAt = 0;
+      }
+      if (this._isCurrentPlayerNumberOrHostForPlayer(controllerPlayerNumber)) {
+        this._justGotControl = true;
+      }
+    }
+
+    _applyObjectControlRefusal(requestId: string) {
+      if (requestId && requestId !== this._controlRequestId) return;
+      this._controlRequestPending = false;
+      this._controlRequestId = '';
+      this._controlRequestSentAt = 0;
+      this._controlRequestRefused = true;
+    }
+
+    _applyObjectControlKeep({
+      controllerPlayerNumber,
+      leaseId,
+      durationInMs,
+    }: {
+      controllerPlayerNumber: number;
+      leaseId: string;
+      durationInMs: number;
+    }) {
+      if (
+        this._controllerPlayerNumber !== controllerPlayerNumber ||
+        this._controlLeaseId !== leaseId
+      ) {
+        return;
+      }
+      this._controlLeaseExpiresAt = getTimeNow() + durationInMs;
+    }
+
+    _applyObjectControlRelease({
+      controllerPlayerNumber,
+      leaseId,
+    }: {
+      controllerPlayerNumber: number;
+      leaseId: string;
+    }) {
+      if (
+        this._controllerPlayerNumber !== controllerPlayerNumber ||
+        this._controlLeaseId !== leaseId
+      ) {
+        return;
+      }
+      this._clearObjectControlLease();
+    }
+
+    _clearObjectControlLease() {
+      this._controllerPlayerNumber = null;
+      this._controlLeaseId = '';
+      this._controlLeaseExpiresAt = 0;
+      this._controlRequestPending = false;
+      this._controlRequestId = '';
+      this._controlRequestSentAt = 0;
+      this._controlReleasePending = false;
     }
 
     removeObjectOwnership() {

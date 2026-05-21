@@ -190,8 +190,16 @@ namespace gdjs {
         gdjs.multiplayerMessageManager.handleChangeInstanceOwnerMessagesReceived(
           runtimeScene
         );
+        gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+          runtimeScene,
+          'beforeObjectUpdates'
+        );
         gdjs.multiplayerMessageManager.handleUpdateInstanceMessagesReceived(
           runtimeScene
+        );
+        gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+          runtimeScene,
+          'afterObjectUpdates'
         );
         gdjs.multiplayerMessageManager.handleCustomMessagesReceived();
         gdjs.multiplayerMessageManager.handleAcknowledgeMessagesReceived();

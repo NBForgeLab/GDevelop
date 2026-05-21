@@ -483,8 +483,14 @@ namespace gdjs {
 
     gdjs.callbacksRuntimeScenePostEvents.push(() => {
       // Clear the list of messages at the end of the frame, assuming they've been all processed.
-      for (const messagesList of allMessages.values()) {
+      for (const [messageName, messagesList] of allMessages.entries()) {
         messagesList.getMessages().length = 0;
+        if (
+          messageName.includes('#instance_') ||
+          messageName.includes('#variable_')
+        ) {
+          allMessages.delete(messageName);
+        }
       }
       // Clear the list of just connected and disconnected peers.
       if (justDisconnectedPeers.length > 0) {

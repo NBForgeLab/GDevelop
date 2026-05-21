@@ -81,6 +81,21 @@ describe('Multiplayer', () => {
     });
   };
 
+  /**
+   * @param {Map<string, gdjs.multiplayerPeerJsHelper.IMessagesList>} messagesMap
+   * @param {string} messageNamePrefix
+   */
+  const countMessagesWithPrefix = (messagesMap, messageNamePrefix) =>
+    Array.from(messagesMap.keys())
+      .filter((messageName) => messageName.startsWith(messageNamePrefix))
+      .reduce((messagesCount, messageName) => {
+        const messagesList = messagesMap.get(messageName);
+        return (
+          messagesCount +
+          (messagesList ? messagesList.getMessages().length : 0)
+        );
+      }, 0);
+
   const makeTestRuntimeSceneWithNetworkId = (timeDelta = 1000 / 60) => {
     const runtimeGame = gdjs.getPixiRuntimeGame();
     gdjs.projectData = {
@@ -266,6 +281,33 @@ describe('Multiplayer', () => {
     };
 
     /**
+     * @param {string} peerId
+     */
+    const getMessagesMapForPeer = (peerId) => getPeerMessages(peerId);
+
+    /**
+     * @param {string} peerId
+     * @param {string} messageName
+     * @param {object} messageData
+     * @param {string} senderPeerId
+     */
+    const pushMessageToPeer = (
+      peerId,
+      messageName,
+      messageData,
+      senderPeerId
+    ) => {
+      const allMessagesMap = getMessagesMapForPeer(peerId);
+      let messagesList = allMessagesMap.get(messageName);
+      if (!messagesList) {
+        messagesList = new MockedMessagesList(messageName);
+        allMessagesMap.set(messageName, messagesList);
+      }
+      const clonedMessageData = JSON.parse(JSON.stringify(messageData));
+      messagesList.pushMessage(clonedMessageData, senderPeerId);
+    };
+
+    /**
      * @param {{ playerNumber: number, allConnectedPlayers: {playerNumber: number, peerId: string}[], justDisconnectedPeers?: string[]}} options
      */
     const switchToPeer = ({
@@ -389,6 +431,8 @@ describe('Multiplayer', () => {
       initiateGameWithPlayers,
       switchToPeer,
       logMessages,
+      getMessagesMapForPeer,
+      pushMessageToPeer,
       markAllPeerMessagesAsProcessed,
       expectNoMessagesToBeProcessed,
     };
@@ -1031,6 +1075,7 @@ describe('Multiplayer', () => {
     it('synchronizes objects from the host to other players', () => {
       const {
         switchToPeer,
+        pushMessageToPeer,
         markAllPeerMessagesAsProcessed,
         initiateGameWithPlayers,
       } = createMultiplayerManagersMock();
@@ -1079,6 +1124,25 @@ describe('Multiplayer', () => {
         )[0];
       expect(p2SpriteObject.getX()).to.be(142);
       expect(p2SpriteObject.getY()).to.be(143);
+      const p2SpriteObjectNetworkId = p2SpriteObject.networkId;
+      const delayedUpdateData = {
+        x: 442,
+        y: 443,
+        z: 0,
+        w: p2SpriteObject.getWidth(),
+        h: p2SpriteObject.getHeight(),
+        zo: p2SpriteObject.getZOrder(),
+        a: p2SpriteObject.getAngle(),
+        hid: p2SpriteObject.isHidden(),
+        lay: '',
+        if: 1,
+        pfx: false,
+        pfy: false,
+        beh: {},
+        var: {},
+        eff: {},
+        _clock: 1000,
+      };
 
       // Move the object on the host's game:
       {
@@ -1148,6 +1212,19 @@ describe('Multiplayer', () => {
 
         expect(p2Objects.length).to.be(0);
       }
+
+      // A delayed update for an already destroyed instance must not recreate it.
+      pushMessageToPeer(
+        'player-2',
+        `#updateInstance#owner_0#object_MySpriteObject#instance_${p2SpriteObjectNetworkId}#scene_${p2RuntimeScene.networkId}`,
+        delayedUpdateData,
+        'player-1'
+      );
+      p2RuntimeScene.renderAndStep(1000 / 60);
+      const p2ObjectsAfterDelayedUpdate =
+        p2RuntimeScene.getObjects('MySpriteObject');
+      if (!p2ObjectsAfterDelayedUpdate) throw new Error('No objects found');
+      expect(p2ObjectsAfterDelayedUpdate.length).to.be(0);
     });
 
     it('synchronizes objects from a player to the host to other players', () => {
@@ -1606,6 +1683,1482 @@ describe('Multiplayer', () => {
 
       markAllPeerMessagesAsProcessed();
       expectNoMessagesToBeProcessed();
+    });
+
+    it('allows a player to control a host-owned object without changing ownership', () => {
+      const {
+        switchToPeer,
+        markAllPeerMessagesAsProcessed,
+        initiateGameWithPlayers,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+        { playerNumber: 3, peerId: 'player-3' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p1RuntimeScene.createObject('MySpriteObject');
+      const {
+        object: p1SpriteObjectOriginal,
+        behavior: p1SpriteObjectBehaviorOriginal,
+      } = getObjectAndMultiplayerBehaviorsFromScene(
+        p1RuntimeScene,
+        'MySpriteObject'
+      )[0];
+      p1SpriteObjectOriginal.setX(142);
+      p1SpriteObjectOriginal.setY(143);
+      // Simulate an object that has already been synchronized many times by
+      // the host. A temporary controller must not be blocked by this clock.
+      p1SpriteObjectBehaviorOriginal._clock = 25;
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      const p2RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+      const {
+        object: p2SpriteObjectOriginal,
+        behavior: p2SpriteObjectBehaviorOriginal,
+      } = getObjectAndMultiplayerBehaviorsFromScene(
+        p2RuntimeScene,
+        'MySpriteObject'
+      )[0];
+      expect(p2SpriteObjectOriginal.getX()).to.be(142);
+      expect(p2SpriteObjectOriginal.getY()).to.be(143);
+      expect(p2SpriteObjectBehaviorOriginal.getPlayerObjectOwnership()).to.be(
+        0
+      );
+
+      switchToPeer({
+        playerNumber: 3,
+        allConnectedPlayers,
+      });
+      const p3RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p3RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p3SpriteObjectOriginal } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p3RuntimeScene,
+          'MySpriteObject'
+        )[0];
+      expect(p3SpriteObjectOriginal.getX()).to.be(142);
+      expect(p3SpriteObjectOriginal.getY()).to.be(143);
+
+      markAllPeerMessagesAsProcessed();
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      const { object: p2SpriteObject, behavior: p2SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p2RuntimeScene,
+          'MySpriteObject'
+        )[0];
+      p2SpriteObjectBehavior.requestObjectControl(1);
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p2RuntimeScene
+      );
+      expect(p2SpriteObjectBehavior.isObjectControlledByCurrentPlayer()).to.be(
+        true
+      );
+      expect(
+        p2SpriteObjectBehavior.hasCurrentPlayerJustGotObjectControl()
+      ).to.be(true);
+      expect(p2SpriteObjectBehavior.getPlayerObjectOwnership()).to.be(0);
+      p2SpriteObjectBehavior._clock = 0;
+
+      switchToPeer({
+        playerNumber: 3,
+        allConnectedPlayers,
+      });
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p3RuntimeScene
+      );
+      const { behavior: p3SpriteObjectBehaviorAfterGrant } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p3RuntimeScene,
+          'MySpriteObject'
+        )[0];
+      expect(
+        p3SpriteObjectBehaviorAfterGrant.getPlayerObjectController()
+      ).to.be(2);
+      expect(
+        p3SpriteObjectBehaviorAfterGrant.isObjectControlledByCurrentPlayer()
+      ).to.be(false);
+
+      markAllPeerMessagesAsProcessed();
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      p2SpriteObject.setX(242);
+      p2SpriteObject.setY(243);
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p1SpriteObject, behavior: p1SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p1RuntimeScene,
+          'MySpriteObject'
+        )[0];
+      expect(p1SpriteObject.getX()).to.be(242);
+      expect(p1SpriteObject.getY()).to.be(243);
+      expect(p1SpriteObjectBehavior.getPlayerObjectOwnership()).to.be(0);
+
+      switchToPeer({
+        playerNumber: 3,
+        allConnectedPlayers,
+      });
+      p3RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p3SpriteObject, behavior: p3SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p3RuntimeScene,
+          'MySpriteObject'
+        )[0];
+      expect(p3SpriteObject.getX()).to.be(242);
+      expect(p3SpriteObject.getY()).to.be(243);
+      expect(p3SpriteObjectBehavior.getPlayerObjectOwnership()).to.be(0);
+
+      markAllPeerMessagesAsProcessed();
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      p2SpriteObjectBehavior.releaseObjectControl();
+      expect(p2SpriteObjectBehavior.isObjectControlledByCurrentPlayer()).to.be(
+        false
+      );
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+      p1SpriteObject.setX(342);
+      p1SpriteObject.setY(343);
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      p2RuntimeScene.renderAndStep(1000 / 60);
+      expect(p2SpriteObject.getX()).to.be(342);
+      expect(p2SpriteObject.getY()).to.be(343);
+      expect(p2SpriteObjectBehavior.getPlayerObjectOwnership()).to.be(0);
+
+      markAllPeerMessagesAsProcessed();
+    });
+
+    it('refuses another player control while an object is already controlled', () => {
+      const {
+        switchToPeer,
+        markAllPeerMessagesAsProcessed,
+        initiateGameWithPlayers,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+        { playerNumber: 3, peerId: 'player-3' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p1RuntimeScene.createObject('MySpriteObject');
+      const { object: p1SpriteObjectOriginal } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p1RuntimeScene,
+          'MySpriteObject'
+        )[0];
+      p1SpriteObjectOriginal.setX(142);
+      p1SpriteObjectOriginal.setY(143);
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      const p2RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+      const { behavior: p2SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p2RuntimeScene,
+          'MySpriteObject'
+        )[0];
+
+      switchToPeer({
+        playerNumber: 3,
+        allConnectedPlayers,
+      });
+      const p3RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p3RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p3SpriteObject, behavior: p3SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p3RuntimeScene,
+          'MySpriteObject'
+        )[0];
+
+      markAllPeerMessagesAsProcessed();
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      p2SpriteObjectBehavior.requestObjectControl(1);
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p2RuntimeScene
+      );
+      expect(p2SpriteObjectBehavior.isObjectControlledByCurrentPlayer()).to.be(
+        true
+      );
+
+      switchToPeer({
+        playerNumber: 3,
+        allConnectedPlayers,
+      });
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p3RuntimeScene
+      );
+
+      markAllPeerMessagesAsProcessed();
+
+      p3SpriteObjectBehavior.requestObjectControl(1);
+      p3RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 3,
+        allConnectedPlayers,
+      });
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p3RuntimeScene
+      );
+      expect(p3SpriteObjectBehavior.wasObjectControlRequestRefused()).to.be(
+        true
+      );
+      expect(p3SpriteObjectBehavior.isObjectControlledByCurrentPlayer()).to.be(
+        false
+      );
+
+      markAllPeerMessagesAsProcessed();
+
+      p3SpriteObject.setX(342);
+      p3SpriteObject.setY(343);
+      p3RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p1SpriteObject } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p1RuntimeScene,
+          'MySpriteObject'
+        )[0];
+      expect(p1SpriteObject.getX()).to.be(142);
+      expect(p1SpriteObject.getY()).to.be(143);
+
+      markAllPeerMessagesAsProcessed();
+    });
+
+    it('sends the final object update when control is released in the same frame', () => {
+      const {
+        switchToPeer,
+        markAllPeerMessagesAsProcessed,
+        initiateGameWithPlayers,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p1RuntimeScene.createObject('MySpriteObject');
+      const { object: p1SpriteObjectOriginal } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p1RuntimeScene,
+          'MySpriteObject'
+        )[0];
+      p1SpriteObjectOriginal.setX(142);
+      p1SpriteObjectOriginal.setY(143);
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      const p2RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p2SpriteObject, behavior: p2SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p2RuntimeScene,
+          'MySpriteObject'
+        )[0];
+
+      markAllPeerMessagesAsProcessed();
+
+      p2SpriteObjectBehavior.requestObjectControl(1);
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p2RuntimeScene
+      );
+      markAllPeerMessagesAsProcessed();
+
+      p2SpriteObject.setX(242);
+      p2SpriteObject.setY(243);
+      p2SpriteObjectBehavior.releaseObjectControl();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p1SpriteObject } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p1RuntimeScene,
+          'MySpriteObject'
+        )[0];
+      expect(p1SpriteObject.getX()).to.be(242);
+      expect(p1SpriteObject.getY()).to.be(243);
+
+      markAllPeerMessagesAsProcessed();
+    });
+
+    it('allows sending another control request after a pending request times out', () => {
+      const {
+        switchToPeer,
+        getMessagesMapForPeer,
+        markAllPeerMessagesAsProcessed,
+        initiateGameWithPlayers,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p1RuntimeScene.createObject('MySpriteObject');
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      const p2RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+      const { behavior: p2SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p2RuntimeScene,
+          'MySpriteObject'
+        )[0];
+
+      markAllPeerMessagesAsProcessed();
+
+      p2SpriteObjectBehavior.requestObjectControl(1);
+      markAllPeerMessagesAsProcessed();
+
+      p2SpriteObjectBehavior._controlRequestSentAt = -Infinity;
+      p2SpriteObjectBehavior.requestObjectControl(1);
+
+      const controlRequestMessageNames = Array.from(
+        getMessagesMapForPeer('player-1').keys()
+      ).filter((messageName) =>
+        messageName.startsWith('#objectControl#action_request')
+      );
+      const controlRequestMessagesCount = controlRequestMessageNames.reduce(
+        (messagesCount, messageName) => {
+          const messagesList =
+            getMessagesMapForPeer('player-1').get(messageName);
+          return (
+            messagesCount +
+            (messagesList ? messagesList.getMessages().length : 0)
+          );
+        },
+        0
+      );
+      expect(controlRequestMessagesCount).to.be(1);
+
+      markAllPeerMessagesAsProcessed();
+    });
+
+    it('does not resend object control requests every frame while a request is pending', () => {
+      const {
+        switchToPeer,
+        getMessagesMapForPeer,
+        markAllPeerMessagesAsProcessed,
+        initiateGameWithPlayers,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p1RuntimeScene.createObject('MySpriteObject');
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      const p2RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+      const { behavior: p2SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p2RuntimeScene,
+          'MySpriteObject'
+        )[0];
+
+      markAllPeerMessagesAsProcessed();
+
+      for (let frame = 0; frame < 60; frame++) {
+        p2SpriteObjectBehavior.requestObjectControl(1);
+      }
+
+      expect(
+        countMessagesWithPrefix(
+          getMessagesMapForPeer('player-1'),
+          '#objectControl#action_request'
+        )
+      ).to.be(1);
+
+      markAllPeerMessagesAsProcessed();
+    });
+
+    it('does not send object control requests with a non-finite duration', () => {
+      const {
+        switchToPeer,
+        getMessagesMapForPeer,
+        markAllPeerMessagesAsProcessed,
+        initiateGameWithPlayers,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p1RuntimeScene.createObject('MySpriteObject');
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      const p2RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+      const { behavior: p2SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p2RuntimeScene,
+          'MySpriteObject'
+        )[0];
+
+      markAllPeerMessagesAsProcessed();
+
+      p2SpriteObjectBehavior.requestObjectControl(NaN);
+
+      expect(
+        countMessagesWithPrefix(
+          getMessagesMapForPeer('player-1'),
+          '#objectControl#action_request'
+        )
+      ).to.be(0);
+      expect(p2SpriteObjectBehavior._controlRequestPending).to.be(false);
+      expect(p2SpriteObjectBehavior.isObjectControlledByCurrentPlayer()).to.be(
+        false
+      );
+
+      markAllPeerMessagesAsProcessed();
+    });
+
+    it('ignores object control messages with a non-finite duration', () => {
+      const {
+        switchToPeer,
+        pushMessageToPeer,
+        getMessagesMapForPeer,
+        markAllPeerMessagesAsProcessed,
+        initiateGameWithPlayers,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p1RuntimeScene.createObject('MySpriteObject');
+      p1RuntimeScene.renderAndStep(1000 / 60);
+      const { behavior: p1SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p1RuntimeScene,
+          'MySpriteObject'
+        )[0];
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      const p2RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p2SpriteObject, behavior: p2SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p2RuntimeScene,
+          'MySpriteObject'
+        )[0];
+
+      markAllPeerMessagesAsProcessed();
+
+      const requestMessageName = `#objectControl#action_request#object_MySpriteObject#instance_${p2SpriteObject.networkId}#scene_${p2RuntimeScene.networkId}`;
+      pushMessageToPeer(
+        'player-1',
+        requestMessageName,
+        {
+          requesterPlayerNumber: 2,
+          requestId: 'invalid-duration-request',
+          durationInMs: NaN,
+          instanceX: p2SpriteObject.getX(),
+          instanceY: p2SpriteObject.getY(),
+        },
+        'player-2'
+      );
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p1RuntimeScene
+      );
+
+      expect(p1SpriteObjectBehavior.getPlayerObjectController()).to.be(0);
+      expect(
+        countMessagesWithPrefix(
+          getMessagesMapForPeer('player-2'),
+          '#objectControl#action_grant'
+        )
+      ).to.be(0);
+
+      markAllPeerMessagesAsProcessed();
+
+      const grantMessageName = `#objectControl#action_grant#object_MySpriteObject#instance_${p2SpriteObject.networkId}#scene_${p2RuntimeScene.networkId}`;
+      pushMessageToPeer(
+        'player-2',
+        grantMessageName,
+        {
+          requesterPlayerNumber: 2,
+          requestId: '',
+          controllerPlayerNumber: 2,
+          leaseId: 'invalid-duration-grant',
+          durationInMs: Infinity,
+        },
+        'player-1'
+      );
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p2RuntimeScene
+      );
+
+      expect(p2SpriteObjectBehavior.isObjectControlledByCurrentPlayer()).to.be(
+        false
+      );
+
+      markAllPeerMessagesAsProcessed();
+    });
+
+    it('ignores malformed object control messages before matching an unsynchronized object', () => {
+      const {
+        initiateGameWithPlayers,
+        switchToPeer,
+        pushMessageToPeer,
+        markAllPeerMessagesAsProcessed,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      const p1SpriteObject = p1RuntimeScene.createObject('MySpriteObject');
+      const fakeNetworkId = 'malformed-request-network-id';
+      const requestMessageName = `#objectControl#action_request#object_MySpriteObject#instance_${fakeNetworkId}#scene_${p1RuntimeScene.networkId}`;
+      pushMessageToPeer(
+        'player-1',
+        requestMessageName,
+        {
+          requesterPlayerNumber: 2,
+          requestId: 'invalid-request',
+          durationInMs: NaN,
+          instanceX: p1SpriteObject.getX(),
+          instanceY: p1SpriteObject.getY(),
+        },
+        'player-2'
+      );
+
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p1RuntimeScene
+      );
+
+      expect(p1SpriteObject.networkId || '').to.be('');
+
+      markAllPeerMessagesAsProcessed();
+    });
+
+    it('ignores object updates with malformed authority fields', () => {
+      const {
+        initiateGameWithPlayers,
+        switchToPeer,
+        pushMessageToPeer,
+        markAllPeerMessagesAsProcessed,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p1RuntimeScene.createObject('MySpriteObject');
+      p1RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p1SpriteObject } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p1RuntimeScene,
+          'MySpriteObject'
+        )[0];
+      p1SpriteObject.setX(142);
+      p1SpriteObject.setY(143);
+      const p1SpriteObjectNetworkId = p1SpriteObject.networkId;
+
+      markAllPeerMessagesAsProcessed();
+
+      const updateMessageName = `#updateInstance#owner_0#object_MySpriteObject#instance_${p1SpriteObjectNetworkId}#scene_${p1RuntimeScene.networkId}`;
+      pushMessageToPeer(
+        'player-1',
+        updateMessageName,
+        {
+          _clock: Infinity,
+          x: 242,
+          y: 243,
+        },
+        'player-2'
+      );
+      pushMessageToPeer(
+        'player-1',
+        updateMessageName,
+        {
+          _clock: 50,
+          _controller: 2,
+          x: 342,
+          y: 343,
+        },
+        'player-2'
+      );
+
+      gdjs.multiplayerMessageManager.handleUpdateInstanceMessagesReceived(
+        p1RuntimeScene
+      );
+
+      expect(p1SpriteObject.getX()).to.be(142);
+      expect(p1SpriteObject.getY()).to.be(143);
+
+      markAllPeerMessagesAsProcessed();
+    });
+
+    it('does not create missing objects from stale controlled updates', () => {
+      const {
+        initiateGameWithPlayers,
+        switchToPeer,
+        pushMessageToPeer,
+        markAllPeerMessagesAsProcessed,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+
+      pushMessageToPeer(
+        'player-1',
+        `#updateInstance#owner_0#object_MySpriteObject#instance_stale-controlled-object#scene_${p1RuntimeScene.networkId}`,
+        {
+          x: 242,
+          y: 243,
+          z: 0,
+          w: 0,
+          h: 0,
+          zo: 0,
+          a: 0,
+          hid: false,
+          lay: '',
+          if: 1,
+          pfx: false,
+          pfy: false,
+          beh: {},
+          var: {},
+          eff: {},
+          _clock: 100,
+          _controller: 2,
+          _controlLeaseId: 'stale-lease',
+        },
+        'player-2'
+      );
+
+      gdjs.multiplayerMessageManager.handleUpdateInstanceMessagesReceived(
+        p1RuntimeScene
+      );
+
+      const p1Objects = p1RuntimeScene.getObjects('MySpriteObject');
+      if (!p1Objects) throw new Error('No objects found');
+      expect(p1Objects.length).to.be(0);
+
+      markAllPeerMessagesAsProcessed();
+    });
+
+    it('throttles keep object control messages when called every frame', () => {
+      const {
+        switchToPeer,
+        getMessagesMapForPeer,
+        markAllPeerMessagesAsProcessed,
+        initiateGameWithPlayers,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p1RuntimeScene.createObject('MySpriteObject');
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      const p2RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+      const { behavior: p2SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p2RuntimeScene,
+          'MySpriteObject'
+        )[0];
+
+      markAllPeerMessagesAsProcessed();
+
+      p2SpriteObjectBehavior.requestObjectControl(1);
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p2RuntimeScene
+      );
+      expect(p2SpriteObjectBehavior.isObjectControlledByCurrentPlayer()).to.be(
+        true
+      );
+      markAllPeerMessagesAsProcessed();
+
+      p2SpriteObjectBehavior._lastControlKeepSentAt = -Infinity;
+      for (let frame = 0; frame < 60; frame++) {
+        p2SpriteObjectBehavior.keepObjectControl(1);
+      }
+
+      expect(
+        countMessagesWithPrefix(
+          getMessagesMapForPeer('player-1'),
+          '#objectControl#action_keep'
+        )
+      ).to.be(1);
+
+      markAllPeerMessagesAsProcessed();
+    });
+
+    it('does not corrupt an active control lease when keep duration is non-finite', () => {
+      const {
+        switchToPeer,
+        getMessagesMapForPeer,
+        markAllPeerMessagesAsProcessed,
+        initiateGameWithPlayers,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p1RuntimeScene.createObject('MySpriteObject');
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      const p2RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+      const { behavior: p2SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p2RuntimeScene,
+          'MySpriteObject'
+        )[0];
+
+      markAllPeerMessagesAsProcessed();
+
+      p2SpriteObjectBehavior.requestObjectControl(1);
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p2RuntimeScene
+      );
+      expect(p2SpriteObjectBehavior.isObjectControlledByCurrentPlayer()).to.be(
+        true
+      );
+      markAllPeerMessagesAsProcessed();
+
+      const previousControlLeaseExpiresAt =
+        p2SpriteObjectBehavior._controlLeaseExpiresAt;
+      p2SpriteObjectBehavior._lastControlKeepSentAt = -Infinity;
+      p2SpriteObjectBehavior.keepObjectControl(NaN);
+
+      expect(
+        countMessagesWithPrefix(
+          getMessagesMapForPeer('player-1'),
+          '#objectControl#action_keep'
+        )
+      ).to.be(0);
+      expect(p2SpriteObjectBehavior._controlLeaseExpiresAt).to.be(
+        previousControlLeaseExpiresAt
+      );
+      expect(p2SpriteObjectBehavior.isObjectControlledByCurrentPlayer()).to.be(
+        true
+      );
+
+      markAllPeerMessagesAsProcessed();
+    });
+
+    it('sends one object control release when release is called repeatedly in the same frame', () => {
+      const {
+        switchToPeer,
+        getMessagesMapForPeer,
+        markAllPeerMessagesAsProcessed,
+        initiateGameWithPlayers,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p1RuntimeScene.createObject('MySpriteObject');
+      const { object: p1SpriteObjectOriginal } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p1RuntimeScene,
+          'MySpriteObject'
+        )[0];
+      p1SpriteObjectOriginal.setX(142);
+      p1SpriteObjectOriginal.setY(143);
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      const p2RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p2SpriteObject, behavior: p2SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p2RuntimeScene,
+          'MySpriteObject'
+        )[0];
+
+      markAllPeerMessagesAsProcessed();
+
+      p2SpriteObjectBehavior.requestObjectControl(1);
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p2RuntimeScene
+      );
+      markAllPeerMessagesAsProcessed();
+
+      p2SpriteObject.setX(242);
+      p2SpriteObject.setY(243);
+      for (let repeat = 0; repeat < 20; repeat++) {
+        p2SpriteObjectBehavior.releaseObjectControl();
+      }
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      expect(
+        countMessagesWithPrefix(
+          getMessagesMapForPeer('player-1'),
+          '#objectControl#action_release'
+        )
+      ).to.be(1);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p1SpriteObject } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p1RuntimeScene,
+          'MySpriteObject'
+        )[0];
+      expect(p1SpriteObject.getX()).to.be(242);
+      expect(p1SpriteObject.getY()).to.be(243);
+
+      markAllPeerMessagesAsProcessed();
+    });
+
+    it('does not let a temporary controller destroy a host-owned object', () => {
+      const {
+        switchToPeer,
+        markAllPeerMessagesAsProcessed,
+        initiateGameWithPlayers,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p1RuntimeScene.createObject('MySpriteObject');
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      const p2RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p2SpriteObject, behavior: p2SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p2RuntimeScene,
+          'MySpriteObject'
+        )[0];
+
+      markAllPeerMessagesAsProcessed();
+
+      p2SpriteObjectBehavior.requestObjectControl(1);
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p2RuntimeScene
+      );
+      expect(p2SpriteObjectBehavior.isObjectControlledByCurrentPlayer()).to.be(
+        true
+      );
+      markAllPeerMessagesAsProcessed();
+
+      p2SpriteObject.deleteFromScene();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+      const p1Objects = p1RuntimeScene.getObjects('MySpriteObject');
+      if (!p1Objects) throw new Error('No objects found');
+      expect(p1Objects.length).to.be(1);
+
+      markAllPeerMessagesAsProcessed();
+    });
+
+    it('ignores delayed updates from a previous control lease after the same player gets a new lease', () => {
+      const {
+        switchToPeer,
+        pushMessageToPeer,
+        markAllPeerMessagesAsProcessed,
+        initiateGameWithPlayers,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p1RuntimeScene.createObject('MySpriteObject');
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      const p2RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p2SpriteObject, behavior: p2SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p2RuntimeScene,
+          'MySpriteObject'
+        )[0];
+
+      markAllPeerMessagesAsProcessed();
+
+      p2SpriteObjectBehavior.requestObjectControl(1);
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p2RuntimeScene
+      );
+      markAllPeerMessagesAsProcessed();
+
+      const previousLeaseId = p2SpriteObjectBehavior._controlLeaseId;
+      p2SpriteObject.setX(242);
+      p2SpriteObject.setY(243);
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      p2SpriteObjectBehavior.releaseObjectControl();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      p2SpriteObjectBehavior.requestObjectControl(1);
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p2RuntimeScene
+      );
+      expect(p2SpriteObjectBehavior._controlLeaseId).not.to.be(
+        previousLeaseId
+      );
+      markAllPeerMessagesAsProcessed();
+
+      p2SpriteObject.setX(342);
+      p2SpriteObject.setY(343);
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p1SpriteObject } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p1RuntimeScene,
+          'MySpriteObject'
+        )[0];
+      expect(p1SpriteObject.getX()).to.be(342);
+      expect(p1SpriteObject.getY()).to.be(343);
+
+      const staleUpdateMessageName = `#updateInstance#owner_0#object_MySpriteObject#instance_${p2SpriteObject.networkId}#scene_${p2RuntimeScene.networkId}`;
+      pushMessageToPeer(
+        'player-1',
+        staleUpdateMessageName,
+        {
+          x: 442,
+          y: 443,
+          z: 0,
+          w: p2SpriteObject.getWidth(),
+          h: p2SpriteObject.getHeight(),
+          zo: p2SpriteObject.getZOrder(),
+          a: p2SpriteObject.getAngle(),
+          hid: p2SpriteObject.isHidden(),
+          lay: '',
+          if: 1,
+          pfx: false,
+          pfy: false,
+          beh: {},
+          var: {},
+          eff: {},
+          _clock: p2SpriteObjectBehavior._clock,
+          _controller: 2,
+          _controlLeaseId: previousLeaseId,
+        },
+        'player-2'
+      );
+
+      p1RuntimeScene.renderAndStep(1000 / 60);
+      expect(p1SpriteObject.getX()).to.be(342);
+      expect(p1SpriteObject.getY()).to.be(343);
+
+      markAllPeerMessagesAsProcessed();
+    });
+
+    it('ignores object updates sent for a released control lease even with a newer clock', () => {
+      const {
+        switchToPeer,
+        pushMessageToPeer,
+        markAllPeerMessagesAsProcessed,
+        initiateGameWithPlayers,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p1RuntimeScene.createObject('MySpriteObject');
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      const p2RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p2SpriteObject, behavior: p2SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p2RuntimeScene,
+          'MySpriteObject'
+        )[0];
+
+      markAllPeerMessagesAsProcessed();
+
+      p2SpriteObjectBehavior.requestObjectControl(1);
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p2RuntimeScene
+      );
+      const releasedLeaseId = p2SpriteObjectBehavior._controlLeaseId;
+      markAllPeerMessagesAsProcessed();
+
+      p2SpriteObjectBehavior.releaseObjectControl();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      p1RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p1SpriteObject } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p1RuntimeScene,
+          'MySpriteObject'
+        )[0];
+      const releasedX = p1SpriteObject.getX();
+      const releasedY = p1SpriteObject.getY();
+
+      const staleUpdateMessageName = `#updateInstance#owner_0#object_MySpriteObject#instance_${p2SpriteObject.networkId}#scene_${p2RuntimeScene.networkId}`;
+      pushMessageToPeer(
+        'player-1',
+        staleUpdateMessageName,
+        {
+          x: 542,
+          y: 543,
+          z: 0,
+          w: p2SpriteObject.getWidth(),
+          h: p2SpriteObject.getHeight(),
+          zo: p2SpriteObject.getZOrder(),
+          a: p2SpriteObject.getAngle(),
+          hid: p2SpriteObject.isHidden(),
+          lay: '',
+          if: 1,
+          pfx: false,
+          pfy: false,
+          beh: {},
+          var: {},
+          eff: {},
+          _clock: p2SpriteObjectBehavior._clock + 1000,
+          _controller: 2,
+          _controlLeaseId: releasedLeaseId,
+        },
+        'player-2'
+      );
+
+      p1RuntimeScene.renderAndStep(1000 / 60);
+      expect(p1SpriteObject.getX()).to.be(releasedX);
+      expect(p1SpriteObject.getY()).to.be(releasedY);
+
+      markAllPeerMessagesAsProcessed();
+    });
+
+    it('ignores object control grants that are not sent by the host', () => {
+      const {
+        switchToPeer,
+        pushMessageToPeer,
+        markAllPeerMessagesAsProcessed,
+        initiateGameWithPlayers,
+      } = createMultiplayerManagersMock();
+
+      const allConnectedPlayers = [
+        { playerNumber: 1, peerId: 'player-1', isHost: true },
+        { playerNumber: 2, peerId: 'player-2' },
+        { playerNumber: 3, peerId: 'player-3' },
+      ];
+      initiateGameWithPlayers(allConnectedPlayers);
+
+      switchToPeer({
+        playerNumber: 1,
+        allConnectedPlayers,
+      });
+      const p1RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p1RuntimeScene.createObject('MySpriteObject');
+      p1RuntimeScene.renderAndStep(1000 / 60);
+
+      switchToPeer({
+        playerNumber: 2,
+        allConnectedPlayers,
+      });
+      const p2RuntimeScene = makeTestRuntimeSceneWithNetworkId();
+      p2RuntimeScene.renderAndStep(1000 / 60);
+      const { object: p2SpriteObject, behavior: p2SpriteObjectBehavior } =
+        getObjectAndMultiplayerBehaviorsFromScene(
+          p2RuntimeScene,
+          'MySpriteObject'
+        )[0];
+
+      markAllPeerMessagesAsProcessed();
+
+      const spoofedGrantMessageName = `#objectControl#action_grant#object_MySpriteObject#instance_${p2SpriteObject.networkId}#scene_${p2RuntimeScene.networkId}`;
+      pushMessageToPeer(
+        'player-2',
+        spoofedGrantMessageName,
+        {
+          requesterPlayerNumber: 2,
+          requestId: '',
+          controllerPlayerNumber: 2,
+          leaseId: 'spoofed',
+          durationInMs: 1000,
+        },
+        'player-3'
+      );
+
+      gdjs.multiplayerMessageManager.handleObjectControlMessagesReceived(
+        p2RuntimeScene
+      );
+
+      expect(p2SpriteObjectBehavior.isObjectControlledByCurrentPlayer()).to.be(
+        false
+      );
+
+      markAllPeerMessagesAsProcessed();
     });
 
     it('reconciles an instance owned by a player with a "ghost" instance created on other peers without a network ID (as not owned by them)', () => {

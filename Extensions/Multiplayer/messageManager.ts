@@ -237,6 +237,57 @@ namespace gdjs {
         clock;
     };
 
+    const createInstanceUpdateClockKey = ({
+      instanceNetworkId,
+      controllerPlayerNumber,
+      controlLeaseId,
+    }: {
+      instanceNetworkId: string;
+      controllerPlayerNumber: number;
+      controlLeaseId: string;
+    }) => {
+      // Temporary control lets a different player send object updates without
+      // changing the persistent owner. Keep update clocks separate per
+      // authority source so an old host clock cannot block a new controller,
+      // but don't include the lease id: repeated short leases must not create
+      // unbounded clock entries or let delayed updates from older leases win.
+      return controlLeaseId
+        ? `${instanceNetworkId}#controller_${controllerPlayerNumber}`
+        : instanceNetworkId;
+    };
+    const maxRecentlyDestroyedInstanceKeys = 5000;
+    const recentlyDestroyedInstanceKeys = new RecentlySeenKeys(
+      maxRecentlyDestroyedInstanceKeys
+    );
+    const createDestroyedInstanceKey = ({
+      sceneNetworkId,
+      instanceNetworkId,
+    }: {
+      sceneNetworkId: string;
+      instanceNetworkId: string;
+    }) => `${sceneNetworkId}#${instanceNetworkId}`;
+    const markInstanceAsDestroyed = ({
+      sceneNetworkId,
+      instanceNetworkId,
+    }: {
+      sceneNetworkId: string;
+      instanceNetworkId: string;
+    }) => {
+      recentlyDestroyedInstanceKeys.add(
+        createDestroyedInstanceKey({ sceneNetworkId, instanceNetworkId })
+      );
+    };
+    const isInstanceDestroyed = ({
+      sceneNetworkId,
+      instanceNetworkId,
+    }: {
+      sceneNetworkId: string;
+      instanceNetworkId: string;
+    }) =>
+      recentlyDestroyedInstanceKeys.has(
+        createDestroyedInstanceKey({ sceneNetworkId, instanceNetworkId })
+      );
+
     /**
      * Main function to send messages to other players, via P2P.
      * Takes into account the simulation of network latency and packet loss.
@@ -567,6 +618,481 @@ namespace gdjs {
       });
     };
 
+    const objectControlMessageNamePrefix = '#objectControl';
+    type ObjectControlMessagesProcessingPhase =
+      | 'all'
+      | 'beforeObjectUpdates'
+      | 'afterObjectUpdates';
+    type ObjectControlAction =
+      | 'request'
+      | 'grant'
+      | 'refuse'
+      | 'keep'
+      | 'release';
+    const MAX_LEASE_DURATION_MS = 10000;
+    const isValidObjectControlDurationInMs = (
+      durationInMs: unknown
+    ): durationInMs is number =>
+      typeof durationInMs === 'number' &&
+      Number.isFinite(durationInMs) &&
+      durationInMs > 0 &&
+      durationInMs <= MAX_LEASE_DURATION_MS;
+    const isValidObjectControlPlayerNumber = (
+      playerNumber: unknown
+    ): playerNumber is number =>
+      typeof playerNumber === 'number' &&
+      Number.isFinite(playerNumber) &&
+      Number.isInteger(playerNumber) &&
+      playerNumber >= 0;
+    const isValidObjectControlLeaseId = (
+      leaseId: unknown
+    ): leaseId is string => typeof leaseId === 'string' && leaseId.length > 0;
+    const shouldProcessObjectControlActionInPhase = (
+      action: ObjectControlAction,
+      processingPhase: ObjectControlMessagesProcessingPhase
+    ) => {
+      if (processingPhase === 'beforeObjectUpdates') {
+        return action !== 'release';
+      }
+      if (processingPhase === 'afterObjectUpdates') {
+        return action === 'release';
+      }
+      return true;
+    };
+    const objectControlMessageNameRegex =
+      /#objectControl#action_(request|grant|refuse|keep|release)#object_(.+)#instance_(.+)#scene_(.+)/;
+    const createObjectControlMessageName = ({
+      action,
+      objectName,
+      instanceNetworkId,
+      sceneNetworkId,
+    }: {
+      action: 'request' | 'grant' | 'refuse' | 'keep' | 'release';
+      objectName: string;
+      instanceNetworkId: string;
+      sceneNetworkId: string;
+    }) =>
+      `${objectControlMessageNamePrefix}#action_${action}#object_${objectName}#instance_${instanceNetworkId}#scene_${sceneNetworkId}`;
+    const getObjectControlMessagePeerIds = () => {
+      if (gdjs.multiplayer.isCurrentPlayerHost()) {
+        return gdjs.multiplayerPeerJsHelper.getAllPeers();
+      }
+      return gdjs.multiplayer.hostPeerId ? [gdjs.multiplayer.hostPeerId] : [];
+    };
+
+    const sendRequestObjectControlMessage = ({
+      objectName,
+      instanceNetworkId,
+      sceneNetworkId,
+      requesterPlayerNumber,
+      requestId,
+      durationInMs,
+      instanceX,
+      instanceY,
+    }: {
+      objectName: string;
+      instanceNetworkId: string;
+      sceneNetworkId: string;
+      requesterPlayerNumber: number;
+      requestId: string;
+      durationInMs: number;
+      instanceX: number;
+      instanceY: number;
+    }) => {
+      const messageName = createObjectControlMessageName({
+        action: 'request',
+        objectName,
+        instanceNetworkId,
+        sceneNetworkId,
+      });
+      sendDataTo(gdjs.multiplayerPeerJsHelper.getAllPeers(), messageName, {
+        requesterPlayerNumber,
+        requestId,
+        durationInMs,
+        instanceX,
+        instanceY,
+      });
+    };
+
+    const sendGrantObjectControlMessage = ({
+      objectName,
+      instanceNetworkId,
+      sceneNetworkId,
+      requesterPlayerNumber,
+      requestId,
+      controllerPlayerNumber,
+      leaseId,
+      durationInMs,
+      peerIds,
+    }: {
+      objectName: string;
+      instanceNetworkId: string;
+      sceneNetworkId: string;
+      requesterPlayerNumber: number;
+      requestId: string;
+      controllerPlayerNumber: number;
+      leaseId: string;
+      durationInMs: number;
+      peerIds?: string[];
+    }) => {
+      const messageName = createObjectControlMessageName({
+        action: 'grant',
+        objectName,
+        instanceNetworkId,
+        sceneNetworkId,
+      });
+      sendDataTo(
+        peerIds || gdjs.multiplayerPeerJsHelper.getAllPeers(),
+        messageName,
+        {
+          requesterPlayerNumber,
+          requestId,
+          controllerPlayerNumber,
+          leaseId,
+          durationInMs,
+        }
+      );
+    };
+
+    const sendRefuseObjectControlMessage = ({
+      objectName,
+      instanceNetworkId,
+      sceneNetworkId,
+      requesterPlayerNumber,
+      requestId,
+      peerIds,
+    }: {
+      objectName: string;
+      instanceNetworkId: string;
+      sceneNetworkId: string;
+      requesterPlayerNumber: number;
+      requestId: string;
+      peerIds?: string[];
+    }) => {
+      const messageName = createObjectControlMessageName({
+        action: 'refuse',
+        objectName,
+        instanceNetworkId,
+        sceneNetworkId,
+      });
+      sendDataTo(
+        peerIds || gdjs.multiplayerPeerJsHelper.getAllPeers(),
+        messageName,
+        {
+          requesterPlayerNumber,
+          requestId,
+        }
+      );
+    };
+
+    const sendKeepObjectControlMessage = ({
+      objectName,
+      instanceNetworkId,
+      sceneNetworkId,
+      controllerPlayerNumber,
+      leaseId,
+      durationInMs,
+    }: {
+      objectName: string;
+      instanceNetworkId: string;
+      sceneNetworkId: string;
+      controllerPlayerNumber: number;
+      leaseId: string;
+      durationInMs: number;
+    }) => {
+      const peerIds = getObjectControlMessagePeerIds();
+      if (!peerIds.length) return;
+      const messageName = createObjectControlMessageName({
+        action: 'keep',
+        objectName,
+        instanceNetworkId,
+        sceneNetworkId,
+      });
+      sendDataTo(peerIds, messageName, {
+        controllerPlayerNumber,
+        leaseId,
+        durationInMs,
+      });
+    };
+
+    const sendReleaseObjectControlMessage = ({
+      objectName,
+      instanceNetworkId,
+      sceneNetworkId,
+      controllerPlayerNumber,
+      leaseId,
+    }: {
+      objectName: string;
+      instanceNetworkId: string;
+      sceneNetworkId: string;
+      controllerPlayerNumber: number;
+      leaseId: string;
+    }) => {
+      const peerIds = getObjectControlMessagePeerIds();
+      if (!peerIds.length) return;
+      const messageName = createObjectControlMessageName({
+        action: 'release',
+        objectName,
+        instanceNetworkId,
+        sceneNetworkId,
+      });
+      sendDataTo(peerIds, messageName, {
+        controllerPlayerNumber,
+        leaseId,
+      });
+    };
+
+    const relayObjectControlMessageFromHost = ({
+      messageName,
+      messageData,
+      messageSender,
+    }: {
+      messageName: string;
+      messageData: any;
+      messageSender: string;
+    }) => {
+      if (!gdjs.multiplayer.isCurrentPlayerHost()) {
+        return;
+      }
+
+      const peerIds = gdjs.multiplayerPeerJsHelper
+        .getAllPeers()
+        .filter((peerId) => peerId !== messageSender);
+      if (peerIds.length) {
+        sendDataTo(peerIds, messageName, messageData);
+      }
+    };
+
+    const handleObjectControlMessagesReceived = (
+      runtimeScene: gdjs.RuntimeScene,
+      processingPhase: ObjectControlMessagesProcessingPhase = 'all'
+    ) => {
+      if (!gdjs.multiplayer.isReadyToSendOrReceiveGameUpdateMessages()) {
+        return;
+      }
+
+      const p2pMessagesMap = gdjs.multiplayerPeerJsHelper.getAllMessagesMap();
+      const messageNamesArray = Array.from(p2pMessagesMap.keys());
+      const objectControlMessageNames = messageNamesArray.filter(
+        (messageName) => messageName.startsWith(objectControlMessageNamePrefix)
+      );
+      const isMessageSenderHost = (messageSender: string) =>
+        messageSender === gdjs.multiplayer.hostPeerId;
+      const isMessageSenderPlayer = (
+        messageSender: string,
+        playerNumber: number
+      ) => _peerIdToPlayerNumber[messageSender] === playerNumber;
+      const isMessageSenderHostOrPlayer = (
+        messageSender: string,
+        playerNumber: number
+      ) =>
+        isMessageSenderHost(messageSender) ||
+        isMessageSenderPlayer(messageSender, playerNumber);
+      objectControlMessageNames.forEach((messageName) => {
+        const messagesList = p2pMessagesMap.get(messageName);
+        if (!messagesList) return;
+        const messages = messagesList.getMessages();
+        if (!messages.length) return;
+
+        messages.forEach((message) => {
+          const matches = objectControlMessageNameRegex.exec(messageName);
+          if (!matches) return;
+
+          const action = matches[1] as ObjectControlAction;
+          if (
+            !shouldProcessObjectControlActionInPhase(
+              action,
+              processingPhase
+            )
+          ) {
+            return;
+          }
+
+          const objectName = matches[2];
+          const instanceNetworkId = matches[3];
+          const sceneNetworkId = matches[4];
+          const messageData = message.getData();
+          const messageSender = message.getSender();
+
+          if (sceneNetworkId !== runtimeScene.networkId) return;
+
+          const getTargetBehavior = () => {
+            const instance = getInstanceFromNetworkId({
+              runtimeScene,
+              objectName,
+              instanceNetworkId,
+              instanceX: messageData.instanceX,
+              instanceY: messageData.instanceY,
+            });
+            if (!instance) return null;
+
+            const behavior = instance.getBehavior(
+              'MultiplayerObject'
+            ) as MultiplayerObjectRuntimeBehavior | null;
+            return behavior || null;
+          };
+
+          if (action === 'request') {
+            if (!gdjs.multiplayer.isCurrentPlayerHost()) return;
+            if (!isValidObjectControlDurationInMs(messageData.durationInMs)) {
+              return;
+            }
+
+            const requesterPlayerNumber = messageData.requesterPlayerNumber;
+            if (
+              !isValidObjectControlPlayerNumber(requesterPlayerNumber) ||
+              !isMessageSenderPlayer(messageSender, requesterPlayerNumber)
+            ) {
+              return;
+            }
+
+            const behavior = getTargetBehavior();
+            if (!behavior) return;
+
+            const owner = behavior.getPlayerObjectOwnership();
+            const currentController = behavior.getPlayerObjectController();
+            const isControlledByAnotherPlayer =
+              behavior._controllerPlayerNumber !== null &&
+              currentController !== requesterPlayerNumber;
+            const isOwnedByAnotherPlayer =
+              owner !== 0 && owner !== requesterPlayerNumber;
+
+            if (isControlledByAnotherPlayer || isOwnedByAnotherPlayer) {
+              sendRefuseObjectControlMessage({
+                objectName,
+                instanceNetworkId,
+                sceneNetworkId,
+                requesterPlayerNumber,
+                requestId: messageData.requestId,
+                peerIds: [messageSender],
+              });
+              return;
+            }
+
+            const leaseId = gdjs.makeUuid().substring(0, 8);
+            behavior._applyObjectControlGrant({
+              controllerPlayerNumber: requesterPlayerNumber,
+              leaseId,
+              durationInMs: messageData.durationInMs,
+              requestId: messageData.requestId,
+            });
+            sendGrantObjectControlMessage({
+              objectName,
+              instanceNetworkId,
+              sceneNetworkId,
+              requesterPlayerNumber,
+              requestId: messageData.requestId,
+              controllerPlayerNumber: requesterPlayerNumber,
+              leaseId,
+              durationInMs: messageData.durationInMs,
+            });
+            return;
+          }
+
+          if (action === 'grant') {
+            if (!isMessageSenderHost(messageSender)) return;
+            if (!isValidObjectControlDurationInMs(messageData.durationInMs)) {
+              return;
+            }
+            if (
+              !isValidObjectControlPlayerNumber(
+                messageData.controllerPlayerNumber
+              ) ||
+              !isValidObjectControlLeaseId(messageData.leaseId)
+            ) {
+              return;
+            }
+
+            const behavior = getTargetBehavior();
+            if (!behavior) return;
+
+            behavior._applyObjectControlGrant({
+              controllerPlayerNumber: messageData.controllerPlayerNumber,
+              leaseId: messageData.leaseId,
+              durationInMs: messageData.durationInMs,
+              requestId: messageData.requestId,
+            });
+            return;
+          }
+
+          if (action === 'refuse') {
+            if (!isMessageSenderHost(messageSender)) return;
+
+            const behavior = getTargetBehavior();
+            if (!behavior) return;
+
+            behavior._applyObjectControlRefusal(messageData.requestId);
+            return;
+          }
+
+          if (action === 'keep') {
+            if (!isValidObjectControlDurationInMs(messageData.durationInMs)) {
+              return;
+            }
+            if (
+              !isValidObjectControlPlayerNumber(
+                messageData.controllerPlayerNumber
+              ) ||
+              !isMessageSenderHostOrPlayer(
+                messageSender,
+                messageData.controllerPlayerNumber
+              )
+            ) {
+              return;
+            }
+            if (!isValidObjectControlLeaseId(messageData.leaseId)) {
+              return;
+            }
+
+            const behavior = getTargetBehavior();
+            if (!behavior) return;
+
+            behavior._applyObjectControlKeep({
+              controllerPlayerNumber: messageData.controllerPlayerNumber,
+              leaseId: messageData.leaseId,
+              durationInMs: messageData.durationInMs,
+            });
+            relayObjectControlMessageFromHost({
+              messageName,
+              messageData,
+              messageSender,
+            });
+            return;
+          }
+
+          if (action === 'release') {
+            if (
+              !isValidObjectControlPlayerNumber(
+                messageData.controllerPlayerNumber
+              ) ||
+              !isMessageSenderHostOrPlayer(
+                messageSender,
+                messageData.controllerPlayerNumber
+              )
+            ) {
+              return;
+            }
+            if (!isValidObjectControlLeaseId(messageData.leaseId)) {
+              return;
+            }
+
+            const behavior = getTargetBehavior();
+            if (!behavior) return;
+
+            behavior._applyObjectControlRelease({
+              controllerPlayerNumber: messageData.controllerPlayerNumber,
+              leaseId: messageData.leaseId,
+            });
+            relayObjectControlMessageFromHost({
+              messageName,
+              messageData,
+              messageSender,
+            });
+          }
+        });
+      });
+    };
+
     const updateInstanceMessageNamePrefix = '#updateInstance';
     const updateInstanceMessageNameRegex =
       /#updateInstance#owner_(\d+)#object_(.+)#instance_(.+)#scene_(.+)/;
@@ -626,7 +1152,25 @@ namespace gdjs {
             return;
           }
           const ownerPlayerNumber = parseInt(matches[1], 10);
-          if (ownerPlayerNumber === gdjs.multiplayer.playerNumber) {
+          const controllerPlayerNumber =
+            messageData['_controller'] !== undefined
+              ? messageData['_controller']
+              : ownerPlayerNumber;
+          if (!isValidObjectControlPlayerNumber(controllerPlayerNumber)) {
+            return;
+          }
+          const controlLeaseId = isValidObjectControlLeaseId(
+            messageData['_controlLeaseId']
+          )
+            ? messageData['_controlLeaseId']
+            : '';
+          if (
+            controllerPlayerNumber !== ownerPlayerNumber &&
+            !controlLeaseId
+          ) {
+            return;
+          }
+          if (controllerPlayerNumber === gdjs.multiplayer.playerNumber) {
             // Do not update the instance if we receive an message from ourselves.
             // Should not happen but let's be safe.
             return;
@@ -643,14 +1187,74 @@ namespace gdjs {
             return;
           }
 
+          // Sender verification
+          if (!gdjs.multiplayer.isCurrentPlayerHost()) {
+            if (messageSender !== gdjs.multiplayer.hostPeerId) {
+              return;
+            }
+          } else {
+            const senderPlayerNumber = _peerIdToPlayerNumber[messageSender];
+            if (senderPlayerNumber === undefined) {
+              return;
+            }
+            if (senderPlayerNumber !== controllerPlayerNumber) {
+              return;
+            }
+
+            const existingInstance = getInstanceFromNetworkId({
+              runtimeScene,
+              objectName,
+              instanceNetworkId,
+              shouldCreateIfNotFound: false,
+            });
+            if (existingInstance) {
+              const behavior = existingInstance.getBehavior(
+                'MultiplayerObject'
+              ) as MultiplayerObjectRuntimeBehavior | null;
+              if (behavior) {
+                const currentController = behavior.getPlayerObjectController();
+                if (senderPlayerNumber !== currentController) {
+                  if (currentController === 0 && senderPlayerNumber === ownerPlayerNumber) {
+                    // Allowed: unclaimed object can be updated by its owner
+                  } else {
+                    return;
+                  }
+                }
+              }
+            } else {
+              // The object is going to be created on Host, so the sender must be the claimed owner
+              // (unless it is a temporary object owned by the scene, i.e., ownerPlayerNumber === 0)
+              if (
+                ownerPlayerNumber !== 0 &&
+                senderPlayerNumber !== ownerPlayerNumber
+              ) {
+                return;
+              }
+            }
+          }
+
           const messageInstanceClock = messageData['_clock'];
+          if (
+            typeof messageInstanceClock !== 'number' ||
+            !Number.isFinite(messageInstanceClock)
+          ) {
+            return;
+          }
+          const instanceUpdateClockKey = createInstanceUpdateClockKey({
+            instanceNetworkId,
+            controllerPlayerNumber,
+            controlLeaseId,
+          });
           const lastClock = getLastClockReceivedForInstanceOnScene({
             sceneNetworkId,
-            instanceNetworkId,
+            instanceNetworkId: instanceUpdateClockKey,
           });
 
           if (messageInstanceClock <= lastClock) {
-            // Ignore old messages, they may be arriving out of order because of lag.
+            return;
+          }
+
+          if (isInstanceDestroyed({ sceneNetworkId, instanceNetworkId })) {
             return;
           }
 
@@ -659,13 +1263,16 @@ namespace gdjs {
             objectName,
             instanceNetworkId,
             // This can happen if the object was created on the other player's game, and we need to create it.
-            shouldCreateIfNotFound: true,
+            // Controlled updates must never create a missing instance before
+            // their active lease is validated.
+            shouldCreateIfNotFound: !controlLeaseId,
             instanceX: messageData.x,
             instanceY: messageData.y,
           });
           if (!instance) {
-            // This should not happen as we should have created the instance if it did not exist.
-            logger.error('Instance could not be found or created.');
+            if (!controlLeaseId) {
+              logger.error('Instance could not be found or created.');
+            }
             return;
           }
 
@@ -680,18 +1287,39 @@ namespace gdjs {
             return;
           }
 
-          // If we receive an update for this object for a different owner than the one we know about,
+          if (controlLeaseId) {
+            const currentControllerPlayerNumber =
+              behavior.getPlayerObjectController();
+            const isUpdateForActiveControlLease =
+              currentControllerPlayerNumber === controllerPlayerNumber &&
+              behavior._controlLeaseId === controlLeaseId;
+            if (!isUpdateForActiveControlLease) {
+              return;
+            }
+          }
+
+          // If we receive an update for this object for a different owner/controller than the one we know about,
           // then 2 cases:
-          // - If we are the owner of the object, then ignore the message, we assume it's a late update message or a wrong one,
+          // - If we control the object, then ignore the message, we assume it's a late update message or a wrong one,
           //   we are confident that we own this object. (it may be reverted if we don't receive an acknowledgment in time)
-          // - If we are not the owner of the object, then assume that we missed the ownership change message, so update the object's
-          //   ownership and then update the object.
+          // - If we are not the controller of the object, update the object. Persistent ownership is only reconciled
+          //   from the owner encoded in the message, not from the temporary controller.
+          const currentController = behavior.getPlayerObjectController();
+          const isLocallyControlledByUs = currentController === gdjs.multiplayer.playerNumber;
+          if (isLocallyControlledByUs) {
+            debugLogger.info(
+              `Object ${objectName} with instance network ID ${instanceNetworkId} is controlled by us ${gdjs.multiplayer.playerNumber}, ignoring update message.`
+            );
+            return;
+          }
+
           if (
-            behavior.getPlayerObjectOwnership() ===
-            gdjs.multiplayer.playerNumber
+            gdjs.multiplayer.isCurrentPlayerHost() &&
+            behavior.getPlayerObjectOwnership() !== 0 &&
+            behavior.getPlayerObjectOwnership() !== ownerPlayerNumber
           ) {
             debugLogger.info(
-              `Object ${objectName} with instance network ID ${instanceNetworkId} is owned by us ${gdjs.multiplayer.playerNumber}, ignoring update message from ${ownerPlayerNumber}.`
+              `Object ${objectName} with instance network ID ${instanceNetworkId} has owner ${behavior.getPlayerObjectOwnership()} on host, ignoring update message from owner ${ownerPlayerNumber}.`
             );
             return;
           }
@@ -709,12 +1337,12 @@ namespace gdjs {
 
           setLastClockReceivedForInstanceOnScene({
             sceneNetworkId,
-            instanceNetworkId,
+            instanceNetworkId: instanceUpdateClockKey,
             clock: messageInstanceClock,
           });
           // Also update the clock on the behavior of this instance, so that if we take ownership of this object,
           // we can send the correct clock to the other players.
-          behavior._clock = messageInstanceClock;
+          behavior._clock = Math.max(behavior._clock, messageInstanceClock);
 
           // If we are are the host,
           // we need to relay the position to others except the player who sent the update message.
@@ -1226,6 +1854,7 @@ namespace gdjs {
       messageName: string;
       messageData: any;
     } => {
+      markInstanceAsDestroyed({ sceneNetworkId, instanceNetworkId });
       return {
         messageName: `${destroyInstanceMessageNamePrefix}#owner_${objectOwner}#object_${objectName}#instance_${instanceNetworkId}#scene_${sceneNetworkId}`,
         messageData: {},
@@ -1291,6 +1920,21 @@ namespace gdjs {
             );
             return;
           }
+
+          if (!gdjs.multiplayer.isCurrentPlayerHost()) {
+            if (messageSender !== gdjs.multiplayer.hostPeerId) {
+              return;
+            }
+          } else if (playerNumber !== 0) {
+            const senderPlayerNumber = _peerIdToPlayerNumber[messageSender];
+            if (senderPlayerNumber !== playerNumber) {
+              return;
+            }
+          } else {
+            return;
+          }
+
+          markInstanceAsDestroyed({ sceneNetworkId, instanceNetworkId });
 
           const instance = getInstanceFromNetworkId({
             runtimeScene,
@@ -2254,6 +2898,12 @@ namespace gdjs {
             ) as MultiplayerObjectRuntimeBehavior | null;
             if (
               behavior &&
+              behavior.getPlayerObjectController() === playerNumber
+            ) {
+              behavior._clearObjectControlLease();
+            }
+            if (
+              behavior &&
               behavior.getPlayerObjectOwnership() === playerNumber
             ) {
               const actionOnPlayerDisconnect =
@@ -2434,6 +3084,7 @@ namespace gdjs {
       _playerNumbersWhoJustJoined = [];
       expectedMessageAcknowledgements = {};
       _lastClockReceivedByInstanceByScene = {};
+      recentlyDestroyedInstanceKeys.clear();
     };
 
     const clearPlayerTempData = (playerNumber: number) => {
@@ -2442,6 +3093,11 @@ namespace gdjs {
       // and the others will consider them as disconnected.
       delete _playersLastRoundTripTimes[playerNumber];
       delete _playersInfo[playerNumber];
+      for (const peerId of Object.keys(_peerIdToPlayerNumber)) {
+        if (_peerIdToPlayerNumber[peerId] === playerNumber) {
+          delete _peerIdToPlayerNumber[peerId];
+        }
+      }
     };
 
     return {
@@ -2454,6 +3110,11 @@ namespace gdjs {
       createChangeInstanceOwnerMessage,
       createInstanceOwnerChangedMessageNameFromChangeInstanceOwnerMessage,
       handleChangeInstanceOwnerMessagesReceived,
+      // Temporary object control.
+      sendRequestObjectControlMessage,
+      sendKeepObjectControlMessage,
+      sendReleaseObjectControlMessage,
+      handleObjectControlMessagesReceived,
       // Instance update.
       createUpdateInstanceMessage,
       handleUpdateInstanceMessagesReceived,
