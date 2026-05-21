@@ -79,10 +79,10 @@ namespace gdjs {
   };
 
   const isModel3D = (
-    object: gdjs.RuntimeObject
+    object: gdjs.RuntimeObject | null | undefined
   ): object is gdjs.Model3DRuntimeObject => {
     //@ts-ignore We are checking if the methods are present.
-    return object._modelResourceName;
+    return !!object && object._modelResourceName;
   };
 
   /** @category Behaviors > Physics 3D */
