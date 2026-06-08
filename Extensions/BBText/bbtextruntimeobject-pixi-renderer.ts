@@ -168,7 +168,6 @@ namespace gdjs {
           tagStyles: renderData.tagStyles,
         },
       });
-
       instanceContainer
         .getLayer('')
         .getRenderer()

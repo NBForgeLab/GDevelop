@@ -465,7 +465,7 @@ namespace gdjs {
         // TODO What if 2 assets share the same file with different settings?
         applyTextureSettings(loadedTexture, resource);
       } catch (error) {
-        logFileLoadingError(resource.file, error);
+        logFileLoadingError(resource.file, error as Error);
         const resourceUrl = this._resourceLoader.getFullUrl(resource.file);
         PIXI.Assets.unload(resourceUrl).catch(() => {});
         throw error;

@@ -249,6 +249,114 @@ module.exports = {
         .addParameter('number', _('Angle to add (in degrees)'), '', false)
         .markAsAdvanced()
         .setFunctionName('turnAroundZ');
+
+      base3D
+        .addExpression(
+          'ForwardX',
+          _('Forward vector X component'),
+          _('Return the object forward vector X component.'),
+          _('Object basis'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D object'), '', false)
+        .addParameter('behavior', _('Behavior'), 'Base3DBehavior')
+        .setFunctionName('getForwardX');
+
+      base3D
+        .addExpression(
+          'ForwardY',
+          _('Forward vector Y component'),
+          _('Return the object forward vector Y component.'),
+          _('Object basis'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D object'), '', false)
+        .addParameter('behavior', _('Behavior'), 'Base3DBehavior')
+        .setFunctionName('getForwardY');
+
+      base3D
+        .addExpression(
+          'ForwardZ',
+          _('Forward vector Z component'),
+          _('Return the object forward vector Z component.'),
+          _('Object basis'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D object'), '', false)
+        .addParameter('behavior', _('Behavior'), 'Base3DBehavior')
+        .setFunctionName('getForwardZ');
+
+      base3D
+        .addExpression(
+          'UpX',
+          _('Up vector X component'),
+          _('Return the object up vector X component.'),
+          _('Object basis'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D object'), '', false)
+        .addParameter('behavior', _('Behavior'), 'Base3DBehavior')
+        .setFunctionName('getUpX');
+
+      base3D
+        .addExpression(
+          'UpY',
+          _('Up vector Y component'),
+          _('Return the object up vector Y component.'),
+          _('Object basis'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D object'), '', false)
+        .addParameter('behavior', _('Behavior'), 'Base3DBehavior')
+        .setFunctionName('getUpY');
+
+      base3D
+        .addExpression(
+          'UpZ',
+          _('Up vector Z component'),
+          _('Return the object up vector Z component.'),
+          _('Object basis'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D object'), '', false)
+        .addParameter('behavior', _('Behavior'), 'Base3DBehavior')
+        .setFunctionName('getUpZ');
+
+      base3D
+        .addExpression(
+          'RightX',
+          _('Right vector X component'),
+          _('Return the object right vector X component.'),
+          _('Object basis'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D object'), '', false)
+        .addParameter('behavior', _('Behavior'), 'Base3DBehavior')
+        .setFunctionName('getRightX');
+
+      base3D
+        .addExpression(
+          'RightY',
+          _('Right vector Y component'),
+          _('Return the object right vector Y component.'),
+          _('Object basis'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D object'), '', false)
+        .addParameter('behavior', _('Behavior'), 'Base3DBehavior')
+        .setFunctionName('getRightY');
+
+      base3D
+        .addExpression(
+          'RightZ',
+          _('Right vector Z component'),
+          _('Return the object right vector Z component.'),
+          _('Object basis'),
+          'res/conditions/3d_box.svg'
+        )
+        .addParameter('object', _('3D object'), '', false)
+        .addParameter('behavior', _('Behavior'), 'Base3DBehavior')
+        .setFunctionName('getRightZ');
     }
 
     {
@@ -261,6 +369,7 @@ module.exports = {
           new gd.Model3DObjectConfiguration()
         )
         .setCategory('General')
+        .setHelpPath('/objects/3d-model')
         // Effects are unsupported because the object is not rendered with PIXI.
         .addDefaultBehavior('ResizableCapability::ResizableBehavior')
         .addDefaultBehavior('ScalableCapability::ScalableBehavior')
@@ -1512,6 +1621,7 @@ module.exports = {
         Cube3DObject
       )
       .setCategory('General')
+      .setHelpPath('/objects/3d-box')
       // Effects are unsupported because the object is not rendered with PIXI.
       .addDefaultBehavior('ResizableCapability::ResizableBehavior')
       .addDefaultBehavior('ScalableCapability::ScalableBehavior')
@@ -1995,7 +2105,7 @@ module.exports = {
         'CameraZ',
         _('Camera Z position'),
         _('the camera position on Z axis'),
-        _('the camera position on Z axis'),
+        _('the camera position on Z axis (layer: _PARAM3_)'),
         '',
         'res/conditions/3d_box.svg'
       )
@@ -2016,7 +2126,7 @@ module.exports = {
         'CameraRotationX',
         _('Camera X rotation'),
         _('the camera rotation on X axis'),
-        _('the camera rotation on X axis'),
+        _('the camera rotation on X axis (layer: _PARAM3_)'),
         '',
         'res/conditions/3d_box.svg'
       )
@@ -2042,7 +2152,7 @@ module.exports = {
         'CameraRotationY',
         _('Camera Y rotation'),
         _('the camera rotation on Y axis'),
-        _('the camera rotation on Y axis'),
+        _('the camera rotation on Y axis (layer: _PARAM3_)'),
         '',
         'res/conditions/3d_box.svg'
       )
@@ -2060,6 +2170,150 @@ module.exports = {
       .markAsAdvanced()
       .setFunctionName('gdjs.scene3d.camera.setCameraRotationY')
       .setGetter('gdjs.scene3d.camera.getCameraRotationY')
+      .setIncludeFile('Extensions/3D/Scene3DTools.js');
+
+    extension
+      .addExpression(
+        'CameraForwardX',
+        _('Camera forward vector X component'),
+        _('Return the camera forward vector X component.'),
+        _('Camera basis'),
+        'res/conditions/3d_box.svg'
+      )
+      .addCodeOnlyParameter('currentScene', '')
+      .addParameter('layer', _('Layer'), '', true)
+      .setDefaultValue('""')
+      .addParameter('expression', _('Camera number (default : 0)'), '', true)
+      .setDefaultValue('0')
+      .setFunctionName('gdjs.scene3d.camera.getCameraForwardX')
+      .setIncludeFile('Extensions/3D/Scene3DTools.js');
+
+    extension
+      .addExpression(
+        'CameraForwardY',
+        _('Camera forward vector Y component'),
+        _('Return the camera forward vector Y component.'),
+        _('Camera basis'),
+        'res/conditions/3d_box.svg'
+      )
+      .addCodeOnlyParameter('currentScene', '')
+      .addParameter('layer', _('Layer'), '', true)
+      .setDefaultValue('""')
+      .addParameter('expression', _('Camera number (default : 0)'), '', true)
+      .setDefaultValue('0')
+      .setFunctionName('gdjs.scene3d.camera.getCameraForwardY')
+      .setIncludeFile('Extensions/3D/Scene3DTools.js');
+
+    extension
+      .addExpression(
+        'CameraForwardZ',
+        _('Camera forward vector Z component'),
+        _('Return the camera forward vector Z component.'),
+        _('Camera basis'),
+        'res/conditions/3d_box.svg'
+      )
+      .addCodeOnlyParameter('currentScene', '')
+      .addParameter('layer', _('Layer'), '', true)
+      .setDefaultValue('""')
+      .addParameter('expression', _('Camera number (default : 0)'), '', true)
+      .setDefaultValue('0')
+      .setFunctionName('gdjs.scene3d.camera.getCameraForwardZ')
+      .setIncludeFile('Extensions/3D/Scene3DTools.js');
+
+    extension
+      .addExpression(
+        'CameraUpX',
+        _('Camera up vector X component'),
+        _('Return the camera up vector X component.'),
+        _('Camera basis'),
+        'res/conditions/3d_box.svg'
+      )
+      .addCodeOnlyParameter('currentScene', '')
+      .addParameter('layer', _('Layer'), '', true)
+      .setDefaultValue('""')
+      .addParameter('expression', _('Camera number (default : 0)'), '', true)
+      .setDefaultValue('0')
+      .setFunctionName('gdjs.scene3d.camera.getCameraUpX')
+      .setIncludeFile('Extensions/3D/Scene3DTools.js');
+
+    extension
+      .addExpression(
+        'CameraUpY',
+        _('Camera up vector Y component'),
+        _('Return the camera up vector Y component.'),
+        _('Camera basis'),
+        'res/conditions/3d_box.svg'
+      )
+      .addCodeOnlyParameter('currentScene', '')
+      .addParameter('layer', _('Layer'), '', true)
+      .setDefaultValue('""')
+      .addParameter('expression', _('Camera number (default : 0)'), '', true)
+      .setDefaultValue('0')
+      .setFunctionName('gdjs.scene3d.camera.getCameraUpY')
+      .setIncludeFile('Extensions/3D/Scene3DTools.js');
+
+    extension
+      .addExpression(
+        'CameraUpZ',
+        _('Camera up vector Z component'),
+        _('Return the camera up vector Z component.'),
+        _('Camera basis'),
+        'res/conditions/3d_box.svg'
+      )
+      .addCodeOnlyParameter('currentScene', '')
+      .addParameter('layer', _('Layer'), '', true)
+      .setDefaultValue('""')
+      .addParameter('expression', _('Camera number (default : 0)'), '', true)
+      .setDefaultValue('0')
+      .setFunctionName('gdjs.scene3d.camera.getCameraUpZ')
+      .setIncludeFile('Extensions/3D/Scene3DTools.js');
+
+    extension
+      .addExpression(
+        'CameraRightX',
+        _('Camera right vector X component'),
+        _('Return the camera right vector X component.'),
+        _('Camera basis'),
+        'res/conditions/3d_box.svg'
+      )
+      .addCodeOnlyParameter('currentScene', '')
+      .addParameter('layer', _('Layer'), '', true)
+      .setDefaultValue('""')
+      .addParameter('expression', _('Camera number (default : 0)'), '', true)
+      .setDefaultValue('0')
+      .setFunctionName('gdjs.scene3d.camera.getCameraRightX')
+      .setIncludeFile('Extensions/3D/Scene3DTools.js');
+
+    extension
+      .addExpression(
+        'CameraRightY',
+        _('Camera right vector Y component'),
+        _('Return the camera right vector Y component.'),
+        _('Camera basis'),
+        'res/conditions/3d_box.svg'
+      )
+      .addCodeOnlyParameter('currentScene', '')
+      .addParameter('layer', _('Layer'), '', true)
+      .setDefaultValue('""')
+      .addParameter('expression', _('Camera number (default : 0)'), '', true)
+      .setDefaultValue('0')
+      .setFunctionName('gdjs.scene3d.camera.getCameraRightY')
+      .setIncludeFile('Extensions/3D/Scene3DTools.js');
+
+    extension
+      .addExpression(
+        'CameraRightZ',
+        _('Camera right vector Z component'),
+        _('Return the camera right vector Z component.'),
+        _('Camera basis'),
+        'res/conditions/3d_box.svg'
+      )
+      .addCodeOnlyParameter('currentScene', '')
+      .addParameter('layer', _('Layer'), '', true)
+      .setDefaultValue('""')
+      .addParameter('expression', _('Camera number (default : 0)'), '', true)
+      .setDefaultValue('0')
+      .setFunctionName('gdjs.scene3d.camera.getCameraRightZ')
       .setIncludeFile('Extensions/3D/Scene3DTools.js');
 
     extension
@@ -2247,6 +2501,7 @@ module.exports = {
         )
         .markAsNotWorkingForObjects()
         .markAsOnlyWorkingFor3D()
+        .setHelpPath('/objects/3d-light')
         .addIncludeFile('Extensions/3D/AmbientLight.js');
       const properties = effect.getProperties();
       properties
@@ -2271,6 +2526,7 @@ module.exports = {
         )
         .markAsNotWorkingForObjects()
         .markAsOnlyWorkingFor3D()
+        .setHelpPath('/objects/3d-light')
         .addIncludeFile('Extensions/3D/ShadowSettings.js')
         .addIncludeFile('Extensions/3D/DirectionalLight.js');
       const properties = effect.getProperties();
@@ -2400,6 +2656,7 @@ module.exports = {
         )
         .markAsNotWorkingForObjects()
         .markAsOnlyWorkingFor3D()
+        .setHelpPath('/objects/3d-light')
         .addIncludeFile('Extensions/3D/HemisphereLight.js');
       const properties = effect.getProperties();
       properties

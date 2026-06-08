@@ -310,6 +310,7 @@ module.exports = {
       .setFullName(_('Color Map'))
       .setDescription(_('Change the color rendered on screen.'))
       .markAsOnlyWorkingFor2D()
+      .setHelpPath('/all-features/effects/color-map')
       .addIncludeFile('Extensions/Effects/color-map-pixi-filter.js')
       .addIncludeFile('Extensions/Effects/pixi-filters/pixi-filters.js');
     const colorMapProperties = colorMapEffect.getProperties();
@@ -371,6 +372,7 @@ module.exports = {
       .setFullName(_('CRT'))
       .setDescription(_('Apply an effect resembling old CRT monitors.'))
       .markAsOnlyWorkingFor2D()
+.setHelpPath('/all-features/effects/crt')
       .addIncludeFile('Extensions/Effects/pixi-filters/pixi-filters.js')
       .addIncludeFile('Extensions/Effects/crt-pixi-filter.js');
     const crtProperties = crtEffect.getProperties();
@@ -449,6 +451,7 @@ module.exports = {
         )
       )
       .markAsOnlyWorkingFor2D()
+      .setHelpPath('/all-features/effects/displacement')
       .addIncludeFile('Extensions/Effects/displacement-pixi-filter.js');
     const displacementProperties = displacementEffect.getProperties();
     displacementProperties
@@ -502,7 +505,7 @@ module.exports = {
       .setFullName(_('Drop shadow'))
       .setDescription(_('Add a shadow around the rendered image.'))
       .markAsOnlyWorkingFor2D()
-      .addIncludeFile('Extensions/Effects/pixi-filters/pixi-filters.js')
+.setHelpPath('/all-features/effects/drop-shadow')
       .addIncludeFile('Extensions/Effects/pixi-filters/pixi-filters.js')
       .addIncludeFile('Extensions/Effects/drop-shadow-pixi-filter.js');
     const dropShadowProperties = dropShadowEffect.getProperties();
@@ -673,6 +676,7 @@ module.exports = {
       .setFullName(_('Godray'))
       .setDescription(_('Apply and animate atmospheric light rays.'))
       .markAsOnlyWorkingFor2D()
+.setHelpPath('/all-features/effects/god-rays')
       .addIncludeFile('Extensions/Effects/pixi-filters/pixi-filters.js')
       .addIncludeFile('Extensions/Effects/godray-pixi-filter.js');
     const godrayProperties = godrayEffect.getProperties();
@@ -771,6 +775,7 @@ module.exports = {
         )
       )
       .markAsOnlyWorkingFor2D()
+.setHelpPath('/all-features/effects/kawase-blur')
       .addIncludeFile('Extensions/Effects/pixi-filters/pixi-filters.js')
       .addIncludeFile('Extensions/Effects/kawase-blur-pixi-filter.js');
     const kawaseBlurProperties = kawaseBlurEffect.getProperties();
@@ -951,6 +956,7 @@ module.exports = {
       .setFullName(_('Outline'))
       .setDescription(_('Draws an outline around the rendered image.'))
       .markAsOnlyWorkingFor2D()
+.setHelpPath('/all-features/effects/outline')
       .addIncludeFile('Extensions/Effects/pixi-filters/pixi-filters.js')
       .addIncludeFile('Extensions/Effects/outline-pixi-filter.js');
     const outlineProperties = outlineEffect.getProperties();
@@ -978,6 +984,7 @@ module.exports = {
         _("Applies a pixelate effect, making display objects appear 'blocky'.")
       )
       .markAsOnlyWorkingFor2D()
+.setHelpPath('/all-features/effects/pixelate')
       .addIncludeFile('Extensions/Effects/pixi-filters/pixi-filters.js')
       .addIncludeFile('Extensions/Effects/pixelate-pixi-filter.js');
     const pixelateProperties = pixelateEffect.getProperties();
@@ -1111,6 +1118,7 @@ module.exports = {
         _('Applies a RGB split effect also known as chromatic aberration.')
       )
       .markAsOnlyWorkingFor2D()
+.setHelpPath('/all-features/effects/rgb-split')
       .addIncludeFile('Extensions/Effects/pixi-filters/pixi-filters.js')
       .addIncludeFile('Extensions/Effects/rgb-split-pixi-filter.js');
     const rgbSplitProperties = rgbSplitEffect.getProperties();
@@ -1218,6 +1226,7 @@ module.exports = {
       .setFullName(_('Tilt shift'))
       .setDescription(_('Render a tilt-shift-like camera effect.'))
       .markAsOnlyWorkingFor2D()
+.setHelpPath('/all-features/effects/tilt-split')
       .addIncludeFile('Extensions/Effects/pixi-filters/pixi-filters.js')
       .addIncludeFile('Extensions/Effects/tilt-shift-pixi-filter.js');
     const tiltShiftProperties = tiltShiftEffect.getProperties();

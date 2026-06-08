@@ -112,6 +112,14 @@ export enum ExpressionCompletionDescription_CompletionKind {
   Parameter = 6,
 }
 
+export enum ExpressionColorationDescription_ColorationKind {
+  String = 0,
+  Number = 1,
+  Object = 2,
+  Variable = 3,
+  Operator = 4,
+}
+
 export enum EventsFunction_FunctionType {
   Action = 0,
   Condition = 1,
@@ -599,6 +607,7 @@ export class Project extends EmscriptenObject {
   getUseDeprecatedZeroAsDefaultStringVariable(): boolean;
   areEffectsHiddenInEditor(): boolean;
   setEffectsHiddenInEditor(enable: boolean): void;
+  getInitialGDVersion(): string;
   setLastCompilationDirectory(path: string): void;
   getLastCompilationDirectory(): string;
   getExtensionProperties(): ExtensionProperties;
@@ -617,6 +626,8 @@ export class Project extends EmscriptenObject {
   removeLayout(name: string): void;
   setFirstLayout(name: string): void;
   getFirstLayout(): string;
+  setPreviewLayout(name: string): void;
+  getPreviewLayout(): string;
   getLayoutPosition(name: string): number;
   hasExternalEventsNamed(name: string): boolean;
   getExternalEvents(name: string): ExternalEvents;
@@ -791,6 +802,8 @@ export class gdObject extends EmscriptenObject {
   getAssetStoreId(): string;
   setType(type: string): void;
   getType(): string;
+  setResourcesPreloading(value: string): void;
+  getResourcesPreloading(): string;
   getConfiguration(): ObjectConfiguration;
   getVariables(): VariablesContainer;
   getEffects(): EffectsContainer;
@@ -1371,6 +1384,8 @@ export class SharedPtrSerializerElement extends EmscriptenObject {
 export class Serializer extends EmscriptenObject {
   static toJSON(element: SerializerElement): string;
   static fromJSON(json: string): SerializerElement;
+  static setCanonicalMode(canonical: boolean): void;
+  static isCanonicalMode(): boolean;
   static fromJSObject(object: Object): gdSerializerElement;
   static toJSObject(element: gdSerializerElement): any;
 }
@@ -1452,6 +1467,7 @@ export class AbstractFunctionMetadata extends EmscriptenObject {
   addCodeOnlyParameter(type: string, supplementaryInformation: string): AbstractFunctionMetadata;
   setDefaultValue(defaultValue: string): AbstractFunctionMetadata;
   setParameterLongDescription(longDescription: string): AbstractFunctionMetadata;
+  setParameterHint(hint: string): AbstractFunctionMetadata;
   setParameterExtraInfo(extraInfo: string): AbstractFunctionMetadata;
   setHidden(): AbstractFunctionMetadata;
   setPrivate(): AbstractFunctionMetadata;
@@ -1496,7 +1512,10 @@ export class InstructionMetadata extends AbstractFunctionMetadata {
   addCodeOnlyParameter(type: string, supplementaryInformation: string): InstructionMetadata;
   setDefaultValue(defaultValue: string): InstructionMetadata;
   setParameterLongDescription(longDescription: string): InstructionMetadata;
+  setParameterHint(hint: string): InstructionMetadata;
   setParameterExtraInfo(extraInfo: string): InstructionMetadata;
+  setHint(hint: string): InstructionMetadata;
+  getHint(): string;
   useStandardOperatorParameters(type: string, options: ParameterOptions): InstructionMetadata;
   useStandardRelationalOperatorParameters(type: string, options: ParameterOptions): InstructionMetadata;
   markAsSimple(): InstructionMetadata;
@@ -1544,6 +1563,7 @@ export class ExpressionMetadata extends AbstractFunctionMetadata {
   addCodeOnlyParameter(type: string, supplementaryInformation: string): ExpressionMetadata;
   setDefaultValue(defaultValue: string): ExpressionMetadata;
   setParameterLongDescription(longDescription: string): ExpressionMetadata;
+  setParameterHint(hint: string): ExpressionMetadata;
   setParameterExtraInfo(extraInfo: string): ExpressionMetadata;
   getCodeExtraInformation(): ExpressionMetadata;
   setFunctionName(functionName: string): ExpressionMetadata;
@@ -1559,6 +1579,7 @@ export class MultipleInstructionMetadata extends AbstractFunctionMetadata {
   addCodeOnlyParameter(type: string, supplementaryInformation: string): MultipleInstructionMetadata;
   setDefaultValue(defaultValue: string): MultipleInstructionMetadata;
   setParameterLongDescription(longDescription: string): MultipleInstructionMetadata;
+  setParameterHint(hint: string): MultipleInstructionMetadata;
   setParameterExtraInfo(extraInfo: string): MultipleInstructionMetadata;
   useStandardParameters(type: string, options: ParameterOptions): MultipleInstructionMetadata;
   setHidden(): MultipleInstructionMetadata;
@@ -1612,6 +1633,8 @@ export class ParameterMetadata extends EmscriptenObject {
   setDescription(description_: string): ParameterMetadata;
   getLongDescription(): string;
   setLongDescription(longDescription_: string): ParameterMetadata;
+  getHint(): string;
+  setHint(hint_: string): ParameterMetadata;
   isCodeOnly(): boolean;
   setCodeOnly(codeOnly_: boolean): ParameterMetadata;
   getDefaultValue(): string;
@@ -1640,6 +1663,7 @@ export class ValueTypeMetadata extends EmscriptenObject {
   isNumber(): boolean;
   isString(): boolean;
   isVariable(): boolean;
+  isResource(): boolean;
   static isTypeObject(parameterType: string): boolean;
   static isTypeBehavior(parameterType: string): boolean;
   static isTypeExpression(type: string, parameterType: string): boolean;
@@ -1676,6 +1700,7 @@ export class ObjectMetadata extends EmscriptenObject {
   getHelpPath(): string;
   getCategory(): string;
   getAssetStoreTag(): string;
+  setHelpPath(helpPath: string): ObjectMetadata;
   setCategory(categoryFullName: string): ObjectMetadata;
   setAssetStoreTag(assetStoreTag: string): ObjectMetadata;
   addInGameEditorResource(): InGameEditorResourceMetadata;
@@ -1746,6 +1771,7 @@ export class BehaviorMetadata extends EmscriptenObject {
   getGroup(): string;
   getIconFilename(): string;
   getHelpPath(): string;
+  setHelpPath(helpPath: string): BehaviorMetadata;
   addScopedCondition(name: string, fullname: string, description: string, sentence: string, group: string, icon: string, smallicon: string): InstructionMetadata;
   addScopedAction(name: string, fullname: string, description: string, sentence: string, group: string, icon: string, smallicon: string): InstructionMetadata;
   addCondition(name: string, fullname: string, description: string, sentence: string, group: string, icon: string, smallicon: string): InstructionMetadata;
@@ -1824,7 +1850,9 @@ export class PlatformExtension extends EmscriptenObject {
   setDimension(dimension: string): PlatformExtension;
   getDimension(): string;
   addInstructionOrExpressionGroupMetadata(name: string): InstructionOrExpressionGroupMetadata;
-  markAsDeprecated(): void;
+  markAsDeprecatedSince(version: string): PlatformExtension;
+  isDeprecated(): boolean;
+  getDeprecationGDVersion(): string;
   getTags(): VectorString;
   setTags(csvTags: string): PlatformExtension;
   addExpressionAndCondition(type: string, name: string, fullname: string, description: string, sentenceName: string, group: string, icon: string): MultipleInstructionMetadata;
@@ -1915,6 +1943,7 @@ export class BaseEvent extends EmscriptenObject {
   setDisabled(disable: boolean): void;
   isFolded(): boolean;
   setFolded(folded: boolean): void;
+  getInstructionList(label: string): InstructionsList;
   serializeTo(element: SerializerElement): void;
   unserializeFrom(project: Project, element: SerializerElement): void;
   getAiGeneratedEventId(): string;
@@ -2187,7 +2216,9 @@ export class PropertyFunctionGenerator extends EmscriptenObject {
   static generateBehaviorGetterAndSetter(project: Project, extension: EventsFunctionsExtension, eventsBasedBehavior: EventsBasedBehavior, property: NamedPropertyDescriptor, isSharedProperties: boolean): void;
   static generateObjectGetterAndSetter(project: Project, extension: EventsFunctionsExtension, eventsBasedObject: EventsBasedObject, property: NamedPropertyDescriptor): void;
   static canGenerateGetterAndSetter(eventsBasedBehavior: AbstractEventsBasedEntity, property: NamedPropertyDescriptor): boolean;
-  static generateConditionSkeleton(project: Project, eventFunction: EventsFunction): void;
+  static generateConditionSkeleton(project: Project, eventsFunction: EventsFunction): void;
+  static generateExpressionSkeleton(project: Project, eventsFunction: EventsFunction): void;
+  static updateReturnActionType(project: Project, eventsFunction: EventsFunction): void;
 }
 
 export class UsedExtensionsResult extends EmscriptenObject {
@@ -2306,6 +2337,7 @@ export class ExpressionValidator extends EmscriptenObject {
   constructor(platform: Platform, projectScopedContainers: ProjectScopedContainers, rootType: string, extraInfo: string);
   getAllErrors(): VectorExpressionParserError;
   getFatalErrors(): VectorExpressionParserError;
+  getDeprecationWarnings(): VectorExpressionParserError;
 }
 
 export class ExpressionCompletionDescription extends EmscriptenObject {
@@ -2335,6 +2367,22 @@ export class VectorExpressionCompletionDescription extends EmscriptenObject {
 export class ExpressionCompletionFinder extends EmscriptenObject {
   static getCompletionDescriptionsFor(platform: Platform, projectScopedContainers: ProjectScopedContainers, rootType: string, node: ExpressionNode, location: number): VectorExpressionCompletionDescription;
   getCompletionDescriptions(): VectorExpressionCompletionDescription;
+}
+
+export class ExpressionColorationDescription extends EmscriptenObject {
+  getColorationKind(): ExpressionColorationDescription_ColorationKind;
+  getStartPosition(): number;
+  getEndPosition(): number;
+}
+
+export class VectorExpressionColorationDescription extends EmscriptenObject {
+  size(): number;
+  at(index: number): ExpressionColorationDescription;
+}
+
+export class ExpressionSyntaxColoringHelper extends EmscriptenObject {
+  static getColorationDescriptionsFor(platform: Platform, projectScopedContainers: ProjectScopedContainers, rootType: string, node: ExpressionNode): VectorExpressionColorationDescription;
+  getColorationDescriptions(): VectorExpressionColorationDescription;
 }
 
 export class ExpressionNodeLocationFinder extends EmscriptenObject {

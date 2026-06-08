@@ -846,6 +846,9 @@ namespace gdjs {
       if (targetRowCount <= 0) return;
       if (!this._tileMap) return;
       this._tileMap.setDimensionY(targetRowCount);
+      if (this._collisionTileMap) {
+        this._collisionTileMap.updateDimensions();
+      }
       this._isTileMapDirty = true;
       this.invalidateHitboxes();
     }
@@ -854,6 +857,9 @@ namespace gdjs {
       if (targetColumnCount <= 0) return;
       if (!this._tileMap) return;
       this._tileMap.setDimensionX(targetColumnCount);
+      if (this._collisionTileMap) {
+        this._collisionTileMap.updateDimensions();
+      }
       this._isTileMapDirty = true;
       this.invalidateHitboxes();
     }
