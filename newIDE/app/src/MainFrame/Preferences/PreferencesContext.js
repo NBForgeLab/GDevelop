@@ -246,6 +246,7 @@ export type PreferencesValues = {|
   disableNpmScriptConfirmation: boolean,
   showJsTypeError: boolean,
   homePageMenuIsCollapsed: boolean,
+  canonicalEventSerialization: boolean,
 |};
 
 /**
@@ -373,6 +374,7 @@ export type Preferences = {|
   setUseBackgroundSerializerForSaving: (enabled: boolean) => void,
   setShowJsTypeError: (enabled: boolean) => void,
   setHomePageMenuIsCollapsed: (collapsed: boolean) => void,
+  setCanonicalEventSerialization: (enabled: boolean) => void,
 |};
 
 export const initialPreferences = {
@@ -414,7 +416,7 @@ export const initialPreferences = {
     resourcesImporationBehavior: 'ask',
     eventsSheetCancelInlineParameter: 'apply',
     showExperimentalExtensions: false,
-    favoriteExtensions: [],
+    favoriteExtensions: ([]: Array<string>),
     showCreateSectionByDefault: false,
     showInAppTutorialDeveloperMode: false,
     openDiagnosticReportAutomatically: true,
@@ -440,6 +442,7 @@ export const initialPreferences = {
     disableNpmScriptConfirmation: false,
     showJsTypeError: false,
     homePageMenuIsCollapsed: false,
+    canonicalEventSerialization: false,
   },
   setMultipleValues: () => {},
   setLanguage: () => {},
@@ -530,6 +533,7 @@ export const initialPreferences = {
   setUseBackgroundSerializerForSaving: (enabled: boolean) => {},
   setShowJsTypeError: (enabled: boolean) => {},
   setHomePageMenuIsCollapsed: (collapsed: boolean) => {},
+  setCanonicalEventSerialization: (enabled: boolean) => {},
 };
 
 const PreferencesContext: React.Context<Preferences> = React.createContext<Preferences>(
