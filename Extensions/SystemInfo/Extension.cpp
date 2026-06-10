@@ -54,17 +54,17 @@ void DeclareSystemInfoExtension(gd::PlatformExtension& extension) {
       .AddCodeOnlyParameter("currentScene", "");
 
   extension
-      .AddCondition("IsWebGLSupported",
-                    _("Is WebGL supported"),
-                    _("Check if GPU accelerated WebGL is supported on the "
+      .AddCondition("IsWebGPUSupported",
+                    _("Is WebGPU supported"),
+                    _("Check if GPU accelerated WebGPU is supported on the "
                       "target device."),
-                    _("WebGL is available"),
+                    _("WebGPU is available"),
                     "",
                     "CppPlatform/Extensions/systeminfoicon.png",
                     "CppPlatform/Extensions/systeminfoicon.png")
 
       .AddCodeOnlyParameter("currentScene", "")
-      .SetFunctionName("SystemInfo::IsWebGLSupported");
+      .SetFunctionName("SystemInfo::IsWebGPUSupported");
 
   extension
       .AddCondition(

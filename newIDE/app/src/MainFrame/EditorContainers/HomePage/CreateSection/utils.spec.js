@@ -2,7 +2,7 @@
 import { getExampleAndTemplateTiles } from './utils';
 
 // Mock the tile components to avoid pulling in their full dependency tree.
-jest.mock('../../../../AssetStore/ShopTiles', () => ({
+vi.mock('../../../../AssetStore/ShopTiles', () => ({
   ExampleTile: 'ExampleTile',
   PrivateGameTemplateTile: 'PrivateGameTemplateTile',
 }));
@@ -67,8 +67,8 @@ const makeTemplate = (id: string, score: ?number): any => ({
 });
 
 const mockCallbacks = ({
-  onSelectPrivateGameTemplateListingData: jest.fn(),
-  onSelectExampleShortHeader: jest.fn(),
+  onSelectPrivateGameTemplateListingData: vi.fn(),
+  onSelectExampleShortHeader: vi.fn(),
   i18n: {},
   gdevelopTheme: {},
 }: any);

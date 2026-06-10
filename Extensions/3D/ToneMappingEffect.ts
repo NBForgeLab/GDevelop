@@ -32,7 +32,7 @@ namespace gdjs {
 
   const getThreeRendererFromTarget = (
     target: EffectsTarget
-  ): THREE.WebGLRenderer | null => {
+  ): THREE.WebGPURenderer | null => {
     if (!(target instanceof gdjs.Layer)) {
       return null;
     }
@@ -127,7 +127,7 @@ namespace gdjs {
 
   const applySceneToneMappingToRenderer = (
     sceneState: ToneMappingSceneState,
-    threeRenderer: THREE.WebGLRenderer | null
+    threeRenderer: THREE.WebGPURenderer | null
   ): boolean => {
     if (!threeRenderer) {
       return false;

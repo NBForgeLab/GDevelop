@@ -51,7 +51,7 @@ export const GridSearchResults = <SearchItem>({
   const cachedHeights = React.useRef({});
 
   const onItemHeightComputed = React.useCallback(
-    (searchItem, height) => {
+    (searchItem: SearchItem, height: number) => {
       const uniqueId = getSearchItemUniqueId(searchItem);
       // $FlowFixMe[invalid-computed-prop]
       if (cachedHeights.current[uniqueId] === height) return false;
@@ -64,7 +64,7 @@ export const GridSearchResults = <SearchItem>({
   );
 
   const getRowHeight = React.useCallback(
-    ({ index }) => {
+    ({ index }: { index: number }) => {
       if (!searchItems) return ESTIMATED_CELL_HEIGHT;
 
       let maxHeight = ESTIMATED_CELL_HEIGHT;
@@ -86,7 +86,17 @@ export const GridSearchResults = <SearchItem>({
   );
 
   const renderCell = React.useCallback(
-    ({ columnIndex, key, rowIndex, style }) => {
+    ({
+      columnIndex,
+      key,
+      rowIndex,
+      style,
+    }: {
+      columnIndex: number,
+      key: string,
+      rowIndex: number,
+      style: Object,
+    }) => {
       if (!searchItems) return null;
 
       const itemIndex = rowIndex * columnCount + columnIndex;

@@ -3,12 +3,12 @@
 
 // $FlowFixMe[incompatible-type] - Mock worker for tests
 // $FlowFixMe[underconstrained-implicit-instantiation]
-const MockWorker: JestMockFn<any, any> = jest.fn().mockImplementation(() => {
+const MockWorker: JestMockFn<any, any> = vi.fn().mockImplementation(() => {
   return {
-    postMessage: jest.fn(),
+    postMessage: vi.fn(),
     onmessage: null,
     onerror: null,
-    terminate: jest.fn(),
+    terminate: vi.fn(),
   };
 });
 

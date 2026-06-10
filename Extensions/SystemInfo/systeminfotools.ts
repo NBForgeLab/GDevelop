@@ -62,13 +62,13 @@ namespace gdjs {
       };
 
       /**
-       * Check if the the device supports WebGL.
-       * @returns true if WebGL is supported
+       * Check if the renderer is using WebGPU.
+       * @returns true if WebGPU is used
        */
-      export const isWebGLSupported = (
+      export const isWebGPUSupported = (
         instanceContainer: gdjs.RuntimeInstanceContainer
       ): boolean => {
-        return instanceContainer.getGame().getRenderer().isWebGLSupported();
+        return instanceContainer.getGame().getRenderer().isWebGPUSupported();
       };
 
       /**

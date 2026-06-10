@@ -5,7 +5,7 @@ import { fakeAssetShortHeader1 } from '../../fixtures/GDevelopServicesTestData';
 
 describe('UseSearchItem', () => {
   test('sanitizeObjectName', () => {
-    const performanceApiMock = { now: jest.fn(() => Date.now()) };
+    const performanceApiMock = { now: vi.fn(() => Date.now()) };
     global.performance = performanceApiMock;
 
     expect(filterSearchItems(null, null, new Set())).toEqual(null);

@@ -12,8 +12,8 @@ import { moveUrlResourcesToCloudFilesIfPrivate } from './CloudResourceFetcher';
 import { fakeSilverAuthenticatedUser } from '../../fixtures/GDevelopServicesTestData';
 const gd: libGDevelop = global.gd;
 
-jest.mock('../../Utils/GDevelopServices/Project');
-jest.mock('../../Utils/BlobDownloader');
+vi.mock('../../Utils/GDevelopServices/Project');
+vi.mock('../../Utils/BlobDownloader');
 
 const mockFn = (fn: Function): JestMockFn<any, any> => fn;
 
@@ -63,7 +63,7 @@ const makeMoveUrlResourcesToCloudFilesIfPrivateOptions = (
   fileMetadata: { fileIdentifier: 'fake-cloud-project-id' },
   authenticatedUser: fakeSilverAuthenticatedUser,
   // $FlowFixMe[underconstrained-implicit-instantiation]
-  onProgress: jest.fn(),
+  onProgress: vi.fn(),
 });
 
 describe('CloudResourceFetcher', () => {

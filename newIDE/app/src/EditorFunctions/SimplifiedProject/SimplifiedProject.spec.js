@@ -13,20 +13,20 @@ describe('SimplifiedProject', () => {
     ).getSimplifiedProject(project, {});
 
     expect(simplifiedJson).toMatchInlineSnapshot(`
-      Object {
-        "globalObjectGroups": Array [],
-        "globalObjects": Array [
-          Object {
-            "behaviors": Array [
-              Object {
+      {
+        "globalObjectGroups": [],
+        "globalObjects": [
+          {
+            "behaviors": [
+              {
                 "behaviorName": "Effect",
                 "behaviorType": "EffectCapability::EffectBehavior",
               },
-              Object {
+              {
                 "behaviorName": "Opacity",
                 "behaviorType": "OpacityCapability::OpacityBehavior",
               },
-              Object {
+              {
                 "behaviorName": "Resizable",
                 "behaviorType": "ResizableCapability::ResizableBehavior",
               },
@@ -34,21 +34,21 @@ describe('SimplifiedProject', () => {
             "objectName": "GlobalTiledSpriteObject",
             "objectType": "TiledSpriteObject::TiledSprite",
           },
-          Object {
-            "behaviors": Array [
-              Object {
+          {
+            "behaviors": [
+              {
                 "behaviorName": "Effect",
                 "behaviorType": "EffectCapability::EffectBehavior",
               },
-              Object {
+              {
                 "behaviorName": "Opacity",
                 "behaviorType": "OpacityCapability::OpacityBehavior",
               },
-              Object {
+              {
                 "behaviorName": "Scale",
                 "behaviorType": "ScalableCapability::ScalableBehavior",
               },
-              Object {
+              {
                 "behaviorName": "Text",
                 "behaviorType": "TextContainerCapability::TextContainerBehavior",
               },
@@ -57,97 +57,97 @@ describe('SimplifiedProject', () => {
             "objectType": "TextObject::Text",
           },
         ],
-        "globalVariables": Array [],
-        "properties": Object {
+        "globalVariables": [],
+        "properties": {
           "gameResolutionHeight": 600,
           "gameResolutionWidth": 800,
         },
-        "resources": Array [
-          Object {
+        "resources": [
+          {
             "file": "fake-image1.png",
             "metadata": undefined,
             "name": "fake-image1.png",
             "type": "image",
           },
-          Object {
+          {
             "file": "fake-image2.png",
             "metadata": undefined,
             "name": "fake-image2.png",
             "type": "image",
           },
-          Object {
+          {
             "file": "res/icon128.png",
             "metadata": undefined,
             "name": "icon128.png",
             "type": "image",
           },
-          Object {
+          {
             "file": "res/powered-pixijs.png",
             "metadata": undefined,
             "name": "pixi",
             "type": "image",
           },
-          Object {
+          {
             "file": "fake-audio1.mp3",
             "metadata": undefined,
             "name": "fake-audio1.mp3",
             "type": "audio",
           },
-          Object {
+          {
             "file": "fake-video1.mp4",
             "metadata": undefined,
             "name": "fake-video1.mp4",
             "type": "video",
           },
-          Object {
+          {
             "file": "fake-video2.mp4",
             "metadata": undefined,
             "name": "fake-video2.mp4",
             "type": "video",
           },
-          Object {
+          {
             "file": "font.ttf",
             "metadata": undefined,
             "name": "font.ttf",
             "type": "font",
           },
-          Object {
+          {
             "file": "bmfont.xml",
             "metadata": undefined,
             "name": "bmfont.xml",
             "type": "bitmapFont",
           },
-          Object {
+          {
             "file": "super-font.fnt",
             "metadata": undefined,
             "name": "super-font.fnt",
             "type": "bitmapFont",
           },
-          Object {
+          {
             "file": "levelData.json",
             "metadata": undefined,
             "name": "levelData.json",
             "type": "json",
           },
-          Object {
+          {
             "file": "InventoryData.json",
             "metadata": undefined,
             "name": "InventoryData.json",
             "type": "json",
           },
-          Object {
+          {
             "file": "text-data.json",
             "metadata": undefined,
             "name": "text-data.json",
             "type": "json",
           },
         ],
-        "scenes": Array [
-          Object {
+        "scenes": [
+          {
             "instancesOnSceneDescription": "On the scene, there are:
-      - on layer \\"GUI\\":
+      - on layer "GUI":
         - Nothing (no instances)
-      - on layer \\"OtherLayer\\":
+      - on layer "OtherLayer":
         - Nothing (no instances)
       - on base layer:
         - 1 CubeObject
@@ -155,85 +155,85 @@ describe('SimplifiedProject', () => {
         - 1 MySpriteObject
 
       Inspect instances on the scene to get more details if needed.",
-            "layers": Array [
-              Object {
+            "layers": [
+              {
                 "isBaseLayer": undefined,
                 "layerName": "GUI",
                 "position": 0,
               },
-              Object {
+              {
                 "isBaseLayer": undefined,
                 "layerName": "OtherLayer",
                 "position": 1,
               },
-              Object {
+              {
                 "isBaseLayer": true,
                 "layerName": "",
                 "position": 2,
               },
             ],
-            "objectGroups": Array [
-              Object {
-                "behaviors": Array [
-                  Object {
+            "objectGroups": [
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Animation",
                     "behaviorType": "AnimatableCapability::AnimatableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
                 ],
                 "objectGroupName": "GroupOfSprites",
                 "objectGroupType": "Sprite",
-                "objectNames": Array [
+                "objectNames": [
                   "MySpriteObject",
                 ],
-                "variables": Array [
-                  Object {
+                "variables": [
+                  {
                     "type": "String",
                     "value": "A multiline
       str value",
                     "variableName": "ObjectVariable",
                   },
-                  Object {
+                  {
                     "type": "Structure",
-                    "variableChildren": Array [
-                      Object {
+                    "variableChildren": [
+                      {
                         "type": "Number",
                         "value": "564",
                         "variableName": "ObjectChild1",
                       },
-                      Object {
+                      {
                         "type": "String",
                         "value": "Guttentag",
                         "variableName": "ObjectChild2",
                       },
-                      Object {
+                      {
                         "type": "Boolean",
                         "value": "True",
                         "variableName": "ObjectChild3",
                       },
-                      Object {
+                      {
                         "type": "Array",
-                        "variableChildren": Array [
-                          Object {
+                        "variableChildren": [
+                          {
                             "type": "Number",
                             "value": "856.5",
                             "variableName": "0",
@@ -246,105 +246,105 @@ describe('SimplifiedProject', () => {
                   },
                 ],
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
                 ],
                 "objectGroupName": "GroupOfObjects",
                 "objectGroupType": "",
-                "objectNames": Array [
+                "objectNames": [
                   "MySpriteObject",
                   "MyTextObject",
                 ],
                 "variables": undefined,
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Anchor",
                     "behaviorType": "AnchorBehavior::AnchorBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Animation",
                     "behaviorType": "AnimatableCapability::AnimatableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Draggable",
                     "behaviorType": "DraggableBehavior::Draggable",
                   },
-                  Object {
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "PlatformerObject",
                     "behaviorType": "PlatformBehavior::PlatformerObjectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
                 ],
                 "objectGroupName": "GroupOfSpriteObjectsWithBehaviors",
                 "objectGroupType": "Sprite",
-                "objectNames": Array [
+                "objectNames": [
                   "MySpriteObjectWithBehaviors",
                 ],
                 "variables": undefined,
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Animation",
                     "behaviorType": "AnimatableCapability::AnimatableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
                 ],
                 "objectGroupName": "MyGroupWithObjectsHavingLongName",
                 "objectGroupType": "Sprite",
-                "objectNames": Array [
+                "objectNames": [
                   "MySpriteObject",
                   "MySpriteObject_With_A_Veeeerrryyyyyyyyy_Looooooooooooong_Name",
                   "MySpriteObjectWithoutBehaviors",
@@ -352,30 +352,30 @@ describe('SimplifiedProject', () => {
                 "variables": undefined,
               },
             ],
-            "objects": Array [
-              Object {
-                "behaviors": Array [
-                  Object {
+            "objects": [
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Animation",
                     "behaviorType": "AnimatableCapability::AnimatableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
@@ -383,29 +383,29 @@ describe('SimplifiedProject', () => {
                 "objectName": "MySpriteObjectWithEffects",
                 "objectType": "Sprite",
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Animation",
                     "behaviorType": "AnimatableCapability::AnimatableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
@@ -413,29 +413,29 @@ describe('SimplifiedProject', () => {
                 "objectName": "MySpriteObjectWithoutEffect",
                 "objectType": "Sprite",
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Animation",
                     "behaviorType": "AnimatableCapability::AnimatableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
@@ -443,41 +443,41 @@ describe('SimplifiedProject', () => {
                 "objectName": "MySpriteObjectWithoutBehaviors",
                 "objectType": "Sprite",
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Anchor",
                     "behaviorType": "AnchorBehavior::AnchorBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Animation",
                     "behaviorType": "AnimatableCapability::AnimatableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Draggable",
                     "behaviorType": "DraggableBehavior::Draggable",
                   },
-                  Object {
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "PlatformerObject",
                     "behaviorType": "PlatformBehavior::PlatformerObjectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
@@ -485,29 +485,29 @@ describe('SimplifiedProject', () => {
                 "objectName": "MySpriteObjectWithBehaviors",
                 "objectType": "Sprite",
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Animation",
                     "behaviorType": "AnimatableCapability::AnimatableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
@@ -515,65 +515,65 @@ describe('SimplifiedProject', () => {
                 "objectName": "MyEmptySpriteObject",
                 "objectType": "Sprite",
               },
-              Object {
+              {
                 "animationNames": "My animation, My other animation, (animation without name, animation index is: 2)",
-                "behaviors": Array [
-                  Object {
+                "behaviors": [
+                  {
                     "behaviorName": "Animation",
                     "behaviorType": "AnimatableCapability::AnimatableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
                 ],
                 "objectName": "MySpriteObject",
                 "objectType": "Sprite",
-                "objectVariables": Array [
-                  Object {
+                "objectVariables": [
+                  {
                     "type": "String",
                     "value": "A multiline
       str value",
                     "variableName": "ObjectVariable",
                   },
-                  Object {
+                  {
                     "type": "Structure",
-                    "variableChildren": Array [
-                      Object {
+                    "variableChildren": [
+                      {
                         "type": "Number",
                         "value": "564",
                         "variableName": "ObjectChild1",
                       },
-                      Object {
+                      {
                         "type": "String",
                         "value": "Guttentag",
                         "variableName": "ObjectChild2",
                       },
-                      Object {
+                      {
                         "type": "Boolean",
                         "value": "True",
                         "variableName": "ObjectChild3",
                       },
-                      Object {
+                      {
                         "type": "Array",
-                        "variableChildren": Array [
-                          Object {
+                        "variableChildren": [
+                          {
                             "type": "Number",
                             "value": "856.5",
                             "variableName": "0",
@@ -586,17 +586,17 @@ describe('SimplifiedProject', () => {
                   },
                 ],
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
@@ -604,25 +604,25 @@ describe('SimplifiedProject', () => {
                 "objectName": "MyPanelSpriteObject",
                 "objectType": "PanelSpriteObject::PanelSprite",
               },
-              Object {
+              {
                 "objectName": "TextInputObject",
                 "objectType": "FakeTextInput::TextInput",
               },
-              Object {
+              {
                 "objectName": "CubeObject",
                 "objectType": "FakeScene3D::Cube3DObject",
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
@@ -630,9 +630,9 @@ describe('SimplifiedProject', () => {
                 "objectName": "MyTiledSpriteObject",
                 "objectType": "TiledSpriteObject::TiledSprite",
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
@@ -640,21 +640,21 @@ describe('SimplifiedProject', () => {
                 "objectName": "MyParticleEmitter",
                 "objectType": "ParticleSystem::ParticleEmitter",
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Text",
                     "behaviorType": "TextContainerCapability::TextContainerBehavior",
                   },
@@ -662,21 +662,21 @@ describe('SimplifiedProject', () => {
                 "objectName": "MyTextObject",
                 "objectType": "TextObject::Text",
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
@@ -684,33 +684,33 @@ describe('SimplifiedProject', () => {
                 "objectName": "MyShapePainterObject",
                 "objectType": "PrimitiveDrawing::Drawer",
               },
-              Object {
+              {
                 "objectName": "MyButton",
                 "objectType": "Button::PanelSpriteButton",
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Animation",
                     "behaviorType": "AnimatableCapability::AnimatableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
@@ -718,33 +718,33 @@ describe('SimplifiedProject', () => {
                 "objectName": "MySpriteObject_With_A_Veeeerrryyyyyyyyy_Looooooooooooong_Name",
                 "objectType": "Sprite",
               },
-              Object {
+              {
                 "objectName": "MyFakeObjectWithUnsupportedCapability",
                 "objectType": "FakeObjectWithUnsupportedCapability::FakeObjectWithUnsupportedCapability",
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Animation",
                     "behaviorType": "AnimatableCapability::AnimatableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
@@ -752,29 +752,29 @@ describe('SimplifiedProject', () => {
                 "objectName": "VirtualControls",
                 "objectType": "Sprite",
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Animation",
                     "behaviorType": "AnimatableCapability::AnimatableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
@@ -782,29 +782,29 @@ describe('SimplifiedProject', () => {
                 "objectName": "VirtualControls1",
                 "objectType": "Sprite",
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Animation",
                     "behaviorType": "AnimatableCapability::AnimatableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
@@ -812,29 +812,29 @@ describe('SimplifiedProject', () => {
                 "objectName": "VirtualControls2",
                 "objectType": "Sprite",
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Animation",
                     "behaviorType": "AnimatableCapability::AnimatableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
@@ -842,29 +842,29 @@ describe('SimplifiedProject', () => {
                 "objectName": "VirtualControls3",
                 "objectType": "Sprite",
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Animation",
                     "behaviorType": "AnimatableCapability::AnimatableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
@@ -872,29 +872,29 @@ describe('SimplifiedProject', () => {
                 "objectName": "VirtualControls4",
                 "objectType": "Sprite",
               },
-              Object {
-                "behaviors": Array [
-                  Object {
+              {
+                "behaviors": [
+                  {
                     "behaviorName": "Animation",
                     "behaviorType": "AnimatableCapability::AnimatableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Effect",
                     "behaviorType": "EffectCapability::EffectBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Flippable",
                     "behaviorType": "FlippableCapability::FlippableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Opacity",
                     "behaviorType": "OpacityCapability::OpacityBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Resizable",
                     "behaviorType": "ResizableCapability::ResizableBehavior",
                   },
-                  Object {
+                  {
                     "behaviorName": "Scale",
                     "behaviorType": "ScalableCapability::ScalableBehavior",
                   },
@@ -904,35 +904,35 @@ describe('SimplifiedProject', () => {
               },
             ],
             "sceneName": "TestLayout",
-            "sceneVariables": Array [
-              Object {
+            "sceneVariables": [
+              {
                 "type": "String",
                 "value": "A multiline
       str value",
                 "variableName": "Variable1",
               },
-              Object {
+              {
                 "type": "String",
                 "value": "123456",
                 "variableName": "Variable2",
               },
-              Object {
+              {
                 "type": "Structure",
-                "variableChildren": Array [
-                  Object {
+                "variableChildren": [
+                  {
                     "type": "String",
                     "value": "Child1 str value",
                     "variableName": "Child1",
                   },
-                  Object {
+                  {
                     "type": "String",
                     "value": "7891011",
                     "variableName": "Child2",
                   },
-                  Object {
+                  {
                     "type": "Structure",
-                    "variableChildren": Array [
-                      Object {
+                    "variableChildren": [
+                      {
                         "type": "String",
                         "value": "Hello
       Multiline
@@ -945,21 +945,21 @@ describe('SimplifiedProject', () => {
                 ],
                 "variableName": "Variable3",
               },
-              Object {
+              {
                 "type": "Array",
-                "variableChildren": Array [
-                  Object {
+                "variableChildren": [
+                  {
                     "type": "String",
                     "value": "String value
       with Multiline",
                     "variableName": "0",
                   },
-                  Object {
+                  {
                     "type": "Number",
                     "value": "4539.42",
                     "variableName": "1",
                   },
-                  Object {
+                  {
                     "type": "Boolean",
                     "value": "True",
                     "variableName": "2",
@@ -967,20 +967,20 @@ describe('SimplifiedProject', () => {
                 ],
                 "variableName": "FoldedArray",
               },
-              Object {
+              {
                 "type": "Array",
-                "variableChildren": Array [
-                  Object {
+                "variableChildren": [
+                  {
                     "type": "String",
                     "value": "PlayerName",
                     "variableName": "0",
                   },
-                  Object {
+                  {
                     "type": "Number",
                     "value": "25",
                     "variableName": "1",
                   },
-                  Object {
+                  {
                     "type": "Boolean",
                     "value": "False",
                     "variableName": "2",
@@ -990,33 +990,33 @@ describe('SimplifiedProject', () => {
               },
             ],
           },
-          Object {
+          {
             "instancesOnSceneDescription": "There are no instances of objects placed on the scene - the scene is empty.",
-            "layers": Array [
-              Object {
+            "layers": [
+              {
                 "isBaseLayer": true,
                 "layerName": "",
                 "position": 0,
               },
             ],
-            "objectGroups": Array [],
-            "objects": Array [],
+            "objectGroups": [],
+            "objects": [],
             "sceneName": "EmptyLayout",
-            "sceneVariables": Array [],
+            "sceneVariables": [],
           },
-          Object {
+          {
             "instancesOnSceneDescription": "There are no instances of objects placed on the scene - the scene is empty.",
-            "layers": Array [
-              Object {
+            "layers": [
+              {
                 "isBaseLayer": true,
                 "layerName": "",
                 "position": 0,
               },
             ],
-            "objectGroups": Array [],
-            "objects": Array [],
+            "objectGroups": [],
+            "objects": [],
             "sceneName": "Layout with a very looooooooong naaaaame to test in the project manager",
-            "sceneVariables": Array [],
+            "sceneVariables": [],
           },
         ],
       }
@@ -1035,29 +1035,29 @@ describe('SimplifiedProject', () => {
     ).getProjectSpecificExtensionsSummary(project);
 
     expect(projectSpecificExtensionsSummary).toMatchInlineSnapshot(`
-      Object {
-        "extensionSummaries": Array [
-          Object {
-            "behaviors": Object {
-              "FakeBehavior::FakeBehavior": Object {
-                "actions": Array [],
-                "conditions": Array [],
+      {
+        "extensionSummaries": [
+          {
+            "behaviors": {
+              "FakeBehavior::FakeBehavior": {
+                "actions": [],
+                "conditions": [],
                 "description": "A fake behavior with two properties.",
-                "expressions": Array [
-                  Object {
+                "expressions": [
+                  {
                     "description": "Some expression returning a number",
-                    "parameters": Array [
-                      Object {
+                    "parameters": [
+                      {
                         "description": "First parameter (number)",
                         "type": "number",
                       },
                     ],
                     "type": "SomethingReturningNumberWith1NumberParam",
                   },
-                  Object {
+                  {
                     "description": "Some expression returning a string",
-                    "parameters": Array [
-                      Object {
+                    "parameters": [
+                      {
                         "description": "First parameter (number)",
                         "type": "number",
                       },
@@ -1067,31 +1067,31 @@ describe('SimplifiedProject', () => {
                 ],
                 "fullName": "Fake behavior with two properties",
                 "name": "FakeBehavior::FakeBehavior",
-                "properties": Array [
-                  Object {
+                "properties": [
+                  {
                     "description": "",
                     "label": "Property 1",
                     "name": "property1",
                     "type": "",
                   },
-                  Object {
+                  {
                     "description": "A description for property 2",
                     "name": "property2",
                     "type": "Boolean",
                   },
                 ],
-                "sharedProperties": Array [],
+                "sharedProperties": [],
               },
             },
             "description": "A fake extension with a fake behavior containing 2 properties.",
             "dimension": "",
-            "effects": Object {},
+            "effects": {},
             "extensionFullName": "Fake extension with a fake behavior",
             "extensionName": "FakeBehavior",
-            "freeActions": Array [],
-            "freeConditions": Array [],
-            "freeExpressions": Array [],
-            "objects": Object {},
+            "freeActions": [],
+            "freeConditions": [],
+            "freeExpressions": [],
+            "objects": {},
             "shortDescription": "Fake behavior with two properties",
           },
         ],
@@ -1115,68 +1115,68 @@ describe('SimplifiedProject', () => {
     );
 
     expect(buttonExtensionSummary).toMatchInlineSnapshot(`
-      Object {
-        "behaviors": Object {},
-        "description": "Fake event-based object (long description)",
-        "dimension": "2D",
-        "effects": Object {},
-        "extensionFullName": "Fake event-based object",
-        "extensionName": "Button",
-        "freeActions": Array [],
-        "freeConditions": Array [],
-        "freeExpressions": Array [],
-        "objects": Object {
-          "Button::PanelSpriteButton": Object {
-            "actions": Array [],
-            "conditions": Array [],
-            "description": "A fake button made with a panel sprite and events.",
-            "expressions": Array [],
-            "fullName": "PanelSpriteButton",
-            "name": "Button::PanelSpriteButton",
-            "properties": Array [
-              Object {
-                "description": "",
-                "label": "Label offset on Y axis when pressed",
-                "name": "PressedLabelOffsetY",
-                "type": "number",
+    {
+      "behaviors": {},
+      "description": "Fake event-based object (long description)",
+      "dimension": "2D",
+      "effects": {},
+      "extensionFullName": "Fake event-based object",
+      "extensionName": "Button",
+      "freeActions": [],
+      "freeConditions": [],
+      "freeExpressions": [],
+      "objects": {
+        "Button::PanelSpriteButton": {
+          "actions": [],
+          "conditions": [],
+          "description": "A fake button made with a panel sprite and events.",
+          "expressions": [],
+          "fullName": "PanelSpriteButton",
+          "name": "Button::PanelSpriteButton",
+          "properties": [
+            {
+              "description": "",
+              "label": "Label offset on Y axis when pressed",
+              "name": "PressedLabelOffsetY",
+              "type": "number",
+            },
+            {
+              "description": "The left padding of the button",
+              "group": "Padding",
+              "label": "Left padding",
+              "measurementUnit": {
+                "name": "Pixel",
               },
-              Object {
-                "description": "The left padding of the button",
-                "group": "Padding",
-                "label": "Left padding",
-                "measurementUnit": Object {
-                  "name": "Pixel",
-                },
-                "name": "LeftPadding",
-                "type": "number",
-              },
-              Object {
-                "description": "",
-                "group": "Padding",
-                "label": "Right padding",
-                "name": "RightPadding",
-                "type": "number",
-              },
-              Object {
-                "description": "",
-                "group": "Padding",
-                "label": "Top padding",
-                "name": "TopPadding",
-                "type": "number",
-              },
-              Object {
-                "description": "",
-                "group": "Padding",
-                "label": "Down padding",
-                "name": "DownPadding",
-                "type": "number",
-              },
-            ],
-          },
+              "name": "LeftPadding",
+              "type": "number",
+            },
+            {
+              "description": "",
+              "group": "Padding",
+              "label": "Right padding",
+              "name": "RightPadding",
+              "type": "number",
+            },
+            {
+              "description": "",
+              "group": "Padding",
+              "label": "Top padding",
+              "name": "TopPadding",
+              "type": "number",
+            },
+            {
+              "description": "",
+              "group": "Padding",
+              "label": "Down padding",
+              "name": "DownPadding",
+              "type": "number",
+            },
+          ],
         },
-        "shortDescription": "Fake event-based object",
-      }
-    `);
+      },
+      "shortDescription": "Fake event-based object",
+    }
+  `);
 
     project.delete();
   });

@@ -142,15 +142,11 @@ describe('ResourceUtils', () => {
       resource = new gd.Resource();
       updateResourceJsonMetadata(resource, { test: 123, test2: { '4': '56' } });
       // $FlowFixMe[incompatible-use]
-      expect(resource.getMetadata()).toMatchInlineSnapshot(
-        `"{\\"test\\":123,\\"test2\\":{\\"4\\":\\"56\\"}}"`
-      );
+      expect(resource.getMetadata()).toEqual('{"test":123,"test2":{"4":"56"}}');
       // $FlowFixMe[incompatible-type]
       updateResourceJsonMetadata(resource, { test2: 789 });
       // $FlowFixMe[incompatible-use]
-      expect(resource.getMetadata()).toMatchInlineSnapshot(
-        `"{\\"test\\":123,\\"test2\\":789}"`
-      );
+      expect(resource.getMetadata()).toEqual('{"test":123,"test2":789}');
 
       // $FlowFixMe[incompatible-use]
       resource.setMetadata('invalid json');
@@ -159,8 +155,8 @@ describe('ResourceUtils', () => {
         test3: 'this overwrote everything',
       });
       // $FlowFixMe[incompatible-use]
-      expect(resource.getMetadata()).toMatchInlineSnapshot(
-        `"{\\"test3\\":\\"this overwrote everything\\"}"`
+      expect(resource.getMetadata()).toEqual(
+        '{"test3":"this overwrote everything"}'
       );
     });
 
@@ -172,7 +168,7 @@ describe('ResourceUtils', () => {
       // $FlowFixMe[incompatible-type]
       expect(parseLocalFilePathOrExtensionFromMetadata(resource))
         .toMatchInlineSnapshot(`
-        Object {
+        {
           "extension": null,
           "localFilePath": null,
         }
@@ -187,7 +183,7 @@ describe('ResourceUtils', () => {
       // $FlowFixMe[incompatible-type]
       expect(parseLocalFilePathOrExtensionFromMetadata(resource))
         .toMatchInlineSnapshot(`
-        Object {
+        {
           "extension": ".png",
           "localFilePath": null,
         }
@@ -203,7 +199,7 @@ describe('ResourceUtils', () => {
       // $FlowFixMe[incompatible-type]
       expect(parseLocalFilePathOrExtensionFromMetadata(resource))
         .toMatchInlineSnapshot(`
-        Object {
+        {
           "extension": ".png",
           "localFilePath": "test",
         }
@@ -219,7 +215,7 @@ describe('ResourceUtils', () => {
       // $FlowFixMe[incompatible-type]
       expect(parseLocalFilePathOrExtensionFromMetadata(resource))
         .toMatchInlineSnapshot(`
-        Object {
+        {
           "extension": null,
           "localFilePath": null,
         }
@@ -235,9 +231,10 @@ describe('ResourceUtils', () => {
     fs.mkdirSync(projectFolder);
     try {
       const copiedPath = await copyDroppedFileToProjectFolder(
-        {
+        // $FlowFixMe[incompatible-type]
+        ({
           getProjectFile: () => path.join(projectFolder, 'game.json'),
-        },
+        }: any),
         {
           name: 'hero.png',
           arrayBuffer: async () => Uint8Array.from([1, 2, 3, 4]).buffer,

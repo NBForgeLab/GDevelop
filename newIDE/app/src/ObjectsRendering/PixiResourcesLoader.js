@@ -7,7 +7,9 @@ import * as PIXI_SPINE from '@esotericsoftware/spine-pixi-v8';
 import { SkeletonData, TextureAtlas } from '@esotericsoftware/spine-pixi-v8';
 import * as THREE from 'three';
 // $FlowFixMe[cannot-resolve-module]
-import { GLTFLoader, GLTF } from 'three/addons/loaders/GLTFLoader';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader';
+// $FlowFixMe[cannot-resolve-module]
+import { type GLTF } from 'three/addons/loaders/GLTFLoader';
 // $FlowFixMe[cannot-resolve-module]
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader';
 import ResourcesLoader from '../ResourcesLoader';
@@ -802,7 +804,7 @@ export default class PixiResourcesLoader {
 
     // Texture is not loaded, load it now from the PixiJS texture.
     // TODO (3D) - optimization: don't load the PixiJS Texture if not used by PixiJS.
-    // TODO (3D) - optimization: Ideally we could even share the same WebGL texture.
+    // TODO (3D) - optimization: Ideally we could share GPU texture data.
     const pixiTexture = PixiResourcesLoader.getPIXITexture(
       project,
       resourceName

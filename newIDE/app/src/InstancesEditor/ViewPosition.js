@@ -167,7 +167,7 @@ export default class ViewPosition {
     // $FlowFixMe[value-as-type]
     threeCamera: THREE.Camera,
     // $FlowFixMe[value-as-type]
-    threePlaneMesh: THREE.Mesh
+    threePlaneMesh?: THREE.Mesh
   ) {
     threeCamera.aspect = this._width / this._height;
 
@@ -188,12 +188,14 @@ export default class ViewPosition {
     threeCamera.far = cameraZPosition + 2000;
     threeCamera.updateProjectionMatrix();
 
-    // Adapt the plane size so that it covers the whole screen.
-    threePlaneMesh.scale.x = this._width / zoomFactor;
-    threePlaneMesh.scale.y = this._height / zoomFactor;
-    // Adapt the plane position so that it's always displayed on the whole screen.
-    threePlaneMesh.position.x = threeCamera.position.x;
-    threePlaneMesh.position.y = -threeCamera.position.y; // Inverted because the scene is mirrored on Y axis.
-    threePlaneMesh.rotation.z = 0;
+    if (threePlaneMesh) {
+      // Adapt the plane size so that it covers the whole screen.
+      threePlaneMesh.scale.x = this._width / zoomFactor;
+      threePlaneMesh.scale.y = this._height / zoomFactor;
+      // Adapt the plane position so that it's always displayed on the whole screen.
+      threePlaneMesh.position.x = threeCamera.position.x;
+      threePlaneMesh.position.y = -threeCamera.position.y; // Inverted because the scene is mirrored on Y axis.
+      threePlaneMesh.rotation.z = 0;
+    }
   }
 }

@@ -8,7 +8,7 @@ const gd: libGDevelop = global.gd;
 // $FlowFixMe[value-as-type]
 type StretchedSprite = PIXI.Sprite | PIXI.TilingSprite;
 
-const isTextureReady = (texture: PIXI.Texture): boolean =>
+const isTextureReady = (texture: any): boolean =>
   !!(
     texture &&
     !texture.destroyed &&
@@ -18,19 +18,13 @@ const isTextureReady = (texture: PIXI.Texture): boolean =>
     texture.source.height > 0
   );
 
-const createPanelSpriteTexture = (
-  texture: PIXI.Texture,
-  frame?: PIXI.Rectangle
-): PIXI.Texture =>
+const createPanelSpriteTexture = (texture: any, frame?: any): any =>
   new PIXI.Texture({
     source: texture.source,
     frame,
   });
 
-const createStretchedSprite = (
-  tiled: boolean,
-  texture: PIXI.Texture
-): StretchedSprite =>
+const createStretchedSprite = (tiled: boolean, texture: any): StretchedSprite =>
   tiled ? new PIXI.TilingSprite({ texture }) : new PIXI.Sprite({ texture });
 
 /**

@@ -2,6 +2,8 @@
  * Set up the environment for tests.
  */
 
+import { beforeAll, vi } from 'vitest';
+
 // * In the browser or in Electron, libGD.js is included as a separate file
 // and imported using a <script> tag in index.html, so it's not part of the
 // webpack build. It's made available as a global variable called gd.
@@ -13,16 +15,34 @@
 // rest of the codebase. See scripts/import-libGD.js
 const initializeGDevelopJs = require('libGD.js-for-tests-only');
 
+vi.setConfig({ testTimeout: 10000 });
+vi.mock('./Utils/BackgroundSerializer.worker');
+vi.mock('./ResourcesList/ResourcePreview/Resource3DPreview.worker');
+
 // We create the global "gd" object **synchronously** here. This is done as
 // the source files are using `global.gd` as a "top level" object (after imports).
 // This is a side effect, so this file must be imported before any test.
 // See also GDevelopJsInitializerDecorator.js for Storybook.
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => {}, // deprecated
+    removeListener: () => {}, // deprecated
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => {},
+  }),
+});
+
 global.gd = {
   I_AM_NOT_YET_INITIALIZED_YOU_MUST_USE_GD_INSIDE_A_TEST_ONLY: true,
 };
 
-beforeAll(done => {
-  initializeGDevelopJs().then(module => {
+beforeAll(() => {
+  return initializeGDevelopJs().then(module => {
     // We're **updating** the global "gd" object here. This is done so that
     // the source files that are using `global.gd` have the proper reference to the
     // object.
@@ -31,14 +51,5 @@ beforeAll(done => {
     for (var key in module) {
       global.gd[key] = module[key];
     }
-    done();
   });
 });
-
-// We increase the timeout for CIs (the default 5s can be too low sometimes, as a real browser is involved).
-jest.setTimeout(10000);
-
-// Mock worker files to prevent "self is not defined" errors in tests
-// Jest will automatically use the mock implementations from the __mocks__ folders
-jest.mock('./Utils/BackgroundSerializer.worker');
-jest.mock('./ResourcesList/ResourcePreview/Resource3DPreview.worker');

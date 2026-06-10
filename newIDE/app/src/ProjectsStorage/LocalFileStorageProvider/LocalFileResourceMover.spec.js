@@ -8,8 +8,8 @@ import { fakeSilverAuthenticatedUser } from '../../fixtures/GDevelopServicesTest
 import path from 'path';
 const gd: libGDevelop = global.gd;
 
-jest.mock('../../Utils/OptionalRequire');
-jest.mock('axios');
+vi.mock('../../Utils/OptionalRequire');
+vi.mock('axios');
 
 const mockFn = (fn: Function): JestMockFn<any, any> => fn;
 
@@ -125,7 +125,7 @@ const makeTestProjectWitheBlobResourcesFailingToDownload = () => {
 const makeMoveAllProjectResourcesOptions = (project: gdProject) => ({
   project,
   // $FlowFixMe[underconstrained-implicit-instantiation]
-  onProgress: jest.fn(),
+  onProgress: vi.fn(),
   fileMetadata: { fileIdentifier: 'fake-file' },
   authenticatedUser: fakeSilverAuthenticatedUser,
 });

@@ -140,7 +140,7 @@ namespace gdjs {
       },
       gameState: {
         sceneNames,
-        isWebGLSupported: runtimeGame.getRenderer().isWebGLSupported(),
+        isWebGPUSupported: runtimeGame.getRenderer().isWebGPUSupported(),
         hasPixiRenderer: !!runtimeGame.getRenderer().getPIXIRenderer(),
         hasThreeRenderer: !!runtimeGame.getRenderer().getThreeRenderer(),
         resourcesTotalCount:

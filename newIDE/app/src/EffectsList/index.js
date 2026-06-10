@@ -13,6 +13,7 @@ import RaisedButton from '../UI/RaisedButton';
 import FlatButton from '../UI/FlatButton';
 import IconButton from '../UI/IconButton';
 import ElementWithMenu from '../UI/Menu/ElementWithMenu';
+import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
 import SemiControlledTextField from '../UI/SemiControlledTextField';
 import newNameGenerator from '../Utils/NewNameGenerator';
 import DismissableAlertMessage from '../UI/DismissableAlertMessage';
@@ -935,8 +936,8 @@ export default function EffectsList(props: Props): React.Node {
       : effectsContainer.getEffectsCount();
 
   const buildAdd3DEffectMenuTemplate = React.useCallback(
-    (i18n: I18nType) =>
-      all3DEffectMetadata.map(effectMetadata => ({
+    (i18n: I18nType): Array<MenuItemTemplate> =>
+      all3DEffectMetadata.map((effectMetadata: EnumeratedEffectMetadata) => ({
         label: effectMetadata.fullName,
         enabled:
           !(target === 'object') ||

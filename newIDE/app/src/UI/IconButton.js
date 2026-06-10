@@ -37,7 +37,7 @@ type Props = {|
   id?: string,
 
   className?: string,
-  style?: {|
+  style?: {
     backgroundColor?: string,
     position?: string,
     top?: number,
@@ -57,7 +57,8 @@ type Props = {|
     marginTop?: number,
     marginBottom?: number,
     visibility?: 'visible' | 'hidden',
-  |},
+    [string]: any,
+  },
   size?: 'small',
 
   tooltip?: MessageDescriptor,
@@ -100,8 +101,8 @@ const useStylesForIconButton = ({
 
 const IconButton: React.ComponentType<{
   ...Props,
-  +ref?: React.RefSetter<{}>,
-}> = React.forwardRef<Props, {||}>((props: Props, ref) => {
+  +ref?: React.RefSetter<any>,
+}> = React.forwardRef<Props, any>((props: Props, ref) => {
   const {
     selected,
     tooltip,

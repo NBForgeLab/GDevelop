@@ -2,39 +2,41 @@
 
 import { getInitialPreferences } from '../MainFrame/Preferences/PreferencesProvider';
 
-jest.mock('../locales/LocalesMetadata', () => [
-  {
-    languageCode: 'pt_PT',
-    translationRatio: 0.46,
-  },
-  {
-    languageCode: 'pt_BR',
-    translationRatio: 0.95,
-  },
-  {
-    languageCode: 'en',
-    translationRatio: 0.04,
-  },
-  {
-    languageCode: 'es_ES',
-    translationRatio: 0.97,
-  },
-  {
-    languageCode: 'fr_FR',
-    translationRatio: 0.35,
-  },
-  {
-    languageCode: 'fr_CA',
-    translationRatio: 0.17,
-  },
-]);
+vi.mock('../locales/LocalesMetadata', () => ({
+  default: [
+    {
+      languageCode: 'pt_PT',
+      translationRatio: 0.46,
+    },
+    {
+      languageCode: 'pt_BR',
+      translationRatio: 0.95,
+    },
+    {
+      languageCode: 'en',
+      translationRatio: 0.04,
+    },
+    {
+      languageCode: 'es_ES',
+      translationRatio: 0.97,
+    },
+    {
+      languageCode: 'fr_FR',
+      translationRatio: 0.35,
+    },
+    {
+      languageCode: 'fr_CA',
+      translationRatio: 0.17,
+    },
+  ],
+}));
 
 // $FlowFixMe[underconstrained-implicit-instantiation]
-const mockGetBrowserLanguageOrLocale = jest.fn();
+const mockGetBrowserLanguageOrLocale = vi.fn();
 
-jest.mock('./Language', () => {
+vi.mock('./Language', async () => {
   // $FlowFixMe[underconstrained-implicit-instantiation]
-  const originalModule = jest.requireActual('./Language');
+  const originalModule = await vi.importActual('./Language');
 
   return {
     __esModule: true,

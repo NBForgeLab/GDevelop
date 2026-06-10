@@ -98,13 +98,13 @@ describe('EventsGlobalSearchScanner', () => {
     // Verify context: comment event gets otherText, standard event gets conditionText.
     const commentMatch = layoutGroup.matches.find(m => m.eventPath[0] === 0);
     expect(commentMatch).toMatchInlineSnapshot(`
-      Object {
-        "context": Object {
+      {
+        "context": {
           "actionText": "",
           "conditionText": "",
           "otherText": "Needle in a comment",
         },
-        "eventPath": Array [
+        "eventPath": [
           0,
         ],
         "id": "0-0-0",
@@ -113,13 +113,13 @@ describe('EventsGlobalSearchScanner', () => {
     `);
     const stdMatch = layoutGroup.matches.find(m => m.eventPath[0] === 1);
     expect(stdMatch).toMatchInlineSnapshot(`
-      Object {
-        "context": Object {
+      {
+        "context": {
           "actionText": "Delete SomeObject",
           "conditionText": "Needle key is pressed",
           "otherText": "",
         },
-        "eventPath": Array [
+        "eventPath": [
           1,
         ],
         "id": "1-1-1",

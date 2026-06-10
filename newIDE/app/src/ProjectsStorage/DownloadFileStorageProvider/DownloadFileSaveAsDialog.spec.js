@@ -3,8 +3,8 @@ import { downloadResourcesAsBlobs } from './DownloadFileSaveAsDialog';
 import { downloadUrlsToBlobs } from '../../Utils/BlobDownloader';
 const gd: libGDevelop = global.gd;
 
-jest.mock('../../Utils/BlobDownloader');
-jest.mock('../../Utils/OptionalRequire');
+vi.mock('../../Utils/BlobDownloader');
+vi.mock('../../Utils/OptionalRequire');
 
 const mockFn = (fn: Function): JestMockFn<any, any> => fn;
 
@@ -79,7 +79,7 @@ describe('DownloadFileSaveAsDialog', () => {
       if (!project)
         throw new Error('Missing project, test is not properly setup.');
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const onAddBlobFile = jest.fn();
+      const onAddBlobFile = vi.fn();
       mockFn(downloadUrlsToBlobs).mockImplementationOnce(({ urlContainers }) =>
         urlContainers.map(({ filename, resource }) => ({
           item: { resource, filename },
@@ -101,13 +101,13 @@ describe('DownloadFileSaveAsDialog', () => {
       // Local resources are expected to be erroring, as they can't be fetched.
       // We should also get an error for the resource that is set to fail to download.
       expect(result).toMatchInlineSnapshot(`
-        Object {
-          "erroredResources": Array [
-            Object {
+        {
+          "erroredResources": [
+            {
               "error": [Error: Unsupported relative file when downloading a copy.],
               "resourceName": "MyAlreadyLocalResource",
             },
-            Object {
+            {
               "error": [Error: Fake download error],
               "resourceName": "Failing download",
             },
@@ -118,16 +118,16 @@ describe('DownloadFileSaveAsDialog', () => {
       // GDevelop cloud resources have been downloaded as blobs:
       expect(onAddBlobFile).toHaveBeenCalledTimes(2);
       expect(onAddBlobFile.mock.calls[0][0]).toMatchInlineSnapshot(`
-        Object {
-          "blob": Object {
+        {
+          "blob": {
             "blob": "this-is-a-fake-blob",
           },
           "filePath": "assets/image/Pea-Happy.png",
         }
       `);
       expect(onAddBlobFile.mock.calls[1][0]).toMatchInlineSnapshot(`
-        Object {
-          "blob": Object {
+        {
+          "blob": {
             "blob": "this-is-a-fake-blob",
           },
           "filePath": "assets/image/Pea-Happy2.png",

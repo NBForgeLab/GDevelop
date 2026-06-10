@@ -1,5 +1,5 @@
 // @flow
-const { getItemsSplitInLines } = require('./CreditsPackagesHelper');
+import { getItemsSplitInLines } from './CreditsPackagesHelper';
 
 describe('getItemsSplitInLines', () => {
   describe('loading', () => {

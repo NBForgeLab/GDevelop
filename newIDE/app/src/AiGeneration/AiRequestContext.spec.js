@@ -20,7 +20,7 @@ import {
 } from './AiRequestContext';
 import { act } from 'react-dom/test-utils';
 
-jest.mock('../Utils/GDevelopServices/Generation');
+vi.mock('../Utils/GDevelopServices/Generation');
 
 const mockFn = (fn: any): JestMockFn<any, any> => fn;
 
@@ -104,7 +104,7 @@ const renderProvider = () => {
 
 describe('AiRequestProvider sub-agent polling', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     mockFn(getAiRequest).mockReset();
     mockFn(getAiRequestStatuses).mockReset();
     mockFn(getAiRequestStatuses).mockResolvedValue([]);
@@ -118,7 +118,7 @@ describe('AiRequestProvider sub-agent polling', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   // Covers bug 2 fix: once the sub-agent is in a non-`working` state, the
@@ -149,7 +149,7 @@ describe('AiRequestProvider sub-agent polling', () => {
 
     // First tick: shouldDoFullFetch is true (lastFullFetch starts at 0).
     await act(async () => {
-      jest.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
+      vi.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
       await flushPromises();
     });
     expect(mockFn(getAiRequest)).toHaveBeenCalledTimes(1);
@@ -161,7 +161,7 @@ describe('AiRequestProvider sub-agent polling', () => {
     for (let i = 0; i < 3; i++) {
       // eslint-disable-next-line no-await-in-loop
       await act(async () => {
-        jest.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
+        vi.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
         await flushPromises();
       });
     }
@@ -197,7 +197,7 @@ describe('AiRequestProvider sub-agent polling', () => {
 
     // First tick consumes the initial full fetch.
     await act(async () => {
-      jest.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
+      vi.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
       await flushPromises();
     });
     expect(mockFn(getAiRequest)).toHaveBeenCalledTimes(1);
@@ -211,7 +211,7 @@ describe('AiRequestProvider sub-agent polling', () => {
     ]);
 
     await act(async () => {
-      jest.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
+      vi.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
       await flushPromises();
     });
 
@@ -247,7 +247,7 @@ describe('AiRequestProvider sub-agent polling', () => {
 
     // First tick: everyone is due for a full fetch.
     await act(async () => {
-      jest.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
+      vi.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
       await flushPromises();
     });
 
@@ -259,7 +259,7 @@ describe('AiRequestProvider sub-agent polling', () => {
 
     // Second tick: everyone is status-only → one batched request for all ids.
     await act(async () => {
-      jest.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
+      vi.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
       await flushPromises();
     });
 
@@ -296,7 +296,7 @@ describe('AiRequestProvider sub-agent polling', () => {
     });
 
     await act(async () => {
-      jest.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
+      vi.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
       await flushPromises();
     });
     expect(mockFn(getAiRequest)).toHaveBeenCalledTimes(3);
@@ -309,7 +309,7 @@ describe('AiRequestProvider sub-agent polling', () => {
     ]);
 
     await act(async () => {
-      jest.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
+      vi.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
       await flushPromises();
     });
 
@@ -341,7 +341,7 @@ describe('AiRequestProvider sub-agent polling', () => {
     });
 
     await act(async () => {
-      jest.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
+      vi.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
       await flushPromises();
     });
     expect(mockFn(getAiRequest)).toHaveBeenCalledTimes(2);
@@ -352,7 +352,7 @@ describe('AiRequestProvider sub-agent polling', () => {
     ]);
 
     await act(async () => {
-      jest.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
+      vi.advanceTimersByTime(POLLING_INTERVAL_IN_MS);
       await flushPromises();
     });
 
@@ -365,7 +365,7 @@ describe('AiRequestProvider sub-agent polling', () => {
 
 describe('AiRequestProvider sub-agent cleanup on navigation', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     mockFn(getAiRequest).mockReset();
     mockFn(getAiRequestStatuses).mockReset();
     mockFn(getAiRequestStatuses).mockResolvedValue([]);
@@ -379,7 +379,7 @@ describe('AiRequestProvider sub-agent cleanup on navigation', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   // Covers bug 3 fix: when the user switches away from a parent AI request,

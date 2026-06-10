@@ -36,9 +36,9 @@ type Props = {|
   isActive: boolean,
   hideLabel?: boolean,
   id?: string,
-  iconStyle?: { [string]: string | number },
+  iconStyle?: { +[string]: string | number },
   iconFontSize?: 'inherit' | 'small',
-  labelStyle?: { [string]: string | number },
+  labelStyle?: { +[string]: string | number },
 |};
 
 const VerticalTabButton = ({
@@ -67,12 +67,11 @@ const VerticalTabButton = ({
       disableElevation
     >
       <div
-        style={{
-          ...(hideLabel
-            ? styles.iconWrapperWithoutLabel
-            : styles.iconWrapperWithLabel),
-          ...iconStyle,
-        }}
+        style={
+          hideLabel
+            ? { ...styles.iconWrapperWithoutLabel, ...(iconStyle: any) }
+            : { ...styles.iconWrapperWithLabel, ...(iconStyle: any) }
+        }
       >
         {getIcon({
           color: isActive ? 'inherit' : 'secondary',

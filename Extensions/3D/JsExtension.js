@@ -3854,7 +3854,7 @@ module.exports = {
         const hasMorphTargets =
           !!sourceGeometry.morphAttributes &&
           Object.keys(sourceGeometry.morphAttributes).length > 0;
-        const isSkinnedMesh = mesh.isSkinnedMesh === true;
+        const isSkinnedMesh = /** @type {any} */ (mesh).isSkinnedMesh === true;
 
         // Never optimize geometries used by skinned/morphed meshes.
         // Check eligibility before cache lookup so shared geometries do not
@@ -4516,12 +4516,14 @@ module.exports = {
           .get3DModel(this._project, this._modelResourceName)
           .then((model3d) => {
             if (this._wasDestroyed) return;
-            this._clonedModel3D = THREE_ADDONS.SkeletonUtils.clone(
+            const clonedModel3D = THREE_ADDONS.SkeletonUtils.clone(
               model3d.scene
             );
+            if (!clonedModel3D) return;
+            this._clonedModel3D = clonedModel3D;
             if (this._optimizeGeometry) {
               optimizeGeometryForModel(
-                this._clonedModel3D,
+                clonedModel3D,
                 this._optimizeGeometryTolerance
               );
             }

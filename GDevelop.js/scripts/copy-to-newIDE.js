@@ -1,64 +1,78 @@
 const shell = require('shelljs');
 const path = require('path');
+const fs = require('fs');
 
-const sourcePath = path.join(__dirname, '../../Binaries/embuild/GDevelop.js');
+const sourcePaths = [
+  path.join(__dirname, '../../Binaries/embuild/GDevelop.js'),
+  path.join(__dirname, '../../Binaries/embuild-fresh/GDevelop.js'),
+];
 const destinationPath = path.join(__dirname, '../../newIDE/app/public');
 const destinationTestPath = path.join(
   __dirname,
   '../../newIDE/app/node_modules/libGD.js-for-tests-only'
 );
 
-const copyLibGdJsFile = (filePath) => {
-  if (
-    !shell.cp(filePath, destinationPath).stderr &&
-    !shell.cp(filePath, destinationTestPath).stderr
-  ) {
-    shell.echo(
-      `✅ Copied ${path.basename(filePath)} from Binaries/embuild/GDevelop.js to public and node_modules folders of newIDE/app.`
-    );
-  } else {
-    shell.echo(
-      `❌ Error while copying ${path.basename(filePath)} from Binaries/embuild/GDevelop.js to public and node_modules folders of newIDE/app.`
-    );
+const copyFileAtomically = (sourceFile, destinationFile) => {
+  const temporaryDestinationFile = `${destinationFile}.tmp`;
+  fs.mkdirSync(path.dirname(destinationFile), { recursive: true });
+  fs.copyFileSync(sourceFile, temporaryDestinationFile);
+  fs.renameSync(temporaryDestinationFile, destinationFile);
+};
+
+const assertReadableFile = filePath => {
+  fs.accessSync(filePath, fs.constants.R_OK);
+  const fileDescriptor = fs.openSync(filePath, 'r');
+  try {
+    fs.readSync(fileDescriptor, Buffer.alloc(1), 0, 1, 0);
+  } finally {
+    fs.closeSync(fileDescriptor);
   }
+};
+
+const findReadableSourcePath = () => {
+  const errors = [];
+  for (const sourcePath of sourcePaths) {
+    const sourceJsFile = path.join(sourcePath, 'libGD.js');
+    const sourceWasmFile = path.join(sourcePath, 'libGD.wasm');
+    try {
+      assertReadableFile(sourceJsFile);
+      assertReadableFile(sourceWasmFile);
+      return { sourcePath, sourceJsFile, sourceWasmFile };
+    } catch (error) {
+      errors.push(`${sourcePath}: ${error.message}`);
+    }
+  }
+
+  shell.echo('❌ You must compile GDevelop.js first.');
+  shell.echo('ℹ️ Expected a readable matching libGD.js/libGD.wasm pair in:');
+  for (const sourcePath of sourcePaths) {
+    shell.echo(`- ${sourcePath}`);
+  }
+  shell.echo(errors.join('\n'));
+  shell.exit(1);
 };
 
 if (shell.mkdir('-p', destinationTestPath).stderr) {
   shell.echo(
     `❌ Can't create ${destinationTestPath}. Have you the proper rights?`
   );
-}
-
-if (!shell.test('-f', path.join(sourcePath, 'libGD.js'))) {
-  shell.echo('❌ You must compile GDevelop.js first');
   shell.exit(1);
 }
 
-// Copy the files built locally
-const sourceJsFile = path.join(sourcePath, 'libGD.js');
-const sourceWasmFile = path.join(sourcePath, 'libGD.wasm');
+const { sourcePath, sourceJsFile, sourceWasmFile } = findReadableSourcePath();
 
-// Copy the wasm or memory file.
-if (shell.test('-f', sourceWasmFile)) {
-  copyLibGdJsFile(sourceWasmFile);
-} else {
+try {
+  copyFileAtomically(sourceJsFile, path.join(destinationPath, 'libGD.js'));
+  copyFileAtomically(sourceJsFile, path.join(destinationTestPath, 'index.js'));
+  copyFileAtomically(sourceWasmFile, path.join(destinationPath, 'libGD.wasm'));
+  copyFileAtomically(sourceWasmFile, path.join(destinationTestPath, 'libGD.wasm'));
   shell.echo(
-    `❌ libGD.wasm should exist in ${sourcePath}.`
+    `✅ Copied matching libGD.js/libGD.wasm from ${sourcePath} to public and node_modules folders of newIDE/app.`
   );
-  shell.exit(1);
-}
-
-// Copy the JS file.
-if (
-  !shell.cp(sourceJsFile, destinationPath).stderr &&
-  !shell.cp(sourceJsFile, path.join(destinationTestPath, 'index.js')).stderr
-) {
+} catch (error) {
   shell.echo(
-    '✅ Copied libGD.js from Binaries/embuild/GDevelop.js to public and node_modules folders of newIDE/app.'
+    `❌ Error while copying libGD.js/libGD.wasm from ${sourcePath} to public and node_modules folders of newIDE/app.`
   );
-} else {
-  shell.echo(
-    '❌ Error while copying libGD.js from Binaries/embuild/GDevelop.js to public and node_modules folders of newIDE/app'
-  );
+  shell.echo(error.message);
   shell.exit(1);
 }

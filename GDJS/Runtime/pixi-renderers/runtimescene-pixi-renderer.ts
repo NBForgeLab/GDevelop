@@ -11,7 +11,7 @@ namespace gdjs {
     private _pixiContainer: PIXI.Container;
     private _profilerText: PIXI.Text | null = null;
     private _showCursorAtNextRender: boolean = false;
-    private _threeRenderer: THREE.WebGLRenderer | null = null;
+    private _threeRenderer: THREE.WebGPURenderer | null = null;
     private _layerRenderingMetrics: {
       rendered2DLayersCount: number;
       rendered3DLayersCount: number;
@@ -97,15 +97,12 @@ namespace gdjs {
 
         /**
          * true if the last layer rendered 3D objects using Three.js, false otherwise.
-         * Useful to avoid needlessly resetting the WebGL states between layers (which can be expensive).
+         * Useful to avoid needlessly resetting the renderer states between layers.
          */
         let lastRenderWas3D = true;
 
-        // Even if no rendering at all has been made already, setting up the Three.js/PixiJS renderers
-        // might have changed some WebGL states already. Reset the state for the very first frame.
-        // And, out of caution, keep doing it for every frame.
-        // TODO (3D): optimization - check if this can be done only on the very first frame.
-        threeRenderer.resetState();
+        // Reset the state for the very first frame when the renderer exposes such a hook.
+        (threeRenderer as any).resetState?.();
 
         // Render each layer one by one.
         for (let i = 0; i < this._runtimeScene._orderedLayers.length; ++i) {
@@ -128,7 +125,7 @@ namespace gdjs {
 
             if (lastRenderWas3D) {
               // Ensure the state is clean for PixiJS to render.
-              threeRenderer.resetState();
+              (threeRenderer as any).resetState?.();
               pixiRenderer.resetState();
             }
 
@@ -177,7 +174,7 @@ namespace gdjs {
             }
 
             // Render the 3D objects of this layer.
-            if (threeScene && threeCamera && threeEffectComposer) {
+            if (threeScene && threeCamera) {
               // TODO (3D) - optimization: do this at the beginning for all layers that are 2d+3d?
               // So the second pass is clearer (just rendering 2d or 3d layers without doing PixiJS renders in between).
               if (
@@ -190,7 +187,7 @@ namespace gdjs {
                 if (layerHas2DObjectsToRender) {
                   if (lastRenderWas3D) {
                     // Ensure the state is clean for PixiJS to render.
-                    threeRenderer.resetState();
+                    (threeRenderer as any).resetState?.();
                     pixiRenderer.resetState();
                   }
 
@@ -199,7 +196,7 @@ namespace gdjs {
                   // so that the 2D rendering made by PixiJS can be shown in the 3D world.
                   runtimeLayerRenderer.renderOnPixiRenderTexture(pixiRenderer);
                   runtimeLayerRenderer.updateThreePlaneTextureFromPixiRenderTexture(
-                    // The renderers are needed to find the internal WebGL texture.
+                    // The renderers are needed by the layer renderer implementation.
                     threeRenderer,
                     pixiRenderer
                   );
@@ -213,10 +210,9 @@ namespace gdjs {
               }
 
               if (!lastRenderWas3D) {
-                // It's important to reset the internal WebGL state of PixiJS, then Three.js
-                // to ensure the 3D rendering is made properly by Three.js
+                // Ensure the 3D rendering is made properly by Three.js.
                 pixiRenderer.resetState();
-                threeRenderer.resetState();
+                (threeRenderer as any).resetState?.();
               }
 
               if (isFirstRender) {
@@ -224,7 +220,7 @@ namespace gdjs {
                 threeRenderer.setClearColor(
                   this._runtimeScene.getBackgroundColor()
                 );
-                threeRenderer.resetState();
+                (threeRenderer as any).resetState?.();
                 if (this._runtimeScene.getClearCanvas()) threeRenderer.clear();
                 if (!this._backgroundColor) {
                   this._backgroundColor = new THREE.Color();
@@ -248,7 +244,10 @@ namespace gdjs {
               // Clear the depth as each layer is independent and display on top of the previous one,
               // even 3D objects.
               threeRenderer.clearDepth();
-              if (runtimeLayerRenderer.hasPostProcessingPass()) {
+              if (
+                threeEffectComposer &&
+                runtimeLayerRenderer.hasPostProcessingPass()
+              ) {
                 threeEffectComposer.render();
               } else {
                 threeRenderer.render(threeScene, threeCamera);
@@ -266,15 +265,15 @@ namespace gdjs {
           .getRendererObject();
 
         if (debugContainer) {
-          threeRenderer.resetState();
+          (threeRenderer as any).resetState?.();
           pixiRenderer.resetState();
           pixiRenderer.render({ container: debugContainer });
           lastRenderWas3D = false;
         }
 
         if (!lastRenderWas3D) {
-          // Out of caution, reset the WebGL states from PixiJS to start again
-          // with a 3D rendering on the next frame.
+          // Out of caution, reset the PixiJS state to start again with a 3D
+          // rendering on the next frame.
           pixiRenderer.resetState();
         }
 
@@ -333,8 +332,8 @@ namespace gdjs {
      *   to allow the game to actually progress, since GDevelop will no longer step by itself with
      *   `requestAnimationFrame` disabled.
      *
-     * Note to engine developers: `threeRenderer.resetState()` may NOT be called in this function,
-     * as WebXR modifies the WebGL state in a way that resetting it will cause an improper render
+     * Note to engine developers: renderer state reset may NOT be called in this function,
+     * as WebXR modifies renderer state in a way that resetting it will cause an improper render
      * that will lead to a black screen being displayed in VR mode.
      */
     renderForVR() {

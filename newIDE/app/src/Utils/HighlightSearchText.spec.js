@@ -21,29 +21,29 @@ describe('HighlightSearchText', () => {
         )
       ).toMatchInlineSnapshot(
         `
-        Array [
-          Object {
-            "endIndex": 7,
-            "key": "ipsum-0",
-            "props": Object {},
-            "startIndex": 0,
-          },
-          Object {
-            "endIndex": 12,
-            "key": "ipsum-1",
-            "props": Object {
-              "className": "Highlighted",
-            },
-            "startIndex": 7,
-          },
-          Object {
-            "endIndex": 32,
-            "key": "ipsum-2",
-            "props": Object {},
-            "startIndex": 12,
-          },
-        ]
-      `
+  [
+    {
+      "endIndex": 7,
+      "key": "ipsum-0",
+      "props": {},
+      "startIndex": 0,
+    },
+    {
+      "endIndex": 12,
+      "key": "ipsum-1",
+      "props": {
+        "className": "Highlighted",
+      },
+      "startIndex": 7,
+    },
+    {
+      "endIndex": 32,
+      "key": "ipsum-2",
+      "props": {},
+      "startIndex": 12,
+    },
+  ]
+`
       );
     });
   });
@@ -67,33 +67,33 @@ describe('HighlightSearchText', () => {
         })
       ).toMatchInlineSnapshot(
         `
-        Array [
-          Object {
-            "endIndex": 13,
-            "key": "color-part-0",
-            "props": Object {
-              "className": "instruction-parameter string",
-            },
-            "startIndex": 0,
-          },
-          Object {
-            "endIndex": 16,
-            "key": "color-part-1",
-            "props": Object {
-              "className": "instruction-parameter operator",
-            },
-            "startIndex": 13,
-          },
-          Object {
-            "endIndex": 32,
-            "key": "color-part-2",
-            "props": Object {
-              "className": "instruction-parameter string",
-            },
-            "startIndex": 16,
-          },
-        ]
-      `
+    [
+      {
+        "endIndex": 13,
+        "key": "color-part-0",
+        "props": {
+          "className": "instruction-parameter string",
+        },
+        "startIndex": 0,
+      },
+      {
+        "endIndex": 16,
+        "key": "color-part-1",
+        "props": {
+          "className": "instruction-parameter operator",
+        },
+        "startIndex": 13,
+      },
+      {
+        "endIndex": 32,
+        "key": "color-part-2",
+        "props": {
+          "className": "instruction-parameter string",
+        },
+        "startIndex": 16,
+      },
+    ]
+  `
       );
       parser.delete();
     });
@@ -127,13 +127,13 @@ describe('HighlightSearchText', () => {
         )
       ).toMatchInlineSnapshot(
         `
-        Array [
-          Object {
-            "children": Array [
-              Object {
+        [
+          {
+            "children": [
+              {
                 "endIndex": 7,
                 "key": "color-part-0",
-                "props": Object {
+                "props": {
                   "className": "instruction-parameter string",
                 },
                 "startIndex": 0,
@@ -141,15 +141,15 @@ describe('HighlightSearchText', () => {
             ],
             "endIndex": 7,
             "key": "ipsum-0",
-            "props": Object {},
+            "props": {},
             "startIndex": 0,
           },
-          Object {
-            "children": Array [
-              Object {
+          {
+            "children": [
+              {
                 "endIndex": 12,
                 "key": "color-part-0",
-                "props": Object {
+                "props": {
                   "className": "instruction-parameter string",
                 },
                 "startIndex": 7,
@@ -157,33 +157,33 @@ describe('HighlightSearchText', () => {
             ],
             "endIndex": 12,
             "key": "ipsum-1",
-            "props": Object {
+            "props": {
               "className": "Highlighted",
             },
             "startIndex": 7,
           },
-          Object {
-            "children": Array [
-              Object {
+          {
+            "children": [
+              {
                 "endIndex": 13,
                 "key": "color-part-0",
-                "props": Object {
+                "props": {
                   "className": "instruction-parameter string",
                 },
                 "startIndex": 12,
               },
-              Object {
+              {
                 "endIndex": 16,
                 "key": "color-part-1",
-                "props": Object {
+                "props": {
                   "className": "instruction-parameter operator",
                 },
                 "startIndex": 13,
               },
-              Object {
+              {
                 "endIndex": 32,
                 "key": "color-part-2",
-                "props": Object {
+                "props": {
                   "className": "instruction-parameter string",
                 },
                 "startIndex": 16,
@@ -191,7 +191,7 @@ describe('HighlightSearchText', () => {
             ],
             "endIndex": 32,
             "key": "ipsum-2",
-            "props": Object {},
+            "props": {},
             "startIndex": 12,
           },
         ]
@@ -225,75 +225,75 @@ describe('HighlightSearchText', () => {
           })
         )
       ).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "children": Array [
-              Object {
-                "endIndex": 7,
-                "key": "color-part-0",
-                "props": Object {
-                  "className": "instruction-parameter string",
-                },
-                "startIndex": 0,
-              },
-            ],
-            "endIndex": 7,
-            "key": "ipsum\\" + \\"dolor-0",
-            "props": Object {},
-            "startIndex": 0,
-          },
-          Object {
-            "children": Array [
-              Object {
-                "endIndex": 13,
-                "key": "color-part-0",
-                "props": Object {
-                  "className": "instruction-parameter string",
-                },
-                "startIndex": 7,
-              },
-              Object {
-                "endIndex": 16,
-                "key": "color-part-1",
-                "props": Object {
-                  "className": "instruction-parameter operator",
-                },
-                "startIndex": 13,
-              },
-              Object {
-                "endIndex": 22,
-                "key": "color-part-2",
-                "props": Object {
-                  "className": "instruction-parameter string",
-                },
-                "startIndex": 16,
-              },
-            ],
-            "endIndex": 22,
-            "key": "ipsum\\" + \\"dolor-1",
-            "props": Object {
-              "className": "Highlighted",
-            },
-            "startIndex": 7,
-          },
-          Object {
-            "children": Array [
-              Object {
-                "endIndex": 32,
-                "key": "color-part-2",
-                "props": Object {
-                  "className": "instruction-parameter string",
-                },
-                "startIndex": 22,
-              },
-            ],
-            "endIndex": 32,
-            "key": "ipsum\\" + \\"dolor-2",
-            "props": Object {},
-            "startIndex": 22,
-          },
-        ]
-      `);
+                  [
+                    {
+                      "children": [
+                        {
+                          "endIndex": 7,
+                          "key": "color-part-0",
+                          "props": {
+                            "className": "instruction-parameter string",
+                          },
+                          "startIndex": 0,
+                        },
+                      ],
+                      "endIndex": 7,
+                      "key": "ipsum" + "dolor-0",
+                      "props": {},
+                      "startIndex": 0,
+                    },
+                    {
+                      "children": [
+                        {
+                          "endIndex": 13,
+                          "key": "color-part-0",
+                          "props": {
+                            "className": "instruction-parameter string",
+                          },
+                          "startIndex": 7,
+                        },
+                        {
+                          "endIndex": 16,
+                          "key": "color-part-1",
+                          "props": {
+                            "className": "instruction-parameter operator",
+                          },
+                          "startIndex": 13,
+                        },
+                        {
+                          "endIndex": 22,
+                          "key": "color-part-2",
+                          "props": {
+                            "className": "instruction-parameter string",
+                          },
+                          "startIndex": 16,
+                        },
+                      ],
+                      "endIndex": 22,
+                      "key": "ipsum" + "dolor-1",
+                      "props": {
+                        "className": "Highlighted",
+                      },
+                      "startIndex": 7,
+                    },
+                    {
+                      "children": [
+                        {
+                          "endIndex": 32,
+                          "key": "color-part-2",
+                          "props": {
+                            "className": "instruction-parameter string",
+                          },
+                          "startIndex": 22,
+                        },
+                      ],
+                      "endIndex": 32,
+                      "key": "ipsum" + "dolor-2",
+                      "props": {},
+                      "startIndex": 22,
+                    },
+                  ]
+                `);
       parser.delete();
     });
   });

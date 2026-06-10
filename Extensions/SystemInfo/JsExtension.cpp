@@ -33,9 +33,9 @@ class SystemInfoJsExtension : public gd::PlatformExtension {
     GetAllConditions()["SystemInfo::IsNativeDesktopApp"]
         .SetIncludeFile("Extensions/SystemInfo/systeminfotools.js")
         .SetFunctionName("gdjs.evtTools.systemInfo.isNativeDesktopApp");
-    GetAllConditions()["SystemInfo::IsWebGLSupported"]
+    GetAllConditions()["SystemInfo::IsWebGPUSupported"]
         .SetIncludeFile("Extensions/SystemInfo/systeminfotools.js")
-        .SetFunctionName("gdjs.evtTools.systemInfo.isWebGLSupported");
+        .SetFunctionName("gdjs.evtTools.systemInfo.isWebGPUSupported");
     GetAllConditions()["SystemInfo::IsPreview"]
         .SetIncludeFile("Extensions/SystemInfo/systeminfotools.js")
         .SetFunctionName("gdjs.evtTools.systemInfo.isPreview");

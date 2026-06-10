@@ -12,18 +12,18 @@ const gd: libGDevelop = global.gd;
 
 type Props = EditorProps;
 
-const createRow = (name, fields) => ({
+const createRow = (name: string, fields: Array<any>) => ({
   name,
   type: 'row',
   children: fields,
 });
 
 const replaceFieldsWithRow = (
-  fields,
-  rowName,
-  firstFieldName,
-  secondFieldName
-) => {
+  fields: Array<any>,
+  rowName: string,
+  firstFieldName: string,
+  secondFieldName: string
+): Array<any> => {
   const firstIndex = fields.findIndex(f => f.name === firstFieldName);
   const secondIndex = fields.findIndex(f => f.name === secondFieldName);
   if (firstIndex === -1 || secondIndex === -1) return fields;
@@ -68,6 +68,7 @@ const MapEditor = (props: Props): React.Node => {
         .getValue(),
     onUpdateProperty: (object, name, value) =>
       object.updateProperty(name, value),
+    layersContainer: null,
   });
 
   const groups = fullSchema.filter(

@@ -9,30 +9,32 @@ import {
   getResourceKindFromMimeType,
 } from './DroppedFileObjectSelectorUtils';
 
-jest.mock('../UI/ListIcon', () => 'ListIcon');
-jest.mock('../UI/Theme/GDevelopThemeContext', () => {
+vi.mock('../UI/ListIcon', () => ({ default: 'ListIcon' }));
+vi.mock('../UI/Theme/GDevelopThemeContext', () => {
   const React = require('react');
-  return React.createContext({
-    listItem: {
-      selectedBackgroundColor: '#ff8800',
-    },
-    list: {
-      itemsBackgroundColor: '#223344',
-    },
-    palette: {
-      canvasColor: '#0f1014',
-    },
-    paper: {
-      backgroundColor: {
-        dark: '#121826',
+  return {
+    default: React.createContext({
+      listItem: {
+        selectedBackgroundColor: '#ff8800',
       },
-    },
-    text: {
-      color: {
-        primary: '#ffffff',
+      list: {
+        itemsBackgroundColor: '#223344',
       },
-    },
-  });
+      palette: {
+        canvasColor: '#0f1014',
+      },
+      paper: {
+        backgroundColor: {
+          dark: '#121826',
+        },
+      },
+      text: {
+        color: {
+          primary: '#ffffff',
+        },
+      },
+    }),
+  };
 });
 
 describe('ObjectsList drag and drop helpers', () => {

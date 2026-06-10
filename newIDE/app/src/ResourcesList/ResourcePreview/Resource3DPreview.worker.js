@@ -1,6 +1,6 @@
 /* eslint-env worker */
 // @flow
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader';
 
 // Copied from PixiResourcesLoader.js
@@ -34,23 +34,58 @@ const MESSAGE_TYPES = {
   INIT: 'INIT',
 };
 
-let renderer = null;
+let renderer: any = null;
 let width = 256;
 let height = 256;
 let offscreenCanvas = null;
 
+const checkWebGPUSupport = async () => {
+  // eslint-disable-next-line no-restricted-globals
+  if (!self.navigator || !self.navigator.gpu) {
+    return false;
+  }
+
+  try {
+    // eslint-disable-next-line no-restricted-globals
+    const adapter = await self.navigator.gpu.requestAdapter();
+    if (!adapter) {
+      return false;
+    }
+    const device = await adapter.requestDevice();
+    device.destroy();
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
 // Set up the renderer when worker is initialized
-const initRenderer = () => {
+const initRenderer = async () => {
+  if (!(await checkWebGPUSupport())) {
+    throw new Error(
+      'WebGPU is required to render 3D resource previews, but no usable WebGPU adapter/device is available.'
+    );
+  }
+
   // $FlowFixMe[incompatible-type] - OffscreenCanvas is not in Flow types
   // $FlowFixMe[cannot-resolve-name]
   offscreenCanvas = new OffscreenCanvas(width, height);
 
-  // Create renderer with offscreen canvas
-  renderer = new THREE.WebGLRenderer({
+  renderer = new THREE.WebGPURenderer({
     canvas: offscreenCanvas,
     antialias: true,
     alpha: true,
+    forceWebGL: false,
   });
+  await renderer.init();
+  if (
+    !renderer.isWebGPURenderer ||
+    (renderer.backend && renderer.backend.isWebGLBackend)
+  ) {
+    renderer.dispose();
+    renderer = null;
+    throw new Error('Three.js did not initialize with a WebGPU backend.');
+  }
   renderer.setSize(width, height, false);
 
   return true;
@@ -175,7 +210,7 @@ self.onmessage = async event => {
   try {
     switch (type) {
       case MESSAGE_TYPES.INIT:
-        const success = initRenderer();
+        const success = await initRenderer();
         // eslint-disable-next-line no-restricted-globals
         self.postMessage({ type: MESSAGE_TYPES.INIT, success });
         break;

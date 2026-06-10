@@ -26,6 +26,10 @@ const instancesEditorSettings: InstancesEditorSettings = {
   snap: false,
   zoomFactor: 1,
   windowMask: false,
+  showPhysics3DCollisionShapes: false,
+  showAxesHelper: false,
+  physics3DCollisionShapeColor: 0x43c1ff,
+  axesHelperSize: 200,
   selectedLayer: '',
   gameEditorMode: 'instances-editor',
 };

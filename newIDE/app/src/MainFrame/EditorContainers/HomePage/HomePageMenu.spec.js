@@ -3,7 +3,7 @@ import { getTabsToDisplay } from './HomePageMenu';
 import { isNativeMobileApp } from '../../../Utils/Platform';
 import { limitsForStudentUser } from '../../../fixtures/GDevelopServicesTestData';
 
-jest.mock('../../../Utils/Platform');
+vi.mock('../../../Utils/Platform');
 const mockFn = (fn: Function): JestMockFn<any, any> => fn;
 
 describe('HomePageMenu', () => {

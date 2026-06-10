@@ -35,8 +35,6 @@ namespace gdjs {
           _skyUp: THREE.Vector3;
           _cameraUp: THREE.Vector3;
           _cachedCameraUp: THREE.Vector3;
-          _orientationQuat: THREE.Quaternion;
-          _orientationEuler: THREE.Euler;
           _isEnabled: boolean = false;
           _time: number = 0;
 
@@ -63,8 +61,6 @@ namespace gdjs {
             this._skyUp = new THREE.Vector3(0, 1, 0);
             this._cameraUp = new THREE.Vector3(0, 1, 0);
             this._cachedCameraUp = new THREE.Vector3(0, 1, 0);
-            this._orientationQuat = new THREE.Quaternion();
-
             // The Sky shader natively hardcodes direction.y in many places (for clouds, etc).
             // To support varying "Up" axes (like Z, when the game is a top-down 3D game),
             // we dynamically patch the vertex shader to rotate vWorldPosition to match camera.up.

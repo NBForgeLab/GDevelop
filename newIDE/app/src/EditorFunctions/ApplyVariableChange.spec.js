@@ -409,63 +409,61 @@ describe('applyVariableChange', () => {
 
       const variable = variablesContainer.get('testString');
       expect(variable.getType()).toBe(gd.Variable.Structure);
-      expect(serializeToJSObject(variable)).toMatchInlineSnapshot(`
-        Object {
-          "children": Array [
-            Object {
-              "name": "a",
-              "type": "number",
-              "value": 1,
-            },
-            Object {
-              "name": "b",
-              "type": "string",
-              "value": "2",
-            },
-            Object {
-              "children": Array [
-                Object {
-                  "type": "number",
-                  "value": 3,
-                },
-                Object {
-                  "type": "number",
-                  "value": 4,
-                },
-              ],
-              "name": "c",
-              "type": "array",
-            },
-            Object {
-              "children": Array [
-                Object {
-                  "name": "e",
-                  "type": "number",
-                  "value": 5,
-                },
-                Object {
-                  "name": "f",
-                  "type": "string",
-                  "value": "null",
-                },
-                Object {
-                  "name": "g",
-                  "type": "boolean",
-                  "value": true,
-                },
-                Object {
-                  "name": "h",
-                  "type": "boolean",
-                  "value": false,
-                },
-              ],
-              "name": "d",
-              "type": "structure",
-            },
-          ],
-          "type": "structure",
-        }
-      `);
+      expect(serializeToJSObject(variable)).toEqual({
+        children: [
+          {
+            name: 'a',
+            type: 'number',
+            value: 1,
+          },
+          {
+            name: 'b',
+            type: 'string',
+            value: '2',
+          },
+          {
+            children: [
+              {
+                type: 'number',
+                value: 3,
+              },
+              {
+                type: 'number',
+                value: 4,
+              },
+            ],
+            name: 'c',
+            type: 'array',
+          },
+          {
+            children: [
+              {
+                name: 'e',
+                type: 'number',
+                value: 5,
+              },
+              {
+                name: 'f',
+                type: 'string',
+                value: 'null',
+              },
+              {
+                name: 'g',
+                type: 'boolean',
+                value: true,
+              },
+              {
+                name: 'h',
+                type: 'boolean',
+                value: false,
+              },
+            ],
+            name: 'd',
+            type: 'structure',
+          },
+        ],
+        type: 'structure',
+      });
     });
 
     it('should recognize JSON and parse it (object => structure)', () => {
@@ -479,59 +477,57 @@ describe('applyVariableChange', () => {
 
       const variable = variablesContainer.get('testString');
       expect(variable.getType()).toBe(gd.Variable.Array);
-      expect(serializeToJSObject(variable)).toMatchInlineSnapshot(`
-        Object {
-          "children": Array [
-            Object {
-              "type": "number",
-              "value": 1,
-            },
-            Object {
-              "type": "string",
-              "value": "2",
-            },
-            Object {
-              "children": Array [
-                Object {
-                  "type": "number",
-                  "value": 3,
-                },
-                Object {
-                  "type": "number",
-                  "value": 4,
-                },
-              ],
-              "type": "array",
-            },
-            Object {
-              "children": Array [
-                Object {
-                  "name": "e",
-                  "type": "number",
-                  "value": 5,
-                },
-                Object {
-                  "name": "f",
-                  "type": "string",
-                  "value": "null",
-                },
-                Object {
-                  "name": "g",
-                  "type": "boolean",
-                  "value": true,
-                },
-                Object {
-                  "name": "h",
-                  "type": "boolean",
-                  "value": false,
-                },
-              ],
-              "type": "structure",
-            },
-          ],
-          "type": "array",
-        }
-      `);
+      expect(serializeToJSObject(variable)).toEqual({
+        children: [
+          {
+            type: 'number',
+            value: 1,
+          },
+          {
+            type: 'string',
+            value: '2',
+          },
+          {
+            children: [
+              {
+                type: 'number',
+                value: 3,
+              },
+              {
+                type: 'number',
+                value: 4,
+              },
+            ],
+            type: 'array',
+          },
+          {
+            children: [
+              {
+                name: 'e',
+                type: 'number',
+                value: 5,
+              },
+              {
+                name: 'f',
+                type: 'string',
+                value: 'null',
+              },
+              {
+                name: 'g',
+                type: 'boolean',
+                value: true,
+              },
+              {
+                name: 'h',
+                type: 'boolean',
+                value: false,
+              },
+            ],
+            type: 'structure',
+          },
+        ],
+        type: 'array',
+      });
     });
   });
 

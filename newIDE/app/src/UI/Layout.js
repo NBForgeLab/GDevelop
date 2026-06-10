@@ -101,6 +101,7 @@ type LineStackLayoutProps = {|
   overflow?: 'hidden', // allows children Text components to use text ellipsis when they are too long
   neverShrink?: boolean,
   useFullHeight?: boolean,
+  style?: any,
 |};
 
 export const LineStackLayout = ({
@@ -114,6 +115,7 @@ export const LineStackLayout = ({
   overflow,
   neverShrink,
   useFullHeight,
+  style,
 }: LineStackLayoutProps): React.Node => {
   let isFirstChild = true;
   return (
@@ -126,6 +128,7 @@ export const LineStackLayout = ({
       overflow={overflow}
       neverShrink={neverShrink}
       useFullHeight={useFullHeight}
+      style={style}
     >
       {React.Children.map(children, (child, index) => {
         if (!child) return null;
@@ -159,6 +162,7 @@ type ResponsiveLineStackLayoutProps = {|
   noResponsiveLandscape?: boolean,
   useLargeSpacer?: boolean,
   children: React.Node,
+  style?: any,
 |};
 
 export const ResponsiveLineStackLayout = ({
@@ -173,6 +177,7 @@ export const ResponsiveLineStackLayout = ({
   noResponsiveLandscape,
   useLargeSpacer,
   children,
+  style,
 }: ResponsiveLineStackLayoutProps): React.Node => {
   const { isMobile, isLandscape } = useResponsiveWindowSize();
   const assumeMobileScreen = forceMobileLayout || isMobile;
@@ -187,6 +192,7 @@ export const ResponsiveLineStackLayout = ({
       expand
       useLargeSpacer={useLargeSpacer}
       noOverflowParent={noOverflowParent}
+      style={style}
     >
       {children}
     </ColumnStackLayout>
@@ -198,6 +204,7 @@ export const ResponsiveLineStackLayout = ({
       expand={expand}
       noMargin={noMargin}
       useLargeSpacer={useLargeSpacer}
+      style={style}
     >
       {children}
     </LineStackLayout>
@@ -214,6 +221,7 @@ type ColumnStackLayoutProps = {|
   noOverflowParent?: boolean,
   useFullHeight?: boolean,
   useLargeSpacer?: boolean,
+  style?: any,
 |};
 
 export const ColumnStackLayout = ({
@@ -226,6 +234,7 @@ export const ColumnStackLayout = ({
   noOverflowParent,
   useFullHeight,
   useLargeSpacer,
+  style,
 }: ColumnStackLayoutProps): React.Node => {
   let isFirstChild = true;
   return (
@@ -237,6 +246,7 @@ export const ColumnStackLayout = ({
       noMargin={noMargin}
       noOverflowParent={noOverflowParent}
       useFullHeight={useFullHeight}
+      style={style}
     >
       {React.Children.map(children, (child, index) => {
         if (!child) return null;

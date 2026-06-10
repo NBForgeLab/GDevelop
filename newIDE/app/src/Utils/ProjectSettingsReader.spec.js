@@ -76,9 +76,9 @@ preferences:
 
       // Step 4: Apply to preferences via setMultipleValues
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const mockSetMultipleValues = jest.fn();
+      const mockSetMultipleValues = vi.fn();
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const mockSetShortcutForCommand = jest.fn();
+      const mockSetShortcutForCommand = vi.fn();
       // $FlowFixMe[incompatible-type] - partial mock
       const mockPreferences: Preferences = {
         // $FlowFixMe[incompatible-type] - partial mock
@@ -105,9 +105,9 @@ preferences:
 
     test('shortcuts from gdevelop-settings.yaml are properly applied to preferences', () => {
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const mockSetMultipleValues = jest.fn();
+      const mockSetMultipleValues = vi.fn();
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const mockSetShortcutForCommand = jest.fn();
+      const mockSetShortcutForCommand = vi.fn();
       // $FlowFixMe[incompatible-type] - partial mock
       const mockPreferences: Preferences = {
         // $FlowFixMe[incompatible-type] - partial mock
@@ -213,7 +213,7 @@ preferences:
     });
 
     test('ignores an invalid hook name (logs warning, no hook field set)', () => {
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       // $FlowFixMe[incompatible-call]
       const raw = ([
         { name: 'Lint', icon: '🔍', npmScript: 'lint', hook: 'onInvalidHook' },
@@ -225,7 +225,7 @@ preferences:
     });
 
     test('skips a button whose npmScript is not in package.json', () => {
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       // $FlowFixMe[incompatible-call]
       const raw = ([
         { name: 'Missing', icon: '❌', npmScript: 'nonexistent' },
@@ -241,7 +241,7 @@ preferences:
     });
 
     test('skips a button with an unsafe script name', () => {
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       // $FlowFixMe[incompatible-call]
       const raw = ([
         { name: 'Dangerous', icon: '⚠️', npmScript: 'rm -rf /' },

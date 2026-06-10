@@ -1,8 +1,8 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`HelpIcon renders nothing if the helpPagePath is empty 1`] = `null`;
+exports[`HelpIcon > renders nothing if the helpPagePath is empty 1`] = `null`;
 
-exports[`HelpIcon renders the icon linking to a help page 1`] = `
+exports[`HelpIcon > renders the icon linking to a help page 1`] = `
 <button
   className="MuiButtonBase-root MuiIconButton-root makeStyles-root-1 MuiIconButton-colorSecondary"
   disabled={false}

@@ -1,4 +1,5 @@
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader';
+import type { GLTF } from 'three/addons/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils';
@@ -42,5 +43,6 @@ declare global {
       HueSaturationShader,
       ExposureShader,
     };
+    export type { GLTF };
   }
 }

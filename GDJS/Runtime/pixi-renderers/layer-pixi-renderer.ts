@@ -224,9 +224,9 @@ namespace gdjs {
 
     // For a 2D+3D layer, the 2D rendering is done on the render texture
     // and then must be displayed on a plane in the 3D world:
-    private _threePlaneTexture: THREE.Texture | null = null;
     private _threePlaneGeometry: THREE.PlaneGeometry | null = null;
-    private _threePlaneMaterial: THREE.ShaderMaterial | null = null;
+    private _threePlaneTexture: THREE.ExternalTexture | null = null;
+    private _threePlaneMaterial: THREE.MeshBasicMaterial | null = null;
     private _threePlaneMesh: THREE.Mesh | null = null;
     private _threePlaneMeshDebugOutline: THREE.LineSegments | null = null;
 
@@ -450,6 +450,7 @@ namespace gdjs {
       pixiRenderer: PIXI.Renderer | null,
       runtimeInstanceContainerRenderer: gdjs.RuntimeInstanceContainerRenderer
     ): void {
+      void pixiRenderer;
       if (typeof THREE === 'undefined') {
         return;
       }
@@ -527,83 +528,42 @@ namespace gdjs {
             this._layer.getRenderingType() ===
             gdjs.RuntimeLayerRenderingType.TWO_D_PLUS_THREE_D
           ) {
-            if (
-              this._renderTexture ||
-              this._threePlaneGeometry ||
-              this._threePlaneMaterial ||
-              this._threePlaneTexture ||
-              this._threePlaneMesh
-            )
-              throw new Error(
-                'Tried to setup PixiJS plane for 2D rendering in 3D for a layer that is already set up.'
-              );
-
-            this.set2DPlaneMaxDrawingDistance(
-              this._layer.getInitialCamera2DPlaneMaxDrawingDistance()
-            );
-
-            // If we have both 2D and 3D objects to be rendered, create a render texture that PixiJS will use
-            // to render, and that will be projected on a plane by Three.js
             this._createPixiRenderTexture(pixiRenderer);
-
-            // Create the plane that will show this texture.
-            this._threePlaneGeometry = new THREE.PlaneGeometry(1, 1);
-
-            // Create the texture to project on the plane.
-            // Use a buffer to create a "fake" DataTexture, just so the texture
-            // is considered initialized by Three.js.
-            const width = 1;
-            const height = 1;
-            const size = width * height;
-            const data = new Uint8Array(4 * size);
-            const texture = new THREE.DataTexture(data, width, height);
-            texture.needsUpdate = true;
-
-            this._threePlaneTexture = texture;
-            this._threePlaneTexture.generateMipmaps = false;
-            const filter =
-              this._layer.getRuntimeScene().getGame().getScaleMode() ===
-              'nearest'
-                ? THREE.NearestFilter
-                : THREE.LinearFilter;
-            this._threePlaneTexture.minFilter = filter;
-            this._threePlaneTexture.magFilter = filter;
-            this._threePlaneTexture.wrapS = THREE.ClampToEdgeWrapping;
-            this._threePlaneTexture.wrapT = THREE.ClampToEdgeWrapping;
-            // This disable the gamma correction done by THREE as PIXI is already doing it.
-            const noGammaCorrectionShader: THREE.ShaderMaterialParameters = {
-              vertexShader: `
-                varying vec2 vUv;
-                void main() {
-                  vUv = uv;
-                  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-              `,
-              fragmentShader: `
-                uniform sampler2D map;
-                varying vec2 vUv;
-                void main() {
-                  vec4 texel = texture2D(map, vUv);
-                  gl_FragColor = texel;
-                }
-              `,
-              uniforms: {
-                map: { value: this._threePlaneTexture },
-              },
-              side: THREE.FrontSide,
-              transparent: true,
-            };
-            this._threePlaneMaterial = new THREE.ShaderMaterial(
-              noGammaCorrectionShader
+            if (!this._renderTexture) {
+              throw new Error(
+                'Unable to create the WebGPU render texture for a 2D+3D layer.'
+              );
+            }
+            if (!pixiRenderer) {
+              throw new Error(
+                'PixiJS WebGPU renderer is required for a 2D+3D layer.'
+              );
+            }
+            const pixiGpuTexture = this._getPixiRenderTextureGpuTexture(
+              pixiRenderer
             );
-            this._threePlaneMaterial;
+            if (!pixiGpuTexture) {
+              throw new Error(
+                'PixiJS did not expose a WebGPU texture for the 2D+3D layer.'
+              );
+            }
 
-            // Finally, create the mesh shown in the scene.
+            this._threePlaneGeometry = new THREE.PlaneGeometry(1, 1);
+            this._threePlaneTexture = new THREE.ExternalTexture(
+              pixiGpuTexture
+            );
+            this._threePlaneTexture.colorSpace = THREE.SRGBColorSpace;
+            this._threePlaneTexture.needsUpdate = true;
+            this._threePlaneMaterial = new THREE.MeshBasicMaterial({
+              map: this._threePlaneTexture,
+              transparent: true,
+              depthWrite: false,
+              side: THREE.DoubleSide,
+            });
             this._threePlaneMesh = new THREE.Mesh(
               this._threePlaneGeometry,
               this._threePlaneMaterial
             );
-
             // Force to render the mesh last (after the rest of 3D objects, including
             // transparent ones). In most cases, the 2D rendering is composed of a lot
             // of transparent areas, and we can't risk it being displayed first and wrongly
@@ -1031,30 +991,12 @@ namespace gdjs {
         // onScreenPosition = floor(780.75)
         // onScreenPosition = 780
 
-        const pixiRenderer = this._layer
-          .getRuntimeScene()
-          .getGame()
-          .getRenderer()
-          .getPIXIRenderer();
-        if (pixiRenderer && pixiRenderer.name === 'webgl') {
-          // TODO Revert from `round` to `ceil` when the issue is fixed in Pixi.
-          // Since the upgrade to Pixi 7, sprites are rounded with `round`
-          // instead of `floor`.
-          // https://github.com/pixijs/pixijs/issues/9868
-          this._pixiContainer.position.x = Math.round(
-            this._pixiContainer.position.x
-          );
-          this._pixiContainer.position.y = Math.round(
-            this._pixiContainer.position.y
-          );
-        } else {
-          this._pixiContainer.position.x = Math.ceil(
-            this._pixiContainer.position.x
-          );
-          this._pixiContainer.position.y = Math.ceil(
-            this._pixiContainer.position.y
-          );
-        }
+        this._pixiContainer.position.x = Math.ceil(
+          this._pixiContainer.position.x
+        );
+        this._pixiContainer.position.y = Math.ceil(
+          this._pixiContainer.position.y
+        );
       }
     }
 
@@ -1316,11 +1258,10 @@ namespace gdjs {
 
     /**
      * Create the PixiJS RenderTexture used to display the whole layer.
-     * Can be used either for lighting or for rendering the layer in a texture
-     * so it can then be consumed by Three.js to render it in 3D.
+     * Used for lighting layers.
      */
     private _createPixiRenderTexture(pixiRenderer: PIXI.Renderer | null): void {
-      if (!pixiRenderer || pixiRenderer.name !== 'webgl') {
+      if (!pixiRenderer || pixiRenderer.name !== 'webgpu') {
         return;
       }
       if (this._renderTexture) {
@@ -1345,9 +1286,22 @@ namespace gdjs {
       logger.info(`RenderTexture created for layer ${this._layer.getName()}.`);
     }
 
+    private _getPixiRenderTextureGpuTexture(
+      pixiRenderer: PIXI.Renderer
+    ): GPUTexture | null {
+      if (!this._renderTexture || pixiRenderer.name !== 'webgpu') {
+        return null;
+      }
+      const textureSystem = (pixiRenderer as any).texture;
+      if (!textureSystem || typeof textureSystem.getGpuSource !== 'function') {
+        return null;
+      }
+      return textureSystem.getGpuSource(this._renderTexture.source) || null;
+    }
+
     /**
      * Render the layer of the PixiJS RenderTexture, so that it can be then displayed
-     * with a blend mode (for a lighting layer) or consumed by Three.js (for 2D+3D layers).
+     * with a blend mode for a lighting layer.
      */
     renderOnPixiRenderTexture(pixiRenderer: PIXI.Renderer) {
       if (!this._renderTexture) {
@@ -1364,6 +1318,14 @@ namespace gdjs {
         );
         this._oldWidth = pixiRenderer.screen.width;
         this._oldHeight = pixiRenderer.screen.height;
+        if (this._threePlaneTexture) {
+          const pixiGpuTexture =
+            this._getPixiRenderTextureGpuTexture(pixiRenderer);
+          if (pixiGpuTexture) {
+            this._threePlaneTexture.sourceTexture = pixiGpuTexture;
+            this._threePlaneTexture.needsUpdate = true;
+          }
+        }
       }
       // The background is the ambient color for lighting layers
       // and transparent for 2D+3D layers.
@@ -1382,28 +1344,26 @@ namespace gdjs {
     }
 
     /**
-     * Set the texture of the 2D plane in the 3D world to be the same WebGL texture
-     * as the PixiJS RenderTexture - so that the 2D rendering can be shown in the 3D world.
+     * Set the texture of the 2D plane in the 3D world.
      */
     updateThreePlaneTextureFromPixiRenderTexture(
-      threeRenderer: THREE.WebGLRenderer,
+      threeRenderer: unknown,
       pixiRenderer: PIXI.Renderer
     ): void {
-      if (!this._threePlaneTexture || !this._renderTexture) {
+      void threeRenderer;
+      if (!this._threePlaneTexture) {
         return;
       }
-
-      const glTexture =
-        (this._renderTexture.source as any)._gpuData[pixiRenderer.uid];
-      if (glTexture) {
-        // "Hack" into the Three.js renderer by getting the internal WebGL texture for the PixiJS plane,
-        // and set it so that it's the same as the WebGL texture for the PixiJS RenderTexture.
-        // This works because PixiJS and Three.js are using the same WebGL context.
-        const texture = threeRenderer.properties.get(
-          this._threePlaneTexture
-        ) as any;
-        texture.__webglTexture = glTexture.texture;
+      const pixiGpuTexture = this._getPixiRenderTextureGpuTexture(pixiRenderer);
+      if (!pixiGpuTexture) {
+        throw new Error(
+          'PixiJS did not expose a WebGPU texture for the 2D+3D layer.'
+        );
       }
+      if (this._threePlaneTexture.sourceTexture !== pixiGpuTexture) {
+        this._threePlaneTexture.sourceTexture = pixiGpuTexture;
+      }
+      this._threePlaneTexture.needsUpdate = true;
     }
 
     /**

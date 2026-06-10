@@ -1,9 +1,9 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`BackgroundHighlighting can render one highlight at the beginning 1`] = `
+exports[`BackgroundHighlighting > can render one highlight at the beginning 1`] = `
 <div
   style={
-    Object {
+    {
       "color": "transparent",
       "position": "absolute",
       "whiteSpace": "pre-wrap",
@@ -14,7 +14,7 @@ exports[`BackgroundHighlighting can render one highlight at the beginning 1`] = 
 >
   <span
     style={
-      Object {
+      {
         "backgroundColor": "rgba(244, 67, 54, 0.15)",
         "borderBottom": "3px solid rgba(244, 67, 54, 0.7)",
         "borderSizing": "border-box",
@@ -29,10 +29,10 @@ exports[`BackgroundHighlighting can render one highlight at the beginning 1`] = 
 </div>
 `;
 
-exports[`BackgroundHighlighting can render one highlight past the end 1`] = `
+exports[`BackgroundHighlighting > can render one highlight past the end 1`] = `
 <div
   style={
-    Object {
+    {
       "color": "transparent",
       "position": "absolute",
       "whiteSpace": "pre-wrap",
@@ -46,7 +46,7 @@ exports[`BackgroundHighlighting can render one highlight past the end 1`] = `
   </span>
   <span
     style={
-      Object {
+      {
         "backgroundColor": "rgba(244, 67, 54, 0.15)",
         "borderBottom": "3px solid rgba(244, 67, 54, 0.7)",
         "borderSizing": "border-box",
@@ -58,10 +58,10 @@ exports[`BackgroundHighlighting can render one highlight past the end 1`] = `
 </div>
 `;
 
-exports[`BackgroundHighlighting can render overlapping highlights 1`] = `
+exports[`BackgroundHighlighting > can render overlapping highlights 1`] = `
 <div
   style={
-    Object {
+    {
       "color": "transparent",
       "position": "absolute",
       "whiteSpace": "pre-wrap",
@@ -75,7 +75,7 @@ exports[`BackgroundHighlighting can render overlapping highlights 1`] = `
   </span>
   <span
     style={
-      Object {
+      {
         "backgroundColor": "rgba(244, 67, 54, 0.15)",
         "borderBottom": "3px solid rgba(244, 67, 54, 0.7)",
         "borderSizing": "border-box",
@@ -86,7 +86,7 @@ exports[`BackgroundHighlighting can render overlapping highlights 1`] = `
   </span>
   <span
     style={
-      Object {
+      {
         "backgroundColor": "rgba(244, 67, 54, 0.15)",
         "borderBottom": "3px solid rgba(244, 67, 54, 0.7)",
         "borderSizing": "border-box",
@@ -101,10 +101,10 @@ exports[`BackgroundHighlighting can render overlapping highlights 1`] = `
 </div>
 `;
 
-exports[`BackgroundHighlighting can render overlapping highlights on all the text 1`] = `
+exports[`BackgroundHighlighting > can render overlapping highlights on all the text 1`] = `
 <div
   style={
-    Object {
+    {
       "color": "transparent",
       "position": "absolute",
       "whiteSpace": "pre-wrap",
@@ -118,7 +118,7 @@ exports[`BackgroundHighlighting can render overlapping highlights on all the tex
   </span>
   <span
     style={
-      Object {
+      {
         "backgroundColor": "rgba(244, 67, 54, 0.15)",
         "borderBottom": "3px solid rgba(244, 67, 54, 0.7)",
         "borderSizing": "border-box",
@@ -129,7 +129,7 @@ exports[`BackgroundHighlighting can render overlapping highlights on all the tex
   </span>
   <span
     style={
-      Object {
+      {
         "backgroundColor": "rgba(244, 67, 54, 0.15)",
         "borderBottom": "3px solid rgba(244, 67, 54, 0.7)",
         "borderSizing": "border-box",
@@ -140,7 +140,7 @@ exports[`BackgroundHighlighting can render overlapping highlights on all the tex
   </span>
   <span
     style={
-      Object {
+      {
         "backgroundColor": "rgba(244, 67, 54, 0.15)",
         "borderBottom": "3px solid rgba(244, 67, 54, 0.7)",
         "borderSizing": "border-box",

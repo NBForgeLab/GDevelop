@@ -2,18 +2,18 @@ import path from 'path';
 
 const mockElectron = {
   ipcRenderer: {
-    invoke: jest.fn(),
+    invoke: vi.fn(),
   },
 };
 const mockFsExtra = {
-  ensureDir: jest.fn(),
-  existsSync: jest.fn(),
+  ensureDir: vi.fn(),
+  existsSync: vi.fn(),
 };
 const mockFs = {
-  ensureDir: jest.fn(),
-  existsSync: jest.fn(),
+  ensureDir: vi.fn(),
+  existsSync: vi.fn(),
   promises: {
-    readFile: jest.fn(filePath =>
+    readFile: vi.fn(filePath =>
       Promise.resolve('Fake content for file with path:' + filePath)
     ),
   },
@@ -23,7 +23,7 @@ const mockOs = {
   tmpdir: () => '/some/fake-tmp-dir',
 };
 
-const mockOptionalRequire = jest.fn(
+const mockOptionalRequire = vi.fn(
   (
     moduleName,
     config = {

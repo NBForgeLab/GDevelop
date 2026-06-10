@@ -232,7 +232,7 @@ namespace gdjs {
     private _getImageSource(resourceName: string): HTMLImageElement {
       // Texture is not loaded, load it now from the PixiJS texture.
       // TODO (3D) - optimization: don't load the PixiJS Texture if not used by PixiJS.
-      // TODO (3D) - optimization: Ideally we could even share the same WebGL texture.
+      // TODO (3D) - optimization: Ideally we could share GPU texture data.
       const pixiTexture = this.getPIXITexture(resourceName);
       const pixiRenderer = this._resourceLoader._runtimeGame
         .getRenderer()

@@ -1,6 +1,6 @@
 // @flow
 import { fakeAssetShortHeader1 } from '../fixtures/GDevelopServicesTestData';
-const { getFolderTagsFromAssetShortHeaders } = require('./TagsHelper');
+import { getFolderTagsFromAssetShortHeaders } from './TagsHelper';
 
 describe('getFolderTagsFromAssetShortHeaders', () => {
   it('should return an empty array if no assets', () => {

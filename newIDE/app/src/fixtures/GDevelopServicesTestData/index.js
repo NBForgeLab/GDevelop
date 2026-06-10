@@ -5,7 +5,7 @@ import {
   type SubscriptionPlanPricingSystem,
   type Limits,
 } from '../../Utils/GDevelopServices/Usage';
-import { User as FirebaseUser } from 'firebase/auth';
+import { type User as FirebaseUser } from 'firebase/auth';
 import { type Profile } from '../../Utils/GDevelopServices/Authentication';
 import { type Release } from '../../Utils/GDevelopServices/Release';
 import {

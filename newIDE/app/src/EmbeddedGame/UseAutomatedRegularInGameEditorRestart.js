@@ -3,7 +3,7 @@ import * as React from 'react';
 
 /**
  * While not striclty necessary, because when the in-game editor is crashing
- * or detects that its WebGL context is lost, it will automatically be restarted
+ * or detects that its GPU context is lost, it will automatically be restarted
  * (with a new preview + hard-reload),
  * we still restart it regularly if there are too many switches between 2D and 3D.
  */

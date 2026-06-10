@@ -14,7 +14,7 @@ describe('CompactSemiControlledNumberField', () => {
     // during keyInput/wheel events. Fixed by escaping: /[+\-/*^()%]/.
 
     it('calls onChange when scrolling up on a field with a decimal value', () => {
-      const onChange: (value: number) => void = jest.fn();
+      const onChange: (value: number) => void = vi.fn();
       const component = renderer.create(
         <CompactSemiControlledNumberField value={92.12} onChange={onChange} />
       );
@@ -31,7 +31,7 @@ describe('CompactSemiControlledNumberField', () => {
     });
 
     it('calls onChange when pressing ArrowUp on a field with a decimal value', () => {
-      const onChange: (value: number) => void = jest.fn();
+      const onChange: (value: number) => void = vi.fn();
       const component = renderer.create(
         <CompactSemiControlledNumberField value={92.12} onChange={onChange} />
       );
@@ -45,7 +45,7 @@ describe('CompactSemiControlledNumberField', () => {
     });
 
     it('calls onChange when a decimal number is typed in a field', () => {
-      const onChange: (value: number) => void = jest.fn();
+      const onChange: (value: number) => void = vi.fn();
       const component = renderer.create(
         <CompactSemiControlledNumberField value={1.3} onChange={onChange} />
       );

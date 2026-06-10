@@ -813,7 +813,8 @@ const ObjectsList = React.forwardRef<Props, ObjectsListInterface>(
 
     const createProjectResourceFromDroppedFile = React.useCallback(
       async (droppedFile: DroppedSupportedFile): Promise<?string> => {
-        if (!droppedFile.file) return null;
+        const { file } = droppedFile;
+        if (!file) return null;
         const storageProvider = resourceManagementProps.getStorageProvider();
         const resourcesManager = project.getResourcesManager();
         const newResource = new gd.ImageResource();
@@ -825,18 +826,23 @@ const ObjectsList = React.forwardRef<Props, ObjectsListInterface>(
           const uploadResults = await uploadProjectResourceFiles(
             authenticatedUser,
             fileMetadata.fileIdentifier,
-            [droppedFile.file],
+            [file],
             () => {}
           );
           const uploadedFile = uploadResults.find(({ url }) => !!url);
-          if (!uploadedFile || !uploadedFile.url) {
+          if (!uploadedFile) {
             newResource.delete();
             return null;
           }
-          const resourceName = getUniqueResourceName(droppedFile.file.name);
-          newResource.setFile(uploadedFile.url);
+          const { url } = uploadedFile;
+          if (!url) {
+            newResource.delete();
+            return null;
+          }
+          const resourceName = getUniqueResourceName(file.name);
+          newResource.setFile(url);
           newResource.setName(resourceName);
-          newResource.setOrigin('cloud-project-resource', uploadedFile.url);
+          newResource.setOrigin('cloud-project-resource', url);
           applyResourceDefaults(project, newResource);
           resourcesManager.addResource(newResource);
           newResource.delete();
@@ -851,7 +857,7 @@ const ObjectsList = React.forwardRef<Props, ObjectsListInterface>(
         const newToOldFilePaths = new Map<string, string>();
         const copiedPath = await copyDroppedFileToProjectFolder(
           project,
-          droppedFile.file,
+          file,
           newToOldFilePaths
         );
         if (!copiedPath) {
@@ -1856,7 +1862,8 @@ const ObjectsList = React.forwardRef<Props, ObjectsListInterface>(
       [droppedImageObjectOptions]
     );
 
-    const onFileDragEnter = React.useCallback(event => {
+    const onFileDragEnter = React.useCallback((event: DragEvent) => {
+      if (!event.dataTransfer) return;
       const droppedFile = getDroppedSupportedFile(
         event.dataTransfer.items || event.dataTransfer.files
       );
@@ -1868,7 +1875,8 @@ const ObjectsList = React.forwardRef<Props, ObjectsListInterface>(
     }, []);
 
     const onFileDragOver = React.useCallback(
-      event => {
+      (event: DragEvent) => {
+        if (!event.dataTransfer) return;
         const droppedFile = getDroppedSupportedFile(
           event.dataTransfer.items || event.dataTransfer.files
         );
@@ -1889,7 +1897,7 @@ const ObjectsList = React.forwardRef<Props, ObjectsListInterface>(
     );
 
     const onFileDragLeave = React.useCallback(
-      event => {
+      (event: DragEvent) => {
         if (!droppedSupportedFile) return;
         event.preventDefault();
         dragEnterCount.current -= 1;
@@ -1901,7 +1909,11 @@ const ObjectsList = React.forwardRef<Props, ObjectsListInterface>(
     );
 
     const onFileDrop = React.useCallback(
-      async event => {
+      async (event: DragEvent) => {
+        if (!event.dataTransfer) {
+          resetDroppedFileState();
+          return;
+        }
         const droppedFile = getDroppedSupportedFile(
           event.dataTransfer.files || event.dataTransfer.items
         );
@@ -1910,7 +1922,8 @@ const ObjectsList = React.forwardRef<Props, ObjectsListInterface>(
           return;
         }
         event.preventDefault();
-        if (!droppedFile.file) {
+        const { file } = droppedFile;
+        if (!file) {
           resetDroppedFileState();
           return;
         }
@@ -1930,7 +1943,7 @@ const ObjectsList = React.forwardRef<Props, ObjectsListInterface>(
           resetDroppedFileState();
           return;
         }
-        if (droppedFile.file.size > PROJECT_RESOURCE_MAX_SIZE_IN_BYTES) {
+        if (file.size > PROJECT_RESOURCE_MAX_SIZE_IN_BYTES) {
           await showAlert({
             title: t`File is too large`,
             message: t`The file is too large for the project limits.`,

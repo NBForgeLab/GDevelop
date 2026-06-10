@@ -37,11 +37,11 @@ import * as Asset from '../Utils/GDevelopServices/Asset';
 
 const gd: libGDevelop = global.gd;
 
-jest.mock('../Utils/GDevelopServices/Extension');
+vi.mock('../Utils/GDevelopServices/Extension');
 
 // $FlowFixMe[incompatible-type] - overriding method to do a mocked network call.
 // $FlowFixMe[cannot-write]
-Asset.getPublicAsset = jest.fn();
+vi.spyOn(Asset, 'getPublicAsset');
 
 const mockFn = (fn: Function): JestMockFn<any, any> => fn;
 

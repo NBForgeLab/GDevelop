@@ -11,8 +11,8 @@ import {
 import { type MoveAllProjectResourcesOptions } from './index';
 const gd: libGDevelop = global.gd;
 
-jest.mock('../../Utils/LocalFileUploader');
-jest.mock('../../Utils/GDevelopServices/Project');
+vi.mock('../../Utils/LocalFileUploader');
+vi.mock('../../Utils/GDevelopServices/Project');
 
 const mockFn = (fn: Function): JestMockFn<any, any> => fn;
 
@@ -52,7 +52,7 @@ const makeMoveAllLocalResourcesToCloudResourcesOptions = (
   // $FlowFixMe[incompatible-type] - unused property were not mocked.
   ({
     project,
-    onProgress: jest.fn(),
+    onProgress: vi.fn(),
     oldFileMetadata: { fileIdentifier: 'fake-project-file.json' },
     newFileMetadata: { fileIdentifier: 'new-fake-identifier' },
   });
@@ -115,8 +115,8 @@ describe('LocalResourceMover', () => {
 
     // Check no error is reported.
     expect(fetchedResources).toMatchInlineSnapshot(`
-      Object {
-        "erroredResources": Array [],
+      {
+        "erroredResources": [],
       }
     `);
 
@@ -210,10 +210,10 @@ describe('LocalResourceMover', () => {
 
     // Check no error is reported.
     expect(fetchedResources).toMatchInlineSnapshot(`
-      Object {
-        "erroredResources": Array [],
-      }
-    `);
+          {
+            "erroredResources": [],
+          }
+        `);
 
     // Check local resources were updated with the URL they were uploaded to.
     expect(

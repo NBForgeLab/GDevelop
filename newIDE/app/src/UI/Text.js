@@ -38,7 +38,7 @@ type Props = {|
   /** Hide the text - but keep its layouting on screen. Perfect for avoiding layout shift while loading content. */
   hidden?: boolean,
   /** A limited set of styling is supported. */
-  style?: {|
+  style?: {
     // Margins
     marginLeft?: number,
     marginRight?: number,
@@ -65,7 +65,8 @@ type Props = {|
 
     // Allow to override the font weight
     fontWeight?: 'bold' | 'normal' | number,
-  |},
+    [string]: any,
+  },
   tooltip?: string,
 |};
 

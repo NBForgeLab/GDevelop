@@ -16,7 +16,7 @@
  */
 
 /**
- * @param {gd.PlatformExtension} extension
+ * @param {any} extension
  * @param {(translationSource: string) => string} _
  * @param {GDNamespace} gd
  */
@@ -592,7 +592,7 @@ const defineTileMap = function (extension, _, gd) {
 };
 
 /**
- * @param {gd.PlatformExtension} extension
+ * @param {any} extension
  * @param {(translationSource: string) => string} _
  * @param {GDNamespace} gd
  */
@@ -1067,7 +1067,7 @@ const defineSimpleTileMap = function (extension, _, gd) {
 };
 
 /**
- * @param {gd.PlatformExtension} extension
+ * @param {any} extension
  * @param {(translationSource: string) => string} _
  * @param {GDNamespace} gd
  */

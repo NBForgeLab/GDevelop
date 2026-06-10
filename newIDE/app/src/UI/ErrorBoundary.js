@@ -72,6 +72,7 @@ type ErrorBoundaryScope =
   | 'project-icons'
   | 'box-search-result'
   | 'list-search-result'
+  | 'grid-search-result'
   | 'custom-object-editor-canvas'
   | 'project-file-list'
   | 'standalone';

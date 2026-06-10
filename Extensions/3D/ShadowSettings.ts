@@ -102,16 +102,6 @@ namespace gdjs {
         left.shadowMapType === right.shadowMapType &&
         left.directionalShadowQuality === right.directionalShadowQuality;
 
-      const getEffectiveShadowBaseBias = (
-        rawBaseBias: number,
-        _shadowMapTypeName: ShadowMapTypeName
-      ): number => rawBaseBias;
-
-      const getEffectiveShadowNormalBias = (
-        rawNormalBias: number,
-        _shadowMapTypeName: ShadowMapTypeName
-      ): number => rawNormalBias;
-
       const notifyShadowSettingsObservers = (shadowLayerState: ShadowLayerState) => {
         shadowLayerState.shadowSettingsObservers.forEach((refreshShadows) => {
           refreshShadows();
@@ -205,7 +195,7 @@ namespace gdjs {
 
       export const applyToThreeRenderer = (
         runtimeLayer: gdjs.RuntimeLayer | null,
-        threeRenderer: THREE.WebGLRenderer | null
+        threeRenderer: THREE.WebGPURenderer | null
       ): void => {
         if (!threeRenderer) {
           return;

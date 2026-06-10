@@ -19,7 +19,7 @@ import Grid from './Grid';
 import WindowBorder from './WindowBorder';
 import WindowMask from './WindowMask';
 import * as PIXI from 'pixi.js';
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import FpsLimiter from './FpsLimiter';
 import { startPIXITicker, stopPIXITicker } from '../Utils/PIXITicker';
 import StatusBar from './StatusBar';
@@ -58,6 +58,7 @@ import getObjectByName from '../Utils/GetObjectByName';
 import { AffineTransformation } from '../Utils/AffineTransformation';
 import { ErrorFallbackComponent } from '../UI/ErrorBoundary';
 import { Trans } from '@lingui/macro';
+import { checkWebGPUSupport } from '../Utils/WebGPU';
 import { generateUUID } from 'three/src/math/MathUtils';
 import {
   getTilesGridCoordinatesFromPointerSceneCoordinates,
@@ -254,7 +255,7 @@ export default class InstancesEditor extends Component<Props, State> {
       });
   }
 
-  async _initializeCanvasAndRendererAsync() {
+  async _initializeCanvasAndRendererAsync(): Promise<void> {
     const { canvasArea } = this;
     if (!canvasArea) return;
 
@@ -278,48 +279,20 @@ export default class InstancesEditor extends Component<Props, State> {
     const initialWidth = this.props.width || 1;
     const initialHeight = this.props.height || 1;
     // TODO (3D): Should it handle preference changes without needing to reopen tabs?
+    if (!(await checkWebGPUSupport())) {
+      throw new Error(
+        'WebGPU is required to render the scene editor, but no usable WebGPU adapter/device is available.'
+      );
+    }
+
     if (this._showObjectInstancesIn3D) {
       gameCanvas = document.createElement('canvas');
-      const contextAttributes = {
-        antialias: false,
-        preserveDrawingBuffer: true,
-        stencil: true,
-      };
-      let glContext:
-        | WebGLRenderingContext
-        | WebGL2RenderingContext
-        | null = null;
-      if (typeof WebGL2RenderingContext !== 'undefined') {
-        glContext = gameCanvas.getContext('webgl2', contextAttributes);
-      }
-      if (!glContext) {
-        glContext =
-          gameCanvas.getContext('webgl', contextAttributes) ||
-          gameCanvas.getContext('experimental-webgl', contextAttributes);
-      }
-      if (!glContext) {
-        throw new Error('Unable to create a WebGL context.');
-      }
 
-      const threeRenderer = new THREE.WebGLRenderer({
-        canvas: gameCanvas,
-        context: glContext,
-        antialias: false,
-        preserveDrawingBuffer: true,
-        stencil: true,
-      });
-      threeRenderer.autoClear = false;
-      threeRenderer.setSize(initialWidth, initialHeight);
-
-      // Create a PixiJS renderer that use the same GL context as Three.js
-      // so that both can render to the canvas and even have PixiJS rendering
-      // reused in Three.js (by using a RenderTexture and the same internal WebGL texture).
-      const pixiRenderer = new PIXI.WebGLRenderer();
+      const pixiRenderer = new PIXI.WebGPURenderer();
       await pixiRenderer.init({
         width: initialWidth,
         height: initialHeight,
         canvas: gameCanvas,
-        context: threeRenderer.getContext(),
         clearBeforeRender: false,
         preserveDrawingBuffer: true,
         antialias: false,
@@ -334,6 +307,39 @@ export default class InstancesEditor extends Component<Props, State> {
         // TODO (3D): add a setting for pixel ratio (`resolution: window.devicePixelRatio`)
       });
 
+      const pixiGpuDevice =
+        pixiRenderer.gpu && pixiRenderer.gpu.device
+          ? pixiRenderer.gpu.device
+          : null;
+      if (!pixiGpuDevice) {
+        pixiRenderer.destroy();
+        throw new Error(
+          'PixiJS WebGPU renderer did not expose a GPUDevice for the scene editor.'
+        );
+      }
+
+      const threeRenderer = new THREE.WebGPURenderer({
+        canvas: gameCanvas,
+        device: pixiGpuDevice,
+        antialias: false,
+        preserveDrawingBuffer: true,
+        stencil: true,
+        forceWebGL: false,
+      });
+      await threeRenderer.init();
+      if (
+        !threeRenderer.isWebGPURenderer ||
+        (threeRenderer.backend && threeRenderer.backend.isWebGLBackend)
+      ) {
+        pixiRenderer.destroy();
+        threeRenderer.dispose();
+        throw new Error(
+          'Three.js did not initialize the scene editor with a WebGPU backend.'
+        );
+      }
+      threeRenderer.autoClear = false;
+      threeRenderer.setSize(initialWidth, initialHeight);
+
       if (this._unmounted || !this.canvasArea) {
         pixiRenderer.destroy();
         threeRenderer.dispose();
@@ -344,7 +350,8 @@ export default class InstancesEditor extends Component<Props, State> {
       this.threeRenderer = threeRenderer;
     } else {
       // Create the renderer and setup the rendering area for scene editor.
-      const pixiRenderer = await PIXI.autoDetectRenderer({
+      const pixiRenderer = new PIXI.WebGPURenderer();
+      await pixiRenderer.init({
         width: initialWidth,
         height: initialHeight,
         // "preserveDrawingBuffer: true" is needed to avoid flickering and background issues on some mobile phones (see #585 #572 #566 #463)
@@ -384,7 +391,7 @@ export default class InstancesEditor extends Component<Props, State> {
         this.props.onContextMenu(event.clientX, event.clientY),
     });
 
-    gameCanvas.onwheel = (event: WheelEvent) => {
+    (gameCanvas: any).onwheel = (event: WheelEvent) => {
       this.fpsLimiter.notifyInteractionHappened();
       const zoomFactor = this.getZoomFactor();
       if (this.keyboardShortcuts.shouldZoom(event)) {
@@ -400,7 +407,7 @@ export default class InstancesEditor extends Component<Props, State> {
 
       event.preventDefault();
     };
-    gameCanvas.setAttribute('tabIndex', -1);
+    gameCanvas.setAttribute('tabIndex', '-1');
     gameCanvas.addEventListener('keydown', this.keyboardShortcuts.onKeyDown);
     gameCanvas.addEventListener('keyup', this.keyboardShortcuts.onKeyUp);
     gameCanvas.addEventListener(

@@ -185,7 +185,10 @@ declare type ObjectsRenderingService = {
   gd: GDNamespace;
   PIXI: PIXI;
   THREE: typeof import('../newIDE/app/node_modules/three');
-  THREE_ADDONS: { SkeletonUtils: any };
+  THREE_ADDONS: {
+    SkeletonUtils: any;
+    BufferGeometryUtils: any;
+  };
   RenderedInstance: typeof RenderedInstance;
   Rendered3DInstance: typeof Rendered3DInstance;
   registerInstanceRenderer: (objectType: string, renderer: any) => void;

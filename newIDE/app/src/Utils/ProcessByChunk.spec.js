@@ -5,7 +5,7 @@ import { processByChunk } from './ProcessByChunk';
 describe('ProcessByChunk', () => {
   test('empty array', async () => {
     // $FlowFixMe[underconstrained-implicit-instantiation]
-    const processChunk = jest.fn().mockImplementation(async () => {});
+    const processChunk = vi.fn().mockImplementation(async () => {});
     await processByChunk([], {
       transformItem: async item => item,
       isChunkTooBig: () => true,

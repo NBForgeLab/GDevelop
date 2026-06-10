@@ -1,0 +1,140 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`editorFunctions > add_or_edit_variable > adds a deeply nested structure path (path-based creation) 1`] = `"Added global variable "config.audio.volume" (Number) = 0.8"`;
+
+exports[`editorFunctions > add_or_edit_variable > preserves existing array elements when editing one element 1`] = `"Edited global variable "inventory[1]" = Magic Shield"`;
+
+exports[`editorFunctions > add_or_edit_variable > preserves existing sibling fields when editing one field of a structure 1`] = `"Edited global variable "player.hp" = 42"`;
+
+exports[`editorFunctions > add_or_edit_variable > reports scope and new value for a global variable (added) 1`] = `"Added global variable "score" (Number) = 42"`;
+
+exports[`editorFunctions > add_or_edit_variable > reports scope and new value for a global-object variable (added) 1`] = `"Added global object "GlobalEnemy" variable "speed" (Number) = 50"`;
+
+exports[`editorFunctions > add_or_edit_variable > reports scope and new value for a scene variable (added) 1`] = `"Added scene "TestScene" variable "lives" (Number) = 3"`;
+
+exports[`editorFunctions > add_or_edit_variable > reports scope and new value for a scene-object variable (added) 1`] = `"Added scene "TestScene" object "Player" variable "health" (Number) = 100"`;
+
+exports[`editorFunctions > add_or_edit_variable > reports the new value when editing an existing variable 1`] = `"Edited global variable "greeting" = hello world"`;
+
+exports[`editorFunctions > add_or_edit_variable > sets a nested field inside an existing structure 1`] = `"Edited global variable "player.hp" = 42"`;
+
+exports[`editorFunctions > add_or_edit_variable > sets a structure field inside an array element 1`] = `"Added scene "TestScene" variable "players[0].name" (String) = Alice"`;
+
+exports[`editorFunctions > add_or_edit_variable > sets an element of an array variable 1`] = `"Added global variable "inventory[2]" (String) = Magic Sword"`;
+
+exports[`editorFunctions > add_scene_events > adds events to a scene and installs missing resources 1`] = `
+{
+  "aiGeneratedEventId": "test-ai-event-id",
+  "message": "Successfully added explosion events.",
+  "newlyAddedResources": [
+    {
+      "resourceKind": "image",
+      "resourceName": "explosion.png",
+      "status": "resource-installed",
+    },
+    {
+      "resourceKind": "audio",
+      "resourceName": "explosion.wav",
+      "status": "resource-installed",
+    },
+  ],
+  "success": true,
+}
+`;
+
+exports[`editorFunctions > change_behavior_property > changes behavior properties with warnings for invalid values 1`] = `
+"Done with warnings.
+Set "Gravity" on behavior "PlatformerObject" = "1500".
+Set "JumpSpeed" on behavior "PlatformerObject" = "800".
+Set "MaxSpeed" on behavior "PlatformerObject" = "300".
+Set "CanGrabPlatforms" on behavior "PlatformerObject" = "true".
+Set "IgnoreDefaultControls" on behavior "PlatformerObject" = "false".
+Warnings:
+"MaxSpeed" on behavior "PlatformerObject" = "300", but requested "300 x 20" looks multi-dimensional; only a single number is allowed.
+Property "nonExistingProperty" not on behavior "PlatformerObject" of "MySprite"."
+`;
+
+exports[`editorFunctions > change_object_property > fails when changing a resource property to a non-existing resource 1`] = `
+"No changes. Issues:
+"font" on "MyTextObject" -> "non-existing-font.ttf": resource "non-existing-font.ttf" does not exist. New resources cannot be added just by name; use \`create_or_replace_object\` to import assets from the asset store (preserving properties/behaviors/events)."
+`;
+
+exports[`editorFunctions > change_object_property > fails when changing a resource property to one with a different type 1`] = `
+"No changes. Issues:
+"font" on "MyTextObject" -> "audio1.aac": resource "audio1.aac" has kind "audio" but expected "font"."
+`;
+
+exports[`editorFunctions > change_object_property > handles various property types: resource, non-existing, boolean, and number with sanitization warning 1`] = `
+"Done with warnings.
+Set "characterSize" on "MyTextObject" = "56".
+Set "verticalTextAlignment" on "MyTextObject" = "bottom".
+Set "bold" on "MyTextObject" = "true".
+Set "isShadowEnabled" on "MyTextObject" = "true".
+Set "italic" on "MyTextObject" = "false".
+Set "shadowAngle" on "MyTextObject" = "20".
+Set "shadowDistance" on "MyTextObject" = "0".
+Set "shadowBlurRadius" on "MyTextObject" = "20.41".
+Warnings:
+Could not set "textAlignment" on "MyTextObject": invalid value or type.
+Property "nonExistingProperty" not found on object "MyTextObject".
+"shadowAngle" on "MyTextObject" = "20", but requested "20,40 , 50" looks multi-dimensional; only a single number is allowed.
+"shadowDistance" on "MyTextObject" = "0", but requested "20X   40 X 50" looks multi-dimensional; only a single number is allowed.
+"shadowBlurRadius" on "MyTextObject" = "20.41", but requested "20.41 × 50" looks multi-dimensional; only a single number is allowed."
+`;
+
+exports[`editorFunctions > change_object_property > reports the FINAL renamed name when a collision forces a suffix 1`] = `
+"Done.
+Renamed object "MyTextObject" to "Foo2" (events and references updated)."
+`;
+
+exports[`editorFunctions > change_object_property > successfully changes a resource property from one existing resource to another 1`] = `
+"Done.
+Set "font" on "MyTextObject" = "font2.ttf"."
+`;
+
+exports[`editorFunctions > change_scene_properties_layers_effects_groups (echo new values) > echoes the new values for background color and game resolution 1`] = `
+"Done.
+Set scene background color to #ff0080.
+Set game resolution width to 1920.
+Set game resolution height to 1080.
+Set stopSoundsOnStartup to true.
+Set game orientation to landscape.
+Set game scale mode to nearest.
+Set game name to "My Game"."
+`;
+
+exports[`editorFunctions > create_or_replace_object > creates a new object (from scratch, because only object_type was provided) 1`] = `"Created object "MyNewTextObject" (type "TextObject::Text", scene "TestScene") from scratch. Properties: bold: false, characterSize: 20 (px), color: 0;0;0 (color), isOutlineEnabled: false, isShadowEnabled: false, italic: false, lineHeight: 0 (px), outlineColor: 255;255;255 (color), outlineThickness: 2 (px), shadowAngle: 90 (deg), shadowBlurRadius: 2 (px), shadowColor: 0;0;0 (color), shadowDistance: 4 (px), shadowOpacity: 127 (px), text: Text (multilinestring), textAlignment: left (choice, one of: ["left", "center", "right"]), verticalTextAlignment: top (choice, one of: ["top", "center", "bottom"]). Empty: font (resource)."`;
+
+exports[`editorFunctions > create_or_replace_object > creates a new object (from scratch, fallback if not found in the asset store) 1`] = `"Created object "MyNewTextObject" (type "TextObject::Text", scene "TestScene") from scratch. Properties: bold: false, characterSize: 20 (px), color: 0;0;0 (color), isOutlineEnabled: false, isShadowEnabled: false, italic: false, lineHeight: 0 (px), outlineColor: 255;255;255 (color), outlineThickness: 2 (px), shadowAngle: 90 (deg), shadowBlurRadius: 2 (px), shadowColor: 0;0;0 (color), shadowDistance: 4 (px), shadowOpacity: 127 (px), text: Text (multilinestring), textAlignment: left (choice, one of: ["left", "center", "right"]), verticalTextAlignment: top (choice, one of: ["top", "center", "bottom"]). Empty: font (resource)."`;
+
+exports[`editorFunctions > create_or_replace_object > creates a new object (from the asset store, with search_terms and object_type provided) 1`] = `"Created object "MyNewTextObject" (type "TextObject::Text", scene "TestScene") from asset store. Properties: bold: false, characterSize: 20 (px), color: 0;0;0 (color), isOutlineEnabled: false, isShadowEnabled: false, italic: false, lineHeight: 0 (px), outlineColor: 255;255;255 (color), outlineThickness: 2 (px), shadowAngle: 90 (deg), shadowBlurRadius: 2 (px), shadowColor: 0;0;0 (color), shadowDistance: 4 (px), shadowOpacity: 127 (px), text: Text (multilinestring), textAlignment: left (choice, one of: ["left", "center", "right"]), verticalTextAlignment: top (choice, one of: ["top", "center", "bottom"]). Empty: font (resource)."`;
+
+exports[`editorFunctions > create_or_replace_object > creates a new object (from the asset store, with search_terms but without any specified object type) 1`] = `"Created object "SomeNewObject" (type "Sprite", scene "TestScene") from asset store. Properties: ."`;
+
+exports[`editorFunctions > create_or_replace_object > fails when creating a new object without object_type, search_terms nor asset_id 1`] = `"No search_terms or asset_id provided for "MyAssetObject". Not created."`;
+
+exports[`editorFunctions > create_or_replace_object > fails when duplicating an object not existing (in the same scene) 1`] = `"Object "DoesNotExist" not found in scene "TestScene" nor globally. Not duplicated."`;
+
+exports[`editorFunctions > create_or_replace_object > fails when duplicating an object not existing in another scene 1`] = `"Object "DoesNotExist" not found in scene "OtherScene" nor globally. Not duplicated."`;
+
+exports[`editorFunctions > create_or_replace_object > fails when moving a scene object to a global object when there is one already 1`] = `"Object "GlobalObjectPlayer" already exists globally. No change."`;
+
+exports[`editorFunctions > create_or_replace_object > fails when moving an existing global object to a scene 1`] = `""GlobalObjectPlayer" is global; global objects cannot be moved to scene "TestScene"."`;
+
+exports[`editorFunctions > create_or_replace_object > fails when object_type conflicts with an existing object type 1`] = `"Object "Player" already exists in scene "TestScene" with type "Sprite". Cannot (re)create as type "TextObject::Text"."`;
+
+exports[`editorFunctions > create_or_replace_object > fails when scene does not exist 1`] = `"Scene not found: "NonExistentScene"."`;
+
+exports[`editorFunctions > create_or_replace_object > replaces an existing object without specifying object_type 1`] = `"Replaced scene "TestScene" object "Player" with asset store object (same type "Sprite")."`;
+
+exports[`editorFunctions > create_or_replace_object > returns success when duplicating an existing object (and making it global) 1`] = `"Duplicated "Player" (scene "TestScene") as "TheNewPlayer" (global objects); same type/behaviors/properties/effects."`;
+
+exports[`editorFunctions > create_or_replace_object > returns success when duplicating an existing object (from another scene) 1`] = `"Duplicated "OtherScenePlayer" (scene "OtherScene") as "TheNewPlayer" (scene "TestScene"); same type/behaviors/properties/effects."`;
+
+exports[`editorFunctions > create_or_replace_object > returns success when duplicating an existing object (same scene) 1`] = `"Duplicated "Player" (scene "TestScene") as "TheNewPlayer" (scene "TestScene"); same type/behaviors/properties/effects."`;
+
+exports[`editorFunctions > create_or_replace_object > returns success when moving an existing object to the global objects 1`] = `"Moved "Player" to global objects; type/behaviors/properties/effects unchanged."`;
+
+exports[`editorFunctions > create_or_replace_object > returns success when replacing an existing object 1`] = `"Replaced scene "TestScene" object "Player" with asset store object (same type "Sprite")."`;
+
+exports[`editorFunctions > create_or_replace_object > returns success without creating when object already exists with same type 1`] = `"Object "Player" already exists."`;

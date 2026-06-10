@@ -944,12 +944,12 @@ namespace gdjs {
       // window.globalRuntimeGameForTesting = game;
     }
 
-    private _setupWebGLContextLostListener(): void {
+    private _setupGraphicsContextLostListener(): void {
       const canvas = this._runtimeGame.getRenderer().getCanvas();
       if (!canvas) return;
 
       const handleContextLost = (event: Event) => {
-        console.warn('WebGL context lost, notifying the editor...');
+        console.warn('Graphics context lost, notifying the editor...');
 
         // Prevent to restore the context, and prefer to let the editor handle this
         // to restart from a clean state.
@@ -961,10 +961,8 @@ namespace gdjs {
         }
       };
 
-      canvas.addEventListener('webglcontextlost', handleContextLost);
       canvas.addEventListener('contextlost', handleContextLost);
       this._unregisterContextLostListener = () => {
-        canvas.removeEventListener('webglcontextlost', handleContextLost);
         canvas.removeEventListener('contextlost', handleContextLost);
       };
     }
@@ -3656,7 +3654,7 @@ namespace gdjs {
 
     updateAndRender() {
       if (!this._unregisterContextLostListener) {
-        this._setupWebGLContextLostListener();
+        this._setupGraphicsContextLostListener();
       }
 
       const objectUnderCursor: gdjs.RuntimeObject | null =
@@ -5569,11 +5567,12 @@ namespace gdjs {
       const mergedPositions: number[] = [];
 
       object3D.traverse((child) => {
-        if (!child || !child.isMesh || !child.geometry) return;
-        const wireframeGeometry = new THREE.WireframeGeometry(child.geometry);
+        const mesh = child as THREE.Mesh;
+        if (!mesh.isMesh || !mesh.geometry) return;
+        const wireframeGeometry = new THREE.WireframeGeometry(mesh.geometry);
         const relativeMatrix = new THREE.Matrix4().multiplyMatrices(
           rootInverse,
-          child.matrixWorld
+          mesh.matrixWorld
         );
         wireframeGeometry.applyMatrix4(relativeMatrix);
 
@@ -5608,11 +5607,12 @@ namespace gdjs {
     private _disposeShapeObject(): void {
       if (!this._shapeObject) return;
       this._shapeObject.traverse((object) => {
-        if (object.geometry) object.geometry.dispose();
-        if (object.material && Array.isArray(object.material)) {
-          object.material.forEach((material) => material.dispose());
-        } else if (object.material) {
-          object.material.dispose();
+        const mesh = object as THREE.Mesh;
+        if (mesh.geometry) mesh.geometry.dispose();
+        if (mesh.material && Array.isArray(mesh.material)) {
+          mesh.material.forEach((material) => material.dispose());
+        } else if (mesh.material) {
+          mesh.material.dispose();
         }
       });
       this._shapeObject.removeFromParent();

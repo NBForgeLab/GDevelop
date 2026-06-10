@@ -260,7 +260,7 @@ export const CompactEffectsListEditor = ({
     layerRenderingType === '3d' ? all3DEffectMetadata : all2DEffectMetadata;
 
   const buildAdd3DEffectMenuTemplate = React.useCallback(
-    (i18n: I18nType) =>
+    (i18n: I18nType): Array<MenuItemTemplate> =>
       all3DEffectMetadata.map(effectMetadata => ({
         label: effectMetadata.fullName,
         enabled:

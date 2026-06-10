@@ -2,7 +2,6 @@
 import LayerRenderer from './LayerRenderer';
 import ViewPosition from '../ViewPosition';
 import * as PIXI from 'pixi.js';
-import * as THREE from 'three';
 import { rgbToHexNumber } from '../../Utils/ColorTransformer';
 import Rectangle from '../../Utils/Rectangle';
 import {
@@ -197,7 +196,7 @@ export default class InstancesRenderer {
     // $FlowFixMe[value-as-type]
     pixiRenderer: PIXI.Renderer,
     // $FlowFixMe[value-as-type]
-    threeRenderer: THREE.WebGLRenderer | null,
+    threeRenderer: any | null,
     viewPosition: ViewPosition,
     // $FlowFixMe[value-as-type]
     uiPixiContainer: PIXI.Container,
@@ -206,12 +205,9 @@ export default class InstancesRenderer {
   ) {
     resetBasicProfilingCounters(this._basicProfilingCounters);
 
-    // Even if no rendering at all has been made already, setting up the Three.js/PixiJS renderers
-    // might have changed some WebGL states already. Reset the state for the very first frame.
-    // And, out of caution, keep doing it for every frame.
+    // Reset renderer states for the very first frame when available.
     if (threeRenderer) {
-      // Ensure the state is clean for PixiJS to render.
-      threeRenderer.resetState();
+      threeRenderer.resetState && threeRenderer.resetState();
       pixiRenderer.resetState();
     }
 
@@ -290,12 +286,14 @@ export default class InstancesRenderer {
 
       const threeCamera = layerRenderer.getThreeCamera();
       const threePlaneMesh = layerRenderer.getThreePlaneMesh();
-      if (threeCamera && threePlaneMesh) {
+      if (threeCamera) {
         viewPosition.applyTransformationToThree(threeCamera, threePlaneMesh);
         threeCamera.fov = layer.getCamera3DFieldOfView();
       }
 
-      if (!threeRenderer) {
+      const threeScene = layerRenderer.getThreeScene();
+
+      if (!threeRenderer || !threeScene || !threeCamera) {
         // Render a layer with 2D rendering (PixiJS) only.
         const time = performance.now();
         pixiRenderer.render({ container: layerContainer, clear: false });
@@ -304,48 +302,25 @@ export default class InstancesRenderer {
           performance.now() - time
         );
       } else {
-        // Render a layer with 3D rendering, and possibly some 2D rendering too.
-        const threeScene = layerRenderer.getThreeScene();
-        const threeCamera = layerRenderer.getThreeCamera();
+        layerRenderer.renderOnPixiRenderTexture(pixiRenderer);
+        layerRenderer.updateThreePlaneTextureFromPixiRenderTexture(
+          threeRenderer,
+          pixiRenderer
+        );
 
-        // Render the 3D objects of this layer.
-        if (threeScene && threeCamera) {
-          // It's important to reset the internal WebGL state of Three.js then PixiJS
-          // to ensure the Three rendering does not impact the Pixi rendering.
-          threeRenderer.resetState();
-          pixiRenderer.resetState();
+        pixiRenderer.resetState();
+        threeRenderer.resetState && threeRenderer.resetState();
 
-          // Do the rendering of the PixiJS objects of the layer on the render texture.
-          // Then, update the texture of the plane showing the PixiJS rendering,
-          // so that the 2D rendering made by PixiJS can be shown in the 3D world.
-          const pixiStartTime = performance.now();
-          layerRenderer.renderOnPixiRenderTexture(pixiRenderer);
-          layerRenderer.updateThreePlaneTextureFromPixiRenderTexture(
-            // The renderers are needed to find the internal WebGL texture.
-            threeRenderer,
-            pixiRenderer
-          );
-          increasePixiRenderingTime(
-            this._basicProfilingCounters,
-            performance.now() - pixiStartTime
-          );
+        // Clear the depth as each layer is independent and display on top of the previous one,
+        // even 3D objects.
+        threeRenderer.clearDepth();
 
-          // It's important to reset the internal WebGL state of PixiJS, then Three.js
-          // to ensure the 3D rendering is made properly by Three.js
-          pixiRenderer.resetState();
-          threeRenderer.resetState();
-
-          // Clear the depth as each layer is independent and display on top of the previous one,
-          // even 3D objects.
-          threeRenderer.clearDepth();
-
-          const threeStartTime = performance.now();
-          threeRenderer.render(threeScene, threeCamera);
-          increaseThreeRenderingTime(
-            this._basicProfilingCounters,
-            performance.now() - threeStartTime
-          );
-        }
+        const threeStartTime = performance.now();
+        threeRenderer.render(threeScene, threeCamera);
+        increaseThreeRenderingTime(
+          this._basicProfilingCounters,
+          performance.now() - threeStartTime
+        );
       }
     }
     this._updatePixiObjectsZOrder();
@@ -353,7 +328,7 @@ export default class InstancesRenderer {
 
     if (threeRenderer) {
       // Ensure the state is clean for PixiJS to render.
-      threeRenderer.resetState();
+      threeRenderer.resetState && threeRenderer.resetState();
       pixiRenderer.resetState();
     }
 
@@ -365,10 +340,9 @@ export default class InstancesRenderer {
     );
 
     if (threeRenderer) {
-      // It's important to reset the internal WebGL state of PixiJS, then Three.js
-      // to ensure the 3D rendering is made properly by Three.js
+      // Ensure the 3D rendering starts from a clean renderer state.
       pixiRenderer.resetState();
-      threeRenderer.resetState();
+      threeRenderer.resetState && threeRenderer.resetState();
     }
   }
 

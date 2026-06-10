@@ -25,22 +25,22 @@ describe('editorFunctions', () => {
     args: {},
     i18n: makeFakeI18n(),
     editorCallbacks: {
-      onOpenLayout: jest.fn(),
-      onCreateProject: jest.fn(),
+      onOpenLayout: vi.fn(),
+      onCreateProject: vi.fn(),
     },
     relatedAiRequestId: 'fake-ai-request-id',
     getRelatedAiRequestLastMessages: () => ({
       lastUserMessage: null,
       lastAssistantMessages: [],
     }),
-    generateEvents: jest.fn(),
-    onInstancesModifiedOutsideEditor: jest.fn(),
-    onObjectGroupsModifiedOutsideEditor: jest.fn(),
-    onSceneEventsModifiedOutsideEditor: jest.fn(),
+    generateEvents: vi.fn(),
+    onInstancesModifiedOutsideEditor: vi.fn(),
+    onObjectGroupsModifiedOutsideEditor: vi.fn(),
+    onSceneEventsModifiedOutsideEditor: vi.fn(),
     toolOptions: {
       includeEventsJson: true,
     },
-    ensureExtensionInstalled: jest.fn(),
+    ensureExtensionInstalled: vi.fn(),
     searchAndInstallAsset: async ({
       objectsContainer,
       objectName,
@@ -77,9 +77,9 @@ describe('editorFunctions', () => {
         ],
       });
     },
-    onObjectsModifiedOutsideEditor: jest.fn(),
-    onWillInstallExtension: jest.fn(),
-    onExtensionInstalled: jest.fn(),
+    onObjectsModifiedOutsideEditor: vi.fn(),
+    onWillInstallExtension: vi.fn(),
+    onExtensionInstalled: vi.fn(),
     getAssetStoreTagForNewObject: () => null,
     PixiResourcesLoader: PixiResourcesLoaderMock,
   });
@@ -116,7 +116,7 @@ describe('editorFunctions', () => {
 
     it('creates a new object (from scratch, because only object_type was provided)', async () => {
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const onObjectsModifiedOutsideEditor = jest.fn();
+      const onObjectsModifiedOutsideEditor = vi.fn();
 
       const result: EditorFunctionGenericOutput = await editorFunctions.create_or_replace_object.launchFunction(
         {
@@ -130,9 +130,7 @@ describe('editorFunctions', () => {
         }
       );
 
-      expect(result.message).toMatchInlineSnapshot(
-        `"Created object \\"MyNewTextObject\\" (type \\"TextObject::Text\\", scene \\"TestScene\\") from scratch. Properties: bold: false, characterSize: 20 (px), color: 0;0;0 (color), isOutlineEnabled: false, isShadowEnabled: false, italic: false, lineHeight: 0 (px), outlineColor: 255;255;255 (color), outlineThickness: 2 (px), shadowAngle: 90 (deg), shadowBlurRadius: 2 (px), shadowColor: 0;0;0 (color), shadowDistance: 4 (px), shadowOpacity: 127 (px), text: Text (multilinestring), textAlignment: left (choice, one of: [\\"left\\", \\"center\\", \\"right\\"]), verticalTextAlignment: top (choice, one of: [\\"top\\", \\"center\\", \\"bottom\\"]). Empty: font (resource)."`
-      );
+      expect(result.message).toMatchSnapshot();
       expect(result.success).toBe(true);
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
         scene: testScene,
@@ -142,7 +140,7 @@ describe('editorFunctions', () => {
 
     it('creates a new object (from the asset store, with search_terms and object_type provided)', async () => {
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const onObjectsModifiedOutsideEditor = jest.fn();
+      const onObjectsModifiedOutsideEditor = vi.fn();
 
       const result: EditorFunctionGenericOutput = await editorFunctions.create_or_replace_object.launchFunction(
         {
@@ -157,9 +155,7 @@ describe('editorFunctions', () => {
         }
       );
 
-      expect(result.message).toMatchInlineSnapshot(
-        `"Created object \\"MyNewTextObject\\" (type \\"TextObject::Text\\", scene \\"TestScene\\") from asset store. Properties: bold: false, characterSize: 20 (px), color: 0;0;0 (color), isOutlineEnabled: false, isShadowEnabled: false, italic: false, lineHeight: 0 (px), outlineColor: 255;255;255 (color), outlineThickness: 2 (px), shadowAngle: 90 (deg), shadowBlurRadius: 2 (px), shadowColor: 0;0;0 (color), shadowDistance: 4 (px), shadowOpacity: 127 (px), text: Text (multilinestring), textAlignment: left (choice, one of: [\\"left\\", \\"center\\", \\"right\\"]), verticalTextAlignment: top (choice, one of: [\\"top\\", \\"center\\", \\"bottom\\"]). Empty: font (resource)."`
-      );
+      expect(result.message).toMatchSnapshot();
       expect(result.success).toBe(true);
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
         scene: testScene,
@@ -169,7 +165,7 @@ describe('editorFunctions', () => {
 
     it('creates a new object (from the asset store, with search_terms but without any specified object type)', async () => {
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const onObjectsModifiedOutsideEditor = jest.fn();
+      const onObjectsModifiedOutsideEditor = vi.fn();
 
       const result: EditorFunctionGenericOutput = await editorFunctions.create_or_replace_object.launchFunction(
         {
@@ -183,9 +179,7 @@ describe('editorFunctions', () => {
         }
       );
 
-      expect(result.message).toMatchInlineSnapshot(
-        `"Created object \\"SomeNewObject\\" (type \\"Sprite\\", scene \\"TestScene\\") from asset store. Properties: ."`
-      );
+      expect(result.message).toMatchSnapshot();
       expect(result.success).toBe(true);
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
         scene: testScene,
@@ -195,7 +189,7 @@ describe('editorFunctions', () => {
 
     it('creates a new object (from scratch, fallback if not found in the asset store)', async () => {
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const onObjectsModifiedOutsideEditor = jest.fn();
+      const onObjectsModifiedOutsideEditor = vi.fn();
 
       const result: EditorFunctionGenericOutput = await editorFunctions.create_or_replace_object.launchFunction(
         {
@@ -222,9 +216,7 @@ describe('editorFunctions', () => {
         }
       );
 
-      expect(result.message).toMatchInlineSnapshot(
-        `"Created object \\"MyNewTextObject\\" (type \\"TextObject::Text\\", scene \\"TestScene\\") from scratch. Properties: bold: false, characterSize: 20 (px), color: 0;0;0 (color), isOutlineEnabled: false, isShadowEnabled: false, italic: false, lineHeight: 0 (px), outlineColor: 255;255;255 (color), outlineThickness: 2 (px), shadowAngle: 90 (deg), shadowBlurRadius: 2 (px), shadowColor: 0;0;0 (color), shadowDistance: 4 (px), shadowOpacity: 127 (px), text: Text (multilinestring), textAlignment: left (choice, one of: [\\"left\\", \\"center\\", \\"right\\"]), verticalTextAlignment: top (choice, one of: [\\"top\\", \\"center\\", \\"bottom\\"]). Empty: font (resource)."`
-      );
+      expect(result.message).toMatchSnapshot();
       expect(result.success).toBe(true);
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
         scene: testScene,
@@ -234,7 +226,7 @@ describe('editorFunctions', () => {
 
     it('returns success without creating when object already exists with same type', async () => {
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const onObjectsModifiedOutsideEditor = jest.fn();
+      const onObjectsModifiedOutsideEditor = vi.fn();
 
       const result: EditorFunctionGenericOutput = await editorFunctions.create_or_replace_object.launchFunction(
         {
@@ -249,9 +241,7 @@ describe('editorFunctions', () => {
       );
 
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Object \\"Player\\" already exists."`
-      );
+      expect(result.message).toMatchSnapshot();
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
         scene: testScene,
         isNewObjectTypeUsed: false,
@@ -260,7 +250,7 @@ describe('editorFunctions', () => {
 
     it('returns success when duplicating an existing object (same scene)', async () => {
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const onObjectsModifiedOutsideEditor = jest.fn();
+      const onObjectsModifiedOutsideEditor = vi.fn();
 
       const result: EditorFunctionGenericOutput = await editorFunctions.create_or_replace_object.launchFunction(
         {
@@ -278,9 +268,7 @@ describe('editorFunctions', () => {
       expect(project.getObjects().hasObjectNamed('TheNewPlayer')).toBe(false);
       expect(testScene.getObjects().hasObjectNamed('TheNewPlayer')).toBe(true);
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Duplicated \\"Player\\" (scene \\"TestScene\\") as \\"TheNewPlayer\\" (scene \\"TestScene\\"); same type/behaviors/properties/effects."`
-      );
+      expect(result.message).toMatchSnapshot();
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
         scene: testScene,
         isNewObjectTypeUsed: false,
@@ -289,7 +277,7 @@ describe('editorFunctions', () => {
 
     it('returns success when duplicating an existing object (and making it global)', async () => {
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const onObjectsModifiedOutsideEditor = jest.fn();
+      const onObjectsModifiedOutsideEditor = vi.fn();
 
       const result: EditorFunctionGenericOutput = await editorFunctions.create_or_replace_object.launchFunction(
         {
@@ -308,9 +296,7 @@ describe('editorFunctions', () => {
       expect(project.getObjects().hasObjectNamed('TheNewPlayer')).toBe(true);
       expect(testScene.getObjects().hasObjectNamed('TheNewPlayer')).toBe(false);
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Duplicated \\"Player\\" (scene \\"TestScene\\") as \\"TheNewPlayer\\" (global objects); same type/behaviors/properties/effects."`
-      );
+      expect(result.message).toMatchSnapshot();
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
         scene: testScene,
         isNewObjectTypeUsed: false,
@@ -319,7 +305,7 @@ describe('editorFunctions', () => {
 
     it('returns success when duplicating an existing object (from another scene)', async () => {
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const onObjectsModifiedOutsideEditor = jest.fn();
+      const onObjectsModifiedOutsideEditor = vi.fn();
       const otherScene = project.insertNewLayout('OtherScene', 1);
       const otherSceneObjects = otherScene.getObjects();
       otherSceneObjects.insertNewObject(
@@ -359,9 +345,7 @@ describe('editorFunctions', () => {
         true
       );
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Duplicated \\"OtherScenePlayer\\" (scene \\"OtherScene\\") as \\"TheNewPlayer\\" (scene \\"TestScene\\"); same type/behaviors/properties/effects."`
-      );
+      expect(result.message).toMatchSnapshot();
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
         scene: testScene,
         isNewObjectTypeUsed: false,
@@ -386,9 +370,7 @@ describe('editorFunctions', () => {
       );
 
       expect(result.success).toBe(false);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Object \\"DoesNotExist\\" not found in scene \\"OtherScene\\" nor globally. Not duplicated."`
-      );
+      expect(result.message).toMatchSnapshot();
     });
 
     it('fails when duplicating an object not existing (in the same scene)', async () => {
@@ -407,14 +389,12 @@ describe('editorFunctions', () => {
       );
 
       expect(result.success).toBe(false);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Object \\"DoesNotExist\\" not found in scene \\"TestScene\\" nor globally. Not duplicated."`
-      );
+      expect(result.message).toMatchSnapshot();
     });
 
     it('returns success when replacing an existing object', async () => {
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const onObjectsModifiedOutsideEditor = jest.fn();
+      const onObjectsModifiedOutsideEditor = vi.fn();
 
       const result: EditorFunctionGenericOutput = await editorFunctions.create_or_replace_object.launchFunction(
         {
@@ -438,9 +418,7 @@ describe('editorFunctions', () => {
         false
       );
       expect(testScene.getObjects().hasObjectNamed('Player')).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Replaced scene \\"TestScene\\" object \\"Player\\" with asset store object (same type \\"Sprite\\")."`
-      );
+      expect(result.message).toMatchSnapshot();
       expect(result.success).toBe(true);
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
         scene: testScene,
@@ -450,7 +428,7 @@ describe('editorFunctions', () => {
 
     it('returns success when moving an existing object to the global objects', async () => {
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const onObjectsModifiedOutsideEditor = jest.fn();
+      const onObjectsModifiedOutsideEditor = vi.fn();
 
       const result: EditorFunctionGenericOutput = await editorFunctions.create_or_replace_object.launchFunction(
         {
@@ -475,9 +453,7 @@ describe('editorFunctions', () => {
         false
       );
       expect(testScene.getObjects().hasObjectNamed('Player')).toBe(false);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Moved \\"Player\\" to global objects; type/behaviors/properties/effects unchanged."`
-      );
+      expect(result.message).toMatchSnapshot();
       expect(result.success).toBe(true);
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
         scene: testScene,
@@ -510,9 +486,7 @@ describe('editorFunctions', () => {
         }
       );
 
-      expect(result.message).toMatchInlineSnapshot(
-        `"Object \\"GlobalObjectPlayer\\" already exists globally. No change."`
-      );
+      expect(result.message).toMatchSnapshot();
       expect(project.getObjects().hasObjectNamed('GlobalObjectPlayer')).toBe(
         true
       );
@@ -524,7 +498,7 @@ describe('editorFunctions', () => {
 
     it('fails when moving an existing global object to a scene', async () => {
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const onObjectsModifiedOutsideEditor = jest.fn();
+      const onObjectsModifiedOutsideEditor = vi.fn();
 
       const result: EditorFunctionGenericOutput = await editorFunctions.create_or_replace_object.launchFunction(
         {
@@ -540,9 +514,7 @@ describe('editorFunctions', () => {
         }
       );
 
-      expect(result.message).toMatchInlineSnapshot(
-        `"\\"GlobalObjectPlayer\\" is global; global objects cannot be moved to scene \\"TestScene\\"."`
-      );
+      expect(result.message).toMatchSnapshot();
       expect(project.getObjects().hasObjectNamed('GlobalObjectPlayer')).toBe(
         true
       );
@@ -565,14 +537,12 @@ describe('editorFunctions', () => {
       );
 
       expect(result.success).toBe(false);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Scene not found: \\"NonExistentScene\\"."`
-      );
+      expect(result.message).toMatchSnapshot();
     });
 
     it('creates a new object via asset_id without object_type', async () => {
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const onObjectsModifiedOutsideEditor = jest.fn();
+      const onObjectsModifiedOutsideEditor = vi.fn();
 
       const result: EditorFunctionGenericOutput = await editorFunctions.create_or_replace_object.launchFunction(
         {
@@ -622,14 +592,12 @@ describe('editorFunctions', () => {
       );
 
       expect(result.success).toBe(false);
-      expect(result.message).toMatchInlineSnapshot(
-        `"No search_terms or asset_id provided for \\"MyAssetObject\\". Not created."`
-      );
+      expect(result.message).toMatchSnapshot();
     });
 
     it('replaces an existing object without specifying object_type', async () => {
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const onObjectsModifiedOutsideEditor = jest.fn();
+      const onObjectsModifiedOutsideEditor = vi.fn();
 
       const result: EditorFunctionGenericOutput = await editorFunctions.create_or_replace_object.launchFunction(
         {
@@ -645,9 +613,7 @@ describe('editorFunctions', () => {
       );
 
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Replaced scene \\"TestScene\\" object \\"Player\\" with asset store object (same type \\"Sprite\\")."`
-      );
+      expect(result.message).toMatchSnapshot();
     });
 
     it('fails when object_type conflicts with an existing object type', async () => {
@@ -663,9 +629,7 @@ describe('editorFunctions', () => {
       );
 
       expect(result.success).toBe(false);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Object \\"Player\\" already exists in scene \\"TestScene\\" with type \\"Sprite\\". Cannot (re)create as type \\"TextObject::Text\\"."`
-      );
+      expect(result.message).toMatchSnapshot();
     });
 
     it('reports global scope when creating a global object from scratch', async () => {
@@ -780,10 +744,7 @@ describe('editorFunctions', () => {
       );
 
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Set \\"font\\" on \\"MyTextObject\\" = \\"font2.ttf\\"."
-      `);
+      expect(result.message).toMatchSnapshot();
 
       // Verify the property was actually changed
       const textObject = testScene.getObjects().getObject('MyTextObject');
@@ -812,10 +773,7 @@ describe('editorFunctions', () => {
       );
 
       expect(result.success).toBe(false);
-      expect(result.message).toMatchInlineSnapshot(`
-        "No changes. Issues:
-        \\"font\\" on \\"MyTextObject\\" -> \\"non-existing-font.ttf\\": resource \\"non-existing-font.ttf\\" does not exist. New resources cannot be added just by name; use \`create_or_replace_object\` to import assets from the asset store (preserving properties/behaviors/events)."
-      `);
+      expect(result.message).toMatchSnapshot();
 
       // Verify the property was NOT changed (still the original value)
       const textObject = testScene.getObjects().getObject('MyTextObject');
@@ -844,10 +802,7 @@ describe('editorFunctions', () => {
       );
 
       expect(result.success).toBe(false);
-      expect(result.message).toMatchInlineSnapshot(`
-        "No changes. Issues:
-        \\"font\\" on \\"MyTextObject\\" -> \\"audio1.aac\\": resource \\"audio1.aac\\" has kind \\"audio\\" but expected \\"font\\"."
-      `);
+      expect(result.message).toMatchSnapshot();
 
       // Verify the property was NOT changed (still the original value)
       const textObject = testScene.getObjects().getObject('MyTextObject');
@@ -951,23 +906,7 @@ describe('editorFunctions', () => {
 
       // The operation should succeed overall (some changes were made)
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(`
-        "Done with warnings.
-        Set \\"characterSize\\" on \\"MyTextObject\\" = \\"56\\".
-        Set \\"verticalTextAlignment\\" on \\"MyTextObject\\" = \\"bottom\\".
-        Set \\"bold\\" on \\"MyTextObject\\" = \\"true\\".
-        Set \\"isShadowEnabled\\" on \\"MyTextObject\\" = \\"true\\".
-        Set \\"italic\\" on \\"MyTextObject\\" = \\"false\\".
-        Set \\"shadowAngle\\" on \\"MyTextObject\\" = \\"20\\".
-        Set \\"shadowDistance\\" on \\"MyTextObject\\" = \\"0\\".
-        Set \\"shadowBlurRadius\\" on \\"MyTextObject\\" = \\"20.41\\".
-        Warnings:
-        Could not set \\"textAlignment\\" on \\"MyTextObject\\": invalid value or type.
-        Property \\"nonExistingProperty\\" not found on object \\"MyTextObject\\".
-        \\"shadowAngle\\" on \\"MyTextObject\\" = \\"20\\", but requested \\"20,40 , 50\\" looks multi-dimensional; only a single number is allowed.
-        \\"shadowDistance\\" on \\"MyTextObject\\" = \\"0\\", but requested \\"20X   40 X 50\\" looks multi-dimensional; only a single number is allowed.
-        \\"shadowBlurRadius\\" on \\"MyTextObject\\" = \\"20.41\\", but requested \\"20.41 × 50\\" looks multi-dimensional; only a single number is allowed."
-      `);
+      expect(result.message).toMatchSnapshot();
 
       // Verify the properties were actually changed
       const textObject = testScene.getObjects().getObject('MyTextObject');
@@ -1009,10 +948,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       // Final name reported is "Foo2", not the requested "Foo".
-      expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Renamed object \\"MyTextObject\\" to \\"Foo2\\" (events and references updated)."
-      `);
+      expect(result.message).toMatchSnapshot();
       // Original "Foo" still exists; the renamed one is "Foo2".
       expect(testScene.getObjects().hasObjectNamed('Foo')).toBe(true);
       expect(testScene.getObjects().hasObjectNamed('Foo2')).toBe(true);
@@ -1094,17 +1030,7 @@ describe('editorFunctions', () => {
 
       // The operation should succeed overall (some changes were made)
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(`
-        "Done with warnings.
-        Set \\"Gravity\\" on behavior \\"PlatformerObject\\" = \\"1500\\".
-        Set \\"JumpSpeed\\" on behavior \\"PlatformerObject\\" = \\"800\\".
-        Set \\"MaxSpeed\\" on behavior \\"PlatformerObject\\" = \\"300\\".
-        Set \\"CanGrabPlatforms\\" on behavior \\"PlatformerObject\\" = \\"true\\".
-        Set \\"IgnoreDefaultControls\\" on behavior \\"PlatformerObject\\" = \\"false\\".
-        Warnings:
-        \\"MaxSpeed\\" on behavior \\"PlatformerObject\\" = \\"300\\", but requested \\"300 x 20\\" looks multi-dimensional; only a single number is allowed.
-        Property \\"nonExistingProperty\\" not on behavior \\"PlatformerObject\\" of \\"MySprite\\"."
-      `);
+      expect(result.message).toMatchSnapshot();
 
       // Verify the behavior properties were actually changed
       const spriteObject = testScene.getObjects().getObject('MySprite');
@@ -1139,9 +1065,9 @@ describe('editorFunctions', () => {
 
     it('adds events to a scene and installs missing resources', async () => {
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const onSceneEventsModifiedOutsideEditor = jest.fn();
+      const onSceneEventsModifiedOutsideEditor = vi.fn();
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const searchAndInstallResources = jest.fn().mockResolvedValue({
+      const searchAndInstallResources = vi.fn().mockResolvedValue({
         results: [
           {
             resourceName: 'explosion.png',
@@ -1156,7 +1082,7 @@ describe('editorFunctions', () => {
         ],
       });
       // $FlowFixMe[underconstrained-implicit-instantiation]
-      const ensureExtensionInstalled = jest.fn().mockResolvedValue(undefined);
+      const ensureExtensionInstalled = vi.fn().mockResolvedValue(undefined);
 
       const result = await editorFunctions.add_scene_events.launchFunction({
         ...makeFakeLaunchFunctionOptionsWithProject(project),
@@ -1168,7 +1094,7 @@ describe('editorFunctions', () => {
           objects_list: 'Player',
         },
         // $FlowFixMe[underconstrained-implicit-instantiation]
-        generateEvents: jest.fn().mockResolvedValue({
+        generateEvents: vi.fn().mockResolvedValue({
           generationCompleted: true,
           aiGeneratedEvent: {
             id: 'test-ai-event-id',
@@ -1218,25 +1144,7 @@ describe('editorFunctions', () => {
         searchAndInstallResources,
       });
 
-      expect(result).toMatchInlineSnapshot(`
-        Object {
-          "aiGeneratedEventId": "test-ai-event-id",
-          "message": "Successfully added explosion events.",
-          "newlyAddedResources": Array [
-            Object {
-              "resourceKind": "image",
-              "resourceName": "explosion.png",
-              "status": "resource-installed",
-            },
-            Object {
-              "resourceKind": "audio",
-              "resourceName": "explosion.wav",
-              "status": "resource-installed",
-            },
-          ],
-          "success": true,
-        }
-      `);
+      expect(result).toMatchSnapshot();
 
       expect(onSceneEventsModifiedOutsideEditor).toHaveBeenCalledWith({
         scene: testScene,
@@ -1275,9 +1183,7 @@ describe('editorFunctions', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Added global variable \\"score\\" (Number) = 42"`
-      );
+      expect(result.message).toMatchSnapshot();
     });
 
     it('reports scope and new value for a scene variable (added)', async () => {
@@ -1292,9 +1198,7 @@ describe('editorFunctions', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Added scene \\"TestScene\\" variable \\"lives\\" (Number) = 3"`
-      );
+      expect(result.message).toMatchSnapshot();
     });
 
     it('reports scope and new value for a scene-object variable (added)', async () => {
@@ -1310,9 +1214,7 @@ describe('editorFunctions', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Added scene \\"TestScene\\" object \\"Player\\" variable \\"health\\" (Number) = 100"`
-      );
+      expect(result.message).toMatchSnapshot();
     });
 
     it('reports scope and new value for a global-object variable (added)', async () => {
@@ -1327,9 +1229,7 @@ describe('editorFunctions', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Added global object \\"GlobalEnemy\\" variable \\"speed\\" (Number) = 50"`
-      );
+      expect(result.message).toMatchSnapshot();
     });
 
     it('truncates the value to 200 chars in the success message', async () => {
@@ -1383,9 +1283,7 @@ describe('editorFunctions', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Edited global variable \\"greeting\\" = hello world"`
-      );
+      expect(result.message).toMatchSnapshot();
     });
 
     it('creates a structure variable from a JSON object value', async () => {
@@ -1429,9 +1327,7 @@ describe('editorFunctions', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Edited global variable \\"player.hp\\" = 42"`
-      );
+      expect(result.message).toMatchSnapshot();
       expect(struct.getChild('hp').getValue()).toBe(42);
     });
 
@@ -1446,9 +1342,7 @@ describe('editorFunctions', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Added global variable \\"config.audio.volume\\" (Number) = 0.8"`
-      );
+      expect(result.message).toMatchSnapshot();
       const config = project.getVariables().get('config');
       expect(config.getType()).toBe(gd.Variable.Structure);
       expect(
@@ -1470,9 +1364,7 @@ describe('editorFunctions', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Added global variable \\"inventory[2]\\" (String) = Magic Sword"`
-      );
+      expect(result.message).toMatchSnapshot();
       const inventory = project.getVariables().get('inventory');
       expect(inventory.getType()).toBe(gd.Variable.Array);
       expect(inventory.getChildrenCount()).toBe(3);
@@ -1498,9 +1390,7 @@ describe('editorFunctions', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Edited global variable \\"player.hp\\" = 42"`
-      );
+      expect(result.message).toMatchSnapshot();
       expect(struct.getType()).toBe(gd.Variable.Structure);
       expect(struct.getChild('hp').getValue()).toBe(42);
       // Siblings must still be intact (no data loss from cast).
@@ -1529,9 +1419,7 @@ describe('editorFunctions', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Edited global variable \\"inventory[1]\\" = Magic Shield"`
-      );
+      expect(result.message).toMatchSnapshot();
       expect(array.getType()).toBe(gd.Variable.Array);
       // Other elements must still be intact (no data loss from cast).
       expect(array.getChildrenCount()).toBe(3);
@@ -1552,9 +1440,7 @@ describe('editorFunctions', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(
-        `"Added scene \\"TestScene\\" variable \\"players[0].name\\" (String) = Alice"`
-      );
+      expect(result.message).toMatchSnapshot();
       const players = testScene.getVariables().get('players');
       expect(players.getType()).toBe(gd.Variable.Array);
       const player0 = players.getAtIndex(0);
@@ -1764,16 +1650,7 @@ describe('editorFunctions', () => {
       );
 
       expect(result.success).toBe(true);
-      expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Set scene background color to #ff0080.
-        Set game resolution width to 1920.
-        Set game resolution height to 1080.
-        Set stopSoundsOnStartup to true.
-        Set game orientation to landscape.
-        Set game scale mode to nearest.
-        Set game name to \\"My Game\\"."
-      `);
+      expect(result.message).toMatchSnapshot();
 
       // The properties are also actually applied to the project.
       expect(project.getGameResolutionWidth()).toBe(1920);

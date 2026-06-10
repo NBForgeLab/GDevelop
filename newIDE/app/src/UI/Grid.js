@@ -18,6 +18,7 @@ export const Line = (props: {|
   useFullHeight?: boolean,
   neverShrink?: boolean,
   id?: string,
+  style?: any,
 |}): React.MixedElement => (
   <div
     id={props.id}
@@ -38,6 +39,7 @@ export const Line = (props: {|
       // mosaic editor for instance).
       minWidth: 0,
       flexShrink: props.neverShrink ? 0 : undefined,
+      ...props.style,
     }}
   >
     {props.children}
@@ -58,6 +60,7 @@ export const Column = (props: {|
   useFullHeight?: boolean,
   noOverflowParent?: boolean,
   id?: string,
+  style?: any,
 |}): React.MixedElement => (
   <div
     id={props.id}
@@ -78,6 +81,7 @@ export const Column = (props: {|
       // outside its parent. Setting min-width to 0 avoids this.
       // See: https://stackoverflow.com/a/36247448/6199068
       minWidth: props.noOverflowParent ? 0 : undefined,
+      ...props.style,
     }}
   >
     {props.children}

@@ -457,163 +457,163 @@ describe('EventsTree/TextRenderer', () => {
           eventsList,
         })
       ).toMatchInlineSnapshot(`
-        "<event-0>
-         Conditions:
-         - GroupOfSpriteObjectsWithBehaviors is falling
-         Actions:
-         - Change the number of the animation of MySpriteObject: = 1
-         - Show GroupOfObjects
-         - Activate behavior PlatformerObject of GroupOfSpriteObjectsWithBehaviors: no
-         - Activate behavior PlatformerObject of GroupOfSpriteObjectsWithBehaviors: yes
-         - Activate behavior PlatformerObject of GroupOfSpriteObjectsWithBehaviors: no
-         Sub-events:
-          <event-0.0>
-           ~~Else~~ (Else is ignored because not following a standard event)
+                    "<event-0>
+                     Conditions:
+                     - GroupOfSpriteObjectsWithBehaviors is falling
+                     Actions:
+                     - Change the number of the animation of MySpriteObject: = 1
+                     - Show GroupOfObjects
+                     - Activate behavior PlatformerObject of GroupOfSpriteObjectsWithBehaviors: no
+                     - Activate behavior PlatformerObject of GroupOfSpriteObjectsWithBehaviors: yes
+                     - Activate behavior PlatformerObject of GroupOfSpriteObjectsWithBehaviors: no
+                     Sub-events:
+                      <event-0.0>
+                       ~~Else~~ (Else is ignored because not following a standard event)
 
-           Conditions:
-           (no conditions)
-           Actions:
-           - Show GroupOfObjects
-          </event-0.0>
-          <event-0.1 type=\\"repeat\\">
-           Repeat \`1\` times these:
-           Conditions:
-            (no conditions)
-           Actions:
-            (no actions)
-          </event-0.1>
-          <event-0.2>
-           ~~Else if~~ (Else is ignored because not following a standard event)
+                       Conditions:
+                       (no conditions)
+                       Actions:
+                       - Show GroupOfObjects
+                      </event-0.0>
+                      <event-0.1 type="repeat">
+                       Repeat \`1\` times these:
+                       Conditions:
+                        (no conditions)
+                       Actions:
+                        (no actions)
+                      </event-0.1>
+                      <event-0.2>
+                       ~~Else if~~ (Else is ignored because not following a standard event)
 
-           Conditions:
-           - GroupOfSpriteObjectsWithBehaviors is falling
-           Actions:
-           - Change the number of the animation of MySpriteObject: = 1
-          </event-0.2>
-          <event-0.3>
-           - Declare local variable \\"MyVariable\\" of type \\"number\\" with value \`1\`
-           - Declare local variable \\"MyArray\\" of type \\"array\\" with value \`[-0.1,2.3,\\"three\\"]\`
-           - Declare local variable \\"MyStructure\\" of type \\"structure\\" with value \`{\\"MyChild\\":1,\\"MyChild2\\":[1,2,\\"three\\",true]}\`
+                       Conditions:
+                       - GroupOfSpriteObjectsWithBehaviors is falling
+                       Actions:
+                       - Change the number of the animation of MySpriteObject: = 1
+                      </event-0.2>
+                      <event-0.3>
+                       - Declare local variable "MyVariable" of type "number" with value \`1\`
+                       - Declare local variable "MyArray" of type "array" with value \`[-0.1,2.3,"three"]\`
+                       - Declare local variable "MyStructure" of type "structure" with value \`{"MyChild":1,"MyChild2":[1,2,"three",true]}\`
 
-           Conditions:
-           - If all of these conditions are true:
-             - (inverted) GroupOfSpriteObjectsWithBehaviors is falling
-             - (inverted) GroupOfSpriteObjectsWithBehaviors is falling
-           - If all of these conditions are true:
-             (no conditions)
-           Actions:
-           - Change the number of the animation of MySpriteObject: = 1
-           - Hide GroupOfObjects
-           - Unknown or unsupported instruction
-          </event-0.3>
-          <event-0.4 type=\\"while\\">
-           While these conditions are true:
-            - GroupOfSpriteObjectsWithBehaviors is falling
-           Then do:
-           Conditions:
-            - GroupOfSpriteObjectsWithBehaviors is falling
-           Actions:
-            - Change the number of the animation of MySpriteObject: = 1
-            - Show GroupOfObjects
-          </event-0.4>
-          <event-0.5 type=\\"repeat\\">
-           Repeat \`3 + 4\` times these:
-           Conditions:
-            - GroupOfSpriteObjectsWithBehaviors is falling
-           Actions:
-            - Change the number of the animation of MySpriteObject: = 1
-            - Show GroupOfObjects
-          </event-0.5>
-          <event-0.6 type=\\"group\\">
-           Group called \\"My super group\\":
-           Sub-events:
-            <event-0.6.0>
-             Conditions:
-             - GroupOfSpriteObjectsWithBehaviors is falling
-             Actions:
-             - Change the number of the animation of MySpriteObject: = 1
-             - Show GroupOfObjects
-            </event-0.6.0>
-            <event-0.6.1>
-             Conditions:
-             (no conditions)
-             Actions:
-             (no actions)
-            </event-0.6.1>
-          </event-0.6>
-          <event-0.7>
-           Conditions:
-           - GroupOfSpriteObjectsWithBehaviors is falling
-           Actions:
-           - Change the number of the animation of MySpriteObject: = 1
-          </event-0.7>
-          <event-0.8 else-of=\\"event-0.7\\">
-           Else
+                       Conditions:
+                       - If all of these conditions are true:
+                         - (inverted) GroupOfSpriteObjectsWithBehaviors is falling
+                         - (inverted) GroupOfSpriteObjectsWithBehaviors is falling
+                       - If all of these conditions are true:
+                         (no conditions)
+                       Actions:
+                       - Change the number of the animation of MySpriteObject: = 1
+                       - Hide GroupOfObjects
+                       - Unknown or unsupported instruction
+                      </event-0.3>
+                      <event-0.4 type="while">
+                       While these conditions are true:
+                        - GroupOfSpriteObjectsWithBehaviors is falling
+                       Then do:
+                       Conditions:
+                        - GroupOfSpriteObjectsWithBehaviors is falling
+                       Actions:
+                        - Change the number of the animation of MySpriteObject: = 1
+                        - Show GroupOfObjects
+                      </event-0.4>
+                      <event-0.5 type="repeat">
+                       Repeat \`3 + 4\` times these:
+                       Conditions:
+                        - GroupOfSpriteObjectsWithBehaviors is falling
+                       Actions:
+                        - Change the number of the animation of MySpriteObject: = 1
+                        - Show GroupOfObjects
+                      </event-0.5>
+                      <event-0.6 type="group">
+                       Group called "My super group":
+                       Sub-events:
+                        <event-0.6.0>
+                         Conditions:
+                         - GroupOfSpriteObjectsWithBehaviors is falling
+                         Actions:
+                         - Change the number of the animation of MySpriteObject: = 1
+                         - Show GroupOfObjects
+                        </event-0.6.0>
+                        <event-0.6.1>
+                         Conditions:
+                         (no conditions)
+                         Actions:
+                         (no actions)
+                        </event-0.6.1>
+                      </event-0.6>
+                      <event-0.7>
+                       Conditions:
+                       - GroupOfSpriteObjectsWithBehaviors is falling
+                       Actions:
+                       - Change the number of the animation of MySpriteObject: = 1
+                      </event-0.7>
+                      <event-0.8 else-of="event-0.7">
+                       Else
 
-           Conditions:
-           (no conditions)
-           Actions:
-           - Show GroupOfObjects
-          </event-0.8>
-          <event-0.9 else-of=\\"event-0.8\\">
-           Else if
+                       Conditions:
+                       (no conditions)
+                       Actions:
+                       - Show GroupOfObjects
+                      </event-0.8>
+                      <event-0.9 else-of="event-0.8">
+                       Else if
 
-           Conditions:
-           - GroupOfSpriteObjectsWithBehaviors is falling
-           Actions:
-           - Change the number of the animation of MySpriteObject: = 1
-          </event-0.9>
-          <event-0.10 else-of=\\"event-0.9\\">
-           Else
-           - Declare local variable \\"MyElseVar\\" of type \\"number\\" with value \`42\`
+                       Conditions:
+                       - GroupOfSpriteObjectsWithBehaviors is falling
+                       Actions:
+                       - Change the number of the animation of MySpriteObject: = 1
+                      </event-0.9>
+                      <event-0.10 else-of="event-0.9">
+                       Else
+                       - Declare local variable "MyElseVar" of type "number" with value \`42\`
 
-           Conditions:
-           (no conditions)
-           Actions:
-           - Hide GroupOfObjects
-          </event-0.10>
-        </event-0>
-        <event-1 disabled=\\"true\\">
-         Conditions:
-         - GroupOfSpriteObjectsWithBehaviors is falling
-         Actions:
-         - Show GroupOfObjects
-         Sub-events:
-          <event-1.0 disabled-because-of-ancestor=\\"true\\">
-           Conditions:
-           (no conditions)
-           Actions:
-           - Show GroupOfObjects
-          </event-1.0>
-        </event-1>
-        <event-2 type=\\"comment\\">
-         This is a short comment
-        </event-2>
-        <event-3 type=\\"comment\\">
-         AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA[cut - 50 more characters]
-        </event-3>
-        <event-4 type=\\"for-each\\">
-         Repeat these separately for each instance of MySpriteObject:
-         Conditions:
-          (no conditions)
-         Actions:
-          - Show MySpriteObject
-        </event-4>
-        <event-5 type=\\"for-each\\">
-         Repeat these separately for each instance of MySpriteObject ordered by \`MySpriteObject.Variable(Priority)\` (ascending) limit: \`3\`:
-         Conditions:
-          (no conditions)
-         Actions:
-          - Show MySpriteObject
-        </event-5>
-        <event-6 type=\\"for-each\\">
-         Repeat these separately for each instance of MySpriteObject ordered by \`MySpriteObject.Variable(Score)\` (descending):
-         Conditions:
-          (no conditions)
-         Actions:
-          - Show MySpriteObject
-        </event-6>"
-      `);
+                       Conditions:
+                       (no conditions)
+                       Actions:
+                       - Hide GroupOfObjects
+                      </event-0.10>
+                    </event-0>
+                    <event-1 disabled="true">
+                     Conditions:
+                     - GroupOfSpriteObjectsWithBehaviors is falling
+                     Actions:
+                     - Show GroupOfObjects
+                     Sub-events:
+                      <event-1.0 disabled-because-of-ancestor="true">
+                       Conditions:
+                       (no conditions)
+                       Actions:
+                       - Show GroupOfObjects
+                      </event-1.0>
+                    </event-1>
+                    <event-2 type="comment">
+                     This is a short comment
+                    </event-2>
+                    <event-3 type="comment">
+                     AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA[cut - 50 more characters]
+                    </event-3>
+                    <event-4 type="for-each">
+                     Repeat these separately for each instance of MySpriteObject:
+                     Conditions:
+                      (no conditions)
+                     Actions:
+                      - Show MySpriteObject
+                    </event-4>
+                    <event-5 type="for-each">
+                     Repeat these separately for each instance of MySpriteObject ordered by \`MySpriteObject.Variable(Priority)\` (ascending) limit: \`3\`:
+                     Conditions:
+                      (no conditions)
+                     Actions:
+                      - Show MySpriteObject
+                    </event-5>
+                    <event-6 type="for-each">
+                     Repeat these separately for each instance of MySpriteObject ordered by \`MySpriteObject.Variable(Score)\` (descending):
+                     Conditions:
+                      (no conditions)
+                     Actions:
+                      - Show MySpriteObject
+                    </event-6>"
+                  `);
     } finally {
       project.delete();
     }

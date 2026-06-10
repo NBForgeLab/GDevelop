@@ -1,9 +1,6 @@
 // @flow
 
-const {
-  formatDuration,
-  formatCustomScore,
-} = require('./LeaderboardScoreFormatter');
+import { formatDuration, formatCustomScore } from './LeaderboardScoreFormatter';
 
 describe('LeaderboardScoreFormatter', () => {
   describe('formatDuration', () => {
