@@ -5,7 +5,10 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import commonjs from 'vite-plugin-commonjs';
-import { init as initCjsLexer, parse as parseCjsExports } from 'cjs-module-lexer';
+import {
+  init as initCjsLexer,
+  parse as parseCjsExports,
+} from 'cjs-module-lexer';
 import { transformSync as babelTransformSync } from '@babel/core';
 
 let cjsLexerInitPromise = null;
@@ -28,14 +31,24 @@ const repoRoot = path.resolve(appDir, '..', '..');
 const publicDir = path.join(appDir, 'public');
 const outDir = path.join(appDir, 'build-vite');
 const virtualHtmlId = path.join(appDir, 'index.html');
-const gdjsForWebAppDir = path.join(appDir, 'node_modules', 'GDJS-for-web-app-only');
+const gdjsForWebAppDir = path.join(
+  appDir,
+  'node_modules',
+  'GDJS-for-web-app-only'
+);
 
 const WORKER_FACTORY_SUFFIXES = [
   path.join('src', 'Utils', 'BackgroundSerializerWorkerFactory.js'),
-  path.join('src', 'ResourcesList', 'ResourcePreview', 'Resource3DPreviewWorkerFactory.js'),
+  path.join(
+    'src',
+    'ResourcesList',
+    'ResourcePreview',
+    'Resource3DPreviewWorkerFactory.js'
+  ),
 ];
 const CLASSIC_WORKER_PREFIX = '/@gdevelop-classic-worker/';
-const VIRTUAL_CLASSIC_WORKER_FACTORY_PREFIX = '\0gdevelop-classic-worker-factory:';
+const VIRTUAL_CLASSIC_WORKER_FACTORY_PREFIX =
+  '\0gdevelop-classic-worker-factory:';
 
 const LOCALES_PATH_RE = /[\\/]src[\\/]locales[\\/]/;
 const SOURCE_JS_RE = /[\\/]newIDE[\\/]app[\\/]src[\\/].*\.js$/;
@@ -60,7 +73,9 @@ const isExplicitCommonJsModule = id => {
 const normalizePublicUrl = (rawPublicUrl, command) => {
   if (rawPublicUrl !== undefined) {
     if (rawPublicUrl === '/') return '';
-    return rawPublicUrl.endsWith('/') ? rawPublicUrl.slice(0, -1) : rawPublicUrl;
+    return rawPublicUrl.endsWith('/')
+      ? rawPublicUrl.slice(0, -1)
+      : rawPublicUrl;
   }
   return command === 'build' ? '.' : '';
 };
@@ -377,7 +392,9 @@ const appendNamedCommonJsExports = (transformedResult, sourceCode) => {
   if (
     !transformedResult ||
     typeof transformedResult.code !== 'string' ||
-    !transformedResult.code.includes('/* [vite-plugin-commonjs] export-statement-S */')
+    !transformedResult.code.includes(
+      '/* [vite-plugin-commonjs] export-statement-S */'
+    )
   ) {
     return transformedResult;
   }

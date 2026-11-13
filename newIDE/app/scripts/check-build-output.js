@@ -2,7 +2,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const buildPath = path.join(__dirname, '..', 'build');
+const isVite = process.argv.includes('--vite');
+const buildFolderName = isVite ? 'build-vite' : 'build';
+const buildPath = path.join(__dirname, '..', buildFolderName);
 
 /**
  * Verify that the build folder contains the files expected for a working
@@ -23,18 +25,25 @@ const checkBuildOutput = () => {
       : [];
     if (!files.some(file => pattern.test(file))) {
       errors.push(
-        `Expected a file matching ${pattern} in "build/${directory}".`
+        `Expected a file matching ${pattern} in "${buildFolderName}/${directory}".`
       );
     }
   };
 
   checkFileExists('', /^index\.html$/);
-  checkFileExists('static/js', /^main\..*\.js$/);
-  checkFileExists('static/css', /^main\..*\.css$/);
-  // Workers are compiled separately by worker-loader: check they were
-  // properly built too.
-  checkFileExists('', /^Resource3DPreview\.worker\..*\.worker\.js$/);
-  checkFileExists('', /^BackgroundSerializer\.worker\..*\.worker\.js$/);
+  if (isVite) {
+    checkFileExists('assets', /^index-.*\.js$/);
+    checkFileExists('assets', /^index-.*\.css$/);
+    checkFileExists('assets', /^Resource3DPreview\.worker-.*\.js$/);
+    checkFileExists('assets', /^BackgroundSerializer\.worker-.*\.js$/);
+  } else {
+    checkFileExists('static/js', /^main\..*\.js$/);
+    checkFileExists('static/css', /^main\..*\.css$/);
+    // Workers are compiled separately by worker-loader: check they were
+    // properly built too.
+    checkFileExists('', /^Resource3DPreview\.worker\..*\.worker\.js$/);
+    checkFileExists('', /^BackgroundSerializer\.worker\..*\.worker\.js$/);
+  }
 
   if (errors.length > 0) {
     console.error(

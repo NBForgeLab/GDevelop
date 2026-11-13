@@ -61,10 +61,16 @@ const checkLibGDjsSize = () => {
   });
 };
 
+const isVite = !!args['vite'];
+const buildFolderName = isVite ? 'build-vite' : 'build';
+const buildCommand = isVite
+  ? 'npm run import-resources && npm run build:vite'
+  : 'npm run build';
+
 checkLibGDjsSize().then(() => {
   if (!args['skip-app-build']) {
     shell.cd('../app');
-    if (shell.exec('npm run build').code !== 0) {
+    if (shell.exec(buildCommand).code !== 0) {
       shell.exit(1);
     }
     shell.cd('../electron-app');
@@ -72,9 +78,9 @@ checkLibGDjsSize().then(() => {
 
   shell.rm('-rf', 'app/www');
   shell.mkdir('-p', 'app/www');
-  if (shell.cp('-r', '../app/build/*', 'app/www').code !== 0) {
+  if (shell.cp('-r', `../app/${buildFolderName}/*`, 'app/www').code !== 0) {
     shell.echo(
-      `❌ Copy from "../app/build" to Electron's "app/www" folder failed.`
+      `❌ Copy from "../app/${buildFolderName}" to Electron's "app/www" folder failed.`
     );
     shell.exit(1);
   }

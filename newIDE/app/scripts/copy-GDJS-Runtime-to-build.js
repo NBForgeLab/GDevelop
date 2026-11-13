@@ -9,8 +9,11 @@
 const shell = require('shelljs');
 const path = require('path');
 
+const isVite = process.argv.includes('--vite');
+const buildFolderName = isVite ? 'build-vite' : 'build';
+const buildFolderPath = path.join(__dirname, '..', buildFolderName);
 const sourcePath = path.join(__dirname, '..', 'resources', 'GDJS', 'Runtime');
-const destinationPath = path.join(__dirname, '..', 'build', 'GDJS');
+const destinationPath = path.join(buildFolderPath, 'GDJS');
 
 if (!shell.test('-d', sourcePath)) {
   shell.echo(
@@ -19,9 +22,9 @@ if (!shell.test('-d', sourcePath)) {
   shell.exit(1);
 }
 
-if (!shell.test('-d', path.join(__dirname, '..', 'build'))) {
+if (!shell.test('-d', buildFolderPath)) {
   shell.echo(
-    `❌ Build folder not found. Run this script after the app is built.`
+    `❌ Build folder (${buildFolderName}) not found. Run this script after the app is built.`
   );
   shell.exit(1);
 }
@@ -32,4 +35,6 @@ if (shell.cp('-r', sourcePath, destinationPath).code !== 0) {
   shell.exit(1);
 }
 
-shell.echo(`✅ GDJS Runtime copied to ${path.join(destinationPath, 'Runtime')}.`);
+shell.echo(
+  `✅ GDJS Runtime copied to ${path.join(destinationPath, 'Runtime')}.`
+);
