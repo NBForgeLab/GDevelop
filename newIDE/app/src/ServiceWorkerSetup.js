@@ -1,9 +1,9 @@
 // @flow
 import optionalRequire from './Utils/OptionalRequire';
 import { isNativeMobileApp } from './Utils/Platform';
+import { getPublicUrl } from './Utils/BuildEnv';
 
-// $FlowFixMe[cannot-resolve-name]
-const PUBLIC_URL: string = process.env.PUBLIC_URL || '';
+const PUBLIC_URL: string = getPublicUrl();
 // $FlowFixMe[cannot-resolve-name]
 const isDev = process.env.NODE_ENV !== 'production';
 

@@ -3,10 +3,10 @@ const path = require('path');
 
 let versionMetadata = null;
 try {
-  versionMetadata = require('../../app/src/Version/VersionMetadata');
+  versionMetadata = require('../../app/src/Version/VersionMetadata.json');
 } catch (e) {
   shell.echo(
-    '❌ Unable to find VersionMetadata.js in newIDE/app/src/Version - have you run npm install?'
+    '❌ Unable to find VersionMetadata.json in newIDE/app/src/Version - have you run npm install?'
   );
   shell.exit(1);
 }

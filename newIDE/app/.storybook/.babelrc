@@ -1,4 +1,4 @@
 {
-  "presets": ["react-app"],
-  "ignore": ["src/locales/**/*.js"]
+  "extends": "../.babelrc.json",
+  "ignore": ["../src/locales/**/*.js"]
 }

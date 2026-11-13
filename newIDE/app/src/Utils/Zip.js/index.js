@@ -1,8 +1,8 @@
 // @flow
 import { loadScript } from '../LoadScript';
+import { getPublicUrl } from '../BuildEnv';
 
-// $FlowFixMe[cannot-resolve-name]
-const PUBLIC_URL: string = process.env.PUBLIC_URL || '';
+const PUBLIC_URL: string = getPublicUrl();
 const ZIPJS_EXTERNAL_PATH = '/external/zip.js/WebContent';
 const ZLIBASM_EXTERNAL_PATH = '/external/zlib-asm';
 

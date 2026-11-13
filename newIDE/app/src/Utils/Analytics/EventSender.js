@@ -2,7 +2,7 @@
 import posthog from 'posthog-js';
 import { getUserUUID, resetUserUUID } from './UserUUID';
 import { type AuthenticatedUser } from '../../Profile/AuthenticatedUserContext';
-import { User as FirebaseUser } from 'firebase/auth';
+import { type User as FirebaseUser } from 'firebase/auth';
 import {
   countDailyAggregatedEventOccurrence,
   getProgramOpeningCount,
@@ -88,9 +88,9 @@ const ensureGDevelopEditorAnalyticsReady = async () => {
         { times: 2 },
         async () =>
           // $FlowFixMe[incompatible-type] - Remote script cannot be found.
+          (await import(/* webpackIgnore: true */ /* @vite-ignore */
           // $FlowFixMe[cannot-resolve-module]
-          (await import(/* webpackIgnore: true */ 'https://resources.gdevelop.io/a/gea.js'))
-            .default
+          'https://resources.gdevelop.io/a/gea.js')).default
       );
       if (module) {
         await module.initialize({

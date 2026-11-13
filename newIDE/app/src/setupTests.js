@@ -50,7 +50,39 @@ beforeAll(done => {
 // We increase the timeout for CIs (the default 5s can be too low sometimes, as a real browser is involved).
 jest.setTimeout(10000);
 
-// Mock worker files to prevent "self is not defined" errors in tests
+// Mock worker factories to prevent "self is not defined" errors in tests
 // Jest will automatically use the mock implementations from the __mocks__ folders
-jest.mock('./Utils/BackgroundSerializer.worker');
-jest.mock('./ResourcesList/ResourcePreview/Resource3DPreview.worker');
+jest.mock('./Utils/BackgroundSerializerWorkerFactory');
+jest.mock('./ResourcesList/ResourcePreview/Resource3DPreviewWorkerFactory');
+
+// Re-apply default mock implementations before each test because Jest is
+// configured with `resetMocks: true`.
+beforeEach(() => {
+  const {
+    createBackgroundSerializerWorker,
+    createMockBackgroundSerializerWorker,
+  } = require('./Utils/BackgroundSerializerWorkerFactory');
+  if (
+    createBackgroundSerializerWorker &&
+    typeof createBackgroundSerializerWorker.mockImplementation === 'function' &&
+    createMockBackgroundSerializerWorker
+  ) {
+    createBackgroundSerializerWorker.mockImplementation(
+      createMockBackgroundSerializerWorker
+    );
+  }
+
+  const {
+    createResource3DPreviewWorker,
+    createMockResource3DPreviewWorker,
+  } = require('./ResourcesList/ResourcePreview/Resource3DPreviewWorkerFactory');
+  if (
+    createResource3DPreviewWorker &&
+    typeof createResource3DPreviewWorker.mockImplementation === 'function' &&
+    createMockResource3DPreviewWorker
+  ) {
+    createResource3DPreviewWorker.mockImplementation(
+      createMockResource3DPreviewWorker
+    );
+  }
+});

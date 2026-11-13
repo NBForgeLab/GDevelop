@@ -3,7 +3,7 @@ const path = require('path');
 const shell = require('shelljs');
 const workboxBuild = require('workbox-build');
 const buildPath = '../public';
-const VersionMetadata = require('../src/Version/VersionMetadata');
+const VersionMetadata = require('../src/Version/VersionMetadata.json');
 
 /**
  * Remove files created by create-react-app default service worker.
@@ -55,8 +55,8 @@ const buildSW = () => {
         'static/media/*',
         'static/js/locales-*.js', // Locales.
         'static/js/!local-app*.js', // Exclude electron app.
-        'static/js/Resource3DPreview.worker.*.js', // Include the 3D preview worker
-        'static/js/BackgroundSerializer.worker.*.js', // Include the serializer worker
+        '*.worker.*.worker.js', // Include workers output at root by CRA worker-loader
+        'static/js/*{Resource3DPreview,BackgroundSerializer}.worker*.js', // Include workers if output as standard chunks
         // ...But not libGD.js/wasm (there are cached with their URL
         // query string that depends on the VersionMetadata, see below).
 

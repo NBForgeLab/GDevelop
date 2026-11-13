@@ -5,6 +5,7 @@ import URLSearchParams from 'url-search-params';
 import { isWindows } from './Platform';
 import debounce from 'lodash/debounce';
 import { hexToRGBColor, isLightRgbColor } from './ColorTransformer';
+import { isReactAppEnvDevelopment } from './BuildEnv';
 const electron = optionalRequire('electron');
 const remote = optionalRequire('@electron/remote');
 const shell = electron ? electron.shell : null;
@@ -449,8 +450,7 @@ export default class Window {
         !process.env.NODE_ENV ||
         // $FlowFixMe[cannot-resolve-name]
         process.env.NODE_ENV === 'development' ||
-        // $FlowFixMe[cannot-resolve-name]
-        process.env.REACT_APP_ENV === 'development' // Added manually in the .env as we cannot override NODE_ENV with react-scripts.
+        isReactAppEnvDevelopment() // Added manually in the .env as we cannot override NODE_ENV with react-scripts.
       );
     }
 

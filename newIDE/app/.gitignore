@@ -1,5 +1,6 @@
 # Generated files
 src/Version/VersionMetadata.js
+src/Version/VersionMetadata.json
 public/service-worker.js
 
 # dependencies
@@ -14,6 +15,7 @@ build-storybook
 
 # production
 build
+build-vite
 
 # misc
 .DS_Store

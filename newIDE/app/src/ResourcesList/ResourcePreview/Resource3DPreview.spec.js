@@ -11,7 +11,7 @@ import {
   setCachedResource3DPreview,
   setResource3DPreviewRequester,
 } from './Resource3DPreviewCache';
-import Resource3DPreviewWorker from './Resource3DPreview.worker';
+import { createResource3DPreviewWorker } from './Resource3DPreviewWorkerFactory';
 
 const waitForMicrotasks = () => new Promise(resolve => setTimeout(resolve, 0));
 global.requestAnimationFrame = callback => setTimeout(callback, 0);
@@ -20,7 +20,7 @@ describe('Resource3DPreviewProvider', () => {
   beforeEach(() => {
     // The worker can't render: every preview is the fallback image.
     // $FlowFixMe[prop-missing]
-    Resource3DPreviewWorker.mockImplementation(() => {
+    createResource3DPreviewWorker.mockImplementation(() => {
       // $FlowFixMe[unclear-type] - Mock worker for tests
       const worker: any = {
         onmessage: null,
