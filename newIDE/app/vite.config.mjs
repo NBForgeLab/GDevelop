@@ -490,7 +490,14 @@ export default defineConfig(({ command, mode }) => {
     },
     server: {
       port: 3000,
-      preTransformRequests: false,
+      preTransformRequests: true,
+      warmup: {
+        clientFiles: [
+          './src/index.js',
+          './src/BrowserApp.js',
+          './src/MainFrame/index.js',
+        ],
+      },
       watch: {
         ignored: [
           '**/build/**',
@@ -531,7 +538,7 @@ export default defineConfig(({ command, mode }) => {
       ],
     },
     optimizeDeps: {
-      entries: ['src/index.js'],
+      entries: ['src/index.js', 'src/BrowserApp.js', 'src/LocalApp.js'],
       esbuildOptions: {
         loader: { '.js': 'jsx' },
         plugins: [createFlowEsbuildScannerPlugin()],

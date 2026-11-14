@@ -9,7 +9,7 @@ module.exports = {
     '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
     '<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}',
   ],
-  testEnvironment: 'jsdom',
+  testEnvironment: 'node',
   transform: {
     '^.+\\.(md|d\\.ts)$': '<rootDir>/config/jest/rawTextTransform.js',
     '^.+\\.(js|jsx|mjs|cjs|ts|tsx)$': '<rootDir>/config/jest/babelTransform.js',
