@@ -88,18 +88,8 @@ isGitClean()
       );
     }
 
-    const isVite = !!args["vite"];
-    const buildFolderName =
-      isVite &&
-      !fs.existsSync(path.join(__dirname, "../../app/build/index.html"))
-        ? "build-vite"
-        : "build";
-    const buildAppCommand = isVite
-      ? "npm run build:app:vite"
-      : "npm run build:app";
-
     if (!args["skip-app-build"]) {
-      const output = shell.exec(buildAppCommand);
+      const output = shell.exec("npm run build:app");
       if (output.code !== 0) {
         shell.echo("❌ Unable to build the app.");
         shell.exit(output.code);
@@ -119,7 +109,7 @@ isGitClean()
 
     shell.rm("-rf", "dist");
     shell.mkdir("-p", "dist");
-    shell.cp("-r", `../app/${buildFolderName}/*`, "dist");
+    shell.cp("-r", "../app/build/*", "dist");
 
     if (!args["skip-deploy"]) {
       shell.echo("🚄 Uploading the built app to gh-pages...");

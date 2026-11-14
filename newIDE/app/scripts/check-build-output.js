@@ -2,9 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const buildFolderName = process.argv.includes('--build-vite')
-  ? 'build-vite'
-  : 'build';
+const buildFolderName = 'build';
 const buildPath = path.join(__dirname, '..', buildFolderName);
 
 /**

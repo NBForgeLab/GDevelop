@@ -166,7 +166,7 @@ const createRawTextAssetsPlugin = () => ({
 
 /**
  * Rewrites `.worker` imports inside the decoupled WorkerFactory modules to Vite `?worker`
- * imports while leaving the factories untouched for CRA's `worker-loader`.
+ * imports while leaving the factories untouched for Storybook/Webpack's `worker-loader`.
  * Classic workers that call `importScripts` are served as Flow-stripped classic scripts
  * in `vite` dev mode because dev `?worker` defaults to `{ type: 'module' }`.
  */
@@ -471,12 +471,12 @@ export default defineConfig(({ command, mode }) => {
   const viteBase = computeViteBase(publicUrl, command);
   const reactAppEnv =
     process.env.REACT_APP_ENV ||
-    (command === 'serve' ? 'development' : 'production');
+    (command === 'serve' || mode === 'development'
+      ? 'development'
+      : 'production');
   const nodeEnv =
     process.env.NODE_ENV ||
-    (command === 'build' && mode === 'production'
-      ? 'production'
-      : 'development');
+    (command === 'build' ? 'production' : 'development');
 
   return {
     root: appDir,
@@ -501,7 +501,6 @@ export default defineConfig(({ command, mode }) => {
       watch: {
         ignored: [
           '**/build/**',
-          '**/build-vite/**',
           '**/build-storybook/**',
           '**/coverage/**',
         ],
@@ -548,6 +547,7 @@ export default defineConfig(({ command, mode }) => {
       outDir,
       emptyOutDir: true,
       copyPublicDir: false,
+      sourcemap: process.env.GENERATE_SOURCEMAP === 'true',
       commonjsOptions: {
         include: [/node_modules/, ...COMMONJS_SOURCE_PATTERNS],
         transformMixedEsModules: true,

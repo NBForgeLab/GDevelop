@@ -9,9 +9,7 @@
 const shell = require('shelljs');
 const path = require('path');
 
-const buildFolderName = process.argv.includes('--build-vite')
-  ? 'build-vite'
-  : 'build';
+const buildFolderName = 'build';
 const buildFolderPath = path.join(__dirname, '..', buildFolderName);
 const sourcePath = path.join(__dirname, '..', 'resources', 'GDJS', 'Runtime');
 const destinationPath = path.join(buildFolderPath, 'GDJS');

@@ -288,10 +288,10 @@ if (workbox) {
         revision: null, // Revision is null because versioning included in the URL.
       },
     ]);
-  }
 
-  /* injection point for manifest files.  */
-  workbox.precaching.precacheAndRoute([]);
+    /* injection point for manifest files.  */
+    workbox.precaching.precacheAndRoute([]);
+  }
 
   /* custom cache rules*/
   workbox.routing.registerNavigationRoute('/index.html', {

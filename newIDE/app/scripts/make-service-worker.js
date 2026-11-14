@@ -2,7 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const shell = require('shelljs');
 const workboxBuild = require('workbox-build');
-const buildPath = '../public';
+const isBuild = process.argv.includes('--build');
+const buildLabel = isBuild ? 'build' : 'public';
+const buildPath = path.join(__dirname, '..', buildLabel);
+const swSrc = path.join(
+  __dirname,
+  'service-worker-template/service-worker-template.js'
+);
+const swDest = path.join(buildPath, 'service-worker.js');
 const VersionMetadata = require('../src/Version/VersionMetadata.json');
 
 /**
@@ -45,18 +52,20 @@ const replaceInFile = (file, searchText, replacedText) => {
 const buildSW = () => {
   return workboxBuild
     .injectManifest({
-      swSrc: 'service-worker-template/service-worker-template.js',
-      swDest: '../public/service-worker.js',
+      swSrc,
+      swDest,
       globDirectory: buildPath,
       globPatterns: [
         // Application:
         '!(libGD)*.{js,css,html,png}', // Root files.
-        'static/css/*.css',
-        'static/media/*',
-        'static/js/locales-*.js', // Locales.
-        'static/js/!local-app*.js', // Exclude electron app.
-        '*.worker.*.worker.js', // Include workers output at root by CRA worker-loader
-        'static/js/*{Resource3DPreview,BackgroundSerializer}.worker*.js', // Include workers if output as standard chunks
+        ...(isBuild
+          ? [
+              'assets/*.css',
+              'assets/*.{ttf,svg,wasm}',
+              'assets/{index,BrowserApp,Authorization}-*.js',
+              'assets/*{Resource3DPreview,BackgroundSerializer}.worker*.js',
+            ]
+          : []),
         // ...But not libGD.js/wasm (there are cached with their URL
         // query string that depends on the VersionMetadata, see below).
 
@@ -90,13 +99,13 @@ const buildSW = () => {
     .then(({ count, size, warnings }) => {
       if (
         !replaceInFile(
-          '../public/service-worker.js',
+          swDest,
           'VersionMetadata = {}',
           'VersionMetadata = ' + JSON.stringify(VersionMetadata)
         )
       ) {
         console.error(
-          'Error while trying to replace version metadata in public/service-worker.js.'
+          `Error while trying to replace version metadata in ${buildLabel}/service-worker.js.`
         );
         shell.exit(1);
       }

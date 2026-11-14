@@ -178,8 +178,6 @@ jobs:
             # No source maps: they doubled the size of the app (and of the installers)
             # and the build time, while nothing uses them in the desktop app.
             GENERATE_SOURCEMAP: 'false'
-            # The editor is already linted (`npm run lint`) by the Semaphore CI.
-            DISABLE_ESLINT_PLUGIN: 'true'
           command: export CSC_FOR_PULL_REQUEST=true && export NODE_OPTIONS="--max-old-space-size=7168" && cd newIDE/electron-app && CI=false npm run build -- --mac --publish=never
 
       - run:
@@ -253,18 +251,6 @@ jobs:
             - GDJS/node_modules
           key: gd-linux-newide-app-dependencies-v3-{{ checksum "ci-dependencies-checksum.txt" }}
 
-      # The cache of Babel (transpiled source files), restored after saving the
-      # dependencies so that it's not part of them. A new one is started every
-      # week, so that it does not grow forever with outdated files.
-      - run:
-          name: Compute the period of the build cache
-          command: date +%G-%V > ci-build-cache-period.txt
-      - restore_cache:
-          name: Restore the build cache
-          keys:
-            - gd-newide-app-build-cache-v1-{{ checksum "ci-build-cache-period.txt" }}-{{ .Revision }}
-            - gd-newide-app-build-cache-v1-{{ checksum "ci-build-cache-period.txt" }}-
-
       # Build GDevelop IDE (seems like we need to allow Node.js to use more space than usual)
       - run:
           name: Build GDevelop IDE
@@ -272,15 +258,7 @@ jobs:
             # No source maps: they doubled the size of the app (and of the installers)
             # and the build time, while nothing uses them in the desktop app.
             GENERATE_SOURCEMAP: 'false'
-            # The editor is already linted (`npm run lint`) by the Semaphore CI.
-            DISABLE_ESLINT_PLUGIN: 'true'
           command: export NODE_OPTIONS="--max-old-space-size=7168" && cd newIDE/app && npm run build
-
-      - save_cache:
-          name: Save the build cache
-          key: gd-newide-app-build-cache-v1-{{ checksum "ci-build-cache-period.txt" }}-{{ .Revision }}
-          paths:
-            - newIDE/app/node_modules/.cache/babel-loader
 
       # What the desktop app is made of (see newIDE/electron-app/scripts/app-build.js
       # and electron-builder-config.js).
