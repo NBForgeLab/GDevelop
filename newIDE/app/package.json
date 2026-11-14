@@ -26,7 +26,7 @@
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^27.5.1",
     "babel-loader": "8.1.0",
-    "babel-plugin-macros": "^3.1.0",
+    "babel-plugin-macros": "^2.8.0",
     "babel-preset-react-app": "^10.1.0",
     "chokidar": "4.0.3",
     "cjs-module-lexer": "^1.4.3",
