@@ -62,7 +62,10 @@ const checkLibGDjsSize = () => {
 };
 
 const isVite = !!args['vite'];
-const buildFolderName = isVite ? 'build-vite' : 'build';
+const buildFolderName =
+  isVite && !fs.existsSync(path.join(__dirname, '../../app/build/index.html'))
+    ? 'build-vite'
+    : 'build';
 const buildCommand = isVite
   ? 'npm run import-resources && npm run build:vite'
   : 'npm run build';

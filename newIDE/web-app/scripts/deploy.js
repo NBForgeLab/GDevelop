@@ -89,7 +89,11 @@ isGitClean()
     }
 
     const isVite = !!args["vite"];
-    const buildFolderName = isVite ? "build-vite" : "build";
+    const buildFolderName =
+      isVite &&
+      !fs.existsSync(path.join(__dirname, "../../app/build/index.html"))
+        ? "build-vite"
+        : "build";
     const buildAppCommand = isVite
       ? "npm run build:app:vite"
       : "npm run build:app";

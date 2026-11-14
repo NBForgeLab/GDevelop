@@ -2,8 +2,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const isVite = process.argv.includes('--vite');
-const buildFolderName = isVite ? 'build-vite' : 'build';
+const isCra = process.argv.includes('--cra');
+const buildFolderName = process.argv.includes('--build-vite')
+  ? 'build-vite'
+  : 'build';
 const buildPath = path.join(__dirname, '..', buildFolderName);
 
 /**
@@ -31,7 +33,7 @@ const checkBuildOutput = () => {
   };
 
   checkFileExists('', /^index\.html$/);
-  if (isVite) {
+  if (!isCra) {
     checkFileExists('assets', /^index-.*\.js$/);
     checkFileExists('assets', /^index-.*\.css$/);
     checkFileExists('assets', /^Resource3DPreview\.worker-.*\.js$/);

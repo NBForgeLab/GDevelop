@@ -29,7 +29,7 @@ try {
 const appDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(appDir, '..', '..');
 const publicDir = path.join(appDir, 'public');
-const outDir = path.join(appDir, 'build-vite');
+const outDir = path.join(appDir, process.env.VITE_OUT_DIR || 'build');
 const virtualHtmlId = path.join(appDir, 'index.html');
 const gdjsForWebAppDir = path.join(
   appDir,
