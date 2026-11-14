@@ -19,9 +19,8 @@
       "type": "node",
       "request": "launch",
       "name": "newIDE/app Jest tests (current file)",
-      "program": "${workspaceFolder}/newIDE/app/node_modules/.bin/react-scripts",
+      "program": "${workspaceFolder}/newIDE/app/node_modules/.bin/jest",
       "args": [
-        "test", "--env=node",
         "${fileBasenameNoExtension}"
       ],
       "console": "integratedTerminal",

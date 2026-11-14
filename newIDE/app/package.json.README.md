@@ -8,11 +8,9 @@ GDevelop relies on some dependencies that can have special requirements.
 
 ## Storybook
 
-**Storybook** is depending on webpack and babel.
+While the IDE dev server and production build use **Vite**, **Storybook** (`@storybook/react-webpack5`) still uses webpack and Babel via `.storybook/main.js`.
 
-- It's important to have the same webpack version as the one provided by `react-scripts`, hence why `webpack` is specified in the `devDependencies`.
-- `babel-loader` is specified to be the exact version required by `react-scripts` (because `react-scripts` wants the exact version and will complain if forced to use the `babel-loader` of Storybook).
-  - **Try removing these extra `devDependencies`** if you upgrade Storybook or Create React App.
+- `webpack`, `babel-loader`, `css-loader`, `style-loader`, `file-loader`, `worker-loader`, and `@svgr/webpack` are declared explicitly in `devDependencies` for Storybook's webpack pipeline.
 
 ## LinguiJS
 
