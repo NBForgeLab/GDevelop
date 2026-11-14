@@ -74,7 +74,7 @@ checkLibGDjsSize().then(() => {
   shell.mkdir('-p', 'app/www');
   if (shell.cp('-r', '../app/build/*', 'app/www').code !== 0) {
     shell.echo(
-      '❌ Copy from "../app/build" to Electron\'s "app/www" folder failed.'
+      `❌ Copy from "../app/build" to Electron's "app/www" folder failed.`
     );
     shell.exit(1);
   }
