@@ -2,7 +2,6 @@
 const fs = require('fs');
 const path = require('path');
 
-const isCra = process.argv.includes('--cra');
 const buildFolderName = process.argv.includes('--build-vite')
   ? 'build-vite'
   : 'build';
@@ -12,9 +11,8 @@ const buildPath = path.join(__dirname, '..', buildFolderName);
  * Verify that the build folder contains the files expected for a working
  * app. This is important because the build can, in some cases, "succeed"
  * while producing an empty or unusable build folder. For example, an error
- * in a web worker file (compiled by `worker-loader` in a child compilation)
- * is not reported as an error of the whole compilation - see
- * `Resource3DPreview.worker.js`.
+ * in a web worker file is not always reported as an error of the whole
+ * compilation - see `Resource3DPreview.worker.js`.
  */
 const checkBuildOutput = () => {
   const errors = [];
@@ -33,19 +31,10 @@ const checkBuildOutput = () => {
   };
 
   checkFileExists('', /^index\.html$/);
-  if (!isCra) {
-    checkFileExists('assets', /^index-.*\.js$/);
-    checkFileExists('assets', /^index-.*\.css$/);
-    checkFileExists('assets', /^Resource3DPreview\.worker-.*\.js$/);
-    checkFileExists('assets', /^BackgroundSerializer\.worker-.*\.js$/);
-  } else {
-    checkFileExists('static/js', /^main\..*\.js$/);
-    checkFileExists('static/css', /^main\..*\.css$/);
-    // Workers are compiled separately by worker-loader: check they were
-    // properly built too.
-    checkFileExists('', /^Resource3DPreview\.worker\..*\.worker\.js$/);
-    checkFileExists('', /^BackgroundSerializer\.worker\..*\.worker\.js$/);
-  }
+  checkFileExists('assets', /^index-.*\.js$/);
+  checkFileExists('assets', /^index-.*\.css$/);
+  checkFileExists('assets', /^Resource3DPreview\.worker-.*\.js$/);
+  checkFileExists('assets', /^BackgroundSerializer\.worker-.*\.js$/);
 
   if (errors.length > 0) {
     console.error(
