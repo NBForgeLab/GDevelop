@@ -99,3 +99,16 @@ if (typeof window !== 'undefined' && typeof window.matchMedia !== 'function') {
     dispatchEvent: () => false,
   });
 }
+
+if (typeof global.Headers === 'undefined') {
+  global.Headers = class Headers {};
+}
+if (typeof global.Response === 'undefined') {
+  global.Response = class Response {};
+}
+if (typeof global.fetch === 'undefined') {
+  global.fetch = () =>
+    Promise.reject(
+      new Error('fetch is not available in the Jest node test environment.')
+    );
+}

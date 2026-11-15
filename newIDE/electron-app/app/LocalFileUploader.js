@@ -46,6 +46,7 @@ module.exports = {
             },
             // Allow any arbitrary large file to be sent
             maxContentLength: Infinity,
+            maxBodyLength: Infinity,
             // onUploadProgress does not work on Node.js
           })
         );

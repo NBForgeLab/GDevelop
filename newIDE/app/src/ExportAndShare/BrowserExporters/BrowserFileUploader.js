@@ -20,6 +20,7 @@ export const uploadBlobFile = (
         },
         // Allow any arbitrary large file to be sent
         maxContentLength: Infinity,
+        maxBodyLength: Infinity,
         // $FlowFixMe[missing-local-annot]
         onUploadProgress: progressEvent => {
           if (!progressEvent || !progressEvent.total) {

@@ -44,6 +44,12 @@ module.exports = {
     storyStoreV7: false,
   },
 
+  // react-docgen v7 (bundled with Storybook 7.6+) expands imported Flow types
+  // inline into multi-megabyte __docgenInfo payloads, exhausting Terser/Node memory.
+  typescript: {
+    reactDocgen: false,
+  },
+
   stories: ['../src/stories/**/*.stories.js'],
   staticDirs: ['../public'],
 

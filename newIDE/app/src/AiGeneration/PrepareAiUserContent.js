@@ -195,6 +195,7 @@ export const prepareAiUserContent = async ({
               },
               // Allow any arbitrary large file to be sent
               maxContentLength: Infinity,
+              maxBodyLength: Infinity,
             })
           ).then(() => {
             gameProjectJsonUploadCache.storeUpload(
@@ -219,6 +220,7 @@ export const prepareAiUserContent = async ({
                 },
                 // Allow any arbitrary large file to be sent
                 maxContentLength: Infinity,
+                maxBodyLength: Infinity,
               }
             )
           ).then(() => {

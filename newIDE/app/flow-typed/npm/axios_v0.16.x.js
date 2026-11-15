@@ -35,6 +35,7 @@ declare module "axios" {
     headers?: Object;
     httpAgent?: mixed; // Missing the type in the core flow node libdef
     httpsAgent?: mixed; // Missing the type in the core flow node libdef
+    maxBodyLength?: number;
     maxContentLength?: number;
     maxRedirects?: number;
     params?: Object;

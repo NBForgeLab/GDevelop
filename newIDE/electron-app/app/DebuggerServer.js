@@ -50,8 +50,9 @@ module.exports = {
             `Debugger connection with id "${id}" opened for window ${windowId}.`
           );
 
-          newWebSocket.on('message', message => {
+          newWebSocket.on('message', (data, isBinary) => {
             // log.info(`Debugger connection with id "${id}" received message.`);
+            const message = isBinary ? data : data.toString();
             options.onMessage({ id, message });
           });
 
