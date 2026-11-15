@@ -56,4 +56,70 @@ describe('prepareAiUserContent', () => {
     // $FlowFixMe[method-unbinding]
     expect(axios.put).toHaveBeenCalledTimes(2);
   });
+
+  it('uploads project, extensions summary, and events JSON with unlimited axios body/content length', async () => {
+    const projectExtensionsSummaryJson = JSON.stringify({
+      extensions: ['Platformer'],
+    });
+    const eventsJson = JSON.stringify({ events: 'e'.repeat(15000) });
+
+    // $FlowFixMe[method-unbinding]
+    mockFn(axios.put).mockClear();
+    mockFn(createAiUserContentPresignedUrls).mockResolvedValueOnce({
+      gameProjectJsonSignedUrl: 'https://example.com/project-signed',
+      gameProjectJsonUserRelativeKey: 'game-project-json/key-1',
+      projectSpecificExtensionsSummaryJsonSignedUrl:
+        'https://example.com/extensions-signed',
+      projectSpecificExtensionsSummaryJsonUserRelativeKey:
+        'extensions-summary-json/key-2',
+      eventsJsonSignedUrl: 'https://example.com/events-signed',
+      eventsJsonUserRelativeKey: 'events-json/key-3',
+    });
+
+    const result = await prepareAiUserContent({
+      getAuthorizationHeader,
+      userId: 'third-user',
+      simplifiedProjectJson,
+      projectSpecificExtensionsSummaryJson: projectExtensionsSummaryJson,
+      eventsJson,
+    });
+
+    expect(result).toEqual({
+      gameProjectJsonUserRelativeKey: 'game-project-json/key-1',
+      gameProjectJson: null,
+      projectSpecificExtensionsSummaryJsonUserRelativeKey:
+        'extensions-summary-json/key-2',
+      projectSpecificExtensionsSummaryJson: null,
+      eventsJsonUserRelativeKey: 'events-json/key-3',
+      eventsJson: null,
+    });
+
+    const expectedAxiosConfig = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+    };
+    // $FlowFixMe[method-unbinding]
+    expect(axios.put).toHaveBeenCalledTimes(3);
+    // $FlowFixMe[method-unbinding]
+    expect(axios.put).toHaveBeenCalledWith(
+      'https://example.com/project-signed',
+      simplifiedProjectJson,
+      expectedAxiosConfig
+    );
+    // $FlowFixMe[method-unbinding]
+    expect(axios.put).toHaveBeenCalledWith(
+      'https://example.com/extensions-signed',
+      projectExtensionsSummaryJson,
+      expectedAxiosConfig
+    );
+    // $FlowFixMe[method-unbinding]
+    expect(axios.put).toHaveBeenCalledWith(
+      'https://example.com/events-signed',
+      eventsJson,
+      expectedAxiosConfig
+    );
+  });
 });

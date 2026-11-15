@@ -12,11 +12,25 @@ type UploadInfo = {
   userRelativeKey: string | null,
 };
 
+type UploadCache = {|
+  getUserRelativeKey: (userId: string, hash: string | null) => string | null,
+  storeUpload: (
+    userId: string,
+    hash: string | null,
+    uploadInfo: UploadInfo
+  ) => void,
+  shouldUpload: ({|
+    userId: string,
+    hash: string | null,
+    contentLength: number,
+  |}) => boolean,
+|};
+
 const makeUploadCache = ({
   minimalContentLength,
 }: {|
   minimalContentLength: number | null,
-|}) => {
+|}): UploadCache => {
   // Keyed by user too: the key of an upload is relative to the user who made it,
   // so it can't be reused after switching to another account.
   const uploadCacheByUserIdAndHash: {
@@ -87,6 +101,41 @@ const computeSha256 = (payload: string): string => {
   const shaObj = new jsSHA('SHA-256', 'TEXT', { encoding: 'UTF8' });
   shaObj.update(payload);
   return shaObj.getHash('HEX');
+};
+
+const uploadJsonToPresignedUrl = async ({
+  signedUrl,
+  payload,
+  cache,
+  userId,
+  hash,
+  uploadedAt,
+  userRelativeKey,
+}: {|
+  signedUrl: ?string,
+  payload: ?string,
+  cache: UploadCache,
+  userId: string,
+  hash: string | null,
+  uploadedAt: number,
+  userRelativeKey: ?string,
+|}): Promise<void> => {
+  if (!signedUrl) return;
+  await retryIfFailed({ times: 3 }, () =>
+    // $FlowFixMe[underconstrained-implicit-instantiation]
+    axios.put(signedUrl, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Allow any arbitrary large file to be sent
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+    })
+  );
+  cache.storeUpload(userId, hash, {
+    uploadedAt,
+    userRelativeKey: userRelativeKey || null,
+  });
 };
 
 /**
@@ -186,70 +235,33 @@ export const prepareAiUserContent = async ({
     const uploadedAt = Date.now();
 
     await Promise.all([
-      gameProjectJsonSignedUrl
-        ? retryIfFailed({ times: 3 }, () =>
-            // $FlowFixMe[underconstrained-implicit-instantiation]
-            axios.put(gameProjectJsonSignedUrl, simplifiedProjectJson, {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              // Allow any arbitrary large file to be sent
-              maxContentLength: Infinity,
-              maxBodyLength: Infinity,
-            })
-          ).then(() => {
-            gameProjectJsonUploadCache.storeUpload(
-              userId,
-              gameProjectJsonHash,
-              {
-                uploadedAt,
-                userRelativeKey: gameProjectJsonUserRelativeKey || null,
-              }
-            );
-          })
-        : null,
-      projectSpecificExtensionsSummaryJsonSignedUrl
-        ? retryIfFailed({ times: 3 }, () =>
-            // $FlowFixMe[underconstrained-implicit-instantiation]
-            axios.put(
-              projectSpecificExtensionsSummaryJsonSignedUrl,
-              projectSpecificExtensionsSummaryJson,
-              {
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                // Allow any arbitrary large file to be sent
-                maxContentLength: Infinity,
-                maxBodyLength: Infinity,
-              }
-            )
-          ).then(() => {
-            projectSpecificExtensionsSummaryUploadCache.storeUpload(
-              userId,
-              projectSpecificExtensionsSummaryJsonHash,
-              {
-                uploadedAt,
-                userRelativeKey:
-                  projectSpecificExtensionsSummaryJsonUserRelativeKey || null,
-              }
-            );
-          })
-        : null,
-      eventsJsonSignedUrl
-        ? retryIfFailed({ times: 3 }, () =>
-            // $FlowFixMe[underconstrained-implicit-instantiation]
-            axios.put(eventsJsonSignedUrl, eventsJson, {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            })
-          ).then(() => {
-            eventsJsonUploadCache.storeUpload(userId, eventsJsonHash, {
-              uploadedAt,
-              userRelativeKey: eventsJsonUserRelativeKey || null,
-            });
-          })
-        : null,
+      uploadJsonToPresignedUrl({
+        signedUrl: gameProjectJsonSignedUrl,
+        payload: simplifiedProjectJson,
+        cache: gameProjectJsonUploadCache,
+        userId,
+        hash: gameProjectJsonHash,
+        uploadedAt,
+        userRelativeKey: gameProjectJsonUserRelativeKey,
+      }),
+      uploadJsonToPresignedUrl({
+        signedUrl: projectSpecificExtensionsSummaryJsonSignedUrl,
+        payload: projectSpecificExtensionsSummaryJson,
+        cache: projectSpecificExtensionsSummaryUploadCache,
+        userId,
+        hash: projectSpecificExtensionsSummaryJsonHash,
+        uploadedAt,
+        userRelativeKey: projectSpecificExtensionsSummaryJsonUserRelativeKey,
+      }),
+      uploadJsonToPresignedUrl({
+        signedUrl: eventsJsonSignedUrl,
+        payload: eventsJson,
+        cache: eventsJsonUploadCache,
+        userId,
+        hash: eventsJsonHash,
+        uploadedAt,
+        userRelativeKey: eventsJsonUserRelativeKey,
+      }),
     ]);
 
     const endTime = Date.now();
