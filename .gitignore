@@ -16,11 +16,6 @@
 *.bc
 /Binaries/Output
 *.autosave
-!/scripts/libgettextlib-0-17.dll
-!/scripts/libgettextsrc-0-17.dll
-!/xgettext.exe
-!/ExtLibs/curl.exe
-!/ExtLibs/7za.exe
 !/ExtLibs/SFML/extlibs/**/*.dll
 !/ExtLibs/SFML/extlibs/**/*.so
 !/ExtLibs/SFML/extlibs/**/*.a
