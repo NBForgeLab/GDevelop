@@ -51,6 +51,11 @@ const VIRTUAL_CLASSIC_WORKER_FACTORY_PREFIX =
   '\0gdevelop-classic-worker-factory:';
 
 const LOCALES_PATH_RE = /[\\/]src[\\/]locales[\\/]/;
+const LOCALE_CHUNK_FACADE_RE = /[\\/]src[\\/]locales[\\/]([^\\/]+)[\\/]/;
+const MONACO_CHUNK_RE = /[\\/]node_modules[\\/](?:react-)?monaco-editor[\\/]/;
+const VENDOR_THREE_RE = /[\\/]node_modules[\\/]three[\\/]/;
+const VENDOR_PIXI_RE = /[\\/]node_modules[\\/](?:pixi\.js|pixi\.js-legacy|@pixi|@esotericsoftware[\\/]spine-pixi-v7)[\\/]/;
+const VENDOR_FIREBASE_RE = /[\\/]node_modules[\\/](?:firebase|@firebase)[\\/]/;
 const SOURCE_JS_RE = /[\\/]newIDE[\\/]app[\\/]src[\\/].*\.js$/;
 const REACT_VIRTUALIZED_ON_SCROLL_RE = /react-virtualized[\\/]dist[\\/]es[\\/]WindowScroller[\\/]utils[\\/]onScroll\.js$/;
 const REACT_VIRTUALIZED_BAD_IMPORT =
@@ -466,6 +471,57 @@ const createCommonJsPlugin = () => {
   };
 };
 
+const getVendorManualChunk = id => {
+  if (id === '\0commonjsHelpers.js') return 'vendor-commonjs-helpers';
+  if (id.startsWith('\0')) return undefined;
+  const cleanId = id.split('?')[0];
+  if (VENDOR_THREE_RE.test(cleanId)) return 'vendor-three';
+  if (VENDOR_PIXI_RE.test(cleanId)) return 'vendor-pixi';
+  if (VENDOR_FIREBASE_RE.test(cleanId)) return 'vendor-firebase';
+  return undefined;
+};
+
+const getChunkFileName = chunkInfo => {
+  const facadeId = chunkInfo.facadeModuleId
+    ? chunkInfo.facadeModuleId.split('?')[0]
+    : '';
+  const cleanModuleIds = chunkInfo.moduleIds.map(id =>
+    id.replace(/^\0/, '').split('?')[0]
+  );
+
+  const localeModuleId =
+    facadeId && LOCALE_CHUNK_FACADE_RE.test(facadeId)
+      ? facadeId
+      : cleanModuleIds.find(id => LOCALE_CHUNK_FACADE_RE.test(id));
+  if (localeModuleId) {
+    const localeMatch = localeModuleId.match(LOCALE_CHUNK_FACADE_RE);
+    if (localeMatch) {
+      return `assets/locales-${localeMatch[1]}-[name]-[hash].js`;
+    }
+  }
+
+  if (
+    (facadeId && MONACO_CHUNK_RE.test(facadeId)) ||
+    (!facadeId &&
+      cleanModuleIds.length > 0 &&
+      cleanModuleIds.some(id => MONACO_CHUNK_RE.test(id)) &&
+      cleanModuleIds.every(
+        id => MONACO_CHUNK_RE.test(id) || id.includes('commonjsHelpers')
+      ))
+  ) {
+    return 'assets/monaco-[name]-[hash].js';
+  }
+
+  if (!facadeId) {
+    if (chunkInfo.name && chunkInfo.name.startsWith('vendor-')) {
+      return 'assets/[name]-[hash].js';
+    }
+    return 'assets/shared-[hash].js';
+  }
+
+  return 'assets/[name]-[hash].js';
+};
+
 export default defineConfig(({ command, mode }) => {
   const publicUrl = normalizePublicUrl(process.env.PUBLIC_URL, command);
   const viteBase = computeViteBase(publicUrl, command);
@@ -554,6 +610,11 @@ export default defineConfig(({ command, mode }) => {
       },
       rollupOptions: {
         input: virtualHtmlId,
+        output: {
+          entryFileNames: 'assets/[name]-[hash].js',
+          chunkFileNames: getChunkFileName,
+          manualChunks: getVendorManualChunk,
+        },
       },
     },
   };

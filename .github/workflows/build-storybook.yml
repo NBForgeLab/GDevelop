@@ -34,9 +34,9 @@ jobs:
         with:
           fetch-depth: 50
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 24
           cache: "npm"
           cache-dependency-path: "newIDE/app/package-lock.json"
 
@@ -101,9 +101,9 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 24
 
       # Only the dependency of the script is installed, not the whole editor.
       - name: Install script dependencies

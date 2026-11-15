@@ -62,7 +62,11 @@ const buildSW = () => {
           ? [
               'assets/*.css',
               'assets/*.{ttf,svg,wasm}',
-              'assets/{index,BrowserApp,Authorization}-*.js',
+              'assets/{index,BrowserApp,shared}-*.js',
+              'assets/vendor-*.js',
+              'assets/monaco-*.js',
+              'assets/locales-en-*.js',
+              'assets/draco_*.js',
               'assets/*{Resource3DPreview,BackgroundSerializer}.worker*.js',
             ]
           : []),
