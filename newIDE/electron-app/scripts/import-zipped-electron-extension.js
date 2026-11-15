@@ -7,22 +7,22 @@
  * GDevelop sources.
  */
 var shell = require('shelljs');
-var fs = require('fs');
 var AdmZip = require('adm-zip');
 var process = require('process');
 var path = require('path');
+const {
+  validateZipEntries,
+} = require('../../app/scripts/lib/ValidateZipEntries');
 
 const fileName = process.argv[2];
 const relativeExtractPath = process.argv[3];
 if (
   !fileName ||
   !relativeExtractPath ||
-  fileName.indexOf('/') !== -1 ||
-  fileName.indexOf('\\') !== -1 ||
-  fileName.indexOf('..') !== -1 ||
-  fileName.indexOf(':') !== -1 ||
-  fileName.indexOf('\0') !== -1 ||
-  fileName === '.'
+  !/^[a-zA-Z0-9._-]+$/.test(fileName) ||
+  fileName === '.' ||
+  fileName === '..' ||
+  fileName.indexOf('..') !== -1
 ) {
   shell.echo(
     '❌ Usage: node import-zipped-electron-extension.js <fileName> <relativeExtractPath>'
@@ -32,53 +32,12 @@ if (
 const basePath = path.join(relativeExtractPath, fileName);
 const zipFilePath = basePath + '.zip';
 
-const validateZipEntries = (zip, destinationPath) => {
-  const resolvedDestination = path.resolve(destinationPath);
-  const entries = zip.getEntries();
-
-  for (let i = 0; i < entries.length; i++) {
-    const entry = entries[i];
-    const entryName = String(entry.entryName || '');
-
-    if (
-      !entryName ||
-      entryName.indexOf('\0') !== -1 ||
-      /^[a-zA-Z]:/.test(entryName) ||
-      entryName.startsWith('/') ||
-      entryName.startsWith('\\')
-    ) {
-      throw new Error(`Unsafe zip entry path: "${entryName}"`);
-    }
-
-    const segments = entryName.split(/[/\\]/);
-    if (segments.some(segment => segment === '..')) {
-      throw new Error(`Zip Slip traversal detected in entry: "${entryName}"`);
-    }
-
-    const rawAttr =
-      entry.header && typeof entry.header.attr === 'number'
-        ? entry.header.attr
-        : 0;
-    const fileTypeBits = (rawAttr >>> 16) & 0o170000;
-    if (fileTypeBits === 0o120000) {
-      throw new Error(`Symlink zip entry is not allowed: "${entryName}"`);
-    }
-
-    const resolvedEntryPath = path.resolve(resolvedDestination, entryName);
-    const relativePath = path.relative(resolvedDestination, resolvedEntryPath);
-    if (
-      relativePath === '..' ||
-      relativePath.startsWith('..' + path.sep) ||
-      path.isAbsolute(relativePath)
-    ) {
-      throw new Error(`Zip entry escapes target directory: "${entryName}"`);
-    }
-  }
-};
-
 try {
   const zip = new AdmZip(zipFilePath);
-  validateZipEntries(zip, relativeExtractPath);
+  validateZipEntries(zip, relativeExtractPath, {
+    allowedTopLevelDirectories: [fileName, '__MACOSX'],
+    requiredTopLevelDirectory: fileName,
+  });
   zip.extractAllTo(relativeExtractPath, /*overwrite=*/ true);
 
   shell.echo('✅ Extracted ' + zipFilePath + ' to ' + basePath + ' folder');

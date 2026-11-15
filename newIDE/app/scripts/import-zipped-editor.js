@@ -20,12 +20,10 @@ if (
   !editor ||
   !gitRelease ||
   !expectedFolderHash ||
-  editor.indexOf('/') !== -1 ||
-  editor.indexOf('\\') !== -1 ||
-  editor.indexOf('..') !== -1 ||
-  editor.indexOf(':') !== -1 ||
-  editor.indexOf('\0') !== -1 ||
-  editor === '.'
+  !/^[a-zA-Z0-9._-]+$/.test(editor) ||
+  editor === '.' ||
+  editor === '..' ||
+  editor.indexOf('..') !== -1
 ) {
   shell.echo(
     '❌ Usage: node import-zipped-editor.js <editor> <gitRelease> <expectedFolderHash>'
@@ -40,14 +38,23 @@ const zipFilePath = basePath + '.zip';
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-const safeRemovePath = targetPath => {
-  if (!targetPath) return;
-  fs.rmSync(targetPath, {
-    recursive: true,
-    force: true,
-    maxRetries: 5,
-    retryDelay: 100,
-  });
+const safeRemovePathBestEffort = (targetPath, label) => {
+  if (!targetPath) return true;
+  try {
+    fs.rmSync(targetPath, {
+      recursive: true,
+      force: true,
+      maxRetries: 5,
+      retryDelay: 100,
+    });
+    return true;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    shell.echo(
+      `⚠️ Warning: failed to remove ${label || targetPath}: ${message}`
+    );
+    return false;
+  }
 };
 
 const renameWithRetry = async (
@@ -107,7 +114,10 @@ const replaceDirectorySafely = async (
   }
 
   if (hasBackup) {
-    safeRemovePath(backupPath);
+    safeRemovePathBestEffort(
+      backupPath,
+      `${editorName}-editor backup directory`
+    );
   }
 };
 
@@ -217,8 +227,8 @@ const editorHasCorrectHash = (targetPath = basePath) =>
         shell.echo(
           `ℹ️ Expected folder hash was "${expectedFolderHash}" while actual folder hash that is computed is "${actualFolderHash}".`
         );
-        safeRemovePath(stagingDir);
-        safeRemovePath(zipFilePath);
+        safeRemovePathBestEffort(stagingDir, 'staging directory');
+        safeRemovePathBestEffort(zipFilePath, 'downloaded archive');
         process.exit(1);
       }
 
@@ -228,8 +238,8 @@ const editorHasCorrectHash = (targetPath = basePath) =>
         editorParentPath,
         editor
       );
-      safeRemovePath(stagingDir);
-      safeRemovePath(zipFilePath);
+      safeRemovePathBestEffort(stagingDir, 'staging directory');
+      safeRemovePathBestEffort(zipFilePath, 'downloaded archive');
 
       shell.echo(
         '✅ Extracted ' +
@@ -247,8 +257,10 @@ const editorHasCorrectHash = (targetPath = basePath) =>
           ' folder:',
         e.message
       );
-      if (stagingDir) safeRemovePath(stagingDir);
-      safeRemovePath(zipFilePath);
+      if (stagingDir) {
+        safeRemovePathBestEffort(stagingDir, 'staging directory');
+      }
+      safeRemovePathBestEffort(zipFilePath, 'downloaded archive');
       process.exit(1);
     }
   } catch (e) {
@@ -257,7 +269,7 @@ const editorHasCorrectHash = (targetPath = basePath) =>
         editor +
         `-editor.zip (${e}), please check your internet connection`
     );
-    safeRemovePath(zipFilePath);
+    safeRemovePathBestEffort(zipFilePath, 'downloaded archive');
     process.exit(1);
     return;
   }

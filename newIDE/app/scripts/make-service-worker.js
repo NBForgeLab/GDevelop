@@ -126,4 +126,12 @@ const buildSW = () => {
     });
 };
 
-cleanBuildFiles().then(() => buildSW());
+cleanBuildFiles()
+  .then(() => buildSW())
+  .catch(error => {
+    console.error(
+      `❌ Error while generating ${buildLabel}/service-worker.js:`,
+      error
+    );
+    process.exitCode = 1;
+  });

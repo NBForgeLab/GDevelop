@@ -142,7 +142,7 @@
     "flatted": "^3.4.4"
   },
   "scripts": {
-    "postinstall": "patch-package && cd ../../GDJS && npm install && cd ../newIDE/app && node -e \"if (!/^(1|true|yes)$/i.test(process.env.SKIP_IMPORT_RESOURCES || '')) { const r = require('child_process').spawnSync('npm run import-resources', { stdio: 'inherit', shell: true }); if (r.error || r.status !== 0) process.exit(r.status || 1); }\"",
+    "postinstall": "patch-package && cd ../../GDJS && npm install && cd ../newIDE/app && node -e \"if (!/^(1|true|yes)$/i.test((process.env.SKIP_IMPORT_RESOURCES || '').trim())) { const r = require('child_process').spawnSync('npm run import-resources', { stdio: 'inherit', shell: true }); if (r.error || r.status !== 0) process.exit(r.status || 1); }\"",
     "prepare:resources": "npm run import-resources",
     "import-resources": "npm run make-version-metadata && npm run import-zipped-external-editors && npm run build-theme-resources && cd scripts && node import-libGD.js && node import-GDJS-Runtime.js && node import-monaco-editor.js && node import-zipped-external-libs.js && npm run make-service-worker",
     "make-version-metadata": "cd scripts && node make-version-metadata.js",
