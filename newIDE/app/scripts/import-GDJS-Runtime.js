@@ -27,11 +27,11 @@ if (!args['skip-clean']) {
 // Build GDJS runtime (and extensions).
 destinationPaths.forEach(destinationPath => {
   const outPath = path.join(destinationPath, 'Runtime');
-  const output = shell.exec(`node scripts/build.js --out ${outPath}`, {
+  const output = shell.exec(`node scripts/build.js --out "${outPath}"`, {
     cwd: path.join(gdevelopRootPath, 'GDJS'),
   });
   if (output.code !== 0) {
-    shell.exit(0);
+    shell.exit(output.code || 1);
   }
 });
 
@@ -44,56 +44,81 @@ if (!args['skip-sources']) {
       ', '
     )}...`
   );
-  destinationPaths.forEach(destinationPath => {
-    const copyOptions = {
-      overwrite: true,
-      expand: true,
-      dot: true,
-      junk: true,
-    };
+  Promise.all(
+    destinationPaths.map(destinationPath => {
+      const copyOptions = {
+        overwrite: true,
+        expand: true,
+        dot: true,
+        junk: true,
+      };
 
-    const startTime = Date.now();
+      const startTime = Date.now();
 
-    const typesDestinationPath = path.join(destinationPath, 'Runtime-sources', 'types');
-    const pixiDestinationPath = path.join(typesDestinationPath, 'pixi');
-    // TODO: Investigate the use of a smart & faster sync
-    // that only copy files with changed content.
-    return Promise.all([
-      copy(
-        path.join(gdevelopRootPath, 'GDJS', 'Runtime'),
-        path.join(destinationPath, 'Runtime-sources'),
-        copyOptions
-      ),
-      copy(
-        path.join(gdevelopRootPath, 'Extensions'),
-        path.join(destinationPath, 'Runtime-sources', 'Extensions'),
-        { ...copyOptions, filter: ['**/*.js', '**/*.ts'] }
-      ),
-      copy(
-        path.join(gdevelopRootPath, 'GDJS', 'node_modules', '@types', 'three'),
-        path.join(typesDestinationPath, 'three'),
-        { ...copyOptions, filter: ['*.d.ts'] }
-      ),
-      copy(
-        path.join(gdevelopRootPath, 'GDJS', 'node_modules', '@types', 'three', 'src'),
-        path.join(typesDestinationPath, 'three', 'src'),
-        { ...copyOptions, filter: ['**/*.d.ts'] }
-      ),
-      copy(
-        path.join(gdevelopRootPath, 'GDJS', 'node_modules', '@pixi'),
-        pixiDestinationPath,
-        { ...copyOptions, filter: ['**/*.d.ts'] }
-      ),
-    ])
-      .then(function([unbundledResults, unbundledExtensionsResults]) {
+      const typesDestinationPath = path.join(
+        destinationPath,
+        'Runtime-sources',
+        'types'
+      );
+      const pixiDestinationPath = path.join(typesDestinationPath, 'pixi');
+      // TODO: Investigate the use of a smart & faster sync
+      // that only copy files with changed content.
+      return Promise.all([
+        copy(
+          path.join(gdevelopRootPath, 'GDJS', 'Runtime'),
+          path.join(destinationPath, 'Runtime-sources'),
+          copyOptions
+        ),
+        copy(
+          path.join(gdevelopRootPath, 'Extensions'),
+          path.join(destinationPath, 'Runtime-sources', 'Extensions'),
+          { ...copyOptions, filter: ['**/*.js', '**/*.ts'] }
+        ),
+        copy(
+          path.join(
+            gdevelopRootPath,
+            'GDJS',
+            'node_modules',
+            '@types',
+            'three'
+          ),
+          path.join(typesDestinationPath, 'three'),
+          { ...copyOptions, filter: ['*.d.ts'] }
+        ),
+        copy(
+          path.join(
+            gdevelopRootPath,
+            'GDJS',
+            'node_modules',
+            '@types',
+            'three',
+            'src'
+          ),
+          path.join(typesDestinationPath, 'three', 'src'),
+          { ...copyOptions, filter: ['**/*.d.ts'] }
+        ),
+        copy(
+          path.join(gdevelopRootPath, 'GDJS', 'node_modules', '@pixi'),
+          pixiDestinationPath,
+          { ...copyOptions, filter: ['**/*.d.ts'] }
+        ),
+      ]).then(function([unbundledResults, unbundledExtensionsResults]) {
         // Replace import of packages by import of relative folders.
-        shell.sed(
+        const sedResult = shell.sed(
           '-i',
-          'from \'@pixi((/\\w+)+)',
-          'from \'../..$1/lib',
+          "from '@pixi((/\\w+)+)",
+          "from '../..$1/lib",
           pixiDestinationPath + '/*/lib/*.d.ts'
         );
-        fs.writeFileSync(path.join(pixiDestinationPath, 'index.d.ts'), `
+        if (sedResult.stderr || sedResult.code !== 0) {
+          throw new Error(
+            `Failed to rewrite @pixi imports in "${pixiDestinationPath}": ${sedResult.stderr ||
+              `exit code ${sedResult.code}`}`
+          );
+        }
+        fs.writeFileSync(
+          path.join(pixiDestinationPath, 'index.d.ts'),
+          `
   import './mixin-cache-as-bitmap/lib';
   import './mixin-get-child-by-name/lib';
   import './mixin-get-global-position/lib';
@@ -133,16 +158,18 @@ if (!args['skip-sources']) {
   export * from './utils/lib';
   
   export as namespace PIXI;
-      `);
+      `
+        );
         const totalFilesCount =
           unbundledResults.length + unbundledExtensionsResults.length;
         const duration = Date.now() - startTime;
         console.info(
           `✅ Runtime source files copy done (${totalFilesCount} file(s) copied in ${duration}ms).`
         );
-      })
-      .catch(function(error) {
-        console.error('❌ Copy failed: ', error);
       });
+    })
+  ).catch(function(error) {
+    console.error('❌ Copy failed: ', error);
+    process.exitCode = 1;
   });
 }

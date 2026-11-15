@@ -5,24 +5,117 @@
  */
 var shell = require('shelljs');
 var AdmZip = require('adm-zip');
+var fs = require('fs');
 var process = require('process');
 var path = require('path');
 const { hashElement } = require('folder-hash');
 const { downloadLocalFile } = require('./lib/DownloadLocalFile');
 const { retryIfFailed } = require('./lib/RetryIfFailed');
+const { validateZipEntries } = require('./lib/ValidateZipEntries');
 
 const editor = process.argv[2];
 const gitRelease = process.argv[3];
 const expectedFolderHash = process.argv[4];
+if (
+  !editor ||
+  !gitRelease ||
+  !expectedFolderHash ||
+  editor.indexOf('/') !== -1 ||
+  editor.indexOf('\\') !== -1 ||
+  editor.indexOf('..') !== -1 ||
+  editor.indexOf(':') !== -1 ||
+  editor.indexOf('\0') !== -1 ||
+  editor === '.'
+) {
+  shell.echo(
+    '❌ Usage: node import-zipped-editor.js <editor> <gitRelease> <expectedFolderHash>'
+  );
+  process.exit(1);
+}
 const gitUrl = 'https://github.com/4ian/GDevelop';
-const basePath = path.join('../public/external/', editor, editor + '-editor');
+const editorParentPath = path.join('../public/external/', editor);
+const expectedFolderName = editor + '-editor';
+const basePath = path.join(editorParentPath, expectedFolderName);
 const zipFilePath = basePath + '.zip';
+
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+const safeRemovePath = targetPath => {
+  if (!targetPath) return;
+  fs.rmSync(targetPath, {
+    recursive: true,
+    force: true,
+    maxRetries: 5,
+    retryDelay: 100,
+  });
+};
+
+const renameWithRetry = async (
+  sourcePath,
+  destinationPath,
+  maxRetries = 5,
+  retryDelayMs = 100
+) => {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await fs.promises.rename(sourcePath, destinationPath);
+      return;
+    } catch (error) {
+      const code = error && error.code;
+      const isRetryable =
+        code === 'EPERM' || code === 'EBUSY' || code === 'EACCES';
+      if (!isRetryable || attempt >= maxRetries) {
+        throw error;
+      }
+      await delay(retryDelayMs * (attempt + 1));
+    }
+  }
+};
+
+const replaceDirectorySafely = async (
+  stagedPath,
+  targetPath,
+  parentPath,
+  editorName
+) => {
+  const backupPath = path.join(
+    parentPath,
+    '.backup-' + editorName + '-' + process.pid + '-' + Date.now()
+  );
+  let hasBackup = false;
+
+  if (fs.existsSync(targetPath)) {
+    await renameWithRetry(targetPath, backupPath);
+    hasBackup = true;
+  }
+
+  try {
+    await renameWithRetry(stagedPath, targetPath);
+  } catch (error) {
+    if (hasBackup && !fs.existsSync(targetPath) && fs.existsSync(backupPath)) {
+      try {
+        await renameWithRetry(backupPath, targetPath);
+      } catch (restoreError) {
+        shell.echo(
+          `⚠️ Failed to restore existing ${editorName}-editor backup: ${
+            restoreError.message
+          }`
+        );
+      }
+    }
+    throw error;
+  }
+
+  if (hasBackup) {
+    safeRemovePath(backupPath);
+  }
+};
 
 // Tool function checking if the editor folder has the proper SHA256 checksum
 // If you're updating the zip of a third party editor, update also the checksum
 // in package.json.
-const editorHasCorrectHash = () =>
-  hashElement(basePath, { algo: 'sha256', encoding: 'hex' }).then(
+const editorHasCorrectHash = (targetPath = basePath) =>
+  hashElement(targetPath, { algo: 'sha256', encoding: 'hex' }).then(
     folderHashResult => {
       const actualFolderHash = folderHashResult.hash;
       return {
@@ -63,6 +156,7 @@ const editorHasCorrectHash = () =>
   );
 
   try {
+    fs.mkdirSync(editorParentPath, { recursive: true });
     await retryIfFailed(
       { times: 3, backoff: { initialDelay: 400, factor: 2 } },
       () =>
@@ -84,22 +178,35 @@ const editorHasCorrectHash = () =>
         ' folder'
     );
 
+    let stagingDir = null;
     try {
+      stagingDir = fs.mkdtempSync(
+        path.join(editorParentPath, '.tmp-' + editor + '-')
+      );
       const zip = new AdmZip(zipFilePath);
-      zip.extractAllTo(
-        path.join('../public/external/', editor),
-        /*overwrite=*/ true
-      );
+      validateZipEntries(zip, stagingDir);
+      zip.extractAllTo(stagingDir, /*overwrite=*/ true);
 
-      shell.echo(
-        '✅ Extracted ' +
-          editor +
-          '-editor.zip to public/external/' +
-          editor +
-          ' folder'
+      const stagedEntries = fs.readdirSync(stagingDir);
+      const unexpectedEntries = stagedEntries.filter(
+        entry => entry !== expectedFolderName && entry !== '__MACOSX'
       );
-      shell.rm(zipFilePath);
-      const { isHashCorrect, actualFolderHash } = await editorHasCorrectHash();
+      const stagedBasePath = path.join(stagingDir, expectedFolderName);
+      if (
+        unexpectedEntries.length > 0 ||
+        !fs.existsSync(stagedBasePath) ||
+        !fs.statSync(stagedBasePath).isDirectory()
+      ) {
+        throw new Error(
+          `Unexpected archive structure in ${editor}-editor.zip (entries: ${stagedEntries.join(
+            ', '
+          )})`
+        );
+      }
+
+      const { isHashCorrect, actualFolderHash } = await editorHasCorrectHash(
+        stagedBasePath
+      );
 
       if (!isHashCorrect) {
         shell.echo(
@@ -110,7 +217,27 @@ const editorHasCorrectHash = () =>
         shell.echo(
           `ℹ️ Expected folder hash was "${expectedFolderHash}" while actual folder hash that is computed is "${actualFolderHash}".`
         );
+        safeRemovePath(stagingDir);
+        safeRemovePath(zipFilePath);
+        process.exit(1);
       }
+
+      await replaceDirectorySafely(
+        stagedBasePath,
+        basePath,
+        editorParentPath,
+        editor
+      );
+      safeRemovePath(stagingDir);
+      safeRemovePath(zipFilePath);
+
+      shell.echo(
+        '✅ Extracted ' +
+          editor +
+          '-editor.zip to public/external/' +
+          editor +
+          ' folder'
+      );
     } catch (e) {
       shell.echo(
         '❌ Error while extracting ' +
@@ -120,6 +247,9 @@ const editorHasCorrectHash = () =>
           ' folder:',
         e.message
       );
+      if (stagingDir) safeRemovePath(stagingDir);
+      safeRemovePath(zipFilePath);
+      process.exit(1);
     }
   } catch (e) {
     shell.echo(
@@ -127,7 +257,8 @@ const editorHasCorrectHash = () =>
         editor +
         `-editor.zip (${e}), please check your internet connection`
     );
-    shell.exit(1);
+    safeRemovePath(zipFilePath);
+    process.exit(1);
     return;
   }
 })();

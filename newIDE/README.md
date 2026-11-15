@@ -15,6 +15,14 @@ cd GDevelop/newIDE/app
 npm install # or yarn
 ```
 
+> Note: `npm install` in `newIDE/app` runs `npm run import-resources` during `postinstall` to prepare external editors, themes, `libGD.js`, and the GDJS runtime. To install dependencies without downloading external resources (e.g. in offline or dependency-only environments), set `SKIP_IMPORT_RESOURCES=true` during `npm install` and run `npm run prepare:resources` (or `npm run import-resources`) explicitly when ready:
+>
+> - macOS / Linux (`bash`/`zsh`): `SKIP_IMPORT_RESOURCES=true npm install`
+> - Windows (`cmd`): `set SKIP_IMPORT_RESOURCES=true && npm install`
+> - Windows (`PowerShell`): `$env:SKIP_IMPORT_RESOURCES="true"; npm install`
+>
+> Note that `newIDE/electron-app` also runs its own `postinstall` (`import-zipped-electron-extensions` from the local zip archive, `app`'s `npm install`, and `copy-electron-remote-to-app-resources`); setting `SKIP_IMPORT_RESOURCES=true` skips the resource downloads inside `newIDE/app` while `electron-app` only extracts local files.
+
 ## 2) Development 🤓
 
 ```bash

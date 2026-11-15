@@ -12,6 +12,7 @@ const alreadyHasLibGdJs =
 
 if (shell.mkdir('-p', destinationTestDirectory).stderr) {
   shell.echo('❌ Error while creating node_modules folder for libGD.js');
+  shell.exit(1);
 }
 
 if (shell.test('-f', path.join(sourceDirectory, 'libGD.js'))) {
@@ -27,7 +28,18 @@ if (shell.test('-f', path.join(sourceDirectory, 'libGD.js'))) {
     'scripts',
     'copy-to-newIDE.js'
   );
-  shell.exec(`node ${copyToNewIDEScriptPath}`);
+  const copyResult = shell.exec(`node "${copyToNewIDEScriptPath}"`);
+  if (copyResult.code !== 0) {
+    shell.exit(copyResult.code || 1);
+  }
+} else if (
+  /^(1|true|yes)$/i.test(process.env.SKIP_LIBGD_DOWNLOAD || '') &&
+  alreadyHasLibGdJs
+) {
+  shell.echo(
+    'ℹ️  SKIP_LIBGD_DOWNLOAD is set and libGD.js is already present, skipping S3 download.'
+  );
+  shell.exit(0);
 } else {
   // Download a pre-built version otherwise
   shell.echo(
@@ -112,25 +124,32 @@ if (shell.test('-f', path.join(sourceDirectory, 'libGD.js'))) {
         downloadLocalFile(baseUrl + '/libGD.js', '../public/libGD.js')
       )
       .catch(error => {
-        if (error.statusCode === 403) {
+        const statusCode =
+          (error && error.response && error.response.status) ||
+          (error && error.status) ||
+          (error && error.statusCode) ||
+          0;
+        const statusMessage =
+          (error && error.response && error.response.statusText) ||
+          (error && error.message) ||
+          (error && error.statusMessage) ||
+          String(error);
+
+        if (statusCode === 403) {
           shell.echo(
             `ℹ️ Maybe libGD.js was not automatically built yet, try again in a few minutes.`
           );
           throw error;
         }
-        if (error.statusCode === 0) {
+        if (statusCode === 0) {
           shell.echo(
-            `⚠️ Can't download libGD.js (error: ${
-              error.statusMessage
-            }) (baseUrl=${baseUrl}), please check your internet connection.`
+            `⚠️ Can't download libGD.js (error: ${statusMessage}) (baseUrl=${baseUrl}), please check your internet connection.`
           );
           throw error;
         }
 
         shell.echo(
-          `⚠️ Can't download libGD.js (${
-            error.statusMessage
-          }) (baseUrl=${baseUrl}), try again later.`
+          `⚠️ Can't download libGD.js (${statusMessage}) (baseUrl=${baseUrl}), try again later.`
         );
         throw error;
       });
@@ -149,6 +168,7 @@ if (shell.test('-f', path.join(sourceDirectory, 'libGD.js'))) {
       shell.echo('✅ Copied libGD.js to node_modules folder');
     } else {
       shell.echo('❌ Error while copying libGD.js to node_modules folder');
+      shell.exit(1);
     }
   };
 

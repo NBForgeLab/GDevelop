@@ -32,6 +32,7 @@ const AdmZip = require('adm-zip');
 const args = require('minimist')(process.argv.slice(2));
 const { downloadLocalFile } = require('./lib/DownloadLocalFile');
 const { retryIfFailed } = require('./lib/RetryIfFailed');
+const { validateZipEntries } = require('./lib/ValidateZipEntries');
 
 const electronAppPackageJson = require('../../electron-app/app/package.json');
 
@@ -64,7 +65,9 @@ const fail = msg => {
 };
 
 (async () => {
-  shell.echo(`ℹ️ GDevelop version (from electron-app/app/package.json): ${version}`);
+  shell.echo(
+    `ℹ️ GDevelop version (from electron-app/app/package.json): ${version}`
+  );
   shell.echo(`ℹ️ Branch: ${branch} — example: ${exampleSlug}`);
   shell.echo(`ℹ️ Work dir:      ${workDir}`);
   shell.echo(`ℹ️ Artifacts dir: ${artifactsDir}`);
@@ -105,7 +108,9 @@ const fail = msg => {
   shell.rm('-rf', extractedDir);
   shell.mkdir('-p', extractedDir);
   shell.echo(`📂 Extracting portable zip to ${extractedDir} ...`);
-  new AdmZip(portableZipPath).extractAllTo(extractedDir, /*overwrite=*/ true);
+  const portableZip = new AdmZip(portableZipPath);
+  validateZipEntries(portableZip, extractedDir);
+  portableZip.extractAllTo(extractedDir, /*overwrite=*/ true);
 
   // 3. Locate the GDevelop executable inside the extracted dir.
   const gdevelopBinary = findExecutable(extractedDir);
@@ -124,7 +129,12 @@ const fail = msg => {
   shell.rm('-rf', exampleParentDir);
   shell.mkdir('-p', exampleParentDir);
   shell.echo(`🌐 Sparse-cloning ${exampleSlug} from GDevelop-examples ...`);
-  cloneExampleSparse(EXAMPLES_REPO, EXAMPLES_BRANCH, exampleSlug, exampleParentDir);
+  cloneExampleSparse(
+    EXAMPLES_REPO,
+    EXAMPLES_BRANCH,
+    exampleSlug,
+    exampleParentDir
+  );
   const exampleDir = path.join(exampleParentDir, 'examples', exampleSlug);
   const gameJsonPath = path.join(exampleDir, `${exampleSlug}.json`);
   if (!fs.existsSync(gameJsonPath)) {

@@ -13,6 +13,7 @@ if (!success) {
   shell.echo(
     `❌ Error(s) occurred while copying Monaco Editor sources from node_modules/monaco-editor/min/vs`
   );
+  process.exit(1);
 } else {
   shell.echo(
     '✅ Sources of Monaco Editor properly copied in public folder'

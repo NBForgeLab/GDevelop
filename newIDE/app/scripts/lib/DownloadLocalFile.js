@@ -1,6 +1,6 @@
 // @ts-check
 const fs = require('fs');
-const {default: axios} = require('axios');
+const { default: axios } = require('axios');
 
 let temporaryFileCounter = 0;
 
@@ -15,7 +15,9 @@ let temporaryFileCounter = 0;
  * @returns {Promise<void>}
  */
 const downloadLocalFile = async (url, outputPath) => {
-  const temporaryPath = `${outputPath}.${process.pid}-${temporaryFileCounter++}.tmp`;
+  const temporaryPath = `${outputPath}.${
+    process.pid
+  }-${temporaryFileCounter++}.tmp`;
   try {
     const response = await axios.get(url, {
       responseType: 'stream',
@@ -24,10 +26,24 @@ const downloadLocalFile = async (url, outputPath) => {
     await new Promise((resolve, reject) => {
       const writer = fs.createWriteStream(temporaryPath);
       let error = null;
-      const onError = err => {
-        error = err;
-        writer.close();
+      let settled = false;
+
+      const rejectOnce = err => {
+        if (settled) return;
+        settled = true;
         reject(err);
+      };
+
+      const onError = err => {
+        if (error) return;
+        error = err;
+        if (typeof response.data.unpipe === 'function') {
+          response.data.unpipe(writer);
+        }
+        if (typeof response.data.destroy === 'function') {
+          response.data.destroy();
+        }
+        writer.close(() => rejectOnce(err));
       };
       // Watch for errors on the response stream too: they are not forwarded
       // to the writer by `pipe`, and would otherwise leave the promise
@@ -35,19 +51,21 @@ const downloadLocalFile = async (url, outputPath) => {
       response.data.on('error', onError);
       writer.on('error', onError);
       writer.on('close', () => {
-        if (!error) {
+        if (!error && !settled) {
+          settled = true;
           resolve(undefined);
+        } else if (error) {
+          rejectOnce(error);
         }
-
-        // No need to call `reject` here, as it will have been called in the
-        // 'error' callback.
       });
       response.data.pipe(writer);
     });
 
     await fs.promises.rename(temporaryPath, outputPath);
   } catch (error) {
-    await fs.promises.unlink(temporaryPath).catch(() => {});
+    await fs.promises
+      .rm(temporaryPath, { force: true, maxRetries: 3, retryDelay: 50 })
+      .catch(() => {});
     throw error;
   }
 };
