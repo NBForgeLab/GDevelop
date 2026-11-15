@@ -258,6 +258,126 @@ describe('update-bindings.js (patchGlueCppContent & patchGlueCppFile)', () => {
         'void EMSCRIPTEN_KEEPALIVE keptAfterSingleLineFn() {}'
       );
     });
+
+    it('erases multi-line class and function blocks whose first line ends with an inner brace pair (1f)', () => {
+      const targetClass = DEFAULT_CLASSES_TO_ERASE[0];
+      const targetFn = DEFAULT_FUNCTIONS_TO_ERASE[0];
+      const raw = createValidGlueFixture()
+        .replace(
+          `class ${targetClass} : public ${targetClass}Wrapper {\npublic:\n  void invoke() {}\n};`,
+          [
+            `class ${targetClass} : public ${targetClass}Wrapper { struct Inner {};`,
+            'public:',
+            '  void leakedLineIfStoppedEarly() {}',
+            '  int shouldBeErasedToo = 42;',
+            '};',
+            'class KeptAfterNestedFirstLineClass {};',
+          ].join('\n')
+        )
+        .replace(
+          `void EMSCRIPTEN_KEEPALIVE ${targetFn}(void* self, const char* arg0) {\n  // erased body\n}`,
+          [
+            `void EMSCRIPTEN_KEEPALIVE ${targetFn}(void* self, const char* arg0) { if (self) { noop(); }`,
+            '  shouldAlsoBeErased(arg0);',
+            '  if (arg0) { cleanup(); }',
+            '}',
+            'void EMSCRIPTEN_KEEPALIVE keptAfterNestedFirstLineFn() {}',
+          ].join('\n')
+        );
+
+      const { patchedContent } = patchGlueCppContent(raw);
+
+      expect(patchedContent).not.toContain(`class ${targetClass}`);
+      expect(patchedContent).not.toContain('leakedLineIfStoppedEarly');
+      expect(patchedContent).not.toContain('shouldBeErasedToo');
+      expect(patchedContent).toContain(
+        'class KeptAfterNestedFirstLineClass {};'
+      );
+      expect(patchedContent).not.toContain(targetFn);
+      expect(patchedContent).not.toContain('shouldAlsoBeErased');
+      expect(patchedContent).toContain(
+        'void EMSCRIPTEN_KEEPALIVE keptAfterNestedFirstLineFn() {}'
+      );
+    });
+
+    it('erases single-line blocks ending with comments without swallowing subsequent declarations (1g)', () => {
+      const targetClass = DEFAULT_CLASSES_TO_ERASE[0];
+      const targetFn = DEFAULT_FUNCTIONS_TO_ERASE[0];
+      const raw = createValidGlueFixture()
+        .replace(
+          `class ${targetClass} : public ${targetClass}Wrapper {\npublic:\n  void invoke() {}\n};`,
+          `class ${targetClass} {}; // single-line class { trailing comment\nclass KeptAfterCommentedSingleLineClass {};`
+        )
+        .replace(
+          `void EMSCRIPTEN_KEEPALIVE ${targetFn}(void* self, const char* arg0) {\n  // erased body\n}`,
+          `void EMSCRIPTEN_KEEPALIVE ${targetFn}(void* self, const char* arg0) { return; } // comment {\nvoid EMSCRIPTEN_KEEPALIVE keptAfterCommentedSingleLineFn() {}`
+        );
+
+      const { patchedContent } = patchGlueCppContent(raw);
+
+      expect(patchedContent).not.toContain(`class ${targetClass}`);
+      expect(patchedContent).toContain(
+        'class KeptAfterCommentedSingleLineClass {};'
+      );
+      expect(patchedContent).not.toContain(targetFn);
+      expect(patchedContent).toContain(
+        'void EMSCRIPTEN_KEEPALIVE keptAfterCommentedSingleLineFn() {}'
+      );
+    });
+
+    it('ignores braces inside single-line comments, multi-line block comments, strings, and char literals inside erased blocks (1h)', () => {
+      const targetClass = DEFAULT_CLASSES_TO_ERASE[0];
+      const targetFn = DEFAULT_FUNCTIONS_TO_ERASE[0];
+      const raw = createValidGlueFixture()
+        .replace(
+          `class ${targetClass} : public ${targetClass}Wrapper {\npublic:\n  void invoke() {}\n};`,
+          [
+            `class ${targetClass} : public ${targetClass}Wrapper`,
+            '{',
+            'public:',
+            '  /* multi-line comment with fake closing braces } };',
+            `     and even a commented target line:\nclass ${DEFAULT_CLASSES_TO_ERASE[1]} {};`,
+            '     and quotes " } \' */',
+            '  void invoke() {',
+            '    EM_ASM_INT({',
+            "      var msg = 'single quoted } and \\' } \\\\';",
+            '      var str = "escaped \\" } \\" and \\\\";',
+            '      var spliced = "line \\',
+            '} still inside string";',
+            '    }, 0);',
+            '  }',
+            '  }; // closing class with indentation and comment',
+            'class KeptAfterComplexErasedClass {};',
+          ].join('\n')
+        )
+        .replace(
+          `void EMSCRIPTEN_KEEPALIVE ${targetFn}(void* self, const char* arg0) {\n  // erased body\n}`,
+          [
+            `void EMSCRIPTEN_KEEPALIVE ${targetFn}(void* self, const char* arg0) {`,
+            '  // line comment with unmatched } and {',
+            '  /* inline comment } */ const char* a = "/* } */ // }";',
+            "  char openBrace = '{'; char closeBrace = '}'; char escQuote = '\\''; char escSlash = '\\\\';",
+            '  /* multi-line comment',
+            '     } fake function end',
+            '  */',
+            '  if (self) { /* } */ return; } // } comment',
+            '} /* trailing block comment */',
+            'void EMSCRIPTEN_KEEPALIVE keptAfterComplexErasedFn() {}',
+          ].join('\n')
+        );
+
+      const { patchedContent } = patchGlueCppContent(raw);
+
+      expect(patchedContent).not.toContain(`class ${targetClass}`);
+      expect(patchedContent).not.toContain('EM_ASM_INT');
+      expect(patchedContent).not.toContain('still inside string');
+      expect(patchedContent).toContain('class KeptAfterComplexErasedClass {};');
+      expect(patchedContent).not.toContain(targetFn);
+      expect(patchedContent).not.toContain('escQuote');
+      expect(patchedContent).toContain(
+        'void EMSCRIPTEN_KEEPALIVE keptAfterComplexErasedFn() {}'
+      );
+    });
   });
 
   describe('patchGlueCppContent fail-fast assertions', () => {
@@ -306,6 +426,31 @@ describe('update-bindings.js (patchGlueCppContent & patchGlueCppFile)', () => {
         `\nvoid EMSCRIPTEN_KEEPALIVE ${DEFAULT_FUNCTIONS_TO_ERASE[0]}(void* self) {\n  // missing closing brace`;
       expect(() => patchGlueCppContent(raw)).toThrow(
         `Unclosed function block at end of glue.cpp while erasing "${DEFAULT_FUNCTIONS_TO_ERASE[0]}"`
+      );
+    });
+
+    it('throws when closing braces only appear inside comments or strings before EOF', () => {
+      const onlyInCommentOrString =
+        createValidGlueFixture() +
+        `\nvoid EMSCRIPTEN_KEEPALIVE ${DEFAULT_FUNCTIONS_TO_ERASE[0]}(void* self) {\n  const char* s = "}";\n  /* } */\n  // }`;
+      expect(() => patchGlueCppContent(onlyInCommentOrString)).toThrow(
+        `Unclosed function block at end of glue.cpp while erasing "${DEFAULT_FUNCTIONS_TO_ERASE[0]}"`
+      );
+
+      const headerWithoutOpeningBrace =
+        createValidGlueFixture() +
+        `\nclass ${DEFAULT_CLASSES_TO_ERASE[0]} : public Wrapper`;
+      expect(() => patchGlueCppContent(headerWithoutOpeningBrace)).toThrow(
+        `Unclosed class block at end of glue.cpp while erasing "${DEFAULT_CLASSES_TO_ERASE[0]}"`
+      );
+    });
+
+    it('throws when an erased block encounters a closing brace before its opening brace', () => {
+      const raw =
+        createValidGlueFixture() +
+        `\nclass ${DEFAULT_CLASSES_TO_ERASE[0]} : public Wrapper\n};`;
+      expect(() => patchGlueCppContent(raw)).toThrow(
+        `Unexpected closing brace while erasing class "${DEFAULT_CLASSES_TO_ERASE[0]}"`
       );
     });
 
