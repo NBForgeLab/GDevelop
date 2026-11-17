@@ -8,7 +8,7 @@ import { findGDJS } from '../../GameEngineFinder/LocalGDJSFinder';
 import LocalFileSystem, { type UrlFileDescriptor } from './LocalFileSystem';
 import LocalFolderPicker from '../../UI/LocalFolderPicker';
 import assignIn from 'lodash/assignIn';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import {
   type ExportFlowProps,
   type ExportPipeline,
@@ -20,11 +20,6 @@ import {
   ExportFlow,
 } from '../GenericExporters/CordovaExport';
 import { downloadUrlsToLocalFiles } from '../../Utils/LocalFileDownloader';
-// It's important to use remote and not electron for folder actions,
-// otherwise they will be opened in the background.
-// See https://github.com/electron/electron/issues/4349#issuecomment-777475765
-const remote = optionalRequire('@electron/remote');
-const shell = remote ? remote.shell : null;
 
 const gd: libGDevelop = global.gd;
 
@@ -120,6 +115,10 @@ export const localCordovaExportPipeline: ExportPipeline<
     { exporter, localFileSystem }: PreparedExporter,
     fallbackAuthor: ?{ id: string, username: string }
   ): Promise<ExportOutput> => {
+    await DesktopService.requestFileAccess(context.exportState.outputDir, {
+      write: true,
+      directory: true,
+    });
     const exportOptions = new gd.ExportOptions(
       context.project,
       context.exportState.outputDir
@@ -170,7 +169,7 @@ export const localCordovaExportPipeline: ExportPipeline<
 
   renderDoneFooter: ({ exportState }) => {
     const openExportFolder = () => {
-      if (shell) shell.openPath(exportState.outputDir);
+      DesktopService.openPath(exportState.outputDir);
     };
 
     return (

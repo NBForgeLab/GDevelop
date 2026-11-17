@@ -20,10 +20,7 @@ import {
 import { getIDEVersion } from '../../Version';
 import { type OpenAskAiOptions } from '../../AiGeneration/Utils';
 import Window from '../../Utils/Window';
-import optionalRequire from '../../Utils/OptionalRequire';
-
-const electron = optionalRequire('electron');
-const ipcRenderer = electron ? electron.ipcRenderer : null;
+import DesktopService from '../../Utils/DesktopService';
 
 const makeProjectReady = (): {|
   promise: Promise<void>,
@@ -102,7 +99,7 @@ export const useMcpServers = ({
   const projectReadyRef = React.useRef(makeProjectReady());
   React.useEffect(
     () => {
-      if (!ipcRenderer) return;
+      if (!DesktopService.isDesktop()) return;
       const appArguments = Window.getArguments();
       if (!appArguments['mcp']) return;
       const projectReady = projectReadyRef.current;
@@ -122,14 +119,18 @@ export const useMcpServers = ({
           },
         },
         send: text => {
-          if (ipcRenderer) ipcRenderer.send('mcp-send', text);
+          DesktopService.mcp.sendCliResponse(text);
         },
       });
-      const onMcpMessageEvent = (event: any, line: string) =>
-        onMcpMessage(line);
-      ipcRenderer.on('mcp-message', onMcpMessageEvent);
-      ipcRenderer.send('mcp-ready');
-      return () => ipcRenderer.removeListener('mcp-message', onMcpMessageEvent);
+      const onMcpMessageEvent = (line: string) => onMcpMessage(line);
+      const unsubscribe = DesktopService.onIpcEvent(
+        'mcp-message',
+        onMcpMessageEvent
+      );
+      DesktopService.mcp.ready();
+      return () => {
+        unsubscribe();
+      };
     },
     [makeHandlers, lookupTools]
   );
@@ -150,12 +151,15 @@ export const useMcpServers = ({
 
   React.useEffect(
     () => {
-      if (!ipcRenderer) return;
+      if (!DesktopService.isDesktop()) return;
       const sessionQueues: Map<string, (line: string) => void> = new Map();
-      const onLiveMcpMessage = (
-        event: any,
-        { sessionId, line }: {| sessionId: string, line: string |}
-      ) => {
+      const onLiveMcpMessage = ({
+        sessionId,
+        line,
+      }: {|
+        sessionId: string,
+        line: string,
+      |}) => {
         let onMessage = sessionQueues.get(sessionId);
         if (!onMessage) {
           onMessage = makeMcpMessagesQueue({
@@ -165,29 +169,31 @@ export const useMcpServers = ({
               serverTools: liveServerTools,
             },
             send: text => {
-              if (ipcRenderer)
-                ipcRenderer.send('mcp-live-send', { sessionId, text });
+              DesktopService.mcp.sendLiveResponse({ sessionId, text });
             },
           });
           sessionQueues.set(sessionId, onMessage);
         }
         onMessage(line);
       };
-      const onLiveMcpSessionClosed = (
-        event: any,
-        { sessionId }: {| sessionId: string |}
-      ) => {
+      const onLiveMcpSessionClosed = ({
+        sessionId,
+      }: {|
+        sessionId: string,
+      |}) => {
         sessionQueues.delete(sessionId);
       };
-      ipcRenderer.on('mcp-live-message', onLiveMcpMessage);
-      ipcRenderer.on('mcp-live-session-closed', onLiveMcpSessionClosed);
+      const unsubscribeMessage = DesktopService.onIpcEvent(
+        'mcp-live-message',
+        onLiveMcpMessage
+      );
+      const unsubscribeClosed = DesktopService.onIpcEvent(
+        'mcp-live-session-closed',
+        onLiveMcpSessionClosed
+      );
       return () => {
-        if (!ipcRenderer) return;
-        ipcRenderer.removeListener('mcp-live-message', onLiveMcpMessage);
-        ipcRenderer.removeListener(
-          'mcp-live-session-closed',
-          onLiveMcpSessionClosed
-        );
+        unsubscribeMessage();
+        unsubscribeClosed();
       };
     },
     [makeHandlers, liveServerTools]

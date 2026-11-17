@@ -1,5 +1,6 @@
 const electron = require('electron');
 const { app, Menu, ipcMain } = electron;
+const { isSafeExternalUrl } = require('./DesktopIpcHandlers');
 const package = require('./package.json');
 
 /**
@@ -22,7 +23,13 @@ const buildElectronMenuFromDeclarativeTemplate = (window, mainMenuTemplate) => {
         ...menuItemTemplate,
         click: hasOnClick
           ? function() {
-              if (menuItemTemplate.onClickSendEvent) {
+              if (
+                menuItemTemplate.onClickSendEvent &&
+                window &&
+                !window.isDestroyed() &&
+                window.webContents &&
+                !window.webContents.isDestroyed()
+              ) {
                 if (args)
                   window.webContents.send(
                     menuItemTemplate.onClickSendEvent,
@@ -31,7 +38,10 @@ const buildElectronMenuFromDeclarativeTemplate = (window, mainMenuTemplate) => {
                 else window.webContents.send(menuItemTemplate.onClickSendEvent);
               }
 
-              if (menuItemTemplate.onClickOpenLink) {
+              if (
+                menuItemTemplate.onClickOpenLink &&
+                isSafeExternalUrl(menuItemTemplate.onClickOpenLink)
+              ) {
                 electron.shell.openExternal(menuItemTemplate.onClickOpenLink);
               }
             }

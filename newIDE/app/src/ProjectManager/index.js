@@ -111,14 +111,12 @@ import ProjectManagerMainMenu from './ProjectManagerMainMenu';
 import EmptyMessage from '../UI/EmptyMessage';
 import { ColumnStackLayout } from '../UI/Layout';
 import { isMacLike } from '../Utils/Platform';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import { useShouldAutofocusInput } from '../UI/Responsive/ScreenTypeMeasurer';
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
 import { useProjectItemsSelection } from './UseProjectItemsSelection';
 import { getProjectItemFoldersKind } from './ProjectItemFoldersKinds';
 import { useBulkProjectItemsOperations } from './UseBulkProjectItemsOperations';
-
-const electron = optionalRequire('electron');
 
 export const getProjectManagerItemId = (identifier: string): string =>
   `project-manager-tab-${identifier}`;
@@ -2002,7 +2000,7 @@ const ProjectManager = React.forwardRef<Props, ProjectManagerInterface>(
       setSelectedMainMenuItemIndices,
     ] = React.useState<Array<number>>([]);
     const isNavigatingInMainMenuItem = selectedMainMenuItemIndices.length > 0;
-    const shouldHideMainMenu = isMacLike() && !!electron;
+    const shouldHideMainMenu = isMacLike() && DesktopService.isDesktop();
 
     // Unselect items when the project manager is closed.
     React.useEffect(

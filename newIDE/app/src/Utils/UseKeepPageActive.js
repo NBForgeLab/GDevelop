@@ -1,10 +1,8 @@
 // @flow
 import * as React from 'react';
-import optionalRequire from './OptionalRequire';
+import DesktopService from './DesktopService';
 import { isNativeMobileApp } from './Platform';
 import { startNativeAppBackgroundWork } from './NativeAppLifecycle';
-
-const electron = optionalRequire('electron');
 
 /**
  * Browsers stop `requestAnimationFrame` and throttle timers in a hidden
@@ -122,7 +120,7 @@ const stopKeepingPageActive = () => {
 export const useKeepPageActive = (shouldKeepPageActive: boolean) => {
   React.useEffect(
     () => {
-      if (electron) return;
+      if (DesktopService.isDesktop()) return;
       if (!shouldKeepPageActive) return;
 
       if (isNativeMobileApp()) {

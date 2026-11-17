@@ -1,7 +1,5 @@
 // @flow
-import optionalRequire from './OptionalRequire';
-const electron = optionalRequire('electron');
-const ipcRenderer = electron ? electron.ipcRenderer : null;
+import DesktopService from './DesktopService';
 
 export type ClipboardKind = string;
 
@@ -24,8 +22,8 @@ export default class Clipboard {
       content: object,
     });
 
-    if (ipcRenderer) {
-      ipcRenderer.sendSync('clipboard-write-text', text);
+    if (DesktopService.isDesktop()) {
+      DesktopService.writeClipboardText(text);
     } else {
       internalClipboard = text;
     }
@@ -39,8 +37,8 @@ export default class Clipboard {
    */
   static has(kind: ClipboardKind): boolean {
     let text = '';
-    if (ipcRenderer) {
-      text = ipcRenderer.sendSync('clipboard-read-text');
+    if (DesktopService.isDesktop()) {
+      text = DesktopService.readClipboardText();
     } else {
       text = internalClipboard;
     }
@@ -59,8 +57,8 @@ export default class Clipboard {
     if (!Clipboard.has(kind)) return null;
 
     let text = '';
-    if (ipcRenderer) {
-      text = ipcRenderer.sendSync('clipboard-read-text');
+    if (DesktopService.isDesktop()) {
+      text = DesktopService.readClipboardText();
     } else {
       text = internalClipboard;
     }

@@ -139,7 +139,7 @@ import {
 import { type ResourceExternalEditor } from '../ResourcesList/ResourceExternalEditor';
 import { type JsExtensionsLoader } from '../JsExtensionsLoader';
 import EventsFunctionsExtensionsContext from '../EventsFunctionsExtensionsLoader/EventsFunctionsExtensionsContext';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import {
   getElectronUpdateNotificationTitle,
   getElectronUpdateNotificationBody,
@@ -316,9 +316,6 @@ import { useInGameEditorSettings } from '../EmbeddedGame/InGameEditorSettings';
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
 import { useAutomatedRegularInGameEditorRestart } from '../EmbeddedGame/UseAutomatedRegularInGameEditorRestart';
 import isUserTyping from '../KeyboardShortcuts/IsUserTyping';
-
-const electron = optionalRequire('electron');
-const ipcRendererForUpdates = electron ? electron.ipcRenderer : null;
 
 const GD_STARTUP_TIMES = global.GD_STARTUP_TIMES || [];
 
@@ -5688,8 +5685,7 @@ const MainFrame = (props: Props): React.MixedElement => {
         { body: i18n._(t`Click to restart and install the update now.`) }
       );
       restartNotification.onclick = () => {
-        if (ipcRendererForUpdates)
-          ipcRendererForUpdates.send('updates-install-and-quit');
+        DesktopService.updates.installAndQuit();
       };
     } else {
       const notificationTitle = getElectronUpdateNotificationTitle(

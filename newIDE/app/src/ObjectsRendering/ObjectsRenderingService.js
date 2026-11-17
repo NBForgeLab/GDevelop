@@ -17,14 +17,13 @@ import Rendered3DInstance from './Renderers/Rendered3DInstance';
 import * as PIXI from 'pixi.js-legacy';
 import * as THREE from 'three';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import {
   rgbOrHexToHexNumber,
   hexNumberToRGBArray,
 } from '../Utils/ColorTransformer';
 
-const path = optionalRequire('path');
-const electron = optionalRequire('electron');
+const path = DesktopService.getPath();
 const gd: libGDevelop = global.gd;
 // Some PixiJS plugins like pixi-tilemap are not distributed as UMD modules,
 // or still require a global PIXI object to be accessible, so we expose PIXI here.
@@ -225,32 +224,32 @@ const ObjectsRenderingService = {
     requirableModules[requirePath] = module;
   },
   /**
-   * Require a module, that was either registered using `registerModule` (i.e: on the web-app), or from
-   * the specified path (if `optionalRequire` can find the file, i.e: on the electron app).
+   * Require a module that was registered using `registerModule` (used by
+   * `BrowserJsExtensionsLoader`), or load dynamically from disk when running
+   * inside a Node.js script with `global.require` (e.g. extraction scripts).
    */
   requireModule: function(requireBasePath: string, requirePath: string): ?any {
-    // On Electron, where modules can be required at runtime from files, require the
-    // file, relative to the base path.
-    if (electron && path) {
+    // $FlowFixMe[invalid-computed-prop]
+    if (requirableModules[requirePath]) return requirableModules[requirePath];
+
+    // Node.js script fallback (when LocalJsExtensionsLoader is used outside Electron renderer):
+    if (
+      typeof global !== 'undefined' &&
+      typeof global.require === 'function' &&
+      path
+    ) {
       const originalRequiredModulePath = path.join(
         requireBasePath,
         requirePath
       );
-
-      // Get the "module" module from Node.js and temporarily overwrite its internal "_load"
-      // method. This method is called when a module is loaded, and is used here to provide "pixi.js-legacy"
-      // to extensions needing it. If we don't, "pixi.js-legacy" is found in development, because Node.js resolution
-      // algorithm traverses the paths until it reaches newIDE/app/node_modules, but is not found in production,
-      // because newIDE/app node_modules are now gone (compiled by Webpack).
-      const module = optionalRequire('module');
-      if (!module._load) {
+      const nodeModule = global.require('module');
+      if (!nodeModule._load) {
         throw new Error(
           'module._load does not exist. This is possibly a change in Node.js that is breaking the custom loader, in ObjectsRenderingService.requireModule, that is injected to expose Pixi.js to extensions using "require".'
         );
       }
-      const originalNodeModuleLoad = module._load;
+      const originalNodeModuleLoad = nodeModule._load;
 
-      // Allow pixi.js to be required by extensions:
       const allowedModules = {
         'pixi.js-legacy': PIXI,
         'pixi.js': PIXI,
@@ -262,7 +261,7 @@ const ObjectsRenderingService = {
         '@pixi/utils': PIXI,
         '@pixi/graphics': PIXI,
       };
-      module._load = function hookedLoader(request, parent, isMain) {
+      nodeModule._load = function hookedLoader(request, parent, isMain) {
         const loadedModule = allowedModules[request];
         if (loadedModule) return loadedModule;
 
@@ -274,10 +273,6 @@ const ObjectsRenderingService = {
 
         console.error(
           `A module ("${request}") was required from ${originalRequiredModulePath} but is not an allowed module or a relative file path starting with "./". null will be returned instead.`
-        );
-        console.warn(`Allowed modules are: `, Object.keys(allowedModules));
-        console.warn(
-          `Please use only allowed modules or a reference a local file.`
         );
         return null;
       };
@@ -293,20 +288,15 @@ const ObjectsRenderingService = {
         requiredModule = null;
       }
 
-      // Whatever the result, always restore the original "_load" in Node.js "module".
-      module._load = originalNodeModuleLoad;
+      nodeModule._load = originalNodeModuleLoad;
       return requiredModule;
-    } else {
-      // On the web-app, modules need to be registered manually.
-      // $FlowFixMe[invalid-computed-prop]
-      if (requirableModules[requirePath]) return requirableModules[requirePath];
-
-      console.error(
-        `Unable to load module "${requirePath}". Are you sure you registered it using ObjectsRenderingService.registerModule? This is mandatory for the web-app to have the file bundled.`
-      );
-
-      return null;
     }
+
+    console.error(
+      `Unable to load module "${requirePath}". Are you sure you registered it using ObjectsRenderingService.registerModule?`
+    );
+
+    return null;
   },
   rgbOrHexToHexNumber, // Expose a ColorTransformer function, useful to manage different color types for the extensions
   hexNumberToRGBArray, // Expose a ColorTransformer function, useful to manage different color types for the extensions

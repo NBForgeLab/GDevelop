@@ -61,7 +61,15 @@ const setupWatcher = (folderPath, fileWiseCallback, serializedOptions) => {
     .on('unlink', fileWiseCallback)
     .on('add', fileWiseCallback);
 
-  subscriptionCancelers[newSubscriptionId] = () => watcher.unwatch(folderPath);
+  subscriptionCancelers[newSubscriptionId] = () => {
+    const closePromise = watcher.close();
+    if (closePromise && typeof closePromise.catch === 'function') {
+      return closePromise.catch(error => {
+        console.error('Error closing filesystem watcher:', error);
+      });
+    }
+    return closePromise;
+  };
 
   return newSubscriptionId;
 };
@@ -72,8 +80,9 @@ const disableWatcher = id => {
     console.log('No watcher subscription to disable.');
     return;
   }
-  subscriptionCanceler();
+  const cancelPromise = subscriptionCanceler();
   delete subscriptionCancelers[id];
+  return cancelPromise;
 };
 
 module.exports = {

@@ -1,10 +1,8 @@
 // @flow
-import optionalRequire from './OptionalRequire';
-const fs = optionalRequire('fs');
+import DesktopService from './DesktopService';
+const fs = DesktopService.getFs();
 const fsPromises = fs ? fs.promises : null;
-const remote = optionalRequire('@electron/remote');
-const dialog = remote ? remote.dialog : null;
-const path = optionalRequire('path');
+const path = DesktopService.getPath();
 
 const lastUsedDialogDirectoryKey = 'gd-last-used-file-dialog-directory';
 
@@ -52,22 +50,20 @@ export const openFilePicker = ({
   message: string,
   filters: Array<{| name: string, extensions: Array<string> |}>,
 |}): any | Promise<> => {
-  if (!dialog) return Promise.reject('Not supported');
-  const browserWindow = remote.getCurrentWindow();
+  if (!DesktopService.isDesktop()) return Promise.reject('Not supported');
 
-  return dialog
-    .showOpenDialog(browserWindow, {
-      title,
-      properties,
-      message,
-      filters,
-      defaultPath: getLastUsedDialogDirectory(),
-    })
-    .then(({ filePaths }) => {
-      if (!filePaths || !filePaths.length) return null;
-      rememberLastUsedDialogDirectory(filePaths[0]);
-      return filePaths[0];
-    });
+  return DesktopService.showOpenDialog({
+    title,
+    properties,
+    message,
+    filters,
+    defaultPath: getLastUsedDialogDirectory(),
+  }).then(result => {
+    const filePaths = result ? result.filePaths : null;
+    if (!filePaths || !filePaths.length) return null;
+    rememberLastUsedDialogDirectory(filePaths[0]);
+    return filePaths[0];
+  });
 };
 
 export const openFilesPicker = ({
@@ -81,20 +77,18 @@ export const openFilesPicker = ({
   message: string,
   filters: Array<{| name: string, extensions: Array<string> |}>,
 |}): any | Promise<> => {
-  if (!dialog) return Promise.reject('Not supported');
-  const browserWindow = remote.getCurrentWindow();
+  if (!DesktopService.isDesktop()) return Promise.reject('Not supported');
 
-  return dialog
-    .showOpenDialog(browserWindow, {
-      title,
-      properties,
-      message,
-      filters,
-      defaultPath: getLastUsedDialogDirectory(),
-    })
-    .then(({ filePaths }) => {
-      if (filePaths && filePaths.length)
-        rememberLastUsedDialogDirectory(filePaths[0]);
-      return filePaths;
-    });
+  return DesktopService.showOpenDialog({
+    title,
+    properties,
+    message,
+    filters,
+    defaultPath: getLastUsedDialogDirectory(),
+  }).then(result => {
+    const filePaths = result ? result.filePaths : [];
+    if (filePaths && filePaths.length)
+      rememberLastUsedDialogDirectory(filePaths[0]);
+    return filePaths;
+  });
 };

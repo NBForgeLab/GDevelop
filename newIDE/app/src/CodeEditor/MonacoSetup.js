@@ -1,6 +1,7 @@
 // @flow
 import { setupAutocompletions } from './LocalCodeEditorAutocompletions';
 import { getAllThemes } from './Theme';
+import DesktopService from '../Utils/DesktopService';
 
 // Track which Monaco instances have been initialized.
 // A WeakSet works naturally with separate Monaco instances
@@ -169,22 +170,36 @@ export const applyElectronClipboardPatch = (editor: any, monaco: any) => {
     target.focus();
     const domNode: HTMLElement = target.getDomNode();
     const doc = domNode ? domNode.ownerDocument : document;
+    const win = doc ? doc.defaultView : null;
     const result = doc.execCommand('paste');
-    if (!result && navigator.clipboard) {
-      try {
-        const text = await navigator.clipboard.readText();
-        if (text) {
-          const selection = target.getSelection();
-          target.executeEdits('paste', [
-            {
-              range: selection,
-              text: text,
-              forceMoveMarkers: true,
-            },
-          ]);
+    if (!result) {
+      let text = '';
+      const clipboard =
+        (win && win.navigator && win.navigator.clipboard) ||
+        (typeof navigator !== 'undefined' ? navigator.clipboard : null);
+      if (clipboard) {
+        try {
+          text = await clipboard.readText();
+        } catch (e) {
+          // Document/permission clipboard read can fail in popped-out about:blank windows.
         }
-      } catch (e) {
-        // Clipboard read failed — ignore.
+      }
+      if (!text && DesktopService.isDesktop()) {
+        try {
+          text = DesktopService.readClipboardText();
+        } catch (e) {
+          // Ignore clipboard bridge errors.
+        }
+      }
+      if (text) {
+        const selection = target.getSelection();
+        target.executeEdits('paste', [
+          {
+            range: selection,
+            text: text,
+            forceMoveMarkers: true,
+          },
+        ]);
       }
     }
   };

@@ -13,7 +13,7 @@ import {
   type SaveAsOptions,
   type SaveProjectOptions,
 } from '../index';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import {
   getLastUsedDialogDirectory,
   rememberLastUsedDialogDirectory,
@@ -31,10 +31,8 @@ import {
   type ShowConfirmFunction,
 } from '../../UI/Alert/AlertContext';
 
-const fs = optionalRequire('fs-extra');
-const path = optionalRequire('path');
-const remote = optionalRequire('@electron/remote');
-const dialog = remote ? remote.dialog : null;
+const fs = DesktopService.getFs();
+const path = DesktopService.getPath();
 
 export const splittedProjectFolderNames = [
   'layouts',
@@ -49,19 +47,22 @@ const deleteExistingFilesFromDirs = (
 ) => {
   //If multiFile is not enabled in settings and directories do not exist.
   if (!project.isFolderProject()) return;
+  if (!fs || !path) return;
+  const localFs = fs;
+  const localPath = path;
 
-  const entries = fs.readdirSync(projectPath);
+  const entries = localFs.readdirSync(projectPath);
   entries.forEach(entry => {
     if (!splittedProjectFolderNames.includes(entry)) return;
 
-    const dirPath = path.join(projectPath, entry);
-    if (!fs.statSync(dirPath).isDirectory()) return;
+    const dirPath = localPath.join(projectPath, entry);
+    if (!localFs.statSync(dirPath).isDirectory()) return;
 
-    const filenames = fs.readdirSync(dirPath);
+    const filenames = localFs.readdirSync(dirPath);
     filenames.forEach(file => {
-      const fileToRemovePath = path.join(dirPath, file);
+      const fileToRemovePath = localPath.join(dirPath, file);
       try {
-        fs.unlinkSync(fileToRemovePath);
+        localFs.unlinkSync(fileToRemovePath);
       } catch (e) {
         throw new Error(`Unable to remove file ${file}: ${e.message}`);
       }
@@ -72,6 +73,7 @@ const deleteExistingFilesFromDirs = (
 const checkFileContent = (filePath: string, expectedContent: string) => {
   const time = performance.now();
   return new Promise((resolve, reject) => {
+    if (!fs) return reject(new Error('Filesystem is not supported.'));
     fs.readFile(filePath, { encoding: 'utf8' }, (err, content) => {
       if (err) return reject(err);
 
@@ -98,7 +100,7 @@ const writeAndCheckFile = async (
   content: string,
   filePath: string
 ): Promise<void> => {
-  if (!fs) throw new Error('Filesystem is not supported.');
+  if (!fs || !path) throw new Error('Filesystem is not supported.');
   if (content === '')
     throw new Error('The content to save on disk is empty. Aborting.');
 
@@ -129,6 +131,7 @@ const writeProjectFiles = async ({
   useBackgroundSerializer: boolean,
   canonicalEventSerialization: boolean,
 }): Promise<void> => {
+  await DesktopService.requestProjectAccess(filePath);
   const startTime = Date.now();
 
   let serializedProjectObject;
@@ -146,6 +149,8 @@ const writeProjectFiles = async ({
   const serializeEndTime = Date.now();
 
   if (project.isFolderProject()) {
+    if (!path) throw new Error('Desktop path is not available.');
+    const localPath = path;
     const partialObjects = split(serializedProjectObject, {
       pathSeparator: '/',
       getArrayItemReferenceName: getSlugifiedUniqueNameFromProperty('name'),
@@ -161,7 +166,7 @@ const writeProjectFiles = async ({
       partialObjects.map(partialObject => {
         return writeAndCheckFormattedJSONFile(
           partialObject.object,
-          path.join(projectPath, partialObject.reference) + '.json'
+          localPath.join(projectPath, partialObject.reference) + '.json'
         ).catch(err => {
           console.error('Unable to write a partial file:', err);
           throw err;
@@ -222,8 +227,10 @@ export const onSaveProject = async (
     lastModifiedDate: now,
   };
 
+  if (!path) throw new Error('Desktop path is not available.');
   const projectPath = path.dirname(filePath);
 
+  await DesktopService.requestProjectAccess(filePath);
   try {
     deleteExistingFilesFromDirs(project, projectPath);
   } catch (e) {
@@ -239,6 +246,7 @@ export const onSaveProject = async (
     canonicalEventSerialization:
       !!saveOptions && !!saveOptions.canonicalEventSerialization,
   });
+  DesktopService.setWindowProjectPath(filePath);
   return {
     wasSaved: true,
     // $FlowFixMe[incompatible-type]
@@ -303,16 +311,15 @@ export const generateOnChooseSaveProjectAsLocation = ({
     defaultPath = path.join(path.dirname(defaultPath), `${safeFilename}.json`);
   }
 
-  const browserWindow = remote.getCurrentWindow();
   const saveDialogOptions = {
     defaultPath: defaultPath || getLastUsedDialogDirectory(),
     filters: [{ name: 'GDevelop 5 project', extensions: ['json'] }],
   };
 
-  if (!dialog) {
+  if (!DesktopService.isDesktop()) {
     throw new Error('Unsupported');
   }
-  const filePath = dialog.showSaveDialogSync(browserWindow, saveDialogOptions);
+  const filePath = DesktopService.showSaveDialogSync(saveDialogOptions);
   if (!filePath) {
     return { saveAsLocation: null, saveAsOptions: null };
   }
@@ -351,6 +358,7 @@ export const onSaveProjectAs = async (
     throw new Error('A file path was not chosen before saving as.');
 
   options.onStartSaving();
+  await DesktopService.requestProjectAccess(filePath);
 
   // Ensure we always pick the latest name and gameId.
   const newFileMetadata = {
@@ -365,6 +373,7 @@ export const onSaveProjectAs = async (
   await options.onMoveResources({ newFileMetadata });
 
   // Save the project when resources have been copied.
+  if (!path) throw new Error('Desktop path is not available.');
   const projectPath = path.dirname(filePath);
   project.setProjectFile(filePath);
 
@@ -377,6 +386,7 @@ export const onSaveProjectAs = async (
     // through the normal onSaveProject path, which honors the preference.
     canonicalEventSerialization: false,
   });
+  DesktopService.setWindowProjectPath(filePath);
   return {
     wasSaved: true,
     // $FlowFixMe[incompatible-type]
@@ -421,16 +431,19 @@ export const getProjectLocation = ({
   saveAsLocation: ?SaveAsLocation,
   newProjectsDefaultFolder?: string,
 }): SaveAsLocation => {
-  const outputPath = saveAsLocation
-    ? path.dirname(saveAsLocation.fileIdentifier)
-    : newProjectsDefaultFolder
-    ? newProjectsDefaultFolder
-    : '';
+  const outputPath =
+    saveAsLocation && saveAsLocation.fileIdentifier && path
+      ? path.dirname(saveAsLocation.fileIdentifier)
+      : newProjectsDefaultFolder
+      ? newProjectsDefaultFolder
+      : '';
   const projectFileName = projectName
     ? cleanUpProjectFileName(projectName) + '.json'
     : 'game.json';
   return {
-    fileIdentifier: path.join(outputPath, projectFileName),
+    fileIdentifier: path
+      ? path.join(outputPath, projectFileName)
+      : projectFileName,
   };
 };
 
@@ -453,12 +466,18 @@ export const renderNewProjectSaveAsLocationChooser = ({
   return (
     <LocalFolderPicker
       fullWidth
-      value={path.dirname(projectLocation.fileIdentifier)}
+      value={
+        path && projectLocation.fileIdentifier
+          ? path.dirname(projectLocation.fileIdentifier)
+          : ''
+      }
       onChange={newOutputPath => {
-        const newOutputFileIdentifier = path.join(
-          newOutputPath,
-          path.basename(projectLocation.fileIdentifier)
-        );
+        const newOutputFileIdentifier = path
+          ? path.join(
+              newOutputPath,
+              path.basename(projectLocation.fileIdentifier || '')
+            )
+          : newOutputPath;
         setSaveAsLocation(
           getProjectLocation({
             projectName,
@@ -475,10 +494,10 @@ export const renderNewProjectSaveAsLocationChooser = ({
 };
 
 const isTryingToSaveInForbiddenPath = (filePath: string): boolean => {
-  if (!remote) return false; // This should not happen, but let's be safe.
+  if (!DesktopService.isDesktop() || !path) return false; // This should not happen, but let's be safe.
   // If the user is saving locally and chose the same location as where the
   // executable is running, prevent this, as it will be deleted when the app is updated.
-  const exePath = remote.app.getPath('exe');
+  const exePath = DesktopService.getAppPathSync('exe');
   if (!exePath) return false; // This should not happen, but let's be safe.
   const gdevelopDirectory = path.dirname(exePath);
   return filePath.startsWith(gdevelopDirectory);

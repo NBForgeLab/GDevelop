@@ -1,10 +1,10 @@
 // @flow
-import optionalRequire from './OptionalRequire';
-const os = optionalRequire('os');
+import DesktopService from './DesktopService';
 
 export const getUID = (): any | string => {
   try {
-    return os.userInfo().uid;
+    const userInfo = DesktopService.getUserInfo();
+    return userInfo ? userInfo.uid : '';
   } catch (e) {
     return '';
   }

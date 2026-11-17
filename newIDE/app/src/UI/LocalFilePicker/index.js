@@ -4,15 +4,12 @@ import { t } from '@lingui/macro';
 
 import * as React from 'react';
 import TextField from '../TextField';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import {
   getLastUsedDialogDirectory,
   rememberLastUsedDialogDirectory,
 } from '../../Utils/FileSystem';
 import FlatButton from '../FlatButton';
-const electron = optionalRequire('electron');
-const remote = optionalRequire('@electron/remote');
-const dialog = remote ? remote.dialog : null;
 
 const styles = {
   container: {
@@ -51,15 +48,15 @@ const LocalFilePicker = ({
   filters,
 }: Props): React.MixedElement => {
   const onChooseFolder = async () => {
-    if (!dialog || !electron) return;
+    if (!DesktopService.isDesktop()) return;
 
-    const browserWindow = remote.getCurrentWindow();
-    const { filePath } = await dialog.showSaveDialog(browserWindow, {
+    const result = await DesktopService.showSaveDialog({
       title: title,
       filters: filters,
       message: message,
       defaultPath: defaultPath || getLastUsedDialogDirectory(),
     });
+    const filePath = result ? result.filePath : '';
     if (filePath) rememberLastUsedDialogDirectory(filePath);
     onChange(filePath || '');
   };

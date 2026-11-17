@@ -25,7 +25,7 @@ import {
   checkIfHasTooManyCloudProjects,
   MaxProjectCountAlertMessage,
 } from '../MainFrame/EditorContainers/HomePage/CreateSection/MaxProjectCountAlertMessage';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import PreferencesContext from '../MainFrame/Preferences/PreferencesContext';
 import Checkbox from '../UI/Checkbox';
 import InAppTutorialContext from '../InAppTutorial/InAppTutorialContext';
@@ -64,10 +64,6 @@ import { isNativeMobileApp } from '../Utils/Platform';
 import { AskAiStandAloneForm } from '../AiGeneration/AskAiStandAloneForm';
 import { type OpenAskAiOptions } from '../AiGeneration/Utils';
 import { AiRequestContext } from '../AiGeneration/AiRequestContext';
-
-const electron = optionalRequire('electron');
-const remote = optionalRequire('@electron/remote');
-const app = remote ? remote.app : null;
 
 const ASK_AI_STANDALONE_FORM_DISMISSABLE_IDENTIFIER =
   'new-project-setup-dialog';
@@ -253,8 +249,8 @@ const NewProjectSetupDialog = ({
   const [optimizeForPixelArt, setOptimizeForPixelArt] = React.useState<boolean>(
     false
   );
-  const newProjectsDefaultFolder = app
-    ? findEmptyPathInWorkspaceFolder(app, values.newProjectsDefaultFolder || '')
+  const newProjectsDefaultFolder = DesktopService.isDesktop()
+    ? findEmptyPathInWorkspaceFolder(values.newProjectsDefaultFolder || '')
     : '';
   const [
     storageProviderForCreation,
@@ -451,7 +447,7 @@ const NewProjectSetupDialog = ({
   // On the web-app, allow to create a project without saving it, unless a private game template is selected
   // (as it requires to save the project to the cloud to be able to use it).
   const shouldAllowCreatingProjectWithoutSaving =
-    !electron && !selectedPrivateGameTemplateListingData;
+    !DesktopService.isDesktop() && !selectedPrivateGameTemplateListingData;
 
   const shouldAllowCreatingProject =
     !isLoading &&
@@ -866,7 +862,7 @@ const NewProjectSetupDialog = ({
                         disabled={availableStorageProvider.disabled}
                       />
                     ))}
-                  {!electron && !isNativeMobileApp() && (
+                  {!DesktopService.isDesktop() && !isNativeMobileApp() && (
                     <SelectOption
                       value={'FakeLocalFile'}
                       label={t`Save on your computer: download GDevelop desktop app`}

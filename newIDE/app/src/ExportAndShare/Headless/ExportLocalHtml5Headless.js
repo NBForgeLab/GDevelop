@@ -1,9 +1,9 @@
 // @flow
 import { type I18n as I18nType } from '@lingui/core';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import { localHTML5ExportPipeline } from '../LocalExporters/LocalHTML5Export';
 
-const path = optionalRequire('path');
+const path = DesktopService.getPath();
 
 const DEFAULT_BUILD_FOLDER_NAME = 'build';
 

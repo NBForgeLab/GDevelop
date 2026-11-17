@@ -9,11 +9,10 @@ import {
   type InAppTutorial,
 } from '../Utils/GDevelopServices/InAppTutorial';
 import { IN_APP_TUTORIALS_FETCH_TIMEOUT } from '../Utils/GlobalFetchTimeouts';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import Window from '../Utils/Window';
 import { openFilePicker, readJSONFile } from '../Utils/FileSystem';
 import { checkInAppTutorialFileJsonSchema } from './SchemaChecker';
-const electron = optionalRequire('electron');
 
 type Props = {| children: React.Node |};
 
@@ -95,7 +94,7 @@ const InAppTutorialProvider = (props: Props): React.Node => {
 
   const onLoadInAppTutorialFromLocalFile = React.useCallback(
     async () => {
-      if (!electron) {
+      if (!DesktopService.isDesktop()) {
         Window.showMessageBox(
           'This option is available on the desktop app only.'
         );

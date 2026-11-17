@@ -15,7 +15,7 @@ import { homepageDesktopMenuBarWidth } from '../EditorContainers/HomePage/HomePa
 import { themes } from '../../UI/Theme/ThemeRegistry';
 import { getAllThemes } from '../../CodeEditor/Theme';
 import Window from '../../Utils/Window';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import PreferencesContext, {
   type EditorMosaicName,
 } from './PreferencesContext';
@@ -73,7 +73,6 @@ import DebugIcon from '../../UI/CustomSvgIcons/Debug';
 import ProjectManagerIcon from '../../UI/CustomSvgIcons/ProjectManager';
 import Object3dIcon from '../../UI/CustomSvgIcons/Object3d';
 import Grid2dIcon from '../../UI/CustomSvgIcons/Grid2d';
-const electron = optionalRequire('electron');
 
 export type PreferencesSectionName =
   | 'general'
@@ -390,7 +389,7 @@ const PreferencesDialog = ({
   onClose,
   initialTab,
   initialSection,
-  isDesktop = !!electron,
+  isDesktop = DesktopService.isDesktop(),
   is3DRenderingSupported = isWebGL2Supported(),
 }: Props) => {
   const { isMobile } = useResponsiveWindowSize();

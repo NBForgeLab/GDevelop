@@ -10,7 +10,7 @@ import ResourcePropertiesEditor, {
 import Toolbar from './Toolbar';
 import EditorMosaic, { type EditorMosaicInterface } from '../UI/EditorMosaic';
 import ResourcesLoader from '../ResourcesLoader';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import AlertContext, { type ConfirmState } from '../UI/Alert/AlertContext';
 import PreferencesContext from '../MainFrame/Preferences/PreferencesContext';
 import {
@@ -28,12 +28,7 @@ import { showWarningBox } from '../UI/Messages/MessageBox';
 
 const gd: libGDevelop = global.gd;
 
-// It's important to use remote and not electron for folder actions,
-// otherwise they will be opened in the background.
-// See https://github.com/electron/electron/issues/4349#issuecomment-777475765
-const remote = optionalRequire('@electron/remote');
-const shell = remote ? remote.shell : null;
-const path = optionalRequire('path');
+const path = DesktopService.getPath();
 const styles = {
   container: {
     display: 'flex',
@@ -109,7 +104,7 @@ export default class ResourcesEditor extends React.Component<Props, State> {
       <Toolbar
         onOpenProjectFolder={this.openProjectFolder}
         canOpenProjectFolder={
-          !!remote &&
+          DesktopService.isDesktop() &&
           !!this.props.fileMetadata &&
           this.props.storageProvider.internalName === 'LocalFile'
         }
@@ -275,8 +270,8 @@ export default class ResourcesEditor extends React.Component<Props, State> {
   };
 
   openProjectFolder = () => {
-    if (shell)
-      shell.openPath(path.dirname(this.props.project.getProjectFile()));
+    if (!path) return;
+    DesktopService.openPath(path.dirname(this.props.project.getProjectFile()));
   };
 
   toggleProperties = () => {

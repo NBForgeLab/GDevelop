@@ -13,7 +13,7 @@ import {
 import {} from '../Utils/GDevelopServices/Asset';
 import { ResourceStore } from '../AssetStore/ResourceStore';
 import { isPathInProjectFolder, copyAllToProjectFolder } from './ResourceUtils';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import Window from '../Utils/Window';
 import {
   copyAllEmbeddedResourcesToProjectFolder,
@@ -28,9 +28,7 @@ import { FileToCloudProjectResourceUploader } from './FileToCloudProjectResource
 import { DialogPrimaryButton } from '../UI/Dialog';
 import ProjectResourcesChooser from './ProjectResources/ProjectResourcesChooser';
 
-const remote = optionalRequire('@electron/remote');
-const dialog = remote ? remote.dialog : null;
-const path = optionalRequire('path');
+const path = DesktopService.getPath();
 
 const ResourceStoreChooser = ({
   options,
@@ -68,18 +66,23 @@ const localResourceSources: Array<ResourceSource> = [
         options,
         resourcesImporationBehavior,
       }: ChooseResourceProps) => {
-        if (!dialog)
+        if (!DesktopService.isDesktop())
           throw new Error('Electron dialog not supported in this environment.');
+        if (!path)
+          throw new Error(
+            'Path utilities are not available in this environment.'
+          );
 
         const properties = ['openFile'];
         if (options.multiSelection) properties.push('multiSelections');
 
-        const projectPath = path.dirname(project.getProjectFile());
+        if (!path) return [];
+        const localPath = path;
+        const projectPath = localPath.dirname(project.getProjectFile());
         // $FlowFixMe[incompatible-type]
         const latestPath = getLastUsedPath(project, kind) || projectPath;
 
-        const browserWindow = remote.getCurrentWindow();
-        let { filePaths } = await dialog.showOpenDialog(browserWindow, {
+        const openDialogResult = await DesktopService.showOpenDialog({
           title: i18n._(t`Choose a file`),
           properties,
           filters: [
@@ -87,9 +90,10 @@ const localResourceSources: Array<ResourceSource> = [
           ],
           defaultPath: latestPath,
         });
+        let filePaths = openDialogResult ? openDialogResult.filePaths : null;
         if (!filePaths || !filePaths.length) return [];
 
-        const lastUsedPath = path.parse(filePaths[0]).dir;
+        const lastUsedPath = localPath.parse(filePaths[0]).dir;
         // $FlowFixMe[incompatible-type]
         setLastUsedPath(project, kind, lastUsedPath);
 
@@ -189,10 +193,10 @@ const localResourceSources: Array<ResourceSource> = [
         return filePaths.map(filePath => {
           const newResource = createNewResource();
           newResource.setFile(
-            path.relative(projectPath, filePath).replace(/\\/g, '/')
+            localPath.relative(projectPath, filePath).replace(/\\/g, '/')
           );
           newResource.setName(
-            path.relative(projectPath, filePath).replace(/\\/g, '/')
+            localPath.relative(projectPath, filePath).replace(/\\/g, '/')
           );
 
           const filePathWithMapping = newToOldFilePaths.has(filePath)
@@ -337,7 +341,9 @@ const localResourceSources: Array<ResourceSource> = [
               const chosenResourceUrl = resource.url;
               const newResource = source.createNewResource();
               newResource.setFile(chosenResourceUrl);
-              newResource.setName(path.basename(chosenResourceUrl));
+              newResource.setName(
+                path ? path.basename(chosenResourceUrl) : chosenResourceUrl
+              );
               newResource.setOrigin('gdevelop-asset-store', chosenResourceUrl);
 
               onChooseResources({

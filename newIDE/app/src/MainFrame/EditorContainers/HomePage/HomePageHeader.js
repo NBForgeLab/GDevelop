@@ -8,7 +8,7 @@ import { Column, Line } from '../../../UI/Grid';
 import { LineStackLayout } from '../../../UI/Layout';
 import UserChip from '../../../UI/User/UserChip';
 import Window from '../../../Utils/Window';
-import optionalRequire from '../../../Utils/OptionalRequire';
+import DesktopService from '../../../Utils/DesktopService';
 import TextButton from '../../../UI/TextButton';
 import IconButton from '../../../UI/IconButton';
 import { isNativeMobileApp } from '../../../Utils/Platform';
@@ -20,7 +20,6 @@ import Desktop from '../../../UI/CustomSvgIcons/Desktop';
 import HistoryIcon from '../../../UI/CustomSvgIcons/History';
 import AuthenticatedUserContext from '../../../Profile/AuthenticatedUserContext';
 import { type FileMetadata } from '../../../ProjectsStorage';
-const electron = optionalRequire('electron');
 
 type Props = {|
   hasProject: boolean,
@@ -77,7 +76,7 @@ export const HomePageHeader = ({
           </Column>
           <Column>
             <LineStackLayout noMargin alignItems="center">
-              {!electron &&
+              {!DesktopService.isDesktop() &&
                 !isNativeMobileApp() &&
                 (isMobile ? (
                   <IconButton

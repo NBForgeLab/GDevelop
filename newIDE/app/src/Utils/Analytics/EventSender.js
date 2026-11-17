@@ -12,7 +12,7 @@ import { getIDEVersion, getIDEVersionWithHash } from '../../Version';
 import { loadPreferencesFromLocalStorage } from '../../MainFrame/Preferences/PreferencesProvider';
 import { getBrowserLanguageOrLocale } from '../Language';
 import { type SubscriptionAnalyticsMetadata } from '../../Profile/Subscription/SubscriptionContext';
-import optionalRequire from '../OptionalRequire';
+import DesktopService from '../DesktopService';
 import Window from '../Window';
 import {
   isMobile,
@@ -23,9 +23,8 @@ import {
 import { retryIfFailed } from '../RetryIfFailed';
 import { type NewProjectCreationSource } from '../../ProjectCreation/NewProjectSetupDialog';
 import { isServiceWorkerSupported } from '../../ServiceWorkerSetup';
-const electron = optionalRequire('electron');
 
-const isElectronApp = !!electron;
+const isElectronApp = DesktopService.isDesktop();
 const isDev = Window.isDev();
 
 // Flag helpful to know if posthog is ready to send events.

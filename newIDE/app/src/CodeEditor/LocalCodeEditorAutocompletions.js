@@ -1,8 +1,8 @@
 //@flow
 import { findGDJS } from '../GameEngineFinder/LocalGDJSFinder';
-import optionalRequire from '../Utils/OptionalRequire';
-const fs = optionalRequire('fs');
-const path = optionalRequire('path');
+import DesktopService from '../Utils/DesktopService';
+const fs = DesktopService.getFs();
+const path = DesktopService.getPath();
 
 // Avoid conflicts in declaration of PIXI and THREE namespaces.
 const excludedFiles = [
@@ -15,8 +15,12 @@ const excludedFiles = [
 ];
 
 export const setupAutocompletions = (monaco: any): Promise<void> => {
+  if (!fs || !path) return Promise.resolve();
+  const localFs = fs;
+  const localPath = path;
+
   const importAllJsFilesFromFolder = (folderPath: string) =>
-    fs.readdir(folderPath, (error: ?Error, filenames: Array<string>) => {
+    localFs.readdir(folderPath, (error: ?Error, filenames: Array<string>) => {
       if (error) {
         console.error(
           'Unable to read GDJS files for setting up autocompletions:',
@@ -26,8 +30,8 @@ export const setupAutocompletions = (monaco: any): Promise<void> => {
       }
 
       filenames.forEach(filename => {
-        const isDirectory = fs
-          .lstatSync(path.join(folderPath, filename))
+        const isDirectory = localFs
+          .lstatSync(localPath.join(folderPath, filename))
           .isDirectory();
         if (
           (filename.endsWith('.ts') ||
@@ -37,8 +41,8 @@ export const setupAutocompletions = (monaco: any): Promise<void> => {
           // Dialogue tree uses a folder called `bondage.js` that should not be read as a file.
           !isDirectory
         ) {
-          const fullPath = path.join(folderPath, filename);
-          fs.readFile(fullPath, 'utf8', (fileError, content) => {
+          const fullPath = localPath.join(folderPath, filename);
+          localFs.readFile(fullPath, 'utf8', (fileError, content) => {
             if (fileError) {
               console.error(
                 `Unable to read ${fullPath} for setting up autocompletions:`,
@@ -58,7 +62,7 @@ export const setupAutocompletions = (monaco: any): Promise<void> => {
 
   // $FlowFixMe[recursive-definition]
   const importAllJsFilesFromFolderRecursively = (folderPath: string) =>
-    fs.readdir(folderPath, (error: ?Error, filenames: Array<string>) => {
+    localFs.readdir(folderPath, (error: ?Error, filenames: Array<string>) => {
       if (error) {
         console.error(
           'Unable to read GDJS files for setting up autocompletions:',
@@ -68,12 +72,12 @@ export const setupAutocompletions = (monaco: any): Promise<void> => {
       }
 
       filenames.forEach(filename => {
-        const fullPath = path.join(folderPath, filename);
-        const isDirectory = fs.lstatSync(fullPath).isDirectory();
+        const fullPath = localPath.join(folderPath, filename);
+        const isDirectory = localFs.lstatSync(fullPath).isDirectory();
         if (isDirectory) {
           importAllJsFilesFromFolderRecursively(fullPath);
         } else if (filename.endsWith('.ts') || filename.endsWith('.js')) {
-          fs.readFile(fullPath, 'utf8', (fileError, content) => {
+          localFs.readFile(fullPath, 'utf8', (fileError, content) => {
             if (fileError) {
               console.error(
                 `Unable to read ${fullPath} for setting up autocompletions:`,
@@ -100,24 +104,27 @@ export const setupAutocompletions = (monaco: any): Promise<void> => {
     // We could also use the TypeScript compiler to emit .d.ts files when building GDJS,
     // but this would make TypeScript slower (at least 2x slower) and we would still need
     // to copy and read an equivalent number of files.
-    const runtimePath = path.join(gdjsRoot, 'Runtime-sources');
-    const runtimeTypesPath = path.join(runtimePath, 'types');
-    const runtimeLibsPath = path.join(runtimePath, 'libs');
-    const runtimePixiRenderersPath = path.join(runtimePath, 'pixi-renderers');
-    const runtimeHowlerSoundManagerPath = path.join(
+    const runtimePath = localPath.join(gdjsRoot, 'Runtime-sources');
+    const runtimeTypesPath = localPath.join(runtimePath, 'types');
+    const runtimeLibsPath = localPath.join(runtimePath, 'libs');
+    const runtimePixiRenderersPath = localPath.join(
+      runtimePath,
+      'pixi-renderers'
+    );
+    const runtimeHowlerSoundManagerPath = localPath.join(
       runtimePath,
       'howler-sound-manager'
     );
-    const runtimeFontfaceobserverFontManagerPath = path.join(
+    const runtimeFontfaceobserverFontManagerPath = localPath.join(
       runtimePath,
       'fontfaceobserver-font-manager'
     );
-    const extensionsPath = path.join(runtimePath, 'Extensions');
-    const eventToolsPath = path.join(runtimePath, 'events-tools');
-    const inGameEditorPath = path.join(runtimePath, 'InGameEditor');
-    const gameplayTestsPath = path.join(runtimePath, 'gameplay-tests');
-    const threeTypesPath = path.join(runtimeTypesPath, 'three');
-    const pixiTypesPath = path.join(runtimeTypesPath, 'pixi');
+    const extensionsPath = localPath.join(runtimePath, 'Extensions');
+    const eventToolsPath = localPath.join(runtimePath, 'events-tools');
+    const inGameEditorPath = localPath.join(runtimePath, 'InGameEditor');
+    const gameplayTestsPath = localPath.join(runtimePath, 'gameplay-tests');
+    const threeTypesPath = localPath.join(runtimeTypesPath, 'three');
+    const pixiTypesPath = localPath.join(runtimeTypesPath, 'pixi');
 
     importAllJsFilesFromFolder(runtimePath);
     importAllJsFilesFromFolder(runtimeTypesPath);
@@ -131,28 +138,33 @@ export const setupAutocompletions = (monaco: any): Promise<void> => {
     importAllJsFilesFromFolderRecursively(threeTypesPath);
     importAllJsFilesFromFolderRecursively(pixiTypesPath);
 
-    fs.readdir(extensionsPath, (error: ?Error, folderNames: Array<string>) => {
-      if (error) {
-        console.error(
-          'Unable to read Extensions folders for setting up autocompletions:',
-          error
-        );
-        return;
-      }
+    localFs.readdir(
+      extensionsPath,
+      (error: ?Error, folderNames: Array<string>) => {
+        if (error) {
+          console.error(
+            'Unable to read Extensions folders for setting up autocompletions:',
+            error
+          );
+          return;
+        }
 
-      folderNames
-        .filter(
-          folderName =>
-            !folderName.endsWith('.txt') &&
-            !folderName.endsWith('.md') &&
-            !folderName.endsWith('.flow.js') &&
-            !folderName.endsWith('.d.ts') &&
-            !folderName.endsWith('.gitignore')
-        )
-        .forEach(folderName =>
-          importAllJsFilesFromFolder(path.join(extensionsPath, folderName))
-        );
-    });
+        folderNames
+          .filter(
+            folderName =>
+              !folderName.endsWith('.txt') &&
+              !folderName.endsWith('.md') &&
+              !folderName.endsWith('.flow.js') &&
+              !folderName.endsWith('.d.ts') &&
+              !folderName.endsWith('.gitignore')
+          )
+          .forEach(folderName =>
+            importAllJsFilesFromFolder(
+              localPath.join(extensionsPath, folderName)
+            )
+          );
+      }
+    );
 
     monaco.languages.typescript.javascriptDefaults.addExtraLib(
       `

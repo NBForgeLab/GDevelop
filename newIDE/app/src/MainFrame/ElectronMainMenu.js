@@ -1,6 +1,6 @@
 // @flow
 import * as React from 'react';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import { useCommandWithOptions } from '../CommandPalette/CommandHooks';
 import {
   buildMainMenuDeclarativeTemplate,
@@ -11,10 +11,6 @@ import {
 } from './MainMenu';
 import PreferencesContext from './Preferences/PreferencesContext';
 import AuthenticatedUserContext from '../Profile/AuthenticatedUserContext';
-const electron = optionalRequire('electron');
-const remote = optionalRequire('@electron/remote');
-const app = remote ? remote.app : null;
-const ipcRenderer = electron ? electron.ipcRenderer : null;
 
 // Custom hook to register and deregister IPC listener
 const useIPCEventListener = ({
@@ -28,12 +24,9 @@ const useIPCEventListener = ({
 }) => {
   React.useEffect(
     () => {
-      if (!ipcRenderer || !shouldApply) return;
+      if (!DesktopService.isDesktop() || !shouldApply) return;
 
-      // $FlowFixMe[missing-local-annot]
-      const handler = (event, ...eventArgs) => callback(...eventArgs);
-      ipcRenderer.on(ipcEvent, handler);
-      return () => ipcRenderer.removeListener(ipcEvent, handler);
+      return DesktopService.onIpcEvent(ipcEvent, callback);
     },
     [ipcEvent, callback, shouldApply]
   );
@@ -48,11 +41,8 @@ const useAppEventListener = ({
 }) => {
   React.useEffect(
     () => {
-      if (!app) return;
-      // $FlowFixMe[missing-local-annot]
-      const handler = (event, ...eventArgs) => callback(...eventArgs);
-      app.on(event, handler);
-      return () => app.removeListener(event, handler);
+      if (!DesktopService.isDesktop()) return;
+      return DesktopService.onIpcEvent(event, callback);
     },
     [event, callback]
   );
@@ -96,7 +86,7 @@ const ElectronMainMenu = ({
     setIsFocusedOnMainWindow,
   ] = React.useState<boolean>(true);
   const [focusedWindowId, setFocusedWindowId] = React.useState<number>(
-    remote.getCurrentWindow().id
+    DesktopService.getWindowId()
   );
   const closePreviewWindow =
     !isFocusedOnMainWindow && onClosePreview
@@ -242,9 +232,8 @@ const ElectronMainMenu = ({
 
   React.useEffect(
     () => {
-      if (ipcRenderer) {
-        ipcRenderer.send(
-          'set-main-menu',
+      if (DesktopService.isDesktop()) {
+        DesktopService.setMainMenu(
           buildMainMenuDeclarativeTemplate({
             project,
             canSaveProjectAs,

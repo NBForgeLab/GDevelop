@@ -3,11 +3,17 @@ const axios = require('axios');
 const log = require('electron-log');
 const { session } = require('electron');
 
-const findGDevelopCloudCookieValue = async () => {
+const findGDevelopCloudCookieValue = async (
+  targetSession = session.defaultSession
+) => {
   /** @type {import("electron").Cookie[]} */
   let cookies = [];
+  const resolvedSession = targetSession || session.defaultSession;
+  if (!resolvedSession || !resolvedSession.cookies) {
+    return null;
+  }
   try {
-    cookies = await session.defaultSession.cookies.get({
+    cookies = await resolvedSession.cookies.get({
       domain: 'gdevelop.io',
       name: 'gd_resource',
     });
@@ -41,10 +47,11 @@ module.exports = {
   /**
    * @param {string} url
    * @param {string} outputPath
+   * @param {import("electron").Session} [targetSession]
    */
-  downloadLocalFile: async (url, outputPath) => {
+  downloadLocalFile: async (url, outputPath, targetSession) => {
     const gdevelopCloudCookieValue = isGDevelopCloudHost(url)
-      ? await findGDevelopCloudCookieValue()
+      ? await findGDevelopCloudCookieValue(targetSession)
       : null;
 
     log.verbose(`Downloading ${url} to ${outputPath}...`);

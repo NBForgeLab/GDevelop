@@ -1,14 +1,23 @@
+const path = require('path');
 const electron = require('electron');
 const BrowserWindow = electron.BrowserWindow; // Module to create native browser window.
 const isDev = require('electron-is-dev');
 const ipcMain = electron.ipcMain;
-const { load } = require('./Utils/UrlLoader');
+const { registerGdideProtocol } = require('./Utils/UrlLoader');
+const { isSafeExternalUrl } = require('./DesktopIpcHandlers');
 
-// Generic function to load external editors in a modal window.
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
-/** @type {BrowserWindow | null} */
-let modalWindow = null;
+let externalEditorSession;
+const getExternalEditorSession = () => {
+  if (!externalEditorSession) {
+    const session = electron.session.fromPartition('persist:gdevelop-external-editors');
+    registerGdideProtocol({ isDev, protocol: session.protocol, externalOnly: true });
+    externalEditorSession = session;
+  }
+  return externalEditorSession;
+};
+
+// Keep modal windows alive until they close.
+const openModalWindows = new Set();
 
 const relativeWidth = 0.7;
 const relativeHeight = 0.9;
@@ -25,39 +34,72 @@ const loadExternalEditorWindow = ({
 }) => {
   return new Promise(resolve => {
     let externalEditorOutput = null;
+    let isSettled = false;
+
+    const hasValidParent = Boolean(
+      parentWindow &&
+        !parentWindow.isDestroyed() &&
+        typeof parentWindow.getSize === 'function'
+    );
+    const parentSize = hasValidParent ? parentWindow.getSize() : [1280, 800];
 
     const windowOptions = {
-      parent: parentWindow,
-      width: Math.floor(parentWindow.getSize()[0] * relativeWidth),
-      height: Math.floor(parentWindow.getSize()[1] * relativeHeight),
+      ...(hasValidParent
+        ? { parent: parentWindow, modal: true }
+        : { modal: false }),
+      width: Math.floor(parentSize[0] * relativeWidth),
+      height: Math.floor(parentSize[1] * relativeHeight),
       backgroundColor,
-      modal: true,
       center: true,
       webPreferences: {
-        webSecurity: false,
-        // Allow Node.js API access in renderer process, as long
-        // as we've not removed dependency on it and on "@electron/remote".
-        nodeIntegration: true,
-        sandbox: false,
-        contextIsolation: false,
+        session: getExternalEditorSession(),
+        webSecurity: true,
+        nodeIntegration: false,
+        sandbox: true,
+        contextIsolation: true,
+        preload: path.join(__dirname, 'externalEditorPreload.js'),
       },
     };
 
-    modalWindow = new BrowserWindow(windowOptions);
-    modalWindow.setMenu(null);
+    const localModalWindow = new BrowserWindow(windowOptions);
+    const modalWebContents = localModalWindow.webContents;
+    openModalWindows.add(localModalWindow);
+    localModalWindow.setMenu(null);
 
-    // Enable `@electron/remote` module for renderer process
-    require('@electron/remote/main').enable(modalWindow.webContents);
+    const cleanup = () => {
+      openModalWindows.delete(localModalWindow);
+      ipcMain.removeListener('external-editor-ready', onReady);
+      ipcMain.removeListener(
+        'save-external-editor-output',
+        saveExternalEditorOutput
+      );
+      ipcMain.removeListener(
+        'external-editor-set-title',
+        setExternalEditorTitle
+      );
+      ipcMain.removeListener(
+        'external-editor-close',
+        closeExternalEditorWindow
+      );
+      if (!isSettled) {
+        isSettled = true;
+        resolve(externalEditorOutput);
+      }
+    };
 
     /** @param {import('electron').IpcMainEvent} event */
     const onReady = event => {
-      if (!modalWindow || event.sender !== modalWindow.webContents) return;
+      if (
+        !event ||
+        event.sender !== modalWebContents ||
+        localModalWindow.isDestroyed() ||
+        modalWebContents.isDestroyed()
+      ) {
+        return;
+      }
 
-      modalWindow.webContents.send(
-        'open-external-editor-input',
-        externalEditorInput
-      );
-      modalWindow.show();
+      modalWebContents.send('open-external-editor-input', externalEditorInput);
+      localModalWindow.show();
     };
 
     /**
@@ -65,54 +107,73 @@ const loadExternalEditorWindow = ({
      * @param {any} newExternalEditorOutput
      */
     const saveExternalEditorOutput = (event, newExternalEditorOutput) => {
-      if (!modalWindow || event.sender !== modalWindow.webContents) return;
+      if (!event || event.sender !== modalWebContents) return;
 
       externalEditorOutput = newExternalEditorOutput;
     };
 
+    const setExternalEditorTitle = (event, title) => {
+      if (
+        !event ||
+        event.sender !== modalWebContents ||
+        localModalWindow.isDestroyed()
+      ) {
+        return;
+      }
+      localModalWindow.setTitle(typeof title === 'string' ? title : '');
+    };
+
+    const closeExternalEditorWindow = event => {
+      if (
+        !event ||
+        event.sender !== modalWebContents ||
+        localModalWindow.isDestroyed()
+      ) {
+        return;
+      }
+      localModalWindow.close();
+    };
+
     ipcMain.on('external-editor-ready', onReady);
     ipcMain.on('save-external-editor-output', saveExternalEditorOutput);
+    ipcMain.on('external-editor-set-title', setExternalEditorTitle);
+    ipcMain.on('external-editor-close', closeExternalEditorWindow);
 
     // Load the index.html of the app.
-    load({
-      window: modalWindow,
-      isDev,
-      path: '/external/' + indexSubPath,
-      devTools,
-    });
+    localModalWindow.loadURL('gdide://external/' + indexSubPath);
+    if (isDev || devTools) localModalWindow.openDevTools();
 
     //Prevent any navigation inside the modal window.
-    modalWindow.webContents.on('will-navigate', (e, url) => {
-      if (url !== modalWindow.webContents.getURL()) {
+    modalWebContents.on('will-navigate', (e, url) => {
+      if (
+        !modalWebContents.isDestroyed() &&
+        url !== modalWebContents.getURL()
+      ) {
         console.info('Opening in browser (because of will-navigate):', url);
         e.preventDefault();
-        electron.shell.openExternal(url);
+        if (isSafeExternalUrl(url)) electron.shell.openExternal(url);
       }
     });
 
     // Prevent opening any website or url inside Electron
-    modalWindow.webContents.setWindowOpenHandler(details => {
+    modalWebContents.setWindowOpenHandler(details => {
       console.info('Opening in browser (because of new window): ', details.url);
-      electron.shell.openExternal(details.url);
+      if (isSafeExternalUrl(details.url))
+        electron.shell.openExternal(details.url);
       return { action: 'deny' };
     });
 
-    modalWindow.on('closed', event => {
-      modalWindow = null;
-
-      ipcMain.removeListener('external-editor-ready', onReady);
-      ipcMain.removeListener(
-        'save-external-editor-output',
-        saveExternalEditorOutput
-      );
-      resolve(externalEditorOutput);
+    localModalWindow.on('closed', () => {
+      cleanup();
     });
 
-    modalWindow.on('close', event => {
-      if (!modalWindow) return;
+    localModalWindow.on('close', () => {
+      if (localModalWindow.isDestroyed()) {
+        cleanup();
+        return;
+      }
       // use destroy as a workaround to force window closing, which is not done properly otherwise on Windows
-      modalWindow.destroy();
-      modalWindow = null;
+      localModalWindow.destroy();
     });
   });
 };

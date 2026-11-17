@@ -1,16 +1,9 @@
 // @flow
 import * as React from 'react';
-import optionalRequire from './OptionalRequire';
+import DesktopService from './DesktopService';
 import URLSearchParams from 'url-search-params';
-import { isWindows } from './Platform';
 import debounce from 'lodash/debounce';
 import { hexToRGBColor, isLightRgbColor } from './ColorTransformer';
-import { isReactAppEnvDevelopment } from './BuildEnv';
-const electron = optionalRequire('electron');
-const remote = optionalRequire('@electron/remote');
-const shell = electron ? electron.shell : null;
-const dialog = remote ? remote.dialog : null;
-const ipcRenderer = electron ? electron.ipcRenderer : null;
 
 export type AppArguments = { [string]: any };
 type YesNoCancelDialogChoice = 'yes' | 'no' | 'cancel';
@@ -34,6 +27,11 @@ export const registerDocumentTargetId = (doc: Document, frameName: string) => {
 
 export const unregisterDocumentTargetId = (doc: Document) => {
   documentToTargetId.delete(doc);
+};
+
+export const getDocumentTargetId = (doc: ?Document): ?string => {
+  if (!doc) return null;
+  return documentToTargetId.get(doc) || null;
 };
 
 // Per-navigator watcher state: each window's windowControlsOverlay gets its
@@ -106,15 +104,12 @@ export const useWindowControlsOverlayWatcher = ({
  */
 export default class Window {
   static setTitle(title: string) {
-    if (remote) {
+    if (DesktopService.isDesktop()) {
       try {
-        const browserWindow = remote.getCurrentWindow();
-        browserWindow.setTitle(title);
+        DesktopService.setWindowTitle(title);
       } catch (err) {
-        // This rarely, but sometimes happen that setTitle throw.
-        // Catch the error in the hope that things will continue to work.
         console.error(
-          'Caught an error while calling browserWindow.setTitle',
+          'Caught an error while calling DesktopService.setWindowTitle',
           err
         );
       }
@@ -138,24 +133,21 @@ export default class Window {
       return;
     }
 
-    if (ipcRenderer) {
+    if (DesktopService.isDesktop()) {
       // Update the window controls and background colors on Windows/Linux.
       // For the main window, the main process resolves via event.sender.
       // For popped-out editor windows (opened via window.open and rendered
       // into via React portals), event.sender is always the main window's
       // webContents, so we pass the frameName and let the main process
       // resolve it to the correct BrowserWindow.
-      ipcRenderer.invoke(
-        'titlebar-set-overlay-options',
-        {
-          color: newColor,
-          // $FlowFixMe[incompatible-type]
-          symbolColor: isLightRgbColor(hexToRGBColor(newColor))
-            ? '#000000'
-            : '#ffffff',
-        },
-        documentToTargetId.get(doc)
-      );
+      DesktopService.setTitlebarOverlayOptions({
+        color: newColor,
+        // $FlowFixMe[incompatible-type]
+        symbolColor: isLightRgbColor(hexToRGBColor(newColor))
+          ? '#000000'
+          : '#ffffff',
+        targetId: documentToTargetId.get(doc),
+      });
     }
 
     // Update the PWA titlebar/controls color (if it's an installed PWA).
@@ -178,72 +170,45 @@ export default class Window {
   }
 
   static setBounds(x: number, y: number, width: number, height: number) {
-    if (!remote) return;
+    if (!DesktopService.isDesktop()) return;
 
-    let scaleFactor = 1;
-    if (isWindows()) {
-      // setBounds need to be called with the scale factor of the screen
-      // on Windows.
-      const rect = { x, y, width, height };
-      const display = remote.screen.getDisplayMatching(rect);
-      scaleFactor = display.scaleFactor;
-    }
-
-    const browserWindow = remote.getCurrentWindow();
-    try {
-      browserWindow.setBounds({
-        x: Math.round(x / scaleFactor),
-        y: Math.round(y / scaleFactor),
-        width: Math.round(width / scaleFactor),
-        height: Math.round(height / scaleFactor),
-      });
-    } catch (err) {
-      console.warn('Unable to change window bounds', err);
-    }
-    this.show();
+    DesktopService.setWindowBounds(x, y, width, height);
   }
 
   static quit() {
-    if (!remote) return;
+    if (!DesktopService.isDesktop()) return;
 
-    const electronApp = remote.app;
-    electronApp.quit();
+    DesktopService.quitApp();
   }
 
   static show() {
-    if (!remote) return;
+    if (!DesktopService.isDesktop()) return;
 
-    const browserWindow = remote.getCurrentWindow();
-    browserWindow.showInactive();
-    browserWindow.setAlwaysOnTop(true);
+    DesktopService.showWindow();
   }
 
   static hide(forceHide: boolean = false) {
-    if (!remote) return;
+    if (!DesktopService.isDesktop()) return;
 
-    const browserWindow = remote.getCurrentWindow();
-    if (!browserWindow.isFocused() || forceHide) {
-      browserWindow.setAlwaysOnTop(false);
-      browserWindow.hide();
-    }
+    DesktopService.hideWindow(forceHide);
   }
 
   static onFocus(cb: () => void): any {
-    if (!remote) return;
+    if (!DesktopService.isDesktop()) return;
 
-    return remote.getCurrentWindow().on('focus', cb);
+    return DesktopService.onIpcEvent('desktop-window-focus', cb);
   }
 
   static onBlur(cb: () => void): any {
-    if (!remote) return;
+    if (!DesktopService.isDesktop()) return;
 
-    return remote.getCurrentWindow().on('blur', cb);
+    return DesktopService.onIpcEvent('desktop-window-blur', cb);
   }
 
   static onClose(cb: () => void): any {
-    if (!remote) return;
-
-    return remote.getCurrentWindow().on('close', cb);
+    if (typeof window === 'undefined') return;
+    window.addEventListener('beforeunload', cb);
+    return () => window.removeEventListener('beforeunload', cb);
   }
 
   /** True when the app was launched with `--run-command` (CLI / CI mode). */
@@ -260,8 +225,8 @@ export default class Window {
    * (On the web-app, this is emulated using the "project" argument).
    */
   static getArguments(): AppArguments {
-    if (remote) {
-      return remote.getGlobal('args');
+    if (DesktopService.isDesktop()) {
+      return DesktopService.getArguments();
     }
 
     const argumentsObject = {};
@@ -283,7 +248,7 @@ export default class Window {
    */
   static removeArguments(argumentNames: string[]) {
     // On Electron, we don't have a way to modify global args.
-    if (remote) return;
+    if (DesktopService.isDesktop()) return;
 
     const url = new URL(window.location.href);
     for (const argumentName of argumentNames) {
@@ -294,7 +259,7 @@ export default class Window {
 
   static addArguments(argumentNamesAndValues: { [key: string]: string }) {
     // On Electron, we don't have a way to modify global args.
-    if (remote) return;
+    if (DesktopService.isDesktop()) return;
 
     const url = new URL(window.location.href);
     for (const argumentName in argumentNamesAndValues) {
@@ -307,13 +272,12 @@ export default class Window {
     message: string,
     type?: 'none' | 'info' | 'error' | 'question' | 'warning'
   ) {
-    if (!dialog || !electron) {
+    if (!DesktopService.isDesktop()) {
       alert(message);
       return;
     }
 
-    const browserWindow = remote.getCurrentWindow();
-    dialog.showMessageBoxSync(browserWindow, {
+    DesktopService.showMessageBoxSync({
       message,
       type,
       buttons: ['OK'],
@@ -324,7 +288,7 @@ export default class Window {
     message: string,
     type?: 'none' | 'info' | 'error' | 'question' | 'warning'
   ): YesNoCancelDialogChoice {
-    if (!dialog || !electron) {
+    if (!DesktopService.isDesktop()) {
       // TODO: Find a way to display an alert with 3 buttons (not possible with the 3 native js method confirm, alert and prompt)
       // eslint-disable-next-line
       const answer = confirm(message);
@@ -332,8 +296,7 @@ export default class Window {
       return 'no';
     }
 
-    const browserWindow = remote.getCurrentWindow();
-    const answer = dialog.showMessageBoxSync(browserWindow, {
+    const answer = DesktopService.showMessageBoxSync({
       message,
       type,
       cancelId: 1,
@@ -356,13 +319,12 @@ export default class Window {
     message: string,
     type?: 'none' | 'info' | 'error' | 'question' | 'warning'
   ): any {
-    if (!dialog || !electron) {
+    if (!DesktopService.isDesktop()) {
       // eslint-disable-next-line
       return confirm(message);
     }
 
-    const browserWindow = remote.getCurrentWindow();
-    const answer = dialog.showMessageBoxSync(browserWindow, {
+    const answer = DesktopService.showMessageBoxSync({
       message,
       type,
       cancelId: 1,
@@ -376,27 +338,18 @@ export default class Window {
     const doc = win.document;
     const textEditorSelectors = 'textarea, input, [contenteditable="true"]';
 
-    if (electron) {
-      // `remote.require` since `Menu` is a main-process module.
-      var buildEditorContextMenu = remote.require(
-        'electron-editor-context-menu'
-      );
-
+    if (DesktopService.isDesktop()) {
       win.addEventListener('contextmenu', function(e) {
         // Only show the context menu in text editors.
         if (!e.target.closest(textEditorSelectors)) return;
-
-        var menu = buildEditorContextMenu();
 
         // The 'contextmenu' event is emitted after 'selectionchange' has fired but possibly before the
         // visible selection has changed. Try to wait to show the menu until after that, otherwise the
         // visible selection will update after the menu dismisses and look weird.
         setTimeout(function() {
-          const { BrowserWindow } = remote;
-          menu.popup({
-            window:
-              BrowserWindow.getFocusedWindow() || remote.getCurrentWindow(),
-          });
+          DesktopService.showEditContextMenu(
+            doc ? documentToTargetId.get(doc) || null : null
+          );
         }, 30);
       });
     } else if (doc) {
@@ -422,8 +375,8 @@ export default class Window {
   ) {
     if (!url) return;
 
-    if (electron) {
-      if (shell) shell.openExternal(url);
+    if (DesktopService.isDesktop()) {
+      DesktopService.openExternalURL(url);
       return;
     }
 
@@ -440,44 +393,18 @@ export default class Window {
   }
 
   static hasMainMenu(): any {
-    return !!electron;
+    return DesktopService.isDesktop();
   }
 
   static isDev(): boolean {
-    if (!electron || !remote) {
-      return (
-        // $FlowFixMe[cannot-resolve-name]
-        !process.env.NODE_ENV ||
-        // $FlowFixMe[cannot-resolve-name]
-        process.env.NODE_ENV === 'development' ||
-        isReactAppEnvDevelopment() // Added manually in the .env as we cannot override NODE_ENV with react-scripts.
-      );
-    }
-
-    try {
-      const isDev = remote.require('electron-is-dev');
-      return isDev;
-    } catch (err) {
-      // This rarely, but sometimes happen that require throw ("missing remote object").
-      // Catch the error in the hope that things will continue to work.
-      console.error(
-        "Caught an error while calling remote.require('electron-is-dev')",
-        err
-      );
-      return false; // Assume we're not in development mode. Might be incorrect but better not consider production as development.
-    }
+    return DesktopService.isDev();
   }
 
   static isFullScreen(): boolean {
-    if (!remote) return false;
-
-    const browserWindow = remote.getCurrentWindow();
-    return browserWindow.isFullScreen();
+    return DesktopService.isWindowFullScreen();
   }
 
   static toggleMaximize() {
-    if (!ipcRenderer) return;
-
-    ipcRenderer.invoke('window-maximize-toggle');
+    DesktopService.toggleWindowMaximize();
   }
 }

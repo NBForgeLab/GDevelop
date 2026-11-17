@@ -41,7 +41,7 @@ import { type LastModifiedInfoByProjectId } from '../MainFrame/EditorContainers/
 import AuthenticatedUserContext from '../Profile/AuthenticatedUserContext';
 import useAlertDialog from '../UI/Alert/useAlertDialog';
 import LastModificationInfo from '../MainFrame/EditorContainers/HomePage/CreateSection/LastModificationInfo';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import RaisedButton from '../UI/RaisedButton';
 import { Column, Line, Spacer } from '../UI/Grid';
 import ElementWithMenu from '../UI/Menu/ElementWithMenu';
@@ -58,9 +58,7 @@ import { getRelativeOrAbsoluteDisplayDate } from '../Utils/DateDisplay';
 // It's important to use remote and not electron for folder actions,
 // otherwise they will be opened in the background.
 // See https://github.com/electron/electron/issues/4349#issuecomment-777475765
-const remote = optionalRequire('@electron/remote');
-const shell = remote ? remote.shell : null;
-const path = optionalRequire('path');
+const path = DesktopService.getPath();
 
 export const getThumbnailWidth = ({
   isMobile,
@@ -91,7 +89,7 @@ export const getDetailedProjectDisplayDate = (
   });
 
 const getNoProjectAlertMessage = () => {
-  if (!remote) {
+  if (!DesktopService.isDesktop()) {
     // Trying to open a local project from the web app of the mobile app.
     return t`Looks like your project isn't there!${'\n\n'}Your project must be stored on your computer.`;
   } else {
@@ -130,8 +128,10 @@ const styles = {
 };
 
 const locateProjectFile = (file: FileMetadataAndStorageProviderName) => {
-  if (!shell) return;
-  shell.showItemInFolder(path.resolve(file.fileMetadata.fileIdentifier));
+  if (!path) return;
+  DesktopService.showItemInFolder(
+    path.resolve(file.fileMetadata.fileIdentifier)
+  );
 };
 
 const getFileNameWithoutExtensionFromPath = (path: string) => {

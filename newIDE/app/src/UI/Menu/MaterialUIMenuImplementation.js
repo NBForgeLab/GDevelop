@@ -16,9 +16,8 @@ import {
 } from './Menu.flow';
 import ChevronArrowRight from '../CustomSvgIcons/ChevronArrowRight';
 import { useScreenType } from '../Responsive/ScreenTypeMeasurer';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import { itemAboveBlockingLayerZIndex } from '../../InAppTutorial/BlockingLayerWithHoles';
-const electron = optionalRequire('electron');
 
 const useStyles = makeStyles({
   backdropRootForMouse: {
@@ -52,7 +51,7 @@ const DenseMenuItem = React.forwardRef<any, any>((props, ref) => {
   const screenType = useScreenType();
   return (
     <MenuItem
-      dense={!!electron || screenType !== 'touch'}
+      dense={DesktopService.isDesktop() || screenType !== 'touch'}
       ref={ref}
       {...props}
     />
@@ -150,7 +149,7 @@ const SubMenuItem = ({ item, buildFromTemplate, portalContainer }) => {
   return (
     <React.Fragment>
       <MenuItem
-        dense={!!electron || !isTouchscreen}
+        dense={DesktopService.isDesktop() || !isTouchscreen}
         style={styles.menuItemWithSubMenu}
         key={item.label}
         disabled={

@@ -11,13 +11,12 @@ import { ColumnStackLayout, LineStackLayout } from '../UI/Layout';
 import WarningFilled from '../UI/CustomSvgIcons/WarningFilled';
 import PreferencesContext from '../MainFrame/Preferences/PreferencesContext';
 import { isWindows } from '../Utils/Platform';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import {
   type SlowGraphicsRenderingReason,
   useSlowGraphicsRenderingReason,
 } from '.';
 import classes from './SlowGraphicsRenderingIndicator.module.css';
-const electron = optionalRequire('electron');
 
 const SoftwareRenderingExplanation = (): React.Node => (
   <>
@@ -29,7 +28,7 @@ const SoftwareRenderingExplanation = (): React.Node => (
       </Trans>
     </Text>
     <Text size="body-small" noMargin>
-      {electron ? (
+      {DesktopService.isDesktop() ? (
         <Trans>
           Updating the drivers of your graphics card, then restarting your
           computer, can solve this.

@@ -1,13 +1,13 @@
 // @flow
-import optionalRequire from './OptionalRequire';
+import DesktopService from './DesktopService';
 import YAML from 'yaml';
 import { SafeExtractor } from './SafeExtractor';
 import { type ToolbarButtonConfig } from '../MainFrame/CustomToolbarButton';
 import type { ToolbarButtonHooksNames } from '../MainFrame/CustomToolbarButton';
 
-const fs = optionalRequire('fs');
+const fs = DesktopService.getFs();
 const fsPromises = fs ? fs.promises : null;
-const path = optionalRequire('path');
+const path = DesktopService.getPath();
 
 export type ResourceCustomPropertyType = 'string' | 'boolean' | 'number';
 

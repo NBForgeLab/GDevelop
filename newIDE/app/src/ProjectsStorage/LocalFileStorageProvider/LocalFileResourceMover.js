@@ -1,5 +1,5 @@
 // @flow
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import PromisePool from '@supercharge/promise-pool';
 import { retryIfFailed } from '../../Utils/RetryIfFailed';
 import newNameGenerator from '../../Utils/NewNameGenerator';
@@ -23,10 +23,8 @@ import { sanitizeFilename, sanitizeFilePath } from '../../Utils/Filename';
 import { type AuthenticatedUser } from '../../Profile/AuthenticatedUserContext';
 import { extractDecodedFilenameFromProjectResourceUrl } from '../../Utils/GDevelopServices/Project';
 import axios from 'axios';
-const electron = optionalRequire('electron');
-const ipcRenderer = electron ? electron.ipcRenderer : null;
-const fs = optionalRequire('fs-extra');
-const path = optionalRequire('path');
+const fs = DesktopService.getFs();
+const path = DesktopService.getPath();
 
 type Options = {|
   project: gdProject,
@@ -36,6 +34,7 @@ type Options = {|
 |};
 
 const isPathInFolder = (folderPath: string, filePath: string): boolean => {
+  if (!path) return false;
   const relativePath = path.relative(folderPath, filePath);
   return (
     !!relativePath &&
@@ -50,21 +49,28 @@ const generateUnusedFilepath = (
   alreadyUsedFilePaths: Set<string>,
   unsafeFilename: string
 ) => {
+  if (!path || !fs) throw new Error('Unsupported');
+  const localPath = path;
+  const localFs = fs;
   // The filename comes from the project (a resource URL or name), so it must
   // not be able to point outside of the base folder.
-  const filename = isPathInFolder(basePath, path.join(basePath, unsafeFilename))
+  const filename = isPathInFolder(
+    basePath,
+    localPath.join(basePath, unsafeFilename)
+  )
     ? unsafeFilename
     : sanitizeFilename(unsafeFilename);
-  const directory = path.dirname(filename);
-  const extension = path.extname(filename);
-  const filenameWithoutExtension = path.basename(filename, extension);
+  const directory = localPath.dirname(filename);
+  const extension = localPath.extname(filename);
+  const filenameWithoutExtension = localPath.basename(filename, extension);
   const name = newNameGenerator(filenameWithoutExtension, name => {
-    const tentativePath = path.join(basePath, directory, name) + extension;
+    const tentativePath = localPath.join(basePath, directory, name) + extension;
     return (
-      fs.existsSync(tentativePath) || alreadyUsedFilePaths.has(tentativePath)
+      localFs.existsSync(tentativePath) ||
+      alreadyUsedFilePaths.has(tentativePath)
     );
   });
-  return path.join(basePath, directory, name) + extension;
+  return localPath.join(basePath, directory, name) + extension;
 };
 
 const generateUnusedFilepathFromResourceName = (
@@ -87,7 +93,7 @@ const downloadBlobToLocalFile = async (
   blobUrl: string,
   filePath: string
 ): Promise<void> => {
-  if (!ipcRenderer) throw new Error('Not supported');
+  if (!DesktopService.isDesktop()) throw new Error('Not supported');
 
   // $FlowFixMe[underconstrained-implicit-instantiation]
   const response = await axios.get(blobUrl, {
@@ -95,8 +101,7 @@ const downloadBlobToLocalFile = async (
   });
   const arrayBuffer = response.data;
 
-  await ipcRenderer.invoke(
-    'local-file-save-from-arraybuffer',
+  await DesktopService.fileTransfer.saveLocalFileFromArrayBuffer(
     arrayBuffer,
     filePath
   );
@@ -111,7 +116,10 @@ export const moveUrlResourcesToLocalFiles = async ({
 }: Options): Promise<{
   erroredResources: Array<{ error: any, resourceName: string }>,
 }> => {
-  if (!fs || !ipcRenderer) throw new Error('Unsupported');
+  if (!fs || !path || !DesktopService.isDesktop())
+    throw new Error('Unsupported');
+  const localFs = fs;
+  const localPath = path;
 
   // Get all resources to download.
   const resourcesManager = project.getResourcesManager();
@@ -131,8 +139,8 @@ export const moveUrlResourcesToLocalFiles = async ({
     }
   );
 
-  const projectPath = path.dirname(fileMetadata.fileIdentifier);
-  const baseAssetsPath = path.join(projectPath, 'assets');
+  const projectPath = localPath.dirname(fileMetadata.fileIdentifier);
+  const baseAssetsPath = localPath.join(projectPath, 'assets');
   const downloadedFilePaths = new Set<string>();
   const erroredResources = [];
 
@@ -152,7 +160,7 @@ export const moveUrlResourcesToLocalFiles = async ({
               extension,
             } = parseLocalFilePathOrExtensionFromMetadata(resource);
             const resolvedLocalFilePath = localFilePath
-              ? path.resolve(projectPath, localFilePath)
+              ? localPath.resolve(projectPath, localFilePath)
               : null;
             // The local file path comes from the project, so it's only used
             // if it stays inside the project folder.
@@ -167,11 +175,13 @@ export const moveUrlResourcesToLocalFiles = async ({
                     extension || ''
                   );
 
-            await fs.ensureDir(baseAssetsPath);
-            await fs.ensureDir(path.dirname(downloadedFilePath));
+            await localFs.ensureDir(baseAssetsPath);
+            await localFs.ensureDir(localPath.dirname(downloadedFilePath));
             await downloadBlobToLocalFile(resourceFile, downloadedFilePath);
             resource.setFile(
-              path.relative(projectPath, downloadedFilePath).replace(/\\/g, '/')
+              localPath
+                .relative(projectPath, downloadedFilePath)
+                .replace(/\\/g, '/')
             );
           } catch (error) {
             erroredResources.push({ resourceName, error });
@@ -205,7 +215,7 @@ export const moveUrlResourcesToLocalFiles = async ({
 
           try {
             await retryIfFailed({ times: 2 }, async () => {
-              await fs.ensureDir(baseAssetsPath);
+              await localFs.ensureDir(baseAssetsPath);
               const resourceUrl = new URL(resourceFile);
               if (
                 isPrivateGameTemplateResourceAuthorizedUrl(resourceUrl.href) &&
@@ -217,13 +227,12 @@ export const moveUrlResourcesToLocalFiles = async ({
                 );
               }
               const encodedUrl = resourceUrl.href; // Encode the URL to support special characters in file names.
-              await ipcRenderer.invoke(
-                'local-file-download',
+              await DesktopService.fileTransfer.downloadLocalFile(
                 encodedUrl,
                 downloadedFilePath
               );
               resource.setFile(
-                path
+                localPath
                   .relative(projectPath, downloadedFilePath)
                   .replace(/\\/g, '/')
               );

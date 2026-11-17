@@ -4,18 +4,12 @@ import * as React from 'react';
 import { Trans, t } from '@lingui/macro';
 import { type AuthenticatedUser } from '../../Profile/AuthenticatedUserContext';
 import { type ResourcesActionsProps } from '../../ProjectsStorage';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import { downloadUrlsToLocalFiles } from '../../Utils/LocalFileDownloader';
 import Window from '../../Utils/Window';
 import ResourcesLoader from '../../ResourcesLoader';
 
-const path = optionalRequire('path');
-// It's important to use remote and not electron for folder actions,
-// otherwise they will be opened in the background.
-// See https://github.com/electron/electron/issues/4349#issuecomment-777475765
-const remote = optionalRequire('@electron/remote');
-const shell = remote ? remote.shell : null;
-const app = remote ? remote.app : null;
+const path = DesktopService.getPath();
 
 export const generateGetResourceActions = ({
   authenticatedUser,
@@ -32,7 +26,7 @@ export const generateGetResourceActions = ({
   informUser,
 }: ResourcesActionsProps) => {
   const openLabel =
-    app && path
+    DesktopService.isDesktop() && path
       ? t`Save in the "Downloads" folder`
       : t`Open resource in browser`;
 
@@ -46,14 +40,14 @@ export const generateGetResourceActions = ({
       resource.getName(),
       {}
     );
-    if (app && path && shell) {
+    if (DesktopService.isDesktop() && path) {
       const defaultPath = path.join(
-        app.getPath('downloads'),
+        DesktopService.getAppPathSync('downloads'),
         resource.getName()
       );
       let targetPath;
       if (askUserForDownloadDestination) {
-        targetPath = remote.dialog.showSaveDialogSync(null, {
+        targetPath = DesktopService.showSaveDialogSync({
           defaultPath: defaultPath,
           properties: ['createDirectory', 'showOverwriteConfirmation'],
         });
@@ -74,7 +68,13 @@ export const generateGetResourceActions = ({
       informUser({
         actionLabel: <Trans>Open folder</Trans>,
         message: <Trans>The resource has been downloaded</Trans>,
-        onActionClick: () => shell.showItemInFolder(path.resolve(targetPath)),
+        onActionClick: () => {
+          if (targetPath) {
+            DesktopService.showItemInFolder(
+              path ? path.resolve(targetPath) : targetPath
+            );
+          }
+        },
       });
     } else {
       Window.openExternalURL(resourceUrl);
@@ -89,7 +89,7 @@ export const generateGetResourceActions = ({
     },
   ];
 
-  if (app && path) {
+  if (DesktopService.isDesktop() && path) {
     actions.push({
       label: i18n._(t`Save as...`),
       click: () =>

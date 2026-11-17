@@ -1,9 +1,9 @@
 // @flow
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import newNameGenerator from '../Utils/NewNameGenerator';
 import { toNewGdMapStringString } from '../Utils/MapStringString';
-const fs = optionalRequire('fs');
-const path = optionalRequire('path');
+const fs = DesktopService.getFs();
+const path = DesktopService.getPath();
 const gd: libGDevelop = global.gd;
 
 export const createOrUpdateResource = (
@@ -54,6 +54,7 @@ export const isPathInProjectFolder = (
   project: gdProject,
   resourcePath: string
 ): boolean => {
+  if (!path) return false;
   const projectPath = path.dirname(project.getProjectFile());
   return resourcePath.includes(projectPath);
 };
@@ -131,6 +132,7 @@ export const getResourceFilePathStatus = (
     // This is a URL resource: don't do any check.
     return '';
   } else {
+    if (!path) return '';
     // This is a local resource. Check the file exists.
     const normalizedResourcePath = path.resolve(
       path.dirname(project.getProjectFile()),

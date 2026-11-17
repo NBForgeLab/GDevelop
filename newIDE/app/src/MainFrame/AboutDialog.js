@@ -25,9 +25,8 @@ import {
   getIDEVersionWithHash,
 } from '../Version';
 import { ColumnStackLayout } from '../UI/Layout';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import ErrorBoundary from '../UI/ErrorBoundary';
-const electron = optionalRequire('electron');
 
 type Props = {|
   open?: boolean,
@@ -349,7 +348,7 @@ const AboutDialog = ({ onClose, updateStatus }: Props) => {
               <Text size="sub-title">
                 <Trans>Updates</Trans>
               </Text>
-              {!!electron && electronUpdateStatusString ? (
+              {DesktopService.isDesktop() && electronUpdateStatusString ? (
                 <ColumnStackLayout noMargin>
                   <Text>{electronUpdateStatusString}</Text>
                   <FlatButton
@@ -366,7 +365,7 @@ const AboutDialog = ({ onClose, updateStatus }: Props) => {
                   <Trans>No information about available updates.</Trans>
                 </Text>
               )}
-              {!electron && (
+              {!DesktopService.isDesktop() && (
                 <Text>
                   {getServiceWorkerStatusLabel(serviceWorkerUpdateStatus)}
                 </Text>

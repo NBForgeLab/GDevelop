@@ -7,7 +7,7 @@ import { Column, Line } from '../../UI/Grid';
 import { findGDJS } from '../../GameEngineFinder/LocalGDJSFinder';
 import LocalFileSystem, { type UrlFileDescriptor } from './LocalFileSystem';
 import assignIn from 'lodash/assignIn';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import {
   type ExportFlowProps,
   type ExportPipeline,
@@ -22,13 +22,7 @@ import {
 } from '../GenericExporters/FacebookInstantGamesExport';
 import { downloadUrlsToLocalFiles } from '../../Utils/LocalFileDownloader';
 
-const path = optionalRequire('path');
-// It's important to use remote and not electron for folder actions,
-// otherwise they will be opened in the background.
-// See https://github.com/electron/electron/issues/4349#issuecomment-777475765
-const remote = optionalRequire('@electron/remote');
-const app = remote ? remote.app : null;
-const shell = remote ? remote.shell : null;
+const path = DesktopService.getPath();
 
 const gd: libGDevelop = global.gd;
 
@@ -64,11 +58,15 @@ export const localFacebookInstantGamesExportPipeline: ExportPipeline<
 > = {
   name: exportPipelineName,
 
-  getInitialExportState: (project: gdProject) => ({
-    archiveOutputFilename: app
-      ? path.join(app.getPath('documents'), 'fb-instant-game.zip')
-      : '',
-  }),
+  getInitialExportState: (project: gdProject) => {
+    const documentsPath = DesktopService.getAppPathSync('documents');
+    return {
+      archiveOutputFilename:
+        DesktopService.isDesktop() && path && documentsPath
+          ? path.join(documentsPath, 'fb-instant-game.zip')
+          : '',
+    };
+  },
 
   canLaunchBuild: exportState => !!exportState.archiveOutputFilename,
 
@@ -93,7 +91,7 @@ export const localFacebookInstantGamesExportPipeline: ExportPipeline<
               },
             ]}
             value={exportState.archiveOutputFilename}
-            defaultPath={app ? app.getPath('documents') : ''}
+            defaultPath={DesktopService.getAppPathSync('documents')}
             onChange={value =>
               updateExportState(() => ({ archiveOutputFilename: value }))
             }
@@ -122,6 +120,7 @@ export const localFacebookInstantGamesExportPipeline: ExportPipeline<
         localFileSystem
       );
       const exporter = new gd.Exporter(fileSystem, gdjsRoot);
+      if (!path) return Promise.reject(new Error('Unsupported'));
       const temporaryOutputDir = path.join(
         fileSystem.getTempDir(),
         'FacebookInstantGamesExport'
@@ -196,8 +195,11 @@ export const localFacebookInstantGamesExportPipeline: ExportPipeline<
 
   renderDoneFooter: ({ exportState }) => {
     const openExportFolder = () => {
-      if (shell && path)
-        shell.openPath(path.dirname(exportState.archiveOutputFilename));
+      if (path) {
+        DesktopService.openPath(
+          path.dirname(exportState.archiveOutputFilename)
+        );
+      }
     };
 
     return (

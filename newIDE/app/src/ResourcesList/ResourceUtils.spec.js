@@ -1,4 +1,5 @@
 // @flow
+import optionalRequire from '../Utils/OptionalRequire';
 import {
   getLocalResourceFullPath,
   parseLocalFilePathOrExtensionFromMetadata,
@@ -8,6 +9,7 @@ import {
   getResourceCustomPropertyValue,
   setResourceCustomPropertyValue,
 } from './ResourceUtils';
+const path = optionalRequire('path');
 const gd: libGDevelop = global.gd;
 
 const addNewAnimationWithImageToSpriteObject = (
@@ -39,7 +41,9 @@ describe('ResourceUtils', () => {
     project.getResourcesManager().addResource(urlResource);
 
     expect(getLocalResourceFullPath(project, 'Track #3')).toBe(
-      '/home/user/My Project/assets/Track #3 (100%).wav'
+      path
+        .resolve('/home/user/My Project/assets/Track #3 (100%).wav')
+        .replace(/\\/g, '/')
     );
     expect(getLocalResourceFullPath(project, 'Remote')).toBe(
       'https://example.com/a%23b.png'

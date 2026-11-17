@@ -1,10 +1,8 @@
 // @flow
 import { addGDevelopResourceTokenIfRequired } from '../Utils/CrossOrigin';
-import optionalRequire from '../Utils/OptionalRequire';
-import { encodeLocalFileNameForUrl } from '../Utils/PercentEncodedFileName';
+import DesktopService from '../Utils/DesktopService';
 import { getResource3DPreviewOrRequest } from '../ResourcesList/ResourcePreview/Resource3DPreviewCache';
-const electron = optionalRequire('electron');
-const path = optionalRequire('path');
+const path = DesktopService.getPath();
 
 class UrlsCache {
   projectCache: { [number]: { [string]: string } } = {};
@@ -136,7 +134,7 @@ export default class ResourcesLoader {
     urlOrFilename: string,
     { isResourceForPixi, disableCacheBurst }: LoadingOptions
   ): string {
-    if (!!electron && isLocalFile(urlOrFilename)) {
+    if (DesktopService.isDesktop() && path && isLocalFile(urlOrFilename)) {
       const cachedUrl = ResourcesLoader._cache.getCachedUrl(
         project,
         urlOrFilename
@@ -153,7 +151,7 @@ export default class ResourcesLoader {
       return this._cache.cacheLocalFileUrl(
         project,
         urlOrFilename,
-        'file://' + encodeLocalFileNameForUrl(resourceAbsolutePath),
+        DesktopService.getLocalFileUrl(resourceAbsolutePath),
         !!disableCacheBurst
       );
     }

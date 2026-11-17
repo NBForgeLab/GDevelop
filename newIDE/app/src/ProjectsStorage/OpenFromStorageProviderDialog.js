@@ -10,8 +10,7 @@ import StorageProviderListItem from './StorageProviderListItem';
 import AlertMessage from '../UI/AlertMessage';
 import Computer from '../UI/CustomSvgIcons/Computer';
 import { isNativeMobileApp } from '../Utils/Platform';
-import optionalRequire from '../Utils/OptionalRequire';
-const electron = optionalRequire('electron');
+import DesktopService from '../Utils/DesktopService';
 
 type Props = {|
   storageProviders: Array<StorageProvider>,
@@ -71,7 +70,7 @@ const OpenFromStorageProviderDialog = ({
                   />
                 </React.Fragment>
               ))}
-            {!electron && !isNativeMobileApp() && (
+            {!DesktopService.isDesktop() && !isNativeMobileApp() && (
               <StorageProviderListItem
                 onChooseProvider={onChooseProvider}
                 storageProvider={fakeLocalFileStorageProvider}

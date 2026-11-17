@@ -9,7 +9,7 @@ import PreferencesContext, {
   type EditorStateForProjectUpdate,
   type EditorStateForPropertyPanel,
 } from './PreferencesContext';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import { getIDEVersion } from '../../Version';
 import {
   type PreferencesValues,
@@ -35,8 +35,6 @@ import {
   CHECK_APP_UPDATES_TIMEOUT,
   PERIODIC_APP_UPDATES_TIMEOUT,
 } from '../../Utils/GlobalFetchTimeouts';
-const electron = optionalRequire('electron');
-const ipcRenderer = electron ? electron.ipcRenderer : null;
 
 type Props = {|
   children: React.Node,
@@ -848,12 +846,12 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     // Note: This could be abstracted away later if other updates mechanisms
     // should be supported.
     const { disableCheckForUpdates } = this.props;
-    if (!ipcRenderer || disableCheckForUpdates) return;
+    if (!DesktopService.isDesktop() || disableCheckForUpdates) return;
 
     if (!!forceDownload || this.state.values.autoDownloadUpdates) {
-      ipcRenderer.send('updates-check-and-download', { explicit: !!explicit });
+      DesktopService.updates.checkAndDownload({ explicit: !!explicit });
     } else {
-      ipcRenderer.send('updates-check', { explicit: !!explicit });
+      DesktopService.updates.check({ explicit: !!explicit });
     }
   }
 

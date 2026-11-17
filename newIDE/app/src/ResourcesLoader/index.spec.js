@@ -28,13 +28,15 @@ describe('ResourcesLoader', () => {
       ResourcesLoader.getResourceFullUrl(project, 'Sprite #1', {
         disableCacheBurst: true,
       })
-    ).toBe('file:///home/user/My Project/assets/Sprite %231 (100%25).png');
+    ).toMatch(
+      /^gdevelop-file:\/\/local\/(?:[A-Za-z]:\/)?home\/user\/My%20Project\/assets\/Sprite%20%231%20\(100%25\)\.png$/
+    );
   });
 
   it('keeps adding a cache bursting parameter to local file URLs', () => {
     const url = ResourcesLoader.getResourceFullUrl(project, 'Sprite #1', {});
     expect(url).toMatch(
-      /^file:\/\/\/home\/user\/My Project\/assets\/Sprite %231 \(100%25\)\.png\?cache=\d+$/
+      /^gdevelop-file:\/\/local\/(?:[A-Za-z]:\/)?home\/user\/My%20Project\/assets\/Sprite%20%231%20\(100%25\)\.png\?cache=\d+$/
     );
     // The same URL is given until the cache is burst.
     expect(ResourcesLoader.getResourceFullUrl(project, 'Sprite #1', {})).toBe(

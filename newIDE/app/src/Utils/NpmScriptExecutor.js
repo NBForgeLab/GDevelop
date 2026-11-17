@@ -1,10 +1,7 @@
 // @flow
-import optionalRequire from './OptionalRequire';
+import DesktopService from './DesktopService';
 
 export type ScriptEntry = {| script: string, keepTerminalOpen?: boolean |};
-
-const electron = optionalRequire('electron');
-const ipcRenderer = electron ? electron.ipcRenderer : null;
 
 /**
  * Runs an npm script in a new terminal window.
@@ -15,12 +12,12 @@ export const runNpmScript = (
   projectPath: string,
   entry: ScriptEntry
 ): boolean => {
-  if (!ipcRenderer) {
+  if (!DesktopService.isDesktop()) {
     console.warn('npm scripts are only supported in the desktop app');
     return false;
   }
 
-  ipcRenderer.send('run-npm-script', {
+  DesktopService.runNpmScript({
     projectPath,
     npmScript: entry.script,
     keepTerminalOpen: !!entry.keepTerminalOpen,

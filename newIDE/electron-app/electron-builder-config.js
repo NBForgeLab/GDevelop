@@ -14,10 +14,6 @@ const config = {
       from: '../app/resources/GDJS',
       to: 'GDJS',
     },
-    {
-      from: '../app/resources/preview_node_modules',
-      to: 'preview_node_modules',
-    },
   ],
   linux: {
     target: [

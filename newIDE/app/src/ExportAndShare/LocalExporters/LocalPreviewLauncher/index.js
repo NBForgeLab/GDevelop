@@ -3,7 +3,7 @@ import { Trans } from '@lingui/macro';
 
 import * as React from 'react';
 import LocalFileSystem from '../LocalFileSystem';
-import optionalRequire from '../../../Utils/OptionalRequire';
+import DesktopService from '../../../Utils/DesktopService';
 import { findGDJS } from '../../../GameEngineFinder/LocalGDJSFinder';
 import LocalNetworkPreviewDialog from './LocalNetworkPreviewDialog';
 import assignIn from 'lodash/assignIn';
@@ -23,9 +23,7 @@ import Window from '../../../Utils/Window';
 import { getIDEVersionWithHash } from '../../../Version';
 import { setEmbeddedGameFramePreviewLocation } from '../../../EmbeddedGame/EmbeddedGameFrame';
 import { setGameplayTestFramePreviewLocation } from '../../../GameplayTests/GameplayTestFrame';
-const electron = optionalRequire('electron');
-const path = optionalRequire('path');
-const ipcRenderer = electron ? electron.ipcRenderer : null;
+const path = DesktopService.getPath();
 const gd: libGDevelop = global.gd;
 
 let nextPreviewId = 1;
@@ -50,10 +48,25 @@ type State = {|
   captureOptions: ?CaptureOptions,
 |};
 
+// Keep hot reloads for the same project in one directory without sharing output
+// with another project or another editor window.
+const projectDirectoryIds = new WeakMap<gdProject, number>();
+let nextProjectDirectoryId = 1;
+const getProjectDirectoryName = (project: gdProject): string => {
+  let id = projectDirectoryIds.get(project);
+  if (id === undefined) {
+    id = nextProjectDirectoryId++;
+    projectDirectoryIds.set(project, id);
+  }
+  return `window-${DesktopService.getWindowId()}-project-${id}`;
+};
+
 const prepareExporter = async ({
+  project,
   isForInGameEdition,
   isForGameplayTest,
 }: {
+  project: gdProject,
   isForInGameEdition: boolean,
   isForGameplayTest: boolean,
 }): Promise<{|
@@ -64,12 +77,16 @@ const prepareExporter = async ({
   const { gdjsRoot } = await findGDJS();
   console.info('GDJS found in ', gdjsRoot);
 
+  if (!path) {
+    throw new Error('Desktop path is not available for preview export.');
+  }
   const localFileSystem = new LocalFileSystem({
     downloadUrlsToLocalFiles: false,
   });
   const fileSystem = assignIn(new gd.AbstractFileSystemJS(), localFileSystem);
   const outputDir = path.join(
     fileSystem.getTempDir(),
+    getProjectDirectoryName(project),
     isForGameplayTest
       ? 'gameplay-test-preview'
       : isForInGameEdition
@@ -107,6 +124,24 @@ export default class LocalPreviewLauncher extends React.Component<
   };
   _networkPreviewSubscriptionChecker: ?SubscriptionCheckerInterface = null;
   _hotReloadSubscriptionChecker: ?SubscriptionCheckerInterface = null;
+  _unsubscribePreviewWindowClosed: ?() => void = null;
+  _unsubscribeServeFolderDone: ?() => void = null;
+  _unsubscribeLocalNetworkIp: ?() => void = null;
+
+  componentWillUnmount() {
+    if (this._unsubscribePreviewWindowClosed) {
+      this._unsubscribePreviewWindowClosed();
+      this._unsubscribePreviewWindowClosed = null;
+    }
+    if (this._unsubscribeServeFolderDone) {
+      this._unsubscribeServeFolderDone();
+      this._unsubscribeServeFolderDone = null;
+    }
+    if (this._unsubscribeLocalNetworkIp) {
+      this._unsubscribeLocalNetworkIp();
+      this._unsubscribeLocalNetworkIp = null;
+    }
+  }
 
   _openPreviewBrowserWindow = () => {
     const {
@@ -119,33 +154,49 @@ export default class LocalPreviewLauncher extends React.Component<
     } = this.state;
     if (!previewBrowserWindowOptions || !previewGamePath) return;
 
-    if (!ipcRenderer) return;
+    if (!DesktopService.isDesktop()) return;
 
-    ipcRenderer.invoke('preview-open', {
-      previewBrowserWindowOptions,
-      previewGameIndexHtmlPath: `file://${previewGamePath}/index.html`,
-      alwaysOnTop,
-      hideMenuBar,
-      numberOfWindows,
-      captureOptions,
-    });
+    const previewIndexHtmlPath = DesktopService.getLocalFileUrl(
+      path
+        ? path.join(previewGamePath, 'index.html')
+        : `${previewGamePath}/index.html`
+    );
 
-    ipcRenderer.removeAllListeners('preview-window-closed');
-    ipcRenderer.on('preview-window-closed', async event => {
-      if (captureOptions) {
-        await this.props.onCaptureFinished(captureOptions);
+    if (this._unsubscribePreviewWindowClosed) {
+      this._unsubscribePreviewWindowClosed();
+      this._unsubscribePreviewWindowClosed = null;
+    }
+    this._unsubscribePreviewWindowClosed = DesktopService.onIpcEvent(
+      'preview-window-closed',
+      async () => {
+        if (captureOptions) {
+          await this.props.onCaptureFinished(captureOptions);
+        }
       }
-    });
+    );
+
+    DesktopService.preview
+      .open({
+        previewBrowserWindowOptions,
+        previewGameIndexHtmlPath: previewIndexHtmlPath,
+        alwaysOnTop,
+        hideMenuBar,
+        numberOfWindows,
+        captureOptions,
+      })
+      .catch(error => {
+        console.error('Unable to open preview window:', error);
+      });
   };
 
   closePreview = (windowId: number) => {
-    if (!ipcRenderer) return;
-    ipcRenderer.invoke('preview-close', { windowId });
+    if (!DesktopService.isDesktop()) return;
+    DesktopService.preview.close({ windowId });
   };
 
   closeAllPreviews = () => {
-    if (ipcRenderer) {
-      ipcRenderer.invoke('preview-close-all').catch(error => {
+    if (DesktopService.isDesktop()) {
+      DesktopService.preview.closeAll().catch(error => {
         console.info('Unable to close all preview windows - ignoring.', error);
       });
     }
@@ -172,12 +223,6 @@ export default class LocalPreviewLauncher extends React.Component<
           title: `Preview of ${project.getName()}`,
           backgroundColor: '#000000',
           webPreferences: {
-            webSecurity: false, // Allow to access to local files,
-            // Allow Node.js API access in renderer process, as long
-            // as we've not removed dependency on it and on "@electron/remote".
-            nodeIntegration: true,
-            sandbox: false,
-            contextIsolation: false,
             backgroundThrottling: false,
           },
         },
@@ -191,36 +236,48 @@ export default class LocalPreviewLauncher extends React.Component<
         if (!options.networkPreview) {
           this._openPreviewBrowserWindow();
         } else {
-          if (!ipcRenderer) return;
+          if (!DesktopService.isDesktop()) return;
 
-          ipcRenderer.removeAllListeners('serve-folder-done');
-          ipcRenderer.removeAllListeners('local-network-ips');
-          ipcRenderer.on('serve-folder-done', (event, err, serverParams) => {
-            if (err) {
+          if (this._unsubscribeServeFolderDone) {
+            this._unsubscribeServeFolderDone();
+            this._unsubscribeServeFolderDone = null;
+          }
+          if (this._unsubscribeLocalNetworkIp) {
+            this._unsubscribeLocalNetworkIp();
+            this._unsubscribeLocalNetworkIp = null;
+          }
+          this._unsubscribeServeFolderDone = DesktopService.onIpcEvent(
+            'serve-folder-done',
+            (err, serverParams) => {
+              if (err) {
+                this.setState({
+                  networkPreviewDialogOpen: true,
+                  networkPreviewPort: null,
+                  networkPreviewHost: null,
+                  networkPreviewError: err,
+                });
+              } else {
+                this.setState({
+                  networkPreviewDialogOpen: true,
+                  networkPreviewPort: serverParams.port,
+                });
+              }
+
+              setTimeout(() => this._checkSubscriptionForNetworkPreview());
+            }
+          );
+          this._unsubscribeLocalNetworkIp = DesktopService.onIpcEvent(
+            'local-network-ip',
+            ipAddress => {
               this.setState({
-                networkPreviewDialogOpen: true,
-                networkPreviewPort: null,
-                networkPreviewHost: null,
-                networkPreviewError: err,
-              });
-            } else {
-              this.setState({
-                networkPreviewDialogOpen: true,
-                networkPreviewPort: serverParams.port,
+                networkPreviewHost: ipAddress,
               });
             }
-
-            setTimeout(() => this._checkSubscriptionForNetworkPreview());
-          });
-          ipcRenderer.on('local-network-ip', (event, ipAddress) => {
-            this.setState({
-              networkPreviewHost: ipAddress,
-            });
-          });
-          ipcRenderer.send('serve-folder', {
+          );
+          DesktopService.serveFolder.start({
             root: gamePath,
           });
-          ipcRenderer.send('get-local-network-ip');
+          DesktopService.serveFolder.getLocalNetworkIp();
         }
       }
     );
@@ -253,7 +310,8 @@ export default class LocalPreviewLauncher extends React.Component<
       );
     }
 
-    const { outputDir, exporter, gdjsRoot } = await prepareExporter({
+    const { outputDir, exporter } = await prepareExporter({
+      project,
       isForInGameEdition: previewOptions.isForInGameEdition,
       isForGameplayTest: !!previewOptions.isForGameplayTest,
     });
@@ -295,18 +353,6 @@ export default class LocalPreviewLauncher extends React.Component<
       const hash = includeFileHashs[includeFile];
       previewExportOptions.setIncludeFileHash(includeFile, hash);
     }
-
-    // Give the preview the path to the "@electron/remote" module of the editor,
-    // as this is required by some features and we've not removed dependency
-    // on "@electron/remote" yet.
-    previewExportOptions.setElectronRemoteRequirePath(
-      path.join(
-        gdjsRoot,
-        '../preview_node_modules',
-        '@electron/remote',
-        'renderer/index.js'
-      )
-    );
 
     // TODO Filter according to isForInGameEdition because the first game preview
     // won't necessarily be the first debugger.
@@ -461,7 +507,11 @@ export default class LocalPreviewLauncher extends React.Component<
     } else {
       if (previewOptions.isForInGameEdition) {
         setEmbeddedGameFramePreviewLocation({
-          previewIndexHtmlLocation: `file://${outputDir}/index.html`,
+          previewIndexHtmlLocation: DesktopService.getLocalFileUrl(
+            path
+              ? path.join(outputDir, 'index.html')
+              : `${outputDir}/index.html`
+          ),
         });
       }
 
@@ -470,7 +520,11 @@ export default class LocalPreviewLauncher extends React.Component<
         // no window to open. The previewId in the URL forces the frame to
         // reload the game when the same preview is re-exported.
         setGameplayTestFramePreviewLocation({
-          previewIndexHtmlLocation: `file://${outputDir}/index.html?previewId=${previewId}`,
+          previewIndexHtmlLocation: `${DesktopService.getLocalFileUrl(
+            path
+              ? path.join(outputDir, 'index.html')
+              : `${outputDir}/index.html`
+          )}?previewId=${previewId}`,
           // The game window of the frame is fixed at the project
           // resolution: the frame only zooms its display.
           gameResolution: {

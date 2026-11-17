@@ -179,8 +179,13 @@ namespace gdjs {
       runtimeScene: RuntimeScene
     ): PlayerAuthenticationPlatform => {
       const runtimeGame = runtimeScene.getGame();
-      const electron = runtimeGame.getRenderer().getElectron();
-      if (electron) {
+      const renderer = runtimeGame.getRenderer();
+      const electron = renderer.getElectron();
+      const previewBridge =
+        typeof renderer.getElectronPreviewBridge === 'function'
+          ? renderer.getElectronPreviewBridge()
+          : null;
+      if (electron || previewBridge) {
         // This can be a:
         // - Preview in GDevelop desktop app.
         // - Desktop game running on Electron.
@@ -804,8 +809,16 @@ namespace gdjs {
             authWindowOptions,
           });
 
-          const electron = runtimeScene.getGame().getRenderer().getElectron();
-          const openWindow = () => electron.shell.openExternal(targetUrl);
+          const renderer = runtimeScene.getGame().getRenderer();
+          const previewBridge =
+            typeof renderer.getElectronPreviewBridge === 'function'
+              ? renderer.getElectronPreviewBridge()
+              : null;
+          const electron = renderer.getElectron();
+          const openWindow = () =>
+            previewBridge && previewBridge.shell
+              ? previewBridge.shell.openExternal(targetUrl)
+              : electron.shell.openExternal(targetUrl);
 
           openWindow();
 
@@ -1109,13 +1122,21 @@ namespace gdjs {
             );
 
             if (_authenticationLoaderContainer) {
-              const electron = runtimeScene
-                .getGame()
-                .getRenderer()
-                .getElectron();
-              const wikiOpenAction = electron
+              const renderer = runtimeScene.getGame().getRenderer();
+              const previewBridge =
+                typeof renderer.getElectronPreviewBridge === 'function'
+                  ? renderer.getElectronPreviewBridge()
+                  : null;
+              const electron = renderer.getElectron();
+              const openExternal =
+                previewBridge && previewBridge.shell
+                  ? previewBridge.shell.openExternal
+                  : electron && electron.shell
+                    ? electron.shell.openExternal
+                    : null;
+              const wikiOpenAction = openExternal
                 ? () =>
-                    electron.shell.openExternal(
+                    openExternal(
                       'https://wiki.gdevelop.io/gdevelop5/publishing/web'
                     )
                 : null; // Only show a link if we're on electron.

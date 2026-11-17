@@ -1,11 +1,8 @@
 // @flow
 import * as React from 'react';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import { useInterval } from '../Utils/UseInterval';
 import LiveMcpServerDialog from './LiveMcpServerDialog';
-
-const electron = optionalRequire('electron');
-const ipcRenderer = electron ? electron.ipcRenderer : null;
 
 // An agent session has no open connection to tell it is still there: it is
 // shown as connected while it made a call recently.
@@ -68,11 +65,14 @@ const getClientName = (line: string): string | null => {
 const useConnectedAgents = (): Array<LiveMcpAgent> => {
   const [agents, setAgents] = React.useState<Array<LiveMcpAgent>>([]);
   React.useEffect(() => {
-    if (!ipcRenderer) return;
-    const onLiveMcpMessage = (
-      event: any,
-      { sessionId, line }: {| sessionId: string, line: string |}
-    ) => {
+    if (!DesktopService.isDesktop()) return;
+    const onLiveMcpMessage = ({
+      sessionId,
+      line,
+    }: {|
+      sessionId: string,
+      line: string,
+    |}) => {
       const clientName = getClientName(line);
       setAgents(agents => [
         {
@@ -87,23 +87,22 @@ const useConnectedAgents = (): Array<LiveMcpAgent> => {
         ...agents.filter(agent => agent.sessionId !== sessionId),
       ]);
     };
-    const onLiveMcpSessionClosed = (
-      event: any,
-      { sessionId }: {| sessionId: string |}
-    ) => {
+    const onLiveMcpSessionClosed = ({ sessionId }: {| sessionId: string |}) => {
       setAgents(agents =>
         agents.filter(agent => agent.sessionId !== sessionId)
       );
     };
-    ipcRenderer.on('mcp-live-message', onLiveMcpMessage);
-    ipcRenderer.on('mcp-live-session-closed', onLiveMcpSessionClosed);
+    const unsubscribeMessage = DesktopService.onIpcEvent(
+      'mcp-live-message',
+      onLiveMcpMessage
+    );
+    const unsubscribeClosed = DesktopService.onIpcEvent(
+      'mcp-live-session-closed',
+      onLiveMcpSessionClosed
+    );
     return () => {
-      if (!ipcRenderer) return;
-      ipcRenderer.removeListener('mcp-live-message', onLiveMcpMessage);
-      ipcRenderer.removeListener(
-        'mcp-live-session-closed',
-        onLiveMcpSessionClosed
-      );
+      unsubscribeMessage();
+      unsubscribeClosed();
     };
   }, []);
 
@@ -132,9 +131,9 @@ export const LiveMcpServerProvider = ({
   const connectedAgents = useConnectedAgents();
 
   React.useEffect(() => {
-    if (!ipcRenderer) return;
+    if (!DesktopService.isDesktop()) return;
     let isMounted = true;
-    ipcRenderer.invoke('mcp-live-server-get-status').then(newStatus => {
+    DesktopService.mcp.getLiveServerStatus().then(newStatus => {
       if (isMounted) setStatus(newStatus);
     });
     return () => {
@@ -143,12 +142,12 @@ export const LiveMcpServerProvider = ({
   }, []);
 
   const setEnabled = React.useCallback(async (enabled: boolean) => {
-    if (!ipcRenderer) return;
-    setStatus(await ipcRenderer.invoke('mcp-live-server-set-enabled', enabled));
+    if (!DesktopService.isDesktop()) return;
+    setStatus(await DesktopService.mcp.setLiveServerEnabled(enabled));
   }, []);
   const resetToken = React.useCallback(async () => {
-    if (!ipcRenderer) return;
-    setStatus(await ipcRenderer.invoke('mcp-live-server-reset-token'));
+    if (!DesktopService.isDesktop()) return;
+    setStatus(await DesktopService.mcp.resetLiveServerToken());
   }, []);
   const openSetupDialog = React.useCallback(
     () => setIsSetupDialogOpen(true),
@@ -157,7 +156,7 @@ export const LiveMcpServerProvider = ({
 
   const state = React.useMemo(
     () => ({
-      isSupported: !!ipcRenderer,
+      isSupported: DesktopService.isDesktop(),
       status,
       setEnabled,
       resetToken,

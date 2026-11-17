@@ -1,13 +1,11 @@
 // @flow
-import optionalRequire from '../../../Utils/OptionalRequire';
+import DesktopService from '../../../Utils/DesktopService';
 import {
   type PreviewDebuggerServerCallbacks,
   type PreviewDebuggerServer,
   type DebuggerId,
   type ServerAddress,
 } from '../../PreviewLauncher.flow';
-const electron = optionalRequire('electron');
-const ipcRenderer = electron ? electron.ipcRenderer : null;
 
 let debuggerServerState: 'started' | 'starting' | 'stopped' = 'stopped';
 let debuggerServerAddress: ?ServerAddress = null;
@@ -82,16 +80,13 @@ const notifyConnectionClosed = (id: DebuggerId) => {
   );
 };
 
-const removeServerListeners = () => {
-  if (!ipcRenderer) return;
+let serverListenerUnsubscribes: Array<() => void> = [];
 
-  ipcRenderer.removeAllListeners('debugger-send-message-done');
-  ipcRenderer.removeAllListeners('debugger-error-received');
-  ipcRenderer.removeAllListeners('debugger-connection-closed');
-  ipcRenderer.removeAllListeners('debugger-connection-opened');
-  ipcRenderer.removeAllListeners('debugger-connection-errored');
-  ipcRenderer.removeAllListeners('debugger-start-server-done');
-  ipcRenderer.removeAllListeners('debugger-message-received');
+const removeServerListeners = () => {
+  serverListenerUnsubscribes.forEach(unsubscribe => {
+    unsubscribe();
+  });
+  serverListenerUnsubscribes = [];
 };
 
 /**
@@ -101,7 +96,7 @@ const removeServerListeners = () => {
 class LocalPreviewDebuggerServer {
   // $FlowFixMe[missing-local-annot]
   startServer() {
-    if (!ipcRenderer) return Promise.reject();
+    if (!DesktopService.isDesktop()) return Promise.reject();
     if (debuggerServerState === 'started') return Promise.resolve();
 
     if (!isWindowMessageListenerRegistered) {
@@ -136,69 +131,87 @@ class LocalPreviewDebuggerServer {
       removeServerListeners();
       setDebuggerServerState('starting');
 
-      ipcRenderer.on('debugger-error-received', (event, err) => {
-        setDebuggerServerState('stopped');
-        if (!serverStartPromiseCompleted) {
-          reject(err);
-          serverStartPromiseCompleted = true;
-        }
+      serverListenerUnsubscribes.push(
+        DesktopService.onIpcEvent('debugger-error-received', err => {
+          setDebuggerServerState('stopped');
+          if (!serverStartPromiseCompleted) {
+            reject(err);
+            serverStartPromiseCompleted = true;
+          }
 
-        callbacksList.forEach(({ onErrorReceived }) => onErrorReceived(err));
-      });
-
-      ipcRenderer.on('debugger-connection-closed', (event, { id }) => {
-        const debuggerIdIndex = debuggerIds.indexOf(id);
-        if (debuggerIdIndex !== -1) debuggerIds.splice(debuggerIdIndex, 1);
-
-        notifyConnectionClosed(id);
-      });
-
-      ipcRenderer.on('debugger-connection-opened', (event, { id }) => {
-        debuggerIds.push(id);
-        callbacksList.forEach(({ onConnectionOpened }) =>
-          onConnectionOpened({
-            id,
-            debuggerIds: getExistingDebuggerIds(),
-          })
-        );
-      });
-
-      ipcRenderer.on(
-        'debugger-connection-errored',
-        (event, { id, errorMessage }) => {
-          callbacksList.forEach(({ onConnectionErrored }) =>
-            onConnectionErrored({
-              id,
-              errorMessage,
-            })
-          );
-        }
+          callbacksList.forEach(({ onErrorReceived }) => onErrorReceived(err));
+        })
       );
 
-      ipcRenderer.on('debugger-start-server-done', (event, { address }) => {
-        console.info('Local preview debugger started');
-        debuggerServerAddress = address;
-        setDebuggerServerState('started');
-        if (!serverStartPromiseCompleted) {
-          resolve();
-          serverStartPromiseCompleted = true;
-        }
-      });
+      serverListenerUnsubscribes.push(
+        DesktopService.onIpcEvent('debugger-connection-closed', ({ id }) => {
+          const debuggerIdIndex = debuggerIds.indexOf(id);
+          if (debuggerIdIndex !== -1) debuggerIds.splice(debuggerIdIndex, 1);
 
-      ipcRenderer.on('debugger-message-received', (event, { id, message }) => {
-        let parsedMessage = null;
-        try {
-          parsedMessage = JSON.parse(message);
-        } catch (e) {
-          console.warn(
-            'Error while parsing message received from debugger client:',
-            e
+          notifyConnectionClosed(id);
+        })
+      );
+
+      serverListenerUnsubscribes.push(
+        DesktopService.onIpcEvent('debugger-connection-opened', ({ id }) => {
+          debuggerIds.push(id);
+          callbacksList.forEach(({ onConnectionOpened }) =>
+            onConnectionOpened({
+              id,
+              debuggerIds: getExistingDebuggerIds(),
+            })
           );
-        }
+        })
+      );
 
-        handleParsedMessage(id, parsedMessage);
-      });
-      ipcRenderer.send('debugger-start-server');
+      serverListenerUnsubscribes.push(
+        DesktopService.onIpcEvent(
+          'debugger-connection-errored',
+          ({ id, errorMessage }) => {
+            callbacksList.forEach(({ onConnectionErrored }) =>
+              onConnectionErrored({
+                id,
+                errorMessage,
+              })
+            );
+          }
+        )
+      );
+
+      serverListenerUnsubscribes.push(
+        DesktopService.onIpcEvent(
+          'debugger-start-server-done',
+          ({ address }) => {
+            console.info('Local preview debugger started');
+            debuggerServerAddress = address;
+            setDebuggerServerState('started');
+            if (!serverStartPromiseCompleted) {
+              resolve();
+              serverStartPromiseCompleted = true;
+            }
+          }
+        )
+      );
+
+      serverListenerUnsubscribes.push(
+        DesktopService.onIpcEvent(
+          'debugger-message-received',
+          ({ id, message }) => {
+            let parsedMessage = null;
+            try {
+              parsedMessage = JSON.parse(message);
+            } catch (e) {
+              console.warn(
+                'Error while parsing message received from debugger client:',
+                e
+              );
+            }
+
+            handleParsedMessage(id, parsedMessage);
+          }
+        )
+      );
+      DesktopService.debuggerServer.start({});
     });
 
     // Consider the start of the server as a failure if not completed/errored
@@ -250,13 +263,13 @@ class LocalPreviewDebuggerServer {
       return;
     }
 
-    if (!ipcRenderer) return;
+    if (!DesktopService.isDesktop()) return;
     if (debuggerServerState !== 'started') {
       console.error('Cannot send message when debugger server is not started.');
       return;
     }
 
-    ipcRenderer.send('debugger-send-message', {
+    DesktopService.debuggerServer.sendMessage({
       id,
       message: JSON.stringify(message),
     });
@@ -385,8 +398,8 @@ class LocalPreviewDebuggerServer {
 
     responseCallbacks.clear();
 
-    if (ipcRenderer && previousDebuggerIds.length) {
-      ipcRenderer.send('debugger-close-all-connections');
+    if (DesktopService.isDesktop() && previousDebuggerIds.length) {
+      DesktopService.debuggerServer.closeAllConnections();
     }
 
     if (embeddedGameFrameWindow) {

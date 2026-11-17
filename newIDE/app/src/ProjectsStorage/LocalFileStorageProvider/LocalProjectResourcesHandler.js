@@ -7,20 +7,12 @@ import {
 } from '../../ResourcesList/ResourceUtils';
 import { mapVector } from '../../Utils/MapFor';
 import newNameGenerator from '../../Utils/NewNameGenerator';
-import optionalLazyRequire from '../../Utils/OptionalLazyRequire';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import { copyTextToClipboard } from '../../Utils/Clipboard';
 
 const gd: libGDevelop = global.gd;
 
-const lazyRequireGlob = optionalLazyRequire('glob');
-const path = optionalRequire('path');
-
-// It's important to use remote and not electron for folder actions,
-// otherwise they will be opened in the background.
-// See https://github.com/electron/electron/issues/4349#issuecomment-777475765
-const remote = optionalRequire('@electron/remote');
-const shell = remote ? remote.shell : null;
+const path = DesktopService.getPath();
 
 export const locateResourceFile = ({
   project,
@@ -29,12 +21,13 @@ export const locateResourceFile = ({
   project: gdProject,
   resource: gdResource,
 |}) => {
+  if (!path) return;
   const resourceFilePath = getLocalResourceFullPath(
     project,
     resource.getName()
   );
 
-  if (shell) shell.showItemInFolder(path.resolve(resourceFilePath));
+  DesktopService.showItemInFolder(path.resolve(resourceFilePath));
 };
 
 export const openResourceFile = ({
@@ -44,11 +37,12 @@ export const openResourceFile = ({
   project: gdProject,
   resource: gdResource,
 |}) => {
+  if (!path) return;
   const resourceFilePath = getLocalResourceFullPath(
     project,
     resource.getName()
   );
-  if (shell) shell.openPath(path.resolve(resourceFilePath));
+  DesktopService.openPath(path.resolve(resourceFilePath));
 };
 
 export const copyResourceFilePath = ({
@@ -58,6 +52,7 @@ export const copyResourceFilePath = ({
   project: gdProject,
   resource: gdResource,
 |}) => {
+  if (!path) return;
   const resourceFilePath = getLocalResourceFullPath(
     project,
     resource.getName()
@@ -74,27 +69,17 @@ export const scanForNewResources = async ({
   extensions: Array<string>,
   createResource: () => gdResource,
 |}) => {
-  const glob = lazyRequireGlob();
-  if (!glob) return;
+  if (!path) return;
 
   const resourcesManager = project.getResourcesManager();
   const projectPath = path.dirname(project.getProjectFile());
 
-  const allExtensions = [
-    ...extensions,
-    ...extensions.map(extension => extension.toUpperCase()),
-  ];
-
   try {
-    const allFiles: Array<string> = await new Promise((resolve, reject) => {
-      glob(
-        projectPath + '/**/*.{' + allExtensions.join(',') + '}',
-        (error, files) => {
-          if (error) reject(error);
-          else resolve(files);
-        }
-      );
+    const allFiles: ?Array<string> = await DesktopService.globFiles({
+      baseFolder: projectPath,
+      extensions,
     });
+    if (!allFiles) return;
 
     const filesToCheck = new gd.VectorString();
     allFiles.forEach(filePath =>

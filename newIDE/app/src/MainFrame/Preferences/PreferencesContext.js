@@ -11,13 +11,9 @@ import { type ShortcutMap } from '../../KeyboardShortcuts/DefaultShortcuts';
 import { type CommandName } from '../../CommandPalette/CommandsList';
 import { type EditorTabsPersistedState } from '../EditorTabs/EditorTabsHandler';
 import { type GamesDashboardOrderBy } from '../../GameDashboard/GamesList';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import { findDefaultFolder } from '../../ProjectsStorage/LocalFileStorageProvider/LocalPathFinder';
 import { isWebGL2Supported } from '../../Utils/WebGL';
-
-const electron = optionalRequire('electron');
-const remote = optionalRequire('@electron/remote');
-const app = remote ? remote.app : null;
 
 export type AlertMessageIdentifier =
   | 'default-additional-work'
@@ -431,7 +427,7 @@ export const initialPreferences = {
     autoOpenMostRecentProject: true,
     hasProjectOpened: false,
     userShortcutMap: {},
-    newObjectDialogDefaultTab: ((electron
+    newObjectDialogDefaultTab: ((DesktopService.isDesktop()
       ? 'new-object'
       : 'asset-store'): string),
     // Show the effects of the store first, as they are not otherwise visible.
@@ -451,7 +447,9 @@ export const initialPreferences = {
     use3DEditor: (isWebGL2Supported(): boolean),
     showBasicProfilingCounters: false,
     inAppTutorialsProgress: {},
-    newProjectsDefaultFolder: ((app ? findDefaultFolder(app) : ''): string),
+    newProjectsDefaultFolder: ((DesktopService.isDesktop()
+      ? findDefaultFolder()
+      : ''): string),
     newProjectsDefaultStorageProviderName: 'Cloud',
     useShortcutToClosePreviewWindow: true,
     watchProjectFolderFilesForLocalProjects: true,

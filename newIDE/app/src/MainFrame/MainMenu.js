@@ -14,10 +14,9 @@ import {
 import { getElectronAccelerator } from '../KeyboardShortcuts';
 import { isMacLike } from '../Utils/Platform';
 import Window from '../Utils/Window';
-import optionalRequire from '../Utils/OptionalRequire';
-const electron = optionalRequire('electron');
+import DesktopService from '../Utils/DesktopService';
 
-const isDesktop = !!electron;
+const isDesktop = DesktopService.isDesktop();
 
 export type BuildMainMenuProps = {|
   i18n: I18nType,
@@ -253,7 +252,7 @@ export const buildMainMenuDeclarativeTemplate = ({
         accelerator: getElectronAccelerator(shortcutMap['OPEN_GLOBAL_SEARCH']),
       },
       // Some Electron specific menu items, not shown in the web-app.
-      ...(!!electron
+      ...(DesktopService.isDesktop()
         ? [
             { type: 'separator' },
             {
@@ -373,13 +372,17 @@ export const buildMainMenuDeclarativeTemplate = ({
   // View (with Global search, Debugger, etc.) is shown in top menu and in drawer when project is open.
   const template: Array<MenuDeclarativeItemTemplate> = [
     fileTemplate,
-    ...(!!electron && isApplicationTopLevelMenu ? [editTemplate] : []),
-    ...(!!electron && isApplicationTopLevelMenu
+    ...(DesktopService.isDesktop() && isApplicationTopLevelMenu
+      ? [editTemplate]
+      : []),
+    ...(DesktopService.isDesktop() && isApplicationTopLevelMenu
       ? [viewTemplate]
       : project
       ? [viewTemplate]
       : []),
-    ...(!!electron && isApplicationTopLevelMenu ? [windowTemplate] : []),
+    ...(DesktopService.isDesktop() && isApplicationTopLevelMenu
+      ? [windowTemplate]
+      : []),
     helpTemplate,
   ];
 

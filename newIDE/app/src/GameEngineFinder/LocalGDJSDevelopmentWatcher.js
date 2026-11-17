@@ -1,9 +1,7 @@
 // @flow
 import * as React from 'react';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import PreferencesContext from '../MainFrame/Preferences/PreferencesContext';
-const electron = optionalRequire('electron');
-const ipcRenderer = electron ? electron.ipcRenderer : null;
 
 type Props = {
   onGDJSUpdated: () => Promise<void> | void,
@@ -24,16 +22,16 @@ export const LocalGDJSDevelopmentWatcher = ({ onGDJSUpdated }: Props): null => {
         return;
       }
 
-      if (!ipcRenderer) {
+      if (!DesktopService.isDesktop()) {
         console.error(
-          'Unable to find ipcRenderer to set up GDJS development watchers'
+          'Unable to find desktop bridge to set up GDJS development watchers'
         );
         return;
       }
 
-      ipcRenderer.send('setup-local-gdjs-development-watcher');
+      DesktopService.gdjsWatcher.setup();
       return () => {
-        ipcRenderer.send('close-local-gdjs-development-watcher');
+        DesktopService.gdjsWatcher.close();
       };
     },
     [shouldWatch]
@@ -46,24 +44,19 @@ export const LocalGDJSDevelopmentWatcher = ({ onGDJSUpdated }: Props): null => {
         return;
       }
 
-      if (!ipcRenderer) {
+      if (!DesktopService.isDesktop()) {
         return;
       }
 
-      ipcRenderer.removeAllListeners(
-        'local-gdjs-development-watcher-runtime-updated'
-      );
-      ipcRenderer.on(
+      const unsubscribe = DesktopService.onIpcEvent(
         'local-gdjs-development-watcher-runtime-updated',
-        (event, err) => {
+        () => {
           onGDJSUpdated();
         }
       );
 
       return () => {
-        ipcRenderer.removeAllListeners(
-          'local-gdjs-development-watcher-runtime-updated'
-        );
+        unsubscribe();
       };
     },
     [shouldWatch, onGDJSUpdated]

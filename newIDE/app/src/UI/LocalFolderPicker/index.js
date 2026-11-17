@@ -6,15 +6,12 @@ import { type I18n as I18nType } from '@lingui/core';
 
 import * as React from 'react';
 import TextField from '../TextField';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import {
   getLastUsedDialogDirectory,
   rememberLastUsedDialogDirectory,
 } from '../../Utils/FileSystem';
 import FlatButton from '../FlatButton';
-const electron = optionalRequire('electron');
-const remote = optionalRequire('@electron/remote');
-const dialog = remote ? remote.dialog : null;
 
 const styles = {
   container: {
@@ -55,15 +52,15 @@ const LocalFolderPicker = ({
   // formatting kicking in.
   const [textValue, setTextValue] = React.useState(value);
   const onChooseFolder = async ({ title, message }: TitleAndMessage) => {
-    if (!dialog || !electron) return;
+    if (!DesktopService.isDesktop()) return;
 
-    const browserWindow = remote.getCurrentWindow();
-    const { filePaths } = await dialog.showOpenDialog(browserWindow, {
+    const result = await DesktopService.showOpenDialog({
       title,
       properties: ['openDirectory', 'createDirectory'],
       message,
       defaultPath: defaultPath || getLastUsedDialogDirectory(),
     });
+    const filePaths = result ? result.filePaths : null;
 
     if (!filePaths || !filePaths.length) return;
 

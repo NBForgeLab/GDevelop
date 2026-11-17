@@ -3,7 +3,7 @@ import {
   type EventsFunctionCodeWriter,
   type EventsFunctionCodeWriterCallbacks,
 } from '..';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import { getUID } from '../../Utils/LocalUserInfo';
 import slugs from 'slugs';
 
@@ -18,9 +18,8 @@ import slugs from 'slugs';
 // To avoid this, we use `safelyDoFsOperation` which will guard against these happening concurrently.
 import { safelyDoFsOperation } from '../../Utils/ElectronConflictingOperationsMutex';
 
-const path = optionalRequire('path');
-const os = optionalRequire('os');
-const fs = optionalRequire('fs');
+const path = DesktopService.getPath();
+const fs = DesktopService.getFs();
 
 /**
  * Create the EventsFunctionCodeWriter that writes generated code for events functions
@@ -31,12 +30,14 @@ export const makeLocalEventsFunctionCodeWriter = ({
 }: EventsFunctionCodeWriterCallbacks): EventsFunctionCodeWriter => {
   // The generated code for extensions will be stored in a temporary directory
 
-  const outputDir = path.join(
-    os.tmpdir(),
-    `GDGeneratedEventsFunctions-` + getUID()
-  );
+  const outputDir = path
+    ? path.join(
+        DesktopService.getTmpDir(),
+        `GDGeneratedEventsFunctions-` + getUID()
+      )
+    : `${DesktopService.getTmpDir()}/GDGeneratedEventsFunctions-${getUID()}`;
   try {
-    fs.mkdirSync(outputDir, { recursive: true });
+    if (fs) fs.mkdirSync(outputDir, { recursive: true });
   } catch (err) {
     console.error(
       'Unable to create the directory where to output events functions generated code: ',
@@ -59,6 +60,7 @@ export const makeLocalEventsFunctionCodeWriter = ({
           new Promise((resolve, reject) => {
             const includeFile = getPathFor(functionCodeNamespace);
             onWriteFile({ includeFile, content: code });
+            if (!fs) return reject(new Error('Filesystem is not supported.'));
             fs.writeFile(includeFile, code, err => {
               if (err) return reject(err);
 
@@ -76,6 +78,7 @@ export const makeLocalEventsFunctionCodeWriter = ({
           new Promise((resolve, reject) => {
             const includeFile = getPathFor(behaviorCodeNamespace);
             onWriteFile({ includeFile, content: code });
+            if (!fs) return reject(new Error('Filesystem is not supported.'));
             fs.writeFile(includeFile, code, err => {
               if (err) return reject(err);
 
@@ -93,6 +96,7 @@ export const makeLocalEventsFunctionCodeWriter = ({
           new Promise((resolve, reject) => {
             const includeFile = getPathFor(objectCodeNamespace);
             onWriteFile({ includeFile, content: code });
+            if (!fs) return reject(new Error('Filesystem is not supported.'));
             fs.writeFile(includeFile, code, err => {
               if (err) return reject(err);
 

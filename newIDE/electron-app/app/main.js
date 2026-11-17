@@ -8,7 +8,30 @@ const Menu = electron.Menu;
 const Notification = electron.Notification;
 const protocol = electron.protocol;
 const isDev = require('electron-is-dev');
-const ipcMain = electron.ipcMain;
+const { createAuthorizedIpc } = require('./Utils/AuthorizedIpc');
+const { resolvePreviewDirectory } = require('./Utils/PreviewDirectory');
+const { createFileAccessPolicy } = require('./Utils/FileAccessPolicy');
+const { grantCliFileAccess } = require('./Utils/CliFileAccess');
+const ipcMain = createAuthorizedIpc(electron.ipcMain, event => {
+  if (!event || !event.sender || event.sender.isDestroyed()) return false;
+  if (!event.senderFrame || event.senderFrame !== event.sender.mainFrame)
+    return false;
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win || !mainWindows.has(win)) return false;
+  try {
+    const url = new URL(event.senderFrame.url);
+    return (
+      (url.protocol === 'gdide:' && url.hostname === 'app') ||
+      (isDev &&
+        url.origin ===
+          new URL(
+            process.env.GDEVELOP_DEV_SERVER_URL || 'http://localhost:3000'
+          ).origin)
+    );
+  } catch (_) {
+    return false;
+  }
+});
 const autoUpdater = require('electron-updater').autoUpdater;
 const log = require('electron-log');
 const { uploadLocalFile } = require('./LocalFileUploader');
@@ -26,6 +49,16 @@ const {
 } = require('./MainMenu');
 const { loadExternalEditorWindow } = require('./LocalExternalEditorWindow');
 const { load, registerGdideProtocol } = require('./Utils/UrlLoader');
+const {
+  GDEVELOP_FILE_SCHEME,
+  registerGdevelopFileProtocol,
+} = require('./Utils/GdevelopFileProtocol');
+const {
+  buildNpmScriptSpawnConfig,
+  isSafeExternalUrl,
+  setupDesktopIpcHandlers,
+  attachWindowDesktopEvents,
+} = require('./DesktopIpcHandlers');
 const { setupMcpStdioPipe } = require('./CliMcpServerPipe');
 const { waitForPreviousCliInstance } = require('./CliInstanceLock');
 const {
@@ -64,17 +97,8 @@ const {
   routeCliCommandToLiveEditor,
 } = require('./CliCommandHandoff');
 
-// Initialize `@electron/remote` module
-require('@electron/remote/main').initialize();
-
-// @electron/remote 2.1.2 walks `module.parent` to the root and requires from
-// there. On Electron 45 that root is the Electron bootstrap, which cannot see
-// app/node_modules. Resolve from this file instead.
-app.on('remote-require', (event, _webContents, moduleName) => {
-  event.returnValue = require(moduleName);
-});
-
-const args = parseGDevelopArgs(process.argv.slice(isDev ? 2 : 1));
+let defaultWindowArgs = parseGDevelopArgs(process.argv.slice(isDev ? 2 : 1));
+const args = defaultWindowArgs;
 // `--mcp`: serve the editor functions of the project on stdin/stdout, in its
 // own (headless) process, until the MCP client closes stdin.
 if (args['mcp']) args['run-command'] = 'SERVE_MCP';
@@ -113,9 +137,27 @@ let liveMcpServer = null;
 
 const devTools = !!args['dev-tools'];
 
-// See registerGdideProtocol (used for HTML modules support)
+// See registerGdideProtocol (used for HTML modules support) & registerGdevelopFileProtocol
 protocol.registerSchemesAsPrivileged([
-  { scheme: 'gdide', privileges: { corsEnabled: true } },
+  {
+    scheme: 'gdide',
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      corsEnabled: true,
+    },
+  },
+  {
+    scheme: GDEVELOP_FILE_SCHEME,
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      corsEnabled: true,
+      stream: true,
+    },
+  },
 ]);
 
 // On computers having an integrated and a discrete graphics card (most gaming
@@ -139,8 +181,7 @@ if (process.platform === 'win32') {
 // a stale registry entry falls back to running headless in this process.
 const isCliRunCommand = !!args['run-command'];
 const gotTheLock =
-  isCliRunCommand &&
-  (args['mcp'] || !isCliProjectAlreadyOpenElsewhere(args))
+  isCliRunCommand && (args['mcp'] || !isCliProjectAlreadyOpenElsewhere(args))
     ? true
     : app.requestSingleInstanceLock({ args });
 
@@ -148,24 +189,36 @@ if (!gotTheLock) {
   // Second instance attempted - quit immediately
   app.quit();
 } else {
-  app.on('second-instance', (event, commandLine, workingDirectory, additionalData) => {
-    const secondInstanceArgs = parseSecondInstanceArgs({
-      commandLine,
-      additionalData,
-      isDev,
-    });
+  app.on(
+    'second-instance',
+    (event, commandLine, workingDirectory, additionalData) => {
+      const secondInstanceArgs = parseSecondInstanceArgs({
+        commandLine,
+        additionalData,
+        isDev,
+      });
+      grantCliFileAccess(
+        secondInstanceArgs,
+        grantSelectedPath,
+        workingDirectory
+      );
 
-    if (routeCliCommandToLiveEditor({ parsedArgs: secondInstanceArgs, mainWindows })) {
-      return;
+      if (
+        routeCliCommandToLiveEditor({
+          parsedArgs: secondInstanceArgs,
+          mainWindows,
+        })
+      ) {
+        return;
+      }
+
+      // Update the default args so newly created windows pick up the
+      // second-instance CLI flags (e.g. --run-command, positional project file).
+      defaultWindowArgs = secondInstanceArgs;
+
+      createNewWindow(secondInstanceArgs);
     }
-
-    // Update the global args so the new window's renderer (which reads them
-    // via remote.getGlobal('args')) picks up the second-instance CLI flags
-    // (e.g. --run-command, positional project file).
-    global['args'] = secondInstanceArgs;
-
-    createNewWindow(secondInstanceArgs);
-  });
+  );
 }
 
 // Quit when all windows are closed.
@@ -193,6 +246,10 @@ app.on('window-all-closed', function() {
 // Maps target (from window.open) to BrowserWindow ID for child windows.
 // This is used to target the correct BrowserWindow for IPC messages.
 const windowTargetIdToBrowserWindowIds = new Map();
+const windowArgsByWebContentsId = new Map();
+let fileAccessPolicy = null;
+let grantSelectedPath = null;
+let registerProtocolsForSession = null;
 
 // Function to create a new GDevelop window
 function createNewWindow(windowArgs = args) {
@@ -217,12 +274,11 @@ function createNewWindow(windowArgs = args) {
     },
     trafficLightPosition: { x: 12, y: 12 },
     webPreferences: {
-      webSecurity: false, // Allow to access to local files,
-      // Allow Node.js API access in renderer process, as long
-      // as we've not removed dependency on it and on "@electron/remote".
-      nodeIntegration: true,
-      sandbox: false,
-      contextIsolation: false,
+      webSecurity: true,
+      nodeIntegration: false,
+      sandbox: true,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js'),
       // Keep timers and `requestAnimationFrame` running at full speed when
       // the window is minimized or covered by another window (Chromium
       // otherwise throttles timers to once a minute and stops animation
@@ -282,14 +338,20 @@ function createNewWindow(windowArgs = args) {
 
   // Track this window
   mainWindows.add(newWindow);
+  if (registerProtocolsForSession) {
+    registerProtocolsForSession(newWindow.webContents.session);
+  }
+  const newWindowWebContentsId = newWindow.webContents.id;
+  windowArgsByWebContentsId.set(newWindowWebContentsId, windowArgs);
+  attachWindowDesktopEvents(newWindow);
+  newWindow.on('closed', () => {
+    windowArgsByWebContentsId.delete(newWindowWebContentsId);
+  });
 
   // Set as primary window if this is the first one
   if (isPrimaryWindow) {
     mainWindow = newWindow;
   }
-
-  // Enable `@electron/remote` module for renderer process
-  require('@electron/remote/main').enable(newWindow.webContents);
 
   // The app is loaded from file://, so no Referer is sent: YouTube embeds then fail with "Error 153".
   newWindow.webContents.session.webRequest.onBeforeSendHeaders(
@@ -325,16 +387,15 @@ function createNewWindow(windowArgs = args) {
 
   // Log process ID to verify separate renderer processes
   newWindow.webContents.once('did-finish-load', () => {
-    newWindow.webContents
-      .executeJavaScript('process.pid')
-      .then(pid => {
-        log.info(
-          `Window ${windowId} (window number ${windowNumber}) is running in renderer process PID: ${pid}`
-        );
-      })
-      .catch(err => {
-        log.warn('Could not get renderer process PID:', err);
-      });
+    const pid =
+      typeof newWindow.webContents.getOSProcessId === 'function'
+        ? newWindow.webContents.getOSProcessId()
+        : null;
+    if (pid != null) {
+      log.info(
+        `Window ${windowId} (window number ${windowNumber}) is running in renderer process PID: ${pid}`
+      );
+    }
   });
 
   if (isDev)
@@ -343,12 +404,28 @@ function createNewWindow(windowArgs = args) {
     );
 
   // Load the index.html of the app.
-  load({
-    window: newWindow,
-    isDev,
-    path: '/index.html',
-    devTools,
-  });
+  const loadEditor = () =>
+    load({ window: newWindow, isDev, path: '/index.html', devTools });
+  if (isDev) loadEditor();
+  else {
+    require('./Utils/StorageMigration')
+      .migrateLegacyStorage({
+        targetSession: newWindow.webContents.session,
+        legacyPath: path.join(__dirname, 'www', 'index.html'),
+      })
+      .then(() => {
+        if (!newWindow.isDestroyed()) loadEditor();
+      })
+      .catch(error => {
+        log.error('Legacy storage migration failed:', error);
+        electron.dialog.showErrorBox(
+          'Unable to restore editor data',
+          'Your previous editor data has been preserved. Please restart GDevelop to retry.\n' +
+            error.message
+        );
+        if (!newWindow.isDestroyed()) newWindow.destroy();
+      });
+  }
 
   newWindow.on('closed', function() {
     // Remove from tracked windows
@@ -375,7 +452,7 @@ function createNewWindow(windowArgs = args) {
     if (url !== newWindow.webContents.getURL()) {
       console.info('Opening in browser (because of will-navigate):', url);
       e.preventDefault();
-      electron.shell.openExternal(url);
+      if (isSafeExternalUrl(url)) electron.shell.openExternal(url);
     }
   });
 
@@ -386,9 +463,7 @@ function createNewWindow(windowArgs = args) {
       // Extract the theme background color passed via the features string
       // by WindowPortal (e.g. "...,themeBackgroundColor=%23282828").
       let backgroundColor = '#000';
-      const match = details.features.match(
-        /themeBackgroundColor=([^,]*)/
-      );
+      const match = details.features.match(/themeBackgroundColor=([^,]*)/);
       if (match) {
         try {
           backgroundColor = decodeURIComponent(match[1]);
@@ -408,30 +483,32 @@ function createNewWindow(windowArgs = args) {
           trafficLightPosition: { x: 12, y: 12 },
           backgroundColor,
           webPreferences: {
-            // No need for Node.js integration or disabled context isolation, because
-            // popped-out windows are driven by React portals and don't do any Node operations.
-            // Still keep webSecurity enabled to allow local file access.
-            // nodeIntegration: true,
-            // contextIsolation: false,
-            webSecurity: false,
-            sandbox: false,
+            webSecurity: true,
+            nodeIntegration: false,
+            sandbox: true,
+            contextIsolation: true,
           },
         },
       };
     }
 
     console.info('Opening in browser (because of new window): ', details.url);
-    electron.shell.openExternal(details.url);
+    if (isSafeExternalUrl(details.url))
+      electron.shell.openExternal(details.url);
     return { action: 'deny' };
   });
 
-  // When a child window is created (e.g. a popped-out editor), set up security
-  // policies and enable @electron/remote on it.
+  // When a child window is created (e.g. a popped-out editor), set up security policies on it.
   newWindow.webContents.on('did-create-window', (childWindow, details) => {
-    require('@electron/remote/main').enable(childWindow.webContents);
-
-    if (!details.frameName || !details.frameName.startsWith('GDevelopWindowPortal')) {
-      console.warn(`Unexpected frameName for child window: ${details.frameName} - verify handling on Electron side.`);
+    if (
+      !details.frameName ||
+      !details.frameName.startsWith('GDevelopWindowPortal')
+    ) {
+      console.warn(
+        `Unexpected frameName for child window: ${
+          details.frameName
+        } - verify handling on Electron side.`
+      );
     }
 
     // Track child window by frameName so the renderer can look up its
@@ -450,13 +527,15 @@ function createNewWindow(windowArgs = args) {
     childWindow.webContents.on('will-navigate', (e, url) => {
       if (url !== childWindow.webContents.getURL()) {
         e.preventDefault();
-        electron.shell.openExternal(url);
+        if (isSafeExternalUrl(url)) electron.shell.openExternal(url);
       }
     });
 
     // Block further nesting of new windows from pop-outs.
     childWindow.webContents.setWindowOpenHandler(childDetails => {
-      electron.shell.openExternal(childDetails.url);
+      if (isSafeExternalUrl(childDetails.url)) {
+        electron.shell.openExternal(childDetails.url);
+      }
       return { action: 'deny' };
     });
   });
@@ -538,13 +617,96 @@ app.on('ready', async function() {
     await waitForPreviousCliInstance({ app, log, timeoutMs: 10000 });
   }
 
-  registerGdideProtocol({ isDev });
+  const { net, session } = electron;
+  const registeredProtocolSessions = new WeakSet();
+  // The renderer gets an application-owned scratch directory, never all of OS temp.
+  const temporaryDirectory = path.join(app.getPath('temp'), 'GDevelop-sandbox');
+  fs.mkdirSync(temporaryDirectory, { recursive: true });
+  const readRoots = [
+    app.getAppPath(),
+    process.resourcesPath,
+    ...(isDev
+      ? [
+          path.resolve(__dirname, '../../app'),
+          path.resolve(__dirname, '../../../GDJS'),
+        ]
+      : []),
+  ].filter(Boolean);
+  fileAccessPolicy = createFileAccessPolicy({
+    readRoots,
+    writeRoots: [temporaryDirectory],
+  });
+  const grantsFile = path.join(
+    app.getPath('userData'),
+    'file-access-grants.json'
+  );
+  try {
+    const saved = JSON.parse(fs.readFileSync(grantsFile, 'utf8'));
+    if (saved && saved.version === 2) {
+      fileAccessPolicy.restoreGrants(saved.grants);
+    }
+  } catch (error) {
+    if (error.code !== 'ENOENT')
+      log.warn('Could not restore file grants:', error.message);
+  }
+  grantSelectedPath = (selectedPath, mode = 'read', directory = false) => {
+    if (directory) {
+      fileAccessPolicy.grantRoot(selectedPath, mode);
+    } else {
+      fileAccessPolicy.grantFile(selectedPath, mode);
+    }
+    const pendingFile = grantsFile + '.tmp';
+    fs.writeFileSync(
+      pendingFile,
+      JSON.stringify({ version: 2, grants: fileAccessPolicy.exportGrants() }),
+      { mode: 0o600 }
+    );
+    fs.renameSync(pendingFile, grantsFile);
+  };
+  grantCliFileAccess(defaultWindowArgs, grantSelectedPath);
+  registerProtocolsForSession = targetSession => {
+    if (!targetSession || registeredProtocolSessions.has(targetSession)) {
+      return;
+    }
+    registeredProtocolSessions.add(targetSession);
+    const sessionProtocol = targetSession.protocol || protocol;
+    registerGdideProtocol({
+      isDev,
+      protocol: sessionProtocol,
+      developmentServerBaseUrl: process.env.GDEVELOP_DEV_SERVER_URL,
+    });
+    registerGdevelopFileProtocol({
+      protocol: sessionProtocol,
+      net,
+      isDev,
+      developmentServerBaseUrl: process.env.GDEVELOP_DEV_SERVER_URL,
+      isPathAllowed: candidatePath =>
+        fileAccessPolicy.hasAccess(candidatePath, 'read'),
+    });
+  };
+  registerProtocolsForSession(session.defaultSession);
+
+  setupDesktopIpcHandlers({
+    isDev,
+    getDefaultArgs: () => defaultWindowArgs,
+    getWindowArgsForWebContents: webContents =>
+      windowArgsByWebContentsId.get(webContents.id) || defaultWindowArgs,
+    mainWindows,
+    resolveWindowByTargetId: targetId => {
+      if (typeof targetId !== 'string' || !targetId) return null;
+      const windowId = windowTargetIdToBrowserWindowIds.get(targetId);
+      if (windowId === undefined) return null;
+      const targetWin = BrowserWindow.fromId(windowId);
+      return targetWin && !targetWin.isDestroyed() ? targetWin : null;
+    },
+    fileAccessPolicy,
+    grantSelectedPath,
+    temporaryDirectory,
+    ipc: ipcMain,
+  });
 
   // Create the first window
   createNewWindow(args);
-
-  // Expose program arguments (to be accessed by windows)
-  global['args'] = args;
 
   Menu.setApplicationMenu(buildPlaceholderMainMenu());
 
@@ -575,7 +737,7 @@ app.on('ready', async function() {
     ]);
   }
 
-  setupClipboardTextCache();
+  setupClipboardTextCache(ipcMain);
 
   ipcMain.on('app-exit', (_event, exitCode) => {
     app.exit(typeof exitCode === 'number' ? exitCode : 0);
@@ -588,7 +750,9 @@ app.on('ready', async function() {
   ipcMain.handle(
     'cli-write-stdout',
     (_event, text) =>
-      new Promise(resolve => process.stdout.write(String(text), () => resolve()))
+      new Promise(resolve =>
+        process.stdout.write(String(text), () => resolve())
+      )
   );
 
   // The input of a CLI command given as "-" (e.g. calls piped to GDevelop).
@@ -609,7 +773,11 @@ app.on('ready', async function() {
 
   ipcMain.on('set-window-project-path', (event, fileIdentifier) => {
     const window = BrowserWindow.fromWebContents(event.sender);
-    if (window) setWindowFileIdentifier(window.id, fileIdentifier);
+    if (window) {
+      if (fileIdentifier && !fileAccessPolicy.hasAccess(fileIdentifier, 'read'))
+        return;
+      setWindowFileIdentifier(window.id, fileIdentifier);
+    }
   });
 
   // Not in a CLI process (like `--mcp`): it has no editor the user works in.
@@ -642,10 +810,11 @@ app.on('ready', async function() {
       numberOfWindows: options.numberOfWindows,
       captureOptions: options.captureOptions,
       openEvent: event,
+      temporaryDirectory,
     });
   });
   ipcMain.handle('preview-close', async (event, options) => {
-    return closePreviewWindow(options.windowId);
+    return closePreviewWindow(options && options.windowId);
   });
 
   ipcMain.handle('preview-close-all', async () => {
@@ -687,6 +856,13 @@ app.on('ready', async function() {
 
   // LocalFileUploader events:
   ipcMain.on('local-file-upload', (event, localFilePath, uploadOptions) => {
+    if (!fileAccessPolicy.hasAccess(localFilePath, 'read')) {
+      event.sender.send('local-file-upload-done', {
+        message: 'File access is not authorized.',
+        code: 'EACCES',
+      });
+      return;
+    }
     log.info(
       'Received event local-file-upload with localFilePath=',
       localFilePath
@@ -696,16 +872,40 @@ app.on('ready', async function() {
       localFilePath,
       uploadOptions,
       throttle((current, max) => {
-        event.sender.send('local-file-upload-progress', current, max);
+        if (!event.sender.isDestroyed()) {
+          event.sender.send('local-file-upload-progress', current, max);
+        }
       }, 300)
     ).then(
       () => {
         log.info('Local file upload successfully done');
-        event.sender.send('local-file-upload-done', null);
+        if (!event.sender.isDestroyed()) {
+          event.sender.send('local-file-upload-done', null);
+        }
       },
       uploadError => {
         log.error('Local file upload errored', uploadError);
-        event.sender.send('local-file-upload-done', uploadError);
+        if (!event.sender.isDestroyed()) {
+          const serializedError = uploadError
+            ? {
+                message: uploadError.message || String(uploadError),
+                code: uploadError.code,
+                status:
+                  typeof uploadError.status === 'number'
+                    ? uploadError.status
+                    : uploadError.response &&
+                      typeof uploadError.response.status === 'number'
+                    ? uploadError.response.status
+                    : undefined,
+                responseStatus:
+                  uploadError.response &&
+                  typeof uploadError.response.status === 'number'
+                    ? uploadError.response.status
+                    : undefined,
+              }
+            : { message: 'Local file upload failed' };
+          event.sender.send('local-file-upload-done', serializedError);
+        }
       }
     );
   });
@@ -714,29 +914,44 @@ app.on('ready', async function() {
   ipcMain.handle(
     'titlebar-set-overlay-options',
     async (event, overlayOptions, optionalTargetId) => {
-      // When a optionalTargetId is provided, resolve it to the child BrowserWindow
+      if (!overlayOptions || typeof overlayOptions !== 'object') return;
+      const targetId =
+        optionalTargetId != null ? optionalTargetId : overlayOptions.targetId;
+      // When a targetId is provided, resolve it to the child BrowserWindow
       // (needed for popped-out editor windows, where event.sender is always
       // the main window's webContents). Otherwise, use event.sender.
       let window;
-      if (optionalTargetId) {
-        const windowId = windowTargetIdToBrowserWindowIds.get(optionalTargetId);
+      if (targetId) {
+        const windowId = windowTargetIdToBrowserWindowIds.get(targetId);
         window = windowId != null ? BrowserWindow.fromId(windowId) : null;
       } else {
         window = BrowserWindow.fromWebContents(event.sender);
       }
-      if (!window) return;
+      if (!window || window.isDestroyed()) return;
+
+      const sanitizedOverlayOptions = {
+        color:
+          typeof overlayOptions.color === 'string'
+            ? overlayOptions.color
+            : '#000000',
+        symbolColor:
+          typeof overlayOptions.symbolColor === 'string'
+            ? overlayOptions.symbolColor
+            : '#ffffff',
+      };
 
       // setTitleBarOverlay seems not defined on macOS.
-      if (window.setTitleBarOverlay) window.setTitleBarOverlay(overlayOptions);
-      if (window.setBackgroundColor)
-        window.setBackgroundColor(overlayOptions.color);
+      if (window.setTitleBarOverlay)
+        window.setTitleBarOverlay(sanitizedOverlayOptions);
+      if (window.setBackgroundColor && sanitizedOverlayOptions.color)
+        window.setBackgroundColor(sanitizedOverlayOptions.color);
     }
   );
 
   // Window maximize toggle (for double-click on titlebar):
   ipcMain.handle('window-maximize-toggle', async event => {
     const window = BrowserWindow.fromWebContents(event.sender);
-    if (!window) return;
+    if (!window || window.isDestroyed()) return;
 
     if (window.isMaximized()) {
       window.unmaximize();
@@ -747,12 +962,18 @@ app.on('ready', async function() {
 
   // LocalFileDownloader events:
   ipcMain.handle('local-file-download', async (event, url, outputPath) => {
-    const result = await downloadLocalFile(url, outputPath);
+    fileAccessPolicy.assertAccess(outputPath, 'write');
+    const senderSession =
+      event && event.sender && !event.sender.isDestroyed()
+        ? event.sender.session
+        : undefined;
+    const result = await downloadLocalFile(url, outputPath, senderSession);
     return result;
   });
   ipcMain.handle(
     'local-file-save-from-arraybuffer',
     async (event, arrayBuffer, outputPath) => {
+      fileAccessPolicy.assertAccess(outputPath, 'write');
       const result = await saveLocalFileFromArrayBuffer(
         arrayBuffer,
         outputPath
@@ -765,6 +986,7 @@ app.on('ready', async function() {
   ipcMain.handle(
     'local-filesystem-watcher-setup',
     (event, folderPath, options) => {
+      fileAccessPolicy.assertAccess(folderPath, 'read');
       const subscriptionId = setupWatcher(
         folderPath,
         changedFilePath => {
@@ -780,7 +1002,7 @@ app.on('ready', async function() {
   ipcMain.handle(
     'local-filesystem-watcher-disable',
     (event, subscriptionId) => {
-      disableWatcher(subscriptionId);
+      return disableWatcher(subscriptionId);
     }
   );
 
@@ -795,11 +1017,22 @@ app.on('ready', async function() {
       windowId
     );
 
-    serveFolder({ ...options, windowId }, (err, serverParams) => {
+    let root;
+    try {
+      root = resolvePreviewDirectory(options && options.root, temporaryDirectory);
+    } catch (error) {
+      event.sender.send('serve-folder-done', error.message, null);
+      return;
+    }
+    serveFolder({ root, useHttps: !!options.useHttps, windowId }, (err, serverParams) => {
       // Using JSON to copy the config strips unserializable properties
       // (like middleware functions) automatically.
-      const configCopy = JSON.parse(JSON.stringify(serverParams));
-      event.sender.send('serve-folder-done', err, configCopy);
+      const configCopy = serverParams
+        ? JSON.parse(JSON.stringify(serverParams))
+        : null;
+      if (!event.sender.isDestroyed()) {
+        event.sender.send('serve-folder-done', err, configCopy);
+      }
     });
   });
 
@@ -809,12 +1042,16 @@ app.on('ready', async function() {
     log.info('Received event to stop server for window', windowId);
 
     stopServer(windowId, err => {
-      event.sender.send('stop-server-done', err);
+      if (!event.sender.isDestroyed()) {
+        event.sender.send('stop-server-done', err);
+      }
     });
   });
 
   ipcMain.on('get-local-network-ip', event => {
-    event.sender.send('local-network-ip', findLocalIp());
+    if (!event.sender.isDestroyed()) {
+      event.sender.send('local-network-ip', findLocalIp());
+    }
   });
 
   // LocalGDJSDevelopmentWatcher events:
@@ -831,10 +1068,16 @@ app.on('ready', async function() {
       'Notifying all editor windows that the GDJS runtime has been updated.'
     );
     mainWindows.forEach(window => {
-      window.webContents.send(
-        'local-gdjs-development-watcher-runtime-updated',
-        null
-      );
+      if (
+        window &&
+        !window.isDestroyed() &&
+        !window.webContents.isDestroyed()
+      ) {
+        window.webContents.send(
+          'local-gdjs-development-watcher-runtime-updated',
+          null
+        );
+      }
     });
   });
 
@@ -933,7 +1176,12 @@ app.on('ready', async function() {
   function sendUpdateStatus(status) {
     log.info(status);
     mainWindows.forEach(window => {
-      if (!window.isDestroyed()) {
+      if (
+        window &&
+        !window.isDestroyed() &&
+        window.webContents &&
+        !window.webContents.isDestroyed()
+      ) {
         window.webContents.send('update-status', status);
       }
     });
@@ -1002,62 +1250,39 @@ app.on('ready', async function() {
   // npm script execution in external terminal (cross-platform)
   ipcMain.on(
     'run-npm-script',
-    (event, { projectPath, npmScript, keepTerminalOpen }) => {
-      log.info(`Running npm script "${npmScript}" in ${projectPath}`);
-
-      const platform = process.platform;
-      const npmCommand = `npm run ${npmScript}`;
-      const keepOpen = !!keepTerminalOpen;
-
+    async (event, { projectPath, npmScript, keepTerminalOpen } = {}) => {
       try {
-        if (platform === 'win32') {
-          const innerCmd = keepOpen
-            ? `cd /d ${projectPath} && ${npmCommand}`
-            : `cd /d ${projectPath} && ${npmCommand} || (echo. & echo ${NPM_SCRIPT_COMMAND_FAILED_MESSAGE} & pause)`;
-          const cmdCloseFlag = keepOpen ? '/k' : '/c';
-          child_process
-            .spawn(
-              'cmd.exe',
-              ['/c', 'start', 'cmd.exe', cmdCloseFlag, innerCmd],
-              {
-                detached: true,
-                stdio: 'ignore',
-              }
-            )
-            .unref();
-        } else if (platform === 'darwin') {
-          const escapedPath = projectPath.replace(/'/g, "'\\''");
-          const shellCommand = keepOpen
-            ? `cd '${escapedPath}' && ${npmCommand}`
-            : `cd '${escapedPath}' && ${npmCommand} && exit || echo '${NPM_SCRIPT_COMMAND_FAILED_MESSAGE}'`;
-          const script = `tell application "Terminal" to do script "${shellCommand.replace(
-            /"/g,
-            '\\"'
-          )}"`;
-          child_process.spawn('osascript', ['-e', script], {
-            detached: true,
-            stdio: 'ignore',
-          });
-        } else {
-          const bashCommand = keepOpen
-            ? `cd "${projectPath}" && ${npmCommand}; exec bash`
-            : `cd "${projectPath}" && ${npmCommand} || { echo "${NPM_SCRIPT_COMMAND_FAILED_MESSAGE}"; exec bash; }`;
-          const terminals = [
-            {
-              cmd: 'x-terminal-emulator',
-              args: ['-e', 'bash', '-c', bashCommand],
-            },
-            { cmd: 'gnome-terminal', args: ['--', 'bash', '-c', bashCommand] },
-            { cmd: 'konsole', args: ['-e', 'bash', '-c', bashCommand] },
-            { cmd: 'xterm', args: ['-e', 'bash', '-c', bashCommand] },
-          ];
+        fileAccessPolicy.assertAccess(projectPath, 'read');
+        const confirmation = await electron.dialog.showMessageBox(
+          BrowserWindow.fromWebContents(event.sender),
+          {
+            type: 'question',
+            title: 'Run project command',
+            message: `Run npm script "${npmScript}"?`,
+            detail: `${projectPath}\nThis command can execute code on your computer.`,
+            buttons: ['Cancel', 'Run'],
+            defaultId: 0,
+            cancelId: 0,
+            noLink: true,
+          }
+        );
+        if (confirmation.response !== 1) return;
+        const spawnConfig = buildNpmScriptSpawnConfig({
+          projectPath,
+          npmScript,
+          keepTerminalOpen,
+          platform: process.platform,
+          failureMessage: NPM_SCRIPT_COMMAND_FAILED_MESSAGE,
+        });
+        log.info(`Running npm script "${npmScript}" in ${spawnConfig.cwd}`);
 
+        if (spawnConfig.terminals) {
           const tryTerminal = index => {
-            if (index >= terminals.length) {
+            if (index >= spawnConfig.terminals.length) {
               log.error('No terminal emulator found');
               return;
             }
-            const terminal = terminals[index];
+            const terminal = spawnConfig.terminals[index];
             const proc = child_process.spawn(terminal.cmd, terminal.args, {
               detached: true,
               stdio: 'ignore',
@@ -1065,8 +1290,22 @@ app.on('ready', async function() {
             proc.on('error', () => tryTerminal(index + 1));
             proc.unref();
           };
-
           tryTerminal(0);
+        } else {
+          const proc = child_process.spawn(
+            spawnConfig.command,
+            spawnConfig.args,
+            {
+              detached: true,
+              stdio: 'ignore',
+            }
+          );
+          proc.on('error', err =>
+            log.error('Failed to launch npm script terminal:', err)
+          );
+          if (typeof proc.unref === 'function') {
+            proc.unref();
+          }
         }
       } catch (err) {
         log.error('Failed to run npm script:', err);

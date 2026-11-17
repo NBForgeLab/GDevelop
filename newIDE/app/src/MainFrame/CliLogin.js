@@ -1,9 +1,7 @@
 // @flow
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import Window from '../Utils/Window';
 import { type LoginForm } from '../Utils/GDevelopServices/Authentication';
-
-const remote = optionalRequire('@electron/remote');
 
 // The account a command of the CLI logs in with when nobody is logged in:
 // made for the machines where nobody can log in by hand (CI).
@@ -26,11 +24,11 @@ export const getCliLoginForm = (environment: {
  * when it runs a command of the CLI or serves the stdio MCP server.
  */
 export const readCliLoginForm = (): LoginForm | null => {
-  if (!remote) return null;
+  if (!DesktopService.isDesktop()) return null;
   const appArguments = Window.getArguments();
   if (!appArguments['run-command'] && !appArguments['mcp']) return null;
   try {
-    return getCliLoginForm(remote.process.env);
+    return getCliLoginForm(DesktopService.getCliLoginEnvironment());
   } catch (error) {
     console.error('[CLI] Unable to read the environment variables:', error);
     return null;

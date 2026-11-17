@@ -39,7 +39,12 @@ namespace gdjs {
       export const isNativeDesktopApp = (
         instanceContainer: gdjs.RuntimeInstanceContainer
       ): boolean => {
-        return !!instanceContainer.getGame().getRenderer().getElectron();
+        const renderer = instanceContainer.getGame().getRenderer();
+        return !!(
+          renderer.getElectron() ||
+          (typeof renderer.getElectronPreviewBridge === 'function' &&
+            renderer.getElectronPreviewBridge())
+        );
       };
 
       const checkHasTouchScreen = (): boolean => {

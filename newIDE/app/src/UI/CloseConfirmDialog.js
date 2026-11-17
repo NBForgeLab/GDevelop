@@ -2,11 +2,9 @@
 import { t } from '@lingui/macro';
 import { type I18n as I18nType } from '@lingui/core';
 import * as React from 'react';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import Window from '../Utils/Window';
 import { isNativeMobileApp } from '../Utils/Platform';
-const electron = optionalRequire('electron');
-const remote = optionalRequire('@electron/remote');
 
 type Props = {|
   shouldPrompt: boolean,
@@ -35,7 +33,7 @@ export default (React.memo<Props>(function CloseConfirmDialog({
         .filter(Boolean)
         .join('\n');
 
-      if (electron) {
+      if (DesktopService.isDesktop()) {
         window.onbeforeunload = e => {
           if (delayElectronClose.current && shouldPrompt) {
             // Use setTimeout to avoiding blocking the thread with the "confirm" dialog,
@@ -46,7 +44,7 @@ export default (React.memo<Props>(function CloseConfirmDialog({
               if (answer) {
                 // If answer is positive, re-trigger the close
                 delayElectronClose.current = false;
-                remote.getCurrentWindow().close();
+                DesktopService.closeWindow();
               }
             }, 10);
 

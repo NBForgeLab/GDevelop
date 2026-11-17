@@ -4,8 +4,131 @@ namespace gdjs {
     const logger = new gdjs.Logger('Steamworks');
     export let steamAPI: import('steamworks.js').Client | null = null;
 
+    const fromEntries = (
+      entries: Array<[string, (...args: any[]) => any]>
+    ): Record<string, (...args: any[]) => any> => {
+      const result: Record<string, (...args: any[]) => any> = {};
+      for (const [name, fn] of entries) result[name] = fn;
+      return result;
+    };
+
+    // Preserve the extension's synchronous expression API without exposing remote
+    // objects, require(), or arbitrary native methods to the preview renderer.
+    const createPreviewClient = (bridge: {
+      initialize: (appId: number) => void;
+      call: (method: string, args: unknown[]) => any;
+      invoke: (method: string, args: unknown[]) => Promise<any>;
+    }): import('steamworks.js').Client => {
+      const group = (name: string, methods: string[]) =>
+        fromEntries(
+          methods.map((method) => [
+            method,
+            (...args: unknown[]) => bridge.call(`${name}.${method}`, args),
+          ])
+        );
+      const lobby = (id: string) => ({
+        id: BigInt(id),
+        ...fromEntries(
+          [
+            'leave',
+            'openInviteDialog',
+            'getData',
+            'setData',
+            'setJoinable',
+            'getMemberCount',
+            'getMemberLimit',
+            'getOwner',
+            'getMembers',
+          ].map((method) => [
+            method,
+            (...args: unknown[]) =>
+              bridge.call(`lobby.${method}`, [id, ...args]),
+          ])
+        ),
+      });
+      return {
+        achievement: group('achievement', ['activate', 'clear', 'isActivated']),
+        localplayer: group('localplayer', [
+          'getSteamId',
+          'getName',
+          'getIpCountry',
+          'getLevel',
+          'setRichPresence',
+        ]),
+        utils: group('utils', [
+          'getAppId',
+          'getServerRealTime',
+          'isSteamRunningOnSteamDeck',
+        ]),
+        apps: group('apps', [
+          'isSubscribedApp',
+          'isAppInstalled',
+          'isDlcInstalled',
+          'appInstallDir',
+          'isVacBanned',
+          'isLowViolence',
+          'isSubscribed',
+          'currentGameLanguage',
+          'currentBetaName',
+          'appBuildId',
+        ]),
+        cloud: group('cloud', [
+          'isEnabledForAccount',
+          'isEnabledForApp',
+          'readFile',
+          'writeFile',
+          'fileExists',
+          'deleteFile',
+        ]),
+        workshop: {
+          ...group('workshop', [
+            'download',
+            'state',
+            'installInfo',
+            'downloadInfo',
+          ]),
+          ...fromEntries(
+            ['createItem', 'updateItem', 'subscribe', 'unsubscribe'].map(
+              (method) => [
+                method,
+                (...args: unknown[]) =>
+                  bridge.invoke(`workshop.${method}`, args),
+              ]
+            )
+          ),
+        },
+        matchmaking: {
+          createLobby: (...args: unknown[]) =>
+            bridge.invoke('matchmaking.createLobby', args).then(lobby),
+          joinLobby: (...args: unknown[]) =>
+            bridge.invoke('matchmaking.joinLobby', args).then(lobby),
+          getLobbies: () =>
+            bridge
+              .invoke('matchmaking.getLobbies', [])
+              .then((ids: string[]) => ids.map(lobby)),
+        },
+      } as unknown as import('steamworks.js').Client;
+    };
+
     gdjs.registerFirstRuntimeSceneLoadedCallback((runtimeScene) => {
-      const remote = runtimeScene.getGame().getRenderer().getElectronRemote();
+      const renderer = runtimeScene.getGame().getRenderer();
+      const previewBridge = renderer.getElectronPreviewBridge();
+      if (previewBridge && previewBridge.steam) {
+        try {
+          const appID = Number(
+            runtimeScene.getGame().getExtensionProperty('Steamworks', 'AppID')
+          );
+          previewBridge.steam.initialize(appID);
+          steamAPI = createPreviewClient(previewBridge.steam);
+        } catch (error) {
+          logger.error(
+            'Unable to initialize Steamworks preview. Check the AppID and that Steam is running.',
+            error
+          );
+        }
+        return;
+      }
+      const remote = renderer.getElectronRemote();
       if (!remote) return; // Steamworks is only supported on electron
 
       try {

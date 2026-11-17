@@ -1,5 +1,5 @@
 // @flow
-import optionalRequire from './Utils/OptionalRequire';
+import DesktopService from './Utils/DesktopService';
 import { isNativeMobileApp } from './Utils/Platform';
 import { getPublicUrl } from './Utils/BuildEnv';
 
@@ -7,7 +7,6 @@ const PUBLIC_URL: string = getPublicUrl();
 // $FlowFixMe[cannot-resolve-name]
 const isDev = process.env.NODE_ENV !== 'production';
 
-const electron = optionalRequire('electron');
 const serviceWorker =
   typeof navigator !== 'undefined' ? navigator.serviceWorker : undefined;
 
@@ -16,7 +15,7 @@ export function isServiceWorkerSupported(): boolean {
 }
 
 export function registerServiceWorker() {
-  if (isNativeMobileApp() || !!electron) {
+  if (isNativeMobileApp() || DesktopService.isDesktop()) {
     return;
   }
 

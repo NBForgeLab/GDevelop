@@ -1,10 +1,10 @@
 // @flow
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import { type FileMetadata } from '../index';
 import { unsplit } from '../../Utils/ObjectSplitter';
 import { openFilePicker, readJSONFile } from '../../Utils/FileSystem';
-const fs = optionalRequire('fs');
-const path = optionalRequire('path');
+const fs = DesktopService.getFs();
+const path = DesktopService.getPath();
 
 export const onOpenWithPicker = (): Promise<?FileMetadata> => {
   return openFilePicker({
@@ -22,30 +22,39 @@ export const onOpen = (
 ): Promise<{|
   content: Object,
 |}> => {
+  if (!path) return Promise.reject(new Error('Unsupported'));
+  const localPath = path;
   const filePath = fileMetadata.fileIdentifier;
-  const projectPath = path.dirname(filePath);
-  return readJSONFile(filePath).then(object => {
-    return unsplit(object, {
-      getReferencePartialObject: referencePath => {
-        return readJSONFile(path.join(projectPath, referencePath) + '.json');
-      },
-      isReferenceMagicPropertyName: '__REFERENCE_TO_SPLIT_OBJECT',
-      // Limit unsplitting to depth 3 (which would allow properties of layouts/external layouts/external events
-      // to be un-splitted, but not the content of these properties), to avoid very slow processing
-      // of large game files.
-      maxUnsplitDepth: 3,
-    }).then(() => {
-      return { content: object };
+  const projectPath = localPath.dirname(filePath);
+  return DesktopService.requestProjectAccess(filePath)
+    .then(() => readJSONFile(filePath))
+    .then(object => {
+      DesktopService.setWindowProjectPath(filePath);
+      return unsplit(object, {
+        getReferencePartialObject: referencePath => {
+          return readJSONFile(
+            localPath.join(projectPath, referencePath) + '.json'
+          );
+        },
+        isReferenceMagicPropertyName: '__REFERENCE_TO_SPLIT_OBJECT',
+        // Limit unsplitting to depth 3 (which would allow properties of layouts/external layouts/external events
+        // to be un-splitted, but not the content of these properties), to avoid very slow processing
+        // of large game files.
+        maxUnsplitDepth: 3,
+      }).then(() => {
+        return { content: object };
+      });
     });
-  });
 };
 
 export const getAutoSaveCreationDate = async (
   fileMetadata: FileMetadata,
   compareLastModified: boolean
 ): Promise<?number> => {
+  if (!fs) return null;
   const filePath = fileMetadata.fileIdentifier;
   const autoSavePath = filePath + '.autosave';
+  await DesktopService.requestProjectAccess(filePath);
   if (fs.existsSync(autoSavePath)) {
     const autoSavedTime = fs.statSync(autoSavePath).mtime.getTime();
     if (!compareLastModified) {

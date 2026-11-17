@@ -1,13 +1,11 @@
 // @flow
 import { useEffect } from 'react';
-import optionalRequire from './OptionalRequire';
-const electron = optionalRequire('electron');
-const ipc = electron ? electron.ipcRenderer : null;
+import DesktopService from './DesktopService';
 
 const richPresenceStartTimestamp = Date.now();
 
 const updateDiscordRichPresence = (project: ?gdProject) => {
-  if (ipc === null) return;
+  if (!DesktopService.isDesktop()) return;
 
   const config = {
     details: project ? 'Working on:' : 'Not working on',
@@ -17,7 +15,7 @@ const updateDiscordRichPresence = (project: ?gdProject) => {
     largeImageText: 'GDevelop',
   };
 
-  ipc.send('update-discord-rich-presence', config);
+  DesktopService.updateDiscordRichPresence(config);
 };
 
 export const useDiscordRichPresence = (project: ?gdProject) => {

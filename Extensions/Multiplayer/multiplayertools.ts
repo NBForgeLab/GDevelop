@@ -2029,12 +2029,21 @@ namespace gdjs {
           _isCheckingIfGameIsRegistered = false;
         }
       }
-      const electron = runtimeScene.getGame().getRenderer().getElectron();
-      const wikiOpenAction = electron
+      const renderer = runtimeScene.getGame().getRenderer();
+      const previewBridge =
+        typeof renderer.getElectronPreviewBridge === 'function'
+          ? renderer.getElectronPreviewBridge()
+          : null;
+      const electron = renderer.getElectron();
+      const openExternal =
+        previewBridge && previewBridge.shell
+          ? previewBridge.shell.openExternal
+          : electron && electron.shell
+            ? electron.shell.openExternal
+            : null;
+      const wikiOpenAction = openExternal
         ? () =>
-            electron.shell.openExternal(
-              'https://wiki.gdevelop.io/gdevelop5/publishing/web'
-            )
+            openExternal('https://wiki.gdevelop.io/gdevelop5/publishing/web')
         : () =>
             window.open(
               'https://wiki.gdevelop.io/gdevelop5/publishing/web',

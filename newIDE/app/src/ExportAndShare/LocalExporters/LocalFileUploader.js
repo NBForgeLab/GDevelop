@@ -1,7 +1,5 @@
 // @flow
-import optionalRequire from '../../Utils/OptionalRequire';
-const electron = optionalRequire('electron');
-const ipcRenderer = electron ? electron.ipcRenderer : null;
+import DesktopService from '../../Utils/DesktopService';
 
 type UploadOptions = {
   signedUrl: string,
@@ -13,22 +11,27 @@ export const uploadLocalFile = (
   uploadOptions: UploadOptions,
   onProgress: (progress: number, total: number) => void
 ): Promise<void> => {
-  if (!ipcRenderer) return Promise.reject('No support for local file upload');
-
-  ipcRenderer.removeAllListeners('local-file-upload-progress');
-  ipcRenderer.removeAllListeners('local-file-upload-done');
+  if (!DesktopService.isDesktop()) {
+    return Promise.reject('No support for local file upload');
+  }
 
   return new Promise((resolve, reject) => {
-    ipcRenderer.on(
+    const unsubscribeProgress = DesktopService.onIpcEvent(
       'local-file-upload-progress',
-      (event, stepCurrentProgress, stepMaxProgress) => {
+      (stepCurrentProgress, stepMaxProgress) => {
         onProgress(stepCurrentProgress, stepMaxProgress);
       }
     );
-    ipcRenderer.on('local-file-upload-done', (event, err) => {
-      if (err) return reject(err);
-      resolve();
-    });
-    ipcRenderer.send('local-file-upload', localFilePath, uploadOptions);
+    let unsubscribeDone: () => void = () => {};
+    unsubscribeDone = DesktopService.onIpcEvent(
+      'local-file-upload-done',
+      err => {
+        unsubscribeProgress();
+        unsubscribeDone();
+        if (err) return reject(err);
+        resolve();
+      }
+    );
+    DesktopService.fileTransfer.uploadLocalFile(localFilePath, uploadOptions);
   });
 };

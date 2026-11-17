@@ -45,13 +45,12 @@ import {
 } from '../MainFrame/EditorContainers/HomePage/CreateSection/utils';
 import AuthenticatedUserContext from '../Profile/AuthenticatedUserContext';
 import Refresh from '../UI/CustomSvgIcons/Refresh';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import TextButton from '../UI/TextButton';
 import Skeleton from '@material-ui/lab/Skeleton';
 import PreferencesContext from '../MainFrame/Preferences/PreferencesContext';
-const electron = optionalRequire('electron');
 
-const isDesktop = !!electron;
+const isDesktop = DesktopService.isDesktop();
 
 const pageSize = 10;
 

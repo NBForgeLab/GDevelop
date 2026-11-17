@@ -1,15 +1,17 @@
 // @flow
 import generateName from '../../Utils/NewNameGenerator';
-import optionalRequire from '../../Utils/OptionalRequire';
-const path = optionalRequire('path');
-var fs = optionalRequire('fs-extra');
+import DesktopService from '../../Utils/DesktopService';
+const path = DesktopService.getPath();
+const fs = DesktopService.getFs();
 
 const findEmptyPath = (basePath: string) => {
-  if (!path) return basePath;
+  if (!fs || !path) return basePath;
+  const localFs = fs;
+  const localPath = path;
 
   const folderName = generateName('My project', name => {
     try {
-      fs.accessSync(path.join(basePath, name));
+      localFs.accessSync(localPath.join(basePath, name));
     } catch (ex) {
       return false;
     }
@@ -22,14 +24,11 @@ const findEmptyPath = (basePath: string) => {
 /**
  * Returns the default workspace folder from the Documents folder or the Home folder
  */
-export const findDefaultFolder = (electronApp: any): string => {
-  let documentsPath = '';
-  try {
-    documentsPath = electronApp.getPath('documents');
-  } catch (ex) {
-    // A user may not have the Documents folder defined on Windows.
-    documentsPath = electronApp.getPath('home');
-  }
+export const findDefaultFolder = (): string => {
+  const documentsPath =
+    DesktopService.getAppPathSync('documents') ||
+    DesktopService.getAppPathSync('home');
+  if (!path) return documentsPath;
   return path.join(documentsPath, 'GDevelop projects');
 };
 
@@ -37,10 +36,8 @@ export const findDefaultFolder = (electronApp: any): string => {
  * Returns the current workspace with a generated project name
  */
 export const findEmptyPathInWorkspaceFolder = (
-  electronApp: any,
   defaultFolder: string | null
 ): string => {
-  const folder =
-    defaultFolder === null ? findDefaultFolder(electronApp) : defaultFolder;
+  const folder = defaultFolder === null ? findDefaultFolder() : defaultFolder;
   return findEmptyPath(folder);
 };

@@ -7,13 +7,13 @@ import Menu from '@material-ui/core/Menu';
 import Fade from '@material-ui/core/Fade';
 import ElectronMenuImplementation from './ElectronMenuImplementation';
 import MaterialUIMenuImplementation from './MaterialUIMenuImplementation';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import useForceUpdate from '../../Utils/UseForceUpdate';
 import { Drawer } from '@material-ui/core';
 import { isMobile } from '../../Utils/Platform';
 import { itemAboveBlockingLayerZIndex } from '../../InAppTutorial/BlockingLayerWithHoles';
 import PortalContainerContext from '../PortalContainerContext';
-const electron = optionalRequire('electron');
+import { getDocumentTargetId } from '../../Utils/Window';
 
 const getValidPortalContainer = (
   portalContainer: ?HTMLElement
@@ -156,7 +156,13 @@ const ElectronContextMenu = React.forwardRef<
   ContextMenuProps,
   ContextMenuInterface
 >((props, ref) => {
-  const menuImplementation = new ElectronMenuImplementation();
+  const portalContainer = getValidPortalContainer(
+    React.useContext(PortalContainerContext)
+  );
+  const targetId = getDocumentTargetId(
+    portalContainer ? portalContainer.ownerDocument : null
+  );
+  const menuImplementation = new ElectronMenuImplementation({ targetId });
 
   // $FlowFixMe[missing-local-annot]
   const open = (x, y, options) => {
@@ -178,7 +184,9 @@ const ElectronContextMenu = React.forwardRef<
   return null;
 });
 
-const ContextMenu = electron ? ElectronContextMenu : MaterialUIContextMenu;
+const ContextMenu = DesktopService.isDesktop()
+  ? ElectronContextMenu
+  : MaterialUIContextMenu;
 
 export default (React.forwardRef<ContextMenuWrapperProps, ContextMenuInterface>(
   (props, ref) => {

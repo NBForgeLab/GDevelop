@@ -8,14 +8,11 @@ import CompactTextField from '../CompactTextField';
 import IconButton from '../IconButton';
 import Folder from '../CustomSvgIcons/Folder';
 import { LineStackLayout } from '../Layout';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import {
   getLastUsedDialogDirectory,
   rememberLastUsedDialogDirectory,
 } from '../../Utils/FileSystem';
-const electron = optionalRequire('electron');
-const remote = optionalRequire('@electron/remote');
-const dialog = remote ? remote.dialog : null;
 
 const styles = {
   icon: {
@@ -77,15 +74,15 @@ const CompactLocalFolderPicker = ({
   const [textValue, setTextValue] = React.useState(value);
 
   const onChooseFolder = async ({ title, message }: TitleAndMessage) => {
-    if (!dialog || !electron) return;
+    if (!DesktopService.isDesktop()) return;
 
-    const browserWindow = remote.getCurrentWindow();
-    const { filePaths } = await dialog.showOpenDialog(browserWindow, {
+    const result = await DesktopService.showOpenDialog({
       title,
       properties: ['openDirectory', 'createDirectory'],
       message,
       defaultPath: defaultPath || getLastUsedDialogDirectory(),
     });
+    const filePaths = result ? result.filePaths : null;
 
     if (!filePaths || !filePaths.length) return;
 

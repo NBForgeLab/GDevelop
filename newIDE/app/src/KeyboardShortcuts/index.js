@@ -11,9 +11,8 @@ import defaultShortcuts, {
   type ShortcutMap,
 } from './DefaultShortcuts';
 import { type PreviewDebuggerServer } from '../ExportAndShare/PreviewLauncher.flow';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import { SafeExtractor } from '../Utils/SafeExtractor';
-const electron = optionalRequire('electron');
 
 // Valid action keys
 type KeyType =
@@ -294,7 +293,10 @@ export const useKeyboardShortcuts = ({
         // On desktop app, ignore shortcuts that are handled by Electron,
         // unless ignoreHandledByElectron is set (for external windows where
         // Electron menu IPC doesn't reach).
-        if (electron && commandsList[commandName].handledByElectron) {
+        if (
+          DesktopService.isDesktop() &&
+          commandsList[commandName].handledByElectron
+        ) {
           if (!ignoreHandledByElectron) return;
         }
 

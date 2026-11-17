@@ -1,7 +1,6 @@
 // @flow
 import * as React from 'react';
-import optionalRequire from '../Utils/OptionalRequire';
-const remote = optionalRequire('@electron/remote');
+import DesktopService from '../Utils/DesktopService';
 
 export type SlowGraphicsRenderingReason =
   | 'software-rendering'
@@ -44,9 +43,9 @@ const getWebGLRendererName = (): string | null => {
  * are installed.
  */
 const isIntegratedGraphicsCardUsedWhileDiscreteOneIsAvailable = async (): Promise<boolean> => {
-  if (!remote) return false;
+  if (!DesktopService.isDesktop()) return false;
   try {
-    const gpuInfo: any = await remote.app.getGPUInfo('basic');
+    const gpuInfo: any = await DesktopService.getGPUInfo('basic');
     const gpuDevices: Array<{ active: boolean, vendorId: number }> =
       (gpuInfo && gpuInfo.gpuDevice) || [];
     const activeGpuDevice = gpuDevices.find(gpuDevice => gpuDevice.active);

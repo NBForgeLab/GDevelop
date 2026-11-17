@@ -1,4 +1,4 @@
-const { app, clipboard, ipcMain } = require('electron');
+const { app, clipboard, ipcMain: electronIpcMain } = require('electron');
 const log = require('electron-log');
 
 // The clipboard of Electron is asynchronous, but the editor reads it
@@ -16,7 +16,7 @@ const refreshCachedText = () => {
     });
 };
 
-const setupClipboardTextCache = () => {
+const setupClipboardTextCache = (ipcMain = electronIpcMain) => {
   refreshCachedText();
   // The clipboard can only have been changed by another app while no window was focused.
   app.on('browser-window-focus', refreshCachedText);

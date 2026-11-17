@@ -8,7 +8,7 @@ import { moveUrlResourcesToLocalFiles } from '../LocalFileStorageProvider/LocalF
 import UrlStorageProvider from '../UrlStorageProvider';
 import LocalFileSystem from '../../ExportAndShare/LocalExporters/LocalFileSystem';
 import assignIn from 'lodash/assignIn';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import { moveUrlResourcesToCloudProject } from '../CloudStorageProvider/CloudResourceMover';
 import { checkIfIsGDevelopCloudBucketUrl } from '../../Utils/CrossOrigin';
 import {
@@ -21,7 +21,7 @@ import { readLocalFileToFile } from '../../Utils/LocalFileUploader';
 import { isURL, isBlobURL } from '../../ResourcesList/ResourceUtils';
 import { cloudStorageProviderInternalName } from '../CloudStorageProvider/CloudStoageProviderInternalName';
 import { localFileStorageProviderInternalName } from '../LocalFileStorageProvider/LocalFileStorageProviderInternalName';
-const path = optionalRequire('path');
+const path = DesktopService.getPath();
 
 const gd: libGDevelop = global.gd;
 
@@ -80,13 +80,15 @@ export const moveAllLocalResourcesToCloudResources = async ({
 
   const allResourcesToUpload = getResourcesToUpload(project);
 
-  const projectPath = path.dirname(oldFileMetadata.fileIdentifier);
+  if (!path) throw new Error('Desktop path is not available.');
+  const localPath = path;
+  const projectPath = localPath.dirname(oldFileMetadata.fileIdentifier);
 
   let alreadyDoneCount = 0;
   // Read all files as Files.
   await processByChunk(allResourcesToUpload, {
     transformItem: async (resource): Promise<ResourceAndFile | null> => {
-      const resourceAbsolutePath = path.resolve(
+      const resourceAbsolutePath = localPath.resolve(
         projectPath,
         resource.getFile()
       );
@@ -167,6 +169,7 @@ const movers: {
   }: MoveAllProjectResourcesOptions) => {
     // TODO: Ideally, errors while copying resources should be reported.
     // TODO: Report progress.
+    if (!path) throw new Error('Desktop path is not available.');
     const projectPath = path.dirname(newFileMetadata.fileIdentifier);
     const fileSystem = assignIn(
       new gd.AbstractFileSystemJS(),

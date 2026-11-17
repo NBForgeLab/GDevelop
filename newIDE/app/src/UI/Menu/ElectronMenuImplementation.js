@@ -1,11 +1,9 @@
 // @flow
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import {
   type MenuItemTemplate,
   type ContextMenuImplementation,
 } from './Menu.flow';
-const electron = optionalRequire('electron');
-const remote = optionalRequire('@electron/remote');
 
 /**
  * Wraps an Electron Menu
@@ -13,7 +11,11 @@ const remote = optionalRequire('@electron/remote');
 export default class ElectronMenuImplementation
   implements ContextMenuImplementation {
   menuTemplate: Array<MenuItemTemplate>;
-  menu: any; // TODO: Is it necessary to store the menu in a class variable?
+  targetId: ?string;
+
+  constructor(options?: {| targetId?: ?string |}) {
+    this.targetId = options ? options.targetId : null;
+  }
 
   buildFromTemplate(template: Array<MenuItemTemplate>): any {
     this.menuTemplate = template;
@@ -26,17 +28,12 @@ export default class ElectronMenuImplementation
     width: number,
     height: number,
   |}) {
-    if (!electron) return;
+    if (!DesktopService.isDesktop()) return;
 
-    const { Menu, BrowserWindow } = remote;
-    const browserWindow =
-      BrowserWindow.getFocusedWindow() || remote.getCurrentWindow();
-    this.menu = Menu.buildFromTemplate(this.menuTemplate);
-    this.menu.popup({
-      window: browserWindow,
-      x: Math.round(dimensions.left),
-      y: Math.round(dimensions.top + dimensions.height),
-      async: true, // Ensure the UI is not blocked on macOS.
+    Promise.resolve(
+      DesktopService.popupMenu(this.menuTemplate, dimensions, this.targetId)
+    ).catch(error => {
+      console.warn('[ElectronMenuImplementation] popupMenu failed:', error);
     });
   }
 

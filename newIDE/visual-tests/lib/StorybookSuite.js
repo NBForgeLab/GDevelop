@@ -67,7 +67,7 @@ const runStorybookSuite = async ({ tests, options, reporter }) => {
 
   const browser = await puppeteer.launch({
     executablePath: findChrome(options.chromePath),
-    headless: options.headful ? false : 'new',
+    headless: !options.headful,
     slowMo: options.headful ? 20 : 0,
     defaultViewport: options.headful ? null : { width: 1500, height: 1000 },
     args: [

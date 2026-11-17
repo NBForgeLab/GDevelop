@@ -28,19 +28,14 @@ import {
   useProjectsListFor,
 } from './utils';
 import ErrorBoundary from '../../../../UI/ErrorBoundary';
-import optionalRequire from '../../../../Utils/OptionalRequire';
+import DesktopService from '../../../../Utils/DesktopService';
 import ContextMenu, {
   type ContextMenuInterface,
 } from '../../../../UI/Menu/ContextMenu';
 import type { ClientCoordinates } from '../../../../Utils/UseLongTouch';
 import PreferencesContext from '../../../Preferences/PreferencesContext';
 import useAlertDialog from '../../../../UI/Alert/useAlertDialog';
-// It's important to use remote and not electron for folder actions,
-// otherwise they will be opened in the background.
-// See https://github.com/electron/electron/issues/4349#issuecomment-777475765
-const remote = optionalRequire('@electron/remote');
-const shell = remote ? remote.shell : null;
-const path = optionalRequire('path');
+const path = DesktopService.getPath();
 
 const styles = {
   listItem: {
@@ -76,8 +71,10 @@ type Props = {|
 |};
 
 const locateProjectFile = (file: FileMetadataAndStorageProviderName) => {
-  if (!shell) return;
-  shell.showItemInFolder(path.resolve(file.fileMetadata.fileIdentifier));
+  if (!path) return;
+  DesktopService.showItemInFolder(
+    path.resolve(file.fileMetadata.fileIdentifier)
+  );
 };
 
 const ProjectFileList = ({

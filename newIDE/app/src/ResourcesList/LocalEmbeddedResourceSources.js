@@ -1,10 +1,10 @@
 // @flow
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import newNameGenerator from '../Utils/NewNameGenerator';
 import { isPathInProjectFolder } from './ResourceUtils';
 import { createNewResource } from './ResourceSource';
-const fs = optionalRequire('fs');
-const path = optionalRequire('path');
+const fs = DesktopService.getFs();
+const path = DesktopService.getPath();
 
 export type EmbeddedResource = {|
   resourceKind: string,
@@ -95,6 +95,7 @@ export function createAndMapEmbeddedResources(
   project: gdProject,
   filesWithEmbeddedResources: Map<string, EmbeddedResources>
 ): Map<string, MappedResources> {
+  if (!path) return new Map();
   const projectPath = path.dirname(project.getProjectFile());
 
   const filesWithMappedResources = new Map<string, MappedResources>();

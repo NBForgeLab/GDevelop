@@ -12,7 +12,16 @@ namespace gdjs {
       instanceContainer: gdjs.RuntimeInstanceContainer,
       savePath: string
     ) {
-      const fs = typeof require !== 'undefined' ? require('fs') : null;
+      const previewBridge = instanceContainer
+        .getGame()
+        .getRenderer()
+        .getElectronPreviewBridge();
+      const fs: any =
+        typeof require !== 'undefined'
+          ? require('fs')
+          : previewBridge && previewBridge.fs
+            ? previewBridge.fs
+            : null;
       if (fs) {
         const canvas = instanceContainer.getGame().getRenderer().getCanvas();
         if (canvas) {

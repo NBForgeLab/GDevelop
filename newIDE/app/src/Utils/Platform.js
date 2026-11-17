@@ -1,11 +1,9 @@
 // @flow
-import optionalRequire from './OptionalRequire';
-const remote = optionalRequire('@electron/remote');
-const process = optionalRequire('process');
+import DesktopService from './DesktopService';
 
 let _isWindows = false;
-if (remote) {
-  _isWindows = remote.process.platform === 'win32';
+if (DesktopService.isDesktop()) {
+  _isWindows = DesktopService.getPlatform() === 'win32';
 }
 const _isMacLike =
   typeof navigator !== 'undefined' &&
@@ -24,20 +22,20 @@ export const getUserAgent = (): string => {
 };
 
 export const getArch = (): string => {
-  return process
-    ? process.arch || 'Unknown architecture'
+  return DesktopService.isDesktop()
+    ? DesktopService.getArch()
     : 'Unknown architecture (web-app)';
 };
 
 export const getSystemVersion = (): string => {
-  return process && process.getSystemVersion
-    ? process.getSystemVersion() || 'Unknown system version'
+  return DesktopService.isDesktop()
+    ? DesktopService.getSystemVersion()
     : 'Unknown system version (web-app)';
 };
 
 export const getPlatformName = (): string => {
-  return process
-    ? process.platform || 'Unknown platform'
+  return DesktopService.isDesktop()
+    ? DesktopService.getPlatform() || 'Unknown platform'
     : (typeof navigator !== 'undefined' ? navigator.platform : '') ||
         'Unknown platform (web-app)';
 };

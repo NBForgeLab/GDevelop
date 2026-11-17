@@ -1,13 +1,11 @@
 // @flow
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import { getUID } from '../../Utils/LocalUserInfo';
 import Window from '../../Utils/Window';
 import { isURL } from '../../ResourcesList/ResourceUtils';
 import { decodePercentEncodedFileName } from '../../Utils/PercentEncodedFileName';
-const fs = optionalRequire('fs-extra');
-const path = optionalRequire('path');
-const os = optionalRequire('os');
-const process = optionalRequire('process');
+const fs = DesktopService.getFs();
+const path = DesktopService.getPath();
 
 const gd: libGDevelop = global.gd;
 
@@ -17,19 +15,21 @@ const gd: libGDevelop = global.gd;
  * can run at the same time (like gameplay tests, each exporting its preview).
  */
 export const getLocalTempDir = (): string => {
+  if (!path) return '';
   const appArguments = Window.getArguments();
   const isCli = !!appArguments['run-command'] || !!appArguments['mcp'];
+  const pid = DesktopService.getPid();
   return path.join(
-    os.tmpdir(),
-    `GDTMP-${getUID()}${isCli && process ? `-cli-${process.pid}` : ''}`
+    DesktopService.getTmpDir(),
+    `GDTMP-${getUID()}${isCli && pid ? `-cli-${pid}` : ''}`
   );
 };
 
 /** To be called when an editor running a command of the CLI exits. */
 export const removeLocalTempDirOfCli = () => {
-  if (!fs || !path || !os) return;
+  if (!fs || !path) return;
   const tempDir = getLocalTempDir();
-  if (!tempDir.includes('-cli-')) return;
+  if (!tempDir || !tempDir.includes('-cli-')) return;
   try {
     fs.removeSync(tempDir);
   } catch (error) {
@@ -47,7 +47,7 @@ export type UrlFileDescriptor = {|
 // it should always be the posix version. In tests on Windows,
 // it's necessary to use path.posix.
 // Search for "pathPosix" in the codebase for other places where this is used.
-const pathPosix = path.posix || path;
+const pathPosix = (path && path.posix) || path;
 
 /**
  * Gives access to the local filesystem, but returns paths
@@ -84,6 +84,7 @@ class LocalFileSystem {
     // Ensure the path prefix we're searching the files in is normalized,
     // because everything that we stored was normalized. If we don't do this,
     // we risk missing files on Windows (as pathPrefix can contain backslashes).
+    if (!pathPosix) return [];
     const normalizedPathPrefix = pathPosix
       .normalize(pathPrefix)
       .replace(/\\/g, '/');
@@ -102,6 +103,7 @@ class LocalFileSystem {
       return;
     }
 
+    if (!fs) return false;
     try {
       fs.mkdirsSync(path);
     } catch (e) {
@@ -116,9 +118,10 @@ class LocalFileSystem {
       return true;
     }
 
-    return fs.existsSync(path);
+    return !!fs && fs.existsSync(path);
   };
   clearDir = (path: string) => {
+    if (!fs) return;
     try {
       fs.emptyDirSync(path);
     } catch (e) {
@@ -131,6 +134,7 @@ class LocalFileSystem {
   fileNameFrom = (fullPath: string): any => {
     // If URLs are not downloaded, then filenames are not changed.
     if (!this._downloadUrlsToLocalFiles && isURL(fullPath)) return fullPath;
+    if (!path) return fullPath;
 
     // For URLs that are downloaded (like resources of cloud projects), decode
     // the percent-encoded file name, so that the file is stored on disk with
@@ -144,10 +148,12 @@ class LocalFileSystem {
     return path.basename(fullPath);
   };
   dirNameFrom = (fullPath: string): any => {
+    if (!path) return '';
     return path.dirname(fullPath).replace(/\\/g, '/');
   };
   makeAbsolute = (filename: string, baseDirectory: string): any => {
     if (isURL(filename)) return filename;
+    if (!path) return filename;
 
     if (!this.isAbsolute(baseDirectory))
       baseDirectory = path.resolve(baseDirectory);
@@ -162,6 +168,7 @@ class LocalFileSystem {
   };
   makeRelative = (filename: string, baseDirectory: string): any => {
     if (isURL(filename)) return filename;
+    if (!path) return filename;
 
     return path
       .relative(baseDirectory, path.normalize(filename))
@@ -187,11 +194,13 @@ class LocalFileSystem {
         );
         return false;
       }
+      if (!pathPosix) return false;
 
       this._filesToDownload[pathPosix.normalize(dest)] = source;
       return true;
     }
 
+    if (!fs) return false;
     try {
       if (source !== dest) fs.copySync(source, dest);
     } catch (e) {
@@ -201,7 +210,7 @@ class LocalFileSystem {
         const existingDestToDownload = Object.keys(this._filesToDownload).find(
           filePath => filePath === source
         );
-        if (existingDestToDownload) {
+        if (existingDestToDownload && pathPosix) {
           const existingSourceToDownload = this._filesToDownload[
             existingDestToDownload
           ];
@@ -218,6 +227,7 @@ class LocalFileSystem {
     return true;
   };
   writeToFile = (file: string, contents: string): any => {
+    if (!fs) return false;
     try {
       fs.outputFileSync(file, contents);
     } catch (e) {
@@ -227,9 +237,9 @@ class LocalFileSystem {
     return true;
   };
   readFile = (file: string): any => {
+    if (!fs) return '';
     try {
-      var contents = fs.readFileSync(file);
-      return contents.toString();
+      return fs.readFileSync(file, 'utf8');
     } catch (e) {
       console.error('readFile(' + file + ') failed: ' + e);
       return '';
@@ -238,10 +248,12 @@ class LocalFileSystem {
   readDir = (path: string, ext: string): any => {
     ext = ext.toUpperCase();
     var output = new gd.VectorString();
+    const localFs = fs;
+    if (!localFs) return output;
     try {
       var files: Array<string> = [];
-      if (fs.existsSync(path)) {
-        files = fs.readdirSync(path);
+      if (localFs.existsSync(path)) {
+        files = localFs.readdirSync(path);
         files.forEach(function(file) {
           if (
             ext.length === 0 ||
@@ -259,7 +271,9 @@ class LocalFileSystem {
   };
   fileExists = (filePath: string): any => {
     // Check if a file WILL exists once downloaded.
-    const normalizedFilePath = pathPosix.normalize(filePath);
+    const normalizedFilePath = pathPosix
+      ? pathPosix.normalize(filePath)
+      : filePath;
     const shouldTheFileBeDownloaded = !!this._filesToDownload[
       normalizedFilePath
     ];
@@ -267,6 +281,7 @@ class LocalFileSystem {
       return true;
     }
 
+    if (!fs) return false;
     // Check if a local file exists.
     try {
       const stat = fs.statSync(filePath);

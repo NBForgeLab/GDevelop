@@ -1,9 +1,7 @@
 // @flow
 import PromisePool from '@supercharge/promise-pool';
 import { retryIfFailed } from './RetryIfFailed';
-import optionalRequire from './OptionalRequire';
-const electron = optionalRequire('electron');
-const ipcRenderer = electron ? electron.ipcRenderer : null;
+import DesktopService from './DesktopService';
 
 type Input<Item> = {|
   urlContainers: Array<Item>,
@@ -25,7 +23,7 @@ export const downloadUrlsToLocalFiles = async <
 }: Input<Item>): Promise<Array<ItemResult<Item>>> => {
   let count = 0;
   let firstError = null;
-  if (!ipcRenderer)
+  if (!DesktopService.isDesktop())
     throw new Error('Download to local files is not supported.');
 
   const { results } = await PromisePool.withConcurrency(20)
@@ -36,7 +34,10 @@ export const downloadUrlsToLocalFiles = async <
       try {
         await retryIfFailed({ times: 2 }, async () => {
           const encodedUrl = new URL(url).href; // Encode the URL to support special characters in file names.
-          await ipcRenderer.invoke('local-file-download', encodedUrl, filePath);
+          await DesktopService.fileTransfer.downloadLocalFile(
+            encodedUrl,
+            filePath
+          );
         });
 
         const result: ItemResult<Item> = {

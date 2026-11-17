@@ -1,13 +1,13 @@
 // @flow
-import optionalRequire from './OptionalRequire';
-const path = optionalRequire('path');
-const fs = optionalRequire('fs');
+import DesktopService from './DesktopService';
+const path = DesktopService.getPath();
+const fs = DesktopService.getFs();
 
 const readLocalFileToArrayBuffer = async (
   filePath: string
 ): Promise<ArrayBuffer> => {
-  // $FlowFixMe[cannot-resolve-name]
-  const buffer: Buffer = await new Promise((resolve, reject) => {
+  if (!fs) throw new Error('Filesystem is not supported.');
+  const buffer: any = await new Promise((resolve, reject) => {
     fs.readFile(filePath, function(err, buffer) {
       if (err) {
         reject(err);
@@ -29,7 +29,7 @@ const readLocalFileToArrayBuffer = async (
 };
 
 // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types.
-const extensionToMimeType = {
+const extensionToMimeType: { [string]: string } = {
   // Common audio extensions:
   aac: 'audio/aac',
   m4a: 'audio/x-m4a',
@@ -59,6 +59,7 @@ const extensionToMimeType = {
 };
 
 export const readLocalFileToFile = async (filePath: string): Promise<File> => {
+  if (!path) throw new Error('Path utilities are not supported.');
   const arrayBuffer = await readLocalFileToArrayBuffer(filePath);
   const extensionWithoutLeadingDot = path.extname(filePath).replace(/^\./, '');
   return new File([arrayBuffer], path.basename(filePath), {

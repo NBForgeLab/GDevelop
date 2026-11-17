@@ -5,8 +5,8 @@ import {
   readJSONFile,
 } from '../../Utils/FileSystem';
 import { type SerializedExtension } from '../../Utils/GDevelopServices/Extension';
-import optionalRequire from '../../Utils/OptionalRequire';
-const fs = optionalRequire('fs');
+import DesktopService from '../../Utils/DesktopService';
+const fs = DesktopService.getFs();
 
 export default class LocalEventsFunctionsExtensionOpener {
   static chooseEventsFunctionExtensionFile = (): Promise<Array<string>> => {
@@ -46,6 +46,7 @@ export default class LocalEventsFunctionsExtensionOpener {
   };
 
   static readAssetPackFile = async (filepath: string): Promise<Blob> => {
+    if (!fs) throw new Error('Filesystem is not supported.');
     const buffer = await fs.promises.readFile(filepath);
     return new Blob([buffer]);
   };

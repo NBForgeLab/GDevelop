@@ -1,17 +1,15 @@
 import { Trans } from '@lingui/macro';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import Dialog from './Dialog';
 import Text from './Text';
 import FlatButton from './FlatButton';
-
-const electron = optionalRequire('electron');
 
 export const ExternalEditorOpenedDialog = ({
   onClose,
 }: {|
   onClose?: () => Promise<void>,
 |}) => {
-  if (!!electron) return null;
+  if (DesktopService.isDesktop()) return null;
 
   return (
     <Dialog

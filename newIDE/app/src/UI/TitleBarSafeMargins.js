@@ -3,10 +3,8 @@ import * as React from 'react';
 import { isMacLike } from '../Utils/Platform';
 import useForceUpdate from '../Utils/UseForceUpdate';
 import Window, { useWindowControlsOverlayWatcher } from '../Utils/Window';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import PortalContainerContext from './PortalContainerContext';
-
-const electron = optionalRequire('electron');
 
 const titleBarStyles = {
   leftSideArea: {
@@ -49,7 +47,7 @@ export const TitleBarLeftSafeMargins = ({
   let leftSideOffset = 0;
   // macOS displays the "traffic lights" on the left.
   const isDesktopMacosFullScreen =
-    !!electron && isMacLike() && Window.isFullScreen();
+    DesktopService.isDesktop() && isMacLike() && Window.isFullScreen();
 
   if (isDesktopMacosFullScreen) {
     // When in full screen on macOS, the "traffic lights" are not in the overlay.
@@ -100,7 +98,7 @@ export const TitleBarRightSafeMargins = ({
     targetWindow: currentWindow,
   });
 
-  const isDesktopWindowsOrLinux = !!electron && !isMacLike();
+  const isDesktopWindowsOrLinux = DesktopService.isDesktop() && !isMacLike();
   // Windows and Linux have their "window controls" on the right
   let rightSideOffset = isDesktopWindowsOrLinux ? 150 : 0;
 

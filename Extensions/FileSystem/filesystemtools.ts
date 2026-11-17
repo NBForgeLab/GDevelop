@@ -3,21 +3,63 @@ namespace gdjs {
 
   /** @category Other extensions > File System */
   export namespace fileSystem {
+    const getPreviewBridge = (): any =>
+      typeof window !== 'undefined' &&
+      (window as any).gdevelopPreview &&
+      (window as any).gdevelopPreview.isPreview
+        ? (window as any).gdevelopPreview
+        : null;
+
     // The Node.js path module, or null if it can't be loaded.
-    const path: typeof import('path') | null =
+    const nodePath: typeof import('path') | null =
       typeof require !== 'undefined' ? require('path') : null;
     // The Node.js fs module, or null if it can't be loaded.
-    const fs: typeof import('fs') | null =
+    const nodeFs: typeof import('fs') | null =
       typeof require !== 'undefined' ? require('fs') : null;
-    const asyncFs: typeof import('fs/promises') | null =
+    const nodeAsyncFs: typeof import('fs/promises') | null =
       typeof require !== 'undefined' ? require('fs/promises') : null;
 
-    if (!fs)
+    const getPathApi = (): any => nodePath || getPreviewBridge()?.path || null;
+    const getFsApi = (): any => nodeFs || getPreviewBridge()?.fs || null;
+    const getAsyncFsApi = (): any =>
+      nodeAsyncFs || getPreviewBridge()?.fs?.promises || null;
+
+    const getElectronAppPath = (
+      instanceContainer: gdjs.RuntimeInstanceContainer,
+      name: string
+    ): string => {
+      const renderer = instanceContainer.getGame().getRenderer();
+      const previewBridge =
+        typeof renderer.getElectronPreviewBridge === 'function'
+          ? renderer.getElectronPreviewBridge()
+          : null;
+      if (
+        previewBridge &&
+        previewBridge.app &&
+        typeof previewBridge.app.getPath === 'function'
+      ) {
+        try {
+          return previewBridge.app.getPath(name) || '';
+        } catch (err) {
+          logger.error(`Unable to get preview app path "${name}":`, err);
+          return '';
+        }
+      }
+      const remote = renderer.getElectronRemote();
+      const app = remote ? remote.app : null;
+      if (app) {
+        return app.getPath(name) || '';
+      }
+      return '';
+    };
+
+    if (!getFsApi())
       logger.warn(
         'Filesystem is not supported on this platform! Only PC builds support filesystem access.'
       );
 
     export const getDirectoryName = function (fileOrFolderPath: string) {
+      const path = getPathApi();
       if (!path) {
         return '';
       }
@@ -25,6 +67,7 @@ namespace gdjs {
     };
 
     export const getFileName = function (filePath: string) {
+      const path = getPathApi();
       if (!path) {
         return '';
       }
@@ -32,6 +75,7 @@ namespace gdjs {
     };
 
     export const getExtensionName = function (filePath: string) {
+      const path = getPathApi();
       if (!path) {
         return '';
       }
@@ -46,16 +90,7 @@ namespace gdjs {
     export const getDesktopPath = function (
       instanceContainer: gdjs.RuntimeInstanceContainer
     ): string {
-      const remote = instanceContainer
-        .getGame()
-        .getRenderer()
-        .getElectronRemote();
-      const app = remote ? remote.app : null;
-      if (app) {
-        return app.getPath('desktop') || '';
-      } else {
-        return '';
-      }
+      return getElectronAppPath(instanceContainer, 'desktop');
     };
 
     /**
@@ -66,16 +101,7 @@ namespace gdjs {
     export const getDocumentsPath = function (
       instanceContainer: gdjs.RuntimeInstanceContainer
     ): string {
-      const remote = instanceContainer
-        .getGame()
-        .getRenderer()
-        .getElectronRemote();
-      const app = remote ? remote.app : null;
-      if (app) {
-        return app.getPath('documents') || '';
-      } else {
-        return '';
-      }
+      return getElectronAppPath(instanceContainer, 'documents');
     };
 
     /**
@@ -86,16 +112,7 @@ namespace gdjs {
     export const getPicturesPath = function (
       instanceContainer: gdjs.RuntimeInstanceContainer
     ): string {
-      const remote = instanceContainer
-        .getGame()
-        .getRenderer()
-        .getElectronRemote();
-      const app = remote ? remote.app : null;
-      if (app) {
-        return app.getPath('pictures') || '';
-      } else {
-        return '';
-      }
+      return getElectronAppPath(instanceContainer, 'pictures');
     };
 
     /**
@@ -106,16 +123,7 @@ namespace gdjs {
     export const getExecutablePath = function (
       instanceContainer: gdjs.RuntimeInstanceContainer
     ): string {
-      const remote = instanceContainer
-        .getGame()
-        .getRenderer()
-        .getElectronRemote();
-      const app = remote ? remote.app : null;
-      if (app) {
-        return app.getPath('exe') || '';
-      } else {
-        return '';
-      }
+      return getElectronAppPath(instanceContainer, 'exe');
     };
 
     /**
@@ -127,6 +135,7 @@ namespace gdjs {
       instanceContainer: gdjs.RuntimeInstanceContainer
     ): string {
       const executablePath = getExecutablePath(instanceContainer);
+      const path = getPathApi();
       if (!path) {
         return '';
       }
@@ -141,16 +150,7 @@ namespace gdjs {
     export const getUserdataPath = function (
       instanceContainer: gdjs.RuntimeInstanceContainer
     ): string {
-      const remote = instanceContainer
-        .getGame()
-        .getRenderer()
-        .getElectronRemote();
-      const app = remote ? remote.app : null;
-      if (app) {
-        return app.getPath('userData') || '';
-      } else {
-        return '';
-      }
+      return getElectronAppPath(instanceContainer, 'userData');
     };
 
     /**
@@ -160,16 +160,7 @@ namespace gdjs {
     export const getUserHomePath = function (
       instanceContainer: gdjs.RuntimeInstanceContainer
     ): string {
-      const remote = instanceContainer
-        .getGame()
-        .getRenderer()
-        .getElectronRemote();
-      const app = remote ? remote.app : null;
-      if (app) {
-        return app.getPath('home') || '';
-      } else {
-        return '';
-      }
+      return getElectronAppPath(instanceContainer, 'home');
     };
 
     /**
@@ -180,16 +171,7 @@ namespace gdjs {
     export const getTempPath = function (
       instanceContainer: gdjs.RuntimeInstanceContainer
     ): string {
-      const remote = instanceContainer
-        .getGame()
-        .getRenderer()
-        .getElectronRemote();
-      const app = remote ? remote.app : null;
-      if (app) {
-        return app.getPath('temp') || '';
-      } else {
-        return '';
-      }
+      return getElectronAppPath(instanceContainer, 'temp');
     };
 
     /**
@@ -197,6 +179,7 @@ namespace gdjs {
      * @return The path delimiter
      */
     export const getPathDelimiter = function (): string {
+      const path = getPathApi();
       if (path) {
         return path.sep || '/';
       } else {
@@ -214,6 +197,7 @@ namespace gdjs {
       resultVar: gdjs.Variable
     ) {
       let result = 'error';
+      const fs = getFsApi();
       if (fs) {
         try {
           fs.mkdirSync(directory);
@@ -231,8 +215,9 @@ namespace gdjs {
     export const makeDirectoryAsync = (
       directory: string,
       resultVar: gdjs.Variable
-    ) =>
-      asyncFs
+    ) => {
+      const asyncFs = getAsyncFsApi();
+      return asyncFs
         ? new gdjs.PromiseTask(
             asyncFs
               .mkdir(directory, { recursive: true })
@@ -248,6 +233,7 @@ namespace gdjs {
               })
           )
         : (resultVar.setString('error'), new gdjs.ResolveTask());
+    };
 
     /**
      * Save a string into a file, asynchronously.
@@ -260,6 +246,7 @@ namespace gdjs {
       savePath: string,
       resultVar: gdjs.Variable
     ) {
+      const fs = getFsApi();
       if (fs) {
         fs.writeFile(savePath, text, 'utf8', (err) => {
           resultVar.setString('ok');
@@ -278,8 +265,9 @@ namespace gdjs {
       text: string,
       savePath: string,
       resultVar: gdjs.Variable
-    ) =>
-      asyncFs
+    ) => {
+      const asyncFs = getAsyncFsApi();
+      return asyncFs
         ? new gdjs.PromiseTask(
             asyncFs
               .writeFile(savePath, text, { encoding: 'utf8' })
@@ -295,6 +283,7 @@ namespace gdjs {
               })
           )
         : (resultVar.setString('error'), new gdjs.ResolveTask());
+    };
 
     /**
      * Save a string into a file.
@@ -308,6 +297,7 @@ namespace gdjs {
       resultVar: gdjs.Variable
     ) {
       let result = 'error';
+      const fs = getFsApi();
       if (fs) {
         try {
           fs.writeFileSync(savePath, text, 'utf8');
@@ -334,6 +324,7 @@ namespace gdjs {
       resultVar: gdjs.Variable
     ) {
       let result = 'error';
+      const fs = getFsApi();
       if (fs) {
         try {
           fs.writeFileSync(
@@ -363,6 +354,7 @@ namespace gdjs {
       savePath: string,
       resultVar: gdjs.Variable
     ) {
+      const fs = getFsApi();
       if (fs) {
         fs.writeFile(
           savePath,
@@ -386,8 +378,9 @@ namespace gdjs {
       variable: gdjs.Variable,
       savePath: string,
       resultVar: gdjs.Variable
-    ) =>
-      asyncFs
+    ) => {
+      const asyncFs = getAsyncFsApi();
+      return asyncFs
         ? new gdjs.PromiseTask(
             asyncFs
               .writeFile(savePath, JSON.stringify(variable.toJSObject()), {
@@ -405,6 +398,7 @@ namespace gdjs {
               })
           )
         : (resultVar.setString('error'), new gdjs.ResolveTask());
+    };
 
     /**
      * Load a string from a file into a scene variable.
@@ -420,6 +414,7 @@ namespace gdjs {
       removeCRCharacters: boolean
     ) {
       let result = 'error';
+      const fs = getFsApi();
       if (fs) {
         try {
           const data = fs.readFileSync(loadPath, 'utf8');
@@ -453,6 +448,7 @@ namespace gdjs {
       removeCRCharacters: boolean
     ) {
       let result = 'error';
+      const fs = getFsApi();
       if (fs) {
         try {
           const data = fs.readFileSync(loadPath, 'utf8');
@@ -487,6 +483,7 @@ namespace gdjs {
       resultVar: gdjs.Variable,
       removeCRCharacters: boolean
     ) {
+      const fs = getFsApi();
       if (fs) {
         fs.readFile(loadPath, 'utf8', (err, data) => {
           if (data) {
@@ -513,8 +510,9 @@ namespace gdjs {
       loadPath: string,
       resultVar: gdjs.Variable,
       removeCRCharacters: boolean
-    ) =>
-      asyncFs
+    ) => {
+      const asyncFs = getAsyncFsApi();
+      return asyncFs
         ? new gdjs.PromiseTask(
             asyncFs
               .readFile(loadPath, { encoding: 'utf8' })
@@ -536,6 +534,7 @@ namespace gdjs {
               })
           )
         : (resultVar.setString('error'), new gdjs.ResolveTask());
+    };
 
     /**
      * Load a string from a file into a scene variable, asynchronously.
@@ -550,6 +549,7 @@ namespace gdjs {
       resultVar: gdjs.Variable,
       removeCRCharacters: boolean
     ) {
+      const fs = getFsApi();
       if (fs) {
         fs.readFile(loadPath, 'utf8', (err, data) => {
           if (data) {
@@ -574,8 +574,9 @@ namespace gdjs {
       loadPath: string,
       resultVar: gdjs.Variable,
       removeCRCharacters: boolean
-    ) =>
-      asyncFs
+    ) => {
+      const asyncFs = getAsyncFsApi();
+      return asyncFs
         ? new gdjs.PromiseTask(
             asyncFs
               .readFile(loadPath, { encoding: 'utf8' })
@@ -597,6 +598,7 @@ namespace gdjs {
               })
           )
         : (resultVar.setString('error'), new gdjs.ResolveTask());
+    };
 
     /**
      * Delete a file from the filesystem.
@@ -608,6 +610,7 @@ namespace gdjs {
       resultVar: gdjs.Variable
     ) {
       let result = 'error';
+      const fs = getFsApi();
       if (fs) {
         try {
           fs.unlinkSync(filePath);
@@ -629,6 +632,7 @@ namespace gdjs {
       filePath: string,
       resultVar: gdjs.Variable
     ) {
+      const fs = getFsApi();
       if (fs) {
         fs.unlink(filePath, (err) => {
           resultVar.setString('ok');
@@ -646,8 +650,9 @@ namespace gdjs {
     export const deleteFileAsyncTask = (
       filePath: string,
       resultVar: gdjs.Variable
-    ) =>
-      asyncFs
+    ) => {
+      const asyncFs = getAsyncFsApi();
+      return asyncFs
         ? new gdjs.PromiseTask(
             asyncFs
               .rm(filePath, { recursive: true })
@@ -663,6 +668,7 @@ namespace gdjs {
               })
           )
         : (resultVar.setString('error'), new gdjs.ResolveTask());
+    };
 
     /**
      * Reads the contents of a directory.
@@ -674,6 +680,7 @@ namespace gdjs {
       resultVar: gdjs.Variable
     ) {
       let result: string[] | string = 'error';
+      const fs = getFsApi();
       if (fs) {
         try {
           result = fs.readdirSync(directoryPath);
@@ -696,8 +703,9 @@ namespace gdjs {
     export const readdirAsync = (
       directoryPath: string,
       resultVar: gdjs.Variable
-    ) =>
-      asyncFs
+    ) => {
+      const asyncFs = getAsyncFsApi();
+      return asyncFs
         ? new gdjs.PromiseTask(
             asyncFs
               .readdir(directoryPath)
@@ -713,6 +721,7 @@ namespace gdjs {
               })
           )
         : (resultVar.setString('error'), new gdjs.ResolveTask());
+    };
 
     /**
      * Check if the file or directory exists.
@@ -720,8 +729,13 @@ namespace gdjs {
      * @return true if fhe file or directory exists
      */
     export const pathExists = function (filePath: string): boolean {
+      const fs = getFsApi();
       if (fs) {
-        return fs.existsSync(filePath);
+        try {
+          return !!fs.existsSync(filePath);
+        } catch (e) {
+          return false;
+        }
       } else {
         return false;
       }

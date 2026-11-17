@@ -16,7 +16,7 @@ import {
   localOnlineWebExporter,
 } from './ExportAndShare/LocalExporters';
 import ElectronMainMenu from './MainFrame/ElectronMainMenu';
-import makeExtensionsLoader from './JsExtensionsLoader/LocalJsExtensionsLoader';
+import makeExtensionsLoader from './JsExtensionsLoader/BrowserJsExtensionsLoader';
 import { makeLocalEventsFunctionCodeWriter } from './EventsFunctionsExtensionsLoader/CodeWriters/LocalEventsFunctionCodeWriter';
 import ObjectsEditorService from './ObjectEditor/ObjectsEditorService';
 import ObjectsRenderingService from './ObjectsRendering/ObjectsRenderingService';
@@ -33,8 +33,6 @@ import UrlStorageProvider from './ProjectsStorage/UrlStorageProvider';
 import LocalResourceMover from './ProjectsStorage/ResourceMover/LocalResourceMover';
 import LocalResourceFetcher from './ProjectsStorage/ResourceFetcher/LocalResourceFetcher';
 import LocalLoginProvider from './LoginProvider/LocalLoginProvider';
-
-const gd: libGDevelop = global.gd;
 
 export const create = (authentication: Authentication): React.Node => {
   Window.setUpContextMenu();
@@ -107,7 +105,13 @@ export const create = (authentication: Authentication): React.Node => {
                 />
               )}
               renderGDJSDevelopmentWatcher={
-                isDev ? ({ onGDJSUpdated }) => <LocalGDJSDevelopmentWatcher onGDJSUpdated={onGDJSUpdated} /> : null
+                isDev
+                  ? ({ onGDJSUpdated }) => (
+                      <LocalGDJSDevelopmentWatcher
+                        onGDJSUpdated={onGDJSUpdated}
+                      />
+                    )
+                  : null
               }
               storageProviders={storageProviders}
               resourceMover={LocalResourceMover}
@@ -120,7 +124,6 @@ export const create = (authentication: Authentication): React.Node => {
               resourceSources={localResourceSources}
               resourceExternalEditors={localResourceExternalEditors}
               extensionsLoader={makeExtensionsLoader({
-                gd,
                 objectsEditorService: ObjectsEditorService,
                 objectsRenderingService: ObjectsRenderingService,
                 filterExamples: !isDev,

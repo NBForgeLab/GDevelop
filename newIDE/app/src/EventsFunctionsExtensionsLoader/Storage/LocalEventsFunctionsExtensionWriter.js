@@ -1,13 +1,12 @@
 // @flow
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import { addFinalNewline } from '../../Utils/Serializer';
-const fs = optionalRequire('fs-extra');
-const path = optionalRequire('path');
-const remote = optionalRequire('@electron/remote');
-const dialog = remote ? remote.dialog : null;
+const fs = DesktopService.getFs();
+const path = DesktopService.getPath();
 
 const writeJSONFile = (object: Object, filepath: string): Promise<void> => {
-  if (!fs) return Promise.reject(new Error('Filesystem is not supported.'));
+  if (!fs || !path)
+    return Promise.reject(new Error('Filesystem is not supported.'));
 
   try {
     const content = addFinalNewline(JSON.stringify(object, null, 2));
@@ -32,24 +31,22 @@ export default class LocalEventsFunctionsExtensionWriter {
   static chooseEventsFunctionExtensionFile = (
     extensionName?: string
   ): Promise<?string> => {
-    if (!dialog) return Promise.reject('Not supported');
-    const browserWindow = remote.getCurrentWindow();
+    if (!DesktopService.isDesktop()) return Promise.reject('Not supported');
 
-    return dialog
-      .showSaveDialog(browserWindow, {
-        title: 'Export an extension of the project',
-        filters: [
-          {
-            name: 'GDevelop 5 "events based" extension',
-            extensions: ['json'],
-          },
-        ],
-        defaultPath: (extensionName || 'Extension') + '.json',
-      })
-      .then(({ filePath }) => {
-        if (!filePath) return null;
-        return filePath;
-      });
+    return DesktopService.showSaveDialog({
+      title: 'Export an extension of the project',
+      filters: [
+        {
+          name: 'GDevelop 5 "events based" extension',
+          extensions: ['json'],
+        },
+      ],
+      defaultPath: (extensionName || 'Extension') + '.json',
+    }).then(saveDialogResult => {
+      const filePath = saveDialogResult ? saveDialogResult.filePath : null;
+      if (!filePath) return null;
+      return filePath;
+    });
   };
 
   static writeSerializedObject = (

@@ -8,14 +8,13 @@ import { generateCustomAuthToken } from '../../../../Utils/GDevelopServices/User
 import PublicProfileContext from '../../../../Profile/PublicProfileContext';
 import RouterContext from '../../../RouterContext';
 import { retryIfFailed } from '../../../../Utils/RetryIfFailed';
-import optionalRequire from '../../../../Utils/OptionalRequire';
+import DesktopService from '../../../../Utils/DesktopService';
 import { isNativeMobileApp } from '../../../../Utils/Platform';
 import Window from '../../../../Utils/Window';
 import { delay } from '../../../../Utils/Delay';
 import { useStableUpToDateRef } from '../../../../Utils/UseStableUpToDateCallback';
 import { useSoftKeyboardBottomOffset } from '../../../../UI/MobileSoftKeyboard';
 import { homepageMobileMenuHeight } from '../HomePageMenuBar';
-const electron = optionalRequire('electron');
 
 // If the iframe is displaying a game, it will continue playing its audio as long as the iframe
 // exists, even if it's not visible. So we don't keep it alive for too long.
@@ -28,7 +27,7 @@ let gdevelopGamesMonetization: {|
 let gdevelopGamesMonetizationPromise: Promise<void> | null = null;
 
 const ensureGDevelopGamesMonetizationReady = async () => {
-  if (!!electron || isNativeMobileApp()) {
+  if (DesktopService.isDesktop() || isNativeMobileApp()) {
     // Not supported on desktop or mobile.
     return;
   }

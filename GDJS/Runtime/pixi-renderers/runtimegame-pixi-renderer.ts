@@ -426,6 +426,18 @@ namespace gdjs {
      */
     setWindowSize(width: float, height: float): void {
       this._throwIfDisposed();
+      const previewBridge = this.getElectronPreviewBridge();
+      if (previewBridge) {
+        try {
+          previewBridge.windowCallSync('setContentSize', [width, height]);
+        } catch (error) {
+          logger.error(
+            `Window size setting to width ${width} and height ${height} failed. See error:`,
+            error
+          );
+        }
+        return;
+      }
       const remote = this.getElectronRemote();
       if (remote) {
         const browserWindow = remote.getCurrentWindow();
@@ -449,6 +461,15 @@ namespace gdjs {
      */
     centerWindow() {
       this._throwIfDisposed();
+      const previewBridge = this.getElectronPreviewBridge();
+      if (previewBridge) {
+        try {
+          previewBridge.windowCallSync('center', []);
+        } catch (error) {
+          logger.error('Window centering failed. See error:', error);
+        }
+        return;
+      }
       const remote = this.getElectronRemote();
       if (remote) {
         const browserWindow = remote.getCurrentWindow();
@@ -474,8 +495,18 @@ namespace gdjs {
       }
       if (this._isFullscreen !== enable) {
         this._isFullscreen = !!enable;
-        const remote = this.getElectronRemote();
-        if (remote) {
+        const previewBridge = this.getElectronPreviewBridge();
+        const remote = previewBridge ? null : this.getElectronRemote();
+        if (previewBridge) {
+          try {
+            previewBridge.windowCallSync('setFullScreen', [this._isFullscreen]);
+          } catch (error) {
+            logger.error(
+              `Full screen setting to ${this._isFullscreen} failed. See error:`,
+              error
+            );
+          }
+        } else if (remote) {
           const browserWindow = remote.getCurrentWindow();
           try {
             if (browserWindow) {
@@ -536,6 +567,15 @@ namespace gdjs {
      * Checks if the game is in full screen.
      */
     isFullScreen(): boolean {
+      const previewBridge = this.getElectronPreviewBridge();
+      if (previewBridge) {
+        try {
+          return !!previewBridge.windowCallSync('isFullScreen', []);
+        } catch (error) {
+          logger.error(`Full screen detection failed. See error:`, error);
+          return false;
+        }
+      }
       const remote = this.getElectronRemote();
       if (remote) {
         try {
@@ -1072,8 +1112,11 @@ namespace gdjs {
       // way of opening an URL.
 
       if (typeof window !== 'undefined') {
-        const electron = this.getElectron();
-        if (electron) {
+        const previewBridge = this.getElectronPreviewBridge();
+        const electron = previewBridge ? null : this.getElectron();
+        if (previewBridge && previewBridge.shell) {
+          previewBridge.shell.openExternal(url);
+        } else if (electron) {
           electron.shell.openExternal(url);
         } else if (
           // @ts-ignore
@@ -1095,6 +1138,15 @@ namespace gdjs {
     stopGame() {
       // Try to detect the environment to use the most adapted
       // way of closing the app
+      const previewBridge = this.getElectronPreviewBridge();
+      if (previewBridge && previewBridge.app) {
+        try {
+          previewBridge.app.quit();
+        } catch (error) {
+          logger.error('Preview closing failed. See error:', error);
+        }
+        return;
+      }
       const remote = this.getElectronRemote();
       if (remote) {
         const browserWindow = remote.getCurrentWindow();
@@ -1161,6 +1213,20 @@ namespace gdjs {
         !!this._pixiRenderer &&
         this._pixiRenderer.type === PIXI.RENDERER_TYPE.WEBGL
       );
+    }
+
+    /**
+     * Get the sandboxed Electron preview bridge exposed by preload, if any.
+     */
+    getElectronPreviewBridge(): any {
+      if (
+        typeof window !== 'undefined' &&
+        (window as any).gdevelopPreview &&
+        (window as any).gdevelopPreview.isPreview
+      ) {
+        return (window as any).gdevelopPreview;
+      }
+      return null;
     }
 
     /**

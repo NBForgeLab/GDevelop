@@ -11,7 +11,7 @@ import { type AuthenticatedUser } from '../../Profile/AuthenticatedUserContext';
 import { findGDJS } from '../../GameEngineFinder/LocalGDJSFinder';
 import { uploadLocalFile } from './LocalFileUploader';
 import { archiveLocalFolder } from '../../Utils/LocalArchiver';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import LocalFileSystem, { type UrlFileDescriptor } from './LocalFileSystem';
 import {
   type ExportFlowProps,
@@ -25,8 +25,7 @@ import {
 } from '../GenericExporters/OnlineElectronExport';
 import { downloadUrlsToLocalFiles } from '../../Utils/LocalFileDownloader';
 
-const path = optionalRequire('path');
-const os = optionalRequire('os');
+const path = DesktopService.getPath();
 const gd: libGDevelop = global.gd;
 
 type PreparedExporter = {|
@@ -95,6 +94,7 @@ export const localOnlineElectronExportPipeline: ExportPipeline<
         localFileSystem
       );
       const exporter = new gd.Exporter(fileSystem, gdjsRoot);
+      if (!path) return Promise.reject(new Error('Unsupported'));
       const temporaryOutputDir = path.join(
         fileSystem.getTempDir(),
         'OnlineElectronExport'
@@ -161,7 +161,9 @@ export const localOnlineElectronExportPipeline: ExportPipeline<
     context: ExportPipelineContext<ExportState>,
     { temporaryOutputDir }: ResourcesDownloadOutput
   ): Promise<CompressionOutput> => {
-    const archiveOutputDir = os.tmpdir();
+    const archiveOutputDir = DesktopService.getTmpDir();
+    if (!path || !archiveOutputDir)
+      return Promise.reject(new Error('Unsupported'));
     return archiveLocalFolder({
       path: temporaryOutputDir,
       outputFilename: path.join(archiveOutputDir, 'game-archive.zip'),

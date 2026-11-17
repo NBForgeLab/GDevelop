@@ -349,7 +349,9 @@ export const CompactObjectGroupPropertiesEditor: React.ComponentType<{
                     <IconButton
                       size="small"
                       onClick={() => {
-                        Window.openExternalURL('/objects/object-groups');
+                        Window.openExternalURL(
+                          getHelpLink('/objects/object-groups')
+                        );
                       }}
                     >
                       <Help style={styles.icon} />

@@ -29,7 +29,7 @@ import {
   type CliEditorFunctionsEditorCallbacks,
   type CliProjectCreationCallbacks,
 } from './CliEditorFunctions';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import { type FileMetadata } from '../ProjectsStorage';
 import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
 import { useEditorFunctionsServices } from '../AiGeneration/UseEditorFunctionsServices';
@@ -46,11 +46,8 @@ import { POSITIONAL_ARGUMENTS_KEY } from '../Utils/Window';
 import { readCliLoginForm } from './CliLogin';
 import { removeLocalTempDirOfCli } from '../ExportAndShare/LocalExporters/LocalFileSystem';
 
-const electron = optionalRequire('electron');
-const ipcRenderer = electron ? electron.ipcRenderer : null;
-const fs = optionalRequire('fs');
-const path = optionalRequire('path');
-const process = optionalRequire('process');
+const fs = DesktopService.getFs();
+const path = DesktopService.getPath();
 
 export type ImportExtension = (options: {|
   i18n: I18nType,
@@ -263,8 +260,10 @@ const readCliInput = async (commandArg: string): Promise<string> => {
     return commandArg;
   }
   if (commandArg === '-') {
-    if (!ipcRenderer) throw new Error('[CLI] stdin is not available.');
-    return ipcRenderer.invoke('cli-read-stdin');
+    if (!DesktopService.isDesktop()) {
+      throw new Error('[CLI] stdin is not available.');
+    }
+    return DesktopService.cli.readStdin();
   }
   if (!fs || !path) throw new Error('[CLI] Files are not available.');
   return fs.readFileSync(path.resolve(commandArg), 'utf8');
@@ -284,8 +283,8 @@ const writeCliCommandResult = async (
     fs.writeFileSync(resultsPath, text);
     console.info(`[CLI] Results written to: ${resultsPath}`);
   }
-  if (cliOptions.json && ipcRenderer) {
-    await ipcRenderer.invoke('cli-write-stdout', text + '\n');
+  if (cliOptions.json && DesktopService.isDesktop()) {
+    await DesktopService.cli.writeStdout(text + '\n');
   }
   if (!cliOptions.resultsPath && !cliOptions.json) {
     console.info(`[CLI] Results:\n${text}`);
@@ -557,7 +556,9 @@ const runners: { [commandName: string]: CliCommandRunner } = {
   // up as soon as the editor is loaded (see `useCliCommandRunner`): this only
   // lets the tool calls run, now that the project is ready.
   SERVE_MCP: async (project, i18n, { onMcpProjectReady }) => {
-    if (!ipcRenderer) throw new Error('[CLI] SERVE_MCP requires Electron.');
+    if (!DesktopService.isDesktop()) {
+      throw new Error('[CLI] SERVE_MCP requires Electron.');
+    }
     onMcpProjectReady();
     console.info(`[CLI] MCP server ready for "${project.getName()}".`);
     // The main process exits the app when the agent closes stdin.
@@ -637,14 +638,14 @@ const FIRE_AND_FORGET_GRACE_MS = 1500;
 
 const exitApp = (exitCode: number) => {
   removeLocalTempDirOfCli();
-  if (ipcRenderer) ipcRenderer.send('app-exit', exitCode);
+  DesktopService.exitApp(exitCode);
 };
 
 // Must match electron-app/app/OpenProjectsRegistry.js normalizeFileIdentifier (IPC routing).
 const normalizeFileIdentifier = (fileIdentifier: ?string): ?string => {
   if (!fileIdentifier || !path) return null;
   const resolved = path.resolve(fileIdentifier);
-  return process && process.platform === 'win32'
+  return DesktopService.getPlatform() === 'win32'
     ? resolved.toLowerCase()
     : resolved;
 };
@@ -991,8 +992,7 @@ export const useCliCommandRunner = ({
 
   React.useEffect(
     () => {
-      if (ipcRenderer)
-        ipcRenderer.send('set-window-project-path', fileIdentifier);
+      DesktopService.setWindowProjectPath(fileIdentifier);
     },
     [fileIdentifier]
   );
@@ -1228,17 +1228,14 @@ export const useCliCommandRunner = ({
 
   React.useEffect(
     () => {
-      if (!ipcRenderer || !project) return;
+      if (!DesktopService.isDesktop() || !project) return;
 
-      const onRunCliCommand = (
-        event: any,
-        {
-          commandName,
-          commandArgs,
-          fileIdentifier: routedFileIdentifier,
-          commandOptions,
-        }: RunCliCommandIpcPayload
-      ) => {
+      const onRunCliCommand = ({
+        commandName,
+        commandArgs,
+        fileIdentifier: routedFileIdentifier,
+        commandOptions,
+      }: RunCliCommandIpcPayload) => {
         if (
           normalizeFileIdentifier(routedFileIdentifier) !==
           normalizeFileIdentifier(fileIdentifier)
@@ -1273,9 +1270,13 @@ export const useCliCommandRunner = ({
         });
       };
 
-      ipcRenderer.on('run-cli-command', onRunCliCommand);
-      return () =>
-        ipcRenderer.removeListener('run-cli-command', onRunCliCommand);
+      const unsubscribe = DesktopService.onIpcEvent(
+        'run-cli-command',
+        onRunCliCommand
+      );
+      return () => {
+        unsubscribe();
+      };
     },
     [
       project,

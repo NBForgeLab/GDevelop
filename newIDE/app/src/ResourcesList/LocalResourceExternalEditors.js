@@ -12,7 +12,7 @@ import {
 } from './ResourceExternalEditor';
 import { sendExternalEditorOpened } from '../Utils/Analytics/EventSender';
 import { t } from '@lingui/macro';
-import optionalRequire from '../Utils/OptionalRequire';
+import DesktopService from '../Utils/DesktopService';
 import { isBlobURL, isURL } from './ResourceUtils';
 import {
   convertBlobToDataURL,
@@ -22,10 +22,8 @@ import {
 import { type ResourceKind } from './ResourceSource';
 import { triggerOnResourceExternallyChanged } from '../MainFrame/ResourcesWatcher';
 
-const path = optionalRequire('path');
-const fs = optionalRequire('fs');
-const electron = optionalRequire('electron');
-const ipcRenderer = electron ? electron.ipcRenderer : null;
+const path = DesktopService.getPath();
+const fs = DesktopService.getFs();
 
 /**
  * Ask Electron main process to open a window for the specified editor,
@@ -35,10 +33,16 @@ const openAndWaitForExternalEditorWindow = async (
   editorName: 'piskel' | 'yarn' | 'jfxr',
   externalEditorInput: ExternalEditorInput
 ): Promise<?ExternalEditorOutput> => {
-  if (!ipcRenderer) throw new Error('Not supported.');
+  if (!DesktopService.isDesktop()) throw new Error('Not supported.');
 
-  const externalEditorOutput = await ipcRenderer.invoke(
-    `${editorName}-load`,
+  const channel =
+    editorName === 'piskel'
+      ? 'piskel-load'
+      : editorName === 'jfxr'
+      ? 'jfxr-load'
+      : 'yarn-load';
+  const externalEditorOutput = await DesktopService.externalEditor.open(
+    channel,
     externalEditorInput
   );
   return externalEditorOutput;
@@ -65,7 +69,10 @@ export const downloadAndPrepareExternalEditorBase64Resources = async ({
     localFilePath: string,
   |};
 
-  const projectPath = path.dirname(project.getProjectFile());
+  if (!fs || !path) throw new Error('Not supported.');
+  const localFs = fs;
+  const localPath = path;
+  const projectPath = localPath.dirname(project.getProjectFile());
   const urlsToDownload: Array<ResourceToDownload> = [];
   const filesToRead: Array<ResourceToReadLocally> = [];
   const resourcesManager = project.getResourcesManager();
@@ -128,8 +135,8 @@ export const downloadAndPrepareExternalEditorBase64Resources = async ({
   await Promise.all(
     filesToRead.map(async ({ localFilePath, resourceName }) => {
       try {
-        const content = await fs.promises.readFile(
-          path.resolve(projectPath, localFilePath)
+        const content = await localFs.promises.readFile(
+          localPath.resolve(projectPath, localFilePath)
         );
 
         resourcesToDataUrl.set(resourceName, {

@@ -13,7 +13,7 @@ import {
   type ExportPipeline,
   type ExportPipelineContext,
 } from '../ExportPipeline.flow';
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import {
   ExplanationHeader,
   DoneFooter,
@@ -21,12 +21,6 @@ import {
 } from '../GenericExporters/HTML5Export';
 import { downloadUrlsToLocalFiles } from '../../Utils/LocalFileDownloader';
 import DismissableTutorialMessage from '../../Hints/DismissableTutorialMessage';
-
-// It's important to use remote and not electron for folder actions,
-// otherwise they will be opened in the background.
-// See https://github.com/electron/electron/issues/4349#issuecomment-777475765
-const remote = optionalRequire('@electron/remote');
-const shell = remote ? remote.shell : null;
 
 const gd: libGDevelop = global.gd;
 
@@ -123,6 +117,10 @@ export const localHTML5ExportPipeline: ExportPipeline<
     { exporter, localFileSystem }: PreparedExporter,
     fallbackAuthor: ?{ id: string, username: string }
   ): Promise<ExportOutput> => {
+    await DesktopService.requestFileAccess(context.exportState.outputDir, {
+      write: true,
+      directory: true,
+    });
     const exportOptions = new gd.ExportOptions(
       context.project,
       context.exportState.outputDir
@@ -172,7 +170,7 @@ export const localHTML5ExportPipeline: ExportPipeline<
 
   renderDoneFooter: ({ exportState }) => {
     const openExportFolder = () => {
-      if (shell) shell.openPath(exportState.outputDir);
+      DesktopService.openPath(exportState.outputDir);
     };
 
     return (

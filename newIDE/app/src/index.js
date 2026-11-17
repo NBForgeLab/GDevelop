@@ -12,7 +12,7 @@ import {
 } from './Utils/Analytics/EventSender';
 import { registerServiceWorker } from './ServiceWorkerSetup';
 import './UI/icomoon-font.css'; // Styles for Icomoon font.
-import optionalRequire from './Utils/OptionalRequire';
+import DesktopService from './Utils/DesktopService';
 import { loadScript } from './Utils/LoadScript';
 import { showErrorBox } from './UI/Messages/MessageBox';
 import VersionMetadata from './Version/VersionMetadata';
@@ -21,8 +21,6 @@ import { getThemeWindowBackgroundColor } from './UI/Theme';
 const GD_STARTUP_TIMES = global.GD_STARTUP_TIMES || [];
 
 // No i18n in this file
-
-const electron = optionalRequire('electron');
 
 // Make sure that the process object is available, even if we are not in Node.
 // This is needed by some libraries like path-browserify for example.
@@ -100,7 +98,7 @@ class Bootstrapper extends Component<{}, State> {
         ]);
         sendProgramOpening();
 
-        if (electron) {
+        if (DesktopService.isDesktop()) {
           import(/* webpackChunkName: "local-app" */ './LocalApp')
             .then(module =>
               this.setState({
@@ -125,7 +123,7 @@ class Bootstrapper extends Component<{}, State> {
 
   // $FlowFixMe[missing-local-annot]
   handleEditorLoadError = rawError => {
-    const message = !electron
+    const message = !DesktopService.isDesktop()
       ? 'Please check your internet connectivity, close the tab and reopen it.'
       : 'Please restart the application or reinstall the latest version if the problem persists.';
 

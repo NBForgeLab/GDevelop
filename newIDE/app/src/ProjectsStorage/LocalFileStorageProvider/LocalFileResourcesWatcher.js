@@ -1,13 +1,11 @@
 // @flow
-import optionalRequire from '../../Utils/OptionalRequire';
+import DesktopService from '../../Utils/DesktopService';
 import debounce from 'lodash/debounce';
 import wrap from 'lodash/wrap';
 import memoize from 'lodash/memoize';
 import { splittedProjectFolderNames } from './LocalProjectWriter';
 
-const path = optionalRequire('path');
-const electron = optionalRequire('electron');
-const ipcRenderer = electron ? electron.ipcRenderer : null;
+const path = DesktopService.getPath();
 
 export const setupResourcesWatcher:
   | (({
@@ -16,7 +14,7 @@ export const setupResourcesWatcher:
       options?: { isProjectSplitInMultipleFiles: boolean },
     }) => () => void)
   | void =
-  ipcRenderer && path
+  DesktopService.isDesktop() && path
     ? ({
         fileIdentifier,
         callback,
@@ -48,12 +46,15 @@ export const setupResourcesWatcher:
         const folderPath = path.dirname(fileIdentifier);
         const gameFile = path.basename(fileIdentifier);
         const autosaveFile = gameFile + '.autosave';
-        ipcRenderer.on('project-file-changed', (event, path) => {
-          // TODO: Is it safe to let it like that since the OS could for some reason
-          // do never-ending operations on the folder or its children, making the debounce
-          // never ending.
-          debouncedCallback(path);
-        });
+        const unsubscribe = DesktopService.onIpcEvent(
+          'project-file-changed',
+          changedPath => {
+            // TODO: Is it safe to let it like that since the OS could for some reason
+            // do never-ending operations on the folder or its children, making the debounce
+            // never ending.
+            debouncedCallback(changedPath);
+          }
+        );
 
         // Note: this ignore list is not a list of glob. Any file that matches a string in this list will be ignored.
         // This could be improved to separate this in a list of paths, filenames, etc.
@@ -71,8 +72,7 @@ export const setupResourcesWatcher:
             )
           );
         }
-        const subscriptionIdPromise = ipcRenderer.invoke(
-          'local-filesystem-watcher-setup',
+        const subscriptionIdPromise = DesktopService.fsWatcher.setup(
           folderPath,
           JSON.stringify({
             ignore,
@@ -80,12 +80,11 @@ export const setupResourcesWatcher:
         );
 
         return () => {
-          ipcRenderer.removeAllListeners('project-file-changed');
+          unsubscribe();
           subscriptionIdPromise.then(subscriptionId => {
-            ipcRenderer.invoke(
-              'local-filesystem-watcher-disable',
-              subscriptionId
-            );
+            if (subscriptionId) {
+              DesktopService.fsWatcher.disable(subscriptionId);
+            }
           });
         };
       }
