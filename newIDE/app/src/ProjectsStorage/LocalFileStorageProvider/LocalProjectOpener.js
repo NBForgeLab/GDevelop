@@ -2,19 +2,22 @@
 import DesktopService from '../../Utils/DesktopService';
 import { type FileMetadata } from '../index';
 import { unsplit } from '../../Utils/ObjectSplitter';
-import { openFilePicker, readJSONFile } from '../../Utils/FileSystem';
+import {
+  getLastUsedDialogDirectory,
+  rememberLastUsedDialogDirectory,
+  readJSONFile,
+} from '../../Utils/FileSystem';
 const fs = DesktopService.getFs();
 const path = DesktopService.getPath();
 
-export const onOpenWithPicker = (): Promise<?FileMetadata> => {
-  return openFilePicker({
-    title: 'Open a project',
-    properties: ['openFile'],
-    message:
-      'If you want to open your GDevelop 4 project, be sure to save it as a .json file',
-    filters: [{ name: 'GDevelop 5 project', extensions: ['json'] }],
-    // $FlowFixMe[incompatible-type]
-  }).then(filePath => (filePath ? { fileIdentifier: filePath } : null));
+export const onOpenWithPicker = async (): Promise<?FileMetadata> => {
+  const filePath = await DesktopService.pickProjectLocation(
+    'file',
+    getLastUsedDialogDirectory()
+  );
+  if (!filePath) return null;
+  rememberLastUsedDialogDirectory(filePath);
+  return { fileIdentifier: filePath };
 };
 
 export const onOpen = (

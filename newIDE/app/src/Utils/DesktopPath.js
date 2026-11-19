@@ -1,5 +1,7 @@
 // @flow
+// Note: this file does not use export/imports and uses Flow comments to allow its usage from Node.js and TypeScript.
 
+/*flow-include
 export type ParsedPath = {|
   root: string,
   dir: string,
@@ -30,11 +32,12 @@ export type DesktopPathInterface = {|
   posix: any,
   win32: any,
 |};
+*/
 
 const normalizeArray = (
-  parts: Array<string>,
-  allowAboveRoot: boolean
-): Array<string> => {
+  parts /*: Array<string> */,
+  allowAboveRoot /*: boolean */
+) /*: Array<string> */ => {
   const res = [];
   for (let i = 0; i < parts.length; i++) {
     const p = parts[i];
@@ -52,13 +55,15 @@ const normalizeArray = (
   return res;
 };
 
-const createPosixPath = (getCwd: () => string): DesktopPathInterface => {
-  const api: any = {
+const createPosixPath = (
+  getCwd /*: () => string */
+) /*: DesktopPathInterface */ => {
+  const api /*: any */ = {
     sep: '/',
     delimiter: ':',
-    isAbsolute: (p: string): boolean =>
+    isAbsolute: (p /*: string */) /*: boolean */ =>
       typeof p === 'string' && p.startsWith('/'),
-    normalize: (p: string): string => {
+    normalize: (p /*: string */) /*: string */ => {
       if (typeof p !== 'string' || p.length === 0) return '.';
       const isAbs = p.startsWith('/');
       const trailingSlash = p.endsWith('/');
@@ -69,12 +74,12 @@ const createPosixPath = (getCwd: () => string): DesktopPathInterface => {
         trailingSlash && normalized && normalized !== '/' ? '/' : '';
       return prefix + normalized + suffix;
     },
-    join: (...paths: Array<string>): string => {
+    join: (...paths /*: Array<string> */) /*: string */ => {
       const nonEmpty = paths.filter(p => typeof p === 'string' && p.length > 0);
       if (nonEmpty.length === 0) return '.';
       return api.normalize(nonEmpty.join('/'));
     },
-    resolve: (...paths: Array<string>): string => {
+    resolve: (...paths /*: Array<string> */) /*: string */ => {
       let resolvedPath = '';
       let resolvedAbsolute = false;
       for (let i = paths.length - 1; i >= -1 && !resolvedAbsolute; i--) {
@@ -89,7 +94,7 @@ const createPosixPath = (getCwd: () => string): DesktopPathInterface => {
       ).join('/');
       return (resolvedAbsolute ? '/' : '') + normalized || '.';
     },
-    relative: (from: string, to: string): string => {
+    relative: (from /*: string */, to /*: string */) /*: string */ => {
       const resolvedFrom = api.resolve(from);
       const resolvedTo = api.resolve(to);
       if (resolvedFrom === resolvedTo) return '';
@@ -109,7 +114,7 @@ const createPosixPath = (getCwd: () => string): DesktopPathInterface => {
       }
       return outputParts.concat(toParts.slice(samePartsLength)).join('/');
     },
-    dirname: (p: string): string => {
+    dirname: (p /*: string */) /*: string */ => {
       if (typeof p !== 'string' || p.length === 0) return '.';
       const hasRoot = p.charCodeAt(0) === 47;
       let end = -1;
@@ -128,7 +133,7 @@ const createPosixPath = (getCwd: () => string): DesktopPathInterface => {
       if (hasRoot && end === 1) return '//';
       return p.slice(0, end);
     },
-    basename: (p: string, ext?: string): string => {
+    basename: (p /*: string */, ext /*:: ?: string */) /*: string */ => {
       if (typeof p !== 'string' || p.length === 0) return '';
       let end = p.length;
       while (end > 0 && p[end - 1] === '/') end--;
@@ -142,14 +147,14 @@ const createPosixPath = (getCwd: () => string): DesktopPathInterface => {
       }
       return base;
     },
-    extname: (p: string): string => {
+    extname: (p /*: string */) /*: string */ => {
       const base = api.basename(p);
       if (!base || base === '.' || base === '..') return '';
       const dotIndex = base.lastIndexOf('.');
       if (dotIndex <= 0) return '';
       return base.slice(dotIndex);
     },
-    parse: (p: string): ParsedPath => {
+    parse: (p /*: string */) /*: ParsedPath */ => {
       if (typeof p !== 'string' || p.length === 0) {
         return { root: '', dir: '', base: '', ext: '', name: '' };
       }
@@ -178,13 +183,15 @@ const createPosixPath = (getCwd: () => string): DesktopPathInterface => {
         name,
       };
     },
-    format: (obj: {|
+    format: (
+      obj /*: {|
       +root?: string,
       +dir?: string,
       +base?: string,
       +ext?: string,
       +name?: string,
-    |}): string => {
+    |} */
+    ) /*: string */ => {
       const dir = obj.dir || obj.root || '';
       const base = obj.base || `${obj.name || ''}${obj.ext || ''}`;
       if (!dir) return base;
@@ -198,9 +205,9 @@ const createPosixPath = (getCwd: () => string): DesktopPathInterface => {
   return api;
 };
 
-const isWinSep = (ch: string): boolean => ch === '/' || ch === '\\';
+const isWinSep = (ch /*: string */) /*: boolean */ => ch === '/' || ch === '\\';
 
-const getWinRootEnd = (p: string): number => {
+const getWinRootEnd = (p /*: string */) /*: number */ => {
   const len = p.length;
   if (len === 0) return 0;
   if (isWinSep(p[0])) {
@@ -225,8 +232,8 @@ const getWinRootEnd = (p: string): number => {
 };
 
 const splitWinRoot = (
-  p: string
-): {| root: string, rest: string, isUnc: boolean |} => {
+  p /*: string */
+) /*: {| root: string, rest: string, isUnc: boolean |} */ => {
   if (!p) return { root: '', rest: '', isUnc: false };
   if (isWinSep(p[0]) && isWinSep(p[1])) {
     const restParts = p.slice(2).split(/[\\/]+/);
@@ -253,19 +260,19 @@ const splitWinRoot = (
 };
 
 const createWin32Path = (
-  getCwd: () => string,
-  posixApi: DesktopPathInterface
-): DesktopPathInterface => {
-  const api: any = {
+  getCwd /*: () => string */,
+  posixApi /*: DesktopPathInterface */
+) /*: DesktopPathInterface */ => {
+  const api /*: any */ = {
     sep: '\\',
     delimiter: ';',
     posix: posixApi,
-    isAbsolute: (p: string): boolean => {
+    isAbsolute: (p /*: string */) /*: boolean */ => {
       if (typeof p !== 'string' || p.length === 0) return false;
       if (isWinSep(p[0])) return true;
       return /^[a-zA-Z]:[\\/]/.test(p);
     },
-    normalize: (p: string): string => {
+    normalize: (p /*: string */) /*: string */ => {
       if (typeof p !== 'string' || p.length === 0) return '.';
       const trailingSlash = isWinSep(p[p.length - 1]);
       const { root, rest } = splitWinRoot(p);
@@ -285,12 +292,12 @@ const createWin32Path = (
         trailingSlash && normalized && !normalized.endsWith('\\') ? '\\' : '';
       return root + normalized + suffix;
     },
-    join: (...paths: Array<string>): string => {
+    join: (...paths /*: Array<string> */) /*: string */ => {
       const nonEmpty = paths.filter(p => typeof p === 'string' && p.length > 0);
       if (nonEmpty.length === 0) return '.';
       return api.normalize(nonEmpty.join('\\'));
     },
-    resolve: (...paths: Array<string>): string => {
+    resolve: (...paths /*: Array<string> */) /*: string */ => {
       let resolvedDevice = '';
       let resolvedTail = '';
       let resolvedAbsolute = false;
@@ -349,7 +356,7 @@ const createWin32Path = (
         : '';
       return rootPrefix + normalized || '.';
     },
-    relative: (from: string, to: string): string => {
+    relative: (from /*: string */, to /*: string */) /*: string */ => {
       const resolvedFrom = api.resolve(from);
       const resolvedTo = api.resolve(to);
       if (resolvedFrom.toLowerCase() === resolvedTo.toLowerCase()) return '';
@@ -377,7 +384,7 @@ const createWin32Path = (
       }
       return outputParts.concat(toParts.slice(samePartsLength)).join('\\');
     },
-    dirname: (p: string): string => {
+    dirname: (p /*: string */) /*: string */ => {
       if (typeof p !== 'string' || p.length === 0) return '.';
       const rootEnd = getWinRootEnd(p);
       let end = p.length - 1;
@@ -397,7 +404,7 @@ const createWin32Path = (
       }
       return p.slice(0, slashIndex);
     },
-    basename: (p: string, ext?: string): string => {
+    basename: (p /*: string */, ext /*:: ?: string */) /*: string */ => {
       if (typeof p !== 'string' || p.length === 0) return '';
       let start = 0;
       let end = p.length;
@@ -421,14 +428,14 @@ const createWin32Path = (
       }
       return base;
     },
-    extname: (p: string): string => {
+    extname: (p /*: string */) /*: string */ => {
       const base = api.basename(p);
       if (!base || base === '.' || base === '..') return '';
       const dotIndex = base.lastIndexOf('.');
       if (dotIndex <= 0) return '';
       return base.slice(dotIndex);
     },
-    parse: (p: string): ParsedPath => {
+    parse: (p /*: string */) /*: ParsedPath */ => {
       if (typeof p !== 'string' || p.length === 0) {
         return { root: '', dir: '', base: '', ext: '', name: '' };
       }
@@ -459,13 +466,15 @@ const createWin32Path = (
         name,
       };
     },
-    format: (obj: {|
+    format: (
+      obj /*: {|
       +root?: string,
       +dir?: string,
       +base?: string,
       +ext?: string,
       +name?: string,
-    |}): string => {
+    |} */
+    ) /*: string */ => {
       const dir = obj.dir || obj.root || '';
       const base = obj.base || `${obj.name || ''}${obj.ext || ''}`;
       if (!dir) return base;
@@ -478,13 +487,12 @@ const createWin32Path = (
   return api;
 };
 
-export const createDesktopPath = ({
-  platform,
-  getCwd,
-}: {|
+const createDesktopPath = (
+  { platform, getCwd } /*: {|
   platform: string,
   getCwd?: () => string,
-|}): DesktopPathInterface => {
+|} */
+) /*: DesktopPathInterface */ => {
   const cwdFn = getCwd || (() => '/');
   const posixPath = createPosixPath(cwdFn);
   const win32Path = createWin32Path(cwdFn, posixPath);
@@ -493,4 +501,8 @@ export const createDesktopPath = ({
     return win32Path;
   }
   return posixPath;
+};
+
+module.exports = {
+  createDesktopPath,
 };

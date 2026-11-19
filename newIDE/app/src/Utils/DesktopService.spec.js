@@ -547,4 +547,177 @@ describe('DesktopService', () => {
       }
     });
   });
+
+  describe('readPublicCatalog & pickProjectLocation', () => {
+    it('routes readPublicCatalog through preload only on gdide: protocol and falls back to HTTP otherwise', async () => {
+      const cleanupWindow = setupBrowserDesktopMock();
+      const originalLocationDescriptor = Object.getOwnPropertyDescriptor(
+        global.window,
+        'location'
+      );
+      const readPublicCatalogMock = jest.fn(async (name: string) => [
+        { id: `bridged-${name}` },
+      ]);
+      const httpFallback = jest.fn(async () => [{ id: 'http-fallback' }]);
+
+      try {
+        jest.doMock('./OptionalRequire', () => jest.fn(() => null));
+        jest.doMock('./OptionalLazyRequire', () => jest.fn(() => () => null));
+        const DesktopServiceModule = require('./DesktopService');
+        const DesktopServiceDefault = DesktopServiceModule.default;
+
+        // Pure web fallback (no window.gdevelopDesktop)
+        expect(
+          await DesktopServiceModule.readPublicCatalog(
+            'assetPacks',
+            httpFallback
+          )
+        ).toEqual([{ id: 'http-fallback' }]);
+        expect(httpFallback).toHaveBeenCalledTimes(1);
+
+        // Desktop preload present, but without window.location defined
+        global.window.gdevelopDesktop = {
+          readPublicCatalog: readPublicCatalogMock,
+        };
+        expect(
+          await DesktopServiceDefault.readPublicCatalog(
+            'releases',
+            httpFallback
+          )
+        ).toEqual([{ id: 'http-fallback' }]);
+        expect(readPublicCatalogMock).not.toHaveBeenCalled();
+
+        // Desktop dev server (http: protocol) must still use HTTP fallback
+        Object.defineProperty(global.window, 'location', {
+          configurable: true,
+          value: { protocol: 'http:' },
+        });
+        expect(
+          await DesktopServiceModule.readPublicCatalog(
+            'showcasedGames',
+            httpFallback
+          )
+        ).toEqual([{ id: 'http-fallback' }]);
+        expect(readPublicCatalogMock).not.toHaveBeenCalled();
+        expect(httpFallback).toHaveBeenCalledTimes(3);
+
+        // Packaged desktop editor (gdide: protocol) must use preload bridge
+        Object.defineProperty(global.window, 'location', {
+          configurable: true,
+          value: { protocol: 'gdide:' },
+        });
+        expect(
+          await DesktopServiceModule.readPublicCatalog(
+            'assetPacks',
+            httpFallback
+          )
+        ).toEqual([{ id: 'bridged-assetPacks' }]);
+        expect(
+          await DesktopServiceDefault.readPublicCatalog(
+            'gameCategories',
+            httpFallback
+          )
+        ).toEqual([{ id: 'bridged-gameCategories' }]);
+        expect(readPublicCatalogMock).toHaveBeenCalledTimes(2);
+        expect(readPublicCatalogMock).toHaveBeenNthCalledWith(1, 'assetPacks');
+        expect(readPublicCatalogMock).toHaveBeenNthCalledWith(
+          2,
+          'gameCategories'
+        );
+        expect(httpFallback).toHaveBeenCalledTimes(3);
+
+        // Non-function readPublicCatalog on desktop bridge falls back to HTTP
+        global.window.gdevelopDesktop = {
+          readPublicCatalog: 'not-a-function',
+        };
+        expect(
+          await DesktopServiceModule.readPublicCatalog(
+            'assetPacks',
+            httpFallback
+          )
+        ).toEqual([{ id: 'http-fallback' }]);
+        expect(httpFallback).toHaveBeenCalledTimes(4);
+      } finally {
+        if (originalLocationDescriptor) {
+          Object.defineProperty(
+            global.window,
+            'location',
+            originalLocationDescriptor
+          );
+        } else if (global.window) {
+          delete global.window.location;
+        }
+        cleanupWindow();
+      }
+    });
+
+    it('delegates pickProjectLocation for file and folder modes and falls back to null on web', async () => {
+      const cleanupWindow = setupBrowserDesktopMock();
+      const pickProjectLocationMock = jest.fn(
+        async (kind: 'file' | 'folder'): Promise<?string> =>
+          kind === 'file' ? '/projects/demo/game.json' : '/projects/workspace'
+      );
+
+      try {
+        jest.doMock('./OptionalRequire', () => jest.fn(() => null));
+        jest.doMock('./OptionalLazyRequire', () => jest.fn(() => () => null));
+        const DesktopServiceModule = require('./DesktopService');
+        const DesktopServiceDefault = DesktopServiceModule.default;
+
+        // Pure web fallback
+        expect(
+          await DesktopServiceModule.pickProjectLocation('file', '/default')
+        ).toBeNull();
+        expect(
+          await DesktopServiceDefault.pickProjectLocation('folder', '/default')
+        ).toBeNull();
+
+        // Desktop bridge present
+        global.window.gdevelopDesktop = {
+          dialog: {
+            pickProjectLocation: pickProjectLocationMock,
+          },
+        };
+        expect(
+          await DesktopServiceModule.pickProjectLocation('file', '/last/dir')
+        ).toBe('/projects/demo/game.json');
+        expect(
+          await DesktopServiceDefault.pickProjectLocation(
+            'folder',
+            '/last/workspace'
+          )
+        ).toBe('/projects/workspace');
+        expect(pickProjectLocationMock).toHaveBeenNthCalledWith(
+          1,
+          'file',
+          '/last/dir'
+        );
+        expect(pickProjectLocationMock).toHaveBeenNthCalledWith(
+          2,
+          'folder',
+          '/last/workspace'
+        );
+
+        // Canceled dialog returns null
+        pickProjectLocationMock.mockImplementationOnce(async () => null);
+        expect(
+          await DesktopServiceModule.pickProjectLocation('folder')
+        ).toBeNull();
+
+        // Missing or non-function pickProjectLocation on desktop bridge falls back to null
+        global.window.gdevelopDesktop = { dialog: {} };
+        expect(
+          await DesktopServiceModule.pickProjectLocation('file')
+        ).toBeNull();
+        global.window.gdevelopDesktop = {
+          dialog: { pickProjectLocation: 'not-a-function' },
+        };
+        expect(
+          await DesktopServiceDefault.pickProjectLocation('folder')
+        ).toBeNull();
+      } finally {
+        cleanupWindow();
+      }
+    });
+  });
 });

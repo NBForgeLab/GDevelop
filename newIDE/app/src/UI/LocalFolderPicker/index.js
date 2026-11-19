@@ -54,17 +54,23 @@ const LocalFolderPicker = ({
   const onChooseFolder = async ({ title, message }: TitleAndMessage) => {
     if (!DesktopService.isDesktop()) return;
 
-    const result = await DesktopService.showOpenDialog({
-      title,
-      properties: ['openDirectory', 'createDirectory'],
-      message,
-      defaultPath: defaultPath || getLastUsedDialogDirectory(),
-    });
-    const filePaths = result ? result.filePaths : null;
-
-    if (!filePaths || !filePaths.length) return;
-
-    const filePath = filePaths[0];
+    const initialPath = defaultPath || getLastUsedDialogDirectory();
+    let filePath;
+    if (type === 'export') {
+      const result = await DesktopService.showOpenDialog({
+        title,
+        message,
+        properties: ['openDirectory', 'createDirectory'],
+        defaultPath: initialPath,
+      });
+      filePath = result && result.filePaths && result.filePaths[0];
+    } else {
+      filePath = await DesktopService.pickProjectLocation(
+        'folder',
+        initialPath
+      );
+    }
+    if (!filePath) return;
     rememberLastUsedDialogDirectory(filePath);
     onChange(filePath);
     setTextValue(filePath);

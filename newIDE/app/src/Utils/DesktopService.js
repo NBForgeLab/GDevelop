@@ -936,7 +936,80 @@ export const setTitlebarOverlayOptions = (options: {|
   }
 };
 
+// A packaged desktop editor has a custom origin. Its public catalog reads
+// use the native client, while browser and development clients use HTTP.
+export type PublicCatalogName =
+  | 'courses'
+  | 'listedCourses'
+  | 'listedChapters'
+  | 'tutorials'
+  | 'inAppTutorials'
+  | 'examples'
+  | 'bundles'
+  | 'templates'
+  | 'credits'
+  | 'assetPacks'
+  | 'givenAwayProducts'
+  | 'releases'
+  | 'showcasedGames'
+  | 'gameCategories'
+  | 'marketingPlans'
+  | 'recommendations'
+  | 'achievements'
+  | 'announcements'
+  | 'promotions'
+  | 'extension'
+  | 'behavior'
+  | 'object'
+  | 'assets'
+  | 'stagingAssets'
+  | 'resources'
+  | 'stagingResources'
+  | 'authors'
+  | 'stagingAuthors'
+  | 'licenses'
+  | 'stagingLicenses'
+  | 'assetLicenses'
+  | 'templateLicenses'
+  | 'subscriptionPlans'
+  | 'subscriptionPlansWithLegacy'
+  | 'pricingSystems'
+  | 'pricingSystemsWithLegacy'
+  | 'gameCommentQualityRatingsLeaderboards'
+  | 'userCommentQualityRatingsLeaderboards'
+  | 'aiSettings'
+  | 'stagingAiSettings';
+
+export const readPublicCatalog = async <T>(
+  name: PublicCatalogName,
+  readHttp: () => Promise<T>
+): Promise<T> => {
+  const api = getWindowDesktopApi();
+  if (
+    api &&
+    typeof api.readPublicCatalog === 'function' &&
+    typeof window !== 'undefined' &&
+    window.location &&
+    window.location.protocol === 'gdide:'
+  ) {
+    return api.readPublicCatalog(name);
+  }
+  return readHttp();
+};
+
 // Dialogs
+export const pickProjectLocation = async (
+  kind: 'file' | 'folder',
+  defaultPath?: string
+): Promise<?string> => {
+  const api = getWindowDesktopApi();
+  return api &&
+    api.dialog &&
+    typeof api.dialog.pickProjectLocation === 'function'
+    ? api.dialog.pickProjectLocation(kind, defaultPath)
+    : null;
+};
+
 export const showOpenDialog = async (options: Object): Promise<?Object> => {
   const api = getWindowDesktopApi();
   if (api) return api.dialog.showOpenDialog(options);
@@ -1531,6 +1604,8 @@ const DesktopService = {
   setWindowFullScreen,
   toggleWindowMaximize,
   setTitlebarOverlayOptions,
+  readPublicCatalog,
+  pickProjectLocation,
   showOpenDialog,
   showSaveDialog,
   showSaveDialogSync,
