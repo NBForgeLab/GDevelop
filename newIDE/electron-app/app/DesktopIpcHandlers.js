@@ -7,6 +7,7 @@ const {
   app,
   BrowserWindow,
   Menu,
+  net,
   dialog,
   ipcMain: electronIpcMain,
   screen,
@@ -789,14 +790,163 @@ const setupDesktopIpcHandlers = ({
     return win && !win.isDestroyed() ? win.isVisible() : false;
   });
 
+  // Public catalog operations use fixed production endpoints. Keep account
+  // credentials, renderer-supplied URLs and redirects out of this bridge.
+  const publicCatalogPaths = new Map([
+    ['bundles', '/shop/bundle'],
+    ['templates', '/shop/game-template'],
+    ['credits', '/shop/credits-package'],
+    ['assetPacks', '/shop/asset-pack'],
+    ['givenAwayProducts', '/shop/given-away-product'],
+    ['releases', '/release/release?last=4'],
+    ['showcasedGames', '/game/showcased-game'],
+    ['gameCategories', '/game/game-category'],
+    ['marketingPlans', '/game/marketing-plan'],
+    ['recommendations', '/user/recommendation'],
+    ['achievements', '/user/achievement'],
+    ['announcements', '/release/announcement'],
+    ['promotions', '/release/promotion'],
+    ['extension', '/asset/extension?environment=live'],
+    ['behavior', '/asset/behavior?environment=live'],
+    ['object', '/asset/object?environment=live'],
+    ['assets', '/asset/asset?environment=live'],
+    ['stagingAssets', '/asset/asset?environment=staging'],
+    ['resources', '/asset/resource?environment=live'],
+    ['stagingResources', '/asset/resource?environment=staging'],
+    ['authors', '/asset/author?environment=live'],
+    ['stagingAuthors', '/asset/author?environment=staging'],
+    ['licenses', '/asset/license?environment=live'],
+    ['stagingLicenses', '/asset/license?environment=staging'],
+    ['assetLicenses', '/shop/product-license?productType=asset-pack'],
+    ['templateLicenses', '/shop/product-license?productType=game-template'],
+    ['subscriptionPlans', '/usage/subscription-plan?includeLegacy=false'],
+    [
+      'subscriptionPlansWithLegacy',
+      '/usage/subscription-plan?includeLegacy=true',
+    ],
+    [
+      'pricingSystems',
+      '/usage/subscription-plan-pricing-system?includeLegacy=false',
+    ],
+    [
+      'pricingSystemsWithLegacy',
+      '/usage/subscription-plan-pricing-system?includeLegacy=true',
+    ],
+    [
+      'gameCommentQualityRatingsLeaderboards',
+      '/game/game-comment-quality-ratings-leaderboard?leaderboardRegionName=global',
+    ],
+    [
+      'userCommentQualityRatingsLeaderboards',
+      '/user/user-comment-quality-ratings-leaderboard?leaderboardRegionName=global',
+    ],
+    [
+      'aiSettings',
+      'https://public-resources.gdevelop.io/ai/ai-settings-v2.json',
+    ],
+    [
+      'stagingAiSettings',
+      'https://public-resources.gdevelop.io/staging/ai/ai-settings-v2.json',
+    ],
+    ['courses', '/asset/course'],
+    ['listedCourses', '/shop/course'],
+    ['listedChapters', '/shop/course-chapter'],
+    ['tutorials', '/asset/tutorial?include=upcoming'],
+    ['inAppTutorials', '/asset/in-app-tutorial-short-header'],
+    ['examples', '/asset/example?environment=live'],
+  ]);
+  ipcMain.handle('desktop-read-public-catalog', async (_event, name) => {
+    const endpoint =
+      typeof name === 'string' ? publicCatalogPaths.get(name) : undefined;
+    if (!endpoint) throw new Error('Unknown public catalog.');
+    const response = await net.fetch(
+      new URL(endpoint, 'https://api.gdevelop.io').href,
+      {
+        credentials: 'omit',
+        redirect: 'error',
+        signal: AbortSignal.timeout(30000),
+      }
+    );
+    if (!response.ok)
+      throw new Error(`Catalog request failed (${response.status}).`);
+    return response.json();
+  });
+
+  // The native picker supplies the path and explains the scope of the grant.
+  ipcMain.handle(
+    'desktop-pick-project-location',
+    async (event, kind, defaultPath) => {
+      const file = kind === 'file';
+      if (!file && kind !== 'folder')
+        throw new Error('Unknown project picker mode.');
+      if (typeof defaultPath === 'string' && defaultPath.indexOf('\0') !== -1) {
+        throw new Error('Invalid default path.');
+      }
+      const sanitizedDefaultPath =
+        typeof defaultPath === 'string' && defaultPath.trim()
+          ? defaultPath
+          : undefined;
+      const result = await dialog.showOpenDialog(
+        getTargetWindow(event) || undefined,
+        {
+          title: file
+            ? 'Open a project for editing'
+            : 'Choose a writable project folder',
+          defaultPath: sanitizedDefaultPath,
+          properties: file
+            ? ['openFile']
+            : ['openDirectory', 'createDirectory'],
+          ...(file
+            ? {
+                filters: [
+                  {
+                    name: 'GDevelop project',
+                    extensions: ['json'],
+                  },
+                ],
+              }
+            : {}),
+        }
+      );
+      if (
+        !result ||
+        result.canceled ||
+        !Array.isArray(result.filePaths) ||
+        result.filePaths.length === 0
+      ) {
+        return null;
+      }
+      const selected = result.filePaths[0];
+      assertValidFilePath(selected);
+      if (!path.isAbsolute(selected)) {
+        throw new Error('Expected an absolute project path.');
+      }
+      if (file && !/\.json$/i.test(selected))
+        throw new Error('Expected a project JSON file.');
+      try {
+        const selectedStat = await fs.promises.stat(selected);
+        if (file && selectedStat.isDirectory()) {
+          throw new Error('Expected a project JSON file.');
+        }
+        if (!file && !selectedStat.isDirectory()) {
+          throw new Error('Expected a project folder.');
+        }
+      } catch (err) {
+        if (err && err.code !== 'ENOENT') throw err;
+      }
+      const grantedRoot = file ? path.dirname(selected) : selected;
+      grantSelection(grantedRoot, 'write', true);
+      if (fileAccessPolicy) {
+        fileAccessPolicy.assertAccess(selected, 'write');
+      }
+      return selected;
+    }
+  );
+
   ipcMain.handle('desktop-dialog-show-open', async (event, options) => {
     const win = getTargetWindow(event);
     const result = await dialog.showOpenDialog(win || undefined, options || {});
-    if (
-      result &&
-      !result.canceled &&
-      Array.isArray(result.filePaths)
-    ) {
+    if (result && !result.canceled && Array.isArray(result.filePaths)) {
       for (const selectedPath of result.filePaths) {
         const stat = await fs.stat(selectedPath);
         grantSelection(selectedPath, 'read', stat.isDirectory());

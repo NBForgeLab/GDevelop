@@ -18,9 +18,19 @@ remaining compatibility work; enabling Electron flags alone is not a sandbox.
   escapes; recursive copies and archives validate their trees. Unapproved UNC
   paths are rejected before filesystem resolution.
 - Initial editor grants cover application/runtime files for reading and a dedicated
-  temporary directory for writing. Open pickers grant read access. Save pickers grant write access to the selected file.
-  Opening a project explicitly requests access to its directory; choosing an
-  unrelated JSON file does not implicitly grant its parent directory.
+  temporary directory and the default `Documents/GDevelop projects` workspace for writing.
+  Open pickers grant read access. Save pickers grant write access to the selected file.
+  `pickProjectLocation` (`desktop-pick-project-location`) handles project file
+  (`.json`) and project folder selection in one native picker, granting recursive
+  write access to the chosen project directory (or parent directory of the chosen `.json`
+  project file). Opening a project outside a granted root explicitly requests access to
+  its directory; choosing an unrelated JSON file via generic file pickers does not
+  implicitly grant its parent directory.
+- Unauthenticated public catalog endpoints needed by the packaged `gdide://app` editor
+  use `readPublicCatalog` (`desktop-read-public-catalog`), which maps a fixed catalog key
+  in the main process to a hardcoded production URL and fetches JSON via `net.fetch`
+  with `credentials: 'omit'` and `redirect: 'error'` (never accepting renderer-supplied
+  URLs or credentials). Browser and dev-server builds use direct HTTP requests.
 - Grants are retained in `userData/file-access-grants.json` so recent projects and
   saved destinations work after restart. Legacy unversioned grants need fresh approval. Removing that file while the application
   is closed revokes remembered grants. Renderer path notifications do not grant

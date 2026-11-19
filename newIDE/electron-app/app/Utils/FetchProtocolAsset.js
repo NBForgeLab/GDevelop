@@ -4,7 +4,11 @@ const fetchProtocolAsset = (net, url, request) => {
   const headers = new Headers();
   const range = request.headers && request.headers.get('range');
   if (range) headers.set('Range', range);
-  return net.fetch(url, { method: request.method, headers, credentials: 'omit' });
+  return net.fetch(url, {
+    method: request.method,
+    headers,
+    credentials: 'omit',
+  });
 };
 
 module.exports = { fetchProtocolAsset };

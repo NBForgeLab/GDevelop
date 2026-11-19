@@ -156,9 +156,15 @@ const registerGdideProtocol = ({
     if (externalOnly && new URL(request.url).host !== 'external')
       return new Response('Forbidden', { status: 403 });
     if (request.url === 'gdide://app/__storage_migration__.html') {
-      return new Response('<!doctype html><html><head><meta charset="utf-8"></head></html>', {
-        headers: { 'Content-Type': 'text/html', 'Content-Security-Policy': "default-src 'none'" },
-      });
+      return new Response(
+        '<!doctype html><html><head><meta charset="utf-8"></head></html>',
+        {
+          headers: {
+            'Content-Type': 'text/html',
+            'Content-Security-Policy': "default-src 'none'",
+          },
+        }
+      );
     }
     const requestOrigin =
       request && request.headers && typeof request.headers.get === 'function'
@@ -191,7 +197,10 @@ const registerGdideProtocol = ({
     }
 
     if (request.method !== 'GET' && request.method !== 'HEAD') {
-      return new Response('Method Not Allowed', { status: 405, headers: corsHeaders });
+      return new Response('Method Not Allowed', {
+        status: 405,
+        headers: corsHeaders,
+      });
     }
 
     const relativePath = resolveGdideRelativePath(request.url);

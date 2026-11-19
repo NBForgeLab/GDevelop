@@ -120,6 +120,8 @@ const callFsAsync = (op, args) =>
 const desktopApi = Object.freeze({
   requestFileAccess: (targetPath, options) =>
     ipcRenderer.invoke('desktop-request-file-access', targetPath, options),
+  readPublicCatalog: name =>
+    ipcRenderer.invoke('desktop-read-public-catalog', name),
   requestProjectAccess: projectPath =>
     ipcRenderer.invoke('desktop-request-project-access', projectPath),
   getBootstrapData,
@@ -177,6 +179,8 @@ const desktopApi = Object.freeze({
       ),
   }),
   dialog: Object.freeze({
+    pickProjectLocation: (kind, defaultPath) =>
+      ipcRenderer.invoke('desktop-pick-project-location', kind, defaultPath),
     showOpenDialog: options =>
       ipcRenderer.invoke('desktop-dialog-show-open', options),
     showSaveDialog: options =>

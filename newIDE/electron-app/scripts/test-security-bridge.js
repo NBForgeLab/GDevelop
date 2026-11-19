@@ -135,8 +135,10 @@ const fakeElectron = {
     fromPartition: partition => ({
       partition,
       protocol: {
-        isProtocolHandled: scheme => registeredProtocols.has(partition + ':' + scheme),
-        unhandle: scheme => registeredProtocols.delete(partition + ':' + scheme),
+        isProtocolHandled: scheme =>
+          registeredProtocols.has(partition + ':' + scheme),
+        unhandle: scheme =>
+          registeredProtocols.delete(partition + ':' + scheme),
         handle: (scheme, handler) =>
           registeredProtocols.set(`${partition}:${scheme}`, handler),
       },
@@ -571,7 +573,9 @@ const run = async () => {
       method: 'GET',
       headers: new Headers({ Range: 'bytes=0-15', Origin: 'gdide://external' }),
     });
-    assert.deepStrictEqual(Array.from(upstreamOptions[0].headers.entries()), [['range', 'bytes=0-15']]);
+    assert.deepStrictEqual(Array.from(upstreamOptions[0].headers.entries()), [
+      ['range', 'bytes=0-15'],
+    ]);
     assert.strictEqual(upstreamOptions[0].credentials, 'omit');
     assert.strictEqual(capturedFetchUrl, 'http://localhost:3000/index.html');
     assert.strictEqual(gdide304Res.status, 304);
@@ -624,22 +628,45 @@ const run = async () => {
     sanitizedMenu[1].submenu[0].click();
     assert.deepStrictEqual(clickedIds, ['a1', 'a2']);
 
-    const { resolvePreviewDirectory } = require('../app/Utils/PreviewDirectory');
-    for (const invalid of [undefined, '', '.', sampleFile, tmpRoot, os.tmpdir()]) {
+    const {
+      resolvePreviewDirectory,
+    } = require('../app/Utils/PreviewDirectory');
+    for (const invalid of [
+      undefined,
+      '',
+      '.',
+      sampleFile,
+      tmpRoot,
+      os.tmpdir(),
+    ]) {
       assert.throws(() => resolvePreviewDirectory(invalid, tmpRoot));
     }
-    assert.strictEqual(resolvePreviewDirectory(subDir, tmpRoot), fs.realpathSync(subDir));
+    assert.strictEqual(
+      resolvePreviewDirectory(subDir, tmpRoot),
+      fs.realpathSync(subDir)
+    );
     const { readFileOptions } = require('../app/Utils/ReadFileOptions');
-    assert.deepStrictEqual(readFileOptions({ encoding: 'utf8', flag: 'unknown' }), {
-      encoding: 'utf8', flag: 'r',
-    });
+    assert.deepStrictEqual(
+      readFileOptions({ encoding: 'utf8', flag: 'unknown' }),
+      {
+        encoding: 'utf8',
+        flag: 'r',
+      }
+    );
     const popoutWin = new FakeBrowserWindow();
     const selectedGrants = [];
+    const testFileAccessPolicy = require('../app/Utils/FileAccessPolicy').createFileAccessPolicy(
+      { writeRoots: [tmpRoot] }
+    );
     setupDesktopIpcHandlers({
-      grantSelectedPath: (...grant) => selectedGrants.push(grant),
-      fileAccessPolicy: require('../app/Utils/FileAccessPolicy').createFileAccessPolicy(
-        { writeRoots: [tmpRoot] }
-      ),
+      grantSelectedPath: (...grant) => {
+        selectedGrants.push(grant);
+        const [target, mode, directory] = grant;
+        return directory
+          ? testFileAccessPolicy.grantRoot(target, mode)
+          : testFileAccessPolicy.grantFile(target, mode);
+      },
+      fileAccessPolicy: testFileAccessPolicy,
       isDev: true,
       getDefaultArgs: () => ({}),
       getWindowArgsForWebContents: sender => (sender && sender.args) || null,
@@ -648,16 +675,296 @@ const run = async () => {
       mainWindows: [],
     });
 
-    const originalPicker = fakeElectron.dialog.showOpenDialog;
+    const readCatalog = registeredIpcHandlers.get(
+      'desktop-read-public-catalog'
+    );
+    const previousFetch = nextFetchImpl;
     try {
-      fakeElectron.dialog.showOpenDialog = async () => ({ filePaths: [sampleFile, subDir] });
+      const expectedCatalogUrls = [
+        ['bundles', 'https://api.gdevelop.io/shop/bundle'],
+        ['templates', 'https://api.gdevelop.io/shop/game-template'],
+        ['credits', 'https://api.gdevelop.io/shop/credits-package'],
+        ['assetPacks', 'https://api.gdevelop.io/shop/asset-pack'],
+        [
+          'givenAwayProducts',
+          'https://api.gdevelop.io/shop/given-away-product',
+        ],
+        ['releases', 'https://api.gdevelop.io/release/release?last=4'],
+        ['showcasedGames', 'https://api.gdevelop.io/game/showcased-game'],
+        ['gameCategories', 'https://api.gdevelop.io/game/game-category'],
+        ['marketingPlans', 'https://api.gdevelop.io/game/marketing-plan'],
+        ['recommendations', 'https://api.gdevelop.io/user/recommendation'],
+        ['achievements', 'https://api.gdevelop.io/user/achievement'],
+        ['announcements', 'https://api.gdevelop.io/release/announcement'],
+        ['promotions', 'https://api.gdevelop.io/release/promotion'],
+        [
+          'extension',
+          'https://api.gdevelop.io/asset/extension?environment=live',
+        ],
+        ['behavior', 'https://api.gdevelop.io/asset/behavior?environment=live'],
+        ['object', 'https://api.gdevelop.io/asset/object?environment=live'],
+        ['assets', 'https://api.gdevelop.io/asset/asset?environment=live'],
+        [
+          'stagingAssets',
+          'https://api.gdevelop.io/asset/asset?environment=staging',
+        ],
+        [
+          'resources',
+          'https://api.gdevelop.io/asset/resource?environment=live',
+        ],
+        [
+          'stagingResources',
+          'https://api.gdevelop.io/asset/resource?environment=staging',
+        ],
+        ['authors', 'https://api.gdevelop.io/asset/author?environment=live'],
+        [
+          'stagingAuthors',
+          'https://api.gdevelop.io/asset/author?environment=staging',
+        ],
+        ['licenses', 'https://api.gdevelop.io/asset/license?environment=live'],
+        [
+          'stagingLicenses',
+          'https://api.gdevelop.io/asset/license?environment=staging',
+        ],
+        [
+          'assetLicenses',
+          'https://api.gdevelop.io/shop/product-license?productType=asset-pack',
+        ],
+        [
+          'templateLicenses',
+          'https://api.gdevelop.io/shop/product-license?productType=game-template',
+        ],
+        [
+          'subscriptionPlans',
+          'https://api.gdevelop.io/usage/subscription-plan?includeLegacy=false',
+        ],
+        [
+          'subscriptionPlansWithLegacy',
+          'https://api.gdevelop.io/usage/subscription-plan?includeLegacy=true',
+        ],
+        [
+          'pricingSystems',
+          'https://api.gdevelop.io/usage/subscription-plan-pricing-system?includeLegacy=false',
+        ],
+        [
+          'pricingSystemsWithLegacy',
+          'https://api.gdevelop.io/usage/subscription-plan-pricing-system?includeLegacy=true',
+        ],
+        [
+          'gameCommentQualityRatingsLeaderboards',
+          'https://api.gdevelop.io/game/game-comment-quality-ratings-leaderboard?leaderboardRegionName=global',
+        ],
+        [
+          'userCommentQualityRatingsLeaderboards',
+          'https://api.gdevelop.io/user/user-comment-quality-ratings-leaderboard?leaderboardRegionName=global',
+        ],
+        [
+          'aiSettings',
+          'https://public-resources.gdevelop.io/ai/ai-settings-v2.json',
+        ],
+        [
+          'stagingAiSettings',
+          'https://public-resources.gdevelop.io/staging/ai/ai-settings-v2.json',
+        ],
+        ['courses', 'https://api.gdevelop.io/asset/course'],
+        ['listedCourses', 'https://api.gdevelop.io/shop/course'],
+        ['listedChapters', 'https://api.gdevelop.io/shop/course-chapter'],
+        [
+          'tutorials',
+          'https://api.gdevelop.io/asset/tutorial?include=upcoming',
+        ],
+        [
+          'inAppTutorials',
+          'https://api.gdevelop.io/asset/in-app-tutorial-short-header',
+        ],
+        ['examples', 'https://api.gdevelop.io/asset/example?environment=live'],
+      ];
+      assert.strictEqual(expectedCatalogUrls.length, 40);
+      let expectedUrl = null;
+      nextFetchImpl = async (url, options) => {
+        assert.strictEqual(url, expectedUrl);
+        assert.strictEqual(options.credentials, 'omit');
+        assert.strictEqual(options.redirect, 'error');
+        assert.ok(options.signal);
+        return Response.json([{ catalogUrl: url }]);
+      };
+      for (const badCatalogKey of ['unsupported', 'toString', null, 42]) {
+        await assert.rejects(
+          () => readCatalog({}, badCatalogKey),
+          /Unknown public catalog/
+        );
+      }
+      for (const [catalogKey, catalogUrl] of expectedCatalogUrls) {
+        expectedUrl = catalogUrl;
+        assert.deepStrictEqual(await readCatalog({}, catalogKey), [
+          { catalogUrl },
+        ]);
+      }
+      nextFetchImpl = async () =>
+        new Response('Upstream error', { status: 500 });
+      await assert.rejects(
+        () => readCatalog({}, 'assetPacks'),
+        /Catalog request failed \(500\)/
+      );
+      nextFetchImpl = async () =>
+        new Response('not-json', {
+          status: 200,
+          headers: { 'Content-Type': 'text/plain' },
+        });
+      await assert.rejects(() => readCatalog({}, 'assetPacks'));
+    } finally {
+      nextFetchImpl = previousFetch;
+    }
+
+    const originalPicker = fakeElectron.dialog.showOpenDialog;
+    let pickedWorkspaceOutsideRoot = null;
+    try {
+      fakeElectron.dialog.showOpenDialog = async () => ({
+        filePaths: [sampleFile, subDir],
+      });
       await registeredIpcHandlers.get('desktop-dialog-show-open')({}, {});
       assert.deepStrictEqual(selectedGrants, [
         [sampleFile, 'read', false],
         [subDir, 'read', true],
       ]);
+      selectedGrants.length = 0;
+      const pickProject = registeredIpcHandlers.get(
+        'desktop-pick-project-location'
+      );
+      await assert.rejects(
+        () => pickProject({}, 'invalid'),
+        /Unknown project picker mode/
+      );
+      let pickerCalledOnBadDefault = false;
+      fakeElectron.dialog.showOpenDialog = async () => {
+        pickerCalledOnBadDefault = true;
+        return { canceled: true, filePaths: [] };
+      };
+      await assert.rejects(
+        () => pickProject({}, 'folder', '/tmp/bad\0path'),
+        /Invalid default path/
+      );
+      assert.strictEqual(pickerCalledOnBadDefault, false);
+
+      const projectFile = path.join(subDir, 'game.json');
+      fakeElectron.dialog.showOpenDialog = async (_win, options) => {
+        assert.deepStrictEqual(options.properties, ['openFile']);
+        assert.strictEqual(options.defaultPath, undefined);
+        return { canceled: false, filePaths: [projectFile] };
+      };
+      assert.strictEqual(await pickProject({}, 'file', '   '), projectFile);
+      assert.deepStrictEqual(selectedGrants, [[subDir, 'write', true]]);
+      selectedGrants.length = 0;
+
+      fakeElectron.dialog.showOpenDialog = async () => ({
+        canceled: false,
+        filePaths: [sampleFile],
+      });
+      await assert.rejects(
+        () => pickProject({}, 'file'),
+        /Expected a project JSON file/
+      );
+      assert.deepStrictEqual(selectedGrants, []);
+
+      const jsonNamedDir = path.join(tmpRoot, 'dir.json');
+      fs.mkdirSync(jsonNamedDir);
+      try {
+        fakeElectron.dialog.showOpenDialog = async () => ({
+          canceled: false,
+          filePaths: [jsonNamedDir],
+        });
+        await assert.rejects(
+          () => pickProject({}, 'file'),
+          /Expected a project JSON file/
+        );
+        assert.deepStrictEqual(selectedGrants, []);
+      } finally {
+        fs.rmdirSync(jsonNamedDir);
+      }
+
+      fakeElectron.dialog.showOpenDialog = async () => ({
+        canceled: false,
+        filePaths: [sampleFile],
+      });
+      await assert.rejects(
+        () => pickProject({}, 'folder'),
+        /Expected a project folder/
+      );
+      assert.deepStrictEqual(selectedGrants, []);
+
+      const sensitiveProjectFile = path.join(os.homedir(), '.ssh', 'game.json');
+      fakeElectron.dialog.showOpenDialog = async () => ({
+        canceled: false,
+        filePaths: [sensitiveProjectFile],
+      });
+      await assert.rejects(
+        () => pickProject({}, 'file'),
+        /File write access is not authorized/
+      );
+      assert.strictEqual(
+        testFileAccessPolicy.hasAccess(sensitiveProjectFile, 'write'),
+        false
+      );
+      selectedGrants.length = 0;
+
+      const sensitiveDir = path.join(os.homedir(), '.ssh');
+      fakeElectron.dialog.showOpenDialog = async () => ({
+        canceled: false,
+        filePaths: [sensitiveDir],
+      });
+      await assert.rejects(
+        () => pickProject({}, 'folder'),
+        /File write access is not authorized/
+      );
+      assert.strictEqual(
+        testFileAccessPolicy.hasAccess(sensitiveDir, 'write'),
+        false
+      );
+      selectedGrants.length = 0;
+
+      pickedWorkspaceOutsideRoot = fs.mkdtempSync(
+        path.join(os.tmpdir(), 'gd-sec-picked-workspace-')
+      );
+      fakeElectron.dialog.showOpenDialog = async (_win, options) => {
+        assert.deepStrictEqual(options.properties, [
+          'openDirectory',
+          'createDirectory',
+        ]);
+        assert.strictEqual(options.defaultPath, pickedWorkspaceOutsideRoot);
+        return { canceled: false, filePaths: [pickedWorkspaceOutsideRoot] };
+      };
+      assert.strictEqual(
+        await pickProject({}, 'folder', pickedWorkspaceOutsideRoot),
+        pickedWorkspaceOutsideRoot
+      );
+      assert.deepStrictEqual(selectedGrants, [
+        [pickedWorkspaceOutsideRoot, 'write', true],
+      ]);
+      assert.strictEqual(
+        testFileAccessPolicy.hasAccess(pickedWorkspaceOutsideRoot, 'write'),
+        true
+      );
+      selectedGrants.length = 0;
+
+      for (const canceledResult of [
+        { canceled: true, filePaths: [] },
+        null,
+        { canceled: false },
+      ]) {
+        fakeElectron.dialog.showOpenDialog = async () => canceledResult;
+        assert.strictEqual(await pickProject({}, 'folder', ''), null);
+        assert.deepStrictEqual(selectedGrants, []);
+      }
     } finally {
       fakeElectron.dialog.showOpenDialog = originalPicker;
+      if (pickedWorkspaceOutsideRoot) {
+        try {
+          fs.rmSync(pickedWorkspaceOutsideRoot, {
+            recursive: true,
+            force: true,
+          });
+        } catch (e) {}
+      }
     }
 
     const openPathHandler = registeredIpcHandlers.get(
@@ -1033,10 +1340,19 @@ const run = async () => {
       fn({ sender: modal2.webContents }, { edited: 'second' })
     );
     modal2.close();
-    assert.strictEqual(modal1.options.webPreferences.session.partition, 'persist:gdevelop-external-editors');
+    assert.strictEqual(
+      modal1.options.webPreferences.session.partition,
+      'persist:gdevelop-external-editors'
+    );
     assert.ok(modal1.webContents.getURL().startsWith('gdide://external/'));
-    const externalProtocol = registeredProtocols.get('persist:gdevelop-external-editors:gdide');
-    assert.strictEqual((await externalProtocol(makeMockRequest('gdide://app/index.html'))).status, 403);
+    const externalProtocol = registeredProtocols.get(
+      'persist:gdevelop-external-editors:gdide'
+    );
+    assert.strictEqual(
+      (await externalProtocol(makeMockRequest('gdide://app/index.html')))
+        .status,
+      403
+    );
     modal1.close();
     assert.deepStrictEqual(await p2, { edited: 'second' });
     assert.deepStrictEqual(await p1, { edited: 'first' });
@@ -1112,10 +1428,20 @@ const run = async () => {
       { color: '#111111', symbolColor: '#ffffff' },
       'window-42'
     );
+    await desktopApi.readPublicCatalog('assetPacks');
+    await desktopApi.dialog.pickProjectLocation('folder', '/tmp/workspace');
     assert.deepStrictEqual(invokedIpcCalls, [
       {
         channel: 'titlebar-set-overlay-options',
         args: [{ color: '#111111', symbolColor: '#ffffff' }, 'window-42'],
+      },
+      {
+        channel: 'desktop-read-public-catalog',
+        args: ['assetPacks'],
+      },
+      {
+        channel: 'desktop-pick-project-location',
+        args: ['folder', '/tmp/workspace'],
       },
     ]);
     assert.ok(desktopApi && Object.isFrozen(desktopApi));
@@ -1302,12 +1628,26 @@ const run = async () => {
         numberOfWindows: 1,
         temporaryDirectory: tmpRoot,
       });
-      const secondWindow = FakeBrowserWindow.instances[FakeBrowserWindow.instances.length - 1];
-      const secondPartition = secondWindow.options.webPreferences.session.partition;
-      const secondProtocol = registeredProtocols.get(secondPartition + ':gdevelop-file');
-      assert.strictEqual((await secondProtocol(makeMockRequest(toGdevUrl(secondEntry)))).status, 200);
-      assert.strictEqual((await secondProtocol(makeMockRequest(toGdevUrl(allowedHtmlPath)))).status, 403);
-      assert.strictEqual((await previewProtocol(makeMockRequest(toGdevUrl(secondEntry)))).status, 403);
+      const secondWindow =
+        FakeBrowserWindow.instances[FakeBrowserWindow.instances.length - 1];
+      const secondPartition =
+        secondWindow.options.webPreferences.session.partition;
+      const secondProtocol = registeredProtocols.get(
+        secondPartition + ':gdevelop-file'
+      );
+      assert.strictEqual(
+        (await secondProtocol(makeMockRequest(toGdevUrl(secondEntry)))).status,
+        200
+      );
+      assert.strictEqual(
+        (await secondProtocol(makeMockRequest(toGdevUrl(allowedHtmlPath))))
+          .status,
+        403
+      );
+      assert.strictEqual(
+        (await previewProtocol(makeMockRequest(toGdevUrl(secondEntry)))).status,
+        403
+      );
       closePreviewWindow(secondWindow.id);
       closePreviewWindow(openedPreviewWin.id);
       assert.strictEqual(

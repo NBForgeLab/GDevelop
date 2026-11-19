@@ -9,8 +9,14 @@ const { isSafeExternalUrl } = require('./DesktopIpcHandlers');
 let externalEditorSession;
 const getExternalEditorSession = () => {
   if (!externalEditorSession) {
-    const session = electron.session.fromPartition('persist:gdevelop-external-editors');
-    registerGdideProtocol({ isDev, protocol: session.protocol, externalOnly: true });
+    const session = electron.session.fromPartition(
+      'persist:gdevelop-external-editors'
+    );
+    registerGdideProtocol({
+      isDev,
+      protocol: session.protocol,
+      externalOnly: true,
+    });
     externalEditorSession = session;
   }
   return externalEditorSession;

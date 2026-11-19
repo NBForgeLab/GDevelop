@@ -634,7 +634,10 @@ app.on('ready', async function() {
   ].filter(Boolean);
   fileAccessPolicy = createFileAccessPolicy({
     readRoots,
-    writeRoots: [temporaryDirectory],
+    writeRoots: [
+      temporaryDirectory,
+      path.join(app.getPath('documents'), 'GDevelop projects'),
+    ],
   });
   const grantsFile = path.join(
     app.getPath('userData'),
@@ -650,11 +653,10 @@ app.on('ready', async function() {
       log.warn('Could not restore file grants:', error.message);
   }
   grantSelectedPath = (selectedPath, mode = 'read', directory = false) => {
-    if (directory) {
-      fileAccessPolicy.grantRoot(selectedPath, mode);
-    } else {
-      fileAccessPolicy.grantFile(selectedPath, mode);
-    }
+    const granted = directory
+      ? fileAccessPolicy.grantRoot(selectedPath, mode)
+      : fileAccessPolicy.grantFile(selectedPath, mode);
+    if (!granted) return false;
     const pendingFile = grantsFile + '.tmp';
     fs.writeFileSync(
       pendingFile,
@@ -662,6 +664,7 @@ app.on('ready', async function() {
       { mode: 0o600 }
     );
     fs.renameSync(pendingFile, grantsFile);
+    return true;
   };
   grantCliFileAccess(defaultWindowArgs, grantSelectedPath);
   registerProtocolsForSession = targetSession => {
@@ -1019,21 +1022,27 @@ app.on('ready', async function() {
 
     let root;
     try {
-      root = resolvePreviewDirectory(options && options.root, temporaryDirectory);
+      root = resolvePreviewDirectory(
+        options && options.root,
+        temporaryDirectory
+      );
     } catch (error) {
       event.sender.send('serve-folder-done', error.message, null);
       return;
     }
-    serveFolder({ root, useHttps: !!options.useHttps, windowId }, (err, serverParams) => {
-      // Using JSON to copy the config strips unserializable properties
-      // (like middleware functions) automatically.
-      const configCopy = serverParams
-        ? JSON.parse(JSON.stringify(serverParams))
-        : null;
-      if (!event.sender.isDestroyed()) {
-        event.sender.send('serve-folder-done', err, configCopy);
+    serveFolder(
+      { root, useHttps: !!options.useHttps, windowId },
+      (err, serverParams) => {
+        // Using JSON to copy the config strips unserializable properties
+        // (like middleware functions) automatically.
+        const configCopy = serverParams
+          ? JSON.parse(JSON.stringify(serverParams))
+          : null;
+        if (!event.sender.isDestroyed()) {
+          event.sender.send('serve-folder-done', err, configCopy);
+        }
       }
-    });
+    );
   });
 
   ipcMain.on('stop-server', event => {

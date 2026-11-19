@@ -106,7 +106,9 @@ const routeCliCommandToLiveEditor = ({ parsedArgs, mainWindows }) => {
   });
   // Paths are resolved by the editor, which can run in another directory.
   if (commandOptions['results-path'])
-    commandOptions['results-path'] = path.resolve(commandOptions['results-path']);
+    commandOptions['results-path'] = path.resolve(
+      commandOptions['results-path']
+    );
 
   targetWindow.webContents.send('run-cli-command', {
     commandName,
