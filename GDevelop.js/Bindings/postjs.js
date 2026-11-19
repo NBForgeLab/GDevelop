@@ -626,3 +626,48 @@ Module.assertObjectAlive = function assertObjectAlive(obj) {
   const className = obj._memoryTrackedClassName || null;
   assertAlive(obj, 'assertObjectAlive', Module, className);
 };
+
+// BinarySerializer allocates a fresh buffer for every snapshot. Unlike a
+// WebIDL wrapper, this handle has exclusive ownership and never exposes it.
+Module.createOwnedBinarySnapshot = (function (gd) {
+  const states = new WeakMap();
+  function release(state) {
+    const ptr = state.ptr;
+    state.ptr = 0;
+    if (ptr) gd.BinarySerializer.freeBinarySnapshot(ptr);
+  }
+  const registry =
+    typeof FinalizationRegistry === 'function'
+      ? new FinalizationRegistry(release)
+      : null;
+
+  class OwnedBinarySnapshot {
+    copyBytes() {
+      const state = states.get(this);
+      if (!state.ptr) throw new Error('Binary snapshot has been disposed.');
+      return new Uint8Array(gd.HEAPU8.buffer, state.ptr, state.size).slice();
+    }
+    dispose() {
+      if (registry) registry.unregister(this);
+      release(states.get(this));
+    }
+  }
+  OwnedBinarySnapshot.prototype[Symbol.dispose || Symbol.for('Symbol.dispose')] =
+    OwnedBinarySnapshot.prototype.dispose;
+
+  return function createOwnedBinarySnapshot(element) {
+    const owner = new OwnedBinarySnapshot();
+    const state = { ptr: gd.BinarySerializer.createBinarySnapshot(element), size: 0 };
+    if (!state.ptr) throw new Error('Failed to create binary snapshot.');
+    try {
+      // The size belongs to the most recent allocation in this Wasm module.
+      state.size = gd.BinarySerializer.getLastBinarySnapshotSize();
+      states.set(owner, state);
+      if (registry) registry.register(owner, state, owner);
+      return owner;
+    } catch (error) {
+      release(state);
+      throw error;
+    }
+  };
+})(Module);

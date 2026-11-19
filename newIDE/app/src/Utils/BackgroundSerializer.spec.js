@@ -7,6 +7,31 @@ import {
 const gd: libGDevelop = global.gd;
 
 describe('BackgroundSerializer', () => {
+  it('disposes the owned snapshot if copying into JavaScript fails', async () => {
+    const project = gd.ProjectHelper.createNewGDJSProject();
+    const create = gd.createOwnedBinarySnapshot;
+    const free = jest.spyOn(gd.BinarySerializer, 'freeBinarySnapshot');
+    const factory = jest
+      .spyOn(gd, 'createOwnedBinarySnapshot')
+      .mockImplementation(element => {
+        const snapshot = create(element);
+        snapshot.copyBytes = () => {
+          throw new Error('Copy failed');
+        };
+        return snapshot;
+      });
+    try {
+      await expect(serializeToJSONInBackground(project)).rejects.toThrow(
+        'Copy failed'
+      );
+      expect(free).toHaveBeenCalledTimes(1);
+    } finally {
+      factory.mockRestore();
+      free.mockRestore();
+      project.delete();
+    }
+  });
+
   it('releases the root element when the target fails to serialize', async () => {
     const project = gd.ProjectHelper.createNewGDJSProject();
     let element;

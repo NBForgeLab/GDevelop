@@ -1,6 +1,7 @@
 // @flow
 
 import VersionMetadata from '../Version/VersionMetadata';
+import { copyBinarySnapshot } from './copyBinarySnapshot';
 import { createBackgroundSerializerWorker } from './BackgroundSerializerWorkerFactory';
 
 const gd: libGDevelop = global.gd;
@@ -77,23 +78,13 @@ export async function serializeInBackground(
   const startTime = Date.now();
   const element = new gd.SerializerElement();
   let serializeToEndTime;
-  let binaryPtr;
+  let binaryBuffer;
   try {
     serializable.serializeTo(element);
     serializeToEndTime = Date.now();
-    binaryPtr = gd.BinarySerializer.createBinarySnapshot(element);
+    binaryBuffer = copyBinarySnapshot(element);
   } finally {
     element.delete();
-  }
-  if (!binaryPtr) throw new Error('Failed to create binary snapshot.');
-
-  let binaryBuffer;
-  try {
-    const size = gd.BinarySerializer.getLastBinarySnapshotSize();
-    // Copy before freeing the native snapshot or sending it to the worker.
-    binaryBuffer = new Uint8Array(gd.HEAPU8.buffer, binaryPtr, size).slice();
-  } finally {
-    gd.BinarySerializer.freeBinarySnapshot(binaryPtr);
   }
 
   const binaryBufferEndTime = Date.now();

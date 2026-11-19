@@ -538,6 +538,8 @@ export default defineConfig(({ command, mode }) => {
     root: appDir,
     cacheDir: path.join(appDir, 'node_modules', '.cache', 'vite'),
     base: viteBase,
+    // Lower resource management syntax even in dev for older editor browsers.
+    esbuild: { supported: { using: false } },
     publicDir: command === 'serve' ? publicDir : false,
     css: {
       postcss: {

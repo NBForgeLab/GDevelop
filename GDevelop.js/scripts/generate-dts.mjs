@@ -462,6 +462,17 @@ export function destroy(object: EmscriptenObject): void;
  */
 export function assertObjectAlive(object: EmscriptenObject): void;
 
+/** An independent Wasm allocation. copyBytes returns a JavaScript-owned copy. */
+export type OwnedBinarySnapshot = {
+  copyBytes(): Uint8Array;
+  dispose(): void;
+} & {
+  // Expose the disposal protocol when the consumer includes ESNext.Disposable.
+  [key in (typeof Symbol)[Extract<'dispose', keyof typeof Symbol>]]: () => void;
+};
+
+export function createOwnedBinarySnapshot(element: SerializerElement): OwnedBinarySnapshot;
+
 export function _malloc(size: number): number;
 export function _free(ptr: number): void;
 export const HEAPU8: Uint8Array;
