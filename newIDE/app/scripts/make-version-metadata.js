@@ -66,9 +66,11 @@ writeVersionMetadataFiles({
     console.info(
       '✅ src/Version/VersionMetadata.js and src/Version/VersionMetadata.json properly generated.'
     ),
-  err =>
+  err => {
     console.error(
       '❌ Error while generating src/Version/VersionMetadata.js / src/Version/VersionMetadata.json',
       err
-    )
+    );
+    process.exitCode = 1;
+  }
 );
