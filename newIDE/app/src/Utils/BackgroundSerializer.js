@@ -75,26 +75,26 @@ export async function serializeInBackground(
   serializable: gdSerializable
 ): Promise<any> {
   const startTime = Date.now();
-  let serializedElement = new gd.SerializerElement();
-  serializable.serializeTo(serializedElement);
-
-  const serializeToEndTime = Date.now();
-
-  const binaryPtr = gd.BinarySerializer.createBinarySnapshot(serializedElement);
-  const binarySize = gd.BinarySerializer.getLastBinarySnapshotSize();
-  serializedElement.delete();
-  // $FlowFixMe[incompatible-type]
-  serializedElement = null;
-
-  if (!binaryPtr) {
-    throw new Error('Failed to create binary snapshot.');
+  const element = new gd.SerializerElement();
+  let serializeToEndTime;
+  let binaryPtr;
+  try {
+    serializable.serializeTo(element);
+    serializeToEndTime = Date.now();
+    binaryPtr = gd.BinarySerializer.createBinarySnapshot(element);
+  } finally {
+    element.delete();
   }
+  if (!binaryPtr) throw new Error('Failed to create binary snapshot.');
 
-  const binaryView = new Uint8Array(gd.HEAPU8.buffer, binaryPtr, binarySize);
-  // Copy the buffer out of the WASM heap so it can be transferred.
-  const binaryBuffer = binaryView.slice();
-
-  gd.BinarySerializer.freeBinarySnapshot(binaryPtr);
+  let binaryBuffer;
+  try {
+    const size = gd.BinarySerializer.getLastBinarySnapshotSize();
+    // Copy before freeing the native snapshot or sending it to the worker.
+    binaryBuffer = new Uint8Array(gd.HEAPU8.buffer, binaryPtr, size).slice();
+  } finally {
+    gd.BinarySerializer.freeBinarySnapshot(binaryPtr);
+  }
 
   const binaryBufferEndTime = Date.now();
   log(

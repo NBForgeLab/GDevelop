@@ -64,23 +64,28 @@ const unserializeBinarySnapshotToJson = (
 
   // Allocate memory in Emscripten heap and copy binary data
   const binaryPtr = gd._malloc(binarySize);
-  gd.HEAPU8.set(binaryArray, binaryPtr);
+  if (!binaryPtr) throw new Error('Failed to allocate binary snapshot buffer.');
 
-  const element = gd.BinarySerializer.deserializeBinarySnapshot(
-    binaryPtr,
-    binarySize
-  );
-
-  // Free the input buffer
-  gd._free(binaryPtr);
+  let element;
+  try {
+    gd.HEAPU8.set(binaryArray, binaryPtr);
+    element = gd.BinarySerializer.deserializeBinarySnapshot(
+      binaryPtr,
+      binarySize
+    );
+  } finally {
+    gd._free(binaryPtr);
+  }
 
   if (element.ptr === 0) {
     throw new Error('Failed to deserialize binary snapshot.');
   }
 
-  const json = gd.Serializer.toJSON(element);
-  element.delete();
-  return json;
+  try {
+    return gd.Serializer.toJSON(element);
+  } finally {
+    element.delete();
+  }
 };
 
 // eslint-disable-next-line no-restricted-globals

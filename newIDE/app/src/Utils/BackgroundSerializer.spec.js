@@ -7,6 +7,55 @@ import {
 const gd: libGDevelop = global.gd;
 
 describe('BackgroundSerializer', () => {
+  it('releases the root element when the target fails to serialize', async () => {
+    const project = gd.ProjectHelper.createNewGDJSProject();
+    let element;
+    jest.spyOn(project, 'serializeTo').mockImplementation(output => {
+      element = output;
+      throw new Error('Interrupted save');
+    });
+    try {
+      await expect(serializeToJSONInBackground(project)).rejects.toThrow(
+        'Interrupted save'
+      );
+      expect(element.ptr).toBe(0);
+    } finally {
+      if (element && element.ptr) element.delete();
+      project.delete();
+    }
+  });
+
+  it('releases the native binary snapshot if reading its size fails', async () => {
+    const project = gd.ProjectHelper.createNewGDJSProject();
+    const createSnapshot = jest.spyOn(
+      gd.BinarySerializer,
+      'createBinarySnapshot'
+    );
+    const freeSnapshot = jest.spyOn(gd.BinarySerializer, 'freeBinarySnapshot');
+    const getSize = jest
+      .spyOn(gd.BinarySerializer, 'getLastBinarySnapshotSize')
+      .mockImplementation(() => {
+        throw new Error('Snapshot unavailable');
+      });
+    try {
+      await expect(serializeToJSONInBackground(project)).rejects.toThrow(
+        'Snapshot unavailable'
+      );
+      expect(freeSnapshot).toHaveBeenCalledWith(
+        createSnapshot.mock.results[0].value
+      );
+    } finally {
+      if (!freeSnapshot.mock.calls.length && createSnapshot.mock.results.length)
+        gd.BinarySerializer.freeBinarySnapshot(
+          createSnapshot.mock.results[0].value
+        );
+      getSize.mockRestore();
+      freeSnapshot.mockRestore();
+      createSnapshot.mockRestore();
+      project.delete();
+    }
+  });
+
   it('serializes a project to JSON via the worker factory', async () => {
     const project = gd.ProjectHelper.createNewGDJSProject();
     project.setName('TestBackgroundJsonProject');
