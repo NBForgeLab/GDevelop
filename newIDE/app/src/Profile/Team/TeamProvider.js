@@ -426,36 +426,58 @@ const TeamProvider = ({ children }: Props): React.Node => {
     [team, members, admins, invitations]
   );
 
-  return (
-    <TeamContext.Provider
-      value={{
-        team,
-        groups,
-        admins,
-        members,
-        memberships,
-        invitations,
-        onEditUser,
-        onChangeGroupName,
-        onChangeUserGroup,
-        onListUserProjects,
-        onDeleteGroup,
-        onCreateGroup,
-        onRefreshMembers,
-        onRefreshAdmins,
-        onRefreshInvitations: fetchInvitations,
-        getAvailableSeats,
-        onCreateMembers,
-        onChangeMemberPassword,
-        onActivateMembers,
-        onSetAdmin,
-        onSetMember,
-        onUpdateTeam,
-      }}
-    >
-      {children}
-    </TeamContext.Provider>
+  const value = React.useMemo(
+    () => ({
+      team,
+      groups,
+      admins,
+      members,
+      memberships,
+      invitations,
+      onEditUser,
+      onChangeGroupName,
+      onChangeUserGroup,
+      onListUserProjects,
+      onDeleteGroup,
+      onCreateGroup,
+      onRefreshMembers,
+      onRefreshAdmins,
+      onRefreshInvitations: fetchInvitations,
+      getAvailableSeats,
+      onCreateMembers,
+      onChangeMemberPassword,
+      onActivateMembers,
+      onSetAdmin,
+      onSetMember,
+      onUpdateTeam,
+    }),
+    [
+      team,
+      groups,
+      admins,
+      members,
+      memberships,
+      invitations,
+      onEditUser,
+      onChangeGroupName,
+      onChangeUserGroup,
+      onListUserProjects,
+      onDeleteGroup,
+      onCreateGroup,
+      onRefreshMembers,
+      onRefreshAdmins,
+      fetchInvitations,
+      getAvailableSeats,
+      onCreateMembers,
+      onChangeMemberPassword,
+      onActivateMembers,
+      onSetAdmin,
+      onSetMember,
+      onUpdateTeam,
+    ]
   );
+
+  return <TeamContext.Provider value={value}>{children}</TeamContext.Provider>;
 };
 
 export default TeamProvider;

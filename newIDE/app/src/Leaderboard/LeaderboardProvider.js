@@ -291,59 +291,84 @@ const LeaderboardProvider = ({ gameId, children }: Props): React.Node => {
     dispatch({ type: 'CHANGE_DISPLAY_ONLY_BEST_ENTRY', payload: newValue });
   }, []);
 
-  const updateLeaderboard = async (attributes: LeaderboardUpdatePayload) => {
-    if (!currentLeaderboardId) return;
-    if (attributes.sort) dispatch({ type: 'PURGE_NAVIGATION' }); // When changing playerUnicityDisplayChoice, it will change the displayOnlyBestEntry state variable, which will purge navigation.
-    const updatedLeaderboard = await doUpdateLeaderboard(
-      authenticatedUser,
-      gameId,
+  const updateLeaderboard = React.useCallback(
+    async (attributes: LeaderboardUpdatePayload) => {
+      if (!currentLeaderboardId) return;
+      if (attributes.sort) dispatch({ type: 'PURGE_NAVIGATION' }); // When changing playerUnicityDisplayChoice, it will change the displayOnlyBestEntry state variable, which will purge navigation.
+      const updatedLeaderboard = await doUpdateLeaderboard(
+        authenticatedUser,
+        gameId,
+        currentLeaderboardId,
+        attributes
+      );
+      if (!updatedLeaderboard) return;
+
+      dispatch({
+        type: 'UPDATE_OR_CREATE_LEADERBOARD',
+        payload: updatedLeaderboard,
+      });
+
+      if (attributes.sort) await fetchEntries();
+    },
+    [currentLeaderboardId, authenticatedUser, gameId, fetchEntries]
+  );
+
+  const resetLeaderboard = React.useCallback(
+    async () => {
+      if (!currentLeaderboardId) return;
+      dispatch({ type: 'PURGE_NAVIGATION' });
+      const updatedLeaderboard = await doResetLeaderboard(
+        authenticatedUser,
+        gameId,
+        currentLeaderboardId
+      );
+      if (!updatedLeaderboard) return;
+
+      dispatch({
+        type: 'UPDATE_OR_CREATE_LEADERBOARD',
+        payload: updatedLeaderboard,
+      });
+      fetchEntries();
+    },
+    [currentLeaderboardId, authenticatedUser, gameId, fetchEntries]
+  );
+
+  const deleteLeaderboard = React.useCallback(
+    async () => {
+      if (!currentLeaderboardId || !leaderboardsByIds) return;
+      dispatch({ type: 'PURGE_NAVIGATION' });
+      await doDeleteLeaderboard(
+        authenticatedUser,
+        gameId,
+        currentLeaderboardId
+      );
+      dispatch({ type: 'REMOVE_LEADERBOARD', payload: currentLeaderboardId });
+    },
+    [currentLeaderboardId, leaderboardsByIds, authenticatedUser, gameId]
+  );
+
+  const deleteLeaderboardEntry = React.useCallback(
+    async (entryId: string) => {
+      if (!currentLeaderboardId) return;
+      await doDeleteLeaderboardEntry(
+        authenticatedUser,
+        gameId,
+        currentLeaderboardId,
+        entryId
+      );
+      fetchEntries({
+        uri: pageIndex > 0 ? mapPageIndexToUri[pageIndex] : null,
+      });
+    },
+    [
       currentLeaderboardId,
-      attributes
-    );
-    if (!updatedLeaderboard) return;
-
-    dispatch({
-      type: 'UPDATE_OR_CREATE_LEADERBOARD',
-      payload: updatedLeaderboard,
-    });
-
-    if (attributes.sort) await fetchEntries();
-  };
-
-  const resetLeaderboard = async () => {
-    if (!currentLeaderboardId) return;
-    dispatch({ type: 'PURGE_NAVIGATION' });
-    const updatedLeaderboard = await doResetLeaderboard(
       authenticatedUser,
       gameId,
-      currentLeaderboardId
-    );
-    if (!updatedLeaderboard) return;
-
-    dispatch({
-      type: 'UPDATE_OR_CREATE_LEADERBOARD',
-      payload: updatedLeaderboard,
-    });
-    fetchEntries();
-  };
-
-  const deleteLeaderboard = async () => {
-    if (!currentLeaderboardId || !leaderboardsByIds) return;
-    dispatch({ type: 'PURGE_NAVIGATION' });
-    await doDeleteLeaderboard(authenticatedUser, gameId, currentLeaderboardId);
-    dispatch({ type: 'REMOVE_LEADERBOARD', payload: currentLeaderboardId });
-  };
-
-  const deleteLeaderboardEntry = async (entryId: string) => {
-    if (!currentLeaderboardId) return;
-    await doDeleteLeaderboardEntry(
-      authenticatedUser,
-      gameId,
-      currentLeaderboardId,
-      entryId
-    );
-    fetchEntries({ uri: pageIndex > 0 ? mapPageIndexToUri[pageIndex] : null });
-  };
+      fetchEntries,
+      pageIndex,
+      mapPageIndexToUri,
+    ]
+  );
 
   // --- Navigation ---
 
@@ -433,37 +458,59 @@ const LeaderboardProvider = ({ gameId, children }: Props): React.Node => {
       : 5000
   );
 
-  return (
-    <LeaderboardContext.Provider
-      value={{
-        leaderboards: !!leaderboardsByIds
-          ? // $FlowFixMe[incompatible-type]
-            Object.values(leaderboardsByIds)
+  const value = React.useMemo(
+    () => ({
+      leaderboards: !!leaderboardsByIds
+        ? // $FlowFixMe[incompatible-type]
+          Object.values(leaderboardsByIds)
+        : null,
+      currentLeaderboard,
+      displayOnlyBestEntry,
+      browsing: {
+        entries,
+        goToNextPage: !!mapPageIndexToUri[pageIndex + 1]
+          ? navigateToNextPage
           : null,
-        currentLeaderboard,
-        displayOnlyBestEntry,
-        browsing: {
-          entries,
-          goToNextPage: !!mapPageIndexToUri[pageIndex + 1]
-            ? navigateToNextPage
+        goToPreviousPage:
+          pageIndex === 1 || !!mapPageIndexToUri[pageIndex - 1]
+            ? navigateToPreviousPage
             : null,
-          goToPreviousPage:
-            pageIndex === 1 || !!mapPageIndexToUri[pageIndex - 1]
-              ? navigateToPreviousPage
-              : null,
-          goToFirstPage: pageIndex === 0 ? null : navigateToFirstPage,
-        },
-        setDisplayOnlyBestEntry,
-        createLeaderboard,
-        listLeaderboards,
-        selectLeaderboard,
-        updateLeaderboard,
-        resetLeaderboard,
-        deleteLeaderboard,
-        deleteLeaderboardEntry,
-        fetchLeaderboardEntries: fetchEntries,
-      }}
-    >
+        goToFirstPage: pageIndex === 0 ? null : navigateToFirstPage,
+      },
+      setDisplayOnlyBestEntry,
+      createLeaderboard,
+      listLeaderboards,
+      selectLeaderboard,
+      updateLeaderboard,
+      resetLeaderboard,
+      deleteLeaderboard,
+      deleteLeaderboardEntry,
+      fetchLeaderboardEntries: fetchEntries,
+    }),
+    [
+      leaderboardsByIds,
+      currentLeaderboard,
+      displayOnlyBestEntry,
+      entries,
+      mapPageIndexToUri,
+      pageIndex,
+      navigateToNextPage,
+      navigateToPreviousPage,
+      navigateToFirstPage,
+      setDisplayOnlyBestEntry,
+      createLeaderboard,
+      listLeaderboards,
+      selectLeaderboard,
+      updateLeaderboard,
+      resetLeaderboard,
+      deleteLeaderboard,
+      deleteLeaderboardEntry,
+      fetchEntries,
+    ]
+  );
+
+  return (
+    <LeaderboardContext.Provider value={value}>
       {children}
     </LeaderboardContext.Provider>
   );

@@ -5,7 +5,7 @@ import {
   getLocalResourceFullPath,
   getResourceFilePathStatus,
 } from '../../ResourcesList/ResourceUtils';
-import { mapVector } from '../../Utils/MapFor';
+import withTemporaryResource from '../../Utils/WithTemporaryResource';
 import newNameGenerator from '../../Utils/NewNameGenerator';
 import optionalLazyRequire from '../../Utils/OptionalLazyRequire';
 import optionalRequire from '../../Utils/OptionalRequire';
@@ -96,26 +96,29 @@ export const scanForNewResources = async ({
       );
     });
 
-    const filesToCheck = new gd.VectorString();
-    allFiles.forEach(filePath =>
-      filesToCheck.push_back(path.relative(projectPath, filePath))
+    const filePathsNotInResources = withTemporaryResource(
+      new gd.VectorString(),
+      filesToCheck => {
+        allFiles.forEach(filePath =>
+          filesToCheck.push_back(path.relative(projectPath, filePath))
+        );
+        return resourcesManager
+          .findFilesNotInResources(filesToCheck)
+          .toJSArray();
+      }
     );
-    const filePathsNotInResources = project
-      .getResourcesManager()
-      .findFilesNotInResources(filesToCheck);
-    filesToCheck.delete();
 
-    mapVector(filePathsNotInResources, (relativeFilePath: string) => {
+    filePathsNotInResources.forEach(relativeFilePath => {
       const resourceName = newNameGenerator(relativeFilePath, name =>
         resourcesManager.hasResource(name)
       );
 
-      const resource = createResource();
-      resource.setFile(relativeFilePath);
-      resource.setName(resourceName);
-      applyResourceDefaults(project, resource);
-      resourcesManager.addResource(resource);
-      resource.delete();
+      withTemporaryResource(createResource(), resource => {
+        resource.setFile(relativeFilePath);
+        resource.setName(resourceName);
+        applyResourceDefaults(project, resource);
+        resourcesManager.addResource(resource);
+      });
 
       console.info(
         `"${relativeFilePath}" added to project as resource named "${resourceName}".`

@@ -1,4 +1,5 @@
 // @flow
+import { setExtraInfoString } from '../../Utils/PropertyDescriptor';
 import { mapFor } from '../../Utils/MapFor';
 import {
   getSafeUniqueName,
@@ -166,16 +167,6 @@ const findMeasurementUnitName = (requestedName: string): string | null => {
   );
   if (existingName) return existingName;
   return MEASUREMENT_UNIT_ALIASES[normalized] || null;
-};
-
-const setExtraInfoString = (
-  property: gdNamedPropertyDescriptor,
-  value: string
-) => {
-  const vectorString = new gd.VectorString();
-  vectorString.push_back(value);
-  property.setExtraInfo(vectorString);
-  vectorString.delete();
 };
 
 const getExtraInfoString = (property: gdNamedPropertyDescriptor): string => {

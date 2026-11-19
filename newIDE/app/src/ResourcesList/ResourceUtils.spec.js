@@ -1,5 +1,6 @@
 // @flow
 import {
+  createOrUpdateResource,
   getLocalResourceFullPath,
   parseLocalFilePathOrExtensionFromMetadata,
   renameResourcesInProject,
@@ -26,9 +27,31 @@ const addNewAnimationWithImageToSpriteObject = (
 };
 
 describe('ResourceUtils', () => {
+  it('releases the transferred resource if the manager cannot copy it', () => {
+    const project = gd.ProjectHelper.createNewGDJSProject();
+    const resource = new gd.ImageResource();
+    const add = jest
+      .spyOn(project.getResourcesManager(), 'addResource')
+      .mockImplementation(() => {
+        throw new Error('Copy failed');
+      });
+    try {
+      expect(() =>
+        createOrUpdateResource(project, resource, 'image.png')
+      ).toThrow('Copy failed');
+      expect(resource.ptr).toBe(0);
+    } finally {
+      add.mockRestore();
+      if (resource.ptr) resource.delete();
+      project.delete();
+    }
+  });
   it('gives the path on disk of a local resource, even with special characters', () => {
     const project = gd.ProjectHelper.createNewGDJSProject();
-    project.setProjectFile('/home/user/My Project/game.json');
+    const directory = require('path')
+      .resolve('My Project')
+      .replace(/\\/g, '/');
+    project.setProjectFile(directory + '/game.json');
     const resource = new gd.AudioResource();
     resource.setName('Track #3');
     resource.setFile('assets/Track #3 (100%).wav');
@@ -39,7 +62,7 @@ describe('ResourceUtils', () => {
     project.getResourcesManager().addResource(urlResource);
 
     expect(getLocalResourceFullPath(project, 'Track #3')).toBe(
-      '/home/user/My Project/assets/Track #3 (100%).wav'
+      directory + '/assets/Track #3 (100%).wav'
     );
     expect(getLocalResourceFullPath(project, 'Remote')).toBe(
       'https://example.com/a%23b.png'

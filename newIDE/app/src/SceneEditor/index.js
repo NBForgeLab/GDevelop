@@ -1527,7 +1527,8 @@ export default class SceneEditor extends React.Component<Props, State> {
 
   _onInstancesModified = (instances: Array<gdInitialInstance>) => {
     this._sendUpdatedInstances(instances);
-    this.forceUpdate();
+    this.forceUpdateInstancesList();
+    this.forceUpdatePropertiesEditor();
     //TODO: Save for redo with debounce (and cancel on unmount)
   };
 
@@ -1535,16 +1536,17 @@ export default class SceneEditor extends React.Component<Props, State> {
     const { previewDebuggerServer } = this.props;
     if (!previewDebuggerServer) return;
 
-    previewDebuggerServer
-      .getExistingEmbeddedGameFrameDebuggerIds()
-      .forEach(debuggerId => {
-        previewDebuggerServer.sendMessage(debuggerId, {
-          command: 'updateInstances',
-          payload: {
-            instances: instances.map(instance => serializeToJSObject(instance)),
-          },
-        });
+    const debuggerIds = previewDebuggerServer.getExistingEmbeddedGameFrameDebuggerIds();
+    if (!debuggerIds.length) return;
+    const serializedInstances = instances.map(instance =>
+      serializeToJSObject(instance)
+    );
+    debuggerIds.forEach(debuggerId => {
+      previewDebuggerServer.sendMessage(debuggerId, {
+        command: 'updateInstances',
+        payload: { instances: serializedInstances },
       });
+    });
   };
 
   onReceiveObjectPropertiesChanges = ({

@@ -114,7 +114,7 @@ export const hasMixedValues = ({
     return true;
   }
   const { getValue } = field;
-  if (!getValue) return false;
+  if (instances.length === 1 || !getValue) return false;
 
   const value = getValue(instances[0]);
   for (let i = 1; i < instances.length; ++i) {

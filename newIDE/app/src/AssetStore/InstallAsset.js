@@ -12,7 +12,7 @@ import {
 import newNameGenerator from '../Utils/NewNameGenerator';
 import { markEffectIfLegacySkybox } from '../Utils/LegacySkyboxOrientation';
 import { unserializeFromJSObject } from '../Utils/Serializer';
-import { toNewGdMapStringString } from '../Utils/MapStringString';
+import { withResourcesRenamer } from '../ResourcesList/ResourceUtils';
 import { getInsertionParentAndPositionFromSelection } from '../Utils/ObjectFolders';
 import { allResourceKindsAndMetadata } from '../ResourcesList/ResourceSource';
 import {
@@ -368,14 +368,9 @@ export const addAssetToProject = async ({
 
     // Resources may have been renamed to be added to the project.
     // In this case, rename them in the object.
-    const renamedResourcesMap = toNewGdMapStringString(resourceNewNames);
-    const resourcesRenamer = new gd.ResourcesRenamer(
-      project.getResourcesManager(),
-      renamedResourcesMap
+    withResourcesRenamer(project, resourceNewNames, renamer =>
+      object.getConfiguration().exposeResources(renamer)
     );
-    renamedResourcesMap.delete();
-    object.getConfiguration().exposeResources(resourcesRenamer);
-    resourcesRenamer.delete();
 
     createdObjects.push(object);
   });

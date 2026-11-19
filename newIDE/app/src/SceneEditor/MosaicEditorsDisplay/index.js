@@ -156,13 +156,6 @@ const MosaicEditorsDisplay: React.ComponentType<{
           ];
     }, []);
 
-    const _onInstancesModified = React.useCallback(
-      (instances: Array<gdInitialInstance>) => {
-        if (onInstancesModified) onInstancesModified(instances);
-        forceUpdateInstancesList();
-      },
-      [onInstancesModified, forceUpdateInstancesList]
-    );
     const toggleEditorView = React.useCallback((editorId: EditorId) => {
       if (!editorMosaicRef.current) return;
       const config = defaultPanelConfigByEditor[editorId];
@@ -329,7 +322,9 @@ const MosaicEditorsDisplay: React.ComponentType<{
                 onEditObjectGroup={props.onEditObjectGroup}
                 onObjectsModified={props.onObjectsModified}
                 onEffectAdded={props.onEffectAdded}
-                onInstancesModified={_onInstancesModified}
+                onInstancesModified={
+                  onInstancesModified || forceUpdateInstancesList
+                }
                 onGetInstanceSize={getInstanceSize}
                 ref={instanceOrObjectPropertiesEditorRef}
                 unsavedChanges={props.unsavedChanges}

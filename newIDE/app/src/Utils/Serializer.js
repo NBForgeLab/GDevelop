@@ -1,4 +1,5 @@
 // @flow
+import withTemporaryResource from './WithTemporaryResource';
 const gd: libGDevelop = global.gd;
 
 /**
@@ -39,18 +40,6 @@ function withSerializationOptions<T>(
     return callback();
   } finally {
     gd.Serializer.setCanonicalMode(previous);
-  }
-}
-
-// Only pass wrappers owned exclusively by this synchronous operation.
-function withTemporaryResource<Resource: { delete: () => void, ... }, Result>(
-  resource: Resource,
-  callback: Resource => Result
-): Result {
-  try {
-    return callback(resource);
-  } finally {
-    resource.delete();
   }
 }
 

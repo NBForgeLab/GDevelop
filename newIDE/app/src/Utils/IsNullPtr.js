@@ -1,6 +1,7 @@
 // @flow
 
 const gd: libGDevelop = global.gd;
+const reportedDeadWrappers = new WeakSet<Object>();
 
 /**
  * Check if the Emscripten object is actually a null pointer.
@@ -35,6 +36,22 @@ export const exceptionallyGuardAgainstDeadObject = <T>(obj: ?T): ?T => {
     gd.assertObjectAlive(obj);
   } catch (exception) {
     if (exception.name && exception.name === 'UseAfterFreeError') {
+      if (typeof obj === 'object' && !reportedDeadWrappers.has(obj)) {
+        reportedDeadWrappers.add(obj);
+        // Do not retain native wrappers or send their contents with the event.
+        import('./Analytics/EventSender')
+          .then(({ sendErrorMessage }) =>
+            sendErrorMessage(
+              'Editor skipped a destroyed object',
+              'error',
+              { errorName: 'UseAfterFreeError' },
+              'guarded-use-after-free'
+            )
+          )
+          .catch(error =>
+            console.warn('Could not report a destroyed object', error)
+          );
+      }
       console.warn(
         'Detected a dead object being accessed - returning null instead.',
         exception

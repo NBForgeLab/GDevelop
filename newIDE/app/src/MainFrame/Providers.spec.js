@@ -1,4 +1,8 @@
 import * as React from 'react';
+import TeamProvider from '../Profile/Team/TeamProvider';
+import TeamContext from '../Profile/Team/TeamContext';
+import LeaderboardProvider from '../Leaderboard/LeaderboardProvider';
+import LeaderboardContext from '../Leaderboard/LeaderboardContext';
 import { act, create } from 'react-test-renderer';
 import RouterContext, { RouterContextProvider } from './RouterContext';
 import CourseStoreContext, {
@@ -66,6 +70,8 @@ describe('editor context updates', () => {
 
   it.each([
     ['router', RouterContextProvider, RouterContext],
+    ['team', TeamProvider, TeamContext],
+    ['leaderboards', LeaderboardProvider, LeaderboardContext],
     ['courses', CourseStoreStateProvider, CourseStoreContext],
     ['alerts', AlertProvider, AlertContext],
     ['guided lessons', InAppTutorialProvider, InAppTutorialContext],
@@ -79,8 +85,10 @@ describe('editor context updates', () => {
     (_, Provider, Context) => {
       const { values, rerender, unmount } = observeContext(Provider, Context);
       try {
+        const rendersAfterMount = values.length;
+        expect(rendersAfterMount).toBeGreaterThan(0);
         rerender();
-        expect(values).toHaveLength(1);
+        expect(values).toHaveLength(rendersAfterMount);
       } finally {
         unmount();
       }

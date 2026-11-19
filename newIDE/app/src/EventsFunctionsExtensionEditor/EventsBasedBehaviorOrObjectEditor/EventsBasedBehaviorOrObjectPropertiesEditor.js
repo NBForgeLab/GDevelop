@@ -1,4 +1,5 @@
 // @flow
+import { setExtraInfoString } from '../../Utils/PropertyDescriptor';
 import { Trans } from '@lingui/macro';
 import { t } from '@lingui/macro';
 import { I18n } from '@lingui/react';
@@ -118,16 +119,6 @@ export const fillBehaviorProperty = (
   );
   property.setName(validatedNewName);
   property.setLabel(behaviorMetadata.getFullName());
-};
-
-const setExtraInfoString = (
-  property: gdNamedPropertyDescriptor,
-  value: string
-) => {
-  const vectorString = new gd.VectorString();
-  vectorString.push_back(value);
-  property.setExtraInfo(vectorString);
-  vectorString.delete();
 };
 
 type Props = {|

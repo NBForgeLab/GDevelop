@@ -97,6 +97,17 @@ describe('update-bindings.js (patchGlueCppContent & patchGlueCppFile)', () => {
   });
 
   describe('patchGlueCppContent happy path', () => {
+    it('erases only the named class and function when declaration spacing changes', () => {
+      const name = DEFAULT_FUNCTIONS_TO_ERASE[0];
+      const raw = createValidGlueFixture()
+        .replace('class ArbitraryResourceWorkerJS :', '  class\tArbitraryResourceWorkerJS :')
+        .replace('EMSCRIPTEN_KEEPALIVE ' + name + '(', 'EMSCRIPTEN_KEEPALIVE\t' + name + '  (');
+      const result = patchGlueCppContent(raw);
+      expect(result.patchedContent).not.toContain('ArbitraryResourceWorkerJSWrapper');
+      expect(result.patchedContent).not.toContain(name);
+      expect(result.patchedContent).toContain('class KeepMeFunctor');
+    });
+
     it('patches string getters when the generator varies declaration spacing', () => {
       const raw = createValidGlueFixture().replace(
         'const char* EMSCRIPTEN_KEEPALIVE emscripten_bind_Resource',

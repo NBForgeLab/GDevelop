@@ -499,7 +499,9 @@ const SwipeableDrawerEditorsDisplay: React.ComponentType<{
                         onEditObjectGroup={props.onEditObjectGroup}
                         onObjectsModified={props.onObjectsModified}
                         onEffectAdded={props.onEffectAdded}
-                        onInstancesModified={forceUpdateInstancesList}
+                        onInstancesModified={
+                          onInstancesModified || forceUpdateInstancesList
+                        }
                         onGetInstanceSize={getInstanceSize}
                         ref={instanceOrObjectPropertiesEditorRef}
                         historyHandler={props.historyHandler}

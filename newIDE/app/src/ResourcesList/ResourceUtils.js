@@ -1,6 +1,7 @@
 // @flow
 import optionalRequire from '../Utils/OptionalRequire';
 import newNameGenerator from '../Utils/NewNameGenerator';
+import withTemporaryResource from '../Utils/WithTemporaryResource';
 import { toNewGdMapStringString } from '../Utils/MapStringString';
 const fs = optionalRequire('fs');
 const path = optionalRequire('path');
@@ -11,19 +12,16 @@ export const createOrUpdateResource = (
   newlyCreatedResource: gdResource,
   resourceName: string
 ) => {
-  const resourcesManager = project.getResourcesManager();
-  if (resourcesManager.hasResource(resourceName)) {
-    resourcesManager.removeResource(resourceName);
-  }
-  newlyCreatedResource.setFile(resourceName);
-  newlyCreatedResource.setName(resourceName);
-  applyResourceDefaults(project, newlyCreatedResource);
-
-  // Important, we are responsible for deleting the resources that was given to us.
-  // Otherwise we have a memory leak.
-  resourcesManager.addResource(newlyCreatedResource);
-
-  newlyCreatedResource.delete();
+  withTemporaryResource(newlyCreatedResource, resource => {
+    const resourcesManager = project.getResourcesManager();
+    if (resourcesManager.hasResource(resourceName)) {
+      resourcesManager.removeResource(resourceName);
+    }
+    resource.setFile(resourceName);
+    resource.setName(resourceName);
+    applyResourceDefaults(project, resource);
+    resourcesManager.addResource(resource);
+  });
 };
 
 /**
@@ -158,6 +156,19 @@ export const applyResourceDefaults = (
   }
 };
 
+export const withResourcesRenamer = (
+  project: gdProject,
+  resourceNewNames: { [string]: string },
+  exposeResources: gdResourcesRenamer => void
+) => {
+  // The renamer copies the name map and borrows the project's resources manager.
+  const renamer = withTemporaryResource(
+    toNewGdMapStringString(resourceNewNames),
+    names => new gd.ResourcesRenamer(project.getResourcesManager(), names)
+  );
+  withTemporaryResource(renamer, exposeResources);
+};
+
 /**
  * Refactor an entire project to rename a resource
  * @param project The project
@@ -167,14 +178,9 @@ export const renameResourcesInProject = (
   project: gdProject,
   resourceNewNames: { [string]: string }
 ) => {
-  const renamedResourcesMap = toNewGdMapStringString(resourceNewNames);
-  const resourcesRenamer = new gd.ResourcesRenamer(
-    project.getResourcesManager(),
-    renamedResourcesMap
+  withResourcesRenamer(project, resourceNewNames, renamer =>
+    gd.ResourceExposer.exposeWholeProjectResources(project, renamer)
   );
-  renamedResourcesMap.delete();
-  gd.ResourceExposer.exposeWholeProjectResources(project, resourcesRenamer);
-  resourcesRenamer.delete();
 };
 
 export const parseLocalFilePathOrExtensionFromMetadata = (

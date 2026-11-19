@@ -211,99 +211,42 @@ function patchGlueCppContent(rawContent, options) {
       currentReturnStringFunctionHasTransform = false;
     }
 
-    if (
-      !(activeEraseBlock && activeEraseBlock.inBlockComment) &&
-      line.indexOf('class') === 0
-    ) {
-      for (var i = 0; i < classesToErase.length; ++i) {
-        var classPrefix = 'class ' + classesToErase[i];
-        var nextChar = line.charAt(classPrefix.length);
-        if (
-          line.indexOf(classPrefix) === 0 &&
-          (nextChar === '' ||
-            nextChar === ' ' ||
-            nextChar === '\t' ||
-            nextChar === ':' ||
-            nextChar === '{' ||
-            nextChar === '\r')
-        ) {
-          if (insideReturnStringFunction) {
-            throw new Error(
-              'Unexpected line inside const char* function "' +
-                currentReturnStringFunctionSignature +
-                '" at line ' +
-                lineNumber +
-                ': ' +
-                line.trim()
-            );
-          }
-          if (activeEraseBlock) {
-            throw new Error(
-              'Encountered class "' +
-                classesToErase[i] +
-                '" while still erasing unclosed ' +
-                activeEraseBlock.kind +
-                ' "' +
-                activeEraseBlock.name +
-                '" at line ' +
-                lineNumber
-            );
-          }
-          activeEraseBlock = {
-            kind: 'class',
-            name: classesToErase[i],
-            braceDepth: 0,
-            sawOpeningBrace: false,
-            inBlockComment: false,
-            inStringQuote: null,
-          };
-          erasedClasses.add(classesToErase[i]);
-          break;
-        }
+    if (!(activeEraseBlock && activeEraseBlock.inBlockComment)) {
+      var classDeclaration = /^\s*class\s+(\w+)(?=[\s:{]|$)/.exec(line);
+      var functionDeclaration = /^\s*[^/{};]*?\bEMSCRIPTEN_KEEPALIVE\s+(\w+)\s*\(/.exec(line);
+      var kind;
+      var nameToErase;
+      if (classDeclaration && classesToErase.includes(classDeclaration[1])) {
+        kind = 'class';
+        nameToErase = classDeclaration[1];
+      } else if (functionDeclaration && functionsToErase.includes(functionDeclaration[1])) {
+        kind = 'function';
+        nameToErase = functionDeclaration[1];
       }
-    }
-    if (
-      !(activeEraseBlock && activeEraseBlock.inBlockComment) &&
-      line.indexOf('EMSCRIPTEN_KEEPALIVE') !== -1
-    ) {
-      for (var j = 0; j < functionsToErase.length; ++j) {
-        if (
-          line.indexOf('EMSCRIPTEN_KEEPALIVE ' + functionsToErase[j] + '(') !==
-          -1
-        ) {
-          if (insideReturnStringFunction) {
-            throw new Error(
-              'Unexpected line inside const char* function "' +
-                currentReturnStringFunctionSignature +
-                '" at line ' +
-                lineNumber +
-                ': ' +
-                line.trim()
-            );
-          }
-          if (activeEraseBlock) {
-            throw new Error(
-              'Encountered function "' +
-                functionsToErase[j] +
-                '" while still erasing unclosed ' +
-                activeEraseBlock.kind +
-                ' "' +
-                activeEraseBlock.name +
-                '" at line ' +
-                lineNumber
-            );
-          }
-          activeEraseBlock = {
-            kind: 'function',
-            name: functionsToErase[j],
-            braceDepth: 0,
-            sawOpeningBrace: false,
-            inBlockComment: false,
-            inStringQuote: null,
-          };
-          erasedFunctions.add(functionsToErase[j]);
-          break;
+      if (nameToErase) {
+        if (insideReturnStringFunction) {
+          throw new Error(
+            'Unexpected line inside const char* function "' +
+              currentReturnStringFunctionSignature + '" at line ' + lineNumber +
+              ': ' + line.trim()
+          );
         }
+        if (activeEraseBlock) {
+          throw new Error(
+            'Encountered ' + kind + ' "' + nameToErase +
+              '" while still erasing unclosed ' + activeEraseBlock.kind +
+              ' "' + activeEraseBlock.name + '" at line ' + lineNumber
+          );
+        }
+        activeEraseBlock = {
+          kind: kind,
+          name: nameToErase,
+          braceDepth: 0,
+          sawOpeningBrace: false,
+          inBlockComment: false,
+          inStringQuote: null,
+        };
+        (kind === 'class' ? erasedClasses : erasedFunctions).add(nameToErase);
       }
     }
 
