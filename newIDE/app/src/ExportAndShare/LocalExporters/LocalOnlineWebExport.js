@@ -1,7 +1,7 @@
 // @flow
 import { t } from '@lingui/macro';
 import * as React from 'react';
-import assignIn from 'lodash/assignIn';
+import exportProject from '../ExportProject';
 import {
   type Build,
   buildWeb,
@@ -24,12 +24,10 @@ import OnlineWebExportFlow from '../GenericExporters/OnlineWebExport/OnlineWebEx
 
 const path = optionalRequire('path');
 const os = optionalRequire('os');
-const gd: libGDevelop = global.gd;
-
 type ExportState = null;
 
 type PreparedExporter = {|
-  exporter: gdjsExporter,
+  gdjsRoot: string,
   localFileSystem: LocalFileSystem,
   temporaryOutputDir: string,
 |};
@@ -82,20 +80,15 @@ export const localOnlineWebExportPipeline: ExportPipeline<
       const localFileSystem = new LocalFileSystem({
         downloadUrlsToLocalFiles: true,
       });
-      const fileSystem = assignIn(
-        new gd.AbstractFileSystemJS(),
-        localFileSystem
-      );
-      const exporter = new gd.Exporter(fileSystem, gdjsRoot);
       const temporaryOutputDir = path.join(
-        fileSystem.getTempDir(),
+        localFileSystem.getTempDir(),
         'OnlineWebExport'
       );
-      fileSystem.mkDir(temporaryOutputDir);
-      fileSystem.clearDir(temporaryOutputDir);
+      localFileSystem.mkDir(temporaryOutputDir);
+      localFileSystem.clearDir(temporaryOutputDir);
 
       return {
-        exporter,
+        gdjsRoot,
         localFileSystem,
         temporaryOutputDir,
       };
@@ -104,22 +97,16 @@ export const localOnlineWebExportPipeline: ExportPipeline<
 
   launchExport: async (
     context: ExportPipelineContext<ExportState>,
-    { exporter, localFileSystem, temporaryOutputDir }: PreparedExporter,
+    { gdjsRoot, localFileSystem, temporaryOutputDir }: PreparedExporter,
     fallbackAuthor: ?{ id: string, username: string }
   ): Promise<ExportOutput> => {
-    const exportOptions = new gd.ExportOptions(
-      context.project,
-      temporaryOutputDir
-    );
-    if (fallbackAuthor) {
-      exportOptions.setFallbackAuthor(
-        fallbackAuthor.id,
-        fallbackAuthor.username
-      );
-    }
-    const exportSucceeded = exporter.exportWholePixiProject(exportOptions);
-    exportOptions.delete();
-    exporter.delete();
+    const exportSucceeded = exportProject({
+      fileSystem: localFileSystem,
+      gdjsRoot,
+      project: context.project,
+      outputDir: temporaryOutputDir,
+      fallbackAuthor,
+    });
 
     if (!exportSucceeded) {
       throw new Error(

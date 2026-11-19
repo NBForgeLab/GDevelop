@@ -1,6 +1,6 @@
 // @flow
 import * as React from 'react';
-import assignIn from 'lodash/assignIn';
+import exportProject from '../ExportProject';
 import {
   type Build,
   buildWeb,
@@ -25,12 +25,10 @@ import {
 import { ExplanationHeader } from '../GenericExporters/OnlineWebExport';
 import OnlineWebExportFlow from '../GenericExporters/OnlineWebExport/OnlineWebExportFlow';
 
-const gd: libGDevelop = global.gd;
-
 type ExportState = null;
 
 type PreparedExporter = {|
-  exporter: gdjsExporter,
+  gdjsRoot: string,
   abstractFileSystem: BrowserFileSystem,
   outputDir: string,
 |};
@@ -85,14 +83,9 @@ export const browserOnlineWebExportPipeline: ExportPipeline<
       const abstractFileSystem = new BrowserFileSystem({
         textFiles: filesContent,
       });
-      const fileSystem = assignIn(
-        new gd.AbstractFileSystemJS(),
-        abstractFileSystem
-      );
-      const exporter = new gd.Exporter(fileSystem, gdjsRoot);
 
       return {
-        exporter,
+        gdjsRoot,
         outputDir,
         abstractFileSystem,
       };
@@ -101,20 +94,17 @@ export const browserOnlineWebExportPipeline: ExportPipeline<
 
   launchExport: (
     context: ExportPipelineContext<ExportState>,
-    { exporter, outputDir, abstractFileSystem }: PreparedExporter,
+    { gdjsRoot, outputDir, abstractFileSystem }: PreparedExporter,
     fallbackAuthor: ?{ id: string, username: string }
   ): Promise<ExportOutput> => {
     const { project } = context;
-    const exportOptions = new gd.ExportOptions(project, outputDir);
-    if (fallbackAuthor) {
-      exportOptions.setFallbackAuthor(
-        fallbackAuthor.id,
-        fallbackAuthor.username
-      );
-    }
-    exporter.exportWholePixiProject(exportOptions);
-    exportOptions.delete();
-    exporter.delete();
+    exportProject({
+      fileSystem: abstractFileSystem,
+      gdjsRoot,
+      project,
+      outputDir,
+      fallbackAuthor,
+    });
 
     return Promise.resolve({
       textFiles: abstractFileSystem.getAllTextFilesIn(outputDir),

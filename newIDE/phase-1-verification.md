@@ -9,8 +9,9 @@
 | Discover resources on disk | The scanner owns the input path vector. Copy the binder-managed result into a JavaScript array before processing individual resources. |
 | Add a newly created resource | The manager clones the resource. The creating operation releases its original wrapper on success and on exceptions. |
 | Rename project or installed asset resources | The renamer copies the name map and borrows the project manager. Release the map after constructing the renamer, then release the renamer after traversal. |
+| Export a whole project | Allocate the filesystem adapter, exporter and options during the synchronous export call. Release them in reverse order before reading the output from the JavaScript filesystem. |
 
-A source inventory found 208 direct constructor expressions across 63 native types in tracked editor JavaScript. The most frequent were AbstractFileSystemJS (20), Exporter (19), ExportOptions (16), SerializerElement (15) and InitialInstanceJSFunctor (14). Reproduce the count with the following Git pathspecs. This search omits factories, borrowed getters and TypeScript. A constructor occurrence alone does not establish when ownership transfers to C++.
+At commit 2bc7c8b145 the source inventory found 208 direct constructor expressions across 63 native types in tracked editor JavaScript. The 16 whole-project export pipelines now share one allocation site for each of their three wrappers. This leaves 163 constructor expressions across the same 63 types. Preview launchers have separate asynchronous lifetimes. Reproduce the count with the following Git pathspecs. This search omits factories, borrowed getters and TypeScript. A constructor occurrence alone does not establish when ownership transfers to C++.
 
 ```sh
 git grep -h -o -E 'new gd\.[A-Za-z0-9_]+\(' -- 'newIDE/app/src/**/*.js' ':!*.spec.js' ':!*.test.js' ':!*.stories.js' ':!**/fixtures/**' ':!**/__tests__/**' ':!**/__mocks__/**' ':!**/stories/**'

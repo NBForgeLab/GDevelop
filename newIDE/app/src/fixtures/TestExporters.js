@@ -12,20 +12,13 @@ import {
   type TextFileDescriptor,
   type BlobFileDescriptor,
 } from '../Utils/BrowserArchiver';
-import BrowserFileSystem from '../ExportAndShare/BrowserExporters/BrowserFileSystem';
 import { completeWebBuild } from '../fixtures/GDevelopServicesTestData';
 import { ExplanationHeader } from '../ExportAndShare/GenericExporters/OnlineWebExport';
 import { delay } from '../Utils/Delay';
-import assignIn from 'lodash/assignIn';
 import OnlineWebExportFlow from '../ExportAndShare/GenericExporters/OnlineWebExport/OnlineWebExportFlow';
-const gd: libGDevelop = global.gd;
 type ExportState = null;
 
-type PreparedExporter = {|
-  exporter: gdjsExporter,
-  abstractFileSystem: BrowserFileSystem,
-  outputDir: string,
-|};
+type PreparedExporter = null;
 
 type ExportOutput = {|
   textFiles: Array<TextFileDescriptor>,
@@ -72,25 +65,12 @@ export const fakeBrowserOnlineWebExportPipeline: ExportPipeline<
   ): Promise<PreparedExporter> => {
     await delay(1000);
 
-    const abstractFileSystem = new BrowserFileSystem({
-      textFiles: [],
-    });
-    const fileSystem = assignIn(
-      new gd.AbstractFileSystemJS(),
-      abstractFileSystem
-    );
-    const exporter = new gd.Exporter(fileSystem, null);
-
-    return {
-      exporter,
-      outputDir: '/export/',
-      abstractFileSystem,
-    };
+    return null;
   },
 
   launchExport: async (
     context: ExportPipelineContext<ExportState>,
-    { exporter, outputDir, abstractFileSystem }: PreparedExporter,
+    preparedExporter: PreparedExporter,
     fallbackAuthor: ?{ id: string, username: string }
   ): Promise<ExportOutput> => {
     await delay(1000);

@@ -1,6 +1,6 @@
 // @flow
 import * as React from 'react';
-import assignIn from 'lodash/assignIn';
+import exportProject from '../ExportProject';
 import {
   type Build,
   buildElectron,
@@ -28,10 +28,8 @@ import {
   ExportFlow,
 } from '../GenericExporters/OnlineElectronExport';
 
-const gd: libGDevelop = global.gd;
-
 type PreparedExporter = {|
-  exporter: gdjsExporter,
+  gdjsRoot: string,
   abstractFileSystem: BrowserFileSystem,
   outputDir: string,
 |};
@@ -93,14 +91,9 @@ export const browserOnlineElectronExportPipeline: ExportPipeline<
       const abstractFileSystem = new BrowserFileSystem({
         textFiles: filesContent,
       });
-      const fileSystem = assignIn(
-        new gd.AbstractFileSystemJS(),
-        abstractFileSystem
-      );
-      const exporter = new gd.Exporter(fileSystem, gdjsRoot);
 
       return {
-        exporter,
+        gdjsRoot,
         outputDir,
         abstractFileSystem,
       };
@@ -109,21 +102,18 @@ export const browserOnlineElectronExportPipeline: ExportPipeline<
 
   launchExport: (
     context: ExportPipelineContext<ExportState>,
-    { exporter, outputDir, abstractFileSystem }: PreparedExporter,
+    { gdjsRoot, outputDir, abstractFileSystem }: PreparedExporter,
     fallbackAuthor: ?{ id: string, username: string }
   ): Promise<ExportOutput> => {
     const { project } = context;
-    const exportOptions = new gd.ExportOptions(project, outputDir);
-    exportOptions.setTarget('electron');
-    if (fallbackAuthor) {
-      exportOptions.setFallbackAuthor(
-        fallbackAuthor.id,
-        fallbackAuthor.username
-      );
-    }
-    exporter.exportWholePixiProject(exportOptions);
-    exportOptions.delete();
-    exporter.delete();
+    exportProject({
+      fileSystem: abstractFileSystem,
+      gdjsRoot,
+      project,
+      outputDir,
+      fallbackAuthor,
+      target: 'electron',
+    });
 
     return Promise.resolve({
       textFiles: abstractFileSystem.getAllTextFilesIn(outputDir),

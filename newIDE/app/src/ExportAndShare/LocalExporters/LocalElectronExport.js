@@ -7,7 +7,7 @@ import { Column, Line } from '../../UI/Grid';
 import { findGDJS } from '../../GameEngineFinder/LocalGDJSFinder';
 import LocalFileSystem, { type UrlFileDescriptor } from './LocalFileSystem';
 import LocalFolderPicker from '../../UI/LocalFolderPicker';
-import assignIn from 'lodash/assignIn';
+import exportProject from '../ExportProject';
 import optionalRequire from '../../Utils/OptionalRequire';
 import {
   type ExportFlowProps,
@@ -26,14 +26,12 @@ import { downloadUrlsToLocalFiles } from '../../Utils/LocalFileDownloader';
 const remote = optionalRequire('@electron/remote');
 const shell = remote ? remote.shell : null;
 
-const gd: libGDevelop = global.gd;
-
 type ExportState = {
   outputDir: string,
 };
 
 type PreparedExporter = {|
-  exporter: gdjsExporter,
+  gdjsRoot: string,
   localFileSystem: LocalFileSystem,
 |};
 
@@ -98,18 +96,12 @@ export const localElectronExportPipeline: ExportPipeline<
     return findGDJS().then(({ gdjsRoot }) => {
       console.info('GDJS found in ', gdjsRoot);
 
-      // TODO: Memory leak? Check for other exporters too.
       const localFileSystem = new LocalFileSystem({
         downloadUrlsToLocalFiles: true,
       });
-      const fileSystem = assignIn(
-        new gd.AbstractFileSystemJS(),
-        localFileSystem
-      );
-      const exporter = new gd.Exporter(fileSystem, gdjsRoot);
 
       return {
-        exporter,
+        gdjsRoot,
         localFileSystem,
       };
     });
@@ -117,23 +109,17 @@ export const localElectronExportPipeline: ExportPipeline<
 
   launchExport: async (
     context: ExportPipelineContext<ExportState>,
-    { exporter, localFileSystem }: PreparedExporter,
+    { gdjsRoot, localFileSystem }: PreparedExporter,
     fallbackAuthor: ?{ id: string, username: string }
   ): Promise<ExportOutput> => {
-    const exportOptions = new gd.ExportOptions(
-      context.project,
-      context.exportState.outputDir
-    );
-    exportOptions.setTarget('electron');
-    if (fallbackAuthor) {
-      exportOptions.setFallbackAuthor(
-        fallbackAuthor.id,
-        fallbackAuthor.username
-      );
-    }
-    const exportSucceeded = exporter.exportWholePixiProject(exportOptions);
-    exportOptions.delete();
-    exporter.delete();
+    const exportSucceeded = exportProject({
+      fileSystem: localFileSystem,
+      gdjsRoot,
+      project: context.project,
+      outputDir: context.exportState.outputDir,
+      fallbackAuthor,
+      target: 'electron',
+    });
 
     if (!exportSucceeded) {
       throw new Error(

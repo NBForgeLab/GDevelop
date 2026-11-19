@@ -1,7 +1,7 @@
 // @flow
 import * as React from 'react';
 import { Trans } from '@lingui/macro';
-import assignIn from 'lodash/assignIn';
+import exportProject from '../ExportProject';
 import { findGDJS } from '../../GameEngineFinder/BrowserS3GDJSFinder';
 import BrowserFileSystem from './BrowserFileSystem';
 import {
@@ -27,12 +27,10 @@ import {
   ExportFlow,
 } from '../GenericExporters/FacebookInstantGamesExport';
 
-const gd: libGDevelop = global.gd;
-
 type ExportState = null;
 
 type PreparedExporter = {|
-  exporter: gdjsExporter,
+  gdjsRoot: string,
   abstractFileSystem: BrowserFileSystem,
   outputDir: string,
 |};
@@ -83,15 +81,9 @@ export const browserFacebookInstantGamesExportPipeline: ExportPipeline<
         const abstractFileSystem = new BrowserFileSystem({
           textFiles: filesContent,
         });
-        // TODO: Memory leak? Check for other exporters too.
-        const fileSystem = assignIn(
-          new gd.AbstractFileSystemJS(),
-          abstractFileSystem
-        );
-        const exporter = new gd.Exporter(fileSystem, gdjsRoot);
 
         return {
-          exporter,
+          gdjsRoot,
           outputDir,
           abstractFileSystem,
         };
@@ -101,21 +93,18 @@ export const browserFacebookInstantGamesExportPipeline: ExportPipeline<
 
   launchExport: (
     context: ExportPipelineContext<ExportState>,
-    { exporter, outputDir, abstractFileSystem }: PreparedExporter,
+    { gdjsRoot, outputDir, abstractFileSystem }: PreparedExporter,
     fallbackAuthor: ?{ id: string, username: string }
   ): Promise<ExportOutput> => {
     const { project } = context;
-    const exportOptions = new gd.ExportOptions(project, outputDir);
-    exportOptions.setTarget('facebookInstantGames');
-    if (fallbackAuthor) {
-      exportOptions.setFallbackAuthor(
-        fallbackAuthor.id,
-        fallbackAuthor.username
-      );
-    }
-    exporter.exportWholePixiProject(exportOptions);
-    exportOptions.delete();
-    exporter.delete();
+    exportProject({
+      fileSystem: abstractFileSystem,
+      gdjsRoot,
+      project,
+      outputDir,
+      fallbackAuthor,
+      target: 'facebookInstantGames',
+    });
 
     return Promise.resolve({
       textFiles: abstractFileSystem.getAllTextFilesIn(outputDir),
