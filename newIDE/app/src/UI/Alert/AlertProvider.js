@@ -98,15 +98,23 @@ function ConfirmProvider({ children }: Props): React.Node {
     [isCli]
   );
 
+  const value = React.useMemo(
+    () => ({
+      showAlertDialog: openAlertDialog,
+      showConfirmDialog: openConfirmDialog,
+      showConfirmDeleteDialog: openConfirmDeleteDialog,
+      showYesNoCancelDialog: openYesNoCancelDialog,
+    }),
+    [
+      openAlertDialog,
+      openConfirmDialog,
+      openConfirmDeleteDialog,
+      openYesNoCancelDialog,
+    ]
+  );
+
   return (
-    <AlertContext.Provider
-      value={{
-        showAlertDialog: openAlertDialog,
-        showConfirmDialog: openConfirmDialog,
-        showConfirmDeleteDialog: openConfirmDeleteDialog,
-        showYesNoCancelDialog: openYesNoCancelDialog,
-      }}
-    >
+    <AlertContext.Provider value={value}>
       {children}
       {alertDialogConfig && (
         <AlertDialog

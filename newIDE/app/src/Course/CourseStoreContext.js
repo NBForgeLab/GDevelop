@@ -71,13 +71,16 @@ export const CourseStoreStateProvider = (props: Props): React.MixedElement => {
     [loadCourseChapters, loadCourses]
   );
 
+  const value = React.useMemo(
+    () => ({
+      listedCourses,
+      listedCourseChapters,
+    }),
+    [listedCourses, listedCourseChapters]
+  );
+
   return (
-    <CourseStoreContext.Provider
-      value={{
-        listedCourses,
-        listedCourseChapters,
-      }}
-    >
+    <CourseStoreContext.Provider value={value}>
       {props.children}
     </CourseStoreContext.Provider>
   );

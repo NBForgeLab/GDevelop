@@ -64,107 +64,126 @@ const PrivateAssetsAuthorizationProvider = ({
     [authenticatedUser.getAuthorizationHeader]
   );
 
-  const updateAuthorizationToken = async () => {
-    if (!profile) return;
-    const userId = profile.id;
+  const updateAuthorizationToken = React.useCallback(
+    async () => {
+      if (!profile) return;
+      const userId = profile.id;
 
-    // If a request is already in progress, don't do anything.
-    if (isLoading.current) return;
+      // If a request is already in progress, don't do anything.
+      if (isLoading.current) return;
 
-    try {
-      isLoading.current = true;
-      await fetchAuthorizationToken(userId);
-    } catch (error) {
-      console.error('Could not fetch the authorization token', error);
-    } finally {
-      isLoading.current = false;
-    }
-  };
+      try {
+        isLoading.current = true;
+        await fetchAuthorizationToken(userId);
+      } catch (error) {
+        console.error('Could not fetch the authorization token', error);
+      } finally {
+        isLoading.current = false;
+      }
+    },
+    [profile, fetchAuthorizationToken]
+  );
 
-  const fetchPrivateAsset = async (
-    assetShortHeader: AssetShortHeader,
-    { environment }: {| environment: Environment |}
-  ): Promise<?Asset> => {
-    if (!profile) return;
-    const userId = profile.id;
+  const fetchPrivateAsset = React.useCallback(
+    async (
+      assetShortHeader: AssetShortHeader,
+      { environment }: {| environment: Environment |}
+    ): Promise<?Asset> => {
+      if (!profile) return;
+      const userId = profile.id;
 
-    let token =
-      authorizationToken || (await fetchAuthorizationToken(profile.id));
+      let token =
+        authorizationToken || (await fetchAuthorizationToken(profile.id));
 
-    try {
-      const asset = await getPrivateAsset(assetShortHeader, token, {
-        environment,
-      });
-      return asset;
-    } catch (error) {
-      const extractedStatusAndCode = extractGDevelopApiErrorStatusAndCode(
-        error
-      );
-      if (extractedStatusAndCode && extractedStatusAndCode.status === 404) {
-        // If the token is expired, fetch a new one and try again.
-        token = await fetchAuthorizationToken(userId);
+      try {
         const asset = await getPrivateAsset(assetShortHeader, token, {
           environment,
         });
         return asset;
+      } catch (error) {
+        const extractedStatusAndCode = extractGDevelopApiErrorStatusAndCode(
+          error
+        );
+        if (extractedStatusAndCode && extractedStatusAndCode.status === 404) {
+          // If the token is expired, fetch a new one and try again.
+          token = await fetchAuthorizationToken(userId);
+          const asset = await getPrivateAsset(assetShortHeader, token, {
+            environment,
+          });
+          return asset;
+        }
+        throw error;
       }
-      throw error;
-    }
-  };
+    },
+    [profile, authorizationToken, fetchAuthorizationToken]
+  );
 
-  const installPrivateAsset = async ({
-    asset,
-    project,
-    objectsContainer,
-    requestedObjectName,
-    targetObjectFolderOrObject,
-  }: InstallAssetArgs): Promise<?AddAssetOutput> => {
-    if (!profile) {
-      throw new Error(
-        'Unable to install the asset because no profile was found.'
-      );
-    }
-
-    const token =
-      authorizationToken || (await fetchAuthorizationToken(profile.id));
-
-    const assetWithAuthorizedResourceUrls = enrichAssetWithAuthorizedResourceUrls(
+  const installPrivateAsset = React.useCallback(
+    async ({
       asset,
-      token
-    );
-
-    return addAssetToProject({
-      asset: assetWithAuthorizedResourceUrls,
       project,
       objectsContainer,
       requestedObjectName,
       targetObjectFolderOrObject,
-    });
-  };
+    }: InstallAssetArgs): Promise<?AddAssetOutput> => {
+      if (!profile) {
+        throw new Error(
+          'Unable to install the asset because no profile was found.'
+        );
+      }
+
+      const token =
+        authorizationToken || (await fetchAuthorizationToken(profile.id));
+
+      const assetWithAuthorizedResourceUrls = enrichAssetWithAuthorizedResourceUrls(
+        asset,
+        token
+      );
+
+      return addAssetToProject({
+        asset: assetWithAuthorizedResourceUrls,
+        project,
+        objectsContainer,
+        requestedObjectName,
+        targetObjectFolderOrObject,
+      });
+    },
+    [profile, authorizationToken, fetchAuthorizationToken]
+  );
 
   // This URL is only valid for a limited time, so this function needs to be called
   // every time the user wants to download the audio files.
-  const getPrivateAssetPackAudioArchiveUrl = async (
-    privateAssetPackId: string
-  ): Promise<string | null> => {
-    if (!profile) return null;
+  const getPrivateAssetPackAudioArchiveUrl = React.useCallback(
+    async (privateAssetPackId: string): Promise<string | null> => {
+      if (!profile) return null;
 
-    // Always fetch a new token, as the URL is only valid for a limited time.
-    const token = await fetchAuthorizationToken(profile.id);
+      // Always fetch a new token, as the URL is only valid for a limited time.
+      const token = await fetchAuthorizationToken(profile.id);
 
-    return getPrivateAssetPackAudioFilesArchiveUrl(privateAssetPackId, token);
-  };
+      return getPrivateAssetPackAudioFilesArchiveUrl(privateAssetPackId, token);
+    },
+    [profile, fetchAuthorizationToken]
+  );
+
+  const value = React.useMemo(
+    () => ({
+      authorizationToken,
+      updateAuthorizationToken,
+      fetchPrivateAsset,
+      installPrivateAsset,
+      getPrivateAssetPackAudioArchiveUrl,
+    }),
+    [
+      authorizationToken,
+      updateAuthorizationToken,
+      fetchPrivateAsset,
+      installPrivateAsset,
+      getPrivateAssetPackAudioArchiveUrl,
+    ]
+  );
 
   return (
-    <PrivateAssetsAuthorizationContext.Provider
-      value={{
-        authorizationToken,
-        updateAuthorizationToken,
-        fetchPrivateAsset,
-        installPrivateAsset,
-        getPrivateAssetPackAudioArchiveUrl,
-      }}
-    >
+    <PrivateAssetsAuthorizationContext.Provider value={value}>
       {children}
     </PrivateAssetsAuthorizationContext.Provider>
   );

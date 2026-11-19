@@ -77,10 +77,10 @@ const InAppTutorialProvider = (props: Props): React.Node => {
     [getInAppTutorialShortHeader, inAppTutorialShortHeaders]
   );
 
-  const endTutorial = () => {
+  const endTutorial = React.useCallback(() => {
     setTutorial(null);
     setCurrentlyRunningInAppTutorial(null);
-  };
+  }, []);
 
   const loadInAppTutorials = React.useCallback(async () => {
     setFetchingError(null);
@@ -151,21 +151,35 @@ const InAppTutorialProvider = (props: Props): React.Node => {
     [loadInAppTutorials]
   );
 
+  const value = React.useMemo(
+    () => ({
+      inAppTutorialShortHeaders,
+      getInAppTutorialShortHeader,
+      currentlyRunningInAppTutorial: tutorial,
+      startTutorial,
+      startProjectData,
+      endTutorial,
+      startStepIndex,
+      inAppTutorialsFetchingError: fetchingError,
+      fetchInAppTutorials: loadInAppTutorials,
+      onLoadInAppTutorialFromLocalFile,
+    }),
+    [
+      inAppTutorialShortHeaders,
+      getInAppTutorialShortHeader,
+      tutorial,
+      startTutorial,
+      startProjectData,
+      endTutorial,
+      startStepIndex,
+      fetchingError,
+      loadInAppTutorials,
+      onLoadInAppTutorialFromLocalFile,
+    ]
+  );
+
   return (
-    <InAppTutorialContext.Provider
-      value={{
-        inAppTutorialShortHeaders,
-        getInAppTutorialShortHeader,
-        currentlyRunningInAppTutorial: tutorial,
-        startTutorial,
-        startProjectData,
-        endTutorial,
-        startStepIndex,
-        inAppTutorialsFetchingError: fetchingError,
-        fetchInAppTutorials: loadInAppTutorials,
-        onLoadInAppTutorialFromLocalFile,
-      }}
-    >
+    <InAppTutorialContext.Provider value={value}>
       {props.children}
     </InAppTutorialContext.Provider>
   );

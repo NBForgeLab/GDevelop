@@ -111,16 +111,17 @@ export const RouterContextProvider = ({
     [addRouteArguments]
   );
 
+  const value = React.useMemo(
+    () => ({
+      routeArguments,
+      addRouteArguments,
+      removeRouteArguments,
+      navigateToRoute,
+    }),
+    [routeArguments, addRouteArguments, removeRouteArguments, navigateToRoute]
+  );
+
   return (
-    <RouterContext.Provider
-      value={{
-        routeArguments,
-        addRouteArguments,
-        removeRouteArguments,
-        navigateToRoute,
-      }}
-    >
-      {children}
-    </RouterContext.Provider>
+    <RouterContext.Provider value={value}>{children}</RouterContext.Provider>
   );
 };
