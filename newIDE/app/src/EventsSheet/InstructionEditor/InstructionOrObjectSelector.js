@@ -7,7 +7,6 @@ import { t, Trans } from '@lingui/macro';
 
 import {
   createTree,
-  type InstructionOrExpressionTreeNode,
   findInTree,
 } from '../../InstructionOrExpression/CreateTree';
 import {
@@ -247,68 +246,58 @@ const InstructionOrObjectSelector: React.ComponentType<{
     const freeInstructionTreeViewRef = React.useRef<?ReadOnlyTreeViewInterface<TreeViewItem>>(
       null
     );
-    const freeInstructionsInfoTreeRef = React.useRef<InstructionOrExpressionTreeNode>(
-      createTree(
-        filterEnumeratedInstructionOrExpressionMetadataByScope(
-          enumerateFreeInstructions(isCondition, project, i18n),
+    const buildInstructionCatalog = React.useCallback(
+      (language: I18nType) => {
+        const freeInstructions = filterEnumeratedInstructionOrExpressionMetadataByScope(
+          enumerateFreeInstructions(isCondition, project, language),
           scope
-        ),
-        i18n
-      )
+        );
+        const allInstructions = filterEnumeratedInstructionOrExpressionMetadataByScope(
+          enumerateAllInstructions(isCondition, project, language),
+          scope
+        );
+        return {
+          freeInstructionsTree: createTree(freeInstructions, language),
+          searchIndex: new Fuse(allInstructions, {
+            ...sharedFuseConfiguration,
+            includeScore: true,
+            keys: [
+              { name: 'displayedName', weight: 5 },
+              { name: 'fullGroupName', weight: 1 },
+              { name: 'description', weight: 3 },
+            ],
+          }),
+        };
+      },
+      [isCondition, project, scope]
     );
-    const initialInstructionTypePathRef = React.useRef<?Array<string>>(
-      findInTree(freeInstructionsInfoTreeRef.current, chosenInstructionType)
+    const [
+      { freeInstructionsTree, searchIndex },
+      setInstructionCatalog,
+    ] = React.useState(() => buildInstructionCatalog(i18n));
+    const reEnumerateInstructions = React.useCallback(
+      (language: I18nType) =>
+        setInstructionCatalog(buildInstructionCatalog(language)),
+      [buildInstructionCatalog]
     );
-    const initialInstructionAscendanceRef = React.useRef<Array<string>>(
-      initialInstructionTypePathRef.current
-        ? initialInstructionTypePathRef.current.reduce(
-            (nodeIds, categoryName) => {
-              const parentId =
-                nodeIds.length > 0 ? nodeIds[nodeIds.length - 1] : null;
-              nodeIds.push(getInstructionGroupId(categoryName, parentId));
-              return nodeIds;
-            },
-            []
-          )
-        : []
-    );
-    // All the instructions, to be used when searching, so that the search is done
-    // across all the instructions (including object and behaviors instructions).
-    const allInstructionsInfoRef = React.useRef<
-      Array<EnumeratedInstructionMetadata>
-    >(
-      filterEnumeratedInstructionOrExpressionMetadataByScope(
-        enumerateAllInstructions(isCondition, project, i18n),
-        scope
-      )
-    );
-    // Instructions search results are handled by Fuse because the text is searched
-    // in different attributes of the object. Objects, groups and folders search is
-    // directly handled by the tree view since they only have one field and their name
-    // are straightforward.
-    // $FlowFixMe[value-as-type]
-    const createFuse: () => Fuse = React.useCallback(
-      () =>
-        new Fuse(allInstructionsInfoRef.current, {
-          ...sharedFuseConfiguration,
-          includeScore: true, // Use Fuse.js score to sort results that don't contain exact matches.
-          keys: [
-            { name: 'displayedName', weight: 5 },
-            { name: 'fullGroupName', weight: 1 },
-            { name: 'description', weight: 3 },
-          ],
-        }),
-      []
-    );
-    const instructionSearchApiRef = React.useRef(createFuse());
+    React.useImperativeHandle(ref, () => ({ reEnumerateInstructions }));
+
+    const [initialInstructionAscendance] = React.useState<Array<string>>(() => {
+      const path = findInTree(freeInstructionsTree, chosenInstructionType);
+      return path
+        ? path.reduce((nodeIds, categoryName) => {
+            const parentId =
+              nodeIds.length > 0 ? nodeIds[nodeIds.length - 1] : null;
+            nodeIds.push(getInstructionGroupId(categoryName, parentId));
+            return nodeIds;
+          }, [])
+        : [];
+    });
     const { currentlyRunningInAppTutorial } = React.useContext(
       InAppTutorialContext
     );
 
     const [searchText, setSearchText] = React.useState<string>('');
-    const [searchResults, setSearchResults] = React.useState<{
-      instructions: Array<SearchResult<EnumeratedInstructionMetadata>>,
-    }>({ instructions: [] });
     const [selectedItem, setSelectedItem] = React.useState<?TreeViewItem>(null);
 
     // The objects must never be kept in a state as they may be temporary copies.
@@ -343,7 +332,7 @@ const InstructionOrObjectSelector: React.ComponentType<{
       objectsContainersList.getObjectsContainersCount() - 1
     );
 
-    const initiallyOpenedFolderIdsRef = React.useRef<string[]>(
+    const [initiallyOpenedFolderIds] = React.useState<string[]>(() =>
       // TODO: Once it is possible to store the opened state of folders,
       // Reuse it here to have the same state between the scene editor
       // and the event sheets + Open the folder ascendance until the chosen object
@@ -361,11 +350,11 @@ const InstructionOrObjectSelector: React.ComponentType<{
           : []),
       ].map(getObjectFolderTreeViewItemId)
     );
-    const initiallyOpenedInstructionsGroupIdsRef = React.useRef<string[]>([
-      ...Object.keys(freeInstructionsInfoTreeRef.current).map(categoryName =>
+    const [initiallyOpenedInstructionsGroupIds] = React.useState<string[]>(() =>
+      Object.keys(freeInstructionsTree).map(categoryName =>
         getInstructionGroupId(categoryName)
-      ),
-    ]);
+      )
+    );
 
     const forceUpdate = useForceUpdate();
     useOnResource3DPreviewRendered(forceUpdate);
@@ -458,58 +447,34 @@ const InstructionOrObjectSelector: React.ComponentType<{
     const getTreeViewItemChildren = (item: TreeViewItem) =>
       item.getChildren(searchText);
 
-    const search = React.useCallback((searchText: string) => {
-      if (!searchText) return;
-      const lowerCaseSearchText = searchText.toLowerCase();
+    const filteredInstructionsList = React.useMemo(
+      () => {
+        if (!searchText) return [];
+        const lowerCaseSearchText = searchText.toLowerCase();
 
-      const matchingInstructions = moveDeprecatedInstructionsDown(
-        instructionSearchApiRef.current
-          .search(
-            getFuseSearchQueryForMultipleKeys(searchText, [
-              'displayedName',
-              'fullGroupName',
-              'description',
-            ])
-          )
-          .map(nullifySingleCharacterMatches)
-          .filter(Boolean)
-          .map(result => augmentSearchResult(result, lowerCaseSearchText))
-          .sort(
-            sortResultsUsingExactMatches([
-              'displayedName',
-              'description',
-              'fullGroupName',
-            ])
-          )
-      );
-
-      setSearchResults({ instructions: matchingInstructions });
-    }, []);
-
-    const reEnumerateInstructions = React.useCallback(
-      (i18n: I18nType) => {
-        freeInstructionsInfoTreeRef.current = createTree(
-          filterEnumeratedInstructionOrExpressionMetadataByScope(
-            enumerateFreeInstructions(isCondition, project, i18n),
-            scope
-          ),
-          i18n
+        return moveDeprecatedInstructionsDown(
+          searchIndex
+            .search(
+              getFuseSearchQueryForMultipleKeys(searchText, [
+                'displayedName',
+                'fullGroupName',
+                'description',
+              ])
+            )
+            .map(nullifySingleCharacterMatches)
+            .filter(Boolean)
+            .map(result => augmentSearchResult(result, lowerCaseSearchText))
+            .sort(
+              sortResultsUsingExactMatches([
+                'displayedName',
+                'description',
+                'fullGroupName',
+              ])
+            )
         );
-        allInstructionsInfoRef.current = filterEnumeratedInstructionOrExpressionMetadataByScope(
-          enumerateAllInstructions(isCondition, project, i18n),
-          scope
-        );
-        instructionSearchApiRef.current = createFuse();
-        setSearchText(searchText => {
-          search(searchText);
-          return searchText;
-        });
-        forceUpdate();
       },
-      [createFuse, forceUpdate, isCondition, project, scope, search]
+      [searchIndex, searchText]
     );
-
-    React.useImperativeHandle(ref, () => ({ reEnumerateInstructions }));
 
     const onSubmitSearch = () => {
       if (!searchText || !treeViewRef.current) return;
@@ -550,13 +515,6 @@ const InstructionOrObjectSelector: React.ComponentType<{
 
     const isSearching = !!searchText;
 
-    let filteredInstructionsList: Array<
-      SearchResult<EnumeratedInstructionMetadata>
-    > = [];
-
-    if (isSearching) {
-      filteredInstructionsList = searchResults.instructions;
-    }
     const displayedInstructionsList = filteredInstructionsList.slice(
       0,
       DISPLAYED_INSTRUCTIONS_MAX_LENGTH
@@ -596,7 +554,7 @@ const InstructionOrObjectSelector: React.ComponentType<{
     const getFreeInstructionsTreeViewItems = i18n =>
       [
         ...createFreeInstructionTreeViewItem({
-          instructionOrGroup: freeInstructionsInfoTreeRef.current,
+          instructionOrGroup: freeInstructionsTree,
           freeInstructionProps: { getGroupIconSrc: getInstructionIconSrc },
         }),
         new InstructionLeafTreeViewItem(
@@ -750,7 +708,6 @@ const InstructionOrObjectSelector: React.ComponentType<{
           value={searchText}
           onChange={newSearchText => {
             const oldSearchText = searchText;
-            if (!!newSearchText) search(newSearchText);
             setSearchText(newSearchText);
             // Notify if needed that we started or cleared a search
             if (
@@ -859,7 +816,7 @@ const InstructionOrObjectSelector: React.ComponentType<{
                   HIGHER_SCOPE_OBJECTS_ROOT_ITEM_ID,
                   LOCAL_GROUPS_ROOT_ITEM_ID,
                   HIGHER_SCOPE_GROUPS_ROOT_ITEM_ID,
-                  ...initiallyOpenedFolderIdsRef.current,
+                  ...initiallyOpenedFolderIds,
                 ]}
                 onSelectItems={(items: TreeViewItem[]) => {
                   if (!items) return;
@@ -958,8 +915,8 @@ const InstructionOrObjectSelector: React.ComponentType<{
                 selectedItems={selectedItem ? [selectedItem] : []}
                 initiallyOpenedNodeIds={Array.from(
                   new Set([
-                    ...initiallyOpenedInstructionsGroupIdsRef.current,
-                    ...initialInstructionAscendanceRef.current,
+                    ...initiallyOpenedInstructionsGroupIds,
+                    ...initialInstructionAscendance,
                   ])
                 )}
                 onSelectItems={(items: TreeViewItem[]) => {
