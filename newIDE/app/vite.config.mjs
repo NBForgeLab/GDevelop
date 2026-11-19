@@ -65,7 +65,7 @@ const COMMONJS_SOURCE_PATTERNS = [
   /[\\/]node_modules[\\/]GDJS-for-web-app-only[\\/]/,
   /[\\/]src[\\/]GameEngineFinder[\\/]LocalGDJSFinder\.js$/,
   /[\\/]src[\\/]JsExtensionsLoader[\\/](LocalJsExtensionsFinder|LocalJsExtensionsLoader|BrowserJsExtensionsLoader|index)\.js$/,
-  /[\\/]src[\\/]Utils[\\/](MapFor|OptionalRequire)\.js$/,
+  /[\\/]src[\\/]Utils[\\/](DesktopPath|MapFor|OptionalRequire)\.js$/,
   /[\\/]src[\\/]GameDashboard[\\/]PublicGameProperties\.js$/,
   /[\\/]src[\\/]EventsSheet[\\/]EventsTree[\\/]TextRenderer[\\/]EventScriptTestHelpers\.js$/,
 ];

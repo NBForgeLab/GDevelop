@@ -1,4 +1,5 @@
 // @flow
+import { readPublicCatalog } from '../DesktopService';
 import axios from 'axios';
 import {
   GDevelopAssetApi,
@@ -416,11 +417,15 @@ export const listAllPublicAssets = async ({
 }: {|
   environment: Environment,
 |}): Promise<AllPublicAssets> => {
-  const response = await client.get(`/asset`, {
-    params: {
-      environment,
-    },
-  });
+  const data = await readPublicCatalog(
+    environment === 'live' ? 'assets' : 'stagingAssets',
+    async () =>
+      (await client.get(`/asset`, {
+        params: {
+          environment,
+        },
+      })).data
+  );
 
   const {
     assetShortHeadersUrl,
@@ -428,7 +433,7 @@ export const listAllPublicAssets = async ({
     filtersUrl,
     assetPacksUrl,
     assetCdn,
-  } = response.data;
+  } = data;
 
   // Overwrite the CDN from where public assets are served.
   if (assetCdn.baseUrl) {
@@ -545,12 +550,16 @@ export const listAllResources = async ({
 }: {|
   environment: Environment,
 |}): Promise<AllResources> => {
-  const response = await client.get(`/resource`, {
-    params: {
-      environment,
-    },
-  });
-  const { resourcesUrl, resourcesV2Url, filtersUrl } = response.data;
+  const data = await readPublicCatalog(
+    environment === 'live' ? 'resources' : 'stagingResources',
+    async () =>
+      (await client.get(`/resource`, {
+        params: {
+          environment,
+        },
+      })).data
+  );
+  const { resourcesUrl, resourcesV2Url, filtersUrl } = data;
   if (!resourcesUrl || !filtersUrl) {
     throw new Error('Unexpected response from the resource endpoint.');
   }
@@ -575,13 +584,15 @@ export const listAllAuthors = ({
 }: {|
   environment: Environment,
 |}): Promise<Array<Author>> => {
-  return client
-    .get(`/author`, {
-      params: {
-        environment,
-      },
-    })
-    .then(response => response.data)
+  return readPublicCatalog(
+    environment === 'live' ? 'authors' : 'stagingAuthors',
+    async () =>
+      (await client.get(`/author`, {
+        params: {
+          environment,
+        },
+      })).data
+  )
     .then(({ authorsUrl }) => {
       if (!authorsUrl)
         throw new Error('Unexpected response from author endpoint.');
@@ -600,13 +611,15 @@ export const listAllLicenses = ({
 }: {|
   environment: Environment,
 |}): Promise<Array<License>> => {
-  return client
-    .get(`/license`, {
-      params: {
-        environment,
-      },
-    })
-    .then(response => response.data)
+  return readPublicCatalog(
+    environment === 'live' ? 'licenses' : 'stagingLicenses',
+    async () =>
+      (await client.get(`/license`, {
+        params: {
+          environment,
+        },
+      })).data
+  )
     .then(({ licensesUrl }) => {
       if (!licensesUrl)
         throw new Error('Unexpected response from license endpoint.');
@@ -876,7 +889,10 @@ export const listCourses = async (
     });
   }
   return ensureIsArray({
-    data: (await client.get(`/course`)).data,
+    data: await readPublicCatalog(
+      'courses',
+      async () => (await client.get('/course')).data
+    ),
     endpointName: '/course of Asset API',
   });
 };

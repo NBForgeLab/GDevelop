@@ -1,4 +1,5 @@
 // @flow
+import { readPublicCatalog } from '../DesktopService';
 import axios from 'axios';
 import { type I18n as I18nType } from '@lingui/core';
 import { GDevelopUsageApi } from './ApiConfigs';
@@ -371,10 +372,15 @@ export const listSubscriptionPlans = async (options: {|
       endpointName: '/subscription-plan of Usage API',
     });
   }
+  const data = await readPublicCatalog(
+    options.includeLegacy ? 'subscriptionPlansWithLegacy' : 'subscriptionPlans',
+    async () =>
+      (await apiClient.get('/subscription-plan', {
+        params: { includeLegacy: options.includeLegacy ? 'true' : 'false' },
+      })).data
+  );
   return ensureIsArray({
-    data: (await apiClient.get('/subscription-plan', {
-      params: { includeLegacy: options.includeLegacy ? 'true' : 'false' },
-    })).data,
+    data,
     endpointName: '/subscription-plan of Usage API',
   });
 };
@@ -426,6 +432,23 @@ export const listSubscriptionPlanPricingSystems = async (options: {|
     });
     return ensureIsArray({
       data: response.data,
+      endpointName: '/subscription-plan-pricing-system of Usage API',
+    });
+  }
+
+  if (
+    !options.subscriptionPlanIds ||
+    options.subscriptionPlanIds.length === 0
+  ) {
+    const data = await readPublicCatalog(
+      options.includeLegacy ? 'pricingSystemsWithLegacy' : 'pricingSystems',
+      async () =>
+        (await apiClient.get('/subscription-plan-pricing-system', {
+          params,
+        })).data
+    );
+    return ensureIsArray({
+      data,
       endpointName: '/subscription-plan-pricing-system of Usage API',
     });
   }

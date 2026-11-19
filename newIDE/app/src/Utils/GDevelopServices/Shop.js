@@ -1,4 +1,5 @@
 // @flow
+import { readPublicCatalog } from '../DesktopService';
 import * as React from 'react';
 import axios from 'axios';
 import path from 'path-browserify';
@@ -276,9 +277,12 @@ export const getArchivedPrivateGameTemplateListingData = ({
 export const listListedPrivateAssetPacks = async (): Promise<
   Array<PrivateAssetPackListingData>
 > => {
-  const response = await client.get('/asset-pack');
+  const data = await readPublicCatalog(
+    'assetPacks',
+    async () => (await client.get('/asset-pack')).data
+  );
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/asset-pack of Shop API',
   });
 };
@@ -286,9 +290,12 @@ export const listListedPrivateAssetPacks = async (): Promise<
 export const listListedPrivateGameTemplates = async (): Promise<
   Array<PrivateGameTemplateListingData>
 > => {
-  const response = await client.get('/game-template');
+  const data = await readPublicCatalog(
+    'templates',
+    async () => (await client.get('/game-template')).data
+  );
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/game-template of Shop API',
   });
 };
@@ -296,9 +303,12 @@ export const listListedPrivateGameTemplates = async (): Promise<
 export const listListedCreditsPackages = async (): Promise<
   Array<CreditsPackageListingData>
 > => {
-  const response = await client.get('/credits-package');
+  const data = await readPublicCatalog(
+    'credits',
+    async () => (await client.get('/credits-package')).data
+  );
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/credits-package of Shop API',
   });
 };
@@ -306,9 +316,12 @@ export const listListedCreditsPackages = async (): Promise<
 export const listListedCourseChapters = async (): Promise<
   Array<CourseChapterListingData>
 > => {
-  const response = await client.get('/course-chapter');
+  const data = await readPublicCatalog(
+    'listedChapters',
+    async () => (await client.get('/course-chapter')).data
+  );
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/course-chapter of Shop API',
   });
 };
@@ -316,9 +329,12 @@ export const listListedCourseChapters = async (): Promise<
 export const listListedCourses = async (): Promise<
   Array<CourseListingData>
 > => {
-  const response = await client.get('/course');
+  const data = await readPublicCatalog(
+    'listedCourses',
+    async () => (await client.get('/course')).data
+  );
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/course of Shop API',
   });
 };
@@ -326,9 +342,12 @@ export const listListedCourses = async (): Promise<
 export const listListedBundles = async (): Promise<
   Array<BundleListingData>
 > => {
-  const response = await client.get('/bundle');
+  const data = await readPublicCatalog(
+    'bundles',
+    async () => (await client.get('/bundle')).data
+  );
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/bundle of Shop API',
   });
 };
@@ -667,13 +686,17 @@ export const listProductLicenses = async ({
 }: {|
   productType: 'asset-pack' | 'game-template',
 |}): Promise<ProductLicense[]> => {
-  const response = await client.get('/product-license', {
-    params: {
-      productType,
-    },
-  });
+  const data = await readPublicCatalog(
+    productType === 'asset-pack' ? 'assetLicenses' : 'templateLicenses',
+    async () =>
+      (await client.get('/product-license', {
+        params: {
+          productType,
+        },
+      })).data
+  );
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/product-license of Shop API',
   });
 };
@@ -853,9 +876,12 @@ export type GivenAwayProduct = {|
 export const listGivenAwayProducts = async (): Promise<
   Array<GivenAwayProduct>
 > => {
-  const response = await client.get('/given-away-product');
+  const data = await readPublicCatalog(
+    'givenAwayProducts',
+    async () => (await client.get('/given-away-product')).data
+  );
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/given-away-product of Shop API',
   });
 };

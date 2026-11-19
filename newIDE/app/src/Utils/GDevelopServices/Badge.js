@@ -1,4 +1,5 @@
 // @flow
+import { readPublicCatalog } from '../DesktopService';
 import axios from 'axios';
 import { GDevelopUserApi } from './ApiConfigs';
 import { type Profile } from './Authentication';
@@ -135,11 +136,15 @@ export const addCreateBadgePreHookIfNotClaimed = <
 };
 
 export const getAchievements = async (): Promise<Array<Achievement>> => {
-  // $FlowFixMe[underconstrained-implicit-instantiation]
-  const response = await axios.get(`${GDevelopUserApi.baseUrl}/achievement`);
+  const data = await readPublicCatalog(
+    'achievements',
+    async () =>
+      (await axios.get<Achievement[]>(`${GDevelopUserApi.baseUrl}/achievement`))
+        .data
+  );
 
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/achievement of User API',
   });
 };

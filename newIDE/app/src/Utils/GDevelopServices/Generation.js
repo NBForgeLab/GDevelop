@@ -1,4 +1,5 @@
 // @flow
+import { readPublicCatalog } from '../DesktopService';
 import { type ToolScope } from '../../EditorFunctions/Scope';
 import axios from 'axios';
 import { GDevelopAiCdn, GDevelopGenerationApi } from './ApiConfigs';
@@ -1343,12 +1344,15 @@ export const fetchAiSettings = async ({
 }: {|
   environment: Environment,
 |}): Promise<AiSettings> => {
-  // $FlowFixMe[underconstrained-implicit-instantiation]
-  const response = await axios.get(
-    `${GDevelopAiCdn.baseUrl[environment]}/ai-settings-v2.json`
+  const data = await readPublicCatalog(
+    environment === 'live' ? 'aiSettings' : 'stagingAiSettings',
+    async () =>
+      (await axios.get<AiSettings>(
+        `${GDevelopAiCdn.baseUrl[environment]}/ai-settings-v2.json`
+      )).data
   );
   return ensureObjectHasProperty({
-    data: response.data,
+    data,
     propertyName: 'aiRequest',
     endpointName: '/ai-settings-v2.json of Generation API',
   });

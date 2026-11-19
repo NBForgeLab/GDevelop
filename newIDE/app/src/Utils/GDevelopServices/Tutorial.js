@@ -1,4 +1,5 @@
 // @flow
+import { readPublicCatalog } from '../DesktopService';
 import axios from 'axios';
 import { GDevelopAssetApi } from './ApiConfigs';
 import { type Capabilities } from './Usage';
@@ -69,16 +70,13 @@ export const client: Axios = axios.create({
 });
 
 export const listAllTutorials = (): Promise<Array<Tutorial>> => {
-  return client
-    .get(`/tutorial`, {
-      params: { include: 'upcoming' },
-    })
-    .then(response =>
-      ensureIsArray({
-        data: response.data,
-        endpointName: '/tutorial of Asset API',
-      })
-    );
+  return readPublicCatalog(
+    'tutorials',
+    async () =>
+      (await client.get('/tutorial', { params: { include: 'upcoming' } })).data
+  ).then(data =>
+    ensureIsArray({ data, endpointName: '/tutorial of Asset API' })
+  );
 };
 
 export const getObjectTutorialIds = (type: string): Array<string> => {

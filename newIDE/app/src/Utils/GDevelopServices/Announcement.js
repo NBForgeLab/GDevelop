@@ -1,4 +1,5 @@
 // @flow
+import { readPublicCatalog } from '../DesktopService';
 import axios from 'axios';
 import { GDevelopReleaseApi } from './ApiConfigs';
 import { type MessageByLocale } from '../i18n/MessageByLocale';
@@ -32,21 +33,28 @@ export interface Promotion {
 }
 
 export const listAllAnnouncements = async (): Promise<Array<Announcement>> => {
-  // $FlowFixMe[underconstrained-implicit-instantiation]
-  const response = await axios.get(
-    `${GDevelopReleaseApi.baseUrl}/announcement`
+  const data = await readPublicCatalog(
+    'announcements',
+    async () =>
+      (await axios.get<Announcement[]>(
+        `${GDevelopReleaseApi.baseUrl}/announcement`
+      )).data
   );
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/announcement of Release API',
   });
 };
 
 export const listAllPromotions = async (): Promise<Array<Promotion>> => {
-  // $FlowFixMe[underconstrained-implicit-instantiation]
-  const response = await axios.get(`${GDevelopReleaseApi.baseUrl}/promotion`);
+  const data = await readPublicCatalog(
+    'promotions',
+    async () =>
+      (await axios.get<Promotion[]>(`${GDevelopReleaseApi.baseUrl}/promotion`))
+        .data
+  );
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/promotion of Release API',
   });
 };

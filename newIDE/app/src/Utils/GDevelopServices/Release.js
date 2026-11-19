@@ -1,4 +1,5 @@
 // @flow
+import { readPublicCatalog } from '../DesktopService';
 import axios from 'axios';
 import { GDevelopReleaseApi } from './ApiConfigs';
 import { ensureIsArray } from '../DataValidator';
@@ -10,14 +11,20 @@ export type Release = {
 };
 
 export const getReleases = async (): Promise<Array<Release>> => {
-  // $FlowFixMe[underconstrained-implicit-instantiation]
-  const response = await axios.get(`${GDevelopReleaseApi.baseUrl}/release`, {
-    params: {
-      last: 4,
-    },
-  });
+  const data = await readPublicCatalog(
+    'releases',
+    async () =>
+      (await axios.get<Array<Release>>(
+        `${GDevelopReleaseApi.baseUrl}/release`,
+        {
+          params: {
+            last: 4,
+          },
+        }
+      )).data
+  );
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/release of Release API',
   });
 };

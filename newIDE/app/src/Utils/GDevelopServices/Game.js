@@ -1,4 +1,5 @@
 // @flow
+import { readPublicCatalog } from '../DesktopService';
 import axios from 'axios';
 import capitalize from 'lodash/capitalize';
 import { type I18n as I18nType } from '@lingui/core';
@@ -268,8 +269,11 @@ export const getAclsFromUserIds = (
   }));
 
 export const listAllShowcasedGames = async (): Promise<AllShowcasedGames> => {
-  const response = await client.get('/showcased-game');
-  const { gamesShowcaseUrl, filtersUrl } = response.data;
+  const data = await readPublicCatalog(
+    'showcasedGames',
+    async () => (await client.get('/showcased-game')).data
+  );
+  const { gamesShowcaseUrl, filtersUrl } = data;
   if (!gamesShowcaseUrl || !filtersUrl) {
     throw new Error('Unexpected response from the resource endpoint.');
   }
@@ -535,9 +539,12 @@ export const getPublicGame = async (gameId: string): Promise<PublicGame> => {
 };
 
 export const getGameCategories = async (): Promise<GameCategory[]> => {
-  const response = await client.get('/game-category');
+  const data = await readPublicCatalog(
+    'gameCategories',
+    async () => (await client.get('/game-category')).data
+  );
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/game-category of Game API',
   });
 };
@@ -589,9 +596,12 @@ export const listGameFeaturings = async (
 };
 
 export const listMarketingPlans = async (): Promise<MarketingPlan[]> => {
-  const response = await client.get('/marketing-plan');
+  const data = await readPublicCatalog(
+    'marketingPlans',
+    async () => (await client.get('/marketing-plan')).data
+  );
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/marketing-plan of Game API',
   });
 };
@@ -621,12 +631,16 @@ export const getRecommendedMarketingPlan = async (
 export const getGameCommentQualityRatingsLeaderboards = async (): Promise<
   Array<GameLeaderboard>
 > => {
-  const response = await client.get(
-    '/game-comment-quality-ratings-leaderboard?leaderboardRegionName=global'
+  const data = await readPublicCatalog(
+    'gameCommentQualityRatingsLeaderboards',
+    async () =>
+      (await client.get(
+        '/game-comment-quality-ratings-leaderboard?leaderboardRegionName=global'
+      )).data
   );
 
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/game-comment-quality-ratings-leaderboard of Game API',
   });
 };

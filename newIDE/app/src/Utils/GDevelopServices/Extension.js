@@ -1,4 +1,5 @@
 // @flow
+import { readPublicCatalog } from '../DesktopService';
 import axios from 'axios';
 import { GDevelopAssetApi } from './ApiConfigs';
 import { type UserPublicProfile } from './User';
@@ -216,14 +217,18 @@ export const client: Axios = axios.create({
 export const cdnClient: Axios = axios.create();
 
 export const getExtensionsRegistry = async (): Promise<ExtensionsRegistry> => {
-  const response = await client.get(`/extension`, {
-    params: {
-      // Could be changed according to the editor environment, but keep
-      // reading from the "live" data for now.
-      environment: 'live',
-    },
-  });
-  const { databaseUrl } = response.data;
+  const data = await readPublicCatalog(
+    'extension',
+    async () =>
+      (await client.get(`/extension`, {
+        params: {
+          // Could be changed according to the editor environment, but keep
+          // reading from the "live" data for now.
+          environment: 'live',
+        },
+      })).data
+  );
+  const { databaseUrl } = data;
 
   const extensionsRegistry: ExtensionsRegistry = await retryIfFailed(
     { times: 2 },
@@ -254,14 +259,18 @@ export const getExtensionsRegistry = async (): Promise<ExtensionsRegistry> => {
 };
 
 export const getBehaviorsRegistry = async (): Promise<BehaviorsRegistry> => {
-  const response = await client.get(`/behavior`, {
-    params: {
-      // Could be changed according to the editor environment, but keep
-      // reading from the "live" data for now.
-      environment: 'live',
-    },
-  });
-  const { databaseUrl } = response.data;
+  const data = await readPublicCatalog(
+    'behavior',
+    async () =>
+      (await client.get(`/behavior`, {
+        params: {
+          // Could be changed according to the editor environment, but keep
+          // reading from the "live" data for now.
+          environment: 'live',
+        },
+      })).data
+  );
+  const { databaseUrl } = data;
 
   const behaviorsRegistry: BehaviorsRegistry = await retryIfFailed(
     { times: 2 },
@@ -293,14 +302,18 @@ const adaptBehaviorHeader = (
 };
 
 export const getObjectsRegistry = async (): Promise<ObjectsRegistry> => {
-  const response = await client.get(`/object`, {
-    params: {
-      // Could be changed according to the editor environment, but keep
-      // reading from the "live" data for now.
-      environment: 'live',
-    },
-  });
-  const { databaseUrl } = response.data;
+  const data = await readPublicCatalog(
+    'object',
+    async () =>
+      (await client.get(`/object`, {
+        params: {
+          // Could be changed according to the editor environment, but keep
+          // reading from the "live" data for now.
+          environment: 'live',
+        },
+      })).data
+  );
+  const { databaseUrl } = data;
 
   const objectsRegistry: ObjectsRegistry = await retryIfFailed(
     { times: 2 },

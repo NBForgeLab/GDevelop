@@ -1,4 +1,5 @@
 // @flow
+import { readPublicCatalog } from '../DesktopService';
 import axios from 'axios';
 import { GDevelopAssetApi } from './ApiConfigs';
 import { type Filters } from './Filters';
@@ -34,15 +35,16 @@ export type AllExamples = {|
 |};
 
 export const listAllExamples = async (): Promise<AllExamples> => {
-  // $FlowFixMe[underconstrained-implicit-instantiation]
-  const response = await axios.get(`${GDevelopAssetApi.baseUrl}/example`, {
-    params: {
-      // Could be changed according to the editor environment, but keep
-      // reading from the "live" data for now.
-      environment: 'live',
-    },
-  });
-  const { exampleShortHeadersUrl, filtersUrl } = response.data;
+  const { exampleShortHeadersUrl, filtersUrl } = await readPublicCatalog(
+    'examples',
+    async () =>
+      (await axios.get<{|
+        exampleShortHeadersUrl: string,
+        filtersUrl: string,
+      |}>(`${GDevelopAssetApi.baseUrl}/example`, {
+        params: { environment: 'live' },
+      })).data
+  );
 
   const [exampleShortHeaders, filters] = await Promise.all([
     retryIfFailed(

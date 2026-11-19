@@ -1,4 +1,5 @@
 // @flow
+import { readPublicCatalog } from '../DesktopService';
 import * as React from 'react';
 import { Trans, t } from '@lingui/macro';
 import axios from 'axios';
@@ -417,9 +418,12 @@ export const listRecommendations = async (
 export const listDefaultRecommendations = async (): Promise<
   Array<Recommendation>
 > => {
-  const response = await client.get(`/recommendation`);
+  const data = await readPublicCatalog(
+    'recommendations',
+    async () => (await client.get(`/recommendation`)).data
+  );
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/recommendation of User API',
   });
 };
@@ -684,12 +688,16 @@ export const syncForumGroup = async (
 export const getUserCommentQualityRatingsLeaderboards = async (): Promise<
   Array<UserLeaderboard>
 > => {
-  const response = await client.get(
-    '/user-comment-quality-ratings-leaderboard?leaderboardRegionName=global'
+  const data = await readPublicCatalog(
+    'userCommentQualityRatingsLeaderboards',
+    async () =>
+      (await client.get(
+        '/user-comment-quality-ratings-leaderboard?leaderboardRegionName=global'
+      )).data
   );
 
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/user-comment-quality-ratings-leaderboard of User API',
   });
 };

@@ -1,4 +1,5 @@
 // @flow
+import { readPublicCatalog } from '../DesktopService';
 
 import axios from 'axios';
 import { GDevelopAssetApi } from './ApiConfigs';
@@ -161,12 +162,15 @@ export type InAppTutorial = {|
 export const fetchInAppTutorialShortHeaders = async (): Promise<
   Array<InAppTutorialShortHeader>
 > => {
-  // $FlowFixMe[underconstrained-implicit-instantiation]
-  const response = await axios.get(
-    `${GDevelopAssetApi.baseUrl}/in-app-tutorial-short-header`
+  const data = await readPublicCatalog(
+    'inAppTutorials',
+    async () =>
+      (await axios.get<InAppTutorialShortHeader[]>(
+        `${GDevelopAssetApi.baseUrl}/in-app-tutorial-short-header`
+      )).data
   );
   return ensureIsArray({
-    data: response.data,
+    data,
     endpointName: '/in-app-tutorial-short-header of Asset API',
   });
 };
