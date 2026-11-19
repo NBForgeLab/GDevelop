@@ -25,6 +25,22 @@ type Props = {|
 
 const changesBeforeShowingWarning = 1;
 
+function takeSnapshot(object: gdSerializable): gdSerializerElement {
+  const element = new gd.SerializerElement();
+  try {
+    object.serializeTo(element);
+    return element;
+  } catch (error) {
+    element.delete();
+    throw error;
+  }
+}
+
+function releaseSnapshots(elements: Map<string, gdSerializerElement>) {
+  for (const element of elements.values()) element.delete();
+  elements.clear();
+}
+
 /**
  * Custom hook serializing the object and allowing to restore back
  * the object to this serialized state later, by calling the function
@@ -62,8 +78,7 @@ export const useSerializableObjectCancelableEditor = ({
 
       if (ensurePersistentUuids) serializableObject.ensurePersistentUuids();
 
-      serializedElementRef.current = new gd.SerializerElement();
-      serializableObject.serializeTo(serializedElementRef.current);
+      serializedElementRef.current = takeSnapshot(serializableObject);
 
       return () => {
         if (serializedElementRef.current) {
@@ -119,7 +134,12 @@ export const useSerializableObjectCancelableEditor = ({
       } else {
         continueCanceling = true;
       }
-      if (!continueCanceling) return;
+      if (
+        !continueCanceling ||
+        serializedElementRef.current !== serializedElement
+      )
+        return;
+      if (!exceptionallyGuardAgainstDeadObject(serializableObject)) return;
 
       if (!useProjectToUnserialize) {
         serializableObject.unserializeFrom(serializedElement);
@@ -182,51 +202,40 @@ export const useSerializableObjectsCancelableEditor = ({
   notifyOfChange: () => void,
   onCancelChanges: () => Promise<void>,
 } => {
-  const serializedElementsRef = React.useRef<Map<string, gdSerializerElement>>(
-    new Map()
-  );
+  const serializedElementsRef = React.useRef<Map<
+    string,
+    gdSerializerElement
+  > | null>(null);
   const numberOfChangesRef = React.useRef(0);
   const { showConfirmation } = useAlertDialog();
   const preferences = React.useContext(PreferencesContext);
   const backdropClickBehavior = preferences.values.backdropClickBehavior;
 
-  const serializedElements = serializedElementsRef.current;
-  if (serializedElements.size === 0) {
-    for (const [id, serializableObject] of serializableObjects) {
-      // Serialize the content of the object, to be used in case the user
-      // want to cancel their changes.
-      {
-        const serializedElement = serializedElements.get(id);
-        if (serializedElement) {
-          serializedElement.delete();
-          serializedElements.delete(id);
-        }
+  if (
+    !serializedElementsRef.current ||
+    (!serializedElementsRef.current.size && serializableObjects.size)
+  ) {
+    const elements = new Map<string, gdSerializerElement>();
+    try {
+      for (const [id, object] of serializableObjects) {
+        if (!exceptionallyGuardAgainstDeadObject(object)) continue;
+        if (ensurePersistentUuids) object.ensurePersistentUuids();
+        elements.set(id, takeSnapshot(object));
       }
-
-      // Guard against the C++ objects having been destroyed before this
-      // effect fires (in case the parent points to a destroyed object).
-      if (!exceptionallyGuardAgainstDeadObject(serializableObject)) continue;
-
-      if (ensurePersistentUuids) {
-        serializableObject.ensurePersistentUuids();
-      }
-      const serializedElement = new gd.SerializerElement();
-      serializableObject.serializeTo(serializedElement);
-      serializedElements.set(id, serializedElement);
+    } catch (error) {
+      releaseSnapshots(elements);
+      throw error;
     }
+    serializedElementsRef.current = elements;
   }
 
-  React.useEffect(
-    () => {
-      return () => {
-        for (const [id, serializedElement] of serializedElements) {
-          serializedElement.delete();
-          serializedElements.delete(id);
-        }
-      };
-    },
-    [serializedElements]
-  );
+  React.useEffect(() => {
+    return () => {
+      const elements = serializedElementsRef.current;
+      serializedElementsRef.current = null;
+      if (elements) releaseSnapshots(elements);
+    };
+  }, []);
 
   const getOriginalContentSerializedElements = React.useCallback(() => {
     if (!serializedElementsRef.current) {
@@ -271,10 +280,19 @@ export const useSerializableObjectsCancelableEditor = ({
       } else {
         continueCanceling = true;
       }
-      if (!continueCanceling) return;
+      if (
+        !continueCanceling ||
+        serializedElementsRef.current !== serializedElements
+      )
+        return;
 
       for (const [id, serializableObject] of serializableObjects) {
         const serializedElement = serializedElements.get(id);
+        if (
+          !serializedElement ||
+          !exceptionallyGuardAgainstDeadObject(serializableObject)
+        )
+          continue;
 
         if (useProjectToUnserialize) {
           serializableObject.unserializeFrom(
