@@ -56,16 +56,25 @@ export const UnsavedChangesContextProvider = (
     []
   );
 
+  const value = React.useMemo(
+    () => ({
+      hasUnsavedChanges,
+      triggerUnsavedChanges,
+      sealUnsavedChanges,
+      getChangesCount,
+      getTimeOfFirstChangeSinceLastSave,
+    }),
+    [
+      hasUnsavedChanges,
+      triggerUnsavedChanges,
+      sealUnsavedChanges,
+      getChangesCount,
+      getTimeOfFirstChangeSinceLastSave,
+    ]
+  );
+
   return (
-    <UnsavedChangesContext.Provider
-      value={{
-        hasUnsavedChanges,
-        triggerUnsavedChanges,
-        sealUnsavedChanges,
-        getChangesCount,
-        getTimeOfFirstChangeSinceLastSave,
-      }}
-    >
+    <UnsavedChangesContext.Provider value={value}>
       {props.children}
     </UnsavedChangesContext.Provider>
   );

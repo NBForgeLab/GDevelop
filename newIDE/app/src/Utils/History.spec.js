@@ -4,6 +4,7 @@ import {
   canRedo,
   canUndo,
   saveToHistory,
+  saveSnapshotToHistory,
   undo,
   redo,
 } from './History';
@@ -11,6 +12,23 @@ import { makeTestProject } from '../fixtures/TestProject';
 const gd: libGDevelop = global.gd;
 
 describe('History', () => {
+  it('retains both undo steps when scene edits are applied in one batch', () => {
+    const initial = {
+      currentValue: { x: 0 },
+      previousActions: [],
+      futureActions: [],
+      maxSize: 5,
+    };
+    const updates = [10, 20].map(x => history =>
+      saveSnapshotToHistory(history, { x }, 'EDIT')
+    );
+    const final = updates.reduce((history, update) => update(history), initial);
+    expect(
+      final.previousActions.map(action => action.valueBeforeChange.x)
+    ).toEqual([0, 10]);
+    expect(final.currentValue.x).toBe(20);
+    expect(initial.previousActions).toEqual([]);
+  });
   it('can save changes for a simple serializable object from libGD.js', () => {
     const gdVariable = new gd.Variable();
 

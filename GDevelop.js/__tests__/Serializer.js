@@ -116,6 +116,25 @@ describe('libGD.js object serialization', function () {
   // TODO: test failures
 
   describe('gd.Serializer.fromJSObject and gd.Serializer.toJSObject', function () {
+    it('releases the root element when reading a child throws', () => {
+      const addChild = jest.spyOn(gd.SerializerElement.prototype, 'addChild');
+      const input = {
+        get value() {
+          throw new Error('Cannot read value');
+        },
+      };
+      try {
+        expect(() => gd.Serializer.fromJSObject(input)).toThrow(
+          'Cannot read value'
+        );
+        expect(addChild.mock.instances[0].ptr).toBe(0);
+      } finally {
+        const root = addChild.mock.instances[0];
+        addChild.mockRestore();
+        if (root && root.ptr) root.delete();
+      }
+    });
+
     const checkJsonParseAndStringify = (json) => {
       const object = JSON.parse(json);
       const element = gd.Serializer.fromJSObject(object);

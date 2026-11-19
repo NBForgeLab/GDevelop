@@ -97,6 +97,15 @@ describe('update-bindings.js (patchGlueCppContent & patchGlueCppFile)', () => {
   });
 
   describe('patchGlueCppContent happy path', () => {
+    it('patches string getters when the generator varies declaration spacing', () => {
+      const raw = createValidGlueFixture().replace(
+        'const char* EMSCRIPTEN_KEEPALIVE emscripten_bind_Resource',
+        '  const char *  EMSCRIPTEN_KEEPALIVE emscripten_bind_Resource'
+      );
+      const { patchedContent } = patchGlueCppContent(raw);
+      expect(patchedContent).toContain('return self->GetName().c_str();');
+    });
+
     it('patches all WebIDL C++ glue patterns and erases targeted classes and functions', () => {
       const raw = createValidGlueFixture();
       const { patchedContent, stats } = patchGlueCppContent(raw);

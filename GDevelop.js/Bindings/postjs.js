@@ -216,9 +216,13 @@ var adaptNamingConventions = function (gd) {
 
   gd.Serializer.fromJSObject = function (object) {
     var element = new gd.SerializerElement();
-    elementFromJSObject(object, element);
-
-    return element;
+    try {
+      elementFromJSObject(object, element);
+      return element;
+    } catch (error) {
+      element.delete();
+      throw error;
+    }
   };
 
   const valueToJSObject = function (serializerValue) {

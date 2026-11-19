@@ -43,6 +43,7 @@ import {
   canRedo,
   getHistoryInitialState,
   saveToHistory,
+  saveSnapshotToHistory,
 } from '../Utils/History';
 import PixiResourcesLoader from '../ObjectsRendering/PixiResourcesLoader';
 import {
@@ -541,7 +542,7 @@ export default class SceneEditor extends React.Component<Props, State> {
       modifiedInstances.push(instance);
     });
     if (modifiedInstances.length > 0) {
-      this._onInstancesMoved(modifiedInstances);
+      this._onInstancesTransformed(modifiedInstances);
     }
 
     const newlySelectedInstances = changes.selectedInstances
@@ -1507,50 +1508,13 @@ export default class SceneEditor extends React.Component<Props, State> {
     });
   };
 
-  _onInstancesMovedAndSendToEditor3D = (
-    instances: Array<gdInitialInstance>
-  ) => {
-    this._onInstancesMoved(instances);
-    this._sendUpdatedInstances(instances);
-  };
-
-  _onInstancesMoved = (instances: Array<gdInitialInstance>) => {
+  _onInstancesTransformed = (instances: Array<gdInitialInstance>) => {
+    // Capture native data now, before another edit can mutate it.
+    const snapshot = serializeToJSObject(this.props.initialInstances);
     this.setState(
-      {
-        history: saveToHistory(
-          this.state.history,
-          this.props.initialInstances,
-          'EDIT'
-        ),
-      },
-      () => this.forceUpdatePropertiesEditor()
-    );
-    this._sendUpdatedInstances(instances);
-  };
-
-  _onInstancesResized = (instances: Array<gdInitialInstance>) => {
-    this.setState(
-      {
-        history: saveToHistory(
-          this.state.history,
-          this.props.initialInstances,
-          'EDIT'
-        ),
-      },
-      () => this.forceUpdatePropertiesEditor()
-    );
-    this._sendUpdatedInstances(instances);
-  };
-
-  _onInstancesRotated = (instances: Array<gdInitialInstance>) => {
-    this.setState(
-      {
-        history: saveToHistory(
-          this.state.history,
-          this.props.initialInstances,
-          'EDIT'
-        ),
-      },
+      ({ history }) => ({
+        history: saveSnapshotToHistory(history, snapshot, 'EDIT'),
+      }),
       () => this.forceUpdatePropertiesEditor()
     );
     this._sendUpdatedInstances(instances);
@@ -3379,9 +3343,9 @@ export default class SceneEditor extends React.Component<Props, State> {
                     onInstancesAdded={this._onInstancesAddedAndSendToEditor3D}
                     onInstancesSelected={this._onInstancesSelected}
                     onInstanceDoubleClicked={this._onInstanceDoubleClicked}
-                    onInstancesMoved={this._onInstancesMovedAndSendToEditor3D}
-                    onInstancesResized={this._onInstancesResized}
-                    onInstancesRotated={this._onInstancesRotated}
+                    onInstancesMoved={this._onInstancesTransformed}
+                    onInstancesResized={this._onInstancesTransformed}
+                    onInstancesRotated={this._onInstancesTransformed}
                     isInstanceOf3DObject={this.isInstanceOf3DObject}
                     onSelectAllInstancesOfObjectInLayout={
                       this.onSelectAllInstancesOfObjectInLayout

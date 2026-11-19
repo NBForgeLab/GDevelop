@@ -42,6 +42,32 @@ function withSerializationOptions<T>(
   }
 }
 
+// Only pass wrappers owned exclusively by this synchronous operation.
+function withTemporaryResource<Resource: { delete: () => void, ... }, Result>(
+  resource: Resource,
+  callback: Resource => Result
+): Result {
+  try {
+    return callback(resource);
+  } finally {
+    resource.delete();
+  }
+}
+
+function parseSerializedElement(element: gdSerializerElement): any {
+  // JSON.parse + toJSON is 30% faster than gd.Serializer.toJSObject.
+  const json = gd.Serializer.toJSON(element);
+  try {
+    return JSON.parse(json);
+  } catch (error) {
+    console.error(
+      'Invalid JSON when serializing to JS object. toJSON should always return a valid JSON string.',
+      { json, error }
+    );
+    throw error;
+  }
+}
+
 /**
  * Tool function to save a serializable object to a JS object.
  * Most gd.* objects are "serializable", meaning they have a serializeTo
@@ -56,53 +82,24 @@ export function serializeToJSObject(
   methodName: string = 'serializeTo',
   options: ?SerializationOptions = undefined
 ): any {
-  return withSerializationOptions(options, () => {
-    const serializedElement = new gd.SerializerElement();
-    serializable[methodName](serializedElement);
-
-    // JSON.parse + toJSON is 30% faster than gd.Serializer.toJSObject.
-    const json = gd.Serializer.toJSON(serializedElement);
-
-    try {
-      const object = JSON.parse(json);
-
-      serializedElement.delete();
-      return object;
-    } catch (error) {
-      serializedElement.delete();
-      console.error(
-        'Invalid JSON when serializing to JS object. toJSON should always return a valid JSON string.',
-        { json, error }
-      );
-      throw error;
-    }
-  });
+  return withSerializationOptions(options, () =>
+    withTemporaryResource(new gd.SerializerElement(), element => {
+      serializable[methodName](element);
+      return parseSerializedElement(element);
+    })
+  );
 }
 
 export function serializeObjectWithCleanDefaultBehaviorFlags(
   object: gdObject
 ): any {
-  const serializedElement = new gd.SerializerElement();
-  gd.BehaviorDefaultFlagClearer.serializeObjectWithCleanDefaultBehaviorFlags(
-    object,
-    serializedElement
-  );
-
-  // JSON.parse + toJSON is 30% faster than gd.Serializer.toJSObject.
-  const json = gd.Serializer.toJSON(serializedElement);
-  try {
-    const object = JSON.parse(json);
-
-    serializedElement.delete();
-    return object;
-  } catch (error) {
-    serializedElement.delete();
-    console.error(
-      'Invalid JSON when serializing to JS object. toJSON should always return a valid JSON string.',
-      { json, error }
+  return withTemporaryResource(new gd.SerializerElement(), element => {
+    gd.BehaviorDefaultFlagClearer.serializeObjectWithCleanDefaultBehaviorFlags(
+      object,
+      element
     );
-    throw error;
-  }
+    return parseSerializedElement(element);
+  });
 }
 
 export function serializeToObjectAsset(
@@ -112,24 +109,20 @@ export function serializeToObjectAsset(
   usedResourceNames: Array<string>,
   extensionDependencyCache: gdExtensionDependencyCache
 ): any {
-  const usedResourceNamesVector = new gd.VectorString();
-  const serializedElement = new gd.SerializerElement();
-  gd.ObjectAssetSerializer.serializeTo(
-    project,
-    object,
-    objectFullName,
-    serializedElement,
-    usedResourceNamesVector,
-    extensionDependencyCache
-  );
-  usedResourceNames.push(...usedResourceNamesVector.toJSArray());
-  usedResourceNamesVector.delete();
-
-  // JSON.parse + toJSON is 30% faster than gd.Serializer.toJSObject.
-  const objectAsset = JSON.parse(gd.Serializer.toJSON(serializedElement));
-  serializedElement.delete();
-
-  return objectAsset;
+  return withTemporaryResource(new gd.SerializerElement(), element => {
+    withTemporaryResource(new gd.VectorString(), resourceNames => {
+      gd.ObjectAssetSerializer.serializeTo(
+        project,
+        object,
+        objectFullName,
+        element,
+        resourceNames,
+        extensionDependencyCache
+      );
+      usedResourceNames.push(...resourceNames.toJSArray());
+    });
+    return JSON.parse(gd.Serializer.toJSON(element));
+  });
 }
 
 /**
@@ -146,16 +139,12 @@ export function serializeToJSON(
   methodName: string = 'serializeTo',
   options: ?SerializationOptions = undefined
 ): string {
-  return withSerializationOptions(options, () => {
-    const serializedElement = new gd.SerializerElement();
-    serializable[methodName](serializedElement);
-
-    // toJSON is 20% faster than gd.Serializer.toJSObject + JSON.stringify.
-    const json = gd.Serializer.toJSON(serializedElement);
-    serializedElement.delete();
-
-    return json;
-  });
+  return withSerializationOptions(options, () =>
+    withTemporaryResource(new gd.SerializerElement(), element => {
+      serializable[methodName](element);
+      return gd.Serializer.toJSON(element);
+    })
+  );
 }
 
 /**
@@ -180,22 +169,20 @@ export function unserializeFromJSObject(
   methodName: string = 'unserializeFrom',
   optionalProject: ?gdProject = undefined
 ) {
-  const serializedElement = gd.Serializer.fromJSObject(object);
-  if (!optionalProject) {
-    serializable[methodName](serializedElement);
-  } else {
-    // It's not uncommon for unserializeFrom methods of gd.* classes
-    // to require the project to be passed as first argument.
-    serializable[methodName](optionalProject, serializedElement);
-  }
-  serializedElement.delete();
+  withTemporaryResource(gd.Serializer.fromJSObject(object), element => {
+    if (optionalProject) {
+      serializable[methodName](optionalProject, element);
+    } else {
+      serializable[methodName](element);
+    }
+  });
 }
 
 export function unserializeResourceFromJSObject(
   resource: gdResource,
   object: Object
 ) {
-  const serializedElement = gd.Serializer.fromJSObject(object);
-  gd.ResourcesContainer.unserializeResourceFrom(resource, serializedElement);
-  serializedElement.delete();
+  withTemporaryResource(gd.Serializer.fromJSObject(object), element => {
+    gd.ResourcesContainer.unserializeResourceFrom(resource, element);
+  });
 }

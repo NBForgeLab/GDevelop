@@ -196,7 +196,7 @@ function patchGlueCppContent(rawContent, options) {
   lines.forEach(function (line, lineIndex) {
     var lineNumber = lineIndex + 1;
 
-    if (insideReturnStringFunction && line.indexOf('}') === 0) {
+    if (insideReturnStringFunction && /^\s*}/.test(line)) {
       if (!currentReturnStringFunctionHasTransform) {
         throw new Error(
           'Return-string function "' +
@@ -448,7 +448,7 @@ function patchGlueCppContent(rawContent, options) {
 
     patchedLines.push(line);
 
-    if (line.indexOf('const char* EMSCRIPTEN_KEEPALIVE') === 0) {
+    if (/^\s*const\s+char\s*\*\s*EMSCRIPTEN_KEEPALIVE\b/.test(line)) {
       if (insideReturnStringFunction) {
         throw new Error(
           'Encountered new const char* function while "' +

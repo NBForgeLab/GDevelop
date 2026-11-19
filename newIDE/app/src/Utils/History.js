@@ -73,7 +73,20 @@ export const saveToHistory = (
   actionType?: RevertableActionType,
   changeContext?: any
 ): HistoryState => {
-  const newCurrentValue = serializeToJSObject(newCurrentSerializableValue);
+  return saveSnapshotToHistory(
+    history,
+    serializeToJSObject(newCurrentSerializableValue),
+    actionType,
+    changeContext
+  );
+};
+
+export const saveSnapshotToHistory = (
+  history: HistoryState,
+  newCurrentValue: Object,
+  actionType?: RevertableActionType,
+  changeContext?: any
+): HistoryState => {
   // Add the current state to the previous actions.
   const newPreviousActions = [
     ...history.previousActions,
