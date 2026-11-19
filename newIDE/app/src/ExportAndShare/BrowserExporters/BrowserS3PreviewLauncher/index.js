@@ -3,7 +3,7 @@ import * as React from 'react';
 import BrowserPreviewErrorDialog from '../BrowserPreview/BrowserPreviewErrorDialog';
 import BrowserS3FileSystem from '../BrowserS3FileSystem';
 import { findGDJS } from '../../../GameEngineFinder/BrowserS3GDJSFinder';
-import assignIn from 'lodash/assignIn';
+import { withPreviewExporter } from '../../PreviewExporter';
 import {
   type PreviewOptions,
   type PreviewLauncherProps,
@@ -21,7 +21,6 @@ import { isNativeMobileApp } from '../../../Utils/Platform';
 import { getIDEVersionWithHash } from '../../../Version';
 import { setEmbeddedGameFramePreviewLocation } from '../../../EmbeddedGame/EmbeddedGameFrame';
 import { immediatelyOpenNewPreviewWindow } from '../BrowserPreview/BrowserPreviewWindow';
-const gd: libGDevelop = global.gd;
 
 type State = {|
   error: ?Error,
@@ -38,9 +37,9 @@ export default class BrowserS3PreviewLauncher extends React.Component<
     error: null,
   };
 
-  _prepareExporter = (): Promise<{|
+  _preparePreviewFiles = (): Promise<{|
     outputDir: string,
-    exporter: gdjsExporter,
+    gdjsRoot: string,
     browserS3FileSystem: BrowserS3FileSystem,
   |}> => {
     return findGDJS('preview').then(({ gdjsRoot, filesContent }) => {
@@ -54,15 +53,9 @@ export default class BrowserS3PreviewLauncher extends React.Component<
         bucketBaseUrl: getBaseUrl(),
         prefix,
       });
-      const fileSystem = assignIn(
-        new gd.AbstractFileSystemJS(),
-        browserS3FileSystem
-      );
-      const exporter = new gd.Exporter(fileSystem, gdjsRoot);
-      exporter.setCodeOutputDirectory(outputDir);
 
       return {
-        exporter,
+        gdjsRoot,
         outputDir,
         browserS3FileSystem,
       };
@@ -133,120 +126,128 @@ export default class BrowserS3PreviewLauncher extends React.Component<
 
     try {
       const {
-        exporter,
+        gdjsRoot,
         outputDir,
         browserS3FileSystem,
-      } = await this._prepareExporter();
+      } = await this._preparePreviewFiles();
 
-      const previewExportOptions = new gd.PreviewExportOptions(
-        project,
-        outputDir
-      );
-      previewExportOptions.setLayoutName(sceneName);
-      previewExportOptions.setIsDevelopmentEnvironment(Window.isDev());
-      previewExportOptions.setIsInGameEdition(
-        previewOptions.isForInGameEdition
-      );
-      previewExportOptions.setEditorId(previewOptions.editorId || '');
-      if (externalLayoutName) {
-        previewExportOptions.setExternalLayoutName(externalLayoutName);
-      }
-      if (eventsBasedObjectType) {
-        previewExportOptions.setEventsBasedObjectType(eventsBasedObjectType);
-        previewExportOptions.setEventsBasedObjectVariantName(
-          eventsBasedObjectVariantName || ''
-        );
-      }
-
-      if (isNativeMobileApp()) {
-        previewExportOptions.useMinimalDebuggerClient();
-      } else {
-        previewExportOptions.useWindowMessageDebuggerClient();
-      }
-
-      // Scripts generated from extensions keep the same URL even after being modified.
-      // Use a cache bursting parameter to force the browser to reload them.
-      previewExportOptions.setNonRuntimeScriptsCacheBurst(Date.now());
-
-      previewExportOptions.setFullLoadingScreen(
-        previewOptions.fullLoadingScreen
-      );
-
-      previewExportOptions.setNativeMobileApp(isNativeMobileApp());
-      previewExportOptions.setGDevelopVersionWithHash(getIDEVersionWithHash());
-      previewExportOptions.setCrashReportUploadLevel(
-        this.props.crashReportUploadLevel
-      );
-      previewExportOptions.setPreviewContext('preview');
-      previewExportOptions.setProjectTemplateSlug(project.getTemplateSlug());
-
-      if (previewOptions.inAppTutorialMessageInPreview) {
-        previewExportOptions.setInAppTutorialMessageInPreview(
-          previewOptions.inAppTutorialMessageInPreview,
-          previewOptions.inAppTutorialMessagePositionInPreview
-        );
-      }
-
-      if (previewOptions.fallbackAuthor) {
-        previewExportOptions.setFallbackAuthor(
-          previewOptions.fallbackAuthor.id,
-          previewOptions.fallbackAuthor.username
-        );
-      }
-      if (previewOptions.authenticatedPlayer) {
-        previewExportOptions.setAuthenticatedPlayer(
-          previewOptions.authenticatedPlayer.playerId,
-          previewOptions.authenticatedPlayer.playerUsername,
-          previewOptions.authenticatedPlayer.playerToken
-        );
-      }
-      if (
-        previewOptions.captureOptions &&
-        previewOptions.captureOptions.screenshots
-      ) {
-        previewOptions.captureOptions.screenshots.forEach(screenshot => {
-          previewExportOptions.addScreenshotCapture(
-            screenshot.delayTimeInSeconds,
-            screenshot.signedUrl,
-            screenshot.publicUrl
+      await withPreviewExporter(
+        { fileSystem: browserS3FileSystem, project, gdjsRoot, outputDir },
+        (exporter, previewExportOptions) => {
+          exporter.setCodeOutputDirectory(outputDir);
+          previewExportOptions.setLayoutName(sceneName);
+          previewExportOptions.setIsDevelopmentEnvironment(Window.isDev());
+          previewExportOptions.setIsInGameEdition(
+            previewOptions.isForInGameEdition
           );
-        });
-      }
-      if (
-        previewOptions.captureOptions &&
-        previewOptions.captureOptions.previewVideo
-      ) {
-        previewExportOptions.setPreviewVideoCapture(
-          previewOptions.captureOptions.previewVideo.signedUrl,
-          previewOptions.captureOptions.previewVideo.publicUrl,
-          previewOptions.captureOptions.previewVideo.isRecordedByUser
-        );
-      }
-      if (previewOptions.editorCameraState3D) {
-        previewExportOptions.setEditorCameraState3D(
-          previewOptions.editorCameraState3D.cameraMode,
-          previewOptions.editorCameraState3D.positionX,
-          previewOptions.editorCameraState3D.positionY,
-          previewOptions.editorCameraState3D.positionZ,
-          previewOptions.editorCameraState3D.rotationAngle,
-          previewOptions.editorCameraState3D.elevationAngle,
-          previewOptions.editorCameraState3D.distance
-        );
-      }
-      if (previewOptions.inGameEditorSettings) {
-        previewExportOptions.setInGameEditorSettingsJson(
-          JSON.stringify(previewOptions.inGameEditorSettings)
-        );
-      }
+          previewExportOptions.setEditorId(previewOptions.editorId || '');
+          if (externalLayoutName) {
+            previewExportOptions.setExternalLayoutName(externalLayoutName);
+          }
+          if (eventsBasedObjectType) {
+            previewExportOptions.setEventsBasedObjectType(
+              eventsBasedObjectType
+            );
+            previewExportOptions.setEventsBasedObjectVariantName(
+              eventsBasedObjectVariantName || ''
+            );
+          }
 
-      // The token, if any, to be used to read resources on GDevelop Cloud buckets.
-      const gdevelopResourceToken = getGDevelopResourceJwtToken();
-      if (gdevelopResourceToken)
-        previewExportOptions.setGDevelopResourceToken(gdevelopResourceToken);
+          if (isNativeMobileApp()) {
+            previewExportOptions.useMinimalDebuggerClient();
+          } else {
+            previewExportOptions.useWindowMessageDebuggerClient();
+          }
 
-      exporter.exportProjectForPixiPreview(previewExportOptions);
-      previewExportOptions.delete();
-      exporter.delete();
+          // Scripts generated from extensions keep the same URL even after being modified.
+          // Use a cache bursting parameter to force the browser to reload them.
+          previewExportOptions.setNonRuntimeScriptsCacheBurst(Date.now());
+
+          previewExportOptions.setFullLoadingScreen(
+            previewOptions.fullLoadingScreen
+          );
+
+          previewExportOptions.setNativeMobileApp(isNativeMobileApp());
+          previewExportOptions.setGDevelopVersionWithHash(
+            getIDEVersionWithHash()
+          );
+          previewExportOptions.setCrashReportUploadLevel(
+            this.props.crashReportUploadLevel
+          );
+          previewExportOptions.setPreviewContext('preview');
+          previewExportOptions.setProjectTemplateSlug(
+            project.getTemplateSlug()
+          );
+
+          if (previewOptions.inAppTutorialMessageInPreview) {
+            previewExportOptions.setInAppTutorialMessageInPreview(
+              previewOptions.inAppTutorialMessageInPreview,
+              previewOptions.inAppTutorialMessagePositionInPreview
+            );
+          }
+
+          if (previewOptions.fallbackAuthor) {
+            previewExportOptions.setFallbackAuthor(
+              previewOptions.fallbackAuthor.id,
+              previewOptions.fallbackAuthor.username
+            );
+          }
+          if (previewOptions.authenticatedPlayer) {
+            previewExportOptions.setAuthenticatedPlayer(
+              previewOptions.authenticatedPlayer.playerId,
+              previewOptions.authenticatedPlayer.playerUsername,
+              previewOptions.authenticatedPlayer.playerToken
+            );
+          }
+          if (
+            previewOptions.captureOptions &&
+            previewOptions.captureOptions.screenshots
+          ) {
+            previewOptions.captureOptions.screenshots.forEach(screenshot => {
+              previewExportOptions.addScreenshotCapture(
+                screenshot.delayTimeInSeconds,
+                screenshot.signedUrl,
+                screenshot.publicUrl
+              );
+            });
+          }
+          if (
+            previewOptions.captureOptions &&
+            previewOptions.captureOptions.previewVideo
+          ) {
+            previewExportOptions.setPreviewVideoCapture(
+              previewOptions.captureOptions.previewVideo.signedUrl,
+              previewOptions.captureOptions.previewVideo.publicUrl,
+              previewOptions.captureOptions.previewVideo.isRecordedByUser
+            );
+          }
+          if (previewOptions.editorCameraState3D) {
+            previewExportOptions.setEditorCameraState3D(
+              previewOptions.editorCameraState3D.cameraMode,
+              previewOptions.editorCameraState3D.positionX,
+              previewOptions.editorCameraState3D.positionY,
+              previewOptions.editorCameraState3D.positionZ,
+              previewOptions.editorCameraState3D.rotationAngle,
+              previewOptions.editorCameraState3D.elevationAngle,
+              previewOptions.editorCameraState3D.distance
+            );
+          }
+          if (previewOptions.inGameEditorSettings) {
+            previewExportOptions.setInGameEditorSettingsJson(
+              JSON.stringify(previewOptions.inGameEditorSettings)
+            );
+          }
+
+          // The token, if any, to be used to read resources on GDevelop Cloud buckets.
+          const gdevelopResourceToken = getGDevelopResourceJwtToken();
+          if (gdevelopResourceToken)
+            previewExportOptions.setGDevelopResourceToken(
+              gdevelopResourceToken
+            );
+
+          exporter.exportProjectForPixiPreview(previewExportOptions);
+        }
+      );
 
       // Upload any file that must be exported for the preview.
       await browserS3FileSystem.uploadPendingObjects();

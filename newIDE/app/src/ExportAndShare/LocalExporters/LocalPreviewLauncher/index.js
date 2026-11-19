@@ -6,7 +6,10 @@ import LocalFileSystem from '../LocalFileSystem';
 import optionalRequire from '../../../Utils/OptionalRequire';
 import { findGDJS } from '../../../GameEngineFinder/LocalGDJSFinder';
 import LocalNetworkPreviewDialog from './LocalNetworkPreviewDialog';
-import assignIn from 'lodash/assignIn';
+import {
+  withPreviewExporter,
+  serializeHotReloadData,
+} from '../../PreviewExporter';
 import {
   type PreviewOptions,
   type PreviewLauncherProps,
@@ -26,7 +29,6 @@ import { setGameplayTestFramePreviewLocation } from '../../../GameplayTests/Game
 const electron = optionalRequire('electron');
 const path = optionalRequire('path');
 const ipcRenderer = electron ? electron.ipcRenderer : null;
-const gd: libGDevelop = global.gd;
 
 let nextPreviewId = 1;
 
@@ -50,7 +52,7 @@ type State = {|
   captureOptions: ?CaptureOptions,
 |};
 
-const prepareExporter = async ({
+const preparePreviewFiles = async ({
   isForInGameEdition,
   isForGameplayTest,
 }: {
@@ -58,7 +60,7 @@ const prepareExporter = async ({
   isForGameplayTest: boolean,
 }): Promise<{|
   outputDir: string,
-  exporter: gdjsExporter,
+  localFileSystem: LocalFileSystem,
   gdjsRoot: string,
 |}> => {
   const { gdjsRoot } = await findGDJS();
@@ -67,20 +69,18 @@ const prepareExporter = async ({
   const localFileSystem = new LocalFileSystem({
     downloadUrlsToLocalFiles: false,
   });
-  const fileSystem = assignIn(new gd.AbstractFileSystemJS(), localFileSystem);
   const outputDir = path.join(
-    fileSystem.getTempDir(),
+    localFileSystem.getTempDir(),
     isForGameplayTest
       ? 'gameplay-test-preview'
       : isForInGameEdition
       ? 'in-game-editor-preview'
       : 'preview'
   );
-  const exporter = new gd.Exporter(fileSystem, gdjsRoot);
 
   return {
     outputDir,
-    exporter,
+    localFileSystem,
     gdjsRoot,
   };
 };
@@ -253,238 +253,232 @@ export default class LocalPreviewLauncher extends React.Component<
       );
     }
 
-    const { outputDir, exporter, gdjsRoot } = await prepareExporter({
+    const { outputDir, localFileSystem, gdjsRoot } = await preparePreviewFiles({
       isForInGameEdition: previewOptions.isForInGameEdition,
       isForGameplayTest: !!previewOptions.isForGameplayTest,
     });
 
     var previewStartTime = performance.now();
 
-    const previewExportOptions = new gd.PreviewExportOptions(
-      project,
-      outputDir
-    );
-    previewExportOptions.setIsDevelopmentEnvironment(Window.isDev());
-    previewExportOptions.setLayoutName(sceneName);
-    previewExportOptions.setIsInGameEdition(previewOptions.isForInGameEdition);
-    previewExportOptions.setEditorId(previewOptions.editorId || '');
-    if (externalLayoutName) {
-      previewExportOptions.setExternalLayoutName(externalLayoutName);
-    }
-    if (eventsBasedObjectType) {
-      previewExportOptions.setEventsBasedObjectType(eventsBasedObjectType);
-      previewExportOptions.setEventsBasedObjectVariantName(
-        eventsBasedObjectVariantName || ''
-      );
-    }
-
-    if (previewOptions.isForInGameEdition || previewOptions.isForGameplayTest) {
-      previewExportOptions.useWindowMessageDebuggerClient();
-    } else {
-      const previewDebuggerServerAddress = getDebuggerServerAddress();
-      if (previewDebuggerServerAddress) {
-        previewExportOptions.useWebsocketDebuggerClientWithServerAddress(
-          previewDebuggerServerAddress.address,
-          '' + previewDebuggerServerAddress.port
+    await withPreviewExporter(
+      { fileSystem: localFileSystem, project, gdjsRoot, outputDir },
+      (exporter, previewExportOptions) => {
+        previewExportOptions.setIsDevelopmentEnvironment(Window.isDev());
+        previewExportOptions.setLayoutName(sceneName);
+        previewExportOptions.setIsInGameEdition(
+          previewOptions.isForInGameEdition
         );
-      }
-    }
-
-    const includeFileHashs = this.props.getIncludeFileHashs();
-    for (const includeFile in includeFileHashs) {
-      const hash = includeFileHashs[includeFile];
-      previewExportOptions.setIncludeFileHash(includeFile, hash);
-    }
-
-    // Give the preview the path to the "@electron/remote" module of the editor,
-    // as this is required by some features and we've not removed dependency
-    // on "@electron/remote" yet.
-    previewExportOptions.setElectronRemoteRequirePath(
-      path.join(
-        gdjsRoot,
-        '../preview_node_modules',
-        '@electron/remote',
-        'renderer/index.js'
-      )
-    );
-
-    // TODO Filter according to isForInGameEdition because the first game preview
-    // won't necessarily be the first debugger.
-    // It doesn't have any side effect because when it wont actually do an hot-reload
-    // since the game preview doesn't exist yet.
-    const debuggerIds = previewOptions.isForInGameEdition
-      ? this.getPreviewDebuggerServer().getExistingEmbeddedGameFrameDebuggerIds()
-      : this.getPreviewDebuggerServer().getExistingPreviewDebuggerIds();
-    const shouldHotReload =
-      previewOptions.hotReload &&
-      !previewOptions.isForGameplayTest &&
-      !!debuggerIds.length;
-    if (shouldHotReload) {
-      previewExportOptions.setShouldClearExportFolder(
-        previewOptions.shouldHardReload
-      );
-      // At hot-reload, the ProjectData are passed into the message.
-      // It means that we don't need to write them in a file.
-      previewExportOptions.setShouldReloadProjectData(false);
-      previewExportOptions.setShouldReloadLibraries(
-        previewOptions.shouldReloadLibraries ||
-          previewOptions.shouldGenerateScenesEventsCode
-      );
-      previewExportOptions.setShouldGenerateScenesEventsCode(
-        previewOptions.shouldGenerateScenesEventsCode
-      );
-    }
-
-    previewExportOptions.setFullLoadingScreen(previewOptions.fullLoadingScreen);
-    previewExportOptions.setGDevelopVersionWithHash(getIDEVersionWithHash());
-    previewExportOptions.setCrashReportUploadLevel(
-      this.props.crashReportUploadLevel
-    );
-    previewExportOptions.setPreviewContext('preview');
-    previewExportOptions.setProjectTemplateSlug(project.getTemplateSlug());
-
-    if (previewOptions.inAppTutorialMessageInPreview) {
-      previewExportOptions.setInAppTutorialMessageInPreview(
-        previewOptions.inAppTutorialMessageInPreview,
-        previewOptions.inAppTutorialMessagePositionInPreview
-      );
-    }
-
-    if (previewOptions.fallbackAuthor) {
-      previewExportOptions.setFallbackAuthor(
-        previewOptions.fallbackAuthor.id,
-        previewOptions.fallbackAuthor.username
-      );
-    }
-    if (previewOptions.authenticatedPlayer) {
-      previewExportOptions.setAuthenticatedPlayer(
-        previewOptions.authenticatedPlayer.playerId,
-        previewOptions.authenticatedPlayer.playerUsername,
-        previewOptions.authenticatedPlayer.playerToken
-      );
-    }
-    if (previewOptions.captureOptions) {
-      if (previewOptions.captureOptions.screenshots) {
-        previewOptions.captureOptions.screenshots.forEach(screenshot => {
-          previewExportOptions.addScreenshotCapture(
-            screenshot.delayTimeInSeconds,
-            screenshot.signedUrl,
-            screenshot.publicUrl
-          );
-        });
-      }
-    }
-    if (
-      previewOptions.captureOptions &&
-      previewOptions.captureOptions.previewVideo
-    ) {
-      previewExportOptions.setPreviewVideoCapture(
-        previewOptions.captureOptions.previewVideo.signedUrl,
-        previewOptions.captureOptions.previewVideo.publicUrl,
-        previewOptions.captureOptions.previewVideo.isRecordedByUser
-      );
-    }
-    if (previewOptions.editorCameraState3D) {
-      previewExportOptions.setEditorCameraState3D(
-        previewOptions.editorCameraState3D.cameraMode,
-        previewOptions.editorCameraState3D.positionX,
-        previewOptions.editorCameraState3D.positionY,
-        previewOptions.editorCameraState3D.positionZ,
-        previewOptions.editorCameraState3D.rotationAngle,
-        previewOptions.editorCameraState3D.elevationAngle,
-        previewOptions.editorCameraState3D.distance
-      );
-    }
-    if (previewOptions.inGameEditorSettings) {
-      previewExportOptions.setInGameEditorSettingsJson(
-        JSON.stringify(previewOptions.inGameEditorSettings)
-      );
-    }
-
-    exporter.exportProjectForPixiPreview(previewExportOptions);
-
-    if (shouldHotReload) {
-      const projectDataElement = new gd.SerializerElement();
-      exporter.serializeProjectData(
-        project,
-        previewExportOptions,
-        projectDataElement
-      );
-      const projectData = JSON.parse(gd.Serializer.toJSON(projectDataElement));
-      projectDataElement.delete();
-
-      const runtimeGameOptionsElement = new gd.SerializerElement();
-      exporter.serializeRuntimeGameOptions(
-        previewExportOptions,
-        runtimeGameOptionsElement
-      );
-      const runtimeGameOptions = JSON.parse(
-        gd.Serializer.toJSON(runtimeGameOptionsElement)
-      );
-      runtimeGameOptionsElement.delete();
-
-      if (previewOptions.shouldHardReload) {
-        console.log(
-          `[LocalPreviewLauncher] Triggering hard reload for preview #${previewId}...`
-        );
-        debuggerIds.forEach(debuggerId => {
-          this.getPreviewDebuggerServer().sendMessage(debuggerId, {
-            command: 'hardReload',
-          });
-        });
-      } else {
-        debuggerIds.forEach(debuggerId => {
-          console.log(
-            `[LocalPreviewLauncher] Triggering hot reload for preview #${previewId}...`
-          );
-          this.getPreviewDebuggerServer().sendMessage(debuggerId, {
-            command: 'hotReload',
-            payload: {
-              shouldReloadResources: previewOptions.shouldReloadResources,
-              projectData,
-              runtimeGameOptions,
-            },
-          });
-        });
-      }
-      if (!previewOptions.isForInGameEdition) {
-        if (
-          this.state.hotReloadsCount % 16 === 0 &&
-          this._hotReloadSubscriptionChecker
-        ) {
-          this._hotReloadSubscriptionChecker.checkUserHasSubscription();
+        previewExportOptions.setEditorId(previewOptions.editorId || '');
+        if (externalLayoutName) {
+          previewExportOptions.setExternalLayoutName(externalLayoutName);
         }
-        this.setState(state => ({
-          hotReloadsCount: state.hotReloadsCount + 1,
-        }));
-      }
-    } else {
-      if (previewOptions.isForInGameEdition) {
-        setEmbeddedGameFramePreviewLocation({
-          previewIndexHtmlLocation: `file://${outputDir}/index.html`,
-        });
-      }
+        if (eventsBasedObjectType) {
+          previewExportOptions.setEventsBasedObjectType(eventsBasedObjectType);
+          previewExportOptions.setEventsBasedObjectVariantName(
+            eventsBasedObjectVariantName || ''
+          );
+        }
 
-      if (previewOptions.isForGameplayTest) {
-        // The preview is shown in (and run by) the gameplay test frame:
-        // no window to open. The previewId in the URL forces the frame to
-        // reload the game when the same preview is re-exported.
-        setGameplayTestFramePreviewLocation({
-          previewIndexHtmlLocation: `file://${outputDir}/index.html?previewId=${previewId}`,
-          // The game window of the frame is fixed at the project
-          // resolution: the frame only zooms its display.
-          gameResolution: {
-            width: project.getGameResolutionWidth(),
-            height: project.getGameResolutionHeight(),
-          },
-        });
-      } else if (previewOptions.numberOfWindows >= 1) {
-        this._openPreviewWindow(project, outputDir, previewOptions);
-      }
-    }
+        if (
+          previewOptions.isForInGameEdition ||
+          previewOptions.isForGameplayTest
+        ) {
+          previewExportOptions.useWindowMessageDebuggerClient();
+        } else {
+          const previewDebuggerServerAddress = getDebuggerServerAddress();
+          if (previewDebuggerServerAddress) {
+            previewExportOptions.useWebsocketDebuggerClientWithServerAddress(
+              previewDebuggerServerAddress.address,
+              '' + previewDebuggerServerAddress.port
+            );
+          }
+        }
 
-    exporter.delete();
-    previewExportOptions.delete();
+        const includeFileHashs = this.props.getIncludeFileHashs();
+        for (const includeFile in includeFileHashs) {
+          const hash = includeFileHashs[includeFile];
+          previewExportOptions.setIncludeFileHash(includeFile, hash);
+        }
+
+        // Give the preview the path to the "@electron/remote" module of the editor,
+        // as this is required by some features and we've not removed dependency
+        // on "@electron/remote" yet.
+        previewExportOptions.setElectronRemoteRequirePath(
+          path.join(
+            gdjsRoot,
+            '../preview_node_modules',
+            '@electron/remote',
+            'renderer/index.js'
+          )
+        );
+
+        // TODO Filter according to isForInGameEdition because the first game preview
+        // won't necessarily be the first debugger.
+        // It doesn't have any side effect because when it wont actually do an hot-reload
+        // since the game preview doesn't exist yet.
+        const debuggerIds = previewOptions.isForInGameEdition
+          ? this.getPreviewDebuggerServer().getExistingEmbeddedGameFrameDebuggerIds()
+          : this.getPreviewDebuggerServer().getExistingPreviewDebuggerIds();
+        const shouldHotReload =
+          previewOptions.hotReload &&
+          !previewOptions.isForGameplayTest &&
+          !!debuggerIds.length;
+        if (shouldHotReload) {
+          previewExportOptions.setShouldClearExportFolder(
+            previewOptions.shouldHardReload
+          );
+          // At hot-reload, the ProjectData are passed into the message.
+          // It means that we don't need to write them in a file.
+          previewExportOptions.setShouldReloadProjectData(false);
+          previewExportOptions.setShouldReloadLibraries(
+            previewOptions.shouldReloadLibraries ||
+              previewOptions.shouldGenerateScenesEventsCode
+          );
+          previewExportOptions.setShouldGenerateScenesEventsCode(
+            previewOptions.shouldGenerateScenesEventsCode
+          );
+        }
+
+        previewExportOptions.setFullLoadingScreen(
+          previewOptions.fullLoadingScreen
+        );
+        previewExportOptions.setGDevelopVersionWithHash(
+          getIDEVersionWithHash()
+        );
+        previewExportOptions.setCrashReportUploadLevel(
+          this.props.crashReportUploadLevel
+        );
+        previewExportOptions.setPreviewContext('preview');
+        previewExportOptions.setProjectTemplateSlug(project.getTemplateSlug());
+
+        if (previewOptions.inAppTutorialMessageInPreview) {
+          previewExportOptions.setInAppTutorialMessageInPreview(
+            previewOptions.inAppTutorialMessageInPreview,
+            previewOptions.inAppTutorialMessagePositionInPreview
+          );
+        }
+
+        if (previewOptions.fallbackAuthor) {
+          previewExportOptions.setFallbackAuthor(
+            previewOptions.fallbackAuthor.id,
+            previewOptions.fallbackAuthor.username
+          );
+        }
+        if (previewOptions.authenticatedPlayer) {
+          previewExportOptions.setAuthenticatedPlayer(
+            previewOptions.authenticatedPlayer.playerId,
+            previewOptions.authenticatedPlayer.playerUsername,
+            previewOptions.authenticatedPlayer.playerToken
+          );
+        }
+        if (previewOptions.captureOptions) {
+          if (previewOptions.captureOptions.screenshots) {
+            previewOptions.captureOptions.screenshots.forEach(screenshot => {
+              previewExportOptions.addScreenshotCapture(
+                screenshot.delayTimeInSeconds,
+                screenshot.signedUrl,
+                screenshot.publicUrl
+              );
+            });
+          }
+        }
+        if (
+          previewOptions.captureOptions &&
+          previewOptions.captureOptions.previewVideo
+        ) {
+          previewExportOptions.setPreviewVideoCapture(
+            previewOptions.captureOptions.previewVideo.signedUrl,
+            previewOptions.captureOptions.previewVideo.publicUrl,
+            previewOptions.captureOptions.previewVideo.isRecordedByUser
+          );
+        }
+        if (previewOptions.editorCameraState3D) {
+          previewExportOptions.setEditorCameraState3D(
+            previewOptions.editorCameraState3D.cameraMode,
+            previewOptions.editorCameraState3D.positionX,
+            previewOptions.editorCameraState3D.positionY,
+            previewOptions.editorCameraState3D.positionZ,
+            previewOptions.editorCameraState3D.rotationAngle,
+            previewOptions.editorCameraState3D.elevationAngle,
+            previewOptions.editorCameraState3D.distance
+          );
+        }
+        if (previewOptions.inGameEditorSettings) {
+          previewExportOptions.setInGameEditorSettingsJson(
+            JSON.stringify(previewOptions.inGameEditorSettings)
+          );
+        }
+
+        exporter.exportProjectForPixiPreview(previewExportOptions);
+
+        if (shouldHotReload) {
+          const { projectData, runtimeGameOptions } = serializeHotReloadData(
+            exporter,
+            project,
+            previewExportOptions
+          );
+
+          if (previewOptions.shouldHardReload) {
+            console.log(
+              `[LocalPreviewLauncher] Triggering hard reload for preview #${previewId}...`
+            );
+            debuggerIds.forEach(debuggerId => {
+              this.getPreviewDebuggerServer().sendMessage(debuggerId, {
+                command: 'hardReload',
+              });
+            });
+          } else {
+            debuggerIds.forEach(debuggerId => {
+              console.log(
+                `[LocalPreviewLauncher] Triggering hot reload for preview #${previewId}...`
+              );
+              this.getPreviewDebuggerServer().sendMessage(debuggerId, {
+                command: 'hotReload',
+                payload: {
+                  shouldReloadResources: previewOptions.shouldReloadResources,
+                  projectData,
+                  runtimeGameOptions,
+                },
+              });
+            });
+          }
+          if (!previewOptions.isForInGameEdition) {
+            if (
+              this.state.hotReloadsCount % 16 === 0 &&
+              this._hotReloadSubscriptionChecker
+            ) {
+              this._hotReloadSubscriptionChecker.checkUserHasSubscription();
+            }
+            this.setState(state => ({
+              hotReloadsCount: state.hotReloadsCount + 1,
+            }));
+          }
+        } else {
+          if (previewOptions.isForInGameEdition) {
+            setEmbeddedGameFramePreviewLocation({
+              previewIndexHtmlLocation: `file://${outputDir}/index.html`,
+            });
+          }
+
+          if (previewOptions.isForGameplayTest) {
+            // The preview is shown in (and run by) the gameplay test frame:
+            // no window to open. The previewId in the URL forces the frame to
+            // reload the game when the same preview is re-exported.
+            setGameplayTestFramePreviewLocation({
+              previewIndexHtmlLocation: `file://${outputDir}/index.html?previewId=${previewId}`,
+              // The game window of the frame is fixed at the project
+              // resolution: the frame only zooms its display.
+              gameResolution: {
+                width: project.getGameResolutionWidth(),
+                height: project.getGameResolutionHeight(),
+              },
+            });
+          } else if (previewOptions.numberOfWindows >= 1) {
+            this._openPreviewWindow(project, outputDir, previewOptions);
+          }
+        }
+      }
+    );
 
     const previewStopTime = performance.now();
     console.info(
