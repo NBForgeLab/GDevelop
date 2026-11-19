@@ -1,47 +1,36 @@
 #!/usr/bin/env node
 /**
- * This script launches Emscripten's WebIDL binder to generate
- * the glue.cpp and glue.js files inside Bindings directory
- * using Bindings.idl, and patches glue.cpp with fail-fast validations.
+ * This script launch Emscripten's WebIDL binder to generate
+ * the glue.cpp and glue.js file inside Bindings directory
+ * using Bindings.idl
  */
 
-var debug = false; // If true, add additional checks in bindings files.
+var debug = false; //If true, add additional checks in bindings files.
 var fs = require('fs');
-var path = require('path');
 var exec = require('child_process').exec;
 
-var DEFAULT_CLASSES_TO_ERASE = [
-  'ArbitraryResourceWorkerJS',
-  'AbstractFileSystemJS',
-  'BehaviorJsImplementation',
-  'ObjectJsImplementation',
-  'BehaviorSharedDataJsImplementation',
-  'ReadOnlyArbitraryEventsWorkerWithContextJS',
-];
+if (!process.env.EMSDK) {
+  console.error('EMSDK env. variable is not set');
+  console.log(
+    'Please set Emscripten environment by launching `emsdk_env` script'
+  );
+}
+var webIdlBinderPath = process.env.EMSDK + '/upstream/emscripten/tools/webidl_binder.py';
 
-var DEFAULT_FUNCTIONS_TO_ERASE = [
-  'emscripten_bind_ArbitraryResourceWorkerJS_ExposeImage_1',
-  'emscripten_bind_ArbitraryResourceWorkerJS_ExposeShader_1',
-  'emscripten_bind_ArbitraryResourceWorkerJS_ExposeFile_1',
-  'emscripten_bind_ReadOnlyArbitraryEventsWorkerWithContextJS_DoVisitEvent_1',
-  'emscripten_bind_ReadOnlyArbitraryEventsWorkerWithContextJS_DoVisitInstruction_3',
-];
+generateGlueFromBinding(function(err) {
+  if (err) return fatalError(err);
+
+  patchGlueCppFile(function(err) {
+    if (err) return fatalError(err);
+  });
+});
 
 /**
- * Run Emscripten webidl_binder.py to generate glue.cpp and glue.js
+ * Run Embind webidl_binder.py to generate glue.cpp and glue.js
  * from Bindings.idl
  */
 function generateGlueFromBinding(cb) {
-  if (!process.env.EMSDK) {
-    console.error('EMSDK env. variable is not set');
-    console.log(
-      'Please set Emscripten environment by launching `emsdk_env` script'
-    );
-  }
-  var webIdlBinderPath =
-    (process.env.EMSDK || '') + '/upstream/emscripten/tools/webidl_binder.py';
-
-  fs.exists(webIdlBinderPath, function (exists) {
+  fs.exists(webIdlBinderPath, function(exists) {
     if (!exists) {
       cb({
         message: 'Please check your Emscripten installation',
@@ -50,20 +39,11 @@ function generateGlueFromBinding(cb) {
       return;
     }
 
-    var idlPath = path.join(__dirname, 'Bindings', 'Bindings.idl');
-    var glueOutputPrefix = path.join(__dirname, 'Bindings', 'glue');
     exec(
-      'python "' +
-        webIdlBinderPath +
-        '" "' +
-        idlPath +
-        '" "' +
-        glueOutputPrefix +
-        '"',
-      function (err) {
+      'python "' + webIdlBinderPath + '" Bindings/Bindings.idl Bindings/glue',
+      function(err, stdout, stderr) {
         if (err) {
           cb({ message: 'Error while running WebIDL binder:', output: err });
-          return;
         }
 
         cb(null);
@@ -73,546 +53,137 @@ function generateGlueFromBinding(cb) {
 }
 
 /**
- * Advance brace-depth tracking across one C++ source line inside an erased
- * class or function block, ignoring braces inside comments and string/char
- * literals. Returns true once the block's outer brace closes.
- */
-function updateEraseBlockState(state, line, lineNumber) {
-  var i = 0;
-  var len = line.length;
-
-  while (i < len) {
-    if (state.inBlockComment) {
-      if (line[i] === '*' && i + 1 < len && line[i + 1] === '/') {
-        state.inBlockComment = false;
-        i += 2;
-      } else {
-        i += 1;
-      }
-      continue;
-    }
-
-    if (state.inStringQuote) {
-      if (line[i] === '\\') {
-        if (i + 1 >= len) {
-          // Trailing backslash splices the literal onto the next line.
-          return false;
-        }
-        i += 2;
-        continue;
-      }
-      if (line[i] === state.inStringQuote) {
-        state.inStringQuote = null;
-      }
-      i += 1;
-      continue;
-    }
-
-    var ch = line[i];
-
-    // Single-line comment ignores the rest of the line.
-    if (ch === '/' && i + 1 < len && line[i + 1] === '/') {
-      break;
-    }
-
-    // Start of multi-line block comment.
-    if (ch === '/' && i + 1 < len && line[i + 1] === '*') {
-      state.inBlockComment = true;
-      i += 2;
-      continue;
-    }
-
-    // String or character literal.
-    if (ch === '"' || ch === "'") {
-      state.inStringQuote = ch;
-      i += 1;
-      continue;
-    }
-
-    if (ch === '{') {
-      state.braceDepth += 1;
-      state.sawOpeningBrace = true;
-    } else if (ch === '}') {
-      if (!state.sawOpeningBrace || state.braceDepth === 0) {
-        throw new Error(
-          'Unexpected closing brace while erasing ' +
-            state.kind +
-            ' "' +
-            state.name +
-            '" at line ' +
-            lineNumber
-        );
-      }
-      state.braceDepth -= 1;
-      if (state.braceDepth === 0) {
-        state.inStringQuote = null;
-        return true;
-      }
-    }
-
-    i += 1;
-  }
-
-  // Unescaped newlines end standard string/char literals.
-  state.inStringQuote = null;
-  return false;
-}
-
-/**
- * Patch the raw C++ glue code content generated by WebIDL binder and
- * enforce fail-fast assertions if any expected pattern is missing or malformed.
- */
-function patchGlueCppContent(rawContent, options) {
-  var opts = options || {};
-  var isDebug = opts.debug !== undefined ? Boolean(opts.debug) : debug;
-  var classesToErase = opts.classesToErase || DEFAULT_CLASSES_TO_ERASE;
-  var functionsToErase = opts.functionsToErase || DEFAULT_FUNCTIONS_TO_ERASE;
-
-  if (typeof rawContent !== 'string' || rawContent.trim().length === 0) {
-    throw new Error('glue.cpp content must be a non-empty string.');
-  }
-
-  var patchedLines = [];
-  var insideReturnStringFunction = false;
-  var currentReturnStringFunctionSignature = '';
-  var currentReturnStringFunctionHasTransform = false;
-  var activeEraseBlock = null;
-
-  var erasedClasses = new Set();
-  var erasedFunctions = new Set();
-  var stats = {
-    returnStringFunctions: 0,
-    staticCharPtrReplacements: 0,
-    tempCstrReplacements: 0,
-    refReturnStringReplacements: 0,
-    freeCallReplacements: 0,
-    mapSetReplacements: 0,
-    cloneCallReplacements: 0,
-    mapKeysReplacements: 0,
-  };
-
-  var eol = rawContent.indexOf('\r\n') !== -1 ? '\r\n' : '\n';
-  var lines = rawContent.split(/\r?\n/);
-  lines.forEach(function (line, lineIndex) {
-    var lineNumber = lineIndex + 1;
-
-    if (insideReturnStringFunction && line.indexOf('}') === 0) {
-      if (!currentReturnStringFunctionHasTransform) {
-        throw new Error(
-          'Return-string function "' +
-            currentReturnStringFunctionSignature +
-            '" closed at line ' +
-            lineNumber +
-            ' without any string return transformation.'
-        );
-      }
-      insideReturnStringFunction = false;
-      currentReturnStringFunctionSignature = '';
-      currentReturnStringFunctionHasTransform = false;
-    }
-
-    if (
-      !(activeEraseBlock && activeEraseBlock.inBlockComment) &&
-      line.indexOf('class') === 0
-    ) {
-      for (var i = 0; i < classesToErase.length; ++i) {
-        var classPrefix = 'class ' + classesToErase[i];
-        var nextChar = line.charAt(classPrefix.length);
-        if (
-          line.indexOf(classPrefix) === 0 &&
-          (nextChar === '' ||
-            nextChar === ' ' ||
-            nextChar === '\t' ||
-            nextChar === ':' ||
-            nextChar === '{' ||
-            nextChar === '\r')
-        ) {
-          if (insideReturnStringFunction) {
-            throw new Error(
-              'Unexpected line inside const char* function "' +
-                currentReturnStringFunctionSignature +
-                '" at line ' +
-                lineNumber +
-                ': ' +
-                line.trim()
-            );
-          }
-          if (activeEraseBlock) {
-            throw new Error(
-              'Encountered class "' +
-                classesToErase[i] +
-                '" while still erasing unclosed ' +
-                activeEraseBlock.kind +
-                ' "' +
-                activeEraseBlock.name +
-                '" at line ' +
-                lineNumber
-            );
-          }
-          activeEraseBlock = {
-            kind: 'class',
-            name: classesToErase[i],
-            braceDepth: 0,
-            sawOpeningBrace: false,
-            inBlockComment: false,
-            inStringQuote: null,
-          };
-          erasedClasses.add(classesToErase[i]);
-          break;
-        }
-      }
-    }
-    if (
-      !(activeEraseBlock && activeEraseBlock.inBlockComment) &&
-      line.indexOf('EMSCRIPTEN_KEEPALIVE') !== -1
-    ) {
-      for (var j = 0; j < functionsToErase.length; ++j) {
-        if (
-          line.indexOf('EMSCRIPTEN_KEEPALIVE ' + functionsToErase[j] + '(') !==
-          -1
-        ) {
-          if (insideReturnStringFunction) {
-            throw new Error(
-              'Unexpected line inside const char* function "' +
-                currentReturnStringFunctionSignature +
-                '" at line ' +
-                lineNumber +
-                ': ' +
-                line.trim()
-            );
-          }
-          if (activeEraseBlock) {
-            throw new Error(
-              'Encountered function "' +
-                functionsToErase[j] +
-                '" while still erasing unclosed ' +
-                activeEraseBlock.kind +
-                ' "' +
-                activeEraseBlock.name +
-                '" at line ' +
-                lineNumber
-            );
-          }
-          activeEraseBlock = {
-            kind: 'function',
-            name: functionsToErase[j],
-            braceDepth: 0,
-            sawOpeningBrace: false,
-            inBlockComment: false,
-            inStringQuote: null,
-          };
-          erasedFunctions.add(functionsToErase[j]);
-          break;
-        }
-      }
-    }
-
-    if (activeEraseBlock) {
-      if (updateEraseBlockState(activeEraseBlock, line, lineNumber)) {
-        activeEraseBlock = null;
-      }
-      return;
-    }
-
-    // When declaring a function returning "[Const, Ref] DOMString"
-    // or "[Const, Value] DOMString"
-    // in the IDL file, the return type is const char*. We are using
-    // gd::String in GDevelop and need to call c_str.
-    if (insideReturnStringFunction) {
-      // [Const, Value] DOMString
-      if (line.indexOf('static char*') !== -1) {
-        line = line.replace('static char*', 'static gd::String');
-        stats.staticCharPtrReplacements++;
-        currentReturnStringFunctionHasTransform = true;
-      } else if (line.indexOf(', &temp);') !== -1) {
-        line = line.replace(', &temp);', ', temp.c_str());');
-        stats.tempCstrReplacements++;
-        currentReturnStringFunctionHasTransform = true;
-        // [Const, Ref] DOMString
-      } else if (line.indexOf('return &') !== -1 && line.indexOf(';') !== -1) {
-        if (isDebug) {
-          // For debugging, use a temporary useless reference
-          // to check the return type is a reference and not a value.
-          // Could generate false positive.
-          line = line
-            .replace(';', '); return ref.c_str();')
-            .replace('return &', 'gd::String & ref = const_cast<gd::String&>(');
-        } else {
-          line = line.replace(';', '.c_str();').replace('return &', 'return ');
-        }
-        stats.refReturnStringReplacements++;
-        currentReturnStringFunctionHasTransform = true;
-      } else {
-        throw new Error(
-          'Unexpected line inside const char* function "' +
-            currentReturnStringFunctionSignature +
-            '" at line ' +
-            lineNumber +
-            ': ' +
-            line.trim()
-        );
-      }
-    }
-
-    // Make sure free functions are called properly.
-    var freeCallPos = line.indexOf('self->FREE_');
-    if (freeCallPos !== -1) {
-      var nameEndPos = line.indexOf('(', freeCallPos);
-      var closeParenPos =
-        nameEndPos !== -1 ? line.indexOf(')', nameEndPos) : -1;
-      var name =
-        nameEndPos !== -1 ? line.substring(freeCallPos + 11, nameEndPos) : '';
-      if (
-        nameEndPos === -1 ||
-        closeParenPos === -1 ||
-        !/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)
-      ) {
-        throw new Error(
-          'Malformed self->FREE_ call at line ' +
-            lineNumber +
-            ': ' +
-            line.trim()
-        );
-      }
-      var startOfLine = line.substring(0, freeCallPos);
-      var endOfLine = line.substring(nameEndPos + 1, line.length);
-      var hasOtherParameters = endOfLine.trim()[0] !== ')';
-
-      line =
-        startOfLine +
-        name +
-        '(*self' +
-        (hasOtherParameters ? ', ' : '') +
-        endOfLine;
-      stats.freeCallReplacements++;
-    }
-
-    // Fix calls to operator [] with pointers
-    if (line.indexOf('self->MAP_set') !== -1) {
-      if (line.indexOf('self->MAP_set(') === -1) {
-        throw new Error(
-          'Malformed self->MAP_set call at line ' +
-            lineNumber +
-            ': ' +
-            line.trim()
-        );
-      }
-      line = line.replace('self->MAP_set', '(*self)MAP_set');
-      stats.mapSetReplacements++;
-    }
-
-    // Simulate copy operator with CLONE_type
-    var cloneCallPos = line.indexOf('self->CLONE_');
-    if (cloneCallPos !== -1) {
-      var cloneArgsPos = line.indexOf('()', cloneCallPos);
-      var cloneTypeName =
-        cloneArgsPos !== -1
-          ? line.substring(cloneCallPos + 12, cloneArgsPos)
-          : '';
-      if (
-        cloneArgsPos === -1 ||
-        !/^[A-Za-z_][A-Za-z0-9_]*$/.test(cloneTypeName)
-      ) {
-        throw new Error(
-          'Malformed self->CLONE_ call at line ' +
-            lineNumber +
-            ': ' +
-            line.trim()
-        );
-      }
-      line =
-        line.slice(0, cloneCallPos) +
-        'new ' +
-        cloneTypeName +
-        '(*self)' +
-        line.slice(cloneArgsPos + 2);
-      stats.cloneCallReplacements++;
-    }
-
-    // Custom function MAP_keys to get the keys of a map
-    var mapKeyCallPos = line.indexOf('self->MAP_keys');
-    if (mapKeyCallPos !== -1) {
-      if (line.indexOf('self->MAP_keys()') === -1) {
-        throw new Error(
-          'Malformed self->MAP_keys call at line ' +
-            lineNumber +
-            ': ' +
-            line.trim()
-        );
-      }
-      line =
-        'temp.clear(); for(auto it = self->begin(); it != self->end();' +
-        '++it) { temp.push_back(it->first); } return &temp;';
-      stats.mapKeysReplacements++;
-    }
-
-    patchedLines.push(line);
-
-    if (line.indexOf('const char* EMSCRIPTEN_KEEPALIVE') === 0) {
-      if (insideReturnStringFunction) {
-        throw new Error(
-          'Encountered new const char* function while "' +
-            currentReturnStringFunctionSignature +
-            '" was still unclosed at line ' +
-            lineNumber
-        );
-      }
-      insideReturnStringFunction = true;
-      currentReturnStringFunctionSignature = line.trim();
-      currentReturnStringFunctionHasTransform = false;
-      stats.returnStringFunctions++;
-    }
-  });
-
-  if (insideReturnStringFunction) {
-    throw new Error(
-      'Unclosed const char* EMSCRIPTEN_KEEPALIVE function at end of glue.cpp: "' +
-        currentReturnStringFunctionSignature +
-        '"'
-    );
-  }
-  if (activeEraseBlock) {
-    throw new Error(
-      'Unclosed ' +
-        activeEraseBlock.kind +
-        ' block at end of glue.cpp while erasing "' +
-        activeEraseBlock.name +
-        '"'
-    );
-  }
-
-  var missingClasses = classesToErase.filter(function (cls) {
-    return !erasedClasses.has(cls);
-  });
-  if (missingClasses.length > 0) {
-    throw new Error(
-      'Expected classes to erase were not found in glue.cpp: ' +
-        missingClasses.join(', ')
-    );
-  }
-
-  var missingFunctions = functionsToErase.filter(function (fn) {
-    return !erasedFunctions.has(fn);
-  });
-  if (missingFunctions.length > 0) {
-    throw new Error(
-      'Expected functions to erase were not found in glue.cpp: ' +
-        missingFunctions.join(', ')
-    );
-  }
-
-  if (stats.returnStringFunctions === 0) {
-    throw new Error(
-      'No "const char* EMSCRIPTEN_KEEPALIVE" functions found in glue.cpp.'
-    );
-  }
-  if (
-    stats.staticCharPtrReplacements === 0 ||
-    stats.tempCstrReplacements === 0
-  ) {
-    throw new Error(
-      'Expected "[Const, Value] DOMString" patterns ("static char*" / ", &temp);") were not found in glue.cpp.'
-    );
-  }
-  if (stats.staticCharPtrReplacements !== stats.tempCstrReplacements) {
-    throw new Error(
-      'Mismatched "[Const, Value] DOMString" replacements in glue.cpp: staticCharPtr=' +
-        stats.staticCharPtrReplacements +
-        ', tempCstr=' +
-        stats.tempCstrReplacements
-    );
-  }
-  if (stats.refReturnStringReplacements === 0) {
-    throw new Error(
-      'Expected "[Const, Ref] DOMString" patterns ("return &...;") were not found in glue.cpp.'
-    );
-  }
-  if (stats.freeCallReplacements === 0) {
-    throw new Error(
-      'Expected "self->FREE_" patterns were not found in glue.cpp.'
-    );
-  }
-  if (stats.mapSetReplacements === 0) {
-    throw new Error(
-      'Expected "self->MAP_set" patterns were not found in glue.cpp.'
-    );
-  }
-  if (stats.cloneCallReplacements === 0) {
-    throw new Error(
-      'Expected "self->CLONE_" patterns were not found in glue.cpp.'
-    );
-  }
-  if (stats.mapKeysReplacements === 0) {
-    throw new Error(
-      'Expected "self->MAP_keys" patterns were not found in glue.cpp.'
-    );
-  }
-
-  var patchedFile = patchedLines.join(eol);
-
-  var residualMarkers = [
-    'self->FREE_',
-    'self->MAP_set',
-    'self->CLONE_',
-    'self->MAP_keys',
-  ];
-  for (var k = 0; k < residualMarkers.length; ++k) {
-    if (patchedFile.indexOf(residualMarkers[k]) !== -1) {
-      throw new Error(
-        'Unpatched residual pattern "' +
-          residualMarkers[k] +
-          '" remained in glue.cpp after patching.'
-      );
-    }
-  }
-
-  return {
-    patchedContent: patchedFile,
-    stats: stats,
-  };
-}
-
-/**
- * A few modifications need to be made to glue.cpp because of limitations
+ * A few modification needs to be made to glue.cpp because of limitations
  * of the IDL language/binder.
  */
-function patchGlueCppFile(optionsOrCb, maybeCb) {
-  var options = typeof optionsOrCb === 'function' ? {} : optionsOrCb || {};
-  var cb = typeof optionsOrCb === 'function' ? optionsOrCb : maybeCb;
-  if (typeof cb !== 'function') {
-    throw new TypeError('patchGlueCppFile requires a callback function.');
-  }
-  var file = options.filePath || path.join(__dirname, 'Bindings', 'glue.cpp');
+function patchGlueCppFile(cb) {
+  var file = 'Bindings/glue.cpp';
+  var classesToErase = [
+    'ArbitraryResourceWorkerJS',
+    'AbstractFileSystemJS',
+    'BehaviorJsImplementation',
+    'ObjectJsImplementation',
+    'BehaviorSharedDataJsImplementation',
+    'ReadOnlyArbitraryEventsWorkerWithContextJS',
+  ];
+  var functionsToErase = [
+    'emscripten_bind_ArbitraryResourceWorkerJS_ExposeImage_1',
+    'emscripten_bind_ArbitraryResourceWorkerJS_ExposeShader_1',
+    'emscripten_bind_ArbitraryResourceWorkerJS_ExposeFile_1',
+    'emscripten_bind_ReadOnlyArbitraryEventsWorkerWithContextJS_DoVisitEvent_1',
+    'emscripten_bind_ReadOnlyArbitraryEventsWorkerWithContextJS_DoVisitInstruction_3',
+  ];
+  fs.readFile(file, function(err, data) {
+    if (err) cb(err);
 
-  fs.readFile(file, function (err, data) {
-    if (err) {
-      cb({
-        message: 'Unable to read glue.cpp file at ' + file,
-        output: err,
+    var patchedFile = '';
+    var insideReturnStringFunction = false;
+    var erasingClass = false;
+    var erasingFunction = false;
+    data
+      .toString()
+      .split('\n')
+      .forEach(function(line) {
+        //When declaring a function returning "[Const, Ref] DOMString"
+        //or "[Const, Value] DOMString"
+        //in the IDL file, the return type is const char*. We are using
+        //std::string in GDevelop and need to call c_str.
+        if (insideReturnStringFunction) {
+          //[Const, Value] DOMString
+          if (line.indexOf('static char*') !== -1) {
+            line = line.replace('static char*', 'static gd::String');
+          } else if (line.indexOf(', &temp);') !== -1) {
+            line = line.replace(', &temp);', ', temp.c_str());');
+            //[Const, Ref] DOMString
+          } else {
+            if (debug) {
+              //For debugging, use a temporary useless reference
+              //to check the return type is a reference and not a value.
+              //Could generate false positive.
+              line = line
+                .replace(';', '); return ref.c_str();')
+                .replace(
+                  'return &',
+                  'gd::String & ref = const_cast<gd::String&>('
+                );
+            } else {
+              line = line.replace(';', '.c_str();').replace('&', '');
+            }
+          }
+        }
+
+        //Make sure free functions are called properly.
+        var freeCallPos = line.indexOf('self->FREE_');
+        if (freeCallPos !== -1) {
+          var nameEndPos = line.indexOf('(', freeCallPos);
+          var name = line.substring(freeCallPos + 11, nameEndPos);
+          var startOfLine = line.substring(0, freeCallPos);
+          var endOfLine = line.substring(nameEndPos + 1, line.length);
+          var hasOtherParameters = endOfLine[0] !== ')';
+
+          line =
+            startOfLine +
+            name +
+            '(*self' +
+            (hasOtherParameters ? ', ' : '') +
+            endOfLine;
+        }
+
+        //Fix calls to operator [] with pointers
+        line = line.replace('self->MAP_set', '(*self)MAP_set');
+
+        //Simulate copy operator with CLONE_type
+        var cloneCallPos = line.indexOf('self->CLONE_');
+        if (cloneCallPos !== -1) {
+          line = line.replace('self->CLONE_', 'new ');
+          line = line.replace('()', '(*self)');
+        }
+
+        //Custom function MAPS_keys to get the keys of a map
+        var mapKeyCallPos = line.indexOf('self->MAP_keys');
+        if (mapKeyCallPos !== -1) {
+          line =
+            'temp.clear(); for(auto it = self->begin(); it != self->end();' +
+            '++it) { temp.push_back(it->first); } return &temp;';
+        }
+
+        if (line.indexOf('class') === 0) {
+          for (var i = 0; i < classesToErase.length; ++i) {
+            if (line.indexOf('class ' + classesToErase[i]) === 0) {
+              erasingClass = true;
+            }
+          }
+        }
+        if (line.indexOf('EMSCRIPTEN_KEEPALIVE') !== -1) {
+          for (var i = 0; i < functionsToErase.length; ++i) {
+            if (
+              line.indexOf(
+                'EMSCRIPTEN_KEEPALIVE ' + functionsToErase[i] + '('
+              ) !== -1
+            ) {
+              erasingFunction = true;
+            }
+          }
+        }
+
+        if (!erasingClass && !erasingFunction) patchedFile += line + '\n';
+
+        if (line.indexOf('const char* EMSCRIPTEN_KEEPALIVE') == 0) {
+          insideReturnStringFunction = true;
+        } else if (line.indexOf('}') == 0) {
+          insideReturnStringFunction = false;
+        }
+
+        if (erasingClass && line.indexOf('};') === 0) {
+          erasingClass = false;
+        }
+        if (erasingFunction && line.indexOf('}') === 0) {
+          erasingFunction = false;
+        }
       });
-      return;
-    }
 
-    var result;
-    try {
-      result = patchGlueCppContent(data.toString(), options);
-    } catch (patchErr) {
-      cb({
-        message: 'Error while patching glue.cpp: ' + patchErr.message,
-        output: patchErr,
-      });
-      return;
-    }
-
-    fs.writeFile(file, result.patchedContent, function (writeErr) {
-      if (writeErr) {
-        cb({
-          message: 'Unable to write patched glue.cpp file at ' + file,
-          output: writeErr,
-        });
-        return;
-      }
-      cb(null, result);
+    fs.writeFile(file, patchedFile, function(err) {
+      cb(err);
     });
   });
 }
@@ -622,21 +193,3 @@ function fatalError(error) {
   if (error.output) console.log(error.output);
   process.exit(1);
 }
-
-if (require.main === module) {
-  generateGlueFromBinding(function (err) {
-    if (err) return fatalError(err);
-
-    patchGlueCppFile(function (err) {
-      if (err) return fatalError(err);
-    });
-  });
-}
-
-module.exports = {
-  DEFAULT_CLASSES_TO_ERASE: DEFAULT_CLASSES_TO_ERASE,
-  DEFAULT_FUNCTIONS_TO_ERASE: DEFAULT_FUNCTIONS_TO_ERASE,
-  generateGlueFromBinding: generateGlueFromBinding,
-  patchGlueCppContent: patchGlueCppContent,
-  patchGlueCppFile: patchGlueCppFile,
-};
