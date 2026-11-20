@@ -9,15 +9,18 @@ const gd: libGDevelop = global.gd;
 describe('BackgroundSerializer', () => {
   it('disposes the owned snapshot if copying into JavaScript fails', async () => {
     const project = gd.ProjectHelper.createNewGDJSProject();
+    // Keep the original implementation to delegate to it from the mock.
     const create = gd.createOwnedBinarySnapshot;
     const free = jest.spyOn(gd.BinarySerializer, 'freeBinarySnapshot');
     const factory = jest
       .spyOn(gd, 'createOwnedBinarySnapshot')
       .mockImplementation(element => {
         const snapshot = create(element);
-        snapshot.copyBytes = () => {
+        // Spy on the method instead of overwriting it: the snapshot handle is
+        // typed as read-only, and its disposal protocol must be preserved.
+        jest.spyOn(snapshot, 'copyBytes').mockImplementation(() => {
           throw new Error('Copy failed');
-        };
+        });
         return snapshot;
       });
     try {
