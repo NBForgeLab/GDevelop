@@ -318,7 +318,10 @@ type CustomObjectConfiguration_EdgeAnchor = 0 | 1 | 2 | 3 | 4`
       [
         'declare class libGDevelop {',
         '  assertObjectAlive(gdEmscriptenObject): void;',
-        '  createOwnedBinarySnapshot(gdSerializerElement): { copyBytes(): Uint8Array, dispose(): void };',
+        // This is a plain function property (see postjs.js), not a method:
+        // declaring it as a method makes Flow reject any extraction of it
+        // with a spurious "method-unbinding" error.
+        '  createOwnedBinarySnapshot: (gdSerializerElement) => { copyBytes(): Uint8Array, dispose(): void };',
         '  getPointer(gdEmscriptenObject): number;',
         '  castObject<T>(gdEmscriptenObject, Class<T>): T;',
         '  wrapPointer<T>(ptr: number, objectClass: Class<T>): T;',
