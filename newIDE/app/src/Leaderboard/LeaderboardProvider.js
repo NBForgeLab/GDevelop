@@ -1,7 +1,9 @@
 // @flow
 
 import * as React from 'react';
-import LeaderboardContext from './LeaderboardContext';
+import LeaderboardContext, {
+  type LeaderboardState,
+} from './LeaderboardContext';
 import {
   type Leaderboard,
   type LeaderboardSortOption,
@@ -459,7 +461,7 @@ const LeaderboardProvider = ({ gameId, children }: Props): React.Node => {
   );
 
   const value = React.useMemo(
-    () => ({
+    (): LeaderboardState => ({
       leaderboards: !!leaderboardsByIds
         ? // $FlowFixMe[incompatible-type]
           Object.values(leaderboardsByIds)

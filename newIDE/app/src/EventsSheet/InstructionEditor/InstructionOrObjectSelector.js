@@ -448,7 +448,7 @@ const InstructionOrObjectSelector: React.ComponentType<{
       item.getChildren(searchText);
 
     const filteredInstructionsList = React.useMemo(
-      () => {
+      (): Array<SearchResult<EnumeratedInstructionMetadata>> => {
         if (!searchText) return [];
         const lowerCaseSearchText = searchText.toLowerCase();
 

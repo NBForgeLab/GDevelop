@@ -59,6 +59,7 @@ declare module "react-test-renderer" {
     nextElement: React$Element<any>,
     options?: TestRendererOptions
   ): ReactTestRenderer;
+  declare function act(callback: () => mixed): Promise<void>;
 }
 
 declare module "react-test-renderer/shallow" {

@@ -41,7 +41,7 @@ export function serializeHotReloadData(
   exporter: gdjsExporter,
   project: gdProject,
   options: gdPreviewExportOptions
-) {
+): {| projectData: any, runtimeGameOptions: any |} {
   const projectData = withTemporaryResource(
     new gd.SerializerElement(),
     element => {

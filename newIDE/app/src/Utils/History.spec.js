@@ -7,19 +7,20 @@ import {
   saveSnapshotToHistory,
   undo,
   redo,
+  type HistoryState,
 } from './History';
 import { makeTestProject } from '../fixtures/TestProject';
 const gd: libGDevelop = global.gd;
 
 describe('History', () => {
   it('retains both undo steps when scene edits are applied in one batch', () => {
-    const initial = {
+    const initial: HistoryState = {
       currentValue: { x: 0 },
       previousActions: [],
       futureActions: [],
       maxSize: 5,
     };
-    const updates = [10, 20].map(x => history =>
+    const updates = [10, 20].map(x => (history: HistoryState) =>
       saveSnapshotToHistory(history, { x }, 'EDIT')
     );
     const final = updates.reduce((history, update) => update(history), initial);

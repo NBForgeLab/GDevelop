@@ -34,7 +34,7 @@ describe('BackgroundSerializer', () => {
 
   it('releases the root element when the target fails to serialize', async () => {
     const project = gd.ProjectHelper.createNewGDJSProject();
-    let element;
+    let element: ?gdSerializerElement = null;
     jest.spyOn(project, 'serializeTo').mockImplementation(output => {
       element = output;
       throw new Error('Interrupted save');
@@ -43,7 +43,7 @@ describe('BackgroundSerializer', () => {
       await expect(serializeToJSONInBackground(project)).rejects.toThrow(
         'Interrupted save'
       );
-      expect(element.ptr).toBe(0);
+      expect(element ? element.ptr : undefined).toBe(0);
     } finally {
       if (element && element.ptr) element.delete();
       project.delete();

@@ -48,6 +48,7 @@ describe('ResourceUtils', () => {
   });
   it('gives the path on disk of a local resource, even with special characters', () => {
     const project = gd.ProjectHelper.createNewGDJSProject();
+    // $FlowFixMe[cannot-resolve-module] - Node.js module, only available in tests.
     const directory = require('path')
       .resolve('My Project')
       .replace(/\\/g, '/');
