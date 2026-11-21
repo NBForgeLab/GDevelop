@@ -1,0 +1,25 @@
+// @flow
+// @flow-transitional-stub [Phase 2]
+import * as React from 'react';
+import { type I18n as I18nType } from '@lingui/core';
+import { type MenuItemTemplate } from './Menu/Menu.flow';
+
+export type EmptyPlaceholderProps = {|
+  title: React.Node,
+  description: React.Node,
+  helpPagePath?: string,
+  helpPageAnchor?: string,
+  tutorialId?: string,
+  isLoading?: boolean,
+  actionButtonId?: string,
+  actionLabel: React.Node,
+  actionIcon?: React.Node,
+  actionBuildSplitMenuTemplate?: (i18n: I18nType) => Array<MenuItemTemplate>,
+  onAction: () => void,
+  secondaryActionLabel?: React.Node,
+  secondaryActionIcon?: React.Node,
+  onSecondaryAction?: () => void,
+|};
+
+declare export var EmptyPlaceholder: React.ComponentType<EmptyPlaceholderProps>;
+declare export default React.ComponentType<EmptyPlaceholderProps>;

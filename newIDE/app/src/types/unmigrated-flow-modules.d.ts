@@ -12,6 +12,7 @@ declare module '*/MainFrame' {
 declare module '*/MainFrame/*' {
   export const getInitialPreferences: any;
   export const loadPreferencesFromLocalStorage: any;
+  export type AlertMessageIdentifier = string;
   const content: any;
   export default content;
 }
@@ -170,6 +171,75 @@ declare module '@lingui/macro' {
   export const t: (strings: TemplateStringsArray, ...values: any[]) => string;
 }
 
+declare module '@lingui/core' {
+  export type I18n = any;
+  const content: any;
+  export default content;
+}
+
+declare module '*/Menu/Menu.flow' {
+  export type MenuItemTemplate =
+    | {
+        id?: string;
+        label: string;
+        visible?: boolean;
+        enabled?: boolean;
+        disabled?: boolean;
+        click?: (() => void | Promise<void>) | null;
+        accelerator?: string;
+      }
+    | {
+        id?: string;
+        label: string;
+        submenu: Array<MenuItemTemplate>;
+      }
+    | {
+        id?: string;
+        type: 'checkbox';
+        label: string;
+        visible?: boolean;
+        enabled?: boolean;
+        checked: boolean;
+        click?: (() => void | Promise<void>) | null;
+      }
+    | {
+        type: 'separator';
+      };
+  const content: any;
+  export default content;
+}
+declare module './Menu/Menu.flow' {
+  export type MenuItemTemplate =
+    | {
+        id?: string;
+        label: string;
+        visible?: boolean;
+        enabled?: boolean;
+        disabled?: boolean;
+        click?: (() => void | Promise<void>) | null;
+        accelerator?: string;
+      }
+    | {
+        id?: string;
+        label: string;
+        submenu: Array<MenuItemTemplate>;
+      }
+    | {
+        id?: string;
+        type: 'checkbox';
+        label: string;
+        visible?: boolean;
+        enabled?: boolean;
+        checked: boolean;
+        click?: (() => void | Promise<void>) | null;
+      }
+    | {
+        type: 'separator';
+      };
+  const content: any;
+  export default content;
+}
+
 declare module '*/Responsive/ResponsiveWindowMeasurer' {
   export type WindowSizeType = 'small' | 'medium' | 'large' | 'xlarge';
   export interface WindowSize {
@@ -246,6 +316,98 @@ declare module '*/UI/Theme/GDevelopThemeContext' {
   export default content;
 }
 declare module './Theme/GDevelopThemeContext' {
+  const content: any;
+  export default content;
+}
+
+declare module '*/UI/Alert/useAlertDialog' {
+  export interface ConfirmOptions {
+    title: any;
+    message: any;
+    confirmButtonLabel?: any;
+    dismissButtonLabel?: any;
+  }
+  const useAlertDialog: () => {
+    showAlert: (options: any) => Promise<void>;
+    showConfirmation: (options: ConfirmOptions) => Promise<boolean>;
+    showDeleteConfirmation: (options: any) => Promise<boolean>;
+    showYesNoCancel: (options: any) => Promise<boolean>;
+  };
+  export default useAlertDialog;
+}
+declare module './Alert/useAlertDialog' {
+  export interface ConfirmOptions {
+    title: any;
+    message: any;
+    confirmButtonLabel?: any;
+    dismissButtonLabel?: any;
+  }
+  const useAlertDialog: () => {
+    showAlert: (options: any) => Promise<void>;
+    showConfirmation: (options: ConfirmOptions) => Promise<boolean>;
+    showDeleteConfirmation: (options: any) => Promise<boolean>;
+    showYesNoCancel: (options: any) => Promise<boolean>;
+  };
+  export default useAlertDialog;
+}
+
+declare module '*/UI/RaisedButton' {
+  const content: any;
+  export default content;
+}
+declare module '../UI/RaisedButton' {
+  const content: any;
+  export default content;
+}
+declare module './RaisedButton' {
+  const content: any;
+  export default content;
+}
+declare module '*/UI/FlatButton' {
+  const content: any;
+  export default content;
+}
+declare module '../UI/FlatButton' {
+  const content: any;
+  export default content;
+}
+declare module './FlatButton' {
+  const content: any;
+  export default content;
+}
+declare module '*/UI/HelpButton' {
+  const content: any;
+  export default content;
+}
+declare module '../UI/HelpButton' {
+  const content: any;
+  export default content;
+}
+declare module './HelpButton' {
+  const content: any;
+  export default content;
+}
+declare module '*/UI/TutorialButton' {
+  const content: any;
+  export default content;
+}
+declare module './TutorialButton' {
+  const content: any;
+  export default content;
+}
+declare module '*/UI/CircularProgress' {
+  const content: any;
+  export default content;
+}
+declare module './CircularProgress' {
+  const content: any;
+  export default content;
+}
+declare module '*/UI/RaisedButtonWithSplitMenu' {
+  const content: any;
+  export default content;
+}
+declare module './RaisedButtonWithSplitMenu' {
   const content: any;
   export default content;
 }

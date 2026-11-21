@@ -1,11 +1,9 @@
-// @flow
 import * as React from 'react';
 import { Trans } from '@lingui/macro';
 import { type I18n as I18nType } from '@lingui/core';
 import { type MenuItemTemplate } from './Menu/Menu.flow';
 import Container from '@material-ui/core/Container';
-import { ColumnStackLayout } from './Layout';
-import { ResponsiveLineStackLayout } from './Layout';
+import { ColumnStackLayout, ResponsiveLineStackLayout } from './Layout';
 import RaisedButton from '../UI/RaisedButton';
 import FlatButton from '../UI/FlatButton';
 import { Column, LargeSpacer } from './Grid';
@@ -17,29 +15,32 @@ import Add from './CustomSvgIcons/Add';
 import RaisedButtonWithSplitMenu from './RaisedButtonWithSplitMenu';
 import { textEllipsisStyle } from './TextEllipsis';
 
-type Props = {|
-  title: React.Node,
-  description: React.Node,
-  helpPagePath?: string,
-  helpPageAnchor?: string,
-  tutorialId?: string,
-  isLoading?: boolean,
-  actionButtonId?: string,
-  actionLabel: React.Node,
-  actionIcon?: React.Node,
-  actionBuildSplitMenuTemplate?: (i18n: I18nType) => Array<MenuItemTemplate>,
-  onAction: () => void,
-  secondaryActionLabel?: React.Node,
-  secondaryActionIcon?: React.Node,
-  onSecondaryAction?: () => void,
-|};
+export interface EmptyPlaceholderProps {
+  title: React.ReactNode;
+  description: React.ReactNode;
+  helpPagePath?: string;
+  helpPageAnchor?: string;
+  tutorialId?: string;
+  isLoading?: boolean;
+  actionButtonId?: string;
+  actionLabel: React.ReactNode;
+  actionIcon?: React.ReactNode;
+  actionBuildSplitMenuTemplate?: (i18n: I18nType) => Array<MenuItemTemplate>;
+  onAction: () => void;
+  secondaryActionLabel?: React.ReactNode;
+  secondaryActionIcon?: React.ReactNode;
+  onSecondaryAction?: () => void;
+}
 
-const DefaultHelpButton = ({
+const DefaultHelpButton: React.FC<{
+  helpPagePath?: string;
+  helpPageAnchor?: string;
+}> = ({
   helpPagePath,
   helpPageAnchor,
 }: {
-  helpPagePath?: string,
-  helpPageAnchor?: string,
+  helpPagePath?: string;
+  helpPageAnchor?: string;
 }) => (
   <HelpButton
     label={<Trans>Read the doc</Trans>}
@@ -52,7 +53,9 @@ const DefaultHelpButton = ({
  * A placeholder for when there is no content to display.
  * Also take a look at EmptyMessage for a less visible message.
  */
-export const EmptyPlaceholder = (props: Props): React.Node => (
+export const EmptyPlaceholder: React.FC<EmptyPlaceholderProps> = (
+  props: EmptyPlaceholderProps
+): React.ReactElement => (
   <Column alignItems="center" noOverflowParent noMargin>
     <Container
       style={{
@@ -153,3 +156,5 @@ export const EmptyPlaceholder = (props: Props): React.Node => (
     </Container>
   </Column>
 );
+
+export default EmptyPlaceholder;

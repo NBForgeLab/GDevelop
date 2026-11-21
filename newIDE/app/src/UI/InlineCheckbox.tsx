@@ -1,4 +1,3 @@
-// @flow
 import * as React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -25,25 +24,28 @@ const useSmallPaddingCheckboxStyles = makeStyles({
   },
 });
 
-type Props = {|
-  id?: string,
-  name?: string,
-  label?: ?React.Node,
-  checked: boolean,
-  indeterminate?: boolean,
-  onCheck?: (e: {||}, checked: boolean) => void | Promise<void>,
-  checkedIcon?: React.Node,
-  uncheckedIcon?: React.Node,
-  disabled?: boolean,
-  paddingSize?: 'small',
-  tooltipOrHelperText?: React.Node,
-|};
+export interface InlineCheckboxProps {
+  id?: string;
+  name?: string;
+  label?: React.ReactNode;
+  checked: boolean;
+  indeterminate?: boolean;
+  onCheck?: (
+    e: React.ChangeEvent<HTMLInputElement> | any,
+    checked: boolean
+  ) => void | Promise<void>;
+  checkedIcon?: React.ReactNode;
+  uncheckedIcon?: React.ReactNode;
+  disabled?: boolean;
+  paddingSize?: 'small';
+  tooltipOrHelperText?: React.ReactNode;
+}
 
 /**
  * A checkbox based on Material-UI Checkbox, but that can be displayed
  * without having it taking the full width of its container.
  */
-const InlineCheckbox = ({
+const InlineCheckbox: React.FC<InlineCheckboxProps> = ({
   id,
   name,
   onCheck,
@@ -55,7 +57,7 @@ const InlineCheckbox = ({
   checkedIcon,
   tooltipOrHelperText,
   paddingSize,
-}: Props): React.Node => {
+}: InlineCheckboxProps) => {
   const labelClasses = useLabelStyles();
   const formGroupClasses = useFormGroupStyles();
   const smallPaddingClasses = useSmallPaddingCheckboxStyles();
@@ -68,7 +70,7 @@ const InlineCheckbox = ({
       onChange={
         onCheck ? event => onCheck(event, event.target.checked) : undefined
       }
-      classes={paddingSize === 'small' ? smallPaddingClasses : null}
+      classes={paddingSize === 'small' ? smallPaddingClasses : undefined}
       icon={uncheckedIcon}
       checkedIcon={checkedIcon}
       color="secondary"
@@ -87,7 +89,9 @@ const InlineCheckbox = ({
       )}
     </FormGroup>
   ) : tooltipOrHelperText && !disabled ? (
-    <Tooltip title={tooltipOrHelperText}>{checkbox}</Tooltip>
+    <Tooltip title={tooltipOrHelperText as NonNullable<React.ReactNode>}>
+      {checkbox}
+    </Tooltip>
   ) : (
     checkbox
   );

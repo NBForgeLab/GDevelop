@@ -1,4 +1,3 @@
-// @flow
 import * as React from 'react';
 import { t } from '@lingui/macro';
 import PreferencesContext, {
@@ -7,30 +6,31 @@ import PreferencesContext, {
 import AlertMessage from './AlertMessage';
 import useAlertDialog from './Alert/useAlertDialog';
 
-type Props = {|
-  kind: 'info' | 'warning',
-  children: React.Node,
-  identifier: AlertMessageIdentifier,
-|};
+export type DismissableAlertMessageIdentifier = AlertMessageIdentifier;
+
+export interface DismissableAlertMessageProps {
+  kind: 'info' | 'warning';
+  children: React.ReactNode;
+  identifier: AlertMessageIdentifier;
+}
 
 /**
  * Show an alert that can be permanently hidden. Hidden messages
  * will be stored in preferences.
  */
-const DismissableAlertMessage = ({
+const DismissableAlertMessage: React.FC<DismissableAlertMessageProps> = ({
   identifier,
   kind,
   children,
-}: Props): React.Node => {
+}: DismissableAlertMessageProps) => {
   const { values, showAlertMessage } = React.useContext(PreferencesContext);
   const { showConfirmation } = useAlertDialog();
 
-  if (values.hiddenAlertMessages[identifier]) return null;
+  if (values?.hiddenAlertMessages?.[identifier]) return null;
 
   return (
     <AlertMessage
       kind={kind}
-      children={children}
       onHide={async () => {
         const answer = await showConfirmation({
           title: t`Hide this hint?`,
@@ -41,7 +41,9 @@ const DismissableAlertMessage = ({
 
         showAlertMessage(identifier, false);
       }}
-    />
+    >
+      {children}
+    </AlertMessage>
   );
 };
 

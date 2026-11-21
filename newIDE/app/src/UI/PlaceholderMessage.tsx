@@ -1,15 +1,16 @@
-// @flow
 import * as React from 'react';
 import { dataObjectToProps, type HTMLDataset } from '../Utils/HTMLDataset';
 import Paper from './Paper';
 
-type Props = {|
-  data?: HTMLDataset,
-  children: React.Node,
-  showOnTop?: boolean,
-|};
+export interface PlaceholderMessageProps {
+  data?: HTMLDataset;
+  children: React.ReactNode;
+  showOnTop?: boolean;
+}
 
-const PlaceholderMessage = (props: Props): React.MixedElement => {
+const PlaceholderMessage: React.FC<PlaceholderMessageProps> = (
+  props: PlaceholderMessageProps
+): React.ReactElement => {
   return (
     <div
       {...dataObjectToProps(props.data)}
