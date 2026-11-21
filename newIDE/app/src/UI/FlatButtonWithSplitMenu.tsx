@@ -1,32 +1,25 @@
-// @flow
 import * as React from 'react';
 import ElementWithMenu from './Menu/ElementWithMenu';
-import { type MenuItemTemplate } from './Menu/Menu.flow';
-import { type I18n as I18nType } from '@lingui/core';
+import { MenuItemTemplate } from './Menu/Menu.flow';
+import { I18n as I18nType } from '@lingui/core';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Button from '@material-ui/core/Button';
 import { ButtonSpacer } from './Grid';
 import ChevronArrowBottom from './CustomSvgIcons/ChevronArrowBottom';
 
-type Props = {|
-  id?: string,
-  splitMenuButtonId?: string,
-  label?: React.Node,
-  primary?: boolean,
-  disabled?: boolean,
-  icon?: React.Node,
-  onClick: ?() => void | Promise<void>,
-  buildMenuTemplate: (i18n: I18nType) => Array<MenuItemTemplate>,
-  style?: {|
-    marginTop?: number,
-    marginBottom?: number,
-    marginLeft?: number,
-    marginRight?: number,
-    margin?: number,
-    flexShrink?: 0,
-  |},
-  fullWidth?: boolean,
-|};
+export interface FlatButtonWithSplitMenuProps {
+  id?: string;
+  splitMenuButtonId?: string;
+  label?: React.ReactNode;
+  primary?: boolean;
+  disabled?: boolean;
+  icon?: React.ReactNode;
+  onClick?: (event?: React.MouseEvent<any> | any) => void | Promise<void>;
+  buildMenuTemplate: (i18n: I18nType) => MenuItemTemplate[];
+  style?: React.CSSProperties;
+  fullWidth?: boolean;
+  [key: string]: any;
+}
 
 const shouldNeverBeCalled = () => {
   throw new Error(
@@ -50,19 +43,18 @@ const styles = {
  * A flat button based on Material-UI button, that has a menu displayed
  * when the dropdown arrow is clicked.
  */
-const FlatButtonWithSplitMenu = (props: Props): React.Node => {
-  const {
-    id,
-    splitMenuButtonId,
-    buildMenuTemplate,
-    onClick,
-    label,
-    primary,
-    icon,
-    disabled,
-    fullWidth,
-  } = props;
-
+const FlatButtonWithSplitMenu: React.FC<FlatButtonWithSplitMenuProps> = ({
+  id,
+  splitMenuButtonId,
+  buildMenuTemplate,
+  onClick,
+  label,
+  primary,
+  icon,
+  disabled,
+  fullWidth,
+  style,
+}: FlatButtonWithSplitMenuProps) => {
   // In theory, focus ripple is only shown after a keyboard interaction
   // (see https://github.com/mui-org/material-ui/issues/12067). However, as
   // it's important to get focus right in the whole app, make the ripple
@@ -76,11 +68,11 @@ const FlatButtonWithSplitMenu = (props: Props): React.Node => {
       color={primary ? 'secondary' : 'default'}
       disabled={disabled}
       size="small"
-      style={props.style}
+      style={style}
       fullWidth={fullWidth}
     >
       <Button
-        id={id}
+        id={id || undefined}
         focusRipple={focusRipple}
         onClick={onClick}
         style={styles.mainButton}
@@ -95,7 +87,7 @@ const FlatButtonWithSplitMenu = (props: Props): React.Node => {
         }
         element={
           <Button
-            id={splitMenuButtonId}
+            id={splitMenuButtonId || undefined}
             onClick={shouldNeverBeCalled}
             focusRipple={focusRipple}
             style={styles.arrowDropDownButton}

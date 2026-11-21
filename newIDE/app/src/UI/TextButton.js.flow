@@ -1,0 +1,38 @@
+// @flow
+// @flow-transitional-stub [Phase 2]
+import * as React from 'react';
+import { type ButtonInterface } from './Button';
+
+export type TextButtonProps = {
+  label?: React.Node,
+  onClick?: ?(ev: any) => void | Promise<void>,
+  primary?: boolean,
+  secondary?: boolean,
+  allowBrowserAutoTranslate?: boolean,
+  disabled?: boolean,
+  keyboardFocused?: boolean,
+  fullWidth?: boolean,
+  icon?: React.Node,
+  rightIcon?: React.Node,
+  style?: {|
+    marginTop?: number,
+    marginBottom?: number,
+    marginLeft?: number,
+    marginRight?: number,
+    margin?: number,
+    flexShrink?: 0,
+    minWidth?: number,
+  |},
+  target?: '_blank' | string,
+  href?: string,
+  rel?: string,
+  id?: ?string,
+  className?: string,
+  children?: React.Node,
+  +ref?: React.RefSetter<ButtonInterface> | any,
+};
+
+declare export default React.ComponentType<{
+  ...TextButtonProps,
+  +ref?: React.RefSetter<ButtonInterface> | any,
+}>;

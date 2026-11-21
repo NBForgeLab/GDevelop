@@ -1,0 +1,25 @@
+// @flow
+// @flow-transitional-stub [Phase 2]
+import * as React from 'react';
+
+export type TwoStatesButtonPart = {|
+  icon?: React.Node,
+  label: React.Node,
+  value: string,
+  id?: string,
+|};
+
+export type TwoStatesButtonProps = {|
+  leftButton: TwoStatesButtonPart,
+  rightButton: TwoStatesButtonPart,
+  onChange: string => void,
+  value: string,
+  disabled?: boolean,
+|};
+
+export type TwoStatesButtonInterface = {| focusLeftButton: () => void |};
+
+declare export default React.ComponentType<{
+  ...TwoStatesButtonProps,
+  +ref?: React.RefSetter<TwoStatesButtonInterface>,
+}>;

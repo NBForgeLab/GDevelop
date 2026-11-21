@@ -1,40 +1,32 @@
-// @flow
 import * as React from 'react';
 import Button from '@material-ui/core/Button';
 import { ButtonSpacer } from './Grid';
-import { type ButtonInterface } from './Button';
 
-type Props = {|
-  label: React.Node,
-  onClick: ?() => void | Promise<void>,
-  primary?: boolean,
-  secondary?: boolean,
-  allowBrowserAutoTranslate?: boolean,
-  disabled?: boolean,
-  keyboardFocused?: boolean,
-  fullWidth?: boolean,
-  icon?: React.Node,
-  rightIcon?: React.Node,
-  style?: {|
-    marginTop?: number,
-    marginBottom?: number,
-    marginLeft?: number,
-    marginRight?: number,
-    margin?: number,
-    flexShrink?: 0,
-    minWidth?: number,
-  |},
-  target?: '_blank',
-  id?: ?string,
-|};
+export interface TextButtonProps {
+  label?: React.ReactNode;
+  onClick?: (event: React.MouseEvent<any> | any) => void | Promise<void>;
+  primary?: boolean;
+  secondary?: boolean;
+  allowBrowserAutoTranslate?: boolean;
+  disabled?: boolean;
+  keyboardFocused?: boolean;
+  fullWidth?: boolean;
+  icon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  style?: React.CSSProperties;
+  target?: '_blank' | string;
+  href?: string;
+  rel?: string;
+  id?: string | null;
+  className?: string;
+  children?: React.ReactNode;
+  [key: string]: any;
+}
 
 /**
  * A "text" button based on Material-UI button.
  */
-const TextButton: React.ComponentType<{
-  ...Props,
-  +ref?: React.RefSetter<ButtonInterface>,
-}> = React.forwardRef<Props, ButtonInterface>(
+const TextButton = React.forwardRef<HTMLButtonElement, TextButtonProps>(
   (
     {
       label,
@@ -47,7 +39,7 @@ const TextButton: React.ComponentType<{
       id,
       allowBrowserAutoTranslate = true,
       ...otherProps
-    },
+    }: TextButtonProps,
     ref
   ) => {
     // In theory, focus ripple is only shown after a keyboard interaction
@@ -65,15 +57,15 @@ const TextButton: React.ComponentType<{
         autoFocus={keyboardFocused}
         focusRipple={focusRipple}
         disabled={disabled}
-        id={id}
+        id={id || undefined}
         {...otherProps}
         ref={ref}
       >
         {icon}
-        {icon && <ButtonSpacer />}
+        {icon && (label || rightIcon) && <ButtonSpacer />}
         {/* span element is required to prevent browser auto translators to crash the app - See https://github.com/4ian/GDevelop/issues/3453 */}
         {label ? <span>{label}</span> : null}
-        {rightIcon && <ButtonSpacer />}
+        {rightIcon && label && <ButtonSpacer />}
         {rightIcon}
       </Button>
     );

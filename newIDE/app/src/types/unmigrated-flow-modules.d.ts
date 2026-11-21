@@ -198,7 +198,6 @@ declare module 'classnames' {
   export default classNames;
 }
 
-
 declare module '*/Menu/Menu.flow' {
   export type MenuItemTemplate =
     | {
@@ -309,14 +308,6 @@ declare module './Theme' {
   const content: any;
   export default content;
 }
-declare module '*/UI/TextButton' {
-  const content: any;
-  export default content;
-}
-declare module '../TextButton' {
-  const content: any;
-  export default content;
-}
 declare module '*/Utils/i18n/MessageDescriptor.flow' {
   export type MessageDescriptor = string | { [key: string]: any };
 }
@@ -405,14 +396,6 @@ declare module './TutorialButton' {
   const content: any;
   export default content;
 }
-declare module '*/UI/RaisedButtonWithSplitMenu' {
-  const content: any;
-  export default content;
-}
-declare module './RaisedButtonWithSplitMenu' {
-  const content: any;
-  export default content;
-}
 
 // Media and static assets
 declare module '*.svg' {
@@ -442,4 +425,3 @@ declare module 'react-measure' {
   const content: any;
   export default content;
 }
-

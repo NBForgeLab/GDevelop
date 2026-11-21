@@ -1,0 +1,27 @@
+// @flow
+// @flow-transitional-stub [Phase 2]
+import * as React from 'react';
+import { type MenuItemTemplate } from './Menu/Menu.flow';
+import { type I18n as I18nType } from '@lingui/core';
+
+export type RaisedButtonWithSplitMenuProps = {
+  id?: string,
+  splitMenuButtonId?: string,
+  label?: React.Node,
+  primary?: boolean,
+  disabled?: boolean,
+  icon?: React.Node,
+  onClick?: ?(event?: any) => void | Promise<void>,
+  buildMenuTemplate: (i18n: I18nType) => Array<MenuItemTemplate>,
+  style?: {|
+    marginTop?: number,
+    marginBottom?: number,
+    marginLeft?: number,
+    marginRight?: number,
+    margin?: number,
+    flexShrink?: 0,
+  |},
+  fullWidth?: boolean,
+};
+
+declare export default React.ComponentType<RaisedButtonWithSplitMenuProps>;
