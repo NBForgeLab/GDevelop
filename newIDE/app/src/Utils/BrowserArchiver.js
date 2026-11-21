@@ -2,7 +2,7 @@
 import { initializeZipJs } from './Zip.js';
 import { downloadUrlsToBlobs, type ItemResult } from './BlobDownloader';
 import path from 'path-browserify';
-import { shortenString } from './StringHelpers.js';
+import { shortenString } from './StringHelpers';
 
 export type BlobFileDescriptor = {|
   filePath: string,

@@ -1,2 +1,4 @@
 // @flow
-declare export function copyBinarySnapshot(element: gdSerializerElement): Uint8Array;
+declare export function copyBinarySnapshot(
+  element: gdSerializerElement
+): Uint8Array;

@@ -1,0 +1,7 @@
+// @flow
+declare export function mergeArraysPerGroup<T, U>(
+  arr1: Array<T>,
+  arr2: Array<U>,
+  howManyPerGroup1: number,
+  howManyPerGroup2: number
+): Array<T | U>;

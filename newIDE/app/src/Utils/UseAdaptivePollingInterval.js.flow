@@ -1,0 +1,16 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var getBackedOffIntervalInMs: (
+  currentIntervalInMs: number,
+  maxIntervalInMs: number
+) => number;
+
+declare export var useAdaptivePollingInterval: ({|
+  baseIntervalInMs: number,
+  maxIntervalInMs: number,
+|}) => {|
+  intervalInMs: number,
+  reportTick: (sawActivity: boolean) => void,
+  resetToBase: () => void,
+|};

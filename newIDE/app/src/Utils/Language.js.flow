@@ -1,0 +1,9 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var setLanguageInDOM: (language: string) => void;
+declare export var getBrowserLanguageOrLocale: () => string;
+declare export var selectLanguageOrLocale: (
+  languageOrLocale: string,
+  defaultLanguage: string
+) => string;
