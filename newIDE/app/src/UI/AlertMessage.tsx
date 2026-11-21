@@ -1,4 +1,3 @@
-// @flow
 import * as React from 'react';
 import { Spacer, Line, Column } from './Grid';
 import { useTheme } from '@material-ui/styles';
@@ -16,27 +15,36 @@ import SquaredInfo from './CustomSvgIcons/SquaredInfo';
 
 const styles = {
   icon: { width: 28, height: 28, marginRight: 10, marginLeft: 10 },
-  topRightHideButton: { position: 'absolute', right: 0, top: 0 },
-  paper: { position: 'relative', overflow: 'hidden' },
+  topRightHideButton: {
+    position: 'absolute' as const,
+    right: 0,
+    top: 0,
+  },
+  paper: {
+    position: 'relative' as const,
+    overflow: 'hidden' as const,
+  },
   content: { flex: 1 },
 };
 
-type Props = {|
-  kind?: 'info' | 'warning' | 'error' | 'valid',
-  children: React.Node,
-  onHide?: ?() => void | Promise<void>,
-  hideButtonSize?: 'small',
-  renderLeftIcon?: () => React.Node,
-  renderRightButton?: ?() => React.Node,
-  contentOnly?: boolean,
-  background?: 'dark' | 'medium' | 'light',
-|};
+export type AlertMessageKind = 'info' | 'warning' | 'error' | 'valid';
+
+export interface AlertMessageProps {
+  kind?: AlertMessageKind;
+  children: React.ReactNode;
+  onHide?: (() => void | Promise<void>) | null;
+  hideButtonSize?: 'small';
+  renderLeftIcon?: () => React.ReactNode;
+  renderRightButton?: (() => React.ReactNode) | null;
+  contentOnly?: boolean;
+  background?: 'dark' | 'medium' | 'light';
+}
 
 /**
  * Show an hint, warning or other message. If you want to allow the user
  * to permanently hide the hint/alert/message, see DismissableAlertMessage.
  */
-const AlertMessage = ({
+const AlertMessage: React.FC<AlertMessageProps> = ({
   kind,
   children,
   onHide,
@@ -45,18 +53,13 @@ const AlertMessage = ({
   renderLeftIcon,
   contentOnly,
   background = 'dark',
-}: Props): React.Node => {
-  const gdevelopTheme = React.useContext(GDevelopThemeContext);
-  const theme = useTheme();
-  const paperStyle: {|
-    position: string,
-    borderColor?: string,
-    backgroundColor?: string,
-    overflow: string,
-  |} = {
+}: AlertMessageProps) => {
+  const gdevelopTheme: any = React.useContext(GDevelopThemeContext);
+  const theme: any = useTheme();
+  const paperStyle: React.CSSProperties = {
     ...styles.paper,
   };
-  const hideButtonContainerStyle = {
+  const hideButtonContainerStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     borderLeft: `1px solid ${theme.palette.divider}`,
@@ -119,7 +122,6 @@ const AlertMessage = ({
                       )}
                     </React.Fragment>
                   )}
-                  {/* $FlowFixMe[incompatible-type] */}
                   <Text style={styles.content}>{children}</Text>
                 </Line>
                 {renderRightButton && renderRightButton()}

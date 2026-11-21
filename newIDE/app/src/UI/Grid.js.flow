@@ -1,0 +1,51 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+import * as React from 'react';
+
+export const marginsSize: 8 = 8;
+export const buttonIconLabelSpacingSize: 4 = 4;
+
+export type LineProps = {|
+  children?: React.Node,
+  noMargin?: boolean,
+  alignItems?: string,
+  justifyContent?: string,
+  expand?: boolean,
+  overflow?: string,
+  useFullHeight?: boolean,
+  neverShrink?: boolean,
+  id?: string,
+|};
+
+declare export var Line: React.ComponentType<LineProps>;
+
+export type ColumnProps = {|
+  children?: React.Node,
+  noMargin?: boolean,
+  alignItems?: string,
+  justifyContent?: string,
+  expand?: boolean,
+  useFullHeight?: boolean,
+  noOverflowParent?: boolean,
+  id?: string,
+|};
+
+declare export var Column: React.ComponentType<ColumnProps>;
+
+type NoProps = {||};
+
+declare export var Spacer: React.ComponentType<NoProps>;
+declare export var ButtonSpacer: React.ComponentType<NoProps>;
+declare export var LargeSpacer: React.ComponentType<NoProps>;
+
+export type FixedHeightFlexContainerProps = {|
+  children: React.Node,
+  heights: {|
+    small: number,
+    medium?: number,
+    large?: number,
+    xlarge?: number,
+  |},
+|};
+
+declare export var FixedHeightFlexContainer: React.ComponentType<FixedHeightFlexContainerProps>;

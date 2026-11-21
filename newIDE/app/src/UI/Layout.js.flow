@@ -1,0 +1,64 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+import * as React from 'react';
+
+export type TextFieldWithButtonLayoutProps = {|
+  renderTextField: () => React.Node,
+  renderButton: (style: {|
+    marginTop?: number,
+    marginBottom?: number,
+    marginLeft?: number,
+    marginRight?: number,
+    margin?: number,
+    flexShrink?: 0,
+  |}) => React.Node,
+  margin?: 'none' | 'dense',
+  noFloatingLabelText?: boolean,
+|};
+
+declare export var TextFieldWithButtonLayout: React.ComponentType<TextFieldWithButtonLayoutProps>;
+
+export type LineStackLayoutProps = {|
+  id?: string,
+  alignItems?: string,
+  justifyContent?: string,
+  expand?: boolean,
+  noMargin?: boolean,
+  children: React.Node,
+  useLargeSpacer?: boolean,
+  overflow?: 'hidden',
+  neverShrink?: boolean,
+  useFullHeight?: boolean,
+|};
+
+declare export var LineStackLayout: React.ComponentType<LineStackLayoutProps>;
+
+export type ResponsiveLineStackLayoutProps = {|
+  id?: string,
+  alignItems?: string,
+  justifyContent?: string,
+  expand?: boolean,
+  noMargin?: boolean,
+  noColumnMargin?: boolean,
+  forceMobileLayout?: boolean,
+  noOverflowParent?: boolean,
+  noResponsiveLandscape?: boolean,
+  useLargeSpacer?: boolean,
+  children: React.Node,
+|};
+
+declare export var ResponsiveLineStackLayout: React.ComponentType<ResponsiveLineStackLayoutProps>;
+
+export type ColumnStackLayoutProps = {|
+  id?: string,
+  alignItems?: string,
+  justifyContent?: string,
+  expand?: boolean,
+  noMargin?: boolean,
+  children: React.Node,
+  noOverflowParent?: boolean,
+  useFullHeight?: boolean,
+  useLargeSpacer?: boolean,
+|};
+
+declare export var ColumnStackLayout: React.ComponentType<ColumnStackLayoutProps>;

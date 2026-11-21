@@ -1,11 +1,10 @@
-// @flow
 import * as React from 'react';
 import Paper from './Paper';
 
 const styles = {
   container: {
-    display: 'flex',
-    flexDirection: 'column',
+    display: 'flex' as const,
+    flexDirection: 'column' as const,
     minWidth: 0,
   },
   maxWidth: {
@@ -13,20 +12,20 @@ const styles = {
   },
 };
 
-type Props = {|
-  children: React.Node,
-  maxWidth?: boolean,
-  width?: number | string,
+export interface BackgroundProps {
+  children: React.ReactNode;
+  maxWidth?: boolean;
+  width?: number | string;
   /** Sometimes required on Safari */
-  noFullHeight?: boolean,
-  noExpand?: boolean,
-|};
+  noFullHeight?: boolean;
+  noExpand?: boolean;
+}
 
 /**
  * This is the component to be used to display the standard
  * background of editor/windows/dialogs.
  */
-const Background = (props: Props): React.Node => (
+const Background: React.FC<BackgroundProps> = (props: BackgroundProps) => (
   <Paper
     square
     style={{

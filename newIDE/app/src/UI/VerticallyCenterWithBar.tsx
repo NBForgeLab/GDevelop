@@ -1,15 +1,13 @@
-// @flow
-
 import * as React from 'react';
 import GDevelopThemeContext from './Theme/GDevelopThemeContext';
 
 const styles = {
   container: {
-    display: 'flex',
-    alignSelf: 'stretch',
-    flexDirection: 'column',
-    justifyContent: 'stretch',
-    alignItems: 'center',
+    display: 'flex' as const,
+    alignSelf: 'stretch' as const,
+    flexDirection: 'column' as const,
+    justifyContent: 'stretch' as const,
+    alignItems: 'center' as const,
   },
   verticalBar: {
     flex: 1,
@@ -19,12 +17,14 @@ const styles = {
   },
 };
 
-type Props = {|
-  children: React.Node,
-|};
+export interface VerticallyCenterWithBarProps {
+  children: React.ReactNode;
+}
 
-const VerticallyCenterWithBar = (props: Props): React.MixedElement => {
-  const gdevelopTheme = React.useContext(GDevelopThemeContext);
+const VerticallyCenterWithBar: React.FC<VerticallyCenterWithBarProps> = (
+  props: VerticallyCenterWithBarProps
+) => {
+  const gdevelopTheme: any = React.useContext(GDevelopThemeContext);
 
   return (
     <div style={styles.container}>

@@ -1,19 +1,20 @@
-// @flow
 import * as React from 'react';
 import Typography from '@material-ui/core/Typography';
 import GDevelopThemeContext from './Theme/GDevelopThemeContext';
 // No i18n in this file
 
-type Props = {|
-  tooltipText?: string,
-  style?: Object,
-  children: ?React.Node,
-  allowSelection?: boolean,
-  align?: 'center' | 'left' | 'right',
-|};
+export interface BackgroundTextProps {
+  tooltipText?: string;
+  style?: React.CSSProperties;
+  children?: React.ReactNode;
+  allowSelection?: boolean;
+  align?: 'center' | 'left' | 'right';
+}
 
-const BackgroundText = (props: Props): React.Node => {
-  const gdevelopTheme = React.useContext(GDevelopThemeContext);
+const BackgroundText: React.FC<BackgroundTextProps> = (
+  props: BackgroundTextProps
+) => {
+  const gdevelopTheme: any = React.useContext(GDevelopThemeContext);
   return (
     <Typography
       variant="body2"

@@ -1,45 +1,28 @@
-// @flow
 import React from 'react';
 import IconButton from '../IconButton';
 import { getHelpLink } from '../../Utils/HelpLink';
 import Window from '../../Utils/Window';
 import Help from '../CustomSvgIcons/Help';
 
-type PropsType = {|
-  helpPagePath: ?string,
-  disabled?: boolean,
-  style?: {|
-    backgroundColor?: string,
-    position?: string,
-    top?: number,
-    right?: number,
-    padding?: number | string,
-    width?: number,
-    height?: number,
-    transform?: string,
-    transition?: string,
-    opacity?: number,
-    cursor?: 'pointer',
-    margin?: number,
-    marginRight?: number,
-    marginLeft?: number,
-    marginTop?: number,
-    marginBottom?: number,
-    visibility?: 'visible' | 'hidden',
-  |},
-  size?: 'small',
-|};
+export interface HelpIconProps {
+  helpPagePath: string | null | undefined;
+  disabled?: boolean;
+  style?: React.CSSProperties;
+  size?: 'small';
+}
 
 /**
  * The icon that can be used in any dialog to open a help page
  */
-const HelpIcon = (props: PropsType): null | React.Node => {
+const HelpIcon: React.FC<HelpIconProps> = (
+  props: HelpIconProps
+): React.ReactElement | null => {
   const { helpPagePath } = props;
   if (!helpPagePath) return null;
 
   return (
     <IconButton
-      onClick={event => {
+      onClick={(event: React.MouseEvent) => {
         event.stopPropagation();
         Window.openExternalURL(getHelpLink(helpPagePath));
       }}

@@ -1,9 +1,8 @@
-// @flow
-import React from 'react';
-import GDevelopThemeContext from '../UI/Theme/GDevelopThemeContext';
+import * as React from 'react';
+import GDevelopThemeContext from './Theme/GDevelopThemeContext';
 
-const ToolbarSeparator = (): React.MixedElement => {
-  const theme = React.useContext(GDevelopThemeContext);
+const ToolbarSeparator: React.FC<{}> = () => {
+  const theme: any = React.useContext(GDevelopThemeContext);
   return (
     <span
       style={{

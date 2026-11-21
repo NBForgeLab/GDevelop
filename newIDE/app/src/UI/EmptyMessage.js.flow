@@ -1,0 +1,11 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+import * as React from 'react';
+
+export type Props = {|
+  style?: Object,
+  messageStyle?: Object,
+  children: ?React.Node,
+|};
+
+declare export default React.ComponentType<Props>;

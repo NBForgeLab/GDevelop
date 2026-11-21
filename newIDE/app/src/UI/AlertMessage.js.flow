@@ -1,0 +1,16 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+import * as React from 'react';
+
+export type AlertMessageProps = {|
+  kind?: 'info' | 'warning' | 'error' | 'valid',
+  children: React.Node,
+  onHide?: ?() => void | Promise<void>,
+  hideButtonSize?: 'small',
+  renderLeftIcon?: () => React.Node,
+  renderRightButton?: ?() => React.Node,
+  contentOnly?: boolean,
+  background?: 'dark' | 'medium' | 'light',
+|};
+
+declare export default React.ComponentType<AlertMessageProps>;

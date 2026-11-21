@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 /**
  * The style to apply on a div to add ellipsis when the
  * text is overflowing.
@@ -6,7 +8,7 @@
  * where text ellipsis is used (without having yet another component).
  * Please also use a `title` prop on the div to set the text tooltip.
  */
-export const textEllipsisStyle = {
+export const textEllipsisStyle: React.CSSProperties = {
   overflow: 'hidden',
   whiteSpace: 'nowrap',
   textOverflow: 'ellipsis',

@@ -1,24 +1,26 @@
-// @flow
 import * as React from 'react';
 import { useResponsiveWindowSize } from './Responsive/ResponsiveWindowMeasurer';
+
 export const marginsSize = 8;
+
+export interface LineProps {
+  children?: React.ReactNode;
+  noMargin?: boolean;
+  alignItems?: React.CSSProperties['alignItems'];
+  justifyContent?: React.CSSProperties['justifyContent'];
+  expand?: boolean;
+  overflow?: React.CSSProperties['overflow'];
+  useFullHeight?: boolean;
+  neverShrink?: boolean;
+  id?: string;
+}
 
 /**
  * A Line in the standard GDevelop grid to position components.
  * Check `Layout` first to see if there is already a layout made
  * specifically for your components (like `TextFieldWithButton`).
  */
-export const Line = (props: {|
-  children?: React.Node,
-  noMargin?: boolean,
-  alignItems?: string,
-  justifyContent?: string,
-  expand?: boolean,
-  overflow?: string,
-  useFullHeight?: boolean,
-  neverShrink?: boolean,
-  id?: string,
-|}): React.MixedElement => (
+export const Line: React.FC<LineProps> = (props: LineProps) => (
   <div
     id={props.id}
     style={{
@@ -44,21 +46,23 @@ export const Line = (props: {|
   </div>
 );
 
+export interface ColumnProps {
+  children?: React.ReactNode;
+  noMargin?: boolean;
+  alignItems?: React.CSSProperties['alignItems'];
+  justifyContent?: React.CSSProperties['justifyContent'];
+  expand?: boolean;
+  useFullHeight?: boolean;
+  noOverflowParent?: boolean;
+  id?: string;
+}
+
 /**
  * A Column in the standard GDevelop grid to position components.
  * Check `Layout` first to see if there is already a layout made
  * specifically for your components (like `TextFieldWithButton`).
  */
-export const Column = (props: {|
-  children?: React.Node,
-  noMargin?: boolean,
-  alignItems?: string,
-  justifyContent?: string,
-  expand?: boolean,
-  useFullHeight?: boolean,
-  noOverflowParent?: boolean,
-  id?: string,
-|}): React.MixedElement => (
+export const Column: React.FC<ColumnProps> = (props: ColumnProps) => (
   <div
     id={props.id}
     style={{
@@ -84,9 +88,7 @@ export const Column = (props: {|
   </div>
 );
 
-type NoProps = {||};
-
-const spacerStyle = {
+const spacerStyle: React.CSSProperties = {
   width: marginsSize,
   height: marginsSize,
   flexShrink: 0, // Ensure the spacer is not shrinked when in a flex container
@@ -97,7 +99,7 @@ const spacerStyle = {
  * Check `Layout` first to see if there is already a layout made
  * specifically for your components (like `TextFieldWithButton`).
  */
-export const Spacer: React.ComponentType<NoProps> = React.memo<NoProps>(() => (
+export const Spacer: React.NamedExoticComponent<{}> = React.memo(() => (
   <span style={spacerStyle} />
 ));
 
@@ -105,42 +107,41 @@ export const Spacer: React.ComponentType<NoProps> = React.memo<NoProps>(() => (
 // than the standard `Spacer` (marginsSize) so the icon and label read as one unit.
 export const buttonIconLabelSpacingSize = 4;
 
-const buttonSpacerStyle = {
+const buttonSpacerStyle: React.CSSProperties = {
   width: buttonIconLabelSpacingSize,
   height: buttonIconLabelSpacingSize,
   flexShrink: 0, // Ensure the spacer is not shrinked when in a flex container
 };
 
 /** A small spacer used between an icon and a label inside buttons. */
-export const ButtonSpacer: React.ComponentType<NoProps> = React.memo<NoProps>(
-  () => <span style={buttonSpacerStyle} />
-);
+export const ButtonSpacer: React.NamedExoticComponent<{}> = React.memo(() => (
+  <span style={buttonSpacerStyle} />
+));
 
-const largeSpacerStyle = {
+const largeSpacerStyle: React.CSSProperties = {
   width: 24,
   height: 24,
   flexShrink: 0, // Ensure the spacer is not shrinked when in a flex container
 };
 
 /** A large spacer that is 24px width. */
-export const LargeSpacer: React.ComponentType<NoProps> = React.memo<NoProps>(
-  () => <span style={largeSpacerStyle} />
-);
+export const LargeSpacer: React.NamedExoticComponent<{}> = React.memo(() => (
+  <span style={largeSpacerStyle} />
+));
 
-type FixedHeightFlexContainerProps = {|
-  children: React.Node,
-  heights: {|
-    small: number,
-    medium?: number,
-    large?: number,
-    xlarge?: number,
-  |},
-|};
+export interface FixedHeightFlexContainerProps {
+  children: React.ReactNode;
+  heights: {
+    small: number;
+    medium?: number;
+    large?: number;
+    xlarge?: number;
+  };
+}
 
-export const FixedHeightFlexContainer = ({
-  children,
-  heights,
-}: FixedHeightFlexContainerProps): React.MixedElement => {
+export const FixedHeightFlexContainer: React.FC<
+  FixedHeightFlexContainerProps
+> = ({ children, heights }: FixedHeightFlexContainerProps) => {
   const { windowSize } = useResponsiveWindowSize();
   const height =
     windowSize === 'xlarge'

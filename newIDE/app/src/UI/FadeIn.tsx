@@ -1,4 +1,3 @@
-// @flow
 import * as React from 'react';
 
 const styles = {
@@ -9,16 +8,16 @@ const styles = {
   },
 };
 
-type Props = {|
-  children: React.Node,
-|};
+export interface FadeInProps {
+  children: React.ReactNode;
+}
 
 /**
  * Quickly fade in its children when they are mounted: for an element
  * appearing in an existing layout (like a button shown in a toolbar) to
  * appear smoothly rather than popping in.
  */
-const FadeIn = ({ children }: Props): React.Node => (
+const FadeIn: React.FC<FadeInProps> = ({ children }: FadeInProps) => (
   <div style={styles.container}>{children}</div>
 );
 
