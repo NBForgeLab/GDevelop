@@ -1,0 +1,11 @@
+// @flow
+// @flow-transitional-stub [Phase 2]
+import * as React from 'react';
+
+export type HelpButtonProps = {
+  helpPagePath: ?string,
+  label?: React.Node,
+  anchor?: string,
+};
+
+declare export default React.ComponentType<HelpButtonProps>;

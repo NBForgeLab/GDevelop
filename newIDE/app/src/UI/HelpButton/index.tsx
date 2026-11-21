@@ -1,4 +1,3 @@
-// @flow
 import * as React from 'react';
 import TextButton from '../TextButton';
 import Window from '../../Utils/Window';
@@ -8,16 +7,16 @@ import { useResponsiveWindowSize } from '../Responsive/ResponsiveWindowMeasurer'
 import HelpIcon from '../HelpIcon';
 import Help from '../CustomSvgIcons/Help';
 
-type PropsType = {
-  helpPagePath: ?string,
-  label?: React.Node,
-  anchor?: string,
-};
+export interface HelpButtonProps {
+  helpPagePath?: string | null;
+  label?: React.ReactNode;
+  anchor?: string;
+}
 
 /**
  * The button that can be used in any dialog to open a help page
  */
-const HelpButton = (props: PropsType): null | React.Node => {
+const HelpButton: React.FC<HelpButtonProps> = (props: HelpButtonProps) => {
   const { isMobile } = useResponsiveWindowSize();
   if (!props.helpPagePath) return null;
   const helpLink = getHelpLink(props.helpPagePath, props.anchor);

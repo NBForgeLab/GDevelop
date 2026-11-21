@@ -1,0 +1,19 @@
+// @flow
+// @flow-transitional-stub [Phase 2]
+import * as React from 'react';
+
+export type CircularProgressProps = {|
+  variant?: 'indeterminate' | 'determinate',
+  value?: ?number,
+  size?: number,
+  disableShrink?: boolean,
+  style?: {|
+    height?: number,
+    width?: number,
+    marginLeft?: number,
+    marginRight?: number,
+    verticalAlign?: 'middle',
+  |},
+|};
+
+declare export default React.ComponentType<CircularProgressProps>;

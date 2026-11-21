@@ -1,0 +1,44 @@
+// @flow
+// @flow-transitional-stub [Phase 2]
+import * as React from 'react';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+
+type IconProps =
+  | {|
+      children?: React.Node,
+    |}
+  | {|
+      className?:
+        | 'icon-youtube'
+        | 'icon-twitter'
+        | 'icon-facebook'
+        | 'icon-discord'
+        | 'icon-reddit'
+        | string,
+    |};
+
+export type IconButtonProps = {
+  ...IconProps,
+  onClick?: (ev: any) => void | Promise<void>,
+  target?: string,
+  onContextMenu?: ?((event: any) => void) | (() => void),
+  disabled?: boolean,
+  selected?: boolean,
+  edge?: 'start' | 'end' | false,
+  id?: string,
+  className?: string,
+  style?: Object,
+  size?: 'small' | 'medium',
+  tooltip?: MessageDescriptor,
+  acceleratorString?: string,
+  'aria-label'?: string,
+  disableRipple?: boolean,
+  disableFocusRipple?: boolean,
+  disableHover?: boolean,
+  color?: 'default' | 'inherit' | 'secondary' | 'primary',
+};
+
+declare export default React.ComponentType<{
+  ...IconButtonProps,
+  +ref?: React.RefSetter<any>,
+}>;

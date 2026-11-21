@@ -1,1 +1,5 @@
-export declare const getHelpLink: (helpPagePath: string) => string;
+export declare const getHelpLink: (
+  helpPagePath: string,
+  anchor?: string
+) => string;
+

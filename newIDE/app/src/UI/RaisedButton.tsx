@@ -1,46 +1,37 @@
-// @flow
 import * as React from 'react';
 import Button from '@material-ui/core/Button';
-import { type ButtonInterface } from './Button';
 import { ButtonSpacer } from './Grid';
 import classes from './RaisedButton.module.css';
 import classNames from 'classnames';
 
-// We support a subset of the props supported by Material-UI v0.x RaisedButton
-// They should be self descriptive - refer to Material UI docs otherwise.
-export type RaisedButtonPropsWithoutOnClick = {|
-  label?: React.Node,
-  primary?: boolean,
-  color?: 'primary' | 'success' | 'danger' | 'premium' | 'ai',
-  size?: 'medium' | 'large',
-  disabled?: boolean,
-  keyboardFocused?: boolean,
-  fullWidth?: boolean,
-  icon?: React.Node,
-  rightIcon?: React.Node,
-  style?: {|
-    marginTop?: number,
-    marginBottom?: number,
-    marginLeft?: number,
-    marginRight?: number,
-    margin?: number,
-    flexShrink?: 0,
-  |},
-  id?: ?string,
-|};
+export interface RaisedButtonPropsWithoutOnClick {
+  label?: React.ReactNode;
+  primary?: boolean;
+  color?: 'primary' | 'success' | 'danger' | 'premium' | 'ai';
+  size?: 'small' | 'medium' | 'large';
+  disabled?: boolean;
+  keyboardFocused?: boolean;
+  fullWidth?: boolean;
+  icon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  style?: React.CSSProperties;
+  id?: string | null;
+  className?: string;
+  target?: '_blank' | string;
+  href?: string;
+  rel?: string;
+  children?: React.ReactNode;
+  [key: string]: any;
+}
 
-export type RaisedButtonProps = {|
-  ...RaisedButtonPropsWithoutOnClick,
-  onClick: ?(MouseEvent) => void | Promise<void>,
-|};
+export interface RaisedButtonProps extends RaisedButtonPropsWithoutOnClick {
+  onClick?: (event: React.MouseEvent<any> | any) => void | Promise<void>;
+}
 
 /**
  * A raised button based on Material-UI button.
  */
-const RaisedButton: React.ComponentType<{
-  ...RaisedButtonProps,
-  +ref?: React.RefSetter<ButtonInterface>,
-}> = React.forwardRef<RaisedButtonProps, ButtonInterface>(
+const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
   (
     {
       label,
@@ -51,7 +42,9 @@ const RaisedButton: React.ComponentType<{
       rightIcon,
       disabled,
       keyboardFocused,
+      id,
       style,
+      className,
       ...otherProps
     }: RaisedButtonProps,
     ref
@@ -71,7 +64,8 @@ const RaisedButton: React.ComponentType<{
         autoFocus={keyboardFocused}
         focusRipple={focusRipple}
         disabled={disabled}
-        className={classNames({
+        id={id || undefined}
+        className={classNames(className, {
           [classes.buttonSuccess]: color === 'success',
           [classes.buttonDanger]: color === 'danger',
           [classes.buttonPremium]: color === 'premium' && !disabled,

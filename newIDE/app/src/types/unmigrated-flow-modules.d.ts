@@ -177,6 +177,28 @@ declare module '@lingui/core' {
   export default content;
 }
 
+declare module '@lingui/react' {
+  import * as React from 'react';
+  export const I18n: React.ComponentType<{
+    children: (args: { i18n: any }) => React.ReactNode;
+  }>;
+  export const I18nProvider: React.ComponentType<any>;
+}
+
+declare module 'classnames' {
+  type ClassValue =
+    | string
+    | number
+    | boolean
+    | undefined
+    | null
+    | { [id: string]: any }
+    | ClassValue[];
+  function classNames(...args: ClassValue[]): string;
+  export default classNames;
+}
+
+
 declare module '*/Menu/Menu.flow' {
   export type MenuItemTemplate =
     | {
@@ -265,25 +287,49 @@ declare module './Responsive/ResponsiveWindowMeasurer' {
   export default content;
 }
 
-declare module '*/UI/IconButton' {
+declare module '*/UI/AcceleratorString' {
+  export const adaptAcceleratorString: (accelerator: string) => string;
+}
+declare module './AcceleratorString' {
+  export const adaptAcceleratorString: (accelerator: string) => string;
+}
+declare module '*/UI/Tooltip' {
+  export const tooltipEnterDelay: number;
+}
+declare module './Tooltip' {
+  export const tooltipEnterDelay: number;
+}
+declare module '*/UI/Theme' {
+  export type GDevelopTheme = any;
   const content: any;
   export default content;
 }
-declare module '../IconButton' {
+declare module './Theme' {
+  export type GDevelopTheme = any;
   const content: any;
   export default content;
 }
-declare module './IconButton' {
+declare module '*/UI/TextButton' {
   const content: any;
   export default content;
+}
+declare module '../TextButton' {
+  const content: any;
+  export default content;
+}
+declare module '*/Utils/i18n/MessageDescriptor.flow' {
+  export type MessageDescriptor = string | { [key: string]: any };
+}
+declare module '../Utils/i18n/MessageDescriptor.flow' {
+  export type MessageDescriptor = string | { [key: string]: any };
 }
 declare module '*/Utils/HelpLink' {
-  export const getHelpLink: (path: string) => string;
+  export const getHelpLink: (path: string, anchor?: string) => string;
   const content: any;
   export default content;
 }
 declare module '../../Utils/HelpLink' {
-  export const getHelpLink: (path: string) => string;
+  export const getHelpLink: (path: string, anchor?: string) => string;
   const content: any;
   export default content;
 }
@@ -351,55 +397,11 @@ declare module './Alert/useAlertDialog' {
   export default useAlertDialog;
 }
 
-declare module '*/UI/RaisedButton' {
-  const content: any;
-  export default content;
-}
-declare module '../UI/RaisedButton' {
-  const content: any;
-  export default content;
-}
-declare module './RaisedButton' {
-  const content: any;
-  export default content;
-}
-declare module '*/UI/FlatButton' {
-  const content: any;
-  export default content;
-}
-declare module '../UI/FlatButton' {
-  const content: any;
-  export default content;
-}
-declare module './FlatButton' {
-  const content: any;
-  export default content;
-}
-declare module '*/UI/HelpButton' {
-  const content: any;
-  export default content;
-}
-declare module '../UI/HelpButton' {
-  const content: any;
-  export default content;
-}
-declare module './HelpButton' {
-  const content: any;
-  export default content;
-}
 declare module '*/UI/TutorialButton' {
   const content: any;
   export default content;
 }
 declare module './TutorialButton' {
-  const content: any;
-  export default content;
-}
-declare module '*/UI/CircularProgress' {
-  const content: any;
-  export default content;
-}
-declare module './CircularProgress' {
   const content: any;
   export default content;
 }

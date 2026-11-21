@@ -1,44 +1,35 @@
-// @flow
 import * as React from 'react';
 import Button from '@material-ui/core/Button';
-import { type ButtonInterface } from './Button';
 import { ButtonSpacer } from './Grid';
 import classes from './FlatButton.module.css';
 import classNames from 'classnames';
 
-// We support a subset of the props supported by Material-UI v0.x FlatButton
-// They should be self descriptive - refer to Material UI docs otherwise.
-export type FlatButtonProps = {|
-  label: React.Node,
-  onClick: ?(ev: any) => void | Promise<void>,
-  primary?: boolean,
-  color?: 'primary' | 'success' | 'danger' | 'premium' | 'ai',
-  disabled?: boolean,
-  keyboardFocused?: boolean,
-  fullWidth?: boolean,
-  leftIcon?: React.Node,
-  rightIcon?: React.Node,
-  style?: {|
-    marginTop?: number,
-    marginBottom?: number,
-    marginLeft?: number,
-    marginRight?: number,
-    margin?: number,
-    flexShrink?: 0,
-  |},
-  noBackground?: boolean,
-  size?: 'medium' | 'large',
-  target?: '_blank',
-  id?: ?string,
-|};
+export interface FlatButtonProps {
+  label?: React.ReactNode;
+  onClick?: (ev: React.MouseEvent<any> | any) => void | Promise<void>;
+  primary?: boolean;
+  color?: 'primary' | 'success' | 'danger' | 'premium' | 'ai';
+  disabled?: boolean;
+  keyboardFocused?: boolean;
+  fullWidth?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  style?: React.CSSProperties;
+  noBackground?: boolean;
+  size?: 'small' | 'medium' | 'large';
+  target?: '_blank' | string;
+  href?: string;
+  rel?: string;
+  id?: string | null;
+  className?: string;
+  children?: React.ReactNode;
+  [key: string]: any;
+}
 
 /**
- * A "outlined" button based on Material-UI button.
+ * An "outlined" button based on Material-UI button.
  */
-const FlatButton: React.ComponentType<{
-  ...FlatButtonProps,
-  +ref?: React.RefSetter<ButtonInterface>,
-}> = React.forwardRef<FlatButtonProps, ButtonInterface>(
+const FlatButton = React.forwardRef<HTMLButtonElement, FlatButtonProps>(
   (
     {
       label,
@@ -52,6 +43,7 @@ const FlatButton: React.ComponentType<{
       id,
       style,
       noBackground,
+      fullWidth,
       ...otherProps
     }: FlatButtonProps,
     ref
@@ -67,7 +59,7 @@ const FlatButton: React.ComponentType<{
         className={classNames({
           [classes.buttonContainer]: true,
           [classes.backgroundButtonContainer]: !noBackground,
-          [classes.fullWidthButtonContainer]: !!otherProps.fullWidth,
+          [classes.fullWidthButtonContainer]: !!fullWidth,
           [classes.coloredButtonContainer]: !!color,
           [classes.buttonContainerSuccess]: color === 'success',
           [classes.buttonContainerDanger]: color === 'danger',
@@ -83,7 +75,8 @@ const FlatButton: React.ComponentType<{
           autoFocus={keyboardFocused}
           focusRipple={focusRipple}
           disabled={disabled}
-          id={id}
+          id={id || undefined}
+          fullWidth={fullWidth}
           {...otherProps}
           ref={ref}
         >

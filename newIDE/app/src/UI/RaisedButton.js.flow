@@ -1,0 +1,39 @@
+// @flow
+// @flow-transitional-stub [Phase 2]
+import * as React from 'react';
+import { type ButtonInterface } from './Button';
+
+export type RaisedButtonPropsWithoutOnClick = {
+  label?: React.Node,
+  primary?: boolean,
+  color?: 'primary' | 'success' | 'danger' | 'premium' | 'ai',
+  size?: 'small' | 'medium' | 'large',
+  disabled?: boolean,
+  keyboardFocused?: boolean,
+  fullWidth?: boolean,
+  icon?: React.Node,
+  rightIcon?: React.Node,
+  style?: {|
+    marginTop?: number,
+    marginBottom?: number,
+    marginLeft?: number,
+    marginRight?: number,
+    margin?: number,
+    flexShrink?: 0,
+  |},
+  id?: ?string,
+  target?: '_blank' | string,
+  href?: string,
+  rel?: string,
+  className?: string,
+};
+
+export type RaisedButtonProps = {
+  ...RaisedButtonPropsWithoutOnClick,
+  onClick?: ?(MouseEvent | any) => void | Promise<void>,
+};
+
+declare export default React.ComponentType<{
+  ...RaisedButtonProps,
+  +ref?: React.RefSetter<ButtonInterface> | any,
+}>;
