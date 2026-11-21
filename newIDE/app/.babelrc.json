@@ -11,8 +11,17 @@
         }
       }
     ],
-    "@babel/preset-react",
-    "@babel/preset-flow"
+    "@babel/preset-react"
+  ],
+  "overrides": [
+    {
+      "test": ["**/*.js", "**/*.jsx"],
+      "presets": ["@babel/preset-flow"]
+    },
+    {
+      "test": ["**/*.ts", "**/*.tsx"],
+      "presets": ["@babel/preset-typescript"]
+    }
   ],
   "plugins": [
     "babel-plugin-macros"

@@ -56,7 +56,7 @@ const MONACO_CHUNK_RE = /[\\/]node_modules[\\/](?:react-)?monaco-editor[\\/]/;
 const VENDOR_THREE_RE = /[\\/]node_modules[\\/]three[\\/]/;
 const VENDOR_PIXI_RE = /[\\/]node_modules[\\/](?:pixi\.js|pixi\.js-legacy|@pixi|@esotericsoftware[\\/]spine-pixi-v7)[\\/]/;
 const VENDOR_FIREBASE_RE = /[\\/]node_modules[\\/](?:firebase|@firebase)[\\/]/;
-const SOURCE_JS_RE = /[\\/]newIDE[\\/]app[\\/]src[\\/].*\.js$/;
+const SOURCE_CODE_RE = /[\\/]newIDE[\\/]app[\\/]src[\\/].*\.(js|jsx|ts|tsx)$/;
 const REACT_VIRTUALIZED_ON_SCROLL_RE = /react-virtualized[\\/]dist[\\/]es[\\/]WindowScroller[\\/]utils[\\/]onScroll\.js$/;
 const REACT_VIRTUALIZED_BAD_IMPORT =
   "import { bpfrpt_proptype_WindowScroller } from '../WindowScroller.js';";
@@ -278,9 +278,16 @@ const createFlowEsbuildScannerPlugin = () => ({
         loader: 'js',
       };
     });
-    build.onLoad({ filter: SOURCE_JS_RE }, args => {
+    build.onLoad({ filter: SOURCE_CODE_RE }, args => {
       if (LOCALES_PATH_RE.test(args.path)) {
         return { contents: '', loader: 'js' };
+      }
+      const isTypeScript = args.path.endsWith('.ts') || args.path.endsWith('.tsx');
+      if (isTypeScript) {
+        return {
+          contents: fs.readFileSync(args.path, 'utf8'),
+          loader: args.path.endsWith('.tsx') ? 'tsx' : 'ts',
+        };
       }
       const source = fs.readFileSync(args.path, 'utf8');
       return {
@@ -317,7 +324,7 @@ const createFastFlowJsxPlugin = ({ macroFileIds, sucraseHandledIds }) => ({
       cleanId.startsWith('\0') ||
       cleanId.includes('node_modules') ||
       LOCALES_PATH_RE.test(cleanId) ||
-      !SOURCE_JS_RE.test(cleanId)
+      !SOURCE_CODE_RE.test(cleanId)
     ) {
       return null;
     }
@@ -332,8 +339,9 @@ const createFastFlowJsxPlugin = ({ macroFileIds, sucraseHandledIds }) => ({
     }
 
     try {
+      const isTypeScript = cleanId.endsWith('.ts') || cleanId.endsWith('.tsx');
       const transformed = sucraseTransform(code, {
-        transforms: ['flow', 'jsx'],
+        transforms: isTypeScript ? ['typescript', 'jsx'] : ['flow', 'jsx'],
         jsxRuntime: 'classic',
         disableESTransforms: true,
         filePath: cleanId,
@@ -370,12 +378,13 @@ const createBabelReactPlugins = ({ macroFileIds, sucraseHandledIds }) =>
           plugins: [],
         };
       }
+      const isTypeScript = cleanId.endsWith('.ts') || cleanId.endsWith('.tsx');
       return {
         babelrc: false,
         configFile: false,
         presets: [
           ['@babel/preset-react', { runtime: 'classic' }],
-          '@babel/preset-flow',
+          isTypeScript ? '@babel/preset-typescript' : '@babel/preset-flow',
         ],
         plugins: macroFileIds.has(cleanId) ? ['babel-plugin-macros'] : [],
       };

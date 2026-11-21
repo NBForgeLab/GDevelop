@@ -44,7 +44,7 @@ module.exports = {
     storyStoreV7: false,
   },
 
-  stories: ['../src/stories/**/*.stories.js'],
+  stories: ['../src/stories/**/*.stories.@(js|jsx|ts|tsx)'],
   staticDirs: ['../public'],
 
   addons: [

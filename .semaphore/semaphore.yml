@@ -106,6 +106,7 @@ blocks:
             - cd newIDE/app
             - npm run postinstall
             - npm run flow
+            - npm run check-types
             - npm run check-script-types
 
         - name: GDJS typing and documentation generation
