@@ -25,4 +25,3 @@ export type MenuItemTemplate =
   | {
       type: 'separator';
     };
-

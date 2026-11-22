@@ -83,7 +83,7 @@ describe('Layout', () => {
         .create(
           <TextFieldWithButtonLayout
             renderTextField={() => <input type="text" />}
-            renderButton={style => <button style={style}>Click</button>}
+            renderButton={(style) => <button style={style}>Click</button>}
           />
         )
         .toJSON();

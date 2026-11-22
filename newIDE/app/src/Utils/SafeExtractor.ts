@@ -135,7 +135,7 @@ export class SafeExtractor {
     const array = anything
       .split(',')
       .slice(0, 2)
-      .map(str => {
+      .map((str) => {
         if (str === '') return null;
         const num = Number(str.trim());
         return Number.isFinite(num) ? num : null;
@@ -155,7 +155,7 @@ export class SafeExtractor {
     const array = anything
       .split(',')
       .slice(0, 3)
-      .map(str => {
+      .map((str) => {
         if (str === '') return null;
         const num = Number(str.trim());
         return Number.isFinite(num) ? num : null;

@@ -106,4 +106,3 @@ describe('IconButton', () => {
     }).not.toThrow();
   });
 });
-

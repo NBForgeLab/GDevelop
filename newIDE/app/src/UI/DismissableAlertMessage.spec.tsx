@@ -35,7 +35,7 @@ describe('DismissableAlertMessage', () => {
         hiddenAlertMessages,
       },
       showAlertMessage,
-    } as any);
+    }) as any;
 
   it('renders alert message when not marked as hidden', () => {
     const preferences = createMockPreferences();
@@ -43,7 +43,10 @@ describe('DismissableAlertMessage', () => {
       <ThemeProvider theme={muiTheme}>
         <GDevelopThemeContext.Provider value={mockGDevelopTheme}>
           <PreferencesContext.Provider value={preferences}>
-            <DismissableAlertMessage kind="info" identifier="default-additional-work">
+            <DismissableAlertMessage
+              kind="info"
+              identifier="default-additional-work"
+            >
               Test message
             </DismissableAlertMessage>
           </PreferencesContext.Provider>
@@ -52,7 +55,9 @@ describe('DismissableAlertMessage', () => {
     );
 
     expect(component.toJSON()).toBeDefined();
-    expect(component.root.findByProps({ children: 'Test message' })).toBeDefined();
+    expect(
+      component.root.findByProps({ children: 'Test message' })
+    ).toBeDefined();
   });
 
   it('renders null when message is marked as hidden', () => {
@@ -63,7 +68,10 @@ describe('DismissableAlertMessage', () => {
       <ThemeProvider theme={muiTheme}>
         <GDevelopThemeContext.Provider value={mockGDevelopTheme}>
           <PreferencesContext.Provider value={preferences}>
-            <DismissableAlertMessage kind="info" identifier="default-additional-work">
+            <DismissableAlertMessage
+              kind="info"
+              identifier="default-additional-work"
+            >
               Test message
             </DismissableAlertMessage>
           </PreferencesContext.Provider>
@@ -80,7 +88,10 @@ describe('DismissableAlertMessage', () => {
       <ThemeProvider theme={muiTheme}>
         <GDevelopThemeContext.Provider value={mockGDevelopTheme}>
           <PreferencesContext.Provider value={preferences}>
-            <DismissableAlertMessage kind="info" identifier="default-additional-work">
+            <DismissableAlertMessage
+              kind="info"
+              identifier="default-additional-work"
+            >
               Fallback message
             </DismissableAlertMessage>
           </PreferencesContext.Provider>
@@ -89,7 +100,9 @@ describe('DismissableAlertMessage', () => {
     );
 
     expect(component.toJSON()).toBeDefined();
-    expect(component.root.findByProps({ children: 'Fallback message' })).toBeDefined();
+    expect(
+      component.root.findByProps({ children: 'Fallback message' })
+    ).toBeDefined();
   });
 
   it('calls showAlertMessage with false when confirmation is accepted', async () => {
@@ -110,7 +123,10 @@ describe('DismissableAlertMessage', () => {
           <GDevelopThemeContext.Provider value={mockGDevelopTheme}>
             <AlertContext.Provider value={mockAlertContext}>
               <PreferencesContext.Provider value={preferences}>
-                <DismissableAlertMessage kind="warning" identifier="default-additional-work">
+                <DismissableAlertMessage
+                  kind="warning"
+                  identifier="default-additional-work"
+                >
                   Warning hint
                 </DismissableAlertMessage>
               </PreferencesContext.Provider>
@@ -126,7 +142,10 @@ describe('DismissableAlertMessage', () => {
     });
 
     expect(showConfirmDialog).toHaveBeenCalled();
-    expect(showAlertMessage).toHaveBeenCalledWith('default-additional-work', false);
+    expect(showAlertMessage).toHaveBeenCalledWith(
+      'default-additional-work',
+      false
+    );
   });
 
   it('does not call showAlertMessage when confirmation is declined', async () => {
@@ -147,7 +166,10 @@ describe('DismissableAlertMessage', () => {
           <GDevelopThemeContext.Provider value={mockGDevelopTheme}>
             <AlertContext.Provider value={mockAlertContext}>
               <PreferencesContext.Provider value={preferences}>
-                <DismissableAlertMessage kind="info" identifier="default-additional-work">
+                <DismissableAlertMessage
+                  kind="info"
+                  identifier="default-additional-work"
+                >
                   Info hint
                 </DismissableAlertMessage>
               </PreferencesContext.Provider>

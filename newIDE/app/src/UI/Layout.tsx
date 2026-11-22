@@ -79,12 +79,12 @@ export const TextFieldWithButtonLayout: React.FC<
         isMobile && !isLandscape
           ? textFieldWithButtonLayoutStyles.textFieldOnMobileMargins
           : margin === 'none'
-          ? noFloatingLabelText
-            ? textFieldWithButtonLayoutStyles.standardTextFieldWithoutLabelRightButtonMargins
-            : textFieldWithButtonLayoutStyles.standardTextFieldWithLabelRightButtonMargins
-          : noFloatingLabelText
-          ? textFieldWithButtonLayoutStyles.filledTextFieldWithoutLabelRightButtonMargins
-          : textFieldWithButtonLayoutStyles.filledTextFieldWithLabelRightButtonMargins
+            ? noFloatingLabelText
+              ? textFieldWithButtonLayoutStyles.standardTextFieldWithoutLabelRightButtonMargins
+              : textFieldWithButtonLayoutStyles.standardTextFieldWithLabelRightButtonMargins
+            : noFloatingLabelText
+              ? textFieldWithButtonLayoutStyles.filledTextFieldWithoutLabelRightButtonMargins
+              : textFieldWithButtonLayoutStyles.filledTextFieldWithLabelRightButtonMargins
       )}
     </ResponsiveLineStackLayout>
   );
@@ -127,7 +127,7 @@ export const LineStackLayout: React.FC<LineStackLayoutProps> = ({
       neverShrink={neverShrink}
       useFullHeight={useFullHeight}
     >
-      {React.Children.map(children, child => {
+      {React.Children.map(children, (child) => {
         if (!child) return null;
 
         const addSpacers = !isFirstChild;
@@ -240,7 +240,7 @@ export const ColumnStackLayout: React.FC<ColumnStackLayoutProps> = ({
       noOverflowParent={noOverflowParent}
       useFullHeight={useFullHeight}
     >
-      {React.Children.map(children, child => {
+      {React.Children.map(children, (child) => {
         if (!child) return null;
 
         const addSpacers = !isFirstChild;

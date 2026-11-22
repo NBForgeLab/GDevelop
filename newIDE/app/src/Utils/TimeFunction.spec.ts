@@ -9,7 +9,7 @@ describe('TimeFunction', () => {
       () => {
         called = true;
       },
-      duration => {
+      (duration) => {
         reportedDuration = duration;
       }
     );

@@ -68,7 +68,7 @@ const InlineCheckbox: React.FC<InlineCheckboxProps> = ({
       checked={checked}
       indeterminate={indeterminate}
       onChange={
-        onCheck ? event => onCheck(event, event.target.checked) : undefined
+        onCheck ? (event) => onCheck(event, event.target.checked) : undefined
       }
       classes={paddingSize === 'small' ? smallPaddingClasses : undefined}
       icon={uncheckedIcon}

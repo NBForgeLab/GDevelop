@@ -4,8 +4,7 @@ describe('SafeExtractor', () => {
   describe('comma separated finite numbers', () => {
     test('parseCommaSeparatedTwoFiniteNumbers', () => {
       expect(SafeExtractor.parseCommaSeparatedTwoFiniteNumbers('1,2')).toEqual([
-        1,
-        2,
+        1, 2,
       ]);
       expect(
         SafeExtractor.parseCommaSeparatedTwoFiniteNumbers('10,2.345')
@@ -109,8 +108,7 @@ describe('SafeExtractor', () => {
         SafeExtractor.extractObjectProperty({ a: [1, 2] }, 'a')
       ).toBeNull();
       expect(SafeExtractor.extractArrayProperty({ a: [1, 2] }, 'a')).toEqual([
-        1,
-        2,
+        1, 2,
       ]);
       expect(
         SafeExtractor.extractArrayProperty({ a: { nested: 1 } }, 'a')

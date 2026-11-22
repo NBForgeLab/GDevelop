@@ -14,8 +14,8 @@ export const mergeArraysPerGroup = <T, U = T>(
     arr1Index += howManyPerGroup1;
     arr2Index += howManyPerGroup2;
 
-    picks1.forEach(item => result.push(item));
-    picks2.forEach(item => result.push(item));
+    picks1.forEach((item) => result.push(item));
+    picks2.forEach((item) => result.push(item));
   }
 
   return result;

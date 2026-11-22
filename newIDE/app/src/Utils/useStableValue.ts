@@ -17,17 +17,14 @@ const useStableValue = ({
 }: UseStableValueProps): boolean => {
   const [stableValue, setStableValue] = React.useState<boolean>(value);
 
-  React.useEffect(
-    () => {
-      if (value) {
-        setStableValue(true);
-        return;
-      }
-      const timeout = setTimeout(() => setStableValue(false), minimumDuration);
-      return () => clearTimeout(timeout);
-    },
-    [value, minimumDuration]
-  );
+  React.useEffect(() => {
+    if (value) {
+      setStableValue(true);
+      return;
+    }
+    const timeout = setTimeout(() => setStableValue(false), minimumDuration);
+    return () => clearTimeout(timeout);
+  }, [value, minimumDuration]);
 
   return stableValue;
 };

@@ -55,7 +55,7 @@ describe('RaisedButton', () => {
 
   it('applies color variants correctly', () => {
     const colors = ['success', 'danger', 'premium', 'ai'] as const;
-    colors.forEach(color => {
+    colors.forEach((color) => {
       const component = renderer.create(
         <RaisedButton label={color} color={color} />
       );

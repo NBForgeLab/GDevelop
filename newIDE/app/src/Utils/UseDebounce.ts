@@ -22,14 +22,14 @@ export const useDebounce = <T extends (...args: any[]) => any>(
   });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   return useCallback(
-    (debounce(
+    debounce(
       (...args: Parameters<T>) => {
         if (inputsRef.current.delay === delay && isMounted.current)
           inputsRef.current.cb(...args);
       },
       delay,
       options
-    ) as unknown) as T,
+    ) as unknown as T,
     [delay, debounce]
   );
 };

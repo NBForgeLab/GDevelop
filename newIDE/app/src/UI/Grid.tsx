@@ -147,10 +147,10 @@ export const FixedHeightFlexContainer: React.FC<
     windowSize === 'xlarge'
       ? heights.xlarge || heights.large || heights.medium || heights.small
       : windowSize === 'large'
-      ? heights.large || heights.medium || heights.small
-      : windowSize === 'medium'
-      ? heights.medium || heights.small
-      : heights.small;
+        ? heights.large || heights.medium || heights.small
+        : windowSize === 'medium'
+          ? heights.medium || heights.small
+          : heights.small;
   return (
     <div
       style={{

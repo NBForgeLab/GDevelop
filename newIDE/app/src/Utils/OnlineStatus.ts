@@ -11,9 +11,8 @@ function getOnlineStatus(): boolean {
  * React Hook listening to the navigator online status.
  */
 export const useOnlineStatus = (): boolean => {
-  const [onlineStatus, setOnlineStatus] = React.useState<boolean>(
-    getOnlineStatus()
-  );
+  const [onlineStatus, setOnlineStatus] =
+    React.useState<boolean>(getOnlineStatus());
 
   const goOnline = () => setOnlineStatus(true);
   const goOffline = () => setOnlineStatus(false);

@@ -49,7 +49,7 @@ describe('FlatButton', () => {
 
   it('applies color variants and classes correctly', () => {
     const colors = ['primary', 'success', 'danger', 'premium', 'ai'] as const;
-    colors.forEach(color => {
+    colors.forEach((color) => {
       const component = renderer.create(
         <FlatButton label={color} color={color} />
       );

@@ -76,7 +76,9 @@ describe('Badge', () => {
         <span>Item</span>
       </Badge>
     );
-    expect(componentDefault.root.findByType(MuiBadge).props.color).toBe('default');
+    expect(componentDefault.root.findByType(MuiBadge).props.color).toBe(
+      'default'
+    );
   });
 
   it('updates styling when forcedColor dynamically updates', () => {

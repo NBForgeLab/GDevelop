@@ -10,8 +10,6 @@ export interface ElementWithMenuProps {
   [key: string]: any;
 }
 
-export default class ElementWithMenu extends React.Component<
-  ElementWithMenuProps
-> {
+export default class ElementWithMenu extends React.Component<ElementWithMenuProps> {
   open: (event?: any) => void;
 }

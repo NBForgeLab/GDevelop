@@ -145,11 +145,11 @@ export const unsplit = (
       const keys = Object.keys(currentObject);
       if (keys) {
         return Promise.all(
-          keys.map(indexOrPropertyName => {
+          keys.map((indexOrPropertyName) => {
             const reference = isReference(currentObject[indexOrPropertyName]);
             if (reference) {
               return getReferencePartialObject(reference.referenceTo).then(
-                partialObject => {
+                (partialObject) => {
                   currentObject[indexOrPropertyName] = partialObject;
 
                   return unsplitObject(
@@ -213,7 +213,7 @@ export const getSlugifiedUniqueNameFromProperty = (
       existingNamesForReference[currentReference] || {};
     const newName = newNameGenerator(
       slugs(property),
-      name => !!existingNamesForReference[currentReference][name]
+      (name) => !!existingNamesForReference[currentReference][name]
     );
     existingNamesForReference[currentReference][newName] = true;
     return newName;

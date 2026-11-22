@@ -14,7 +14,9 @@ describe('PlaceholderMessage', () => {
     const paper = component.root.findByType(Paper);
     expect(paper.props.background).toBe('dark');
     expect(paper.props.elevation).toBe(3);
-    expect(component.root.findByProps({ children: 'Message content' })).toBeDefined();
+    expect(
+      component.root.findByProps({ children: 'Message content' })
+    ).toBeDefined();
   });
 
   it('renders with zIndex when showOnTop is true', () => {
@@ -41,7 +43,9 @@ describe('PlaceholderMessage', () => {
 
   it('attaches data attributes via HTMLDataset', () => {
     const component = renderer.create(
-      <PlaceholderMessage data={{ testId: 'error-placeholder', active: 'true' }}>
+      <PlaceholderMessage
+        data={{ testId: 'error-placeholder', active: 'true' }}
+      >
         <span>With dataset</span>
       </PlaceholderMessage>
     );

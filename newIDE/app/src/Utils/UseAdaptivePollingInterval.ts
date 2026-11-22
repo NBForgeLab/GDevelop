@@ -29,20 +29,16 @@ export const useAdaptivePollingInterval = ({
   baseIntervalInMs,
   maxIntervalInMs,
 }: UseAdaptivePollingIntervalProps): UseAdaptivePollingIntervalResult => {
-  const [intervalInMs, setIntervalInMs] = React.useState<number>(
-    baseIntervalInMs
-  );
+  const [intervalInMs, setIntervalInMs] =
+    React.useState<number>(baseIntervalInMs);
 
-  const resetToBase = React.useCallback(
-    () => {
-      setIntervalInMs(baseIntervalInMs);
-    },
-    [baseIntervalInMs]
-  );
+  const resetToBase = React.useCallback(() => {
+    setIntervalInMs(baseIntervalInMs);
+  }, [baseIntervalInMs]);
 
   const reportTick = React.useCallback(
     (sawActivity: boolean) => {
-      setIntervalInMs(currentIntervalInMs =>
+      setIntervalInMs((currentIntervalInMs) =>
         sawActivity
           ? baseIntervalInMs
           : getBackedOffIntervalInMs(currentIntervalInMs, maxIntervalInMs)
