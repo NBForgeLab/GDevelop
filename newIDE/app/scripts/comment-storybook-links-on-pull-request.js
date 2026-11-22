@@ -24,6 +24,118 @@ const STORIES_PATH_IN_REPOSITORY = 'newIDE/app/src/stories/';
 const gh = args => execFileSync('gh', args, { encoding: 'utf8' }).trim();
 
 /**
+ * Extract the top-level `title` string literal from an object literal starting
+ * at `openBraceIndex` (`source[openBraceIndex] === '{'`).
+ * @param {string} source
+ * @param {number} openBraceIndex
+ * @returns {string | null}
+ */
+const extractTitleFromObjectLiteral = (source, openBraceIndex) => {
+  if (openBraceIndex < 0 || source[openBraceIndex] !== '{') return null;
+
+  let depth = 0;
+  let topLevelContent = '';
+  for (let i = openBraceIndex; i < source.length; i++) {
+    const ch = source[i];
+    const next = source[i + 1];
+
+    // Skip single-line comments.
+    if (ch === '/' && next === '/') {
+      i += 2;
+      while (i < source.length && source[i] !== '\n') i++;
+      if (depth === 1) topLevelContent += '\n';
+      continue;
+    }
+    // Skip block comments.
+    if (ch === '/' && next === '*') {
+      i += 2;
+      while (i < source.length && !(source[i] === '*' && source[i + 1] === '/')) {
+        i++;
+      }
+      i++;
+      if (depth === 1) topLevelContent += ' ';
+      continue;
+    }
+    // Preserve string literals at depth 1 and skip them at deeper levels.
+    if (ch === "'" || ch === '"' || ch === '`') {
+      const quote = ch;
+      let literal = quote;
+      i++;
+      while (i < source.length) {
+        const c = source[i];
+        literal += c;
+        if (c === '\\' && i + 1 < source.length) {
+          i++;
+          literal += source[i];
+        } else if (c === quote) {
+          break;
+        }
+        i++;
+      }
+      if (depth === 1) topLevelContent += literal;
+      continue;
+    }
+
+    if (ch === '{') {
+      depth++;
+      if (depth === 1) topLevelContent += '{';
+      continue;
+    }
+    if (ch === '}') {
+      depth--;
+      if (depth === 0) break;
+      if (depth === 1) topLevelContent += ' ';
+      continue;
+    }
+
+    if (depth === 1) {
+      topLevelContent += ch;
+    }
+  }
+
+  const titleMatch = topLevelContent.match(
+    /(?:^|[{,\s])title\s*:\s*(['"`])((?:\\.|(?!\1).)+)\1/
+  );
+  return titleMatch ? titleMatch[2] : null;
+};
+
+/**
+ * Extract the story title from JS or TS Storybook default exports:
+ * - `export default { title: '...' }` (including `satisfies Meta<...>`)
+ * - `export default ({ title: '...' } as Meta<...>)`
+ * - `const meta: Meta<...> = { title: '...' }; export default meta;`
+ * @param {string} source
+ * @returns {string | null}
+ */
+const extractStoryTitle = source => {
+  const inlineDefaultExportMatch = /export\s+default\s*\(?\s*\{/.exec(source);
+  if (inlineDefaultExportMatch) {
+    const openBraceIndex =
+      inlineDefaultExportMatch.index + inlineDefaultExportMatch[0].length - 1;
+    const inlineTitle = extractTitleFromObjectLiteral(source, openBraceIndex);
+    if (inlineTitle) return inlineTitle;
+  }
+
+  const identifierDefaultExportMatch = /export\s+default\s+([A-Za-z_$][A-Za-z0-9_$]*)\b/.exec(
+    source
+  );
+  if (identifierDefaultExportMatch) {
+    const metaIdentifier = identifierDefaultExportMatch[1];
+    const declRegex = new RegExp(
+      `(?:const|let|var)\\s+${metaIdentifier}\\b(?:\\s*:[\\s\\S]*?)?\\s*=\\s*\\(?\\s*\\{`
+    );
+    const declMatch = declRegex.exec(source);
+    if (declMatch) {
+      const openBraceIndex = declMatch.index + declMatch[0].length - 1;
+      const declTitle = extractTitleFromObjectLiteral(source, openBraceIndex);
+      if (declTitle) return declTitle;
+    }
+  }
+
+  return null;
+};
+
+/**
  * @param {string} storyFilePath
  * @returns {Array<{ id: string, title: string, name: string }>}
  */
@@ -36,12 +148,8 @@ const getStoriesOfFile = storyFilePath => {
   if (!fs.existsSync(absolutePath)) return []; // The file was deleted.
 
   const source = fs.readFileSync(absolutePath, 'utf8');
-  // Stories are declared with `export default { title: '...' }`.
-  const titleMatch = source.match(
-    /export\s+default\s+{[^}]*?title:\s*(['"`])(.+?)\1/s
-  );
-  if (!titleMatch) return [];
-  const title = titleMatch[2];
+  const title = extractStoryTitle(source);
+  if (!title) return [];
 
   const stories = [];
   const exportRegex = /^export\s+(?:const|function)\s+([A-Za-z0-9_$]+)/gm;
@@ -98,7 +206,7 @@ const main = (branch, commitSha) => {
     .filter(
       filePath =>
         filePath.startsWith(STORIES_PATH_IN_REPOSITORY) &&
-        filePath.endsWith('.stories.js')
+        /\.stories\.(js|jsx|ts|tsx)$/.test(filePath)
     )
     .flatMap(getStoriesOfFile);
 

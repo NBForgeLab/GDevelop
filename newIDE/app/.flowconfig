@@ -34,7 +34,7 @@ flow-libs
 [options]
 module.ignore_non_literal_requires=true
 # Text files imported as strings (see vite.config.mjs).
-module.name_mapper='^\(.*\)\.\(md\|d\.ts\)$' -> '<PROJECT_ROOT>/src/Utils/RawTextFileStub.js'
+module.name_mapper='^\(.*\)\.\(md\|d\.ts\)$' -> '<PROJECT_ROOT>/src/Utils/RawTextFileStub'
 sharedmemory.hash_table_pow=22
 
 [lints]

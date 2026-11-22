@@ -1,18 +1,14 @@
-/**
- * Wildcard ambient typings for unmigrated Flow modules and static assets.
- * Allows migrated TypeScript files to import unmigrated Flow subsystems as 'any'.
- * As modules are migrated to TypeScript, these wildcard declarations are superseded by real types.
- */
+// Ambient typings for unmigrated top-level Flow subsystems, untyped third-party
+// packages, and static assets.
+//
+// NOTE: TypeScript only allows at most a single `*` wildcard in ambient module
+// names (no double-wildcard `*/Foo/*` patterns - TS5061) and forbids relative
+// specifiers (`./` or `../` - TS2436). For individual unmigrated Flow modules
+// imported by TypeScript files, author a companion `.d.ts` file next to the
+// `.js` module instead of adding entries here.
 
-// Visual editors and major panels
+// Top-level unmigrated Flow directory entrypoints (single wildcard only)
 declare module '*/MainFrame' {
-  const content: any;
-  export default content;
-}
-declare module '*/MainFrame/*' {
-  export const getInitialPreferences: any;
-  export const loadPreferencesFromLocalStorage: any;
-  export type AlertMessageIdentifier = string;
   const content: any;
   export default content;
 }
@@ -20,15 +16,7 @@ declare module '*/SceneEditor' {
   const content: any;
   export default content;
 }
-declare module '*/SceneEditor/*' {
-  const content: any;
-  export default content;
-}
 declare module '*/EventsSheet' {
-  const content: any;
-  export default content;
-}
-declare module '*/EventsSheet/*' {
   const content: any;
   export default content;
 }
@@ -36,15 +24,7 @@ declare module '*/AssetStore' {
   const content: any;
   export default content;
 }
-declare module '*/AssetStore/*' {
-  const content: any;
-  export default content;
-}
 declare module '*/ObjectEditor' {
-  const content: any;
-  export default content;
-}
-declare module '*/ObjectEditor/*' {
   const content: any;
   export default content;
 }
@@ -52,15 +32,7 @@ declare module '*/ExportAndShare' {
   const content: any;
   export default content;
 }
-declare module '*/ExportAndShare/*' {
-  const content: any;
-  export default content;
-}
 declare module '*/InstancesEditor' {
-  const content: any;
-  export default content;
-}
-declare module '*/InstancesEditor/*' {
   const content: any;
   export default content;
 }
@@ -68,15 +40,7 @@ declare module '*/GameDashboard' {
   const content: any;
   export default content;
 }
-declare module '*/GameDashboard/*' {
-  const content: any;
-  export default content;
-}
 declare module '*/Debugger' {
-  const content: any;
-  export default content;
-}
-declare module '*/Debugger/*' {
   const content: any;
   export default content;
 }
@@ -84,15 +48,7 @@ declare module '*/AiGeneration' {
   const content: any;
   export default content;
 }
-declare module '*/AiGeneration/*' {
-  const content: any;
-  export default content;
-}
 declare module '*/BehaviorsEditor' {
-  const content: any;
-  export default content;
-}
-declare module '*/BehaviorsEditor/*' {
   const content: any;
   export default content;
 }
@@ -100,15 +56,7 @@ declare module '*/ResourcesList' {
   const content: any;
   export default content;
 }
-declare module '*/ResourcesList/*' {
-  const content: any;
-  export default content;
-}
 declare module '*/VariablesList' {
-  const content: any;
-  export default content;
-}
-declare module '*/VariablesList/*' {
   const content: any;
   export default content;
 }
@@ -116,42 +64,9 @@ declare module '*/PropertiesEditor' {
   const content: any;
   export default content;
 }
-declare module '*/PropertiesEditor/*' {
-  const content: any;
-  export default content;
-}
 declare module '*/EditorFunctions' {
   const content: any;
   export default content;
-}
-declare module '*/EditorFunctions/*' {
-  const content: any;
-  export default content;
-}
-declare module '*/Analytics/*' {
-  const content: any;
-  export const sendErrorMessage: any;
-  export default content;
-}
-declare module './Analytics/*' {
-  const content: any;
-  export const sendErrorMessage: any;
-  export default content;
-}
-declare module '*/GDevelopServices/*' {
-  const content: any;
-  export const addGDevelopResourceJwtTokenToUrl: (url: string) => string;
-  export default content;
-}
-declare module './GDevelopServices/*' {
-  const content: any;
-  export const addGDevelopResourceJwtTokenToUrl: (url: string) => string;
-  export default content;
-}
-
-declare module 'slugs' {
-  function slugs(str: string, separator?: string): string;
-  export default slugs;
 }
 
 declare module '*/locales/LocalesMetadata' {
@@ -163,6 +78,12 @@ declare module '*/locales/LocalesMetadata' {
   }
   const content: LocaleMetadata[];
   export default content;
+}
+
+// Untyped third-party npm packages
+declare module 'slugs' {
+  function slugs(str: string, separator?: string): string;
+  export default slugs;
 }
 
 declare module '@lingui/macro' {
@@ -198,205 +119,6 @@ declare module 'classnames' {
   export default classNames;
 }
 
-declare module '*/Menu/Menu.flow' {
-  export type MenuItemTemplate =
-    | {
-        id?: string;
-        label: string;
-        visible?: boolean;
-        enabled?: boolean;
-        disabled?: boolean;
-        click?: (() => void | Promise<void>) | null;
-        accelerator?: string;
-      }
-    | {
-        id?: string;
-        label: string;
-        submenu: Array<MenuItemTemplate>;
-      }
-    | {
-        id?: string;
-        type: 'checkbox';
-        label: string;
-        visible?: boolean;
-        enabled?: boolean;
-        checked: boolean;
-        click?: (() => void | Promise<void>) | null;
-      }
-    | {
-        type: 'separator';
-      };
-  const content: any;
-  export default content;
-}
-declare module './Menu/Menu.flow' {
-  export type MenuItemTemplate =
-    | {
-        id?: string;
-        label: string;
-        visible?: boolean;
-        enabled?: boolean;
-        disabled?: boolean;
-        click?: (() => void | Promise<void>) | null;
-        accelerator?: string;
-      }
-    | {
-        id?: string;
-        label: string;
-        submenu: Array<MenuItemTemplate>;
-      }
-    | {
-        id?: string;
-        type: 'checkbox';
-        label: string;
-        visible?: boolean;
-        enabled?: boolean;
-        checked: boolean;
-        click?: (() => void | Promise<void>) | null;
-      }
-    | {
-        type: 'separator';
-      };
-  const content: any;
-  export default content;
-}
-
-declare module '*/Responsive/ResponsiveWindowMeasurer' {
-  export type WindowSizeType = 'small' | 'medium' | 'large' | 'xlarge';
-  export interface WindowSize {
-    windowSize: WindowSizeType;
-    isMobile: boolean;
-    isMediumScreen: boolean;
-    isLandscape: boolean;
-  }
-  export const useResponsiveWindowSize: () => WindowSize;
-  const content: any;
-  export default content;
-}
-declare module './Responsive/ResponsiveWindowMeasurer' {
-  export type WindowSizeType = 'small' | 'medium' | 'large' | 'xlarge';
-  export interface WindowSize {
-    windowSize: WindowSizeType;
-    isMobile: boolean;
-    isMediumScreen: boolean;
-    isLandscape: boolean;
-  }
-  export const useResponsiveWindowSize: () => WindowSize;
-  const content: any;
-  export default content;
-}
-
-declare module '*/UI/AcceleratorString' {
-  export const adaptAcceleratorString: (accelerator: string) => string;
-}
-declare module './AcceleratorString' {
-  export const adaptAcceleratorString: (accelerator: string) => string;
-}
-declare module '*/UI/Tooltip' {
-  export const tooltipEnterDelay: number;
-}
-declare module './Tooltip' {
-  export const tooltipEnterDelay: number;
-}
-declare module '*/UI/Theme' {
-  export type GDevelopTheme = any;
-  const content: any;
-  export default content;
-}
-declare module './Theme' {
-  export type GDevelopTheme = any;
-  const content: any;
-  export default content;
-}
-declare module '*/Utils/i18n/MessageDescriptor.flow' {
-  export type MessageDescriptor = string | { [key: string]: any };
-}
-declare module '../Utils/i18n/MessageDescriptor.flow' {
-  export type MessageDescriptor = string | { [key: string]: any };
-}
-declare module '*/Utils/HelpLink' {
-  export const getHelpLink: (path: string, anchor?: string) => string;
-  const content: any;
-  export default content;
-}
-declare module '../../Utils/HelpLink' {
-  export const getHelpLink: (path: string, anchor?: string) => string;
-  const content: any;
-  export default content;
-}
-declare module '*/Utils/Window' {
-  const content: any;
-  export default content;
-}
-declare module '../../Utils/Window' {
-  const content: any;
-  export default content;
-}
-declare module '*/UI/Text' {
-  const content: any;
-  export default content;
-}
-declare module './Text' {
-  const content: any;
-  export default content;
-}
-declare module '*/UI/Paper' {
-  const content: any;
-  export default content;
-}
-declare module './Paper' {
-  const content: any;
-  export default content;
-}
-declare module '*/UI/Theme/GDevelopThemeContext' {
-  const content: any;
-  export default content;
-}
-declare module './Theme/GDevelopThemeContext' {
-  const content: any;
-  export default content;
-}
-
-declare module '*/UI/Alert/useAlertDialog' {
-  export interface ConfirmOptions {
-    title: any;
-    message: any;
-    confirmButtonLabel?: any;
-    dismissButtonLabel?: any;
-  }
-  const useAlertDialog: () => {
-    showAlert: (options: any) => Promise<void>;
-    showConfirmation: (options: ConfirmOptions) => Promise<boolean>;
-    showDeleteConfirmation: (options: any) => Promise<boolean>;
-    showYesNoCancel: (options: any) => Promise<boolean>;
-  };
-  export default useAlertDialog;
-}
-declare module './Alert/useAlertDialog' {
-  export interface ConfirmOptions {
-    title: any;
-    message: any;
-    confirmButtonLabel?: any;
-    dismissButtonLabel?: any;
-  }
-  const useAlertDialog: () => {
-    showAlert: (options: any) => Promise<void>;
-    showConfirmation: (options: ConfirmOptions) => Promise<boolean>;
-    showDeleteConfirmation: (options: any) => Promise<boolean>;
-    showYesNoCancel: (options: any) => Promise<boolean>;
-  };
-  export default useAlertDialog;
-}
-
-declare module '*/UI/TutorialButton' {
-  const content: any;
-  export default content;
-}
-declare module './TutorialButton' {
-  const content: any;
-  export default content;
-}
-
 // Media and static assets
 declare module '*.svg' {
   const content: any;
@@ -415,7 +137,7 @@ declare module '*.css' {
   export default content;
 }
 
-// Test libraries
+// Test and UI libraries without bundled TypeScript declarations
 declare module 'react-test-renderer' {
   export const act: (callback: () => void | Promise<void>) => any;
   const content: any;

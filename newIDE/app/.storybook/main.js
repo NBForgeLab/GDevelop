@@ -91,7 +91,7 @@ module.exports = {
 
     // Web workers.
     config.module.rules.push({
-      test: /\.worker\.js$/,
+      test: /\.worker\.(js|ts)$/,
       use: {
         loader: require.resolve('worker-loader'),
         options: {

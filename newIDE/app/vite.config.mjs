@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineConfig } from 'vite';
+import { defineConfig, transformWithEsbuild } from 'vite';
 import react from '@vitejs/plugin-react';
 import commonjs from 'vite-plugin-commonjs';
 import {
@@ -37,15 +37,33 @@ const gdjsForWebAppDir = path.join(
   'GDJS-for-web-app-only'
 );
 
+const resolveSourceFile = (
+  basePathWithoutExt,
+  extensions = ['.tsx', '.ts', '.jsx', '.js']
+) => {
+  for (const ext of extensions) {
+    const candidate = `${basePathWithoutExt}${ext}`;
+    if (fs.existsSync(path.join(appDir, candidate))) {
+      return candidate;
+    }
+  }
+  return `${basePathWithoutExt}.js`;
+};
+
 const WORKER_FACTORY_SUFFIXES = [
-  path.join('src', 'Utils', 'BackgroundSerializerWorkerFactory.js'),
+  path.join('src', 'Utils', 'BackgroundSerializerWorkerFactory'),
   path.join(
     'src',
     'ResourcesList',
     'ResourcePreview',
-    'Resource3DPreviewWorkerFactory.js'
+    'Resource3DPreviewWorkerFactory'
   ),
 ];
+const isWorkerFactoryPath = filePath =>
+  WORKER_FACTORY_SUFFIXES.some(
+    suffix =>
+      filePath.endsWith(`${suffix}.js`) || filePath.endsWith(`${suffix}.ts`)
+  );
 const CLASSIC_WORKER_PREFIX = '/@gdevelop-classic-worker/';
 const VIRTUAL_CLASSIC_WORKER_FACTORY_PREFIX =
   '\0gdevelop-classic-worker-factory:';
@@ -63,11 +81,11 @@ const REACT_VIRTUALIZED_BAD_IMPORT =
 const COMMONJS_SOURCE_PATTERNS = [
   LOCALES_PATH_RE,
   /[\\/]node_modules[\\/]GDJS-for-web-app-only[\\/]/,
-  /[\\/]src[\\/]GameEngineFinder[\\/]LocalGDJSFinder\.js$/,
-  /[\\/]src[\\/]JsExtensionsLoader[\\/](LocalJsExtensionsFinder|LocalJsExtensionsLoader|BrowserJsExtensionsLoader|index)\.js$/,
-  /[\\/]src[\\/]Utils[\\/](MapFor|OptionalRequire)\.js$/,
-  /[\\/]src[\\/]GameDashboard[\\/]PublicGameProperties\.js$/,
-  /[\\/]src[\\/]EventsSheet[\\/]EventsTree[\\/]TextRenderer[\\/]EventScriptTestHelpers\.js$/,
+  /[\\/]src[\\/]GameEngineFinder[\\/]LocalGDJSFinder\.(js|ts|tsx)$/,
+  /[\\/]src[\\/]JsExtensionsLoader[\\/](LocalJsExtensionsFinder|LocalJsExtensionsLoader|BrowserJsExtensionsLoader|index)\.(js|ts|tsx)$/,
+  /[\\/]src[\\/]Utils[\\/](MapFor|OptionalRequire)\.(js|ts|tsx)$/,
+  /[\\/]src[\\/]GameDashboard[\\/]PublicGameProperties\.(js|ts|tsx)$/,
+  /[\\/]src[\\/]EventsSheet[\\/]EventsTree[\\/]TextRenderer[\\/]EventScriptTestHelpers\.(js|ts|tsx)$/,
 ];
 
 const isExplicitCommonJsModule = id => {
@@ -97,7 +115,8 @@ const renderViteIndexHtml = ({ publicUrl }) => {
   const htmlWithPublicUrl = template.replace(/%PUBLIC_URL%/g, publicUrl);
   const globalShimScript =
     '<script>if(typeof globalThis.global==="undefined"){globalThis.global=globalThis;}if(typeof globalThis.process==="undefined"){globalThis.process={env:{},cwd:function(){return "/";}};}if(typeof globalThis.__dirname==="undefined"){globalThis.__dirname="/";}if(typeof globalThis.__filename==="undefined"){globalThis.__filename="/index.js";}</script>';
-  const entryScript = '<script type="module" src="/src/index.js"></script>';
+  const entryPath = resolveSourceFile('src/index');
+  const entryScript = `<script type="module" src="/${entryPath}"></script>`;
 
   return htmlWithPublicUrl
     .replace('</head>', `  ${globalShimScript}\n  </head>`)
@@ -179,7 +198,7 @@ const createWorkerRedirectPlugin = ({ command }) => ({
   name: 'gdevelop-worker-redirect',
   enforce: 'pre',
   configureServer(server) {
-    server.middlewares.use((req, res, next) => {
+    server.middlewares.use(async (req, res, next) => {
       const requestPath = (req.url || '').split('?')[0];
       if (!requestPath.startsWith(CLASSIC_WORKER_PREFIX)) {
         next();
@@ -196,15 +215,34 @@ const createWorkerRedirectPlugin = ({ command }) => ({
 
       try {
         const source = fs.readFileSync(absWorkerPath, 'utf8');
-        const transformed = babelTransformSync(source, {
-          filename: absWorkerPath,
-          babelrc: false,
-          configFile: false,
-          presets: [presetFlow],
-        });
+        const isTypeScript =
+          absWorkerPath.endsWith('.ts') || absWorkerPath.endsWith('.tsx');
+        let transformedCode = source;
+        if (isTypeScript) {
+          // Use esbuild with IIFE output so classic workers never emit `export {}`
+          // (which Babel's TS preset adds for `import type`) and `using` is lowered.
+          const transformed = await transformWithEsbuild(
+            source,
+            absWorkerPath,
+            {
+              loader: absWorkerPath.endsWith('.tsx') ? 'tsx' : 'ts',
+              format: 'iife',
+              supported: { using: false },
+            }
+          );
+          transformedCode = transformed.code;
+        } else {
+          const transformed = babelTransformSync(source, {
+            filename: absWorkerPath,
+            babelrc: false,
+            configFile: false,
+            presets: [presetFlow],
+          });
+          transformedCode = (transformed && transformed.code) || source;
+        }
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-        res.end((transformed && transformed.code) || source);
+        res.end(transformedCode);
       } catch (err) {
         next(err);
       }
@@ -213,18 +251,19 @@ const createWorkerRedirectPlugin = ({ command }) => ({
   resolveId(source, importer) {
     if (!importer || !source.endsWith('.worker')) return null;
     const cleanImporter = path.resolve(importer.split('?')[0]);
-    const isWorkerFactory = WORKER_FACTORY_SUFFIXES.some(suffix =>
-      cleanImporter.endsWith(suffix)
-    );
+    const isWorkerFactory = isWorkerFactoryPath(cleanImporter);
     if (!isWorkerFactory) return null;
 
-    const resolvedWorkerPath = path.resolve(
+    const tsWorkerPath = path.resolve(
       path.dirname(cleanImporter),
-      `${source}.js`
+      `${source}.ts`
     );
+    const resolvedWorkerPath = fs.existsSync(tsWorkerPath)
+      ? tsWorkerPath
+      : path.resolve(path.dirname(cleanImporter), `${source}.js`);
     if (
       command === 'serve' &&
-      resolvedWorkerPath.endsWith('BackgroundSerializer.worker.js')
+      /BackgroundSerializer\.worker\.(js|ts)$/.test(resolvedWorkerPath)
     ) {
       const relPath = path
         .relative(appDir, resolvedWorkerPath)
@@ -340,8 +379,13 @@ const createFastFlowJsxPlugin = ({ macroFileIds, sucraseHandledIds }) => ({
 
     try {
       const isTypeScript = cleanId.endsWith('.ts') || cleanId.endsWith('.tsx');
+      const transforms = isTypeScript
+        ? cleanId.endsWith('.tsx')
+          ? ['typescript', 'jsx']
+          : ['typescript']
+        : ['flow', 'jsx'];
       const transformed = sucraseTransform(code, {
-        transforms: isTypeScript ? ['typescript', 'jsx'] : ['flow', 'jsx'],
+        transforms,
         jsxRuntime: 'classic',
         disableESTransforms: true,
         filePath: cleanId,
@@ -560,9 +604,9 @@ export default defineConfig(({ command, mode }) => {
       preTransformRequests: true,
       warmup: {
         clientFiles: [
-          './src/index.js',
-          './src/BrowserApp.js',
-          './src/MainFrame/index.js',
+          `./${resolveSourceFile('src/index')}`,
+          `./${resolveSourceFile('src/BrowserApp')}`,
+          `./${resolveSourceFile('src/MainFrame/index')}`,
         ],
       },
       watch: {
@@ -604,7 +648,11 @@ export default defineConfig(({ command, mode }) => {
       ],
     },
     optimizeDeps: {
-      entries: ['src/index.js', 'src/BrowserApp.js', 'src/LocalApp.js'],
+      entries: [
+        resolveSourceFile('src/index'),
+        resolveSourceFile('src/BrowserApp'),
+        resolveSourceFile('src/LocalApp'),
+      ],
       esbuildOptions: {
         loader: { '.js': 'jsx' },
         plugins: [createFlowEsbuildScannerPlugin()],

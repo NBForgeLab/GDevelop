@@ -10,6 +10,7 @@
     "@babel/preset-env": "^7.22.14",
     "@babel/preset-flow": "^7.27.1",
     "@babel/preset-react": "^7.22.5",
+    "@babel/preset-typescript": "^7.29.7",
     "@lingui/cli": "^2.7.3",
     "@lingui/macro": "^2.7.3",
     "@storybook/addon-essentials": "7.4.6",
@@ -19,7 +20,10 @@
     "@storybook/react-webpack5": "7.4.6",
     "@storybook/theming": "7.4.6",
     "@svgr/webpack": "^5.5.0",
+    "@types/jest": "^27.5.2",
     "@types/node": "22.18.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.7.0",
     "adm-zip": "^0.5.10",
     "axios-mock-adapter": "^1.22.0",
@@ -46,7 +50,8 @@
     "lint-staged": "^16.2.7",
     "minimist": "1.2.5",
     "patch-package": "^6.4.7",
-    "prettier": "1.15.3",
+    "prettier": "3.4.2",
+    "prettier-legacy": "npm:prettier@1.15.3",
     "react-app-polyfill": "^3.0.0",
     "recursive-copy": "^2.0.14",
     "recursive-readdir": "^2.2.2",
@@ -132,7 +137,10 @@
     "react-dom": "$react-dom",
     "react-dnd": "14.0.5",
     "react-dnd-touch-backend": "14.1.1",
-    "dnd-core": "14.0.1"
+    "dnd-core": "14.0.1",
+    "typescript": "$typescript",
+    "@types/react": "$@types/react",
+    "@types/react-dom": "$@types/react-dom"
   },
   "scripts": {
     "postinstall": "patch-package && cd ../../GDJS && npm install && cd ../newIDE/app && npm run import-resources",
@@ -144,8 +152,8 @@
     "build": "npm run import-resources && vite build && node scripts/check-build-output.js && node scripts/make-service-worker.js --build",
     "build:dev": "npm run import-resources && vite build --mode development && node scripts/check-build-output.js && node scripts/copy-GDJS-Runtime-to-build.js && node scripts/make-service-worker.js --build",
     "preview": "vite preview --port 3000",
-    "format": "prettier --write \"src/!(locales)/**/*.js\"",
-    "check-format": "prettier --list-different \"src/!(locales)/**/*.js\"",
+    "format": "node scripts/run-prettier.js --write",
+    "check-format": "node scripts/run-prettier.js --list-different",
     "lint": "eslint src/ --max-warnings=0",
     "test": "jest --env=node",
     "test:watch": "jest --env=node --watch",
@@ -198,8 +206,8 @@
     "overrides": [
       {
         "files": [
-          "src/stories/componentStories/**/*.stories.js",
-          "src/stories/*.stories.js"
+          "src/stories/componentStories/**/*.stories.{js,jsx,ts,tsx}",
+          "src/stories/*.stories.{js,jsx,ts,tsx}"
         ],
         "rules": {
           "import/no-anonymous-default-export": "off"
@@ -222,8 +230,12 @@
     ]
   },
   "lint-staged": {
-    "src/!(locales)/**/*.js": [
-      "prettier --write",
+    "src/!(locales)/**/*.{js,jsx,ts,tsx}": [
+      "node scripts/run-prettier.js --write",
+      "eslint --max-warnings=0"
+    ],
+    "src/*.{ts,tsx}": [
+      "node scripts/run-prettier.js --write",
       "eslint --max-warnings=0"
     ]
   },

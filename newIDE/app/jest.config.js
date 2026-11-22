@@ -1,10 +1,17 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+
+const setupTestsPath = fs.existsSync(path.join(__dirname, 'src', 'setupTests.ts'))
+  ? '<rootDir>/src/setupTests.ts'
+  : '<rootDir>/src/setupTests.js';
+
 module.exports = {
   roots: ['<rootDir>/src'],
   collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}', '!src/**/*.d.ts'],
   setupFiles: ['react-app-polyfill/jsdom'],
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
+  setupFilesAfterEnv: [setupTestsPath],
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
     '<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}',

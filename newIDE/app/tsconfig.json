@@ -29,5 +29,8 @@
   "include": [
     "src/**/*",
     "../../GDevelop.js/types.d.ts"
+  ],
+  "exclude": [
+    "src/EditorFunctions/PublicApi/**/*.d.ts"
   ]
 }

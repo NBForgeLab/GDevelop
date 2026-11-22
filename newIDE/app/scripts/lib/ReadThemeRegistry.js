@@ -9,7 +9,11 @@ function matchAll(pattern, input) {
 }
 
 module.exports = () => {
-  const registryFileContents = fs.readFileSync(path.resolve(dir, './ThemeRegistry.js')).toString();
+  const tsRegistryPath = path.resolve(dir, './ThemeRegistry.ts');
+  const registryPath = fs.existsSync(tsRegistryPath)
+    ? tsRegistryPath
+    : path.resolve(dir, './ThemeRegistry.js');
+  const registryFileContents = fs.readFileSync(registryPath).toString();
 
   return matchAll(/\['(.*)']: (.*),/, registryFileContents)
     .map(it => {

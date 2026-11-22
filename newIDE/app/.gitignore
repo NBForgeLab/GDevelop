@@ -1,5 +1,7 @@
 # Generated files
 src/Version/VersionMetadata.js
+src/Version/VersionMetadata.ts
+src/Version/VersionMetadata.js.flow
 src/Version/VersionMetadata.json
 public/service-worker.js
 
