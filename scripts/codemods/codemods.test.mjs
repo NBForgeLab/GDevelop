@@ -327,8 +327,11 @@ export default React.forwardRef<Props, HTMLDivElement>((props, ref) => <div />);
   assert.ok(stub.code.includes("import * as React from 'react';"));
   assert.ok(stub.code.includes("import { type UsedType } from './Used';"));
   assert.ok(!stub.code.includes('Unused'));
-  assert.match(stub.code, /declare export var helper: any;/);
-  assert.match(stub.code, /declare export default React\.ComponentType<Props>;/);
+  assert.match(stub.code, /declare export var helper: \(a: string\) => number;/);
+  assert.match(
+    stub.code,
+    /declare export default React\.ComponentType<\{ \.\.\.Props, \+ref\?: React\.RefSetter<HTMLDivElement> \}>;/
+  );
 });
 
 test('Stage 3 migrateSingleFile handles write-mode rename, snapshot rename, companion .d.ts cleanup, and .js.flow stub', async () => {
@@ -436,69 +439,174 @@ const p = global.gd.ProjectHelper.createNewGDJSProject();
   assert.match(s2.code, /\(\(global as any\)\.gd as libGDevelop\)\.ProjectHelper\.createNewGDJSProject\(\)/);
 });
 
-test('End-to-end CLI dry-run succeeds with 0 tsc errors on clean GDevelop leaf files', () => {
-  const out = execFileSync(
-    process.execPath,
-    [
-      path.join(REPO_ROOT, 'scripts/codemods/migrate-file.mjs'),
-      '--dry-run',
-      '--strict-tsc',
-      'src/Utils/Filename.js',
-      'src/AiGeneration/AiAttachments/UseFileDropZone.js',
-      'src/UI/ScrollView.js',
-    ],
-    { cwd: REPO_ROOT, encoding: 'utf8' }
-  );
-  assert.match(out, /Filename\.js -> .*Filename\.ts/);
-  assert.match(out, /UseFileDropZone\.js -> .*UseFileDropZone\.ts/);
-  assert.match(out, /ScrollView\.js -> .*ScrollView\.tsx \(forwardRefSwapped=1/);
+test('End-to-end CLI dry-run succeeds with 0 tsc errors on self-contained Flow fixtures', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gd-codemod-cli-'));
+  try {
+    const leafFile = path.join(tmpDir, 'CleanLeaf.js');
+    const jsxFile = path.join(tmpDir, 'Widget.js');
+
+    fs.writeFileSync(
+      leafFile,
+      `// @flow
+export const sanitize = (name: string): string => name.trim();
+export const makePairs = <T>(items: Array<T>): Array<[T, number]> =>
+  items.map((item, idx) => [item, idx]);
+`,
+      'utf8'
+    );
+    fs.writeFileSync(
+      jsxFile,
+      `// @flow
+type Props = {| label: string |};
+type WidgetRef = {| focus: () => void |};
+declare var React: {
+  forwardRef: <P, R>(fn: (props: P, ref: any) => any) => any,
+};
+export default React.forwardRef<Props, WidgetRef>((props, ref) => (
+  <div>{props.label}</div>
+));
+`,
+      'utf8'
+    );
+
+    const out = execFileSync(
+      process.execPath,
+      [
+        path.join(REPO_ROOT, 'scripts/codemods/migrate-file.mjs'),
+        '--dry-run',
+        '--strict-tsc',
+        leafFile,
+      ],
+      { cwd: REPO_ROOT, encoding: 'utf8' }
+    );
+    assert.match(out, /CleanLeaf\.js -> .*CleanLeaf\.ts/);
+
+    const jsxOut = execFileSync(
+      process.execPath,
+      [
+        path.join(REPO_ROOT, 'scripts/codemods/migrate-file.mjs'),
+        '--dry-run',
+        '--no-tsc',
+        jsxFile,
+      ],
+      { cwd: REPO_ROOT, encoding: 'utf8' }
+    );
+    assert.match(jsxOut, /Widget\.js -> .*Widget\.tsx \(forwardRefSwapped=1/);
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
 });
 
-test('End-to-end CLI dry-run prunes unneeded @ts-expect-error [flow-migrated] directives', () => {
-  const out = execFileSync(
-    process.execPath,
-    [
-      path.join(REPO_ROOT, 'scripts/codemods/migrate-file.mjs'),
-      '--dry-run',
-      'src/CommandPalette/CommandManager.js',
-    ],
-    { cwd: REPO_ROOT, encoding: 'utf8' }
-  );
-  assert.match(
-    out,
-    /CommandManager\.js -> .*CommandManager\.ts .*suppressions=1, prunedUnused=1/
-  );
+test('End-to-end CLI dry-run prunes unneeded @ts-expect-error [flow-migrated] directives and preserves human reasons', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gd-codemod-prune-'));
+  try {
+    const file = path.join(tmpDir, 'PruneTarget.js');
+    fs.writeFileSync(
+      file,
+      `// @flow
+export const run = (items: Array<string>): number => {
+  // $FlowFixMe[incompatible-type]
+  const n: number = items.length;
+  // $FlowIgnore - cannot be empty in practice.
+  const first: string | undefined = items[0];
+  return first ? n : 0;
+};
+`,
+      'utf8'
+    );
+
+    const out = execFileSync(
+      process.execPath,
+      [
+        path.join(REPO_ROOT, 'scripts/codemods/migrate-file.mjs'),
+        '--dry-run',
+        '--strict-tsc',
+        file,
+      ],
+      { cwd: REPO_ROOT, encoding: 'utf8' }
+    );
+    assert.match(
+      out,
+      /PruneTarget\.js -> .*PruneTarget\.ts .*suppressions=2, prunedUnused=2/
+    );
+
+    const stdoutCode = execFileSync(
+      process.execPath,
+      [
+        path.join(REPO_ROOT, 'scripts/codemods/migrate-file.mjs'),
+        '--stdout',
+        file,
+      ],
+      { cwd: REPO_ROOT, encoding: 'utf8' }
+    );
+    assert.ok(!stdoutCode.includes('@ts-expect-error'));
+    assert.ok(stdoutCode.includes('// cannot be empty in practice.'));
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
 });
 
 test('Stage 1 + Stage 2 prevent <// TSX lexer collisions, preserve forwardRef type-arg comments, and map import { type Element } from react', () => {
-  const edgeFiles = [
-    'newIDE/app/src/ObjectEditor/ObjectExporterDialog.js',
-    'newIDE/app/src/ProjectsStorage/DownloadFileStorageProvider/DownloadFileSaveAsDialog.js',
-    'newIDE/app/src/UI/Search/BoxSearchResults.js',
-    'newIDE/app/src/index.js',
+  const fixtures = [
+    {
+      name: 'angle-bracket-comment',
+      src: `// @flow
+import * as React from 'react';
+export const Demo = () => {
+  const [val, setVal] = React.useState<// $FlowFixMe[incompatible-type]
+    ?string>(null);
+  return <div>{val}</div>;
+};
+`,
+    },
+    {
+      name: 'forwardRef-with-comments',
+      src: `// @flow
+import * as React from 'react';
+type BoxSearchResultsInterface = {| focus: () => void |};
+type Props<T> = {| items: Array<T> |};
+type SearchItem = {| id: string |};
+export default React.forwardRef<
+  // $FlowFixMe[incompatible-type] - generic props workaround
+  // $FlowFixMe[cannot-resolve-name]
+  Props<SearchItem>,
+  BoxSearchResultsInterface
+>((props, ref) => <div />);
+`,
+    },
+    {
+      name: 'react-element-import',
+      src: `// @flow
+import React, { Component, type Element } from 'react';
+let App: ?Element<any>;
+export class Root extends Component<{}> {
+  render() {
+    return App;
+  }
+}
+`,
+    },
   ];
 
-  for (const relPath of edgeFiles) {
-    const absPath = path.join(REPO_ROOT, relPath);
-    const src = fs.readFileSync(absPath, 'utf8');
+  for (const { name, src } of fixtures) {
     const s1 = convertFlowAstToTsAst(src);
-    assert.ok(!s1.code.includes('<//'), `${relPath} Stage 1 must not contain <//`);
+    assert.ok(!s1.code.includes('<//'), `${name} Stage 1 must not contain <//`);
     parseAsTypeScript(s1.code, s1.hasJsx);
 
     const s2 = postprocessTypeScriptSource(s1.code, {
       swapForwardRef: true,
       useJsx: s1.hasJsx,
     });
-    assert.ok(!s2.code.includes('<//'), `${relPath} Stage 2 must not contain <//`);
+    assert.ok(!s2.code.includes('<//'), `${name} Stage 2 must not contain <//`);
     parseAsTypeScript(s2.code, s1.hasJsx);
 
-    if (relPath.endsWith('BoxSearchResults.js')) {
+    if (name === 'forwardRef-with-comments') {
       assert.match(
         s2.code,
         /React\.forwardRef<\s*BoxSearchResultsInterface,\s*\/\/ @ts-expect-error \[flow-migrated: incompatible-type\][^\n]*\s*\/\/ @ts-expect-error \[flow-migrated: cannot-resolve-name\]\s*Props<SearchItem>\s*>/
       );
     }
-    if (relPath.endsWith('index.js')) {
+    if (name === 'react-element-import') {
       assert.match(
         s2.code,
         /import React, \{ Component, type ReactElement \} from ['"]react['"];/
@@ -625,52 +733,90 @@ export type ExportedAreaKey = $Keys<typeof exportedAreaMap>;
     /declare export var exportedAreaMap: \{\| GENERAL: any, SCENE: any \|\};/
   );
 
-  const realEdgeStubFiles = [
-    'newIDE/app/src/CommandPalette/CommandPalette/FilterOptions.js',
-    'newIDE/app/src/EventsSheet/InstructionEditor/InstructionOrExpressionSelector/index.js',
-    'newIDE/app/src/UI/Slider.js',
-    'newIDE/app/src/UI/SortableVirtualizedItemList/ItemRow.js',
-    'newIDE/app/src/Utils/Memoize.js',
-    'newIDE/app/src/Utils/WithTemporaryResource.js',
-    'newIDE/app/src/UI/EditorBottomTabsSwitcher.js',
-    'newIDE/app/src/UI/SortableVirtualizedItemList/index.js',
-    'newIDE/app/src/ResourcesLoader/index.js',
-    'newIDE/app/src/ObjectsRendering/Renderers/RenderedIconInstance.js',
-    'newIDE/app/src/Utils/GDevelopServices/Usage.js',
-    'newIDE/app/src/CommandPalette/CommandsList.js',
+  const edgeStubFixtures = [
+    {
+      name: 'unexported-local-class',
+      src: `// @flow
+class UrlsCache {
+  get(key: string): ?string { return null; }
+}
+export default class Loader {
+  static _cache: UrlsCache;
+}
+`,
+    },
+    {
+      name: 'generic-default-component',
+      src: `// @flow
+import * as React from 'react';
+type Props<TabName: string> = {| current: TabName |};
+const Switcher = <TabName: string>({ current }: Props<TabName>): React.Node => <div>{current}</div>;
+export default Switcher;
+`,
+    },
+    {
+      name: 'generic-class-component',
+      src: `// @flow
+import * as React from 'react';
+type Props<Item> = {| items: Array<Item> |};
+export default class SortableVirtualizedItemList<Item> extends React.Component<Props<Item>> {
+  focus(): void {}
+  render() { return null; }
+}
+`,
+    },
+    {
+      name: 'return-suppression-fn',
+      src: `// @flow
+class RenderedIconInstance {}
+export default function makeRenderer(
+  iconPath: string
+  // $FlowFixMe[cannot-resolve-name]
+): typeof RenderedIconInstance {
+  return RenderedIconInstance;
+}
+`,
+    },
+    {
+      name: 'top-level-var-suppression',
+      src: `// @flow
+// $FlowFixMe[cannot-resolve-name]
+export const apiClient: Axios = (null: any);
+`,
+    },
   ];
 
-  for (const relPath of realEdgeStubFiles) {
-    const absPath = path.join(REPO_ROOT, relPath);
-    const src = fs.readFileSync(absPath, 'utf8');
+  for (const { name, src } of edgeStubFixtures) {
     const stub = generateFlowStub(src, { phase: 2 });
     parser.parse(stub.code, {
       sourceType: 'module',
       plugins: FLOW_PARSER_PLUGINS,
     });
 
-    if (relPath.endsWith('ResourcesLoader/index.js')) {
+    if (name === 'unexported-local-class') {
       assert.match(stub.code, /declare class UrlsCache \{/);
     }
-    if (relPath.endsWith('EditorBottomTabsSwitcher.js')) {
+    if (name === 'generic-default-component') {
       assert.match(
         stub.code,
         /declare export default \(<TabName: string>\(arg0: Props<TabName>\) => React\.Node\);/
       );
     }
-    if (relPath.endsWith('SortableVirtualizedItemList/index.js')) {
+    if (name === 'generic-class-component') {
       assert.match(
         stub.code,
-        /declare export default class SortableVirtualizedItemList<Item> extends React\.Component<\s*Props<Item>\s*> \{/
+        /declare export default class SortableVirtualizedItemList<Item> extends React\.Component<Props<Item>> \{/
       );
+      assert.ok(stub.code.includes('focus(): void;'));
+      assert.ok(!stub.code.includes('render('));
     }
-    if (relPath.endsWith('RenderedIconInstance.js')) {
+    if (name === 'return-suppression-fn') {
       assert.match(
         stub.code,
         /\/\/ \$FlowFixMe\[cannot-resolve-name\]\ndeclare export default function makeRenderer\(iconPath: string\): typeof RenderedIconInstance;/
       );
     }
-    if (relPath.endsWith('Usage.js')) {
+    if (name === 'top-level-var-suppression') {
       assert.match(
         stub.code,
         /\/\/ \$FlowFixMe\[cannot-resolve-name\]\ndeclare export var apiClient: Axios;/
@@ -737,4 +883,180 @@ class MyDebugger extends React.Component<any, any> {
     !s2.code.includes('missing-local-annot'),
     'Consumed missing-local-annot suppressions should not remain as unused @ts-expect-error directives'
   );
+});
+
+test('Stage 1 generateFlowStub infers exported arrow functions, void blocks, React helper guards, forwardRef Ref, class components, destructured exports, import typeof, and pure LF', () => {
+  const src = [
+    '// @flow',
+    "import { Component } from 'react';",
+    "import typeof { FooService, UnusedService } from './Services';",
+    '',
+    'type Props = {| title: string |};',
+    'type State = {| open: boolean |};',
+    'type RefApi = {| focus: () => void |};',
+    'const baseFactor: number = 2;',
+    'export const zoomInFactor = baseFactor;',
+    'export const safelyDo = async <T>(fn: () => Promise<T>): Promise<T> => fn();',
+    'export const openUrl = (url: string) => { console.log(url); };',
+    'export const implicitExpr = (x: number) => x + 1;',
+    'export const create = (props: Props): React.Node => null;',
+    'export const renderIcon = (name: string, size: number): React.Node => null;',
+    'export const Widget = ({ title }: Props): React.Node => null;',
+    'export const ForwardedWidget = React.forwardRef<Props, RefApi>((props, ref) => null);',
+    'export const { destructuredA, destructuredB } = (null: any);',
+    'export const svcRef: FooService = (null: any);',
+    'class LocalHelper { ping(x: string) { console.log(x); } }',
+    'export { LocalHelper };',
+    'export default class Panel extends Component<Props, State> {',
+    '  state = { open: false };',
+    '  focus() { console.log("focus"); }',
+    '  static defaultProps = { title: "hi" };',
+    '  render() { return null; }',
+    '}',
+  ].join('\r\n');
+
+  const stub = generateFlowStub(src, { phase: 1 });
+  assert.ok(!stub.code.includes('\r'), 'Stub must use pure LF line endings');
+  parser.parse(stub.code, {
+    sourceType: 'module',
+    plugins: FLOW_PARSER_PLUGINS,
+  });
+
+  // React namespace import auto-injected because source only had named `{ Component }`
+  assert.ok(stub.code.includes("import * as React from 'react';"));
+  // Partial `import typeof` preserves `typeof`
+  assert.ok(stub.code.includes("import typeof { FooService } from './Services';"));
+  assert.ok(!stub.code.includes('UnusedService'));
+
+  assert.ok(stub.code.includes('declare export var zoomInFactor: number;'));
+  assert.ok(
+    stub.code.includes(
+      'declare export var safelyDo: <T>(fn: () => Promise<T>) => Promise<T>;'
+    )
+  );
+  // Void block vs expression-body arrow
+  assert.ok(
+    stub.code.includes('declare export var openUrl: (url: string) => void;')
+  );
+  assert.ok(
+    stub.code.includes('declare export var implicitExpr: (x: number) => any;')
+  );
+  // Lowercase & multi-arg React.Node helpers MUST stay callable function types, NOT ComponentType
+  assert.ok(
+    stub.code.includes('declare export var create: (props: Props) => React.Node;')
+  );
+  assert.ok(
+    stub.code.includes(
+      'declare export var renderIcon: (name: string, size: number) => React.Node;'
+    )
+  );
+  // PascalCase 1-arg component emits ComponentType<Props>
+  assert.ok(
+    stub.code.includes('declare export var Widget: React.ComponentType<Props>;')
+  );
+  // forwardRef preserves Ref type parameter via Flow 0.299 RefSetter
+  assert.ok(
+    stub.code.includes(
+      'declare export var ForwardedWidget: React.ComponentType<{ ...Props, +ref?: React.RefSetter<RefApi> }>;'
+    )
+  );
+  // Destructured export preserved
+  assert.ok(stub.code.includes('declare export var destructuredA: any;'));
+  assert.ok(stub.code.includes('declare export var destructuredB: any;'));
+  // Local class exported via `export { LocalHelper }`
+  assert.match(
+    stub.code,
+    /declare export class LocalHelper \{\s*ping\(x: string\): void;\s*\}/
+  );
+  // Class component preserves ref methods & static defaultProps, omits unannotated state & render
+  assert.match(
+    stub.code,
+    /declare export default class Panel extends Component<Props, State> \{/
+  );
+  assert.ok(stub.code.includes('focus(): void;'));
+  assert.ok(stub.code.includes('static defaultProps: {| title: "hi" |};'));
+  assert.ok(!stub.code.includes('state:'));
+  assert.ok(!stub.code.includes('render('));
+
+  // DOM `Node` return type without React import must NOT become React.ComponentType
+  const domSrc = `// @flow
+export const GetDomNode = (el: HTMLElement): Node => el;
+`;
+  const domStub = generateFlowStub(domSrc, { phase: 1 });
+  assert.ok(!domStub.code.includes('React'));
+  assert.ok(
+    domStub.code.includes(
+      'declare export var GetDomNode: (el: HTMLElement) => Node;'
+    )
+  );
+
+  // `export const a = ...; export default a;` and inline anonymous superclass safety
+  const reExportDefaultSrc = `// @flow
+export const primary = (x: string): number => x.length;
+export default primary;
+export class Wrapped extends class { run() {} } {
+  ping() {}
+}
+`;
+  const reExportStub = generateFlowStub(reExportDefaultSrc, { phase: 1 });
+  parser.parse(reExportStub.code, {
+    sourceType: 'module',
+    plugins: FLOW_PARSER_PLUGINS,
+  });
+  assert.ok(
+    reExportStub.code.includes('declare export default (x: string) => number;')
+  );
+  assert.match(reExportStub.code, /declare export class Wrapped \{\s*ping\(\): void;\s*\}/);
+});
+
+test('Stage 1 + Stage 2 handle trailing type comments without semicolon corruption, numeric object keys, non-return void, typeof undefined, interface extends, $Keys/$Values precedence, and styles: Object', () => {
+  const src = `// @flow
+type Operator = {
+  arity: number, // Needed by evalReversePolishNotation()
+  0: string,
+  1?: number,
+};
+
+type ExtendedIface = interface extends BaseA, BaseB {
+  extra: string,
+};
+
+type MaybeVoid = string | void;
+type MaybeTypeofUndef = string | typeof undefined;
+type UnionKeys = $Keys<A | B>;
+type KeysArray = $Keys<Foo>[];
+type UnionValues = $Values<A | B>;
+type StyleProps = {
+  style: Object,
+  styles: Object,
+};
+
+export const asyncVoid = async (): Promise<void> => {};
+export const cb: (x: string | void) => void = () => {};
+`;
+
+  const s1 = convertFlowAstToTsAst(src);
+  const s2 = postprocessTypeScriptSource(s1.code, {
+    swapForwardRef: true,
+    useJsx: s1.hasJsx,
+  });
+  parseAsTypeScript(s2.code, false);
+
+  assert.ok(
+    !s2.code.includes('evalReversePolishNotation();'),
+    'Trailing line comment must not have semicolon appended'
+  );
+  assert.ok(s2.code.includes('// Needed by evalReversePolishNotation()'));
+  assert.match(s2.code, /0:\s*string;/);
+  assert.match(s2.code, /1\?:\s*number;/);
+  assert.match(s2.code, /type ExtendedIface = BaseA & BaseB & \{/);
+  assert.match(s2.code, /type MaybeVoid = string \| undefined;/);
+  assert.match(s2.code, /type MaybeTypeofUndef = string \| undefined;/);
+  assert.match(s2.code, /type UnionKeys = keyof \(A \| B\);/);
+  assert.match(s2.code, /type KeysArray = \(keyof Foo\)\[\];/);
+  assert.match(s2.code, /type UnionValues = \(A \| B\)\[keyof \(A \| B\)\];/);
+  assert.match(s2.code, /style:\s*React\.CSSProperties;/);
+  assert.match(s2.code, /styles:\s*Record<string,\s*React\.CSSProperties>;/);
+  assert.match(s2.code, /Promise<void>/);
+  assert.match(s2.code, /cb:\s*\(x:\s*string \| undefined\) => void/);
 });

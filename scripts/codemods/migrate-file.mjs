@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -85,9 +86,12 @@ function isTestOrStoryPath(filePath) {
   );
 }
 
-function buildFlowConsumerSet() {
+function buildFlowConsumerSet(excludedFiles = new Set()) {
   const importedModules = new Set();
   if (!fs.existsSync(SRC_DIR)) return importedModules;
+
+  const normPath = (p) => path.resolve(p).replace(/\\/g, '/').toLowerCase();
+  const excludedNorm = new Set([...excludedFiles].map(normPath));
 
   const jsFiles = [];
   const walk = (dir) => {
@@ -95,15 +99,20 @@ function buildFlowConsumerSet() {
       if (entry.name === 'locales' || entry.name === 'node_modules') continue;
       const full = path.join(dir, entry.name);
       if (entry.isDirectory()) walk(full);
-      else if (entry.name.endsWith('.js') && !entry.name.endsWith('.js.flow')) {
-        jsFiles.push(full);
+      else if (
+        (entry.name.endsWith('.js') || entry.name.endsWith('.jsx')) &&
+        !entry.name.endsWith('.js.flow')
+      ) {
+        if (!excludedNorm.has(normPath(full))) {
+          jsFiles.push(full);
+        }
       }
     }
   };
   walk(SRC_DIR);
 
   const importRe =
-    /(?:import\s+(?:[^'"]*?\s+from\s+)?|export\s+[^'"]*?\s+from\s+|require\s*\(\s*)['"](\.[^'"]+)['"]/g;
+    /(?:import\s+(?:[^'"]*?\s+from\s+)?|export\s+[^'"]*?\s+from\s+|(?:require|import|jest\.(?:mock|unmock|requireActual|doMock))\s*\(\s*)['"](\.[^'"]+)['"]/g;
 
   for (const file of jsFiles) {
     const text = fs.readFileSync(file, 'utf8');
@@ -239,7 +248,13 @@ function createTsCheckerContext() {
       const targetKey = normKey(targetPath);
       virtualFiles.delete(targetKey);
       extraFiles.delete(targetPath);
-      if (replacedSourcePath) hiddenFiles.delete(normKey(replacedSourcePath));
+      if (replacedSourcePath) {
+        hiddenFiles.delete(normKey(replacedSourcePath));
+        const dtsCandidate = replacedSourcePath.replace(/\.(js|jsx)$/, '.d.ts');
+        if (dtsCandidate !== replacedSourcePath) {
+          hiddenFiles.delete(normKey(dtsCandidate));
+        }
+      }
     },
   };
 }
@@ -262,13 +277,28 @@ function pruneUnusedFlowMigratedExpectErrors(code, diagnostics) {
       unusedLines.has(lineNum) &&
       /@ts-expect-error\s+\[flow-migrated/.test(line)
     ) {
-      // If it's a standalone comment line or JSX comment `{/* @ts-expect-error ... */}`, drop the line
-      if (
-        /^\s*(?:\/\/\s*@ts-expect-error\s+\[flow-migrated[^\n]*|\{\s*\/\*\s*@ts-expect-error\s+\[flow-migrated[^*]*\*\/\s*\})\s*$/.test(
-          line
-        )
-      ) {
+      // Preserve any human explanation attached to a standalone line comment
+      const standaloneLineMatch = line.match(
+        /^(\s*)\/\/\s*@ts-expect-error\s+\[flow-migrated(?::[^\]]+)?\]\s*(?:[-:]\s*)?(.*?)\s*$/
+      );
+      if (standaloneLineMatch) {
         prunedCount++;
+        const [, indent, reason] = standaloneLineMatch;
+        if (reason) {
+          kept.push(`${indent}// ${reason}`);
+        }
+        continue;
+      }
+      // Standalone JSX comment `{/* @ts-expect-error ... */}`
+      const standaloneJsxMatch = line.match(
+        /^(\s*)\{\s*\/\*\s*@ts-expect-error\s+\[flow-migrated(?::[^\]]+)?\]\s*(?:[-:]\s*)?(.*?)\s*\*\/\s*\}\s*$/
+      );
+      if (standaloneJsxMatch) {
+        prunedCount++;
+        const [, indent, reason] = standaloneJsxMatch;
+        if (reason) {
+          kept.push(`${indent}{/* ${reason} */}`);
+        }
         continue;
       }
       // Inline trailing comment
@@ -297,15 +327,30 @@ function runStage1Khan(sourcePath, originalSource) {
       '@khanacademy/flow-to-ts is not installed in newIDE/app/node_modules. Use default --stage1=ast or install @khanacademy/flow-to-ts.'
     );
   }
-  const tmpOutput = execFileSync(
-    process.execPath,
-    [cliPath, '--write', '--inline', sourcePath],
-    { encoding: 'utf8' }
-  );
-  return {
-    code: tmpOutput || originalSource,
-    hasJsx: /<[A-Za-z>]/.test(originalSource),
-  };
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gd-khan-'));
+  try {
+    const tmpInput = path.join(tmpDir, path.basename(sourcePath));
+    fs.writeFileSync(tmpInput, originalSource, 'utf8');
+    const tmpOutput = execFileSync(
+      process.execPath,
+      [cliPath, '--write', '--inline', tmpInput],
+      { encoding: 'utf8' }
+    );
+    const writtenCandidate = [
+      tmpInput.replace(/\.(js|jsx)$/, '.tsx'),
+      tmpInput.replace(/\.(js|jsx)$/, '.ts'),
+      tmpInput,
+    ].find((p) => fs.existsSync(p));
+    const resultCode = writtenCandidate
+      ? fs.readFileSync(writtenCandidate, 'utf8')
+      : tmpOutput || originalSource;
+    return {
+      code: resultCode,
+      hasJsx: /<[A-Za-z>]/.test(originalSource),
+    };
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
 }
 
 function computeTargetPath(sourcePath, hasJsx) {
@@ -569,7 +614,9 @@ async function main() {
 
   const tsChecker = opts.useTsc ? createTsCheckerContext() : null;
   const flowConsumers =
-    opts.flowStubMode === 'auto' ? buildFlowConsumerSet() : null;
+    opts.flowStubMode === 'auto'
+      ? buildFlowConsumerSet(new Set(inputFiles))
+      : null;
   const prettierOptions = loadPrettierOptions();
 
   let totalDiagnostics = 0;

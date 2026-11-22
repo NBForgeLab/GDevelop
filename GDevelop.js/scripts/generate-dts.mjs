@@ -82,6 +82,19 @@ const extraClassAttributes = {
   ],
 };
 
+// Emscripten's WebIDL binder passes raw WASM pointers (`number`) to
+// `[JSImplementation]` callbacks that are NOT erased and hand-wrapped in C++
+// (see `DEFAULT_CLASSES_TO_ERASE` in `GDevelop.js/update-bindings.js`).
+// Currently only `InitialInstanceJSFunctor.invoke` falls into this category
+// (see `GDevelop.js/Bindings/glue.cpp`), so callers must pass its argument to
+// `gd.wrapPointer(instancePtr, gd.InitialInstance)`.
+/** @type {Record<string, Record<string, string>>} */
+const methodSignatureOverrides = {
+  InitialInstanceJSFunctor: {
+    invoke: 'invoke(instancePtr: number): void;',
+  },
+};
+
 const PrimitiveTypes = new Map([
   ['DOMString', 'string'],
   ['long', 'number'],
@@ -326,8 +339,11 @@ for (const [
           }`
     };`;
 
-    if (isFree) freeFunctions.push(`export function ${method}`);
-    methods.push(method);
+    const finalMethod =
+      methodSignatureOverrides[interfaceName]?.[methodName] ?? method;
+
+    if (isFree) freeFunctions.push(`export function ${finalMethod}`);
+    methods.push(finalMethod);
   }
 
   const explicitlyInheritedClass = bindingsFile.match(

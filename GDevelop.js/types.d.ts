@@ -1489,7 +1489,7 @@ export class InitialInstanceJSFunctorWrapper extends EmscriptenObject {}
 
 export class InitialInstanceJSFunctor extends InitialInstanceJSFunctorWrapper {
   constructor();
-  invoke(instance: InitialInstance): void;
+  invoke(instancePtr: number): void;
 }
 
 export class SerializerValue extends EmscriptenObject {

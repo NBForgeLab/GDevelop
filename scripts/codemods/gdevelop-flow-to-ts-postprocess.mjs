@@ -274,14 +274,17 @@ function stripFlowPragmasFromSource(source) {
   return { code: result, removed };
 }
 
-function transformSuppressionCommentsInSource(source) {
+function transformSuppressionCommentsInSource(
+  source,
+  parserPlugins = TS_PARSER_PLUGINS
+) {
   // Transform comment occurrences using @babel/parser comment locations so strings are untouched
   let comments = [];
   try {
     const parsed = parser.parse(source, {
       sourceType: 'unambiguous',
       tokens: false,
-      plugins: TS_PARSER_PLUGINS,
+      plugins: parserPlugins,
     });
     comments = parsed.comments || [];
   } catch {
@@ -397,11 +400,13 @@ export function postprocessTypeScriptSource(source, options = {}) {
   stats.pragmasRemoved = pragmaPass.removed;
 
   // Step 2: Transform AST using recast + @babel/parser (typescript + jsx)
+  let effectiveUseJsx = useJsx;
   let ast;
   try {
-    ast = parseTsWithRecast(current, useJsx);
+    ast = parseTsWithRecast(current, effectiveUseJsx);
   } catch (err) {
-    if (useJsx) {
+    if (effectiveUseJsx) {
+      effectiveUseJsx = false;
       ast = parseTsWithRecast(current, false);
     } else {
       throw err;
@@ -1017,10 +1022,27 @@ export function postprocessTypeScriptSource(source, options = {}) {
 
         // Flow utility types
         if (qn === '$Keys' && typeArgs.length === 1) {
-          const op = t.tsTypeOperator(typeArgs[0]);
+          const arg = typeArgs[0];
+          const needsInnerParens =
+            t.isTSUnionType(arg) ||
+            t.isTSIntersectionType(arg) ||
+            t.isTSFunctionType(arg) ||
+            t.isTSConstructorType(arg) ||
+            t.isTSConditionalType(arg);
+          const op = t.tsTypeOperator(
+            needsInnerParens ? t.tsParenthesizedType(arg) : arg
+          );
           op.operator = 'keyof';
+          const parent = pathObj.parent;
+          const needsOuterParens =
+            t.isTSArrayType(parent) ||
+            t.isTSOptionalType(parent) ||
+            (t.isTSIndexedAccessType(parent) && pathObj.key === 'object');
+          const replacement = needsOuterParens
+            ? t.tsParenthesizedType(op)
+            : op;
           stats.flowUtilsMapped++;
-          replaceTypeNodeSafely(pathObj, op);
+          replaceTypeNodeSafely(pathObj, replacement);
           return;
         }
         if (qn === '$Shape' && typeArgs.length === 1) {
@@ -1049,9 +1071,20 @@ export function postprocessTypeScriptSource(source, options = {}) {
           return;
         }
         if (qn === '$Values' && typeArgs.length === 1) {
-          const keyofNode = t.tsTypeOperator(typeArgs[0]);
+          const arg = typeArgs[0];
+          const needsParens =
+            t.isTSUnionType(arg) ||
+            t.isTSIntersectionType(arg) ||
+            t.isTSFunctionType(arg) ||
+            t.isTSConstructorType(arg) ||
+            t.isTSConditionalType(arg);
+          const objNode = needsParens ? t.tsParenthesizedType(arg) : arg;
+          const keyArg = t.cloneNode(arg, true);
+          const keyofNode = t.tsTypeOperator(
+            needsParens ? t.tsParenthesizedType(keyArg) : keyArg
+          );
           keyofNode.operator = 'keyof';
-          const indexed = t.tsIndexedAccessType(typeArgs[0], keyofNode);
+          const indexed = t.tsIndexedAccessType(objNode, keyofNode);
           stats.flowUtilsMapped++;
           replaceTypeNodeSafely(pathObj, indexed);
           return;
@@ -1119,9 +1152,20 @@ export function postprocessTypeScriptSource(source, options = {}) {
         if (qn === 'Object' && typeArgs.length === 0) {
           const ctxName = getPropertyOrParamContextName(pathObj);
           let replacement;
-          if (ctxName === 'style' || ctxName === 'styles') {
+          if (ctxName === 'style') {
             replacement = t.tsTypeReference(
               buildQualifiedName(['React', 'CSSProperties'])
+            );
+            needsReactNamespace = true;
+          } else if (ctxName === 'styles') {
+            replacement = t.tsTypeReference(
+              t.identifier('Record'),
+              t.tsTypeParameterInstantiation([
+                t.tsStringKeyword(),
+                t.tsTypeReference(
+                  buildQualifiedName(['React', 'CSSProperties'])
+                ),
+              ])
             );
             needsReactNamespace = true;
           } else {
@@ -1204,11 +1248,17 @@ export function postprocessTypeScriptSource(source, options = {}) {
   }
 
   const lineTerminator = source.includes('\r\n') ? '\r\n' : '\n';
+  const effectivePlugins = effectiveUseJsx
+    ? TS_PARSER_PLUGINS
+    : TS_PARSER_PLUGINS.filter((p) => p !== 'jsx');
   current = recast.print(ast, { lineTerminator }).code;
-  current = separateAngleBracketLineComments(current, TS_PARSER_PLUGINS);
+  current = separateAngleBracketLineComments(current, effectivePlugins);
 
   // Step 3: Map $FlowFixMe / $FlowIgnore / $FlowExpectedError comments
-  const suppPass = transformSuppressionCommentsInSource(current);
+  const suppPass = transformSuppressionCommentsInSource(
+    current,
+    effectivePlugins
+  );
   current = suppPass.code;
   stats.suppressionsMapped = suppPass.count;
 

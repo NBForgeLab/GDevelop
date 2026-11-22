@@ -169,6 +169,67 @@ function copyComments(fromNode, toNode) {
   return toNode;
 }
 
+/**
+ * Copies comments onto a TSTypeElement (`TSPropertySignature`, `TSMethodSignature`,
+ * `TSIndexSignature`, `TSCallSignatureDeclaration`).
+ *
+ * Recast's `TSTypeLiteral` / `TSInterfaceBody` printer appends `;` after printing
+ * a member's trailing comments, which glues `;` onto the end of trailing `// ...`
+ * line comments (e.g. `arity: number // comment;`). Promoting trailing `CommentLine`
+ * comments to leading comments (placed before any `$Flow...` suppression comment so
+ * `@ts-expect-error` stays adjacent to the member) prevents that corruption without
+ * dropping any comment.
+ */
+function copyTypeMemberComments(fromNode, toNode) {
+  if (!fromNode || !toNode) return toNode;
+  const rawComments =
+    fromNode.comments && fromNode.comments.length > 0
+      ? fromNode.comments
+      : null;
+  if (rawComments) {
+    const promoted = [];
+    const remaining = [];
+    for (const c of rawComments) {
+      if (c && c.type === 'CommentLine' && c.trailing) {
+        promoted.push({ ...c, leading: true, trailing: false });
+      } else {
+        remaining.push(c);
+      }
+    }
+    if (promoted.length > 0) {
+      const flowIdx = remaining.findIndex(
+        (c) => c && c.leading && /\$Flow(?:FixMe|Ignore|ExpectedError)\b/.test(c.value)
+      );
+      if (flowIdx >= 0) {
+        toNode.comments = [
+          ...remaining.slice(0, flowIdx),
+          ...promoted,
+          ...remaining.slice(flowIdx),
+        ];
+      } else {
+        toNode.comments = [...remaining, ...promoted];
+      }
+    } else {
+      toNode.comments = [...remaining];
+    }
+  }
+  if (fromNode.leadingComments && fromNode.leadingComments.length > 0) {
+    toNode.leadingComments = [...fromNode.leadingComments];
+  }
+  if (fromNode.trailingComments && fromNode.trailingComments.length > 0) {
+    const keptTrailing = fromNode.trailingComments.filter(
+      (c) => !(c && c.type === 'CommentLine')
+    );
+    if (keptTrailing.length > 0) {
+      toNode.trailingComments = keptTrailing;
+    }
+  }
+  if (fromNode.innerComments && fromNode.innerComments.length > 0) {
+    toNode.innerComments = [...fromNode.innerComments];
+  }
+  return toNode;
+}
+
 export function synthesizeParamName(typeNode, index, usedNames) {
   let candidate = `arg${index}`;
   let baseName = null;
@@ -458,13 +519,43 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
     }
   };
 
-  // Pre-scan local type declarations & local value declarations
+  // Pre-scan React imports, local type declarations, & local value declarations
   const localTypesByName = new Map();
   const localValuesByName = new Map();
   const exportedTypeNames = new Set();
+  let hasReactImport = false;
+  let hasReactNodeNamedImport = false;
+
+  const registerLocalValueDecl = (decl) => {
+    if (!decl) return;
+    if (decl.type === 'VariableDeclaration') {
+      for (const d of decl.declarations) {
+        if (d.id && d.id.type === 'Identifier') {
+          localValuesByName.set(d.id.name, { kind: 'var', node: d });
+        }
+      }
+    } else if (decl.type === 'FunctionDeclaration' && decl.id) {
+      localValuesByName.set(decl.id.name, { kind: 'func', node: decl });
+    } else if (decl.type === 'ClassDeclaration' && decl.id) {
+      localValuesByName.set(decl.id.name, { kind: 'class', node: decl });
+    }
+  };
 
   for (const stmt of flowAst.program.body) {
-    if (
+    if (stmt.type === 'ImportDeclaration') {
+      if (stmt.source && stmt.source.value === 'react') {
+        hasReactImport = true;
+        for (const spec of stmt.specifiers || []) {
+          if (spec.type === 'ImportSpecifier') {
+            const importedName =
+              spec.imported && (spec.imported.name || spec.imported.value);
+            if (importedName === 'Node') {
+              hasReactNodeNamedImport = true;
+            }
+          }
+        }
+      }
+    } else if (
       stmt.type === 'TypeAlias' ||
       stmt.type === 'OpaqueType' ||
       stmt.type === 'InterfaceDeclaration'
@@ -472,21 +563,60 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
       if (stmt.id && stmt.id.name) {
         localTypesByName.set(stmt.id.name, stmt);
       }
-    } else if (stmt.type === 'VariableDeclaration') {
-      for (const d of stmt.declarations) {
-        if (d.id && d.id.type === 'Identifier') {
-          localValuesByName.set(d.id.name, { kind: 'var', node: d });
-        }
-      }
-    } else if (stmt.type === 'FunctionDeclaration' && stmt.id) {
-      localValuesByName.set(stmt.id.name, { kind: 'func', node: stmt });
-    } else if (stmt.type === 'ClassDeclaration' && stmt.id) {
-      localValuesByName.set(stmt.id.name, { kind: 'class', node: stmt });
+    } else if (stmt.type === 'ExportNamedDeclaration' && stmt.declaration) {
+      registerLocalValueDecl(stmt.declaration);
+    } else {
+      registerLocalValueDecl(stmt);
     }
   }
 
   const exportSnippets = [];
   const exportNodesForRefs = [];
+
+  const blockHasReturnWithValue = (blockStmt) => {
+    if (!blockStmt || blockStmt.type !== 'BlockStatement') return true;
+    const visit = (node) => {
+      if (!node || typeof node !== 'object') return false;
+      if (Array.isArray(node)) {
+        for (const item of node) {
+          if (visit(item)) return true;
+        }
+        return false;
+      }
+      if (node.type === 'ReturnStatement') {
+        return node.argument != null;
+      }
+      // Do not descend into nested functions or classes
+      if (
+        node.type === 'FunctionDeclaration' ||
+        node.type === 'FunctionExpression' ||
+        node.type === 'ArrowFunctionExpression' ||
+        node.type === 'ClassDeclaration' ||
+        node.type === 'ClassExpression' ||
+        node.type === 'ObjectMethod' ||
+        node.type === 'ClassMethod'
+      ) {
+        return false;
+      }
+      for (const k of Object.keys(node)) {
+        if (
+          k === 'loc' ||
+          k === 'start' ||
+          k === 'end' ||
+          k === 'extra' ||
+          k === 'comments' ||
+          k === 'leadingComments' ||
+          k === 'trailingComments' ||
+          k === 'innerComments'
+        ) {
+          continue;
+        }
+        if (visit(node[k])) return true;
+      }
+      return false;
+    };
+    return visit(blockStmt.body);
+  };
 
   const formatFlowFunctionSignature = (fnNode) => {
     const typeParams = fnNode.typeParameters ? slice(fnNode.typeParameters) : '';
@@ -519,6 +649,12 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
     if (fnNode.returnType) {
       retAnn = slice(fnNode.returnType);
       exportNodesForRefs.push(fnNode.returnType);
+    } else if (
+      fnNode.body &&
+      fnNode.body.type === 'BlockStatement' &&
+      !blockHasReturnWithValue(fnNode.body)
+    ) {
+      retAnn = fnNode.async ? ': Promise<void>' : ': void';
     } else if (fnNode.async) {
       retAnn = ': Promise<any>';
     }
@@ -529,6 +665,22 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
       fnTypeExpr: `${typeParams}(${params}) => ${retAnn.replace(/^:\s*/, '')}`,
     };
   };
+
+  const REACT_LIFECYCLE_METHODS = new Set([
+    'render',
+    'componentDidMount',
+    'componentDidUpdate',
+    'componentWillUnmount',
+    'shouldComponentUpdate',
+    'getSnapshotBeforeUpdate',
+    'componentDidCatch',
+    'componentWillMount',
+    'componentWillReceiveProps',
+    'componentWillUpdate',
+    'UNSAFE_componentWillMount',
+    'UNSAFE_componentWillReceiveProps',
+    'UNSAFE_componentWillUpdate',
+  ]);
 
   const isReactComponentSuperClass = (superClassNode) => {
     if (!superClassNode) return false;
@@ -541,11 +693,66 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
     );
   };
 
+  const isObjectLikePropsType = (flowTypeNode) => {
+    if (!flowTypeNode) return false;
+    switch (flowTypeNode.type) {
+      case 'ObjectTypeAnnotation':
+      case 'InterfaceTypeAnnotation':
+      case 'IntersectionTypeAnnotation':
+      case 'UnionTypeAnnotation':
+      case 'AnyTypeAnnotation':
+        return true;
+      case 'GenericTypeAnnotation': {
+        const name =
+          flowTypeNode.id && flowTypeNode.id.type === 'Identifier'
+            ? flowTypeNode.id.name
+            : null;
+        if (
+          name === 'Array' ||
+          name === '$ReadOnlyArray' ||
+          name === 'Map' ||
+          name === 'Set' ||
+          name === 'Promise'
+        ) {
+          return false;
+        }
+        return true;
+      }
+      default:
+        return false;
+    }
+  };
+
+  const collectPatternIdentifiers = (pattern, out = []) => {
+    if (!pattern) return out;
+    if (pattern.type === 'Identifier') {
+      out.push(pattern.name);
+    } else if (pattern.type === 'AssignmentPattern') {
+      collectPatternIdentifiers(pattern.left, out);
+    } else if (pattern.type === 'RestElement') {
+      collectPatternIdentifiers(pattern.argument, out);
+    } else if (pattern.type === 'ObjectPattern') {
+      for (const prop of pattern.properties || []) {
+        if (prop.type === 'RestElement') {
+          collectPatternIdentifiers(prop.argument, out);
+        } else if (prop.type === 'ObjectProperty') {
+          collectPatternIdentifiers(prop.value, out);
+        }
+      }
+    } else if (pattern.type === 'ArrayPattern') {
+      for (const el of pattern.elements || []) {
+        if (el) collectPatternIdentifiers(el, out);
+      }
+    }
+    return out;
+  };
+
   const buildFlowClassDeclSnippet = (classNode, prefixKeyword) => {
     const className =
       classNode.id && classNode.id.name
         ? classNode.id.name
         : 'AnonymousDefaultClass';
+    const isReactComp = isReactComponentSuperClass(classNode.superClass);
     const typeParams = classNode.typeParameters
       ? slice(classNode.typeParameters)
       : '';
@@ -553,18 +760,34 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
       exportNodesForRefs.push(classNode.typeParameters);
     }
 
+    const isValidFlowSuperClassExpr = (node) => {
+      if (!node) return false;
+      if (node.type === 'Identifier') return true;
+      if (node.type === 'MemberExpression' && !node.computed) {
+        return (
+          node.property &&
+          node.property.type === 'Identifier' &&
+          isValidFlowSuperClassExpr(node.object)
+        );
+      }
+      return false;
+    };
+
     let extendsClause = '';
-    if (classNode.superClass) {
+    if (classNode.superClass && isValidFlowSuperClassExpr(classNode.superClass)) {
       const superText = slice(classNode.superClass).trim();
       if (superText.startsWith('React.')) {
         typeRefNames.add('React');
       } else if (classNode.superClass.type === 'Identifier') {
         typeRefNames.add(classNode.superClass.name);
-      } else if (
-        classNode.superClass.type === 'MemberExpression' &&
-        classNode.superClass.object.type === 'Identifier'
-      ) {
-        typeRefNames.add(classNode.superClass.object.name);
+      } else {
+        let rootObj = classNode.superClass;
+        while (rootObj.type === 'MemberExpression') {
+          rootObj = rootObj.object;
+        }
+        if (rootObj.type === 'Identifier') {
+          typeRefNames.add(rootObj.name);
+        }
       }
       const superTp = classNode.superTypeParameters
         ? slice(classNode.superTypeParameters)
@@ -606,6 +829,16 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
           member.key.type === 'Identifier'
             ? member.key.name
             : JSON.stringify(member.key.value);
+        // For React class components, unannotated `state = { ... }` is already typed by
+        // `React.Component<Props, State>`; emitting a narrow literal object can violate invariance.
+        if (
+          isReactComp &&
+          !member.static &&
+          keyName === 'state' &&
+          !member.typeAnnotation
+        ) {
+          continue;
+        }
         const staticPrefix = member.static ? 'static ' : '';
         const dedupKey = `${staticPrefix}prop:${keyName}`;
         if (seenMemberKeys.has(dedupKey)) continue;
@@ -622,13 +855,12 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
         if (member.typeAnnotation) {
           propAnn = slice(member.typeAnnotation);
           exportNodesForRefs.push(member.typeAnnotation);
-        } else if (
-          member.value &&
-          (member.value.type === 'ArrowFunctionExpression' ||
-            member.value.type === 'FunctionExpression')
-        ) {
-          const sig = formatFlowFunctionSignature(member.value);
-          propAnn = `: ${sig.fnTypeExpr}`;
+        } else if (member.value) {
+          const inferred = inferFlowComponentOrValueType(member.value, {
+            exportName: keyName,
+            isDefaultExport: false,
+          });
+          propAnn = `: ${inferred}`;
         }
         memberLines.push(
           `${getSuppressionPrefix(member, '  ')}  ${staticPrefix}${variance}${keyName}${opt}${propAnn};`
@@ -638,6 +870,13 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
           continue;
         }
         const keyName = member.key.name;
+        if (
+          isReactComp &&
+          !member.static &&
+          REACT_LIFECYCLE_METHODS.has(keyName)
+        ) {
+          continue;
+        }
         const staticPrefix = member.static ? 'static ' : '';
         const dedupKey = `${staticPrefix}${member.kind || 'method'}:${keyName}`;
         if (seenMemberKeys.has(dedupKey)) continue;
@@ -712,11 +951,27 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
     return `{| ${propParts.join(', ')} |}`;
   };
 
-  const inferFlowComponentOrValueType = (expr) => {
+  const inferFlowComponentOrValueType = (
+    expr,
+    context = {},
+    visitedIdentifiers = new Set()
+  ) => {
     if (!expr) return 'any';
-    if (expr.type === 'StringLiteral') return 'string';
+    if (expr.type === 'StringLiteral' || expr.type === 'TemplateLiteral') {
+      return 'string';
+    }
     if (expr.type === 'NumericLiteral') return 'number';
     if (expr.type === 'BooleanLiteral') return 'boolean';
+    if (expr.type === 'UnaryExpression') {
+      if (
+        (expr.operator === '-' || expr.operator === '+') &&
+        expr.argument &&
+        expr.argument.type === 'NumericLiteral'
+      ) {
+        return 'number';
+      }
+      if (expr.operator === '!') return 'boolean';
+    }
     if (expr.type === 'ObjectExpression') {
       return inferObjectLiteralFlowType(expr) || 'any';
     }
@@ -736,9 +991,18 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
         calleeText.endsWith('.memo');
       if (isForwardRef || isMemo) {
         typeRefNames.add('React');
-        if (expr.typeArguments && expr.typeArguments.params && expr.typeArguments.params[0]) {
+        if (
+          expr.typeArguments &&
+          expr.typeArguments.params &&
+          expr.typeArguments.params[0]
+        ) {
           exportNodesForRefs.push(expr.typeArguments.params[0]);
           const propsArg = slice(expr.typeArguments.params[0]);
+          if (isForwardRef && expr.typeArguments.params[1]) {
+            exportNodesForRefs.push(expr.typeArguments.params[1]);
+            const refArg = slice(expr.typeArguments.params[1]);
+            return `React.ComponentType<{ ...${propsArg}, +ref?: React.RefSetter<${refArg}> }>`;
+          }
           return `React.ComponentType<${propsArg}>`;
         }
         const firstArg = expr.arguments && expr.arguments[0];
@@ -764,7 +1028,11 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
             firstArg.type === 'Identifier' ||
             firstArg.type === 'TypeCastExpression'
           ) {
-            const innerType = inferFlowComponentOrValueType(firstArg);
+            const innerType = inferFlowComponentOrValueType(
+              firstArg,
+              context,
+              visitedIdentifiers
+            );
             if (innerType && innerType !== 'any') {
               return innerType;
             }
@@ -778,21 +1046,33 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
       expr.type === 'FunctionExpression' ||
       expr.type === 'FunctionDeclaration'
     ) {
-      const firstParam =
-        expr.params && expr.params[0]
-          ? expr.params[0].type === 'AssignmentPattern'
-            ? expr.params[0].left
-            : expr.params[0]
-          : null;
+      const hasSingleNonRestParam =
+        Array.isArray(expr.params) &&
+        expr.params.length === 1 &&
+        expr.params[0].type !== 'RestElement';
+      const firstParam = hasSingleNonRestParam
+        ? expr.params[0].type === 'AssignmentPattern'
+          ? expr.params[0].left
+          : expr.params[0]
+        : null;
       const retText = expr.returnType ? slice(expr.returnType) : '';
+      const hasReactReturnType =
+        retText.includes('React.Node') ||
+        retText.includes('React.MixedElement') ||
+        retText.includes('React.Element') ||
+        (hasReactNodeNamedImport && /\bNode\b/.test(retText));
+      const looksLikeComponentName =
+        Boolean(context.isDefaultExport) ||
+        (typeof context.exportName === 'string' &&
+          /^[A-Z]/.test(context.exportName));
       if (
+        hasReactImport &&
         !expr.typeParameters &&
+        looksLikeComponentName &&
         firstParam &&
         firstParam.typeAnnotation &&
-        (retText.includes('React.Node') ||
-          retText.includes('React.MixedElement') ||
-          retText.includes('React.Element') ||
-          /\bNode\b/.test(retText))
+        isObjectLikePropsType(firstParam.typeAnnotation.typeAnnotation) &&
+        hasReactReturnType
       ) {
         exportNodesForRefs.push(firstParam.typeAnnotation);
         typeRefNames.add('React');
@@ -804,8 +1084,11 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
       return formatFlowFunctionSignature(expr).fnTypeExpr;
     }
     if (expr.type === 'Identifier') {
+      if (visitedIdentifiers.has(expr.name)) return 'any';
       const local = localValuesByName.get(expr.name);
       if (local) {
+        const nextVisited = new Set(visitedIdentifiers);
+        nextVisited.add(expr.name);
         if (local.kind === 'var') {
           const d = local.node;
           if (d.id && d.id.typeAnnotation) {
@@ -813,10 +1096,13 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
             return slice(d.id.typeAnnotation).replace(/^:\s*/, '');
           }
           if (d.init) {
-            return inferFlowComponentOrValueType(d.init);
+            return inferFlowComponentOrValueType(d.init, context, nextVisited);
           }
         } else if (local.kind === 'func') {
-          return inferFlowComponentOrValueType(local.node);
+          return inferFlowComponentOrValueType(local.node, context, nextVisited);
+        } else if (local.kind === 'class') {
+          typeRefNames.add(expr.name);
+          return `Class<${expr.name}>`;
         }
       }
     }
@@ -860,12 +1146,12 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
               if (declarator.id.typeAnnotation) {
                 typeAnnot = slice(declarator.id.typeAnnotation);
                 exportNodesForRefs.push(declarator.id.typeAnnotation);
-              } else if (
-                declarator.init &&
-                declarator.init.type === 'ObjectExpression'
-              ) {
-                const objType = inferObjectLiteralFlowType(declarator.init);
-                if (objType) typeAnnot = `: ${objType}`;
+              } else if (declarator.init) {
+                const inferred = inferFlowComponentOrValueType(
+                  declarator.init,
+                  { exportName: name, isDefaultExport: false }
+                );
+                if (inferred) typeAnnot = `: ${inferred}`;
               }
               const suppPrefix = getSuppressionPrefix(
                 stmt,
@@ -873,11 +1159,29 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
                 decl,
                 declarator,
                 declarator.id,
-                declarator.id.typeAnnotation
+                declarator.id.typeAnnotation,
+                ...getFunctionSuppressionNodes(declarator.init)
               );
               exportSnippets.push(
                 `${suppPrefix}declare export var ${name}${typeAnnot};`
               );
+            } else if (
+              declarator.id.type === 'ObjectPattern' ||
+              declarator.id.type === 'ArrayPattern'
+            ) {
+              const suppPrefix = getSuppressionPrefix(
+                stmt,
+                '',
+                decl,
+                declarator
+              );
+              const boundNames = collectPatternIdentifiers(declarator.id);
+              for (const boundName of boundNames) {
+                exportedValueNames.add(boundName);
+                exportSnippets.push(
+                  `${suppPrefix}declare export var ${boundName}: any;`
+                );
+              }
             }
           }
         } else if (decl.type === 'FunctionDeclaration' && decl.id) {
@@ -914,12 +1218,59 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
                   : `export type { ${localName} };`
               );
             } else {
-              exportedValueNames.add(localName);
-              exportedValueNames.add(exportedName);
-              const inferred = inferFlowComponentOrValueType({
-                type: 'Identifier',
-                name: localName,
-              });
+              const localEntry = localValuesByName.get(localName);
+              if (
+                localEntry &&
+                localEntry.kind === 'class' &&
+                exportedName === localName &&
+                !exportedValueNames.has(localName)
+              ) {
+                exportedValueNames.add(localName);
+                const suppPrefix = getSuppressionPrefix(
+                  stmt,
+                  '',
+                  localEntry.node
+                );
+                exportSnippets.push(
+                  `${suppPrefix}${buildFlowClassDeclSnippet(
+                    localEntry.node,
+                    'declare export class'
+                  )}`
+                );
+                continue;
+              }
+              if (
+                localEntry &&
+                localEntry.kind === 'class' &&
+                exportedName === 'default' &&
+                !exportedValueNames.has(localName)
+              ) {
+                exportedValueNames.add(localName);
+                const suppPrefix = getSuppressionPrefix(
+                  stmt,
+                  '',
+                  localEntry.node
+                );
+                exportSnippets.push(
+                  `${suppPrefix}${buildFlowClassDeclSnippet(
+                    localEntry.node,
+                    'declare export default class'
+                  )}`
+                );
+                continue;
+              }
+              if (exportedName === localName) {
+                exportedValueNames.add(localName);
+              } else {
+                exportedValueNames.add(exportedName);
+              }
+              const inferred = inferFlowComponentOrValueType(
+                { type: 'Identifier', name: localName },
+                {
+                  exportName: exportedName,
+                  isDefaultExport: exportedName === 'default',
+                }
+              );
               if (exportedName === 'default') {
                 const formattedDefault = inferred.startsWith('<')
                   ? `(${inferred})`
@@ -952,30 +1303,12 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
       } else if (decl.type === 'ClassDeclaration') {
         if (decl.id && decl.id.name) exportedValueNames.add(decl.id.name);
         const suppPrefix = getSuppressionPrefix(stmt, '', decl);
-        if (
-          isReactComponentSuperClass(decl.superClass) &&
-          !decl.typeParameters
-        ) {
-          typeRefNames.add('React');
-          let typeExpr = 'React.ComponentType<any>';
-          if (
-            decl.superTypeParameters &&
-            decl.superTypeParameters.params &&
-            decl.superTypeParameters.params[0]
-          ) {
-            const firstArg = decl.superTypeParameters.params[0];
-            exportNodesForRefs.push(firstArg);
-            typeExpr = `React.ComponentType<${slice(firstArg)}>`;
-          }
-          exportSnippets.push(`${suppPrefix}declare export default ${typeExpr};`);
-        } else {
-          exportSnippets.push(
-            `${suppPrefix}${buildFlowClassDeclSnippet(
-              decl,
-              'declare export default class'
-            )}`
-          );
-        }
+        exportSnippets.push(
+          `${suppPrefix}${buildFlowClassDeclSnippet(
+            decl,
+            'declare export default class'
+          )}`
+        );
       } else if (
         decl.type === 'Identifier' &&
         localValuesByName.get(decl.name)?.kind === 'class'
@@ -983,30 +1316,12 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
         exportedValueNames.add(decl.name);
         const classNode = localValuesByName.get(decl.name).node;
         const suppPrefix = getSuppressionPrefix(stmt, '', classNode);
-        if (
-          isReactComponentSuperClass(classNode.superClass) &&
-          !classNode.typeParameters
-        ) {
-          typeRefNames.add('React');
-          let typeExpr = 'React.ComponentType<any>';
-          if (
-            classNode.superTypeParameters &&
-            classNode.superTypeParameters.params &&
-            classNode.superTypeParameters.params[0]
-          ) {
-            const firstArg = classNode.superTypeParameters.params[0];
-            exportNodesForRefs.push(firstArg);
-            typeExpr = `React.ComponentType<${slice(firstArg)}>`;
-          }
-          exportSnippets.push(`${suppPrefix}declare export default ${typeExpr};`);
-        } else {
-          exportSnippets.push(
-            `${suppPrefix}${buildFlowClassDeclSnippet(
-              classNode,
-              'declare export default class'
-            )}`
-          );
-        }
+        exportSnippets.push(
+          `${suppPrefix}${buildFlowClassDeclSnippet(
+            classNode,
+            'declare export default class'
+          )}`
+        );
       } else if (
         decl.type === 'Identifier' &&
         localValuesByName.get(decl.name)?.kind === 'func'
@@ -1018,7 +1333,10 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
           '',
           ...getFunctionSuppressionNodes(fnNode)
         );
-        const inferred = inferFlowComponentOrValueType(fnNode);
+        const inferred = inferFlowComponentOrValueType(fnNode, {
+          exportName: decl.name,
+          isDefaultExport: true,
+        });
         if (inferred.startsWith('React.ComponentType<')) {
           exportSnippets.push(`${suppPrefix}declare export default ${inferred};`);
         } else {
@@ -1040,7 +1358,10 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
           }
         }
         const suppPrefix = getSuppressionPrefix(stmt, '', ...localSourceNodes);
-        const typeExpr = inferFlowComponentOrValueType(decl);
+        const typeExpr = inferFlowComponentOrValueType(decl, {
+          exportName: decl.type === 'Identifier' ? decl.name : null,
+          isDefaultExport: true,
+        });
         const formattedDefault = typeExpr.startsWith('<')
           ? `(${typeExpr})`
           : typeExpr;
@@ -1090,7 +1411,10 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
             exportNodesForRefs.push(d.id.typeAnnotation);
             typeExpr = slice(d.id.typeAnnotation).replace(/^:\s*/, '');
           } else if (d.init) {
-            typeExpr = inferFlowComponentOrValueType(d.init);
+            typeExpr = inferFlowComponentOrValueType(d.init, {
+              exportName: refName,
+              isDefaultExport: false,
+            });
           }
           snippet = `declare var ${refName}: ${typeExpr};`;
         }
@@ -1130,6 +1454,7 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
   }
 
   const importLines = [];
+  let emittedReactNamespaceOrDefault = false;
   for (const stmt of flowAst.program.body) {
     if (stmt.type !== 'ImportDeclaration') continue;
     const keptSpecs = [];
@@ -1143,33 +1468,69 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
       keepWholeImport = true;
     }
     if (keepWholeImport) {
+      if (
+        stmt.source &&
+        stmt.source.value === 'react' &&
+        keptSpecs.some(
+          (s) =>
+            (s.type === 'ImportNamespaceSpecifier' ||
+              s.type === 'ImportDefaultSpecifier') &&
+            s.local.name === 'React'
+        )
+      ) {
+        emittedReactNamespaceOrDefault = true;
+      }
       importLines.push(slice(stmt));
     } else if (keptSpecs.length > 0) {
       const named = keptSpecs
         .filter((s) => s.type === 'ImportSpecifier')
         .map((s) => {
           const isType = stmt.importKind === 'type' || s.importKind === 'type';
+          const isTypeof =
+            stmt.importKind === 'typeof' || s.importKind === 'typeof';
           const importedName = s.imported.name || s.imported.value;
           const alias =
             importedName !== s.local.name
               ? `${importedName} as ${s.local.name}`
               : importedName;
-          return isType && stmt.importKind !== 'type' ? `type ${alias}` : alias;
+          if (isTypeof && stmt.importKind !== 'typeof') return `typeof ${alias}`;
+          if (isType && stmt.importKind !== 'type') return `type ${alias}`;
+          return alias;
         });
       const def = keptSpecs.find((s) => s.type === 'ImportDefaultSpecifier');
       const ns = keptSpecs.find((s) => s.type === 'ImportNamespaceSpecifier');
       if (ns) {
+        if (stmt.source && stmt.source.value === 'react' && ns.local.name === 'React') {
+          emittedReactNamespaceOrDefault = true;
+        }
         importLines.push(
           `import * as ${ns.local.name} from '${stmt.source.value}';`
         );
       } else {
+        if (
+          def &&
+          stmt.source &&
+          stmt.source.value === 'react' &&
+          def.local.name === 'React'
+        ) {
+          emittedReactNamespaceOrDefault = true;
+        }
         const parts = [];
         if (def) parts.push(def.local.name);
         if (named.length > 0) parts.push(`{ ${named.join(', ')} }`);
-        const prefix = stmt.importKind === 'type' ? 'import type ' : 'import ';
+        const prefix =
+          stmt.importKind === 'type'
+            ? 'import type '
+            : stmt.importKind === 'typeof'
+              ? 'import typeof '
+              : 'import ';
         importLines.push(`${prefix}${parts.join(', ')} from '${stmt.source.value}';`);
       }
     }
+  }
+
+  if (typeRefNames.has('React') && !emittedReactNamespaceOrDefault) {
+    importLines.unshift("import * as React from 'react';");
   }
 
   const parts = [...headerLines];
@@ -1185,7 +1546,8 @@ function buildFlowStubFromAst(flowAst, originalSource, options = {}) {
 }
 
 export function generateFlowStub(source, options = {}) {
-  const { code: unwrapped } = unwrapFlowComments(source);
+  const normalizedSource = source.replace(/\r\n/g, '\n');
+  const { code: unwrapped } = unwrapFlowComments(normalizedSource);
   const ast = parser.parse(unwrapped, {
     sourceType: 'unambiguous',
     tokens: true,
@@ -1257,7 +1619,7 @@ export function convertFlowAstToTsAst(source, options = {}) {
         result = t.tsAnyKeyword();
         break;
       case 'VoidTypeAnnotation':
-        result = t.tsVoidKeyword();
+        result = ctx.allowVoid ? t.tsVoidKeyword() : t.tsUndefinedKeyword();
         break;
       case 'BooleanTypeAnnotation':
         result = t.tsBooleanKeyword();
@@ -1341,7 +1703,14 @@ export function convertFlowAstToTsAst(source, options = {}) {
       }
       case 'TypeofTypeAnnotation': {
         const arg = node.argument;
-        if (t.isGenericTypeAnnotation(arg)) {
+        if (
+          t.isGenericTypeAnnotation(arg) &&
+          t.isIdentifier(arg.id) &&
+          arg.id.name === 'undefined' &&
+          !arg.typeParameters
+        ) {
+          result = t.tsUndefinedKeyword();
+        } else if (t.isGenericTypeAnnotation(arg)) {
           const exprName = convertTypeId(arg.id);
           const typeParams = convertTypeParamInstantiation(arg.typeParameters);
           result = t.tsTypeQuery(exprName, typeParams);
@@ -1352,7 +1721,10 @@ export function convertFlowAstToTsAst(source, options = {}) {
       }
       case 'GenericTypeAnnotation': {
         const id = convertTypeId(node.id);
-        const typeParams = convertTypeParamInstantiation(node.typeParameters);
+        const allowVoidArg = t.isIdentifier(node.id) && node.id.name === 'Promise';
+        const typeParams = convertTypeParamInstantiation(node.typeParameters, {
+          allowVoid: allowVoidArg,
+        });
         result = t.tsTypeReference(id, typeParams);
         break;
       }
@@ -1396,7 +1768,9 @@ export function convertFlowAstToTsAst(source, options = {}) {
         }
 
         fixOptionalThenRequiredParams(params);
-        const retType = t.tsTypeAnnotation(convertFlowType(node.returnType));
+        const retType = t.tsTypeAnnotation(
+          convertFlowType(node.returnType, { allowVoid: true })
+        );
         result = t.tsFunctionType(typeParams, params, retType);
         break;
       }
@@ -1405,7 +1779,24 @@ export function convertFlowAstToTsAst(source, options = {}) {
         break;
       }
       case 'InterfaceTypeAnnotation': {
-        result = convertObjectTypeAnnotation(node.body);
+        const body = convertObjectTypeAnnotation(node.body);
+        if (node.extends && node.extends.length > 0) {
+          const parts = node.extends.map((e) =>
+            copyComments(
+              e,
+              t.tsTypeReference(
+                convertTypeId(e.id),
+                convertTypeParamInstantiation(e.typeParameters)
+              )
+            )
+          );
+          if (!(t.isTSTypeLiteral(body) && body.members.length === 0)) {
+            parts.push(body);
+          }
+          result = parts.length === 1 ? parts[0] : t.tsIntersectionType(parts);
+        } else {
+          result = body;
+        }
         break;
       }
       default:
@@ -1430,13 +1821,13 @@ export function convertFlowAstToTsAst(source, options = {}) {
     return t.identifier('any');
   }
 
-  function convertTypeParamInstantiation(inst) {
+  function convertTypeParamInstantiation(inst, ctx = {}) {
     if (!inst || !inst.params) return null;
     if (inst.params.length === 0) return null;
     return copyComments(
       inst,
       t.tsTypeParameterInstantiation(
-        inst.params.map((p) => convertFlowType(p))
+        inst.params.map((p) => convertFlowType(p, ctx))
       )
     );
   }
@@ -1475,7 +1866,9 @@ export function convertFlowAstToTsAst(source, options = {}) {
       if (prop.type === 'ObjectTypeProperty') {
         const keyNode = t.isIdentifier(prop.key)
           ? t.identifier(prop.key.name)
-          : t.stringLiteral(prop.key.value);
+          : t.isNumericLiteral(prop.key)
+            ? t.numericLiteral(prop.key.value)
+            : t.stringLiteral(String(prop.key.value));
 
         if (prop.method && prop.value && prop.value.type === 'FunctionTypeAnnotation') {
           const fnType = convertFlowType(prop.value);
@@ -1486,7 +1879,7 @@ export function convertFlowAstToTsAst(source, options = {}) {
             fnType.typeAnnotation || null
           );
           if (prop.optional) methodSig.optional = true;
-          members.push(copyComments(prop, methodSig));
+          members.push(copyTypeMemberComments(prop, methodSig));
         } else {
           const valueType = convertFlowType(prop.value, {
             optionalSlot: Boolean(prop.optional),
@@ -1499,7 +1892,7 @@ export function convertFlowAstToTsAst(source, options = {}) {
           if (prop.variance && prop.variance.kind === 'plus') {
             propSig.readonly = true;
           }
-          members.push(copyComments(prop, propSig));
+          members.push(copyTypeMemberComments(prop, propSig));
         }
       }
     }
@@ -1519,7 +1912,7 @@ export function convertFlowAstToTsAst(source, options = {}) {
         if (indexer.variance && indexer.variance.kind === 'plus') {
           indexSig.readonly = true;
         }
-        members.push(copyComments(indexer, indexSig));
+        members.push(copyTypeMemberComments(indexer, indexSig));
       } else {
         const tp = t.tsTypeParameter(keyType, null, keyName);
         const mapped = t.tsMappedType(tp, valType);
@@ -1537,7 +1930,7 @@ export function convertFlowAstToTsAst(source, options = {}) {
         fnType.parameters || [],
         fnType.typeAnnotation || null
       );
-      members.push(copyComments(callProp, callSig));
+      members.push(copyTypeMemberComments(callProp, callSig));
     }
 
     const parts = [];
@@ -1936,7 +2329,9 @@ export function convertFlowAstToTsAst(source, options = {}) {
         fixOptionalThenRequiredParams(node.params);
       }
       if (node.returnType) {
-        node.returnType = convertTypeAnnotationNode(node.returnType);
+        node.returnType = convertTypeAnnotationNode(node.returnType, {
+          allowVoid: true,
+        });
       }
     },
 
@@ -2018,15 +2413,16 @@ export function convertFlowAstToTsAst(source, options = {}) {
 
   const lineTerminator = source.includes('\r\n') ? '\r\n' : '\n';
   const rawPrinted = recast.print(ast, { lineTerminator }).code;
-  const code = separateAngleBracketLineComments(rawPrinted, [
+  const postPlugins = [
     'typescript',
-    'jsx',
+    ...(hasJsx ? ['jsx'] : []),
     'classProperties',
     'classPrivateProperties',
     'classPrivateMethods',
     'exportDefaultFrom',
     'exportNamespaceFrom',
-  ]);
+  ];
+  const code = separateAngleBracketLineComments(rawPrinted, postPlugins);
   return {
     code,
     hasJsx,
