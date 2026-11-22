@@ -28,15 +28,15 @@
 3. [WebIDL / Emscripten C++ Bindings Bridge (`GDevelop.js`)](#3-webidl--emscripten-c-bindings-bridge-gdevelopjs)
    - [3.1 The Global vs Namespaced C++ Type Conflict](#31-the-global-vs-namespaced-c-type-conflict)
    - [3.2 The Zero-Code-Change Ambient Bridge Solution](#32-the-zero-code-change-ambient-bridge-solution)
-   - [3.3 Reference Implementation: `src/types/gd-globals.d.ts`](#33-reference-implementation-srctypesgd-globalsdts)
+   - [3.3 Implemented Reference: `src/types/gd-globals.d.ts`](#33-implemented-reference-srctypesgd-globalsdts)
    - [3.4 C++ Object Memory Lifecycles & Pointer Equality](#34-c-object-memory-lifecycles--pointer-equality)
    - [3.5 Long-Term Libdef Generation Convergence](#35-long-term-libdef-generation-convergence)
 4. [Tooling & Build System Coexistence Architecture](#4-tooling--build-system-coexistence-architecture)
    - [4.1 Vite 7 Dual-Compilation Engine (`newIDE/app/vite.config.mjs`)](#41-vite-7-dual-compilation-engine-newideappviteconfigmjs)
    - [4.2 Scoped Babel Configuration (`newIDE/app/.babelrc.json`)](#42-scoped-babel-configuration-newideappbabelrcjson)
    - [4.3 Jest 27 Test Runner Coexistence (`newIDE/app/jest.config.js`)](#43-jest-27-test-runner-coexistence-newideappjestconfigjs)
-   - [4.4 Storybook 7 with Webpack 5 Integration (`.storybook/main.js`)](#44-storybook-7-with-webpack-5-integration-storybookmainjs)
-   - [4.5 Linter & Formatter Alignment (ESLint, Prettier, Husky)](#45-linter--formatter-alignment-eslint-prettier-husky)
+   - [4.4 Storybook 7 with Webpack 5 Integration (`.storybook/main.js` & PR Automation)](#44-storybook-7-with-webpack-5-integration-storybookmainjs--pr-automation)
+   - [4.5 Linter, Formatter, Dependencies & Build Scripts Alignment](#45-linter-formatter-dependencies--build-scripts-alignment)
    - [4.6 Continuous Integration Pipeline Dual-Checking (`.semaphore/semaphore.yml`)](#46-continuous-integration-pipeline-dual-checking-semaphoresemaphoreyml)
 5. [Module Boundary Interoperability Patterns](#5-module-boundary-interoperability-patterns)
    - [5.1 Why `allowJs: false` is Mandatory for the IDE `tsconfig.json`](#51-why-allowjs-false-is-mandatory-for-the-ide-tsconfigjson)
@@ -71,12 +71,12 @@ The primary goal is the complete, orderly migration of the GDevelop editor appli
 Key quantitative and qualitative success criteria:
 1. **Zero Runtime Regressions**: 100% test pass rate maintained in Jest unit tests, integration tests, and visual tests across every pull request.
 2. **Unified Monorepo Typing**: Unify `newIDE/app` with `GDJS/Runtime` (Game Engine) and `Extensions/`, eliminating Flow from the entire repository.
-3. **Zero-Code-Change C++ Bindings**: Seamless resolution of 1,386 C++ WebAssembly type call sites (`gdProject`, `gdLayout`) via an ambient declaration bridge.
+3. **Zero-Code-Change C++ Bindings**: Seamless resolution of unnamespaced C++ WebAssembly type references across **579** `.js`/`.ts`/`.tsx` files (**581** incl. `.js.flow`; **4,067** matching lines / **4,111** tokens / **3,628** annotation lines / **3,652** `: ?gd*` annotations) via a generated ambient declaration bridge.
 4. **Tooling Simplification**: Elimination of hundreds of lines of fragile Sucrase and Babel type-stripping logic in `vite.config.mjs`.
 5. **Developer Experience Acceleration**: Sub-second editor autocompletion, refactoring safety, and standard DefinitelyTyped `@types/*` library ecosystem integration.
 
 ### 1.2 Strategic Tenets: Non-Disruptive Incrementalism
-A "big-bang" migration across 1,972 files in a single pull request is mathematically infeasible and architecturally irresponsible. It would create unresolvable merge conflicts for ongoing feature branches, overwhelm code reviewers, and risk catastrophic editor regressions.
+A "big-bang" migration across 1,971 tracked files (1,972 on disk incl. generated `VersionMetadata.js`) in a single pull request is mathematically infeasible and architecturally irresponsible. It would create unresolvable merge conflicts for ongoing feature branches, overwhelm code reviewers, and risk catastrophic editor regressions.
 
 Instead, this strategy adheres to **Strict Topological Incrementalism**:
 - **Leaf-to-Root Migration**: Modules are converted strictly according to their directed acyclic graph (DAG) dependency order: pure utility leaves $\rightarrow$ design system primitives $\rightarrow$ domain models $\rightarrow$ feature editors $\rightarrow$ application shell.
@@ -133,29 +133,29 @@ Instead, this strategy adheres to **Strict Topological Incrementalism**:
 ## 2. Technical Incompatibility Analysis & Syntax Mapping
 
 ### 2.1 Comprehensive Flow vs TypeScript Syntax & Semantics Comparison
-The following table details every Flow typing construct present in GDevelop, mapped to its TypeScript counterpart with real repository code extracts, semantic hazards, and recommended conversion mechanisms:
+The following table details every Flow typing construct present in GDevelop, mapped to its TypeScript counterpart with real repository code extracts (all **17** file/line citations verified at baseline commit `aeb2561323`), semantic hazards, and recommended conversion mechanisms:
 
 | Flow Syntax / Pattern | TypeScript Equivalent | GDevelop Code Sample | Semantic Differences / Hazards | Migration Strategy | Risk |
 |---|---|---|---|---|---|
-| **Exact Object Type** `{| ... |}` (3,677) | `{ ... }` | `type Props = {\| isHistoryOpen: boolean \|};` (`AiGeneration/Toolbar.js:11`) | Flow strictly disallows excess properties across variable assignments. TS only checks fresh object literals. | Convert `{\| ... \|}` $\rightarrow$ `{ ... }`. Accept TS structural excess property behavior. | Low |
+| **Exact Object Type** `{| ... |}` (3,690) | `{ ... }` | `type Props = {\| isHistoryOpen: boolean \|};` (`AiGeneration/Toolbar.js:11`) | Flow strictly disallows excess properties across variable assignments. TS only checks fresh object literals. | Convert `{\| ... \|}` $\rightarrow$ `{ ... }`. Accept TS structural excess property behavior. | Low |
 | **Type Spread in Object Type** `{ ...Props }` (866) | `Props & { ... }` | `type ContainerProps = {\| ...Props, gameId: string \|};` (`LeaderboardAdmin/index.js:1138`) | **Syntax Error in TypeScript**. TS does not allow object spreading in type literals. | Convert to intersection: `Props & { gameId: string }` or `interface ... extends Props`. | **High** |
 | **Maybe Type** `: ?T` (2,958) | `: T \| null \| undefined` | `tutorials: ?Array<Tutorial>` (`EventsSheet/index.js:209`) | **Syntax Error in TypeScript**. Flow's `?T` combines null and undefined. | Convert `: ?T` $\rightarrow$ `: T \| null \| undefined`. For props `x?: ?T`, use `x?: T \| null`. | **High** |
 | **Unnamed Function Parameter** `(T) => R` (87) | `(arg: T) => R` | `done: (boolean) => void` (`CompactEventsFunctionParametersEditor.js:152`) | **Severe Silent Semantic Bug**: TS treats `(boolean) => void` as parameter named `boolean` of type `any`! | Codemod must synthesize named parameter: `(done: boolean) => void`. | **Critical** |
 | **`React.forwardRef` Generics** `<Props, Ref>` (157) | `<Ref, Props>` | `React.forwardRef<Props, AskAiEditorInterface>(...)` (`AskAiEditorContainer.js:294`) | **Generic Parameter Order Inverted**: Flow uses `<Props, Ref>`, TypeScript uses `<Ref, Props>`. | Codemod must swap generic arguments when transforming `forwardRef`. | **Critical** |
 | **Flow Type Cast** `(x: T)` / `((x: any): T)` (3,653) | `(x as T)` / `(x as any as T)` | `((anchorName: any): InstanceAnchor)` (`EditorFunctions/index.js:872`) | `(x: T)` in expression position is a **Syntax Error in TypeScript**. | Transform to `(x as T)` or `(x as unknown as T)`. | **High** |
-| **React Node Type** `React.Node` (2,524) | `React.ReactNode` | `}: Props): React.Node => {` (`Toolbar.js:27`) | `React.Node` does not exist in `@types/react`. | Mechanical replacement: `React.Node` $\rightarrow$ `React.ReactNode`. | Low |
+| **React Node Type** `React.Node` (2,529) | `React.ReactNode` | `}: Props): React.Node => {` (`Toolbar.js:27`) | `React.Node` does not exist in `@types/react`. | Mechanical replacement: `React.Node` $\rightarrow$ `React.ReactNode`. | Low |
 | **React Ref Setter** `React.RefSetter<T>` | `React.Ref<T>` / `React.ForwardedRef<T>` | `+ref?: React.RefSetter<AssetStoreInterface>` (`AssetStore/index.js:125`) | `React.RefSetter` is a Flow-only utility type. | Replace with `React.Ref<T>` or `React.ForwardedRef<T>`. | Medium |
-| **Covariant Property** `+prop: T` (44) | `readonly prop: T` | `+scene: ?gdLayout` (`OutsideEditorChanges.js:22`) | Flow uses `+`/`-`. TS uses `readonly`. | Replace `+key:` with `readonly key:`. | Low |
+| **Covariant Property** `+prop: T` (198) | `readonly prop: T` | `+scene: ?gdLayout` (`OutsideEditorChanges.js:22`) | Flow uses `+`/`-`. TS uses `readonly`. | Replace `+key:` with `readonly key:`. | Low |
 | **Class Constructor Type** `Class<T>` (25) | `typeof T` / `new (...args: any[]) => T` | `pixiResourcesLoader: Class<PixiResourcesLoader>` (`Rendered3DInstance.js:19`) | `Class<T>` does not exist in standard TypeScript. | Replace with `typeof T` (for static side) or `new (...args: any[]) => T`. | Medium |
 | **Flow Utility `$Keys<T>`** (3) | `keyof T` | `export type CommandArea = $Keys<typeof commandAreas>;` (`CommandsList.js:110`) | `$Keys<T>` does not exist in TypeScript. | Replace with `keyof T`. | Low |
 | **Flow Utility `$Shape<T>`** (3) | `Partial<T>` | `export type EditorStateForProjectUpdate = $Shape<EditorStateForProject>;` (`PreferencesContext.js:195`) | `$Shape<T>` is Flow's partial object utility. | Replace with `Partial<T>`. | Low |
 | **Flow Utility `$ReadOnlyArray<T>`** (27) | `ReadonlyArray<T>` / `readonly T[]` | `allowedPreferenceKeys: $ReadOnlyArray<...>` (`ApplyProjectPreferences.js:10`) | Exact equivalent exists in TS. | Replace with `ReadonlyArray<T>` or `readonly T[]`. | Low |
 | **Flow Utility `$ReadOnly<T>`** (1) | `Readonly<T>` | `export type GdGamesMessageEventData = $ReadOnly<{ ... }>` (`UI/GdGamesFrame.js:16`) | Exact equivalent exists in TS. | Replace with `Readonly<T>`. | Low |
 | **Flow Utility `$Exact<T>`** (2) | Identity (`T`) | `type Theme = $Exact<typeof DefaultLightTheme>;` (`UI/Theme/index.js:21`) | TS has no exact type operator; all object types are structural. | Replace with `T`. | Low |
-| **Ambient C++ Class** `gdProject` (1,386 files) | `gd.Project` (or global alias) | `project: gdProject` (`EventsSheet/index.js:171`) | Flow types are flat global classes (`gdProject`); TS `types.d.ts` uses namespace `gd.Project`. | Inject global compatibility alias shim `declare global { type gdX = gd.X }`. | **High** |
+| **Ambient C++ Class** `gdProject` (579 files; 4,067 lines / 4,111 tokens / 3,652 annotations) | `gd.Project` (or global alias) | `project: gdProject` (`EventsSheet/index.js:171`) | Flow types are flat global classes (`gdProject`); TS `types.d.ts` uses namespace `gd.Project`. | Inject generated global compatibility alias shim `declare global { type gdX = gd.X }`. | **High** |
 | **Runtime C++ Object** `const gd = global.gd` (340 files) | Ambient global `gd` | `const gd: libGDevelop = global.gd;` (340 files in `newIDE/app/src/`) | TS already defines global `const gd: typeof gd`. | Define `type libGDevelop = typeof gd;` in bridge. | Medium |
 | **Flow Suppression** `$FlowFixMe[code]` (3,194) | `@ts-expect-error` / `@ts-ignore` | `// $FlowFixMe[incompatible-type]` | Flow error codes in brackets are ignored by TypeScript. | Convert to `// @ts-expect-error [flow-migration: code]`. | Medium |
-| **Inline Type Imports** `import { type Foo }` (1,500) | `import { type Foo }` | `import { type StoryDecorator } from '@storybook/react';` | Supported in TS 4.5+. Requires TS 5+ in `newIDE/app`. | Upgrade `typescript` devDependency to `>=5.4.5`. | Low |
+| **Inline Type Imports** `import { type Foo }` (1,501 single-line / 2,349 incl. multiline) | `import { type Foo }` | `import { type StoryDecorator } from '@storybook/react';` | Supported in TS 4.5+. Requires TS 5+ in `newIDE/app` (and Prettier 3+ for formatting). | Upgrade `typescript` devDependency to `^5.4.5` and format TS with Prettier 3.4.2. | Low |
 | **Flow Test Mocks** `JestMockFn<any, any>` | `jest.Mock<any, any>` | `const mockFn = (fn: any): JestMockFn<any, any> => fn;` (`AiRequestContext.spec.js:37`) | Flow-typed Jest definition vs DefinitelyTyped `@types/jest`. | Replace with `jest.Mock` from `@types/jest`. | Low |
 
 ---
@@ -246,7 +246,7 @@ Flow's `?T` is shorthand for `T | null | void` (which includes `undefined`). In 
    ```
 
 #### 2.2.5 Exact Object Types (`{| |}`) vs TypeScript Structural Types
-Flow enforces strict excess property prevention across variable assignments for exact types (`{| ... |}`, 3,677 occurrences).
+Flow enforces strict excess property prevention across variable assignments for exact types (`{| ... |}`, 3,690 occurrences).
 - In TypeScript, structural typing allows extra properties when assigned through intermediate variables, though Excess Property Checks (EPC) are enforced on direct object literals.
 - **Strategy**: Strip exact delimiters `{| ... |}` $\rightarrow$ `{ ... }`. Code review across GDevelop confirms runtime code does not rely on object sealing; TypeScript's standard structural typing is completely compatible with the existing runtime behavior.
 
@@ -265,7 +265,7 @@ Colons in expression positions are invalid syntax in TypeScript.
 ---
 
 ### 2.3 React Typing Differences (`React.Node`, `RefSetter`, `ComponentType`)
-1. **`React.Node` (2,524 occurrences)**:
+1. **`React.Node` (2,529 occurrences)**:
    In `@types/react`, the corresponding interface is `React.ReactNode`. A global mechanical replacement (`React.Node` $\rightarrow$ `React.ReactNode`) is applied to all migrated `.tsx` files.
 2. **`React.RefSetter<T>`**:
    Flow's custom ref setter interface must be replaced with standard TypeScript `React.Ref<T>` or `React.ForwardedRef<T>`.
@@ -282,7 +282,7 @@ Colons in expression positions are invalid syntax in TypeScript.
 
 ### 2.4 Utility Types & Property Variance (`+prop`, `$Shape`, `$Keys`, `$ReadOnly`)
 The codebase uses standard Flow utility types in low volumes:
-- **`+prop: T` (44 occurrences)** $\rightarrow$ Maps cleanly to `readonly prop: T`.
+- **`+prop: T` (198 occurrences)** $\rightarrow$ Maps cleanly to `readonly prop: T`.
 - **`$Keys<T>` (3 occurrences)** $\rightarrow$ Maps to `keyof T`.
 - **`$Shape<T>` (3 occurrences)** $\rightarrow$ Maps to `Partial<T>`.
 - **`$ReadOnlyArray<T>` (27 occurrences)** $\rightarrow$ Maps to `ReadonlyArray<T>` or `readonly T[]`.
@@ -296,93 +296,67 @@ The codebase uses standard Flow utility types in low volumes:
 
 ### 3.1 The Global vs Namespaced C++ Type Conflict
 The C++ WebAssembly engine bindings (`GDevelop.js`) represent the most critical domain-specific typing subsystem in the monorepo:
-1. **In Flow**: 150+ declaration files in `GDevelop.js/types/` export flat global classes: `gdProject`, `gdLayout`, `gdObjectsContainer`, `gdInstruction`, `gdEventsList`.
-2. **In TypeScript**: `GDevelop.js/scripts/generate-dts.mjs` generates a single unified `GDevelop.js/types.d.ts` file structured under `namespace gd` (`gd.Project`, `gd.Layout`, `gd.ObjectsContainer`).
-3. **The Scale of Conflict**: Across `newIDE/app/src/`, **1,386 files** directly annotate function parameters, variables, and state with unnamespaced `gd*` types!
+1. **In Flow**: 272 declaration files in `GDevelop.js/types/` declare flat global classes: `gdProject`, `gdLayout`, `gdObjectsContainer`, `gdInstruction`, `gdEventsList`, plus special names like `gdObject` and `gdjsExporter`.
+2. **In TypeScript**: `GDevelop.js/scripts/generate-dts.mjs` generates a single unified `GDevelop.js/types.d.ts` ambient declaration file structured under `declare namespace gd` (`gd.Project`, `gd.Layout`, `gd.ObjectsContainer`, `gd.gdObject`, `gd.Exporter`) and `declare const gd`.
+3. **The Scale of Conflict**: Across `newIDE/app/src/` (excl. `locales/`), **579** `.js`/`.ts`/`.tsx` files (**581** incl. `.js.flow`) reference unnamespaced `gd*` identifiers across **4,067** matching lines (**4,111** tokens), including **3,628** annotation lines (**3,652** `: ?gd*` type annotations)!
 4. **The Runtime Conflict**: **340 files** contain:
    ```javascript
    const gd: libGDevelop = global.gd;
    ```
-   Whereas `GDevelop.js/types.d.ts` declares `const gd: typeof gd;` globally.
+   Whereas `GDevelop.js/types.d.ts` declares `declare namespace gd` / `declare const gd` globally.
 
 ### 3.2 The Zero-Code-Change Ambient Bridge Solution
-Refactoring 1,386 files to replace `gdProject` with `gd.Project` would create massive code churn and high merge-conflict risk.
-Instead, we introduce an **Ambient Type Alias Bridge**: `src/types/gd-globals.d.ts`.
+Refactoring 579 files (3,652 type annotations) to replace `gdProject` with `gd.Project` would create massive code churn and high merge-conflict risk.
+Instead, we introduce an **Ambient Type Alias Bridge**: `src/types/gd-globals.d.ts`, automatically generated by `newIDE/app/scripts/generate-gd-globals.js` (`npm run generate-gd-globals`).
 
-By declaring global type aliases that map every `gdX` identifier directly to `gd.X` (from the already existing `GDevelop.js/types.d.ts`), TypeScript will resolve all 1,386 files **with 100% type safety and zero code refactoring**!
+Because `GDevelop.js/types.d.ts` is an ambient declaration file (`declare namespace gd`) rather than an ES module, `gd-globals.d.ts` uses a triple-slash directive (`/// <reference path="../../../../GDevelop.js/types.d.ts" />`) instead of `import * as gdModule from ...`, and maps every `gdX` identifier directly to `gd.X` inside `declare global` (with explicit handling for `gdObject = gd.gdObject` and `gdjsExporter = gd.Exporter`). TypeScript resolves all 579 files **with 100% type safety and zero code refactoring**!
 
-### 3.3 Reference Implementation: `src/types/gd-globals.d.ts`
+### 3.3 Implemented Reference: `src/types/gd-globals.d.ts`
 
 ```typescript
 /**
  * GDevelop.js C++ WebAssembly Ambient Type Bridge
  * Maps unnamespaced gd* Flow type identifiers to GDevelop.js/types.d.ts namespaced classes.
- * Enables zero-code-change type resolution for 1,386 migrated TypeScript files in newIDE/app.
+ * Enables zero-code-change type resolution for migrated TypeScript files in newIDE/app.
+ * Automatically generated by newIDE/app/scripts/generate-gd-globals.js
  */
 
-import * as gdModule from '../../../../GDevelop.js/types';
+/// <reference path="../../../../GDevelop.js/types.d.ts" />
 
 declare global {
-  // Global runtime instance
-  const gd: typeof gdModule;
+  // Type bridge for Flow compatibility
+  type libGDevelop = typeof gd;
 
-  // Runtime library type bridge
-  type libGDevelop = typeof gdModule;
+  // Ad-hoc Flow compatibility types
+  type gdSerializable = any;
+  type gdEmscriptenObject = {
+    ptr: number;
+    delete(): void;
+  };
 
-  // Core Project & Layout Models
-  type gdProject = gdModule.Project;
-  type gdLayout = gdModule.Layout;
-  type gdObjectsContainer = gdModule.ObjectsContainer;
-  type gdObject = gdModule.Object;
-  type gdObjectConfiguration = gdModule.ObjectConfiguration;
-  type gdObjectGroup = gdModule.ObjectGroup;
-  type gdInitialInstance = gdModule.InitialInstance;
-  type gdInitialInstancesContainer = gdModule.InitialInstancesContainer;
+  // Core C++ Class Aliases (257 generated from GDevelop.js/types.d.ts)
+  type gdProject = gd.Project;
+  type gdLayout = gd.Layout;
+  type gdObjectsContainer = gd.ObjectsContainer;
+  type gdObject = gd.gdObject; // Special mapping (not gd.Object)
+  type gdObjectConfiguration = gd.ObjectConfiguration;
+  type gdObjectGroup = gd.ObjectGroup;
+  type gdInitialInstance = gd.InitialInstance;
+  type gdInitialInstancesContainer = gd.InitialInstancesContainer;
+  // ... (all 257 classes sorted alphabetically) ...
+  type gdjsExporter = gd.Exporter; // Special Flow alias
 
-  // Visual Events & Instructions
-  type gdBaseEvent = gdModule.BaseEvent;
-  type gdStandardEvent = gdModule.StandardEvent;
-  type gdRepeatEvent = gdModule.RepeatEvent;
-  type gdWhileEvent = gdModule.WhileEvent;
-  type gdForEachEvent = gdModule.ForEachEvent;
-  type gdEventsList = gdModule.EventsList;
-  type gdInstruction = gdModule.Instruction;
-  type gdInstructionsList = gdModule.InstructionsList;
-  type gdExpression = gdModule.Expression;
+  // Enums (13 generated from GDevelop.js/types.d.ts)
+  // type ... = gd....;
 
-  // Extensions & Functions
-  type gdPlatform = gdModule.Platform;
-  type gdJsPlatform = gdModule.JsPlatform;
-  type gdPlatformExtension = gdModule.PlatformExtension;
-  type gdEventsFunction = gdModule.EventsFunction;
-  type gdEventsFunctionsContainer = gdModule.EventsFunctionsContainer;
-  type gdEventsFunctionsExtension = gdModule.EventsFunctionsExtension;
-  type gdEventsBasedBehavior = gdModule.EventsBasedBehavior;
-  type gdEventsBasedObject = gdModule.EventsBasedObject;
-
-  // Variables & Data Structures
-  type gdVariable = gdModule.Variable;
-  type gdVariablesContainer = gdModule.VariablesContainer;
-  type gdSerializerElement = gdModule.SerializerElement;
-  type gdResource = gdModule.Resource;
-  type gdResourcesManager = gdModule.ResourcesManager;
-
-  // Emscripten Standard Library Vector Helpers
-  type gdVectorString = gdModule.VectorString;
-  type gdVectorPlatformExtension = gdModule.VectorPlatformExtension;
-  type gdVectorObject = gdModule.VectorObject;
-  type gdVectorInstruction = gdModule.VectorInstruction;
-  type gdMapStringString = gdModule.MapStringString;
-  type gdMapStringVariable = gdModule.MapStringVariable;
-
-  // Emscripten Base
-  type gdEmscriptenObject = gdModule.EmscriptenObject;
+  // Additional Exported Types (1 generated from GDevelop.js/types.d.ts)
+  // type gd... = gd....;
 }
 
 export {};
 ```
 
-*Note: A generator script (`scripts/generate-gd-globals.mjs`) will be authored in Phase 0 to automatically synchronize all 248 classes from `GDevelop.js/types.d.ts` into `src/types/gd-globals.d.ts`.*
+*Implemented via `newIDE/app/scripts/generate-gd-globals.js` (`npm run generate-gd-globals`), which parses `GDevelop.js/types.d.ts` and cross-checks `GDevelop.js/types/` to synchronize all 257 class aliases, 13 enum aliases, and 1 type alias automatically. Because `gd-globals.d.ts` is auto-generated, it is listed in `newIDE/app/.prettierignore`.*
 
 ### 3.4 C++ Object Memory Lifecycles & Pointer Equality
 Because Emscripten objects represent heap-allocated C++ instances:
@@ -402,51 +376,46 @@ Upon completion of Phase 5 (zero Flow files remaining in `newIDE/app`):
 ## 4. Tooling & Build System Coexistence Architecture
 
 ### 4.1 Vite 7 Dual-Compilation Engine (`newIDE/app/vite.config.mjs`)
-Vite 7 compiles `newIDE/app` using custom Sucrase and Babel plugins. To enable transparent dual compilation of both Flow and TypeScript files during the transition, three precise modifications are required:
+Vite 7 compiles `newIDE/app` using custom Sucrase, Babel, esbuild-scanner, worker, and CommonJS plugins. To enable transparent dual compilation of both Flow and TypeScript files during the transition—and prevent breakages as entry points, workers, and CommonJS helpers migrate from `.js` to `.ts`/`.tsx`—the following modifications are implemented:
 
 #### Modification 1: Expand Source File Regular Expression
-In `newIDE/app/vite.config.mjs` (line 59):
+In `newIDE/app/vite.config.mjs`:
 ```javascript
-// BEFORE:
-const SOURCE_JS_RE = /[\\/]newIDE[\\/]app[\\/]src[\\/].*\.js$/;
-
-// AFTER:
 const SOURCE_CODE_RE = /[\\/]newIDE[\\/]app[\\/]src[\\/].*\.(js|jsx|ts|tsx)$/;
 ```
 
-#### Modification 2: Route Sucrase Transforms by Extension (`createFastFlowJsxPlugin`)
-In `createFastFlowJsxPlugin` (lines 308–355):
+#### Modification 2: Bypass Flow Stripping for `.ts`/`.tsx` in `createFlowEsbuildScannerPlugin`
+During dependency pre-bundling, `createFlowEsbuildScannerPlugin` intercepts `SOURCE_CODE_RE`. TypeScript files must skip `stripFlowForEsbuildScan` and use native esbuild `'ts'`/`'tsx'` loaders:
 ```javascript
-// BEFORE:
-const transformed = sucraseTransform(code, {
-  transforms: ['flow', 'jsx'],
-  jsxRuntime: 'classic',
-  disableESTransforms: true,
-  filePath: cleanId,
-  sourceMapOptions: { compiledFilename: cleanId },
-});
+const isTypeScript = args.path.endsWith('.ts') || args.path.endsWith('.tsx');
+if (isTypeScript) {
+  return {
+    contents: fs.readFileSync(args.path, 'utf8'),
+    loader: args.path.endsWith('.tsx') ? 'tsx' : 'ts',
+  };
+}
+```
 
-// AFTER:
+#### Modification 3: Route Sucrase Transforms by Extension (`createFastFlowJsxPlugin`)
+```javascript
 const isTypeScript = cleanId.endsWith('.ts') || cleanId.endsWith('.tsx');
+const transforms = isTypeScript
+  ? cleanId.endsWith('.tsx')
+    ? ['typescript', 'jsx']
+    : ['typescript']
+  : ['flow', 'jsx'];
 const transformed = sucraseTransform(code, {
-  transforms: isTypeScript ? ['typescript', 'jsx'] : ['flow', 'jsx'],
+  transforms,
   jsxRuntime: 'classic',
   disableESTransforms: true,
   filePath: cleanId,
   sourceMapOptions: { compiledFilename: cleanId },
 });
 ```
+*(Keeping `'jsx'` disabled on plain `.ts` files ensures legal TypeScript angle-bracket assertions like `(<string>x)` transform in Sucrase without falling back to Babel.)*
 
-#### Modification 3: Route Babel Fallback Presets by Extension (`createBabelReactPlugins`)
-In `createBabelReactPlugins` (lines 358–395):
+#### Modification 4: Route Babel Fallback Presets by Extension (`createBabelReactPlugins`)
 ```javascript
-// BEFORE:
-presets: [
-  ['@babel/preset-react', { runtime: 'classic' }],
-  '@babel/preset-flow',
-]
-
-// AFTER:
 const isTypeScript = cleanId.endsWith('.ts') || cleanId.endsWith('.tsx');
 presets: [
   ['@babel/preset-react', { runtime: 'classic' }],
@@ -454,7 +423,13 @@ presets: [
 ]
 ```
 
-**Verification**: This change guarantees that `.ts` and `.tsx` files are stripped and hot-reloaded with sub-10ms latency using Sucrase, while existing `.js` files continue to be processed through the Flow pipeline.
+#### Modification 5: Eliminate Hardcoded `.js` Paths across Vite Plugins & Entries
+All hardcoded `.js` assumptions in `vite.config.mjs` are updated to support `.ts`/`.tsx` transparently:
+- **`WORKER_FACTORY_SUFFIXES` & `createWorkerRedirectPlugin`**: Match both `.js` and `.ts` worker factories (`BackgroundSerializerWorkerFactory`, `Resource3DPreviewWorkerFactory`), resolve `.worker.ts` before `.worker.js`, match `/BackgroundSerializer\.worker\.(js|ts)$/`, and transform `.ts`/`.tsx` classic workers in dev mode via Vite's `transformWithEsbuild(..., { loader, format: 'iife', supported: { using: false } })` (avoiding `@babel/preset-typescript`'s automatic `export {};` emission on `import type`, which would throw `SyntaxError: Unexpected token 'export'` in classic `new Worker(...)` scripts, while also lowering `using`).
+- **`COMMONJS_SOURCE_PATTERNS`**: Match `\.(js|ts|tsx)$` for `LocalGDJSFinder`, `JsExtensionsLoader/*`, `MapFor`, `OptionalRequire`, `PublicGameProperties`, and `EventScriptTestHelpers`.
+- **Entry Points & Warmup (`renderViteIndexHtml`, `server.warmup.clientFiles`, `optimizeDeps.entries`)**: Use `resolveSourceFile(...)` (probing `.tsx`, `.ts`, `.jsx`, `.js` on disk) for `src/index`, `src/BrowserApp`, `src/LocalApp`, and `src/MainFrame/index`.
+
+**Verification**: This guarantees that `.ts` and `.tsx` files are stripped and hot-reloaded with sub-10ms latency using Sucrase, while existing `.js` files continue through the Flow pipeline and future entry/worker migrations require zero Vite config changes.
 
 ---
 
@@ -502,42 +477,62 @@ We convert the monolithic preset list into file-scoped `overrides`:
 - `testMatch`: `['<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}', '<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}']`
 - `transform`: `'^.+\\.(js|jsx|mjs|cjs|ts|tsx)$': '<rootDir>/config/jest/babelTransform.js'`
 - `moduleFileExtensions`: `['web.js', 'js', 'web.ts', 'ts', 'web.tsx', 'tsx', ...]`
+- `setupFilesAfterEnv`: updated to check `src/setupTests.ts` before falling back to `src/setupTests.js`, avoiding breakage when `setupTests.js` migrates.
 
-Because `babelTransform.js` uses Babel with `babelrc: true`, the updated `.babelrc.json` overrides above immediately allow Jest to execute `.spec.js` (Flow) and `.spec.ts` (TypeScript) tests simultaneously in the same test run!
+Because `babelTransform.js` uses Babel with `babelrc: true`, the updated `.babelrc.json` overrides above immediately allow Jest to execute `.spec.js` (Flow) and `.spec.ts`/`.spec.tsx` (TypeScript) tests simultaneously in the same test run!
 
 ---
 
-### 4.4 Storybook 7 with Webpack 5 Integration (`.storybook/main.js`)
-In `newIDE/app/.storybook/main.js` (line 47):
-```javascript
-// BEFORE:
-stories: ['../src/stories/**/*.stories.js'],
+### 4.4 Storybook 7 with Webpack 5 Integration (`.storybook/main.js` & PR Automation)
+- In `newIDE/app/.storybook/main.js`:
+  - `stories: ['../src/stories/**/*.stories.@(js|jsx|ts|tsx)']` discovers migrated TypeScript stories alongside Flow stories.
+  - The Web Worker rule matches `test: /\.worker\.(js|ts)$/` so migrated `.worker.ts` workers continue working with `worker-loader`.
+- In `newIDE/app/scripts/comment-storybook-links-on-pull-request.js`:
+  - Updated the changed-story filter from `filePath.endsWith('.stories.js')` to `/\.stories\.(js|jsx|ts|tsx)$/.test(filePath)` and updated `getStoriesOfFile`'s title parser to handle TypeScript CSF2/CSF3 default-export patterns (`export default { ... } satisfies Meta<...>`, `export default ({ ... } as Meta<...>)`, `const meta: Meta<...> = { ... }; export default meta;`, and nested objects such as `parameters: { ... }` appearing before `title:`) so PR Storybook link comments continue working for `.stories.tsx` files.
 
-// AFTER:
-stories: ['../src/stories/**/*.stories.@(js|jsx|ts|tsx)'],
-```
 Webpack 5 loads Babel via `babel-loader` extending `.babelrc.json`, ensuring newly migrated `.stories.tsx` components render seamlessly alongside existing `.stories.js` stories.
 
 ---
 
-### 4.5 Linter & Formatter Alignment (ESLint, Prettier, Husky)
-1. **TypeScript devDependency Upgrade**:
-   `newIDE/app/package.json` currently specifies `"typescript": "^4.1.3"`. This must be updated to `"typescript": "5.4.5"` to match `GDJS/package.json` and support modern TypeScript syntax (`using`, inline type imports).
-2. **ESLint Parser Keyword Support**:
-   Upgrade `@typescript-eslint/parser` to support ECMAScript explicit resource management (`using`) used in `copyBinarySnapshot.ts`.
-3. **Expand Package Scripts**:
-   Update `newIDE/app/package.json`:
-   ```json
-   "lint": "eslint src/ --ext .js,.jsx,.ts,.tsx --max-warnings=0",
-   "format": "prettier --write \"src/!(locales)/**/*.{js,jsx,ts,tsx}\"",
-   "check-format": "prettier --list-different \"src/!(locales)/**/*.{js,jsx,ts,tsx}\"",
-   "lint-staged": {
-     "src/!(locales)/**/*.{js,jsx,ts,tsx}": [
-       "prettier --write",
-       "eslint --max-warnings=0"
-     ]
-   }
-   ```
+### 4.5 Linter, Formatter, Dependencies & Build Scripts Alignment
+1. **Explicit `devDependencies` & Peer Dependency Resolution (`newIDE/app/package.json`)**:
+   - Upgrade `"typescript"` from `"^4.1.3"` to `"^5.4.5"` (matching `GDJS/package.json`) and declare explicit `devDependencies` for `"@babel/preset-typescript"`, `"@types/jest": "^27.5.2"`, `"@types/react": "^18.2.0"`, and `"@types/react-dom": "^18.2.0"` (preventing `package-lock.json` drift and replacing the stale transitive `@types/react@16.14.69` pulled in by `@material-ui/core@4.11.0`).
+   - **Peer Dependency `ERESOLVE` Fix**: `@lingui/cli@2.9.2` declares `peerDependencies: { typescript: "2 || 3 || 4" }`, which causes `npm install` / `npm ci` in Semaphore, CircleCI, and GitHub Actions to fail with `ERESOLVE` against `typescript@^5.4.5`. Similarly, `@material-ui/core@4.11.0`, `@material-ui/icons@4.9.1`, and `@material-ui/lab@4.0.0-alpha.56` declare `peerDependencies: { "@types/react": "^16.8.6" }`. Following the existing `"react": "$react"` / `"react-dom": "$react-dom"` precedent in `newIDE/app/package.json`, add npm `"overrides"`:
+     ```json
+     "overrides": {
+       "typescript": "$typescript",
+       "@types/react": "$@types/react",
+       "@types/react-dom": "$@types/react-dom"
+     }
+     ```
+     This keeps a single deduplicated copy of `typescript` and `@types/react` and allows plain `npm install` / `npm ci` to succeed without `--legacy-peer-deps`.
+2. **ESLint 8 Configuration**:
+   - `@typescript-eslint/parser@5.62.0` (provided via `eslint-config-react-app@7.0.1`) **already parses** ECMAScript explicit resource management (`using` in `src/Utils/copyBinarySnapshot.ts`), and ESLint 8 (`eslint src/ --max-warnings=0`) **already discovers and lints `.ts`/`.tsx` files** automatically via `eslint-config-react-app`'s `overrides` (`**/*.ts?(x)`). No ESLint parser upgrade or `--ext` flag change is required.
+   - Expand `eslintConfig.overrides` in `newIDE/app/package.json` from `*.stories.js` to `*.stories.{js,jsx,ts,tsx}` so migrated Storybook stories preserve `"import/no-anonymous-default-export": "off"`.
+3. **Prettier 1.15.3 Incompatibility & Dual-Prettier Transitional Setup**:
+   - `prettier@1.15.3` crashes with `SyntaxError` on TypeScript 3.8+/5.4 syntax (`import type`, `import { type }`, `??`, `?.`, `using`), failing immediately on migrated `.ts`/`.tsx` files.
+   - However, running Prettier `3.4.2` directly across legacy `.js` files would reformat **1,369** untouched legacy Flow `.js` files (due to Prettier 2/3 wrapping and ternary indentation changes) and fail with `SyntaxError` on **8** legacy `.js` files containing Flow syntax without a `// @flow` header (e.g., `src/EventsSheet/OnceInstructionSanitizer.spec.js`), violating Risk R-07 ("avoid sweeping mass-reformatting").
+   - **Implemented Solution**: Upgrade `"prettier"` to `"3.4.2"` (matching `GDJS/package.json` so both `node_modules/prettier` for VS Code's Prettier extension and `node_modules/.bin/prettier` agree on `3.4.2` with zero split-brain) and install `"prettier-legacy": "npm:prettier@1.15.3"` for untouched legacy `.js`/`.jsx` files, routed through `newIDE/app/scripts/run-prettier.js` (with command-line batching for Windows and coverage for both `src/!(locales)/**/*.{ts,tsx}` and top-level `src/*.{ts,tsx}`):
+     ```json
+     "format": "node scripts/run-prettier.js --write",
+     "check-format": "node scripts/run-prettier.js --list-different",
+     "lint-staged": {
+       "src/!(locales)/**/*.{js,jsx,ts,tsx}": [
+         "node scripts/run-prettier.js --write",
+         "eslint --max-warnings=0"
+       ],
+       "src/*.{ts,tsx}": [
+         "node scripts/run-prettier.js --write",
+         "eslint --max-warnings=0"
+       ]
+     }
+     ```
+   - Add `"endOfLine": "auto"` to `newIDE/app/.prettierrc` for cross-platform Windows/Linux parity, and list auto-generated TS/API declaration files (`src/types/gd-globals.d.ts`, `src/EditorFunctions/PublicApi/**/*.d.ts`, `src/Version/VersionMetadata.ts`) alongside the legacy Flow workarounds (`src/Utils/UseOptimisticState.js`, `src/Utils/Sha256.js`) in `newIDE/app/.prettierignore`.
+   - In Phase 6, once all `.js` Flow files are retired, simply uninstall `prettier-legacy` and delete `scripts/run-prettier.js` (`"prettier": "3.4.2"` is already the primary formatter).
+4. **Build, Codegen & Config Scripts Hardcoded-`.js` Cleanup**:
+   - `scripts/lib/ReadThemeRegistry.js` & `scripts/create-new-theme.js`: Probe `ThemeRegistry.ts` before falling back to `ThemeRegistry.js` (and write `index.ts`/`ThemeRegistry.ts` once migrated).
+   - `scripts/make-version-metadata.js` & `.gitignore`: Generate `src/Version/VersionMetadata.ts` (typed TypeScript, zero Flow syntax), `src/Version/VersionMetadata.js.flow` (exact Flow declaration for Flow consumers), and `src/Version/VersionMetadata.json`, removing any stale `VersionMetadata.js`.
+   - `.flowconfig`: Change `module.name_mapper` target from `<PROJECT_ROOT>/src/Utils/RawTextFileStub.js` to extensionless `<PROJECT_ROOT>/src/Utils/RawTextFileStub` so Flow resolves `RawTextFileStub.js` now and `RawTextFileStub.js.flow` after migration.
 
 ---
 
@@ -571,9 +566,19 @@ Because Flow syntax (`?T`, `{| |}`, `(x: T)`, `export type`) is invalid JavaScri
 
 **Architectural Mandate**: `newIDE/app/tsconfig.json` MUST configure:
 ```json
-"allowJs": false,
-"checkJs": false
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "checkJs": false
+  },
+  "exclude": [
+    "src/EditorFunctions/PublicApi/**/*.d.ts"
+  ]
+}
 ```
+- `allowJs: false` / `checkJs: false` prevents `tsc` from parsing unmigrated Flow `.js` files.
+- `exclude: ["src/EditorFunctions/PublicApi/**/*.d.ts"]` prevents `src/EditorFunctions/PublicApi/v22/script-api.d.ts` (a non-module script declaration file meant solely for sandboxed AI editor scripts and imported as raw text) from polluting the IDE's TypeScript global namespace with ~60 global types and function declarations.
+
 Cross-language module resolution across the boundary must be handled strictly via **Declaration Bridges** and **Companion Stubs**.
 
 ---
@@ -581,42 +586,62 @@ Cross-language module resolution across the boundary must be handled strictly vi
 ### 5.2 Pattern A: TypeScript Importing Flow Code
 When a newly migrated TypeScript file imports an unmigrated Flow `.js` file:
 
-#### 1. Ambient Wildcard Declaration (`src/types/unmigrated-flow-modules.d.ts`)
-To allow developers to migrate leaf modules without authoring hundreds of stubs for high-level UI parents, provide ambient wildcard declarations:
-```typescript
-/**
- * Wildcard ambient typings for unmigrated Flow modules.
- * Allows migrated TypeScript files to import unmigrated Flow subsystems as 'any'.
- */
-declare module '*/MainFrame/*' { const content: any; export default content; export = content; }
-declare module '*/SceneEditor/*' { const content: any; export default content; export = content; }
-declare module '*/EventsSheet/*' { const content: any; export default content; export = content; }
-```
+#### 1. Companion `.d.ts` Stubs (Recommended Pattern for Unmigrated Modules)
+For any unmigrated Flow module imported by migrated TypeScript files (e.g., `PreferencesContext.js`, `ResponsiveWindowMeasurer.js`, `Utils/Analytics/EventSender.js`, `Utils/GDevelopServices/Project.js`, `Utils/i18n/MessageDescriptor.flow.js`), author a typed companion `.d.ts` file adjacent to the `.js` module (e.g., `ResponsiveWindowMeasurer.d.ts`).
+TypeScript resolves the companion `.d.ts` directly with full type safety and autocomplete, while Flow continues using the `.js` file.
+*Once the `.js` module is converted to `.ts`/`.tsx`, the companion `.d.ts` file is deleted.*
 
-#### 2. Companion `.d.ts` Stubs (High-Traffic Service Boundaries)
-For heavily consumed services (e.g. `PreferencesContext.js`, `ProjectManager.js`), author a typed companion file: `PreferencesContext.d.ts` adjacent to `PreferencesContext.js`.
-TypeScript resolves `PreferencesContext.d.ts`, providing full autocomplete and type safety, while Flow continues using `PreferencesContext.js`.
-*Once `PreferencesContext.js` is converted to `PreferencesContext.tsx`, the companion `.d.ts` file is deleted.*
+#### 2. Ambient Declarations (`src/types/unmigrated-flow-modules.d.ts`) — Valid Constraints Only
+`src/types/unmigrated-flow-modules.d.ts` is reserved strictly for:
+- Single-wildcard top-level directory entrypoints (`declare module '*/MainFrame'`, `declare module '*/locales/LocalesMetadata'`),
+- Untyped third-party packages (`slugs`, `@lingui/macro`, `@lingui/core`, `@lingui/react`, `classnames`, `react-test-renderer`, `react-measure`), and
+- Static asset extensions (`*.svg`, `*.png`, `*.jpg`, `*.css`).
+
+**Avoid Invalid TypeScript Ambient Module Patterns** (which `skipLibCheck: true` hides silently):
+- **Do NOT combine `export default` with `export =`** (`TS2309: An export assignment cannot be used in a module with other exported elements`).
+- **Do NOT use multiple `*` wildcards** such as `declare module '*/MainFrame/*'` (`TS5061: Pattern '*/MainFrame/*' can have at most one '*' character`).
+- **Do NOT use relative module specifiers** such as `declare module './Analytics/*'` or `declare module '../Utils/i18n/MessageDescriptor.flow'` (`TS2436: Ambient module declaration cannot specify relative module name`). Always use adjacent companion `.d.ts` files instead.
+
+```typescript
+// Valid single-wildcard top-level declaration and static asset declarations:
+declare module '*/MainFrame' {
+  const content: any;
+  export default content;
+}
+declare module '*.svg' {
+  const content: any;
+  export default content;
+}
+```
 
 ---
 
 ### 5.3 Pattern B: Flow Importing TypeScript Code
 When an unmigrated Flow file imports a newly migrated TypeScript file:
 
-#### 1. The Companion `.js.flow` Stub Pattern (The Proven Pilot)
-Demonstrated in production by `src/Utils/copyBinarySnapshot.ts` & `copyBinarySnapshot.js.flow`:
-- Implementation: `MyHelper.ts`
-- Companion Stub: `MyHelper.js.flow` (containing Flow `declare export function ...`)
-- Flow resolves `MyHelper.js.flow` and continues type-checking without error.
-- Bundlers (Vite/Webpack/Jest) resolve `MyHelper.ts` for actual execution.
+#### 1. The Companion `.js.flow` Stub Pattern (Current Repository Discipline)
+Demonstrated in production by `src/Utils/copyBinarySnapshot.ts` & `copyBinarySnapshot.js.flow` (and currently used across all migrated Phase 1–2 modules in `src/Utils/` and `src/UI/`):
+- Implementation: `MyHelper.ts` (or `MyComponent.tsx`)
+- Companion Stub: `MyHelper.js.flow` (containing Flow `declare export ...` signatures)
+- Flow resolves `MyHelper.js.flow` and preserves full type-checking across the boundary.
+- Bundlers (Vite/Webpack/Jest) and `tsc` resolve `MyHelper.ts`/`.tsx` for compilation and execution.
 
-#### 2. Untyped Declaration in `.flowconfig`
-For components where strict type propagation into Flow is not required, `.flowconfig` can mark migrated files as untyped:
+#### 2. Untyped Declaration in `.flowconfig` (Optional Fallback — Caveats Required)
+Adding `<PROJECT_ROOT>/src/.*\.tsx?$` to `[untyped]` **alone does NOT work**: Flow does not resolve `.ts`/`.tsx` file extensions by default and will fail with `[cannot-resolve-module]`.
+To use `[untyped]` for `.ts`/`.tsx` modules without `.js.flow` stubs, `.flowconfig` MUST also configure all 6 `module.file_ext` entries in `[options]` with `.js` listed **first** (so Flow does not disable default `.js` checking and `.js.flow` continues taking precedence over `.ts`/`.tsx`):
 ```ini
 [untyped]
 <PROJECT_ROOT>/src/.*\.tsx?$
+
+[options]
+module.file_ext=.js
+module.file_ext=.jsx
+module.file_ext=.mjs
+module.file_ext=.json
+module.file_ext=.ts
+module.file_ext=.tsx
 ```
-Flow will treat imports of `.ts`/`.tsx` files as `any`, preventing Flow compiler errors without requiring manual `.js.flow` stub authoring for non-critical components.
+**Important Caveat (`[signature-verification-failure]`)**: Even with `module.file_ext` configured, marking imported modules `[untyped]` causes Flow to treat them as `any`, which triggers `[signature-verification-failure]` whenever a Flow file re-exports values or uses types imported from an untyped `.ts`/`.tsx` module in exported annotations. For this reason, the codebase currently uses the **companion `.js.flow` stub discipline** rather than `[untyped]` for migrated modules.
 
 ---
 
@@ -713,25 +738,25 @@ When converting a module `src/Foo/MyComponent.js`:
 ## 7. Actionable 6-Phase Topological Migration Roadmap
 
 ### 7.1 Phase 0: Infrastructure & Tooling Foundation (Weeks 1–2)
-- **Objective**: Establish the dual-stack development, build, and CI environment.
+- **Objective**: Establish the dual-stack development, build, lint, format, and CI environment.
 - **Deliverables**:
-  - Author `newIDE/app/tsconfig.json` (`allowJs: false`, strict null checks, React JSX).
+  - Author `newIDE/app/tsconfig.json` (`allowJs: false`, strict null checks, React JSX, excluding `src/EditorFunctions/PublicApi/**/*.d.ts`).
   - Update `newIDE/app/.babelrc.json` with file-scoped Flow/TS overrides.
-  - Update `newIDE/app/vite.config.mjs` (Sucrase and Babel extension routing).
-  - Update `newIDE/app/.storybook/main.js` to match `.stories.@(js|jsx|ts|tsx)`.
-  - Generate `src/types/gd-globals.d.ts` (ambient C++ WebIDL bridge).
-  - Author `src/types/unmigrated-flow-modules.d.ts` (wildcard fallbacks).
-  - Upgrade `typescript` devDependency in `newIDE/app/package.json` to `5.4.5`.
+  - Update `newIDE/app/vite.config.mjs` (Sucrase, Babel, esbuild scanner, worker redirect, CommonJS patterns, and dynamic entry-point resolution).
+  - Update `newIDE/app/.storybook/main.js` (`.stories.@(js|jsx|ts|tsx)` and `\.worker\.(js|ts)$`), `newIDE/app/jest.config.js` (`setupTests.ts`/`setupTests.js`), and build/CI scripts (`ReadThemeRegistry.js`, `create-new-theme.js`, `make-version-metadata.js`, `comment-storybook-links-on-pull-request.js`, `.flowconfig`, `.prettierignore`).
+  - Generate `src/types/gd-globals.d.ts` via `scripts/generate-gd-globals.js` (`/// <reference path="../../../../GDevelop.js/types.d.ts" />`).
+  - Maintain valid `src/types/unmigrated-flow-modules.d.ts` (single-wildcard/package/asset declarations only) plus companion `.d.ts` stubs next to unmigrated `.js` modules.
+  - Upgrade `typescript` to `^5.4.5`, declare explicit `@babel/preset-typescript`, `@types/jest`, `@types/react@^18.2.0`, `@types/react-dom@^18.2.0`, add npm `overrides` for `typescript`/`@types/react`/`@types/react-dom` to prevent `ERESOLVE`, expand `eslintConfig.overrides` to `*.stories.{js,jsx,ts,tsx}`, and upgrade `"prettier"` to `"3.4.2"` alongside `"prettier-legacy": "npm:prettier@1.15.3"` + `scripts/run-prettier.js` for `.ts`/`.tsx` formatting and `lint-staged`.
   - Update `.semaphore/semaphore.yml` to run `npm run flow` + `npm run check-types`.
-- **Validation Gate**: 0 TypeScript compilation errors; existing Flow checks continue passing 100%.
+- **Validation Gate**: 0 TypeScript compilation errors; existing Flow, ESLint, Prettier, Jest, and `npm install` checks pass 100%.
 
 ---
 
 ### 7.2 Phase 1: Pure Foundation Utilities & Custom SVG Icons (Weeks 3–4)
 - **Scope**:
-  - `src/UI/CustomSvgIcons/*.js` (291 files $\rightarrow$ `.tsx`).
+  - `src/UI/CustomSvgIcons/*.js` (278 files $\rightarrow$ `.tsx`).
   - `src/Utils/` pure leaf utilities (e.g. `Array.js`, `Color.js`, `Mathematics.js`, `Delay.js`, `GDevelopServices/`, `Version.js`).
-- **File Volume**: ~330 files (~17% of total repository files).
+- **File Volume**: ~320 files (~16% of total repository files).
 - **Complexity**: Low. Almost zero incoming dependencies from external modules.
 - **Validation Gate**:
   - All SVG icons render in Vite dev server and Storybook.
@@ -798,13 +823,14 @@ When converting a module `src/Foo/MyComponent.js`:
 
 ### 7.7 Phase 6: Subproject Integration & Flow Decommissioning (Weeks 22–24)
 - **Scope**:
-  - Convert remaining 5 files in `newIDE/electron-app`.
-  - Delete `newIDE/app/.flowconfig`.
+  - Clean up the 3 tracked pragma-only `.js` files in `newIDE/electron-app` (`app/LocalFilesystemWatcher.js`, `app/LocalGDJSDevelopmentWatcher.js`, `app/Utils/TimestampedId.js`): because `newIDE/electron-app` executes raw `.js` directly in Electron/Node without a TypeScript build step (and these 3 files contain zero Flow type syntax), **remove the `// @flow` header** (or optionally opt into `// @ts-check` + JSDoc) rather than renaming them to `.ts`.
+  - Delete `newIDE/app/.flowconfig`, all transitional `.js.flow` stubs (including `VersionMetadata.js.flow` generation in `scripts/make-version-metadata.js`), and companion `.d.ts` stubs.
   - Uninstall `flow-bin`, `@babel/preset-flow`, and `flow-coverage-report` from `newIDE/app/package.json`.
+  - Consolidate Prettier: remove `prettier-legacy` (`1.15.3`) and `scripts/run-prettier.js`, leaving `"prettier": "3.4.2"` as the sole formatter matching `GDJS/package.json`.
   - Delete `newIDE/app/flow-libs/` (9 files) and `newIDE/app/flow-typed/` (33 files).
   - Delete `GDevelop.js/scripts/generate-types.js` and `GDevelop.js/types/` (272 files).
   - Simplify `newIDE/app/vite.config.mjs` by removing Sucrase and Babel Flow stripping plugins.
-  - Update Semaphore CI to run unified `tsc --noEmit` across entire monorepo.
+  - Update Semaphore CI to remove `npm run flow` and run unified `tsc --noEmit` across the entire monorepo.
 - **Validation Gate**: Complete removal of all Flow artifacts; clean monorepo build and test pass.
 
 ---
@@ -817,7 +843,7 @@ When converting a module `src/Foo/MyComponent.js`:
 |---|---|---|---|---|---|
 | **R-01** | `React.forwardRef` generic order inversion silently corrupts component refs | High | High | **Critical** | Custom AST post-processor swaps type arguments automatically; automated TypeScript compiler checks flag mismatches. |
 | **R-02** | Unnamed function parameters `(boolean) => void` erased to `(boolean: any)` | Medium | High | **High** | AST post-processor synthesizes named arguments (`(done: boolean) => void`) before passing to TS compiler. |
-| **R-03** | WebIDL C++ type divergence (`gdProject` vs `gd.Project`) breaks 1,386 files | High | High | **High** | Ambient type bridge `src/types/gd-globals.d.ts` provides complete backward-compatible global type aliases. |
+| **R-03** | WebIDL C++ type divergence (`gdProject` vs `gd.Project`) breaks 579 files (4,067 lines / 3,652 annotations) | High | High | **High** | Generated ambient type bridge `src/types/gd-globals.d.ts` (`scripts/generate-gd-globals.js`) provides complete backward-compatible global type aliases. |
 | **R-04** | Dual compilation in Vite causes development HMR slowdown | Medium | Medium | Medium | Sucrase plugin routes `.ts` to `typescript` transform and `.js` to `flow` transform; preserves sub-10ms HMR. |
 | **R-05** | Circular dependencies between migrated TS and unmigrated Flow modules | Medium | Medium | Medium | Strict leaf-to-root topological ordering; temporary `.js.flow` and `.d.ts` companion stubs at boundaries. |
 | **R-06** | Third-party libdef incompatibilities in React 18 (`react-virtualized`) | Low | Medium | Low | Install official `@types/*` packages from DefinitelyTyped; vendor minimal `.d.ts` shims if needed. |

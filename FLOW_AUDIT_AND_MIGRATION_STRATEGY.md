@@ -1,40 +1,45 @@
 # GDevelop Flow Diagnostic Audit & Phased TypeScript Migration Strategy
 
-This document provides a top-level executive overview and navigation index for the comprehensive Flow Audit and TypeScript Migration Strategy prepared for the GDevelop repository.
+This document provides a top-level executive overview and navigation index for the comprehensive Flow Audit and TypeScript Migration Strategy prepared for the GDevelop repository (baseline commit `aeb2561323`, updated with verified findings from Phase 0–2 execution).
 
-The full, publication-grade documentation deliverables are located in `docs/FlowMigration/`:
-1. [**Flow Diagnostic Audit Report (`docs/FlowMigration/FLOW_AUDIT_REPORT.md`)**](./docs/FlowMigration/FLOW_AUDIT_REPORT.md)
-   - Exhaustive repository-wide census of 13,084 files.
-   - Exact breakdown of 1,977 Flow files (1,972 in `newIDE/app`, 5 in `newIDE/electron-app`, 0 in `GDJS` / `Extensions` / `SharedLibs`).
-   - Pragma strictness analysis (100% `// @flow`, 0 strict, 0 weak).
-   - Granular directory-by-directory inventory across `newIDE/app/src/`.
-   - Taxonomy of 3,265 suppressions across 757 files (3,194 `$FlowFixMe`, 70 `$FlowIgnore`, 1 `$FlowExpectedError`) broken down by Flow error codes (`incompatible-type`, `missing-local-annot`, `value-as-type`, `prop-missing`, etc.).
+The full, publication-grade documentation deliverables are tracked in the repository root (with synchronized local mirrors in `docs/FlowMigration/`, which is gitignored by root `.gitignore`'s `/docs` rule):
+1. [**Flow Diagnostic Audit Report (`FLOW_AUDIT_REPORT.md`)**](./FLOW_AUDIT_REPORT.md)
+   - Exhaustive repository-wide census of tracked source files.
+   - Verified baseline breakdown of **1,974 tracked Flow files** (**1,971** tracked in `newIDE/app` — 1,967 in `src/` + 4 outside — plus gitignored generated `src/Version/VersionMetadata.js` = 1,972 on disk; **3** tracked pragma-only `.js` files in `newIDE/electron-app` out of 29 tracked `.js` files; **0** in `GDJS` / `Extensions` / `SharedLibs`).
+   - Pragma strictness analysis (100% standard `@flow` — `// @flow` or `/** * @flow */`, 0 strict, 0 weak).
+   - Granular directory-by-directory inventory across `newIDE/app/src/` (including 278 `CustomSvgIcons` files out of 291 non-annotated `.js` files in `src/UI/`).
+   - Taxonomy of 3,265 suppressions across 757 files (3,194 `$FlowFixMe`, 70 `$FlowIgnore`, 1 `$FlowExpectedError`) spanning 43 distinct Flow error codes (`incompatible-type`: 1,514 incl. `$FlowExpectedError`, `missing-local-annot`, `value-as-type`, `prop-missing`, etc.).
    - Audit of `.flowconfig`, 9 standard libdefs in `flow-libs/`, 33 third-party libdefs in `flow-typed/`, and 272 C++ WebAssembly Flow declarations in `GDevelop.js/types/`.
-   - Audit of Vite 7, Sucrase, Babel, Jest, Storybook, and Semaphore CI pipelines.
+   - Audit of Vite 7, Sucrase, Babel, Jest, Storybook, ESLint, Prettier, and Semaphore CI pipelines.
    - Existing TypeScript baseline (504 `.ts`, 8 `.tsx`, 1,048 `.d.ts`) and proven coexistence precedent in `src/Utils/copyBinarySnapshot.ts`.
 
-2. [**Phased TypeScript Migration Strategy (`docs/FlowMigration/TYPESCRIPT_MIGRATION_STRATEGY.md`)**](./docs/FlowMigration/TYPESCRIPT_MIGRATION_STRATEGY.md)
-   - Comprehensive technical incompatibility analysis and syntax comparison table:
-     - Exact object types `{| |}` (3,677) vs TypeScript structural types `{ }`.
+2. [**Phased TypeScript Migration Strategy (`TYPESCRIPT_MIGRATION_STRATEGY.md`)**](./TYPESCRIPT_MIGRATION_STRATEGY.md)
+   - Comprehensive technical incompatibility analysis and syntax comparison table (17 baseline-verified citations):
+     - Exact object types `{| |}` (3,690) vs TypeScript structural types `{ }`.
      - Flow type casts `(x: T)` (3,653) vs TypeScript `(x as T)`.
      - Flow maybe types `?T` (2,958) vs `T | null | undefined`.
      - Type spreading `{ ...Props }` (866) vs intersection `Props & { ... }`.
      - Critical Hazard: Inverted generic parameter order in `React.forwardRef<Props, Ref>` (157) vs `React.forwardRef<Ref, Props>`.
      - Critical Hazard: Unnamed function parameter types `(boolean) => void` (87) vs `(arg: boolean) => void`.
-     - React Typing Mappings (`React.Node` $\rightarrow$ `React.ReactNode`, `React.RefSetter<T>` $\rightarrow$ `React.Ref<T>`).
-     - Utility types and property variance (`+prop` $\rightarrow$ `readonly prop`).
-   - WebIDL / Emscripten C++ Bindings Ambient Bridge (`src/types/gd-globals.d.ts`):
-     - Resolves 1,386 C++ type references (`gdProject`, `gdLayout`) without code refactoring.
+     - React Typing Mappings (`React.Node` [2,529] $\rightarrow$ `React.ReactNode`, `React.RefSetter<T>` $\rightarrow$ `React.Ref<T>`).
+     - Utility types and property variance (`+prop:` [198] $\rightarrow$ `readonly prop:`).
+     - Inline type imports `import { type Foo }` (1,501 single-line / 2,349 incl. multiline).
+   - WebIDL / Emscripten C++ Bindings Ambient Bridge (`src/types/gd-globals.d.ts`, generated by `scripts/generate-gd-globals.js`):
+     - Resolves unnamespaced `gd*` C++ type references across **579** `.js`/`.ts`/`.tsx` files (**581** incl. `.js.flow`; **4,067** matching lines / **4,111** tokens / **3,628** annotation lines / **3,652** `: ?gd*` annotations) without code refactoring.
    - Tooling & Build System Coexistence Architecture:
-     - Vite 7 Sucrase and Babel extension routing recipes.
+     - Vite 7 Sucrase, Babel, esbuild scanner, worker redirect, CommonJS pattern, and entry-point extension routing (`vite.config.mjs`).
      - Scoped Babel overrides in `.babelrc.json`.
-     - Jest dual-compilation execution.
-     - Storybook 7 Webpack 5 loader extension.
-     - Upgraded ESLint & Prettier configs (`typescript >= 5.4.5`).
+     - Jest dual-compilation execution and `setupTests` resolution (`jest.config.js`).
+     - Storybook 7 Webpack 5 story & worker extension support (`.storybook/main.js`, `comment-storybook-links-on-pull-request.js`).
+     - ESLint 8 (`@typescript-eslint/parser` + `*.stories.{js,jsx,ts,tsx}` overrides), transitional dual-Prettier runner (`prettier@3.4.2` for `.ts`/`.tsx` and editor tooling + `prettier-legacy@1.15.3` for untouched legacy `.js`/`.jsx`), explicit TypeScript/React/Jest `devDependencies`, and npm `overrides` resolving `@lingui/cli` and `@material-ui/*` peer conflicts.
+     - Build/codegen script updates (`ReadThemeRegistry.js`, `create-new-theme.js`, `make-version-metadata.js`, `.flowconfig`, `.prettierignore`).
      - Dual-check Semaphore CI workflow (`npm run flow` + `npm run check-types`).
-   - Module boundary interoperability patterns (`.d.ts` and `.js.flow` stubs).
+   - Module boundary interoperability patterns (companion `.d.ts` and `.js.flow` stubs, `tsconfig.json` exclusion of `src/EditorFunctions/PublicApi/**/*.d.ts`, and `.flowconfig` `[untyped]` caveats).
    - Automated codemod pipeline evaluation and custom AST post-processor specifications.
    - Actionable 6-Phase Topological Migration Roadmap (Phases 0–6) with validation gates, risk matrices, and rollback runbooks.
+
+3. [**Deferred Engineering Notes & Follow-Up Checklist (`FLOW_MIGRATION_NOTES.md`)**](./FLOW_MIGRATION_NOTES.md)
+   - Tracked follow-up caveats for later migration phases, including `BackgroundSerializer.worker.js` / `BackgroundSerializer.worker.spec.js` (`vm.runInNewContext` TS-stripping requirement), dual-Prettier Phase 6 cleanup, companion stub lifecycle, `newIDE/electron-app` Phase 6 handling, and clean `npm ci` / `npm test` verification notes.
 
 ---
 
@@ -42,9 +47,9 @@ The full, publication-grade documentation deliverables are located in `docs/Flow
 
 | Dimension | Finding | Strategic Implication |
 |---|---|---|
-| **Repository Scope** | Flow is 99.75% confined to `newIDE/app` (1,972 files). | The game engine (`GDJS`), extensions (`Extensions/`), and shared libraries are already 100% TypeScript. No migration is required outside `newIDE`. |
-| **Pragma Uniformity** | 100% of files use standard `// @flow` (no `strict` or `weak`). | Uniform type checking baseline across the entire application codebase. |
-| **Suppression Profile** | 3,265 suppressions across 757 files, heavily concentrated in test fixtures, mocks, and dynamic UI boundaries. | Transition to TypeScript's contextual typing will resolve many `$FlowFixMe[incompatible-type]` issues. |
-| **C++ WebIDL Bindings** | Discrepancy between unnamespaced `gd*` (Flow) and `gd.*` (`types.d.ts`). | Solved via ambient bridge `src/types/gd-globals.d.ts`, avoiding mass refactoring across 1,386 files. |
+| **Repository Scope** | Flow is **99.85%** confined to `newIDE/app` (1,971 tracked files; 1,972 incl. gitignored `VersionMetadata.js`), plus only 3 pragma-only `.js` files in `newIDE/electron-app`. | The game engine (`GDJS`), extensions (`Extensions/`), and shared libraries are already 100% TypeScript. `newIDE/electron-app` executes raw `.js` in Electron/Node without a TS build step and only needs `// @flow` removed (or `// @ts-check` + JSDoc) in Phase 6. |
+| **Pragma Uniformity** | 100% of files use standard `@flow` (`// @flow` or `/** * @flow */`; no `strict` or `weak`). | Uniform type checking baseline across the entire application codebase. |
+| **Suppression Profile** | 3,265 suppressions across 757 files spanning 43 distinct error codes, heavily concentrated in test fixtures, mocks, and dynamic UI boundaries. | Transition to TypeScript's contextual typing will resolve many `$FlowFixMe[incompatible-type]` issues. |
+| **C++ WebIDL Bindings** | Discrepancy between unnamespaced `gd*` (Flow) and `gd.*` (`types.d.ts`) across 579 `.js`/`.ts`/`.tsx` files (4,067 matching lines / 4,111 tokens / 3,652 `: ?gd*` annotations). | Solved via generated ambient bridge `src/types/gd-globals.d.ts` (`/// <reference path="../../../../GDevelop.js/types.d.ts" />`), avoiding mass refactoring across 579 files. |
 | **Critical Hazards** | `React.forwardRef` generic inversion (157) and unnamed function parameters (87). | Solved via custom AST post-processor in the automated codemod pipeline. |
-| **Coexistence Feasibility** | Proven in production by `copyBinarySnapshot.ts` paired with `copyBinarySnapshot.js.flow`. | Vite, Babel, and Jest can run Flow and TypeScript simultaneously, enabling safe incremental migration. |
+| **Coexistence Feasibility** | Proven in production by `copyBinarySnapshot.ts` paired with `copyBinarySnapshot.js.flow`. | Vite, Babel, Jest, Storybook, ESLint, and Prettier run cleanly across Flow and TypeScript simultaneously, enabling safe incremental migration. |

@@ -64,6 +64,8 @@ GDevelop is structured as a multi-language, multi-subproject monorepo:
 
 ### 1.3 High-Level Quantitative Metrics at a Glance
 
+*(Baseline measured at commit `aeb2561323` prior to Phase 0–2 migration execution.)*
+
 ```
 ================================================================================
                     GDEVELOP MONOREPO AUDIT SUMMARY METRICS
@@ -74,37 +76,41 @@ Total TypeScript (.ts) Files:                       504
 Total TypeScript (.tsx) Files:                        8
 Total TypeScript Declaration (.d.ts) Files:       1,048
 --------------------------------------------------------------------------------
-TOTAL FLOW-ANNOTATED FILES (// @flow):            1,977
-  - In newIDE/app:                                1,972  (99.75% of all Flow files)
-  - In newIDE/electron-app:                            5  ( 0.25% of all Flow files)
-  - In GDJS (Game Runtime):                            0  (100% TypeScript)
-  - In Extensions (56 Extensions):                     0  (100% TypeScript)
-  - In SharedLibs:                                     0  (100% TypeScript)
+TOTAL TRACKED FLOW-ANNOTATED FILES (@flow):       1,974  (1,975 incl. generated VersionMetadata.js)
+  - In newIDE/app (tracked):                      1,971  (99.85% of tracked Flow files)
+      * Inside newIDE/app/src/:                   1,967  (1,966 .js + copyBinarySnapshot.js.flow)
+      * Outside src/ (.storybook, flow-typed,       4
+        scripts):
+      * Gitignored generated on disk:                 1  (src/Version/VersionMetadata.js -> 1,972 total on disk)
+  - In newIDE/electron-app (tracked):                 3  (0.15%; pragma-only .js out of 29 tracked .js)
+  - In GDJS (Game Runtime):                           0  (100% TypeScript)
+  - In Extensions (56 Extensions):                    0  (100% TypeScript)
+  - In SharedLibs:                                    0  (100% TypeScript)
 --------------------------------------------------------------------------------
-Flow Pragma Strictness:
-  - Plain '// @flow' or '/* @flow */':            1,977  (100.0%)
-  - Strict ('// @flow strict'):                        0  (  0.0%)
-  - Weak ('// @flow weak'):                            0  (  0.0%)
+Flow Pragma Strictness (tracked):
+  - Standard '@flow' ('// @flow' / JSDoc):        1,974  (100.0%)
+  - Strict ('// @flow strict'):                       0  (  0.0%)
+  - Weak ('// @flow weak'):                           0  (  0.0%)
 --------------------------------------------------------------------------------
-Flow Typing Coverage in newIDE/app/src:
+Flow Typing Coverage in newIDE/app/src (excl. locales):
   - Total JS Files in newIDE/app/src:             2,336
-  - Flow-Annotated JS Files:                      1,967  (84.20% raw coverage)
+  - Flow-Annotated Files in src/:                 1,967  (84.20% raw coverage)
   - Non-Annotated JS Files:                         369
-    * CustomSvgIcons (Pure SVG Wrappers):           291  (Icon components)
-    * Application Logic (excl. SVG icons):        2,045
-    * Net Application Logic Flow Coverage:               95.6%
+    * CustomSvgIcons (Pure SVG Wrappers):           278  (out of 291 non-annotated JS files in src/UI/)
+    * Application Logic (excl. CustomSvgIcons):   2,058
+    * Net Application Logic Flow Coverage:               95.6%  (1,967 / 2,058 = 95.58%)
 --------------------------------------------------------------------------------
-Flow Suppressions across Codebase:                3,265  (in 757 files)
+Flow Suppressions across Codebase:                3,265  (in 757 files; 43 distinct error codes)
   - $FlowFixMe:                                   3,194  (97.83%)
   - $FlowIgnore:                                     70  ( 2.14%)
-  - $FlowExpectedError:                                1  ( 0.03%)
+  - $FlowExpectedError:                               1  ( 0.03%)
 --------------------------------------------------------------------------------
 Flow Configuration & Libdefs:
-  - Configuration Files (.flowconfig):                 1  (newIDE/app/.flowconfig)
-  - Flow Engine Version:                                  flow-bin 0.299.0
-  - Custom Standard Library Defs (flow-libs/):         9  files (289 KB)
-  - Third-Party npm Libdefs (flow-typed/):            33  files (382 KB)
-  - Generated C++ Flow Libdefs (GDevelop.js/types/): 272  files (declare class gd*)
+  - Configuration Files (.flowconfig):                1  (newIDE/app/.flowconfig)
+  - Flow Engine Version:                                 flow-bin 0.299.0
+  - Custom Standard Library Defs (flow-libs/):        9  files (289 KB)
+  - Third-Party npm Libdefs (flow-typed/):           33  files (382 KB)
+  - Generated C++ Flow Libdefs (GDevelop.js/types/):272  files (declare class gd*)
 ================================================================================
 ```
 
@@ -122,27 +128,27 @@ A recursive scan of all 13,084 non-ignored files across the repository yielded t
 | TypeScript source (`.ts`) | **504** | Engine runtime, extensions, shared libs |
 | TypeScript JSX (`.tsx`) | **8** | Runtime components |
 | TypeScript declarations (`.d.ts`) | **1,048** | DefinitelyTyped, bundled libs, mirrored GDJS |
-| **Flow-annotated files (`// @flow`)** | **1,977** | Exactly 1,972 in `newIDE/app`, 5 in `electron-app` |
-| Non-annotated JS files | **2,354** | Locales (121), SVG icons (291), tooling scripts, vendor |
+| **Flow-annotated files (`@flow`)** | **1,974 tracked** (1,975 on disk) | 1,971 tracked in `newIDE/app` (+1 gitignored `VersionMetadata.js` = 1,972), 3 tracked in `newIDE/electron-app` |
+| Non-annotated JS files | **2,357** | Locales (121), `CustomSvgIcons` (278, out of 291 non-annotated JS files in `src/UI/`), tooling scripts, vendor |
 
 ### 2.2 Pragma Breakdown & Typing Strictness
-Every single Flow file in the repository was analyzed for pragma declarations:
+Every tracked Flow file in the repository at baseline `aeb2561323` was analyzed for pragma declarations:
 
 | Pragma Header | Total Matches | Percentage | Interpretation |
 |---|---|---|---|
-| `// @flow` or `/* @flow */` | **1,977** | **100.0%** | Standard Flow type inference and checking |
+| `// @flow` or `/** * @flow */` | **1,974 tracked** (1,975 incl. `VersionMetadata.js`) | **100.0%** | Standard Flow type inference and checking (includes 2 JSDoc `@flow` spec files in `src/UI/`) |
 | `// @flow strict` | **0** | **0.0%** | No strict pragma mode used anywhere |
 | `// @flow weak` | **0** | **0.0%** | No deprecated weak pragma mode used |
 
-**Key Takeaway**: The GDevelop codebase adopted a uniform pragma discipline: standard `// @flow` across all typed files. No files opted into Flow's strict mode (which prohibits unannotated exports or dynamic property assignments), and none rely on the obsolete `weak` mode.
+**Key Takeaway**: The GDevelop codebase adopted a uniform pragma discipline: standard `@flow` across all typed files. No files opted into Flow's strict mode (which prohibits unannotated exports or dynamic property assignments), and none rely on the obsolete `weak` mode.
 
 ### 2.3 Package & Top-Level Module Census
-The distribution of Flow-annotated files across all monorepo packages demonstrates strict localization:
+The distribution of tracked Flow-annotated files across all monorepo packages demonstrates strict localization:
 
 | Module / Package Directory | Flow-Annotated Files | Total JS Files | Flow Coverage % | Primary Typing System |
 |---|---|---|---|---|
-| `newIDE/app` | **1,972** | 3,380 | 58.34% (84.20% in `src`) | **Flow 0.299.0** (`.flowconfig`) |
-| `newIDE/electron-app` | **5** | 346 | 1.45% | Untyped JS / Electron main |
+| `newIDE/app` | **1,971 tracked** (1,972 on disk\*\*) | 3,380 | 58.31% (84.20% in `src`) | **Flow 0.299.0** (`.flowconfig`) |
+| `newIDE/electron-app` | **3 tracked**\*\*\* | 29 tracked | 10.34% | Untyped Node/Electron JS (pragma-only, 0 Flow syntax) |
 | `newIDE/visual-tests` | **0** | 23 | 0.0% | Untyped JS (Puppeteer scripts) |
 | `newIDE/web-app` | **0** | 3 | 0.0% | Untyped JS (deployment scripts) |
 | `GDJS/Runtime` | **0** | 10 | 0.0% | **TypeScript** (`.ts` / `.tsx`) |
@@ -157,7 +163,11 @@ The distribution of Flow-annotated files across all monorepo packages demonstrat
 
 *\*Note on `GDevelop.js/types`: These 272 files contain `declare class ...` declarations loaded via `[libs]` in `.flowconfig`. In Flow, libdef files registered in `[libs]` do not require `@flow` pragmas.*
 
-**Strategic Finding**: Flow is 99.75% isolated to `newIDE/app`. The entire game engine, runtime extensions, and shared utility libraries are already 100% TypeScript. The scope of the Flow migration is strictly bounded to the IDE application.
+*\*\*Note on `newIDE/app`: At baseline `aeb2561323`, `1,971` tracked files contain `@flow` (`1,967` in `src/` — including `src/Utils/copyBinarySnapshot.js.flow` and 2 JSDoc `/** * @flow */` test files — plus `4` outside `src/`: `.storybook/preview.js`, `flow-typed/zip.js`, `scripts/codemod-internationalize-files.js`, and `scripts/make-version-metadata.js`). Including the gitignored generated `src/Version/VersionMetadata.js` on disk brings the count to `1,972`.*
+
+*\*\*\*Note on `newIDE/electron-app`: Only `29` tracked `.js` files exist in `newIDE/electron-app`, of which exactly `3` tracked source files contain a `// @flow` header (`app/LocalFilesystemWatcher.js`, `app/LocalGDJSDevelopmentWatcher.js`, and `app/Utils/TimestampedId.js`) and all three contain zero Flow type annotations. An earlier raw filesystem scan reported `5` `@flow` files and `346` JS files because it included gitignored build artifacts under `newIDE/electron-app/app/www/`.*
+
+**Strategic Finding**: Flow is **99.85%** isolated to `newIDE/app` (`1,971 / 1,974` tracked Flow files). The entire game engine, runtime extensions, and shared utility libraries are already 100% TypeScript, and `newIDE/electron-app` contains no Flow syntax at all. The scope of the Flow-to-TypeScript migration is strictly bounded to `newIDE/app`.
 
 ### 2.4 Granular Directory-by-Directory Breakdown (`newIDE/app/src`)
 Inside the editor application (`newIDE/app/src`), Flow is adopted across all functional areas:
@@ -217,12 +227,12 @@ Inside the editor application (`newIDE/app/src`), Flow is adopted across all fun
 | **Total `newIDE/app/src` (excl. locales)** | **1,967** | **369** | **84.20% Flow Coverage** |
 
 ### 2.5 Non-Annotated JavaScript Files Census
-Out of 369 non-annotated JS files in `newIDE/app/src`:
-- **291 files** in `src/UI/CustomSvgIcons/*.js` are pure SVG icon wrapper components (e.g., `Add.js`, `Folder.js`, `Twitter.js`). They contain only SVG path JSX and no application logic.
-- **121 files** in `src/locales/**/*.js` are pre-compiled message catalogs generated by the Lingui internationalization CLI (`messages.js`). These are data catalogs and excluded from type checking by configuration.
-- The remaining non-annotated files are test runners, Monaco editor wrappers (`CodeEditor/`), or third-party web preview helpers.
+Out of 369 non-annotated JS files in `newIDE/app/src` (excl. locales):
+- **278 files** in `src/UI/CustomSvgIcons/*.js` are pure SVG icon wrapper components (e.g., `Add.js`, `Folder.js`, `Twitter.js`). They contain only SVG path JSX and no application logic. (The remaining 13 of the **291** non-annotated JS files in `src/UI/` are helper/theme/wrapper files outside `CustomSvgIcons/`.)
+- **121 files** in `src/locales/**/*.js` (excluded from the 2,336-file `src` count above) are pre-compiled message catalogs generated by the Lingui internationalization CLI (`messages.js`). These are data catalogs and excluded from type checking by configuration.
+- The remaining **91** non-annotated files outside `CustomSvgIcons/` are test runners, theme registries, Monaco editor wrappers (`CodeEditor/`), or third-party web preview helpers.
 
-**Conclusion**: When excluding pure SVG icon wrappers and generated locale data, Flow coverage across actual application logic in `newIDE/app/src` stands at **95.6%**.
+**Conclusion**: When excluding pure SVG icon wrappers (`278` files) and generated locale data, Flow coverage across actual application logic in `newIDE/app/src` stands at **95.6%** (`1,967 / 2,058`).
 
 ---
 
@@ -334,11 +344,11 @@ Across the repository, **3,265 Flow error suppressions** exist across **757 dist
 | **Total Suppressions** | **3,265** | **100.0%** | Spread across 757 files (38.3% of all Flow files) |
 
 ### 4.2 Breakdown by Flow Error Code
-A complete parse of suppression tags with explicit error codes revealed the underlying failure points of Flow's typechecker in the GDevelop codebase:
+A complete parse of suppression tags with explicit error codes across `newIDE/app/src/**/*.js` identified **43 distinct Flow error codes**. The table below lists the top 21 codes (omitting lower-frequency codes such as `[incompatible-call]` [23] and `[missing-empty-array-annot]` [22]):
 
 | Flow Error Code | Occurrences | Primary Context in GDevelop | Equivalent TypeScript Behavior |
 |---|---|---|---|
-| `[incompatible-type]` | **1,513** | Mismatches between Emscripten C++ bindings, nullable fields, and dynamic React props | TS strictNullChecks + contextual typing resolves many cleanly; remainder require explicit casting |
+| `[incompatible-type]` | **1,514** *(1,513 `$FlowFixMe`/`$FlowIgnore` + 1 `$FlowExpectedError`)* | Mismatches between Emscripten C++ bindings, nullable fields, and dynamic React props | TS strictNullChecks + contextual typing resolves many cleanly; remainder require explicit casting |
 | `[missing-local-annot]` | **268** | Flow 0.299 Local Type Inference (LTI) demanding explicit parameter types | TS contextually infers parameters from callbacks and handlers |
 | `[value-as-type]` | **162** | Using a component or class name directly in type position without `typeof` | TS natively differentiates values and types; components require `typeof` |
 | `[prop-missing]` | **160** | Dynamic property lookups and optional props | TS interfaces with optional properties (`prop?: T`) |
@@ -539,11 +549,11 @@ The repository already contains a functioning, production-tested precedent for F
 ## 7. Audit Conclusions & Strategic Findings
 
 1. **Strictly Bounded Scope**:
-   Flow is 99.75% confined to `newIDE/app` (1,972 files). The game engine (`GDJS`), extensions (`Extensions/`), and shared libraries (`SharedLibs/`) are already 100% authored in TypeScript.
+   Flow is **99.85%** confined to `newIDE/app` (`1,971` tracked files; `1,972` on disk including gitignored `VersionMetadata.js`), plus only `3` pragma-only `.js` files in `newIDE/electron-app` with zero Flow type syntax. The game engine (`GDJS`), extensions (`Extensions/`), and shared libraries (`SharedLibs/`) are already 100% authored in TypeScript.
 2. **Clean Flow Idioms**:
-   Flow usage across the 1,972 files is standard and well-structured: 100% plain `// @flow`, no opaque types, and no exotic Flow type metaprogramming (`$Call`, `$TupleMap`). The vast majority of conversions are syntactic desugaring (`{| |}` $\rightarrow$ `{ }`, `?T` $\rightarrow$ `T | null | undefined`, `(x: T)` $\rightarrow$ `(x as T)`).
+   Flow usage across the `1,971` tracked files in `newIDE/app` is standard and well-structured: 100% standard `@flow` (`// @flow` or `/** * @flow */`), no opaque types, and no exotic Flow type metaprogramming (`$Call`, `$TupleMap`). The vast majority of conversions are syntactic desugaring (`{| |}` $\rightarrow$ `{ }`, `?T` $\rightarrow$ `T | null | undefined`, `(x: T)` $\rightarrow$ `(x as T)`).
 3. **WebIDL Ambient Namespace Discrepancy**:
-   Flow exposes flat global class names (`gdProject`, `gdLayout`) across 1,386 files, whereas `GDevelop.js/types.d.ts` exposes them under `namespace gd` (`gd.Project`, `gd.Layout`). An ambient global bridge (`type gdProject = gd.Project`) is necessary to prevent having to rewrite thousands of identifiers.
+   Flow exposes flat global class names (`gdProject`, `gdLayout`) across **579** `.js`/`.ts`/`.tsx` files in `newIDE/app/src` (excl. `locales/`; **581** incl. `.js.flow`, **4,067** matching lines, **4,111** tokens, **3,628** annotation lines, and **3,652** `: ?gd*` annotations), whereas `GDevelop.js/types.d.ts` exposes them under `namespace gd` (`gd.Project`, `gd.Layout`). An ambient global bridge (`type gdProject = gd.Project`) is necessary to prevent having to rewrite thousands of identifiers across those 579 files.
 4. **Tooling Readiness**:
    Vite, Jest, and Babel are already capable of dual Flow/TypeScript compilation. Implementing file-scoped Babel overrides and updating Vite plugin dispatchers will enable seamless development in both languages simultaneously.
 5. **Clear Migration Pathway**:
