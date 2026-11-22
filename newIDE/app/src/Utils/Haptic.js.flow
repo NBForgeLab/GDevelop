@@ -1,0 +1,7 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var hapticPatterns: {| itemReadyToDrag: Array<number>, dragStarted: Array<number>, longPress: Array<number> |};
+declare export var hapticFeedback: ?({
+  pattern: Array<number>,
+}) => void;

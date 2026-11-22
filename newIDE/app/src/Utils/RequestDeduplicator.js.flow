@@ -1,0 +1,9 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export default class RequestDeduplicator<T> {
+  _promise: Promise<T> | null;
+  _requestSender: (...args: Array<any>) => Promise<T>;
+  constructor(requestSender: (...args: Array<any>) => Promise<T>): void;
+  launchRequestOrGetOngoingPromise(requestSenderArgs: Array<any>): Promise<T>;
+}

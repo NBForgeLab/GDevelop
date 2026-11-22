@@ -1,0 +1,6 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var toNewGdMapStringString: (object: {
+  [string]: string,
+}) => gdMapStringString;

@@ -1,0 +1,9 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+export type InstallCliInPathResult = {|
+  status: 'success' | 'error',
+  message: string,
+|};
+declare export var isCliInPathInstallSupported: () => boolean;
+declare export var installCliInPath: () => Promise<InstallCliInPathResult>;

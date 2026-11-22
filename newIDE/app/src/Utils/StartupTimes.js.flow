@@ -1,0 +1,16 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+type RawStepMeasure = [string, number];
+type SummarizedStep = {|
+  stepName: string,
+  time: number,
+  elapsedTime: number,
+|};
+type Summary = {|
+  totalStartupTime: number,
+  steps: Array<SummarizedStep>,
+|};
+
+declare export var GD_STARTUP_TIMES: Array<RawStepMeasure>;
+declare export var getStartupTimesSummary: () => Summary;

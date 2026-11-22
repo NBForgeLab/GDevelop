@@ -1,0 +1,8 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+interface Deletable {
+  delete(): void;
+}
+
+declare export default function withTemporaryResource<Resource: Deletable, Result>(resource: Resource, callback: Resource => Result): Result;
