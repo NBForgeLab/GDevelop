@@ -1,5 +1,3 @@
-// @flow
-
 // Characters that would make a decoded file name unsafe to use as a file
 // stored on disk (or that would not "round-trip" when the file is requested
 // as a URL by the game engine, like "#", "?" or "%").
@@ -21,7 +19,7 @@ const unsafeDecodedCharacters = /[/\\?#%*:"<>|]|[\x00-\x1f]/;
  * a URL (like "#", "?", "%" or path separators), the original name is kept.
  */
 export const decodePercentEncodedFileName = (fileName: string): string => {
-  let decodedFileName;
+  let decodedFileName: string;
   try {
     decodedFileName = decodeURIComponent(fileName);
   } catch (error) {

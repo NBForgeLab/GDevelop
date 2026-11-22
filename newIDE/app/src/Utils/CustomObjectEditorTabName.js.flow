@@ -1,0 +1,16 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+export type ParsedCustomObjectEditorTabName = {|
+  extensionName: string,
+  objectName: string,
+  /** Empty string when editing the default variant. */
+  variantName: string,
+|};
+declare export var makeCustomObjectEditorTabName: (arg0: {|
+  extensionName: string,
+  objectName: string,
+  variantName?: string,
+|}) => string;
+declare export var parseCustomObjectEditorTabName: (name: string) => ParsedCustomObjectEditorTabName;
+declare export var getObjectTypeFromCustomObjectEditorTabName: (name: string) => string;

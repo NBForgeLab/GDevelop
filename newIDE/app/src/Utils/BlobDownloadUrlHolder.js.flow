@@ -1,0 +1,11 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+import * as React from 'react';
+
+type Props = {
+  blob: ?Blob,
+  children: (blobDownloadUrl: string) => React.Node,
+};
+
+declare export var BlobDownloadUrlHolder: React.ComponentType<Props>;
+declare export var openBlobDownloadUrl: (url: string, filename: string) => void;

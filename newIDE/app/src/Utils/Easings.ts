@@ -1,5 +1,3 @@
-// @flow
-
 /**
  * The easing functions used by the Tween extension.
  *
@@ -10,7 +8,9 @@
 export type EasingFunction = (pos: number) => number;
 
 // prettier-ignore
-export const easingFunctions: { [string]: EasingFunction } = {
+export const easingFunctions: {
+  [key: string]: EasingFunction;
+} = {
   linear: pos => pos,
 
   easeInQuad: pos => Math.pow(pos, 2),
@@ -248,7 +248,7 @@ const newtonRaphsonIterate = (
 /** Parse a `cubic-bezier(x1,y1,x2,y2)` string. Return `null` if the string is not valid. */
 export const parseCubicBezierOrNull = (
   identifier: string
-): ?CubicBezierPoints => {
+): CubicBezierPoints | null => {
   const match = CUBIC_BEZIER_PATTERN.exec(identifier);
   if (!match) return null;
 
@@ -336,8 +336,7 @@ export const roundCubicBezierNumber = (value: number): number => {
 };
 
 const formatCubicBezierNumber = (value: number): string =>
-  // Compact form: 0.91 -> .91, -0.56 -> -.56.
-  String(roundCubicBezierNumber(value)).replace(/^(-?)0\./, '$1.');
+  String(roundCubicBezierNumber(value)).replace(/^(-?)0\./, '$1.'); // Compact form: 0.91 -> .91, -0.56 -> -.56.
 
 /** Return `cubic-bezier(.91,.17,.08,.88)`, with a maximum of 3 decimals. */
 export const formatCubicBezier = (points: CubicBezierPoints): string =>
@@ -347,24 +346,28 @@ export const formatCubicBezier = (points: CubicBezierPoints): string =>
 export const cssEasePoints: CubicBezierPoints = [0.25, 0.1, 0.25, 1];
 
 /** Shown as the custom-curve example in the editor. */
-export const customEasingExampleIdentifier: string = formatCubicBezier(
-  cssEasePoints
-);
+export const customEasingExampleIdentifier: string =
+  formatCubicBezier(cssEasePoints);
 
-export const getBuiltInEasingFunction = (name: string): ?EasingFunction =>
+export const getBuiltInEasingFunction = (
+  name: string
+): EasingFunction | null =>
   easingFunctions.hasOwnProperty(name) ? easingFunctions[name] : null;
 
 /** Return a built-in easing or a custom easing. Return `null` if the identifier is not valid. */
 export const getEasingFunction = (
   easingIdentifier: string
-): ?EasingFunction => {
+): EasingFunction | null => {
   const builtInEasing = getBuiltInEasingFunction(easingIdentifier);
   if (builtInEasing) return builtInEasing;
   const points = parseCubicBezierOrNull(easingIdentifier);
   return points ? createCubicBezierEasing(points) : null;
 };
 
-export type EasingValueRange = {| min: number, max: number |};
+export type EasingValueRange = {
+  min: number;
+  max: number;
+};
 
 /**
  * Lowest and highest values of an easing, sampled over [0, 1]. The range always
@@ -391,4 +394,4 @@ export const getEasingValueRange = (
  */
 export const isEasingChoiceList = (choices: Array<string>): boolean =>
   choices.length > 1 &&
-  choices.every(choice => !!getBuiltInEasingFunction(choice));
+  choices.every((choice) => !!getBuiltInEasingFunction(choice));

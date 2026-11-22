@@ -1,4 +1,3 @@
-// @flow
 import { getChoiceDisplayLabel } from './ChoiceLabel';
 
 describe('getChoiceDisplayLabel', () => {

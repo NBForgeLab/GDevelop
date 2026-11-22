@@ -1,0 +1,31 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+type FloatPoint = [number, number];
+
+declare export class AffineTransformation {
+  matrix: Float32Array;
+  constructor(): void;
+  setToIdentity(): void;
+  isIdentity(): boolean;
+  equals(other: AffineTransformation): boolean;
+  nearlyEquals(other: AffineTransformation, epsilon: number): boolean;
+  copyFrom(other: AffineTransformation): AffineTransformation;
+  setToTranslation(tx: number, ty: number): void;
+  translate(tx: number, ty: number): void;
+  setToScale(sx: number, sy: number): void;
+  scale(sx: number, sy: number): void;
+  setToRotation(theta: number): void;
+  rotate(angle: number): void;
+  setToRotationAround(angle: number, anchorX: number, anchorY: number): void;
+  rotateAround(angle: number, anchorX: number, anchorY: number): void;
+  setToFlipX(anchorX: number): void;
+  flipX(anchorX: number): void;
+  setToFlipY(anchorY: number): void;
+  flipY(anchorY: number): void;
+  concatenate(other: AffineTransformation): void;
+  preConcatenate(other: AffineTransformation): void;
+  transform(source: FloatPoint, destination: FloatPoint): void;
+  invert(): AffineTransformation;
+  toString(): string;
+}

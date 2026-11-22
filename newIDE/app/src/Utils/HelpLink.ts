@@ -1,5 +1,3 @@
-// @flow
-
 export const isRelativePathToDocumentationRoot = (path: string): boolean => {
   return path.startsWith('/');
 };

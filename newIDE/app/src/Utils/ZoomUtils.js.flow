@@ -1,0 +1,7 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var zoomInFactor: number;
+declare export var zoomOutFactor: number;
+declare export var getWheelStepZoomFactor: (deltaY: number) => number;
+declare export var clampInstancesEditorZoom: (zoom: number) => number;

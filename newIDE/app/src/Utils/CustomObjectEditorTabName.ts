@@ -1,26 +1,24 @@
-// @flow
-
 /**
  * A custom object editor tab's `projectItemName`, encoded as
  * `extensionName::objectName[::variantName]`. The single place that knows this
  * `::` encoding - use these helpers instead of splitting/joining by hand.
  */
-export type ParsedCustomObjectEditorTabName = {|
-  extensionName: string,
-  objectName: string,
+export type ParsedCustomObjectEditorTabName = {
+  extensionName: string;
+  objectName: string;
   /** Empty string when editing the default variant. */
-  variantName: string,
-|};
+  variantName: string;
+};
 
 export const makeCustomObjectEditorTabName = ({
   extensionName,
   objectName,
   variantName,
-}: {|
-  extensionName: string,
-  objectName: string,
-  variantName?: string,
-|}): string =>
+}: {
+  extensionName: string;
+  objectName: string;
+  variantName?: string;
+}): string =>
   extensionName + '::' + objectName + (variantName ? '::' + variantName : '');
 
 export const parseCustomObjectEditorTabName = (

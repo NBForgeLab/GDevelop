@@ -1,0 +1,4 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+export type EventPath = Array<number>;

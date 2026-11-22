@@ -1,5 +1,3 @@
-// @flow
-
 // There is a high chance of FS operations running while an Electron window is closing.
 // We run into "Uncaught illegal access" errors from V8/Chrome/Electron on Electron when these
 // FS operations are running while a BrowserWindow is destroyed (see WindowPortal).
@@ -19,7 +17,7 @@ let activeWindowOperations = new Set<string>();
 let activeFsOperations = 0;
 
 const delay = (ms: number): Promise<void> =>
-  new Promise(resolve => setTimeout(resolve, ms));
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 const logWithPrefix = (message: string): void => {
   console.info(`[ElectronConflictingOperationsMutex] ${message}`);
@@ -82,7 +80,7 @@ export const safelyDoFsOperation = async <T>(
     // Launch the operation and wait for it to finish.
     try {
       fn().then(
-        result => {
+        (result) => {
           clearTimeout(timeoutID);
           if (isFinishedOrAbort) {
             logErrorWithPrefix(
@@ -95,7 +93,7 @@ export const safelyDoFsOperation = async <T>(
           activeFsOperations--;
           resolve(result);
         },
-        error => {
+        (error) => {
           clearTimeout(timeoutID);
           if (isFinishedOrAbort) {
             logErrorWithPrefix(

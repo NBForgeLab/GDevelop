@@ -1,8 +1,6 @@
-// @flow
-
 /**
  * Taken from https://gist.github.com/tkrotoff/b0b1d39da340f5fc6c5e2a79a8b6cec0 and
- * manually adapted to FlowJS.
+ * manually adapted.
  */
 
 /**
@@ -12,21 +10,21 @@
  */
 const minus0Hack = (value: number) => (Object.is(value, -0) ? '-0' : value);
 
-type Operator = {|
-  func: (...args: string[]) => string,
-  precedence: number,
-  associativity: 'left' | 'right',
-  arity: number, // Needed by evalReversePolishNotation()
-|};
+type Operator = {
+  func: (...args: Array<string | undefined>) => string;
+  precedence: number;
+  associativity: 'left' | 'right';
+  arity: number; // Needed by evalReversePolishNotation()
+};
 
-type MathFunction = {|
-  func: (...args: string[]) => string,
+type MathFunction = {
+  func: (...args: Array<string | undefined>) => string;
   // Needed by evalReversePolishNotation()
-  arity: number,
-|};
+  arity: number;
+};
 
 const operators: {
-  [operator: string]: Operator,
+  [operator: string]: Operator;
 } = {
   '+': {
     func: (x, y) => `${minus0Hack(Number(x) + Number(y))}`,
@@ -72,7 +70,7 @@ const operators: {
 const operatorsKeys: string[] = Object.keys(operators);
 
 const functions: {
-  [operator: string]: MathFunction,
+  [operator: string]: MathFunction;
 } = {
   min: {
     func: (x, y) => `${minus0Hack(Math.min(Number(x), Number(y)))}`,
@@ -82,19 +80,18 @@ const functions: {
     func: (x, y) => `${minus0Hack(Math.max(Number(x), Number(y)))}`,
     arity: 2,
   },
-  sin: { func: x => `${minus0Hack(Math.sin(Number(x)))}`, arity: 1 },
-  cos: { func: x => `${minus0Hack(Math.cos(Number(x)))}`, arity: 1 },
-  tan: { func: x => `${minus0Hack(Math.tan(Number(x)))}`, arity: 1 },
-  exp: { func: x => `${Math.exp(Number(x))}`, arity: 1 },
-  log: { func: x => `${Math.log(Number(x))}`, arity: 1 }, // No need for -0 hack
+  sin: { func: (x) => `${minus0Hack(Math.sin(Number(x)))}`, arity: 1 },
+  cos: { func: (x) => `${minus0Hack(Math.cos(Number(x)))}`, arity: 1 },
+  tan: { func: (x) => `${minus0Hack(Math.tan(Number(x)))}`, arity: 1 },
+  exp: { func: (x) => `${Math.exp(Number(x))}`, arity: 1 },
+  log: { func: (x) => `${Math.log(Number(x))}`, arity: 1 }, // No need for -0 hack
   pi: { func: () => `${Math.PI}`, arity: 0 },
-  toDeg: { func: x => `${(Number(x) * 180) / Math.PI}`, arity: 1 },
-  toRad: { func: x => `${(Number(x) * Math.PI) / 180}`, arity: 1 },
+  toDeg: { func: (x) => `${(Number(x) * 180) / Math.PI}`, arity: 1 },
+  toRad: { func: (x) => `${(Number(x) * Math.PI) / 180}`, arity: 1 },
 };
 const functionsKeys: string[] = Object.keys(functions);
 
-const top = (stack: string[]): string | typeof undefined =>
-  stack[stack.length - 1];
+const top = (stack: string[]): string | undefined => stack[stack.length - 1];
 
 /**
  * Shunting yard algorithm: converts infix expression to postfix expression (reverse Polish notation)
@@ -114,48 +111,48 @@ export function shuntingYard(tokens: string[]): Array<string> {
       operatorStack.push(token);
     } else if (token === ',') {
       while (operatorStack.length > 0 && top(operatorStack) !== '(') {
-        // $FlowFixMe[incompatible-type]
-        output.push(operatorStack.pop());
+        const op = operatorStack.pop();
+        if (op !== undefined) output.push(op);
       }
       if (operatorStack.length === 0) {
         throw new Error("Misplaced ','");
       }
     } else if (operators[token] !== undefined) {
       const o1 = token;
-      while (
-        operatorStack.length > 0 &&
-        top(operatorStack) !== undefined &&
-        top(operatorStack) !== '(' &&
-        // $FlowIgnore - cannot be undefined.
-        // $FlowFixMe[incompatible-type]
-        (operators[top(operatorStack)].precedence > operators[o1].precedence ||
-          (operators[o1].precedence ===
-            // $FlowIgnore - cannot be undefined.
-            // $FlowFixMe[incompatible-type]
-            operators[top(operatorStack)].precedence &&
-            operators[o1].associativity === 'left'))
-      ) {
-        // $FlowFixMe[incompatible-type]
-        output.push(operatorStack.pop()); // o2
+      while (operatorStack.length > 0) {
+        const topOp = top(operatorStack);
+        if (
+          topOp === undefined ||
+          topOp === '(' ||
+          operators[topOp] === undefined ||
+          !(
+            operators[topOp].precedence > operators[o1].precedence ||
+            (operators[o1].precedence === operators[topOp].precedence &&
+              operators[o1].associativity === 'left')
+          )
+        ) {
+          break;
+        }
+        const poppedOp = operatorStack.pop(); // o2
+        if (poppedOp !== undefined) output.push(poppedOp);
       }
       operatorStack.push(o1);
     } else if (token === '(') {
       operatorStack.push(token);
     } else if (token === ')') {
       while (operatorStack.length > 0 && top(operatorStack) !== '(') {
-        // $FlowFixMe[incompatible-type]
-        output.push(operatorStack.pop());
+        const op = operatorStack.pop();
+        if (op !== undefined) output.push(op);
       }
       if (operatorStack.length > 0 && top(operatorStack) === '(') {
         operatorStack.pop();
       } else {
         throw new Error('Parentheses mismatch');
       }
-      // $FlowIgnore - cannot be undefined.
-      // $FlowFixMe[incompatible-type]
-      if (functions[top(operatorStack)] !== undefined) {
-        // $FlowFixMe[incompatible-type]
-        output.push(operatorStack.pop());
+      const topToken = top(operatorStack);
+      if (topToken !== undefined && functions[topToken] !== undefined) {
+        const fnOp = operatorStack.pop();
+        if (fnOp !== undefined) output.push(fnOp);
       }
     } else {
       output.push(token);
@@ -168,8 +165,8 @@ export function shuntingYard(tokens: string[]): Array<string> {
     if (operator === '(') {
       throw new Error('Parentheses mismatch');
     } else {
-      // $FlowFixMe[incompatible-type]
-      output.push(operatorStack.pop());
+      const poppedOp = operatorStack.pop();
+      if (poppedOp !== undefined) output.push(poppedOp);
     }
   }
 
@@ -187,9 +184,9 @@ export function shuntingYard(tokens: string[]): Array<string> {
 export function evalReversePolishNotation(tokens: string[]): number {
   const stack: string[] = [];
 
-  // $FlowIgnore
-  // $FlowFixMe[incompatible-type]
-  const ops: { [key: string]: MathFunction | Operator } = {
+  const ops: {
+    [key: string]: MathFunction | Operator;
+  } = {
     ...operators,
     ...functions,
   };
@@ -198,11 +195,10 @@ export function evalReversePolishNotation(tokens: string[]): number {
     const op = ops[token];
 
     if (op !== undefined) {
-      const parameters = [];
+      const parameters: Array<string | undefined> = [];
       for (let i = 0; i < op.arity; i++) {
         parameters.push(stack.pop());
       }
-      // $FlowFixMe[incompatible-type]
       stack.push(op.func(...parameters.reverse()));
     } else {
       stack.push(token);
@@ -227,7 +223,7 @@ export function tokenize(expression: string): Array<string> {
   // "1  +" => "1 +"
   const expr = expression.replace(/\s+/g, ' ');
 
-  const tokens = [];
+  const tokens: Array<string> = [];
 
   let acc = '';
   let currentNumber = '';
@@ -279,10 +275,9 @@ export function tokenize(expression: string): Array<string> {
       if (
         operatorsKeys.includes(c) &&
         !numberParsingStarted &&
-        // $FlowFixMe[incompatible-type]
+        lastToken !== undefined &&
         operatorsKeys.includes(lastToken)
       ) {
-        // $FlowIgnore - cannot be undefined.
         throw new Error(`Consecutive operators: '${lastToken}${c}'`);
       }
       if (numberParsingStarted) {

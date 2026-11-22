@@ -1,4 +1,3 @@
-// @flow
 import { getPublicUrl, isReactAppEnvDevelopment } from './BuildEnv';
 
 const originalProcess = global.process;
@@ -16,7 +15,7 @@ const restoreProcess = () => {
     configurable: true,
     writable: true,
   });
-  if (originalProcess) {
+  if (originalProcess && originalEnv) {
     originalProcess.env = originalEnv;
   }
   if (originalEnv) {
@@ -48,7 +47,7 @@ const withGlobalProcess = (mockProcess: any, fn: () => void) => {
 
 const withoutGlobalProcess = (fn: () => void) => {
   try {
-    delete global.process;
+    delete (global as any).process;
     fn();
   } finally {
     restoreProcess();

@@ -1,0 +1,5 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var decodePercentEncodedFileName: (fileName: string) => string;
+declare export var encodeLocalFileNameForUrl: (urlOrFilename: string) => string;

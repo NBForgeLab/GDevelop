@@ -1,0 +1,5 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export function sanitizeFilename(input: string): string;
+declare export function sanitizeFilePath(input: string): string;

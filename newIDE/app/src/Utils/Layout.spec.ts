@@ -1,12 +1,10 @@
-// @flow
 import { renameLayoutInProject } from './Layout';
 
-const gd: libGDevelop = global.gd;
+const gd: libGDevelop = (global as any).gd;
 
 describe('renameLayoutInProject', () => {
   const makeProject = () => {
-    // $FlowFixMe[invalid-constructor]
-    const project = new gd.ProjectHelper.createNewGDJSProject();
+    const project = gd.ProjectHelper.createNewGDJSProject();
     project.insertNewLayout('Scene1', 0);
     project.insertNewLayout('Scene2', 1);
     return project;

@@ -1,5 +1,3 @@
-// @flow
-
 const zoomStepBasePower = 1 / 16;
 
 // See same factors in `GDJS/Runtime/InGameEditor/InGameEditor.tsx`.

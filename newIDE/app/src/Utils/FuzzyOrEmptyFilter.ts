@@ -1,4 +1,3 @@
-// @flow
 const fuzzyFilter = (searchText: string, key: string) => {
   const compareString = key.toLowerCase();
   searchText = searchText.toLowerCase();

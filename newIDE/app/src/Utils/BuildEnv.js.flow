@@ -1,0 +1,5 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var getPublicUrl: () => string;
+declare export var isReactAppEnvDevelopment: () => boolean;

@@ -1,0 +1,8 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var getInstanceInLayoutWithPersistentUuid: (initialInstancesContainer: gdInitialInstancesContainer, persistentUuid: string) => gdInitialInstance | null;
+declare export var getInstancesInLayoutForObject: (initialInstancesContainer: gdInitialInstancesContainer, objectName: string) => Array<gdInitialInstance>;
+declare export var getInstancesInLayoutForLayer: (initialInstancesContainer: gdInitialInstancesContainer, layerName: string) => Array<gdInitialInstance>;
+declare export var getInstanceCountInLayoutForObject: (initialInstancesContainer: gdInitialInstancesContainer, objectName: string) => number;
+declare export var renameLayoutInProject: (project: gdProject, oldName: string, newName: string) => void;

@@ -1,5 +1,3 @@
-// @flow
-
 import { sanitizeFilename } from './Filename';
 
 describe('Filename', () => {

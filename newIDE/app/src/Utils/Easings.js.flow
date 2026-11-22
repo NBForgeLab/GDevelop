@@ -1,0 +1,18 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+export type EasingFunction = (pos: number) => number;
+declare export var easingFunctions: { [string]: EasingFunction };
+declare export var allEasingNames: Array<string>;
+export type CubicBezierPoints = [number, number, number, number];
+declare export var parseCubicBezierOrNull: (identifier: string) => ?CubicBezierPoints;
+declare export var createCubicBezierEasing: (points: CubicBezierPoints) => EasingFunction;
+declare export var roundCubicBezierNumber: (value: number) => number;
+declare export var formatCubicBezier: (points: CubicBezierPoints) => string;
+declare export var cssEasePoints: CubicBezierPoints;
+declare export var customEasingExampleIdentifier: string;
+declare export var getBuiltInEasingFunction: (name: string) => ?EasingFunction;
+declare export var getEasingFunction: (easingIdentifier: string) => ?EasingFunction;
+export type EasingValueRange = {| min: number, max: number |};
+declare export var getEasingValueRange: (easingFunction: EasingFunction, samplesCount: number) => EasingValueRange;
+declare export var isEasingChoiceList: (choices: Array<string>) => boolean;
