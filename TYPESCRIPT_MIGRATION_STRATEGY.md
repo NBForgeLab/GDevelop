@@ -45,8 +45,8 @@
    - [5.4 Stub Management Lifecycle & Automated Cleanup](#54-stub-management-lifecycle--automated-cleanup)
 6. [Automated Codemod Suite & Conversion Workflow](#6-automated-codemod-suite--conversion-workflow)
    - [6.1 Evaluation of Existing Tools (`flow-to-ts`, `flow-to-typescript`)](#61-evaluation-of-existing-tools-flow-to-ts-flow-to-typescript)
-   - [6.2 The Recommended Multi-Stage Codemod Pipeline](#62-the-recommended-multi-stage-codemod-pipeline)
-   - [6.3 Custom AST Post-Processor Specifications](#63-custom-ast-post-processor-specifications)
+   - [6.2 Implemented Multi-Stage Codemod Pipeline](#62-implemented-multi-stage-codemod-pipeline)
+   - [6.3 Custom AST Post-Processor Specifications (`scripts/codemods/gdevelop-flow-to-ts-postprocess.mjs`)](#63-custom-ast-post-processor-specifications-scriptscodemodsgdevelop-flow-to-ts-postprocessmjs)
    - [6.4 Developer Step-by-Step File Migration Guide](#64-developer-step-by-step-file-migration-guide)
 7. [Actionable 6-Phase Topological Migration Roadmap](#7-actionable-6-phase-topological-migration-roadmap)
    - [7.1 Phase 0: Infrastructure & Tooling Foundation (Weeks 1–2)](#71-phase-0-infrastructure--tooling-foundation-weeks-12)
@@ -663,75 +663,53 @@ Off-the-shelf conversion tools were evaluated against GDevelop's AST patterns:
 | **`flow-to-typescript`** | ⭐⭐⭐ | Good type alias conversion. | Fails on Flow 0.299 Local Type Inference syntax; fails on complex union spreads. |
 | **`@babel/plugin-transform-flow-strip-types`** | ⭐⭐ | 100% reliable AST type stripping. | Destructive; removes all types instead of converting them. |
 
-### 6.2 The Recommended Multi-Stage Codemod Pipeline
-We implement a **3-Stage Conversion Pipeline**:
-1. **Stage 1 (AST Normalization)**: Run `@khanacademy/flow-to-ts` to handle baseline syntax desugaring.
-2. **Stage 2 (GDevelop Custom AST Post-Processor)**: Execute a custom `jscodeshift` / Babel AST transform script (`scripts/codemods/gdevelop-flow-to-ts-postprocess.mjs`) to fix GDevelop-specific quirks.
-3. **Stage 3 (Formatting & Validation)**: Run Prettier and `tsc --noEmit` to verify type cleanliness.
+*Implementation Choice*: Rather than adding the unmaintained `@khanacademy/flow-to-ts@0.5.2` (published 2021, bundling `prettier@2.2.1` and older Flow parsing) to `newIDE/app/package.json`, Stage 1 is implemented directly in `scripts/codemods/flow-to-ts-ast.mjs` on top of `newIDE/app`'s existing `@babel/parser` (v7.29.15, which parses 100% of all remaining Flow `.js` files in `newIDE/app/src` with 0 parse errors), `@babel/traverse`, `@babel/types`, and `recast`. Optional `--stage1=khan` support remains available in `migrate-file.mjs` if `@khanacademy/flow-to-ts` is installed externally.
 
-### 6.3 Custom AST Post-Processor Specifications
-The custom post-processor implements the following transforms:
+### 6.2 Implemented Multi-Stage Codemod Pipeline
+We implement a **3-Stage Conversion Pipeline** located in `scripts/codemods/` and powered by `newIDE/app`'s existing AST/compiler dependencies (`@babel/parser` 7.29.15, `@babel/traverse`, `@babel/types`, `recast`, `prettier` 3.4.2, and `typescript` 5.4.5 — requiring zero extra packages in `newIDE/app/package.json`):
+1. **Stage 1 (AST Normalization — `scripts/codemods/flow-to-ts-ast.mjs`)**: Parses Flow 0.299 source (including `/*: ... */` / `/*:: ... */` Flow comments via `unwrapFlowComments`), converts Flow AST nodes into TypeScript AST nodes (`{| |}`, `?T`, `{ ...Props }`, `(x: T)`, `+prop`, non-primitive indexers to mapped types, `interface`/`implements`, TSX generic arrow disambiguation, and `: any` synthesis for unannotated parameters/properties marked with `$FlowFixMe[missing-local-annot]`), and emits transitional `.js.flow` stubs (`generateFlowStub`, including transitive local type/class/variable resolution, object-literal key shapes for `$Keys<typeof ...>` / `$Values<typeof ...>`, generic default functions/components, and suppression preservation). Also supports optional `--stage1=khan` if `@khanacademy/flow-to-ts` is installed externally.
+2. **Stage 2 (GDevelop Custom AST Post-Processor — `scripts/codemods/gdevelop-flow-to-ts-postprocess.mjs`)**: Executes a `jscodeshift`-compatible and Babel/Recast AST + comment post-processor (`postprocessTypeScriptSource`) to resolve GDevelop-specific quirks idempotently.
+3. **Stage 3 (Formatting, Stub Lifecycle & Validation — `scripts/codemods/migrate-file.mjs`)**: Formats with Prettier `3.4.2` (`newIDE/app/.prettierrc`), runs an in-process TypeScript `5.4.5` LanguageService check against `newIDE/app/tsconfig.json`, automatically prunes unneeded `@ts-expect-error [flow-migrated...]` directives (`TS2578`, across multi-pass checks for stacked suppressions), renames `.js`/`.jsx` $\rightarrow$ `.ts`/`.tsx` (and `.spec.js.snap`), cleans up companion `.d.ts` stubs, and emits `.js.flow` transitional stubs when unmigrated Flow consumers exist.
 
-```javascript
-// Rule 1: Invert React.forwardRef generic parameters
-if (isCallExpression(node) && isReactForwardRef(node.callee)) {
-  if (node.typeParameters && node.typeParameters.params.length === 2) {
-    const [propsType, refType] = node.typeParameters.params;
-    node.typeParameters.params = [refType, propsType]; // SWAP!
-  }
-}
+### 6.3 Custom AST Post-Processor Specifications (`scripts/codemods/gdevelop-flow-to-ts-postprocess.mjs`)
+The implemented custom post-processor executes the following transforms (also runnable standalone via CLI or `jscodeshift --no-babel -t scripts/codemods/gdevelop-flow-to-ts-postprocess.mjs --parser=tsx`):
 
-// Rule 2: Synthesize names for unnamed arrow function parameters
-if (isFunctionTypeAnnotation(node)) {
-  node.params.forEach((param, index) => {
-    if (!param.name) {
-      param.name = identifier(`arg${index}`);
-    }
-  });
-}
-
-// Rule 3: Transform Object Type Spreading to Intersections
-// {| ...Props, extra: string |} -> Props & { extra: string }
-if (isTSTypeLiteral(node) && containsTypeSpread(node)) {
-  return transformToIntersection(node);
-}
-
-// Rule 4: Global React Type Mappings
-// React.Node -> React.ReactNode
-// React.RefSetter<T> -> React.Ref<T>
-if (isTypeReference(node, 'React.Node')) {
-  node.typeName = identifier('React.ReactNode');
-}
-if (isTypeReference(node, 'React.RefSetter')) {
-  node.typeName = identifier('React.Ref');
-}
-
-// Rule 5: Error Suppression Mapping
-// // $FlowFixMe[error-code] -> // @ts-expect-error [flow-migrated: error-code]
-comments.forEach(comment => {
-  if (comment.value.includes('$FlowFixMe')) {
-    comment.value = comment.value.replace(/\$FlowFixMe(\[.*?\])?/, '@ts-expect-error [flow-migrated$1]');
-  }
-});
-```
+1. **Flow Pragma Removal**: Strips `// @flow`, `// @flow strict`, `// @flow weak`, and `* @flow` JSDoc pragma lines while preserving surrounding doc comments.
+2. **Rule 1 (`React.forwardRef` Generic Inversion & Wrapper Cleanup)**:
+   - Swaps `React.forwardRef<Props, Ref>` $\rightarrow$ `React.forwardRef<Ref, Props>` (unconditionally under `--from-flow`, and with Props/Ref heuristics in `'auto'` mode so re-runs on already-migrated TS files are idempotent), preserving leading suppression comments on each swapped type argument and separating `<//` angle-bracket line-comment sequences so TypeScript's TSX lexer never misparses `</` as a JSX closing tag.
+   - Strips explicit `<Props>` type arguments on `React.memo<Props>(React.forwardRef(...))` and multi-arg `React.memo<Props, Ref>(...)`, and removes redundant Flow `: React.ComponentType<...>` annotations/assertions on `forwardRef` / `memo(forwardRef)` definitions so `@types/react` infers exact `ForwardRefExoticComponent` / `MemoExoticComponent` types cleanly.
+3. **Rule 2 (Unnamed Function Type Parameters)**:
+   - Detects `TSFunctionType` / `TSConstructorType` / `TSMethodSignature` / call-signature parameters missing `typeAnnotation` (e.g. `(boolean, BundleListingData) => void` or `(string?) => void`) and synthesizes non-colliding parameter names (`(arg0: boolean, bundleListingData: BundleListingData) => void`, `(arg0?: string) => void`).
+4. **Rule 3 (Residual Object-Type Intersection Cleanup)**:
+   - Simplifies empty intersection placeholders (`Props & {}` $\rightarrow$ `Props`) left after spread desugaring.
+5. **Rule 4 (Global React, Flow Utility & C++ Global Mappings)**:
+   - React types: `React.Node` / `React$Node` / `import { type Node }` $\rightarrow$ `React.ReactNode` / `ReactNode`; `React$Portal` $\rightarrow$ `React.ReactPortal`; `React$RefObject` $\rightarrow$ `React.RefObject`; `React.MixedElement` / `React$MixedElement` $\rightarrow$ `React.ReactElement<any>`; `React.Element<T>` / `React$Element<T>` / `import { type Element }` $\rightarrow$ `React.ReactElement<any, T>` / `ReactElement`; `React.RefSetter<T>` / `React$RefSetter<T>` $\rightarrow$ `React.Ref<T>`; `React.ElementRef<any>` / `React$ElementRef<any>` $\rightarrow$ `any`; `React.ElementProps<T>` / `React.ElementConfig<T>` $\rightarrow$ `React.ComponentProps<T>`; `React.AbstractComponent<C, I>` / `React$AbstractComponent<C, I>` $\rightarrow$ `React.ComponentType<C & React.RefAttributes<I>>`; all `Synthetic*Event<T>` $\rightarrow$ `React.*Event<T>`; `React.useRef<?T>(null)` and non-mutated `React.useRef((null: ?T))` $\rightarrow$ `React.useRef<T | null>(null)`; and auto-inserts `import [type] * as React from 'react'` when needed.
+   - Flow utilities & globals: `TimeoutID`/`IntervalID`/`AnimationFrameID`, `JestMockFn<Args, Ret>` $\rightarrow$ `jest.Mock<Ret, Args>`, `$Keys`, `$Shape`, `$ReadOnly`, `$ReadOnlyArray`, `$Exact`, `$NonMaybeType`, `$Values`, `$PropertyType`/`$ElementType`, `$Iterable`, `$AxiosError` $\rightarrow$ `AxiosError`, `Class<T>` $\rightarrow$ `typeof T`, `mixed` $\rightarrow$ `unknown`, `empty` $\rightarrow$ `never`, `Object` (`React.CSSProperties` for `style`, `Record<string, any>` otherwise), `Function`, and `global.gd` $\rightarrow$ `(global as any).gd`.
+6. **Rule 5 (Error Suppression Mapping & `TS2578` Pruning)**:
+   - Maps `$FlowFixMe[code]` / `$FlowIgnore[code]` / `$FlowExpectedError[code]` comments to `@ts-expect-error [flow-migrated: code]` (or `@ts-expect-error [flow-migrated]`), and Stage 3 prunes directives flagged by `tsc` as unused (`TS2578`) unless `--keep-unused-expect-error` is passed.
 
 ### 6.4 Developer Step-by-Step File Migration Guide
 When converting a module `src/Foo/MyComponent.js`:
-1. **Execute Codemod**:
+1. **Dry-Run / Inspect First (Optional)**:
+   ```bash
+   node scripts/codemods/migrate-file.mjs --dry-run src/Foo/MyComponent.js
+   ```
+2. **Execute Codemod**:
    ```bash
    node scripts/codemods/migrate-file.mjs src/Foo/MyComponent.js
    ```
-   (Renames to `.tsx`, executes Stage 1–3 codemods).
-2. **Review Diff**: Verify `React.forwardRef` and prop intersections.
-3. **Run Typecheck**:
+   (Executes Stages 1–3: renames to `.ts`/`.tsx` and any matching `.spec.js.snap`, deletes companion `.d.ts` if present, generates `.js.flow` stub when unmigrated Flow consumers exist unless `--no-flow-stub` is passed, formats with Prettier `3.4.2`, prunes unused `@ts-expect-error` directives, and prints any remaining `tsc` diagnostics).
+3. **Review Diff & Fix Remaining Diagnostics**: Verify `React.forwardRef`, prop intersections, and any unmigrated module stubs.
+4. **Run Verification Checks**:
    ```bash
+   cd newIDE/app
    npm run check-types
+   npm run flow
+   npm run check-format
+   npm run lint
+   npm test -- src/Foo/MyComponent.spec.tsx
    ```
-4. **Run Unit Tests**:
-   ```bash
-   npm test -- src/Foo/MyComponent.spec.js
-   ```
-5. **Commit**: Ensure both `npm run flow` and `npm run check-types` pass in CI.
+   *(To run the codemod suite's own regression tests: `node --test scripts/codemods/codemods.test.mjs`.)*
 
 ---
 
@@ -747,14 +725,15 @@ When converting a module `src/Foo/MyComponent.js`:
   - Generate `src/types/gd-globals.d.ts` via `scripts/generate-gd-globals.js` (`/// <reference path="../../../../GDevelop.js/types.d.ts" />`).
   - Maintain valid `src/types/unmigrated-flow-modules.d.ts` (single-wildcard/package/asset declarations only) plus companion `.d.ts` stubs next to unmigrated `.js` modules.
   - Upgrade `typescript` to `^5.4.5`, declare explicit `@babel/preset-typescript`, `@types/jest`, `@types/react@^18.2.0`, `@types/react-dom@^18.2.0`, add npm `overrides` for `typescript`/`@types/react`/`@types/react-dom` to prevent `ERESOLVE`, expand `eslintConfig.overrides` to `*.stories.{js,jsx,ts,tsx}`, and upgrade `"prettier"` to `"3.4.2"` alongside `"prettier-legacy": "npm:prettier@1.15.3"` + `scripts/run-prettier.js` for `.ts`/`.tsx` formatting and `lint-staged`.
+  - Build the automated Flow-to-TypeScript codemod suite (`scripts/codemods/flow-to-ts-ast.mjs`, `scripts/codemods/gdevelop-flow-to-ts-postprocess.mjs`, `scripts/codemods/migrate-file.mjs`, and `scripts/codemods/codemods.test.mjs`) at the Phase 0 / Phase 1 boundary for use across Phases 1–5.
   - Update `.semaphore/semaphore.yml` to run `npm run flow` + `npm run check-types`.
-- **Validation Gate**: 0 TypeScript compilation errors; existing Flow, ESLint, Prettier, Jest, and `npm install` checks pass 100%.
+- **Validation Gate**: 0 TypeScript compilation errors; existing Flow, ESLint, Prettier, Jest, and `npm install` checks pass 100%; `node --test scripts/codemods/codemods.test.mjs` passes 100%.
 
 ---
 
 ### 7.2 Phase 1: Pure Foundation Utilities & Custom SVG Icons (Weeks 3–4)
 - **Scope**:
-  - `src/UI/CustomSvgIcons/*.js` (278 files $\rightarrow$ `.tsx`).
+  - `src/UI/CustomSvgIcons/*.js` (278 files $\rightarrow$ `.tsx`, batch-converted via `scripts/codemods/migrate-svg-icons.js`).
   - `src/Utils/` pure leaf utilities (e.g. `Array.js`, `Color.js`, `Mathematics.js`, `Delay.js`, `GDevelopServices/`, `Version.js`).
 - **File Volume**: ~320 files (~16% of total repository files).
 - **Complexity**: Low. Almost zero incoming dependencies from external modules.

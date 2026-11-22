@@ -35,7 +35,7 @@ The full, publication-grade documentation deliverables are tracked in the reposi
      - Build/codegen script updates (`ReadThemeRegistry.js`, `create-new-theme.js`, `make-version-metadata.js`, `.flowconfig`, `.prettierignore`).
      - Dual-check Semaphore CI workflow (`npm run flow` + `npm run check-types`).
    - Module boundary interoperability patterns (companion `.d.ts` and `.js.flow` stubs, `tsconfig.json` exclusion of `src/EditorFunctions/PublicApi/**/*.d.ts`, and `.flowconfig` `[untyped]` caveats).
-   - Automated codemod pipeline evaluation and custom AST post-processor specifications.
+   - Implemented 3-stage automated codemod pipeline (`scripts/codemods/migrate-file.mjs`, `scripts/codemods/flow-to-ts-ast.mjs`, `scripts/codemods/gdevelop-flow-to-ts-postprocess.mjs`, and `scripts/codemods/codemods.test.mjs`, built at the Phase 0 / Phase 1 boundary for Phases 1–5 alongside `scripts/codemods/migrate-svg-icons.js`).
    - Actionable 6-Phase Topological Migration Roadmap (Phases 0–6) with validation gates, risk matrices, and rollback runbooks.
 
 3. [**Deferred Engineering Notes & Follow-Up Checklist (`FLOW_MIGRATION_NOTES.md`)**](./FLOW_MIGRATION_NOTES.md)
