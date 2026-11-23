@@ -1,38 +1,28 @@
 // @flow
-
-import axios from 'axios';
-import { GDevelopAssetApi } from './ApiConfigs';
+// @flow-transitional-stub [Phase 1]
 import { type MessageDescriptor } from '../i18n/MessageDescriptor.flow';
 import { type MessageByLocale } from '../i18n/MessageByLocale';
-import { ensureIsArray, ensureObjectHasProperty } from '../DataValidator';
 
-export const FLING_GAME_IN_APP_TUTORIAL_ID = 'flingGame';
-export const PLINKO_MULTIPLIER_IN_APP_TUTORIAL_ID = 'plinkoMultiplier';
-export const CAMERA_PARALLAX_IN_APP_TUTORIAL_ID = 'cameraParallax';
-export const HEALTH_BAR_IN_APP_TUTORIAL_ID = 'healthBar';
-export const JOYSTICK_IN_APP_TUTORIAL_ID = 'joystick';
-export const TIMER_IN_APP_TUTORIAL_ID = 'timer';
-export const OBJECT_3D_IN_APP_TUTORIAL_ID = 'object3d';
-export const KNIGHT_PLATFORMER_IN_APP_TUTORIAL_ID = 'knightPlatformer';
-export const TOP_DOWN_RPG_MOVEMENT_ID = 'topDownRPGMovement';
-export const FIRE_A_BULLET_ID = 'fireABullet';
-export const COOP_PLATFORMER_ID = 'coopPlatformer';
-export const TILEMAP_PLATFORMER_ID = 'tilemapPlatformer';
+type InAppTutorialFlowStepDOMChangeTrigger =
+  | {| presenceOfElement: string |}
+  | {| absenceOfElement: string |};
+type InAppTutorialFlowStepShortcutTrigger =
+  | InAppTutorialFlowStepDOMChangeTrigger
+  | {| objectAddedInLayout: true |};
 
-export const guidedLessonsIds = [
-  PLINKO_MULTIPLIER_IN_APP_TUTORIAL_ID,
-  TIMER_IN_APP_TUTORIAL_ID,
-  CAMERA_PARALLAX_IN_APP_TUTORIAL_ID,
-  HEALTH_BAR_IN_APP_TUTORIAL_ID,
-  JOYSTICK_IN_APP_TUTORIAL_ID,
-  OBJECT_3D_IN_APP_TUTORIAL_ID,
-  KNIGHT_PLATFORMER_IN_APP_TUTORIAL_ID,
-  TOP_DOWN_RPG_MOVEMENT_ID,
-  FIRE_A_BULLET_ID,
-  COOP_PLATFORMER_ID,
-  TILEMAP_PLATFORMER_ID,
-];
-
+declare export var FLING_GAME_IN_APP_TUTORIAL_ID: string;
+declare export var PLINKO_MULTIPLIER_IN_APP_TUTORIAL_ID: string;
+declare export var CAMERA_PARALLAX_IN_APP_TUTORIAL_ID: string;
+declare export var HEALTH_BAR_IN_APP_TUTORIAL_ID: string;
+declare export var JOYSTICK_IN_APP_TUTORIAL_ID: string;
+declare export var TIMER_IN_APP_TUTORIAL_ID: string;
+declare export var OBJECT_3D_IN_APP_TUTORIAL_ID: string;
+declare export var KNIGHT_PLATFORMER_IN_APP_TUTORIAL_ID: string;
+declare export var TOP_DOWN_RPG_MOVEMENT_ID: string;
+declare export var FIRE_A_BULLET_ID: string;
+declare export var COOP_PLATFORMER_ID: string;
+declare export var TILEMAP_PLATFORMER_ID: string;
+declare export var guidedLessonsIds: Array<string>;
 export type InAppTutorialShortHeader = {|
   id: string,
   titleByLocale: MessageByLocale,
@@ -44,7 +34,6 @@ export type InAppTutorialShortHeader = {|
   isMiniTutorial?: boolean,
   shouldRestrictUI?: boolean,
 |};
-
 export type EditorIdentifier =
   | 'Scene'
   | 'EventsSheet'
@@ -53,18 +42,9 @@ export type EditorIdentifier =
   | 'ExternalLayout'
   | 'Extension'
   | 'Resources';
-
 export type TranslatedText =
   | {| messageDescriptor: MessageDescriptor |}
   | {| messageByLocale: MessageByLocale |};
-
-type InAppTutorialFlowStepDOMChangeTrigger =
-  | {| presenceOfElement: string |}
-  | {| absenceOfElement: string |};
-type InAppTutorialFlowStepShortcutTrigger =
-  | InAppTutorialFlowStepDOMChangeTrigger
-  | {| objectAddedInLayout: true |};
-
 export type InAppTutorialFlowStepTrigger =
   | InAppTutorialFlowStepDOMChangeTrigger
   | {| editorIsActive: string |}
@@ -79,7 +59,6 @@ export type InAppTutorialFlowStepTrigger =
       inGameMessagePosition?: string,
     |}
   | {| clickOnTooltipButton: TranslatedText |};
-
 export type InAppTutorialFlowStepFormattedTrigger =
   | InAppTutorialFlowStepDOMChangeTrigger
   | {| editorIsActive: string |}
@@ -94,7 +73,6 @@ export type InAppTutorialFlowStepFormattedTrigger =
       inGameMessagePosition?: string,
     |}
   | {| clickOnTooltipButton: string |};
-
 export type InAppTutorialTooltip = {|
   standalone?: true,
   placement?: 'bottom' | 'left' | 'right' | 'top',
@@ -104,19 +82,16 @@ export type InAppTutorialTooltip = {|
   touchDescription?: TranslatedText,
   image?: { dataUrl: string, width?: string },
 |};
-
 export type InAppTutorialFormattedTooltip = {|
   ...InAppTutorialTooltip,
   title?: string,
   description?: string,
 |};
-
 export type InAppTutorialDialog = {|
   content: Array<
     TranslatedText | {| image: {| imageSource: string, linkHref?: string |} |}
   >,
 |};
-
 export type InAppTutorialFlowStep = {|
   elementToHighlightId?: string,
   id?: string,
@@ -139,13 +114,11 @@ export type InAppTutorialFlowStep = {|
   interactsWithCanvas?: true,
   disableBlockingLayer?: true,
 |};
-
 export type InAppTutorialFlowFormattedStep = {|
   ...InAppTutorialFlowStep,
   tooltip?: InAppTutorialFormattedTooltip,
   nextStepTrigger?: InAppTutorialFlowStepFormattedTrigger,
 |};
-
 export type InAppTutorial = {|
   id: string,
   flow: Array<InAppTutorialFlowStep>,
@@ -157,28 +130,7 @@ export type InAppTutorial = {|
   isMiniTutorial?: boolean,
   shouldRestrictUI?: boolean,
 |};
-
-export const fetchInAppTutorialShortHeaders = async (): Promise<
+declare export var fetchInAppTutorialShortHeaders: () => Promise<
   Array<InAppTutorialShortHeader>
-> => {
-  // $FlowFixMe[underconstrained-implicit-instantiation]
-  const response = await axios.get(
-    `${GDevelopAssetApi.baseUrl}/in-app-tutorial-short-header`
-  );
-  return ensureIsArray({
-    data: response.data,
-    endpointName: '/in-app-tutorial-short-header of Asset API',
-  });
-};
-
-export const fetchInAppTutorial = async (
-  shortHeader: InAppTutorialShortHeader
-): Promise<InAppTutorial> => {
-  // $FlowFixMe[underconstrained-implicit-instantiation]
-  const response = await axios.get(shortHeader.contentUrl);
-  return ensureObjectHasProperty({
-    data: response.data,
-    propertyName: 'id',
-    endpointName: 'in-app-tutorial contentUrl of Asset API',
-  });
-};
+>;
+declare export var fetchInAppTutorial: (shortHeader: InAppTutorialShortHeader) => Promise<InAppTutorial>;

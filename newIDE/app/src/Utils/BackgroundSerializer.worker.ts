@@ -1,38 +1,57 @@
 /* eslint-env worker */
-// @flow
 
-let modulePromise /*: ?Promise<libGDevelop>*/ = null;
+declare function importScripts(...urls: string[]): void;
+declare function initializeGDevelopJs(options?: {
+  locateFile?: (path: string, prefix: string) => string;
+}): Promise<libGDevelop>;
 
-const log = (message /*: string */) => {
+type BackgroundSerializerWorkerInMessage = {
+  type?: string;
+  binary?: Uint8Array | ArrayBuffer;
+  requestId?: number;
+  versionWithHash?: string;
+};
+
+let modulePromise: Promise<libGDevelop> | null = null;
+
+const log = (message: string) => {
   console.log(`[BackgroundSerializerWorker] ${message}`);
 };
 
-const getLibGDevelop = (versionWithHash /*: string */) => {
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (
+    error &&
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof (error as { message: unknown }).message === 'string'
+  ) {
+    return (error as { message: string }).message;
+  }
+  return String(error);
+};
+
+const getLibGDevelop = (versionWithHash?: string): Promise<libGDevelop> => {
   if (modulePromise) return modulePromise;
 
-  modulePromise = new Promise((resolve, reject) => {
+  modulePromise = new Promise<libGDevelop>((resolve, reject) => {
     try {
       const url = `/libGD.js?cache-buster=${versionWithHash}`;
       // Load libGD.js in the worker context.
       // eslint-disable-next-line no-undef
       importScripts(url);
 
-      /* eslint-disable no-undef */
-      // $FlowFixMe[incompatible-type]
-      // $FlowFixMe[cannot-resolve-name]
       if (typeof initializeGDevelopJs !== 'function') {
-        /* eslint-enable no-undef */
         reject(new Error('Missing initializeGDevelopJs in worker'));
         return;
       }
 
-      /* eslint-disable no-undef */
-      // $FlowFixMe[cannot-resolve-name]
       initializeGDevelopJs({
-        /* eslint-enable no-undef */
         // Override the resolved URL for the .wasm file,
         // to ensure a new version is fetched when the version changes.
-        locateFile: (path /*: string */, prefix /*: string */) => {
+        locateFile: (path: string, _prefix: string) => {
           // This function is called by Emscripten to locate the .wasm file only.
           // As the wasm is at the root of the public folder, we can just return
           // the path to the file.
@@ -41,7 +60,7 @@ const getLibGDevelop = (versionWithHash /*: string */) => {
           return path + `?cache-buster=${versionWithHash}`;
         },
       })
-        .then(module => {
+        .then((module) => {
           resolve(module);
         })
         .catch(reject);
@@ -55,9 +74,9 @@ const getLibGDevelop = (versionWithHash /*: string */) => {
 };
 
 const unserializeBinarySnapshotToJson = (
-  gd /*: libGDevelop */,
-  binary /*: Uint8Array */
-) => {
+  gd: libGDevelop,
+  binary: Uint8Array | ArrayBuffer
+): string => {
   const binaryArray =
     binary instanceof Uint8Array ? binary : new Uint8Array(binary);
   const binarySize = binaryArray.byteLength || binaryArray.length;
@@ -66,7 +85,7 @@ const unserializeBinarySnapshotToJson = (
   const binaryPtr = gd._malloc(binarySize);
   if (!binaryPtr) throw new Error('Failed to allocate binary snapshot buffer.');
 
-  let element;
+  let element: gdSerializerElement;
   try {
     gd.HEAPU8.set(binaryArray, binaryPtr);
     element = gd.BinarySerializer.deserializeBinarySnapshot(
@@ -89,27 +108,25 @@ const unserializeBinarySnapshotToJson = (
 };
 
 // eslint-disable-next-line no-restricted-globals
-self.onmessage = async (event /*: MessageEvent */) => {
-  // $FlowFixMe[incompatible-type]
-  // $FlowFixMe[prop-missing]
-  // $FlowFixMe[incompatible-use]
+self.onmessage = async (
+  event: MessageEvent<BackgroundSerializerWorkerInMessage>
+) => {
   const { type, binary, requestId, versionWithHash } = event.data || {};
 
   const startTime = Date.now();
 
-  // $FlowFixMe[incompatible-type]
   log(`Request #${requestId} received (${type}).`);
   if (type !== 'SERIALIZE_TO_JSON' && type !== 'SERIALIZE_TO_JS_OBJECT') return;
 
   try {
-    // $FlowFixMe[incompatible-type]
     const gd = await getLibGDevelop(versionWithHash);
+    if (!binary) {
+      throw new Error('Missing binary payload.');
+    }
 
-    // $FlowFixMe[incompatible-type]
     const json = unserializeBinarySnapshotToJson(gd, binary);
     const result = type === 'SERIALIZE_TO_JSON' ? json : JSON.parse(json);
 
-    // $FlowFixMe[incompatible-type]
     log(`Request #${requestId} done in ${Date.now() - startTime}ms.`);
 
     // eslint-disable-next-line no-restricted-globals
@@ -124,7 +141,12 @@ self.onmessage = async (event /*: MessageEvent */) => {
     self.postMessage({
       type: 'ERROR',
       requestId,
-      message: error.message,
+      message: getErrorMessage(error),
     });
   }
 };
+
+const BackgroundSerializerWorkerConstructor = null as unknown as {
+  new (): Worker;
+};
+export default BackgroundSerializerWorkerConstructor;

@@ -1,0 +1,14 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+export type ObjectReferencesContext = {|
+  project: gdProject,
+  object: gdObject,
+  layout: ?gdLayout,
+  eventsFunctionsExtension: ?gdEventsFunctionsExtension,
+  eventsBasedObject: ?gdEventsBasedObject,
+|};
+declare export var renameObjectAnimationReferences: (context: ObjectReferencesContext, oldName: string, newName: string) => void;
+declare export var renameObjectPointReferences: (context: ObjectReferencesContext, oldName: string, newName: string) => void;
+declare export var getInstancesWithStartingAnimation: (context: ObjectReferencesContext, eventsBasedObjectVariant: ?gdEventsBasedObjectVariant) => Array<gdInitialInstance>;
+declare export var remapStartingAnimations: (instances: Array<gdInitialInstance>, oldAnimationNames: Array<string>, newAnimationNames: Array<string>) => {| remappedInstancesCount: number, resetInstancesCount: number |};

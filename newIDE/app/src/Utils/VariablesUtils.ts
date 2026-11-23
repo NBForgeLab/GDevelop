@@ -1,36 +1,37 @@
-// @flow
 import { mapFor } from './MapFor';
 import newNameGenerator from './NewNameGenerator';
 import { normalizeString } from './Search';
 import { unserializeFromJSObject } from './Serializer';
 
-const gd: libGDevelop = global.gd;
+const gd: libGDevelop = (global as any).gd;
+
+// Resolve `gd.Variable` lazily at call time because `global.gd` is populated asynchronously.
+const getGdVariable = () =>
+  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
 
 export const hasChildThatContainsStringInNameOrValue = (
   variable: gdVariable,
   searchText: string
 ): boolean => {
+  const gdVariable = getGdVariable();
   switch (variable.getType()) {
-    case gd.Variable.String:
+    case gdVariable.String:
       return normalizeString(variable.getString()).includes(searchText);
-    case gd.Variable.Number:
-      return variable
-        .getValue()
-        .toString()
-        .includes(searchText);
-    case gd.Variable.Array:
-      return mapFor(0, variable.getChildrenCount(), index => {
+    case gdVariable.Number:
+      return variable.getValue().toString().includes(searchText);
+    case gdVariable.Array:
+      return mapFor(0, variable.getChildrenCount(), (index) => {
         const childVariable = variable.getAtIndex(index);
         return hasChildThatContainsStringInNameOrValue(
           childVariable,
           searchText
         );
       }).some(Boolean);
-    case gd.Variable.Structure:
+    case gdVariable.Structure:
       return variable
         .getAllChildrenNames()
         .toJSArray()
-        .map(childName => {
+        .map((childName) => {
           const childVariable = variable.getChild(childName);
           return (
             normalizeString(childName).includes(searchText) ||
@@ -60,10 +61,11 @@ export const makeObjectGroupMergedVariablesContainer = (
   // would overwrite it. This helper copies the merged result into a new
   // container owned by the caller - which must call `delete` on it when done,
   // to free the C++ memory.
-  const sharedMergedVariablesContainer = gd.ObjectRefactorer.mergeVariableContainers(
-    objectsContainersList,
-    objectGroup
-  );
+  const sharedMergedVariablesContainer =
+    gd.ObjectRefactorer.mergeVariableContainers(
+      objectsContainersList,
+      objectGroup
+    );
   const mergedVariablesContainer = new gd.VariablesContainer(
     sharedMergedVariablesContainer.getSourceType()
   );
@@ -83,12 +85,15 @@ export const insertInVariablesContainer = (
   name: string,
   serializedVariable: any | null,
   index: number,
-  inheritedVariablesContainer: ?gdVariablesContainer,
+  inheritedVariablesContainer: gdVariablesContainer | null | undefined,
   variableType?: 'number' | 'string' | 'boolean' | null
-): { name: string, variable: gdVariable } => {
+): {
+  name: string;
+  variable: gdVariable;
+} => {
   const newName = newNameGenerator(
     name,
-    name => {
+    (name) => {
       return (
         variablesContainer.has(name) ||
         (!!inheritedVariablesContainer && inheritedVariablesContainer.has(name))
@@ -132,7 +137,7 @@ export const insertInVariableChildren = (
 ): string => {
   const newName = newNameGenerator(
     name,
-    _name => targetParentVariable.hasChild(_name),
+    (_name) => targetParentVariable.hasChild(_name),
     'CopyOf'
   );
   const newVariable = new gd.Variable();
@@ -146,13 +151,14 @@ export const insertInVariableChildren = (
 export const hasVariablesContainerSubChildren = (
   variablesContainer: gdVariablesContainer
 ): boolean =>
-  mapFor(0, variablesContainer.count(), index => {
+  mapFor(0, variablesContainer.count(), (index) => {
     const variable = variablesContainer.getAt(index);
 
     return isCollectionVariable(variable) && variable.getChildrenCount() > 0;
   }).some(Boolean);
 
 export const isCollectionVariable = (variable: gdVariable): boolean => {
+  const gdVariable = getGdVariable();
   const type = variable.getType();
-  return type !== gd.Variable.MixedTypes && !gd.Variable.isPrimitive(type);
+  return type !== gdVariable.MixedTypes && !gdVariable.isPrimitive(type);
 };

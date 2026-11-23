@@ -1,17 +1,23 @@
-// @flow
-// Mock for BackgroundSerializerWorkerFactory.js to prevent "self is not defined" errors in tests
+// Mock for BackgroundSerializerWorkerFactory.ts to prevent "self is not defined" errors in tests
 
-// $FlowFixMe[unclear-type] - Mock worker for tests
-export const createMockBackgroundSerializerWorker = (): any => {
-  // $FlowFixMe[unclear-type] - Mock worker for tests
-  const mockWorker: any = {
+type MockWorkerMessage = {
+  type?: string;
+  binary?: Uint8Array | ArrayBuffer;
+  requestId?: number;
+};
+
+type MockWorker = {
+  postMessage: (message: MockWorkerMessage) => void;
+  onmessage: ((event: { data: unknown }) => void) | null;
+  onerror: ((error: unknown) => void) | null;
+  terminate: jest.Mock;
+};
+
+export const createMockBackgroundSerializerWorker = (): MockWorker => {
+  const mockWorker: MockWorker = {
     // Plain function (not jest.fn()) so Jest `resetMocks: true` does not clear
     // it between tests when BackgroundSerializer reuses its singleton worker.
-    postMessage: (message: {
-      type?: string,
-      binary?: Uint8Array | ArrayBuffer,
-      requestId?: number,
-    }) => {
+    postMessage: (message: MockWorkerMessage) => {
       if (
         !message ||
         (message.type !== 'SERIALIZE_TO_JSON' &&
@@ -23,7 +29,9 @@ export const createMockBackgroundSerializerWorker = (): any => {
       setTimeout(() => {
         if (!mockWorker.onmessage) return;
         try {
-          const gd: libGDevelop = global.gd;
+          const gd: libGDevelop = (
+            global as typeof globalThis & { gd: libGDevelop }
+          ).gd;
           if (!gd || !gd.BinarySerializer || !gd.HEAPU8 || !gd.Serializer) {
             throw new Error('libGDevelop is not initialized in test.');
           }
@@ -66,7 +74,7 @@ export const createMockBackgroundSerializerWorker = (): any => {
             data: {
               type: 'ERROR',
               requestId: message.requestId,
-              message: error.message,
+              message: error instanceof Error ? error.message : String(error),
             },
           });
         }
@@ -80,7 +88,5 @@ export const createMockBackgroundSerializerWorker = (): any => {
   return mockWorker;
 };
 
-// $FlowFixMe[unclear-type] - Mock worker factory for tests
-export const createBackgroundSerializerWorker: JestMockFn<[], any> = jest.fn(
-  createMockBackgroundSerializerWorker
-);
+export const createBackgroundSerializerWorker: jest.Mock<MockWorker, []> =
+  jest.fn(createMockBackgroundSerializerWorker);

@@ -1,10 +1,9 @@
-// @flow
 import {
   serializeToJSONInBackground,
   serializeToJSObjectInBackground,
 } from './BackgroundSerializer';
 
-const gd: libGDevelop = global.gd;
+const gd: libGDevelop = (global as typeof globalThis & { gd: libGDevelop }).gd;
 
 describe('BackgroundSerializer', () => {
   it('disposes the owned snapshot if copying into JavaScript fails', async () => {
@@ -14,7 +13,7 @@ describe('BackgroundSerializer', () => {
     const free = jest.spyOn(gd.BinarySerializer, 'freeBinarySnapshot');
     const factory = jest
       .spyOn(gd, 'createOwnedBinarySnapshot')
-      .mockImplementation(element => {
+      .mockImplementation((element) => {
         const snapshot = create(element);
         // Spy on the method instead of overwriting it: the snapshot handle is
         // typed as read-only, and its disposal protocol must be preserved.
@@ -37,18 +36,20 @@ describe('BackgroundSerializer', () => {
 
   it('releases the root element when the target fails to serialize', async () => {
     const project = gd.ProjectHelper.createNewGDJSProject();
-    let element: ?gdSerializerElement = null;
-    jest.spyOn(project, 'serializeTo').mockImplementation(output => {
-      element = output;
+    const captured: { element: gdSerializerElement | null } = {
+      element: null,
+    };
+    jest.spyOn(project, 'serializeTo').mockImplementation((output) => {
+      captured.element = output;
       throw new Error('Interrupted save');
     });
     try {
       await expect(serializeToJSONInBackground(project)).rejects.toThrow(
         'Interrupted save'
       );
-      expect(element ? element.ptr : undefined).toBe(0);
+      expect(captured.element ? captured.element.ptr : undefined).toBe(0);
     } finally {
-      if (element && element.ptr) element.delete();
+      if (captured.element && captured.element.ptr) captured.element.delete();
       project.delete();
     }
   });

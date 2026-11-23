@@ -1,20 +1,18 @@
-// @flow
-
 import VersionMetadata from '../Version/VersionMetadata';
 import { copyBinarySnapshot } from './copyBinarySnapshot';
 import { createBackgroundSerializerWorker } from './BackgroundSerializerWorkerFactory';
 
-const gd: libGDevelop = global.gd;
+const gd: libGDevelop = (global as typeof globalThis & { gd: libGDevelop }).gd;
 
 type BackgroundSerializerWorkerOutMessage =
-  | {| type: 'DONE', requestId: number, result: any |}
-  | {| type: 'ERROR', requestId: number, message: string |};
+  | { type: 'DONE'; requestId: number; result: unknown }
+  | { type: 'ERROR'; requestId: number; message: string };
 
-let serializerWorker: ?Worker = null;
+let serializerWorker: Worker | null = null;
 let nextRequestId = 1;
 const pendingRequests: Map<
   number,
-  { resolve: (result: any) => void, reject: (error: Error) => void }
+  { resolve: (result: unknown) => void; reject: (error: Error) => void }
 > = new Map();
 
 const log = (message: string) => {
@@ -29,15 +27,15 @@ const getOrCreateBackgroundSerializerWorker = (): Worker => {
   serializerWorker = createBackgroundSerializerWorker();
 
   // Set up message handler
-  serializerWorker.onmessage = (event: MessageEvent) => {
-    const data: BackgroundSerializerWorkerOutMessage = (event.data: any);
+  serializerWorker.onmessage = (
+    event: MessageEvent<BackgroundSerializerWorkerOutMessage>
+  ) => {
+    const data = event.data;
 
     const pending = pendingRequests.get(data.requestId);
     if (!pending) {
       console.warn(
-        `[BackgroundSerializer] Received message for unknown request ID #${
-          data.requestId
-        }.`
+        `[BackgroundSerializer] Received message for unknown request ID #${data.requestId}.`
       );
       return;
     }
@@ -50,18 +48,18 @@ const getOrCreateBackgroundSerializerWorker = (): Worker => {
     pending.reject(new Error(data.message || 'Unknown error'));
   };
 
-  serializerWorker.onerror = error => {
+  serializerWorker.onerror = (error) => {
     console.error('[BackgroundSerializer] Worker sent an error.', error);
   };
 
   return serializerWorker;
 };
 
-const sendMessageToBackgroundSerializerWorker = (message: {|
-  type: 'SERIALIZE_TO_JSON' | 'SERIALIZE_TO_JS_OBJECT',
-  binary: Uint8Array,
-  versionWithHash: string,
-|}) => {
+const sendMessageToBackgroundSerializerWorker = (message: {
+  type: 'SERIALIZE_TO_JSON' | 'SERIALIZE_TO_JS_OBJECT';
+  binary: Uint8Array;
+  versionWithHash: string;
+}): Promise<unknown> => {
   const worker = getOrCreateBackgroundSerializerWorker();
 
   return new Promise((resolve, reject) => {
@@ -71,14 +69,26 @@ const sendMessageToBackgroundSerializerWorker = (message: {|
   });
 };
 
+export function serializeInBackground(
+  type: 'SERIALIZE_TO_JSON',
+  serializable: gdSerializable
+): Promise<string>;
+export function serializeInBackground(
+  type: 'SERIALIZE_TO_JS_OBJECT',
+  serializable: gdSerializable
+): Promise<Record<string, any>>;
+export function serializeInBackground(
+  type: 'SERIALIZE_TO_JSON' | 'SERIALIZE_TO_JS_OBJECT',
+  serializable: gdSerializable
+): Promise<any>;
 export async function serializeInBackground(
   type: 'SERIALIZE_TO_JSON' | 'SERIALIZE_TO_JS_OBJECT',
   serializable: gdSerializable
 ): Promise<any> {
   const startTime = Date.now();
   const element = new gd.SerializerElement();
-  let serializeToEndTime;
-  let binaryBuffer;
+  let serializeToEndTime: number;
+  let binaryBuffer: Uint8Array;
   try {
     serializable.serializeTo(element);
     serializeToEndTime = Date.now();
@@ -89,10 +99,11 @@ export async function serializeInBackground(
 
   const binaryBufferEndTime = Date.now();
   log(
-    `Spent ${binaryBufferEndTime -
-      startTime}ms on main thread (including ${serializeToEndTime -
-      startTime}ms for SerializerElement serialization and ${binaryBufferEndTime -
-      serializeToEndTime}ms for BinaryBuffer preparation).`
+    `Spent ${binaryBufferEndTime - startTime}ms on main thread (including ${
+      serializeToEndTime - startTime
+    }ms for SerializerElement serialization and ${
+      binaryBufferEndTime - serializeToEndTime
+    }ms for BinaryBuffer preparation).`
   );
 
   const result = await sendMessageToBackgroundSerializerWorker({
@@ -117,6 +128,6 @@ export const serializeToJSONInBackground = async (
 
 export const serializeToJSObjectInBackground = async (
   serializable: gdSerializable
-): Promise<Object> => {
+): Promise<Record<string, any>> => {
   return serializeInBackground('SERIALIZE_TO_JS_OBJECT', serializable);
 };

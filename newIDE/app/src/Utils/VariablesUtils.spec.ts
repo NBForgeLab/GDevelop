@@ -1,7 +1,6 @@
-// @flow
 import { makeObjectGroupMergedVariablesContainer } from './VariablesUtils';
 
-const gd: libGDevelop = global.gd;
+const gd: libGDevelop = (global as any).gd;
 
 describe('makeObjectGroupMergedVariablesContainer', () => {
   const setUpProjectWithObjectGroup = () => {
@@ -39,20 +38,10 @@ describe('makeObjectGroupMergedVariablesContainer', () => {
   };
 
   it('returns a new, caller-owned container at each call (never a shared instance)', () => {
-    const {
-      project,
-      objectA,
-      objectB,
-      makeMergedVariablesContainer,
-    } = setUpProjectWithObjectGroup();
-    objectA
-      .getVariables()
-      .insertNew('Health', 0)
-      .setValue(100);
-    objectB
-      .getVariables()
-      .insertNew('Health', 0)
-      .setValue(100);
+    const { project, objectA, objectB, makeMergedVariablesContainer } =
+      setUpProjectWithObjectGroup();
+    objectA.getVariables().insertNew('Health', 0).setValue(100);
+    objectB.getVariables().insertNew('Health', 0).setValue(100);
 
     const container1 = makeMergedVariablesContainer();
     const container2 = makeMergedVariablesContainer();
@@ -71,24 +60,11 @@ describe('makeObjectGroupMergedVariablesContainer', () => {
   });
 
   it('keeps the intersection of variables, with mixed values markers and persistent UUIDs', () => {
-    const {
-      project,
-      objectA,
-      objectB,
-      makeMergedVariablesContainer,
-    } = setUpProjectWithObjectGroup();
-    objectA
-      .getVariables()
-      .insertNew('Health', 0)
-      .setValue(100);
-    objectB
-      .getVariables()
-      .insertNew('Health', 0)
-      .setValue(50);
-    objectA
-      .getVariables()
-      .insertNew('OnlyOnA', 1)
-      .setValue(1);
+    const { project, objectA, objectB, makeMergedVariablesContainer } =
+      setUpProjectWithObjectGroup();
+    objectA.getVariables().insertNew('Health', 0).setValue(100);
+    objectB.getVariables().insertNew('Health', 0).setValue(50);
+    objectA.getVariables().insertNew('OnlyOnA', 1).setValue(1);
     objectA.getVariables().ensurePersistentUuids();
     objectB.getVariables().ensurePersistentUuids();
 
@@ -104,10 +80,7 @@ describe('makeObjectGroupMergedVariablesContainer', () => {
     // The persistent UUIDs of the first object variables are kept, so that
     // refactoring changesets can be computed against them.
     expect(mergedVariablesContainer.get('Health').getPersistentUuid()).toBe(
-      objectA
-        .getVariables()
-        .get('Health')
-        .getPersistentUuid()
+      objectA.getVariables().get('Health').getPersistentUuid()
     );
 
     mergedVariablesContainer.delete();

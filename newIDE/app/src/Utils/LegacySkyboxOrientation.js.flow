@@ -1,0 +1,5 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var markEffectIfLegacySkybox: (effect: gdEffect) => void;
+declare export var markLegacySkyboxes: (project: gdProject) => void;

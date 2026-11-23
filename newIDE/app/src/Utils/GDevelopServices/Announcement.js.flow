@@ -1,8 +1,6 @@
 // @flow
-import axios from 'axios';
-import { GDevelopReleaseApi } from './ApiConfigs';
+// @flow-transitional-stub [Phase 1]
 import { type MessageByLocale } from '../i18n/MessageByLocale';
-import { ensureIsArray } from '../DataValidator';
 
 export type Announcement = {
   id: string,
@@ -14,7 +12,6 @@ export type Announcement = {
   buttonUrl?: string,
   buttonLabelByLocale?: MessageByLocale,
 };
-
 export interface Promotion {
   id: string;
   /** Deprecated, should use the "by locale" attribute instead. */
@@ -30,23 +27,5 @@ export interface Promotion {
   fromDate?: number;
   toDate?: number;
 }
-
-export const listAllAnnouncements = async (): Promise<Array<Announcement>> => {
-  // $FlowFixMe[underconstrained-implicit-instantiation]
-  const response = await axios.get(
-    `${GDevelopReleaseApi.baseUrl}/announcement`
-  );
-  return ensureIsArray({
-    data: response.data,
-    endpointName: '/announcement of Release API',
-  });
-};
-
-export const listAllPromotions = async (): Promise<Array<Promotion>> => {
-  // $FlowFixMe[underconstrained-implicit-instantiation]
-  const response = await axios.get(`${GDevelopReleaseApi.baseUrl}/promotion`);
-  return ensureIsArray({
-    data: response.data,
-    endpointName: '/promotion of Release API',
-  });
-};
+declare export var listAllAnnouncements: () => Promise<Array<Announcement>>;
+declare export var listAllPromotions: () => Promise<Array<Promotion>>;

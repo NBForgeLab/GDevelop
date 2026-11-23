@@ -1,19 +1,18 @@
-// @flow
 import { mapFor } from './MapFor';
 import { getInstancesInLayoutForObject } from './Layout';
-const gd: libGDevelop = global.gd;
+const gd: libGDevelop = (global as any).gd;
 
 /**
  * Where an object lives, as known by its editors: its scene (or the scene a
  * global object is edited from), or the custom object it is a child of.
  */
-export type ObjectReferencesContext = {|
-  project: gdProject,
-  object: gdObject,
-  layout: ?gdLayout,
-  eventsFunctionsExtension: ?gdEventsFunctionsExtension,
-  eventsBasedObject: ?gdEventsBasedObject,
-|};
+export type ObjectReferencesContext = {
+  project: gdProject;
+  object: gdObject;
+  layout: gdLayout | null | undefined;
+  eventsFunctionsExtension: gdEventsFunctionsExtension | null | undefined;
+  eventsBasedObject: gdEventsBasedObject | null | undefined;
+};
 
 const isGlobalObject = (project: gdProject, object: gdObject): boolean => {
   const globalObjects = project.getObjects();
@@ -35,9 +34,9 @@ const getScenesUsingObject = ({
   layout,
 }: ObjectReferencesContext): Array<gdLayout> | null => {
   if (isGlobalObject(project, object)) {
-    return mapFor(0, project.getLayoutsCount(), i =>
+    return mapFor(0, project.getLayoutsCount(), (i) =>
       project.getLayoutAt(i)
-    ).filter(scene => !scene.getObjects().hasObjectNamed(object.getName()));
+    ).filter((scene) => !scene.getObjects().hasObjectNamed(object.getName()));
   }
   return layout ? [layout] : null;
 };
@@ -52,15 +51,11 @@ export const renameObjectAnimationReferences = (
   oldName: string,
   newName: string
 ) => {
-  const {
-    project,
-    object,
-    eventsFunctionsExtension,
-    eventsBasedObject,
-  } = context;
+  const { project, object, eventsFunctionsExtension, eventsBasedObject } =
+    context;
   const scenes = getScenesUsingObject(context);
   if (scenes) {
-    scenes.forEach(scene =>
+    scenes.forEach((scene) =>
       gd.WholeProjectRefactorer.renameObjectAnimationInScene(
         project,
         scene,
@@ -90,15 +85,11 @@ export const renameObjectPointReferences = (
   oldName: string,
   newName: string
 ) => {
-  const {
-    project,
-    object,
-    eventsFunctionsExtension,
-    eventsBasedObject,
-  } = context;
+  const { project, object, eventsFunctionsExtension, eventsBasedObject } =
+    context;
   const scenes = getScenesUsingObject(context);
   if (scenes) {
-    scenes.forEach(scene =>
+    scenes.forEach((scene) =>
       gd.WholeProjectRefactorer.renameObjectPointInScene(
         project,
         scene,
@@ -127,7 +118,7 @@ export const renameObjectPointReferences = (
  */
 const getInstancesOfObject = (
   context: ObjectReferencesContext,
-  eventsBasedObjectVariant: ?gdEventsBasedObjectVariant
+  eventsBasedObjectVariant: gdEventsBasedObjectVariant | null | undefined
 ): Array<gdInitialInstance> => {
   const { project, object } = context;
   const objectName = object.getName();
@@ -140,19 +131,19 @@ const getInstancesOfObject = (
         )
       : [];
   }
-  const associatedSceneNames = scenes.map(scene => scene.getName());
+  const associatedSceneNames = scenes.map((scene) => scene.getName());
   if (isGlobalObject(project, object)) associatedSceneNames.push('');
-  const externalLayouts = mapFor(0, project.getExternalLayoutsCount(), i =>
+  const externalLayouts = mapFor(0, project.getExternalLayoutsCount(), (i) =>
     project.getExternalLayoutAt(i)
-  ).filter(externalLayout =>
+  ).filter((externalLayout) =>
     associatedSceneNames.includes(externalLayout.getAssociatedLayout())
   );
   return [
-    ...scenes.map(scene => scene.getInitialInstances()),
-    ...externalLayouts.map(externalLayout =>
+    ...scenes.map((scene) => scene.getInitialInstances()),
+    ...externalLayouts.map((externalLayout) =>
       externalLayout.getInitialInstances()
     ),
-  ].flatMap(initialInstances =>
+  ].flatMap((initialInstances) =>
     getInstancesInLayoutForObject(initialInstances, objectName)
   );
 };
@@ -165,7 +156,7 @@ const getInstancesOfObject = (
  */
 export const getInstancesWithStartingAnimation = (
   context: ObjectReferencesContext,
-  eventsBasedObjectVariant: ?gdEventsBasedObjectVariant
+  eventsBasedObjectVariant: gdEventsBasedObjectVariant | null | undefined
 ): Array<gdInitialInstance> => {
   const instances = getInstancesOfObject(context, eventsBasedObjectVariant);
   return instances.length > 0 &&
@@ -187,10 +178,13 @@ export const remapStartingAnimations = (
   instances: Array<gdInitialInstance>,
   oldAnimationNames: Array<string>,
   newAnimationNames: Array<string>
-): {| remappedInstancesCount: number, resetInstancesCount: number |} => {
+): {
+  remappedInstancesCount: number;
+  resetInstancesCount: number;
+} => {
   let remappedInstancesCount = 0;
   let resetInstancesCount = 0;
-  instances.forEach(instance => {
+  instances.forEach((instance) => {
     // The runtime truncates the index, and an instance without the property
     // starts with the first animation (0).
     const oldIndex = Math.trunc(instance.getRawDoubleProperty('animation'));
@@ -199,10 +193,10 @@ export const remapStartingAnimations = (
     if (animationName === undefined) return;
     const occurrence = oldAnimationNames
       .slice(0, oldIndex)
-      .filter(name => name === animationName).length;
+      .filter((name) => name === animationName).length;
     const newIndexesOfName = newAnimationNames
       .map((name, index) => (name === animationName ? index : -1))
-      .filter(index => index !== -1);
+      .filter((index) => index !== -1);
     const newIndex =
       occurrence < newIndexesOfName.length ? newIndexesOfName[occurrence] : -1;
     if (newIndex === -1) {

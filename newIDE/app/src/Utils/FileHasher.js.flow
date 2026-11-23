@@ -1,0 +1,4 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var getFileSha512TruncatedTo256: (file: File) => Promise<string>;

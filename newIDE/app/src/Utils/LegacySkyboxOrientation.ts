@@ -1,4 +1,3 @@
-// @flow
 import { mapFor } from './MapFor';
 
 /**
@@ -15,23 +14,23 @@ export const markEffectIfLegacySkybox = (effect: gdEffect) => {
 };
 
 const markLayersLegacySkyboxes = (layers: gdLayersContainer) => {
-  mapFor(0, layers.getLayersCount(), layerIndex => {
+  mapFor(0, layers.getLayersCount(), (layerIndex) => {
     const effects = layers.getLayerAt(layerIndex).getEffects();
-    mapFor(0, effects.getEffectsCount(), effectIndex => {
+    mapFor(0, effects.getEffectsCount(), (effectIndex) => {
       markEffectIfLegacySkybox(effects.getEffectAt(effectIndex));
     });
   });
 };
 
 export const markLegacySkyboxes = (project: gdProject) => {
-  mapFor(0, project.getLayoutsCount(), i => {
+  mapFor(0, project.getLayoutsCount(), (i) => {
     markLayersLegacySkyboxes(project.getLayoutAt(i).getLayers());
   });
-  mapFor(0, project.getEventsFunctionsExtensionsCount(), i => {
+  mapFor(0, project.getEventsFunctionsExtensionsCount(), (i) => {
     const eventsBasedObjects = project
       .getEventsFunctionsExtensionAt(i)
       .getEventsBasedObjects();
-    mapFor(0, eventsBasedObjects.getCount(), j => {
+    mapFor(0, eventsBasedObjects.getCount(), (j) => {
       markLayersLegacySkyboxes(eventsBasedObjects.getAt(j).getLayers());
     });
   });

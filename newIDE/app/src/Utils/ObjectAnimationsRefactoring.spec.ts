@@ -1,18 +1,16 @@
-// @flow
 import {
   renameObjectAnimationReferences,
   renameObjectPointReferences,
 } from './ObjectAnimationsRefactoring';
 import { unserializeFromJSObject } from './Serializer';
 
-const gd: libGDevelop = global.gd;
+const gd: libGDevelop = (global as any).gd;
 
 describe('ObjectAnimationsRefactoring', () => {
   let project: gdProject;
 
   beforeEach(() => {
-    // $FlowFixMe[invalid-constructor]
-    project = new gd.ProjectHelper.createNewGDJSProject();
+    project = gd.ProjectHelper.createNewGDJSProject();
   });
 
   afterEach(() => {
@@ -62,7 +60,7 @@ describe('ObjectAnimationsRefactoring', () => {
     parameterIndex: number
   ): string =>
     gd
-      .asStandardEvent(eventsList.getEventAt(0))
+      .asStandardEvent(eventsList.getEventAt(0) as unknown as Event)
       .getActions()
       .get(actionIndex)
       .getParameter(parameterIndex)
