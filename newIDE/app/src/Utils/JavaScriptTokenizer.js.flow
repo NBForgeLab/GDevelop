@@ -1,0 +1,23 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+export type JavaScriptTokenType =
+  | 'keyword'
+  | 'boolean'
+  | 'string'
+  | 'comment'
+  | 'number'
+  | 'operator'
+  | 'punctuation'
+  | 'identifier'
+  | 'whitespace'
+  | 'plain';
+export type JavaScriptToken = {| type: JavaScriptTokenType, text: string |};
+export type JavaScriptTokenStyle = {|
+  color?: string,
+  fontStyle?: 'italic',
+|};
+declare export var getJavaScriptTokenStyles: (arg0: {|
+  isDarkMode: boolean,
+|}) => { [JavaScriptTokenType]: JavaScriptTokenStyle };
+declare export var computeJavaScriptTokensByLine: (code: string) => JavaScriptToken[][];

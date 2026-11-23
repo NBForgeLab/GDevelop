@@ -1,0 +1,5 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var useAsyncLazyMemo: <T>(fn: () => Promise<T>) => (() => T | null);
+declare export var useLazyMemo: <T>(fn: () => T) => (() => T | null);

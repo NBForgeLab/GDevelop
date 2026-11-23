@@ -1,0 +1,40 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+type YesNoCancelDialogChoice = 'yes' | 'no' | 'cancel';
+
+export type AppArguments = { [string]: any };
+declare export var POSITIONAL_ARGUMENTS_KEY: string;
+declare export var registerDocumentTargetId: (doc: Document, frameName: string) => void;
+declare export var unregisterDocumentTargetId: (doc: Document) => void;
+declare export var useWindowControlsOverlayWatcher: (arg0: {|
+  onChanged: () => void,
+  targetWindow?: typeof window,
+|}) => void;
+declare export default class Window {
+  static setTitle(title: string): void;
+  static setWindowBackgroundColor(newColor: string, targetDocument?: Document): void;
+  static setBounds(x: number, y: number, width: number, height: number): void;
+  static quit(): void;
+  static show(): void;
+  static hide(forceHide?: boolean): void;
+  static onFocus(cb: () => void): any;
+  static onBlur(cb: () => void): any;
+  static onClose(cb: () => void): any;
+  static isRunningCommandFromCli(): boolean;
+  static getArguments(): AppArguments;
+  static removeArguments(argumentNames: string[]): void;
+  static addArguments(argumentNamesAndValues: { [key: string]: string }): void;
+  static showMessageBox(message: string, type?: 'none' | 'info' | 'error' | 'question' | 'warning'): void;
+  static showYesNoCancelDialog(message: string, type?: 'none' | 'info' | 'error' | 'question' | 'warning'): YesNoCancelDialogChoice;
+  static showConfirmDialog(message: string, type?: 'none' | 'info' | 'error' | 'question' | 'warning'): any;
+  static setUpContextMenu(targetWindow?: any): void;
+  static openExternalURL(url: string, arg1?: {|
+      shouldOpenInSameTabIfPossible?: boolean,
+    |}): void;
+  static getOrientation(): 'portrait' | 'landscape';
+  static hasMainMenu(): any;
+  static isDev(): boolean;
+  static isFullScreen(): boolean;
+  static toggleMaximize(): void;
+}

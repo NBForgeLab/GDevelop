@@ -1,0 +1,29 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+export type RevertableActionType = 'ADD' | 'DELETE' | 'EDIT';
+export type UndoAction = {|
+  type?: RevertableActionType,
+  valueBeforeChange: Object,
+  changeContext: any,
+|};
+export type RedoAction = {|
+  type?: RevertableActionType,
+  valueAfterChange: Object,
+  changeContext: any,
+|};
+export type HistoryState = {|
+  previousActions: Array<UndoAction>,
+  currentValue: Object,
+  futureActions: Array<RedoAction>,
+  maxSize: number,
+|};
+declare export var getHistoryInitialState: (serializableObject: gdSerializable, arg1: {
+    historyMaxSize: number,
+  }) => HistoryState;
+declare export var canRedo: (history: HistoryState) => boolean;
+declare export var canUndo: (history: HistoryState) => boolean;
+declare export var saveToHistory: (history: HistoryState, newCurrentSerializableValue: gdSerializable, actionType?: RevertableActionType, changeContext?: any) => HistoryState;
+declare export var saveSnapshotToHistory: (history: HistoryState, newCurrentValue: Object, actionType?: RevertableActionType, changeContext?: any) => HistoryState;
+declare export var undo: (history: HistoryState, serializableObject: gdSerializable, project?: ?gdProject) => HistoryState;
+declare export var redo: (history: HistoryState, serializableObject: gdSerializable, project?: ?gdProject) => HistoryState;

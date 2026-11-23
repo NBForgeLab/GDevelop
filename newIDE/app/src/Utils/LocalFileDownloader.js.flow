@@ -1,0 +1,16 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+type Input<Item> = {|
+  urlContainers: Array<Item>,
+  onProgress: (count: number, total: number) => void,
+  throwIfAnyError: boolean,
+|};
+
+export type ItemResult<Item> = {|
+  item: Item,
+  error?: Error,
+|};
+declare export var downloadUrlsToLocalFiles: <
+  Item: { url: string, filePath: string }
+>(arg0: Input<Item>) => Promise<Array<ItemResult<Item>>>;

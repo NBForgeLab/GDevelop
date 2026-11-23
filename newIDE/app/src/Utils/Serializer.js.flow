@@ -1,0 +1,20 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+export type SerializationOptions = {|
+  /**
+   * When true, the C++ serializer writes default values for properties that
+   * would normally be omitted (e.g. `disabled: false`, `folded: false`,
+   * empty `events`/`variables` arrays, etc.) and writes JSON object keys in
+   * alphabetical order. This makes git diffs minimal and shift-free when
+   * toggling flags or adding/removing sub-events.
+   */
+  canonicalEventSerialization?: boolean,
+|};
+declare export function serializeToJSObject(serializable: gdSerializable, methodName?: string, options?: ?SerializationOptions): any;
+declare export function serializeObjectWithCleanDefaultBehaviorFlags(object: gdObject): any;
+declare export function serializeToObjectAsset(project: gdProject, object: gdObject, objectFullName: string, usedResourceNames: Array<string>, extensionDependencyCache: gdExtensionDependencyCache): any;
+declare export function serializeToJSON(serializable: gdSerializable, methodName?: string, options?: ?SerializationOptions): string;
+declare export function addFinalNewline(json: string): string;
+declare export function unserializeFromJSObject(serializable: gdSerializable, object: Object, methodName?: string, optionalProject?: ?gdProject): void;
+declare export function unserializeResourceFromJSObject(resource: gdResource, object: Object): void;

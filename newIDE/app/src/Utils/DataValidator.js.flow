@@ -1,0 +1,39 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var ensureIsObject: (arg0: {|
+  data: any,
+  endpointName: string,
+|}) => any;
+declare export var ensureIsObjectOrNull: (arg0: {|
+  data: any,
+  endpointName: string,
+|}) => any;
+declare export var ensureObjectHasProperty: (arg0: {|
+  data: any,
+  propertyName: string,
+  endpointName: string,
+|}) => any;
+declare export var ensureIsNullOrObjectHasProperty: (arg0: {|
+  data: any,
+  propertyName: string,
+  endpointName: string,
+|}) => any;
+declare export var ensureIsArray: (arg0: {|
+  data: any,
+  endpointName: string,
+|}) => Array<any>;
+declare export var ensureIsArrayOrNull: (arg0: {|
+  data: any,
+  endpointName: string,
+|}) => Array<any> | null;
+declare export var ensureIsString: (arg0: {|
+  data: any,
+  endpointName: string,
+|}) => string;
+declare export var ensureIsObjectWithPropertyOfType: (arg0: {|
+  data: any,
+  propertyName: string,
+  propertyType: 'string' | 'number' | 'boolean' | 'object' | 'array',
+  endpointName: string,
+|}) => any;

@@ -1,0 +1,5 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+import { type Level } from './GDevelopServices/Project';
+
+declare export var getTranslatableLevel: (level: Level) => any;

@@ -1,0 +1,5 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var unzipFirstEntryOfBlob: (zippedBlob: Blob) => Promise<string>;
+declare export var createZipWithSingleTextFile: (textFileContent: string, fileName?: string) => Promise<Blob>;

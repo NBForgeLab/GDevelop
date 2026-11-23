@@ -1,0 +1,5 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+import Rectangle from './Rectangle';
+
+declare export default function transformRect(transformPoint: (x: number, y: number) => [number, number], rectangle: Rectangle): Rectangle;

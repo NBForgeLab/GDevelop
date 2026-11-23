@@ -1,0 +1,6 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var useDoNowOrAfterRender: <T>(ref: {|
+  current: T,
+|}) => (((T) => void) => void);

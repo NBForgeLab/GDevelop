@@ -1,0 +1,7 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var getIsPageHidden: () => boolean;
+declare export var addPageVisibilityListener: (onVisibilityChanged: (isHidden: boolean) => void) => (() => void);
+declare export var usePageBecameVisible: (onPageBecameVisible: () => void) => void;
+declare export var useIsPageHidden: () => boolean;

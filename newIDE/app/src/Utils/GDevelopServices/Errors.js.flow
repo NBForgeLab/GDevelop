@@ -1,0 +1,10 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+import { type $AxiosError } from 'axios';
+
+export type ExtractedErrorStatusAndCode = {|
+  status: number,
+  code: ?string,
+  data?: ?Object,
+|};
+declare export var extractGDevelopApiErrorStatusAndCode: (error: Error | $AxiosError<any> | null) => ?ExtractedErrorStatusAndCode;

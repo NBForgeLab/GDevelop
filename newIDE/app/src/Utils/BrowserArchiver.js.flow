@@ -1,0 +1,43 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+export type BlobFileDescriptor = {|
+  filePath: string,
+  blob: Blob,
+|};
+export type TextFileDescriptor = {|
+  filePath: string,
+  text: string,
+|};
+export type UrlFileDescriptor = {|
+  filePath: string,
+  url: string,
+|};
+declare export var downloadUrlFilesToBlobFiles: (arg0: {|
+  urlFiles: Array<UrlFileDescriptor>,
+  onProgress: (count: number, total: number) => void,
+|}) => Promise<Array<BlobFileDescriptor>>;
+declare export var archiveFiles: (arg0: {|
+  textFiles: Array<TextFileDescriptor>,
+  blobFiles: Array<BlobFileDescriptor>,
+  basePath: string,
+  onProgress: (count: number, total: number) => void,
+  sizeLimit?: number,
+|}) => Promise<Blob>;
+declare export var listArchiveFiles: (arg0: {|
+  archiveBlob: Blob,
+  onProgress: (count: number, total: number) => void,
+  sizeLimit?: number,
+|}) => Promise<any>;
+export type ArchiveReader = {|
+  getFileBlob: (filePath: string, contentType: string) => Promise<Blob>,
+  close: () => Promise<void>,
+|};
+declare export var openArchive: (archiveBlob: Blob) => Promise<ArchiveReader>;
+declare export var getFileBlob: (arg0: {|
+  archiveBlob: Blob,
+  filePath: string,
+  contentType: string,
+  onProgress: (count: number, total: number) => void,
+  sizeLimit?: number,
+|}) => Promise<Blob>;

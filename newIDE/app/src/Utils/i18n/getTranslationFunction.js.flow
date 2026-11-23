@@ -1,0 +1,9 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+import { type I18n } from '@lingui/core';
+
+type TranslationFunction = (string => string) | null;
+type NotNullTranslationFunction = string => string;
+
+declare export var getTranslationFunction: (i18n: ?I18n) => TranslationFunction;
+declare export var getNotNullTranslationFunction: (i18n: ?I18n) => NotNullTranslationFunction;

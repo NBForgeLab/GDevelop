@@ -1,0 +1,30 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var GDevelopGamePreviews: {| baseUrl: string |};
+declare export var GDevelopGamesPlatform: {|
+  getInstantBuildUrl: (buildId: string) => string,
+  getGameUrl: (gameId: string) => string,
+  getGameUrlWithSlug: (userSlug: string, gameSlug: string) => string,
+  getUserPublicProfileUrl: (userId: string, username: ?string) => string,
+|};
+declare export var GDevelopFirebaseConfig: {| apiKey: "AIzaSyAnX9QMacrIl3yo4zkVFEVhDppGVDDewBc", authDomain: "gdevelop-services.firebaseapp.com", databaseURL: "https://gdevelop-services.firebaseio.com", projectId: "gdevelop-services", storageBucket: "gdevelop-services.appspot.com", messagingSenderId: "44882707384" |};
+declare export var GDevelopAuthorizationWebSocketApi: {| baseUrl: string |};
+declare export var GDevelopBuildApi: {| baseUrl: string |};
+declare export var GDevelopUsageApi: {| baseUrl: string |};
+declare export var GDevelopReleaseApi: {| baseUrl: string |};
+declare export var GDevelopAssetApi: {| baseUrl: string |};
+declare export var GDevelopAssetCdn: {| baseUrl: {| staging: "https://resources.gdevelop-app.com/staging/assets-database", live: "https://resources.gdevelop-app.com/assets-database" |} |};
+declare export var GDevelopAnalyticsApi: {| baseUrl: string |};
+declare export var GDevelopGameApi: {| baseUrl: string |};
+declare export var GDevelopUserApi: {| baseUrl: string |};
+declare export var GDevelopPlayApi: {| baseUrl: string |};
+declare export var GDevelopShopApi: {| baseUrl: string |};
+declare export var GDevelopProjectApi: {| baseUrl: string |};
+declare export var GDevelopGenerationApi: {| baseUrl: string |};
+declare export var GDevelopAiCdn: {| baseUrl: {| staging: "https://public-resources.gdevelop.io/staging/ai", live: "https://public-resources.gdevelop.io/ai" |} |};
+declare export var GDevelopProjectResourcesStorage: {| baseUrl: string |};
+declare export var GDevelopPrivateAssetsStorage: {| baseUrl: string |};
+declare export var GDevelopPrivateGameTemplatesStorage: {| baseUrl: string |};
+declare export var GDevelopPublicAssetResourcesStorageBaseUrl: string;
+declare export var GDevelopPublicAssetResourcesStorageStagingBaseUrl: string;

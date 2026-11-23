@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var setupAuthenticationWebSocket: (arg0: {|
+  onConnectionEstablished: (connectionId: string) => void,
+  onTokenReceived: ({|
+    provider: 'apple' | 'google' | 'github',
+    data: any,
+  |}) => Promise<void>,
+  onError: Error => void,
+  onTimeout: () => void,
+|}) => ?WebSocket;
+declare export var terminateWebSocket: () => void;

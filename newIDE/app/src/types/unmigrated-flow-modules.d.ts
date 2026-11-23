@@ -94,8 +94,27 @@ declare module '@lingui/macro' {
 
 declare module '@lingui/core' {
   export type I18n = any;
+  export const setupI18n: (config?: any) => I18n;
   const content: any;
   export default content;
+}
+
+declare module 'fontfaceobserver' {
+  export default class FontFaceObserver {
+    constructor(fontFamily: string, descriptors?: Record<string, any>);
+    load(text?: string | null, timeout?: number): Promise<void>;
+  }
+}
+
+declare module 'url-search-params' {
+  const URLSearchParamsCtor: typeof globalThis.URLSearchParams;
+  export default URLSearchParamsCtor;
+}
+
+declare module 'path-browserify' {
+  import type * as path from 'path';
+  const pathBrowserify: typeof path;
+  export default pathBrowserify;
 }
 
 declare module '@lingui/react' {

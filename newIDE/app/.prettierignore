@@ -1,6 +1,5 @@
 # Prettier 1.15.3 has troubles handling the generic typing with Flow in these legacy .js files.
 # (Can be removed once migrated to TypeScript and formatted with Prettier 3.)
-src/Utils/UseOptimisticState.js
 src/Utils/Sha256.js
 
 # Generated TypeScript files and external-facing public API declarations.

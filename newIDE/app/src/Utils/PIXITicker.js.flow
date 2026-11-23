@@ -1,0 +1,5 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+declare export var stopPIXITicker: () => void;
+declare export var startPIXITicker: () => void;

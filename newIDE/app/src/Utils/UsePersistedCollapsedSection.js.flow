@@ -1,0 +1,20 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+type Props = {|
+  project: gdProject,
+  persistedPanelStateType:
+    | 'instances-of-object'
+    | 'object'
+    | 'scene'
+    | 'objectGroup'
+    | 'layer',
+  persistedPanelStateId: string | null,
+  foldedByDefault?: boolean,
+|};
+
+declare export var usePersistedCollapsedSection: (arg0: Props) => {
+  isSectionFolded: (sectionId: string) => boolean,
+  setSectionFolded: (sectionId: string, isCollapsed: boolean) => void,
+  toggleSectionFolded: (sectionId: string) => void,
+};
