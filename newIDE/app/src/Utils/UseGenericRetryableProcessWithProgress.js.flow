@@ -1,0 +1,41 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type GenericRetryableProcessWithProgressProps = {|
+  progress: number,
+  result: ?GenericRetryableProcessWithProgressResults,
+  onAbandon: ?() => void,
+  onRetry: ?() => void,
+  genericError: ?Error,
+  /** Defaults to "Importing project resources". */
+  title?: React.Node,
+  /** Displayed above the progress bar while there is no error. */
+  message?: React.Node,
+  /** Display a cancel button while the process is running. */
+  onCancel?: ?() => void,
+|};
+type UseGenericRetryableProcessWithProgressOutput<DoProcessOptions> = {|
+  /**
+   * Launch the process.
+   */
+  ensureProcessIsDone: (options: DoProcessOptions) => Promise<void>,
+  /**
+   * Render, if needed, the dialog that will show the progress of the process.
+   */
+  renderProcessDialog: () => React.Node,
+|};
+
+export type GenericRetryableProcessWithProgressResults = {|
+  erroredResources: Array<{|
+    resourceName: string,
+    error: Error,
+  |}>,
+|};
+declare export var GenericRetryableProcessWithProgressDialog: React.ComponentType<GenericRetryableProcessWithProgressProps>;
+declare export var useGenericRetryableProcessWithProgress: <DoProcessOptions>(arg0: {|
+  onDoProcess: (
+    options: DoProcessOptions,
+    onProgress: (count: number, total: number) => void
+  ) => Promise<GenericRetryableProcessWithProgressResults>,
+|}) => UseGenericRetryableProcessWithProgressOutput<DoProcessOptions>;

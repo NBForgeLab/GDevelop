@@ -1,0 +1,15 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  teamId: string,
+  inviterEmail: string,
+  notificationId: string,
+  onClose: () => void,
+  getAuthorizationHeader: () => Promise<string>,
+  userId: string,
+  onRefreshNotifications: () => Promise<void>,
+|};
+
+declare export default React.ComponentType<Props>;

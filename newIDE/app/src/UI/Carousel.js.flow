@@ -1,0 +1,14 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type WindowSizeType } from './Responsive/ResponsiveWindowMeasurer';
+
+type Props = {|
+  items: Array<CarouselItem>,
+|};
+
+export type CarouselItem = {
+  renderItem: () => React.Node,
+};
+declare export var getCarouselColumnsFromWindowSize: (windowSize: WindowSizeType, isLandscape: boolean) => number;
+declare export default React.ComponentType<Props>;

@@ -1,0 +1,12 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type UserPublicProfile } from '../../Utils/GDevelopServices/User';
+
+type Props = {|
+  user: UserPublicProfile,
+  isClickable?: boolean,
+  variant?: 'default' | 'outlined',
+|};
+
+declare export var UserPublicProfileChip: React.ComponentType<Props>;

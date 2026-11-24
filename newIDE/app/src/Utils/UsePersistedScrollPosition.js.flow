@@ -1,0 +1,19 @@
+// @flow
+// @flow-transitional-stub
+import { type ScrollViewInterface } from '../UI/ScrollView';
+
+type Props = {|
+  project: gdProject,
+  scrollViewRef: {| current: ?ScrollViewInterface |},
+  scrollKey: string,
+  persistedPanelStateType:
+    | 'instances-of-object'
+    | 'object'
+    | 'scene'
+    | 'objectGroup'
+    | 'layer',
+  persistedPanelStateId: string | null,
+  saveDebounceTimeInMs?: number,
+|};
+
+declare export var usePersistedScrollPosition: (arg0: Props) => (() => void);

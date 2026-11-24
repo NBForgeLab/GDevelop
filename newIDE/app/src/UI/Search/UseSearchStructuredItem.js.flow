@@ -1,0 +1,61 @@
+// @flow
+// @flow-transitional-stub
+import { type ChosenCategory } from './FiltersChooser';
+import {
+  type ExtensionShortHeader,
+  type BehaviorShortHeader,
+  type ObjectShortHeader,
+} from '../../Utils/GDevelopServices/Extension';
+import { type PrivateGameTemplateListingData } from '../../Utils/GDevelopServices/Shop';
+import { type ExampleShortHeader } from '../../Utils/GDevelopServices/Example';
+import { type ObjectCategory } from '../../AssetStore/ObjectStoreContext';
+
+type SearchableItem =
+  | ExtensionShortHeader
+  | ExampleShortHeader
+  | BehaviorShortHeader
+  | ObjectShortHeader
+  | ObjectCategory
+  | PrivateGameTemplateListingData;
+type SearchOptions = {|
+  searchText: string,
+  chosenItemCategory?: string,
+  chosenCategory: ?ChosenCategory,
+  chosenFilters: Set<string>,
+  excludedTiers: Set<string>,
+  defaultFirstSearchItemIds: Array<string>,
+  shuffleResults?: boolean,
+|};
+
+export type SearchMatch = {|
+  key: string,
+  indices: number[][],
+  value: string,
+|};
+export type AugmentedSearchMatch = {|
+  ...SearchMatch,
+  closestExactMatchAtStartOfWordIndex: number | null,
+  closestExactMatchIndex: number | null,
+|};
+export type SearchResult<T> = {|
+  item: T,
+  matches: SearchMatch[],
+  score?: number,
+|};
+export type AugmentedSearchResult<T> = {|
+  ...SearchResult<T>,
+  matches: AugmentedSearchMatch[],
+|};
+declare export var getNormalizedSearchValue: (obj: any, path: string | Array<string>) => any;
+declare export var sharedFuseConfiguration: {| minMatchCharLength: 1, threshold: 0.35, includeMatches: true, ignoreLocation: true, useExtendedSearch: true, findAllMatches: true, getFn: any |};
+declare export var getFuseSearchQueryForSimpleArray: (searchText: string) => string;
+declare export var getFuseSearchQueryForMultipleKeys: (searchText: string, keys: Array<string>) => { $or: Array<{ $or: Array<any> }> };
+declare export var nullifySingleCharacterMatches: <T>(result: SearchResult<T>) => any;
+declare export var augmentSearchResult: <T>(result: SearchResult<T>, lowerCaseSearchText: string) => AugmentedSearchResult<T>;
+declare export var tuneMatches: <T>(result: SearchResult<T>, searchText: string) => any;
+declare export var sortResultsUsingExactMatches: (orderedKeys: Array<string>) => (<T>(
+  resultA: AugmentedSearchResult<T>,
+  resultB: AugmentedSearchResult<T>
+) => any);
+declare export var filterSearchResults: <SearchItem: SearchableItem>(searchResults: ?Array<SearchResult<SearchItem>>, chosenItemCategory: ?string, chosenCategory: ?ChosenCategory, chosenFilters: Set<string>, excludedTiers: Set<string>, isSearchTextEmpty?: boolean) => ?Array<SearchResult<SearchItem>>;
+declare export var useSearchStructuredItem: <SearchItem: SearchableItem>(searchItemsById: ?{ [string]: SearchItem }, arg1: SearchOptions) => ?Array<SearchResult<SearchItem>>;

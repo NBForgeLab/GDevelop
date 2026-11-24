@@ -1,0 +1,16 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  title: React.Node,
+  thumbnailSource?: string,
+  thumbnailAlt?: string,
+  content: React.Node,
+  anchorElement: HTMLElement,
+  onClose: () => void,
+  placement: 'left' | 'top' | 'bottom' | 'right',
+  closeWithBackdropClick: boolean,
+|};
+
+declare export default React.ComponentType<Props>;

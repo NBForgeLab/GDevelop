@@ -1,0 +1,35 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type WindowSizeType } from './Responsive/ResponsiveWindowMeasurer';
+
+type OverlayTextPosition =
+  | 'topLeft'
+  | 'topRight'
+  | 'bottomLeft'
+  | 'bottomRight';
+type ImageTileGridProps = {|
+  items: Array<ImageTileComponent>,
+  isLoading?: boolean,
+  getColumnsFromWindowSize: (
+    windowSize: WindowSizeType,
+    isLandscape: boolean
+  ) => number,
+  getLimitFromWindowSize?: (
+    windowSize: WindowSizeType,
+    isLandscape: boolean
+  ) => number,
+|};
+
+export type ImageTileComponent = {|
+  onClick: () => void,
+  imageUrl: string,
+  title?: string,
+  isLocked?: boolean,
+  description?: string,
+  overlayText?: string | React.Node,
+  overlayTextPosition?: OverlayTextPosition,
+  chipText?: string | null,
+  chipColor?: string | null, // Color for the chip border.
+|};
+declare export default React.ComponentType<ImageTileGridProps>;
