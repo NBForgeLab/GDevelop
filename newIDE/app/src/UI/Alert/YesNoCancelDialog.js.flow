@@ -1,0 +1,18 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+
+type Props = {|
+  open: boolean,
+  title: MessageDescriptor,
+  message: MessageDescriptor,
+  onClickYes: () => void,
+  onClickNo: () => void,
+  onClickCancel: () => void,
+  yesButtonLabel?: MessageDescriptor,
+  noButtonLabel?: MessageDescriptor,
+  cancelButtonLabel?: MessageDescriptor,
+|};
+
+declare export default React.ComponentType<Props>;

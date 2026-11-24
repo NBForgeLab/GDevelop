@@ -1,0 +1,16 @@
+// @flow
+// @flow-transitional-stub
+import { type TagsTreeNode } from '../../Utils/GDevelopServices/Filters';
+
+export type ChosenCategory = {|
+  node: TagsTreeNode,
+  parentNodes: Array<TagsTreeNode>,
+|};
+export type FiltersState = {|
+  chosenFilters: Set<string>,
+  addFilter: string => void,
+  removeFilter: string => void,
+  chosenCategory: ?ChosenCategory,
+  setChosenCategory: (?ChosenCategory) => void,
+|};
+declare export var useFilters: () => FiltersState;

@@ -1,3 +1,4 @@
+import type { AssetShortHeader } from '../../Utils/GDevelopServices/Asset';
 import type { ExtensionShortHeader } from '../../Utils/GDevelopServices/Extension';
 import type {
   PrivateAssetPackListingData,
@@ -5,6 +6,7 @@ import type {
 } from '../../Utils/GDevelopServices/Shop';
 import type { Subscription } from '../../Utils/GDevelopServices/Usage';
 
+export declare const fakeAssetShortHeader1: AssetShortHeader;
 export declare const buttonV2ExtensionShortHeader: ExtensionShortHeader;
 export declare const breakingButtonV3ExtensionShortHeader: ExtensionShortHeader;
 export declare const breakingButtonV31ExtensionShortHeader: ExtensionShortHeader;

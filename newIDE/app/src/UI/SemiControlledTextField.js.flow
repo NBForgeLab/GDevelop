@@ -1,0 +1,67 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type FieldFocusFunction } from '../EventsSheet/ParameterFields/ParameterFieldCommons';
+
+type Props = {|
+  onChange: string => void,
+  value: string,
+  commitOnBlur?: boolean,
+  onFocus?: ({
+    currentTarget: {
+      value: string,
+    },
+    preventDefault: () => void,
+  }) => void,
+  onBlur?: ({
+    currentTarget: {
+      value: string,
+    },
+  }) => void,
+  type?: 'text' | 'number',
+
+  // Some TextField props that can be reused:
+  onClick?: (event: SyntheticPointerEvent<HTMLInputElement>) => void,
+  onKeyPress?: (event: SyntheticKeyboardEvent<HTMLInputElement>) => void,
+  onKeyUp?: (event: SyntheticKeyboardEvent<HTMLInputElement>) => void,
+  onKeyDown?: (event: SyntheticKeyboardEvent<HTMLInputElement>) => void,
+  margin?: 'none' | 'dense',
+  disabled?: boolean,
+  errorText?: React.Node,
+  floatingLabelFixed?: boolean,
+  floatingLabelText?: React.Node,
+  fullWidth?: boolean,
+  translatableHintText?: MessageDescriptor,
+  hintText?: string,
+  helperMarkdownText?: ?string,
+  id?: string,
+  inputStyle?: Object,
+  maxLength?: number,
+  precision?: number,
+  max?: number,
+  min?: number,
+  multiline?: boolean,
+  name?: string,
+  step?: number,
+  style?: Object,
+  rows?: number,
+  rowsMax?: number,
+  autoFocus?: 'desktop' | 'desktopAndMobileDevices',
+  endAdornment?: React.Node,
+|};
+
+export type SemiControlledTextFieldInterface = {|
+  focus: FieldFocusFunction,
+  isFocused: () => boolean,
+  forceSetValue: (text: string) => void,
+  forceSetSelection: (start: number, end: number) => void,
+  getInputNode: () => ?HTMLInputElement,
+  getFieldWidth: () => ?number,
+  getCaretPosition: () => ?number,
+|};
+// $FlowFixMe[incompatible-type]
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<SemiControlledTextFieldInterface>,
+}>;

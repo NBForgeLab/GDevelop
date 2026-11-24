@@ -1,0 +1,20 @@
+// @flow
+// @flow-transitional-stub
+
+type WarningOptions = {|
+  /**
+   * Delay the display of the warning to the next tick, not blocking the current function
+   * execution. This can be useful to work around freezing issues on Linux.
+   */
+  delayToNextTick: boolean,
+|};
+type ErrorArgs = {|
+  message: string,
+  rawError: ?Error | Object,
+  errorId: string,
+  doNotReport?: boolean,
+|};
+
+declare export var showMessageBox: (message: string) => void;
+declare export var showWarningBox: (message: string, options?: WarningOptions) => void;
+declare export var showErrorBox: (arg0: ErrorArgs) => void;

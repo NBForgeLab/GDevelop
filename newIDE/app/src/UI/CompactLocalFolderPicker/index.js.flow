@@ -1,0 +1,14 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  type: 'export' | 'create-game' | 'default-workspace',
+  value: string,
+  onChange: string => void,
+  defaultPath?: string,
+  id?: string,
+  disabled?: boolean,
+|};
+
+declare export default React.ComponentType<Props>;

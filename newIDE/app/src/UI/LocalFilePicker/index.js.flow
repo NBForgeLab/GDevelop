@@ -1,0 +1,18 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  value: string,
+  onChange: string => void,
+  title: string,
+  message: string,
+  defaultPath?: string,
+  fullWidth?: boolean,
+  filters: Array<{
+    name: string,
+    extensions: Array<string>,
+  }>,
+|};
+
+declare export default React.ComponentType<Props>;

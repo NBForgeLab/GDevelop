@@ -1,0 +1,26 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type CompactTextFieldInterface } from '../CompactTextField';
+
+type Props = {|
+  id?: string,
+  value: string,
+  onChange: string => void,
+  commitOnBlur?: boolean,
+  disabled?: boolean,
+  errored?: boolean,
+  placeholder?: string,
+  renderLeftIcon?: (className: string) => React.Node,
+  leftIconTooltip?: React.Node,
+  renderEndAdornmentOnHover?: (className: string) => React.Node,
+  onClickEndAdornment?: () => void,
+  onFocus?: () => void,
+
+  errorText?: React.Node,
+|};
+
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<CompactTextFieldInterface>,
+}>;

@@ -1,0 +1,56 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type ValueProps =
+  | {|
+      type?: 'text',
+      value: string,
+      onChange: (newValue: string, reason: 'keyInput' | 'iconControl') => void,
+    |}
+  | {|
+      type: 'number',
+      value: ?number, // null value corresponds to an empty input.
+      onChange: (newValue: string, reason: 'keyInput' | 'iconControl') => void,
+    |};
+type OtherProps = {|
+  onBlur?: ({
+    currentTarget: {
+      value: string,
+    },
+  }) => void,
+  onFocus?: ({
+    currentTarget: {
+      value: string,
+    },
+    preventDefault: () => void,
+  }) => void,
+|};
+
+export type CompactTextFieldInterface = {|
+  blur: () => void,
+  focus: () => void,
+  select: () => void,
+|};
+export type CompactTextFieldProps = {|
+  ...ValueProps,
+  ...OtherProps,
+  id?: string,
+  disabled?: boolean,
+  errored?: boolean,
+  placeholder?: string,
+  renderLeftIcon?: (className: string) => React.Node,
+  leftIconTooltip?: React.Node,
+  useLeftIconAsNumberControl?: boolean,
+  renderEndAdornmentOnHover?: (className: string) => React.Node,
+  onClickEndAdornment?: () => void,
+  onKeyDown?: KeyboardEvent => void,
+  onKeyUp?: KeyboardEvent => void,
+  onWheel?: WheelEvent => void,
+|};
+// $FlowFixMe[missing-local-annot]
+// $FlowFixMe[missing-local-annot]
+declare export default React.ComponentType<{
+  ...CompactTextFieldProps,
+  +ref?: React.RefSetter<CompactTextFieldInterface>,
+}>;

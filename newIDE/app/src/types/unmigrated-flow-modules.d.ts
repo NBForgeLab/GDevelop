@@ -166,3 +166,30 @@ declare module 'react-measure' {
   const content: any;
   export default content;
 }
+declare module 'js-worker-search' {
+  export default class SearchApi {
+    constructor(options?: Record<string, any>);
+    indexDocument(uid: string, text: string): void;
+    search(query: string): Promise<Array<string>>;
+  }
+}
+declare module 'react-color' {
+  import * as React from 'react';
+  export const SketchPicker: React.ComponentType<any>;
+  export const ChromePicker: React.ComponentType<any>;
+  export type ColorResult = any;
+}
+declare module 'react-virtualized' {
+  import * as React from 'react';
+  export const AutoSizer: React.ComponentType<any>;
+  export const Grid: React.ComponentType<any>;
+  export const List: React.ComponentType<any>;
+  export const Table: React.ComponentType<any>;
+  export const Column: React.ComponentType<any>;
+  export const CellMeasurer: React.ComponentType<any>;
+  export const CellMeasurerCache: any;
+  export const WindowScroller: React.ComponentType<any>;
+}
+declare module 'three/src/math/MathUtils' {
+  export function generateUUID(): string;
+}

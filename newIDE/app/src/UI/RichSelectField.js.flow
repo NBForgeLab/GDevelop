@@ -1,0 +1,52 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type FieldFocusFunction } from '../EventsSheet/ParameterFields/ParameterFieldCommons';
+
+type Props = {|
+  value: string,
+  onChange: (value: string) => void,
+  options: Array<RichSelectFieldOption>,
+  groupLabels?: { [group: string]: MessageDescriptor },
+  extraOptions?: Array<RichSelectFieldExtraOption>,
+  fullWidth?: boolean,
+  disabled?: boolean,
+  stopPropagationOnClick?: boolean,
+  id?: ?string,
+  margin?: 'none' | 'dense',
+  floatingLabelText?: React.Node,
+  helperMarkdownText?: ?string,
+  // If a hint text is specified, will be shown when the value is not
+  // one of the options.
+  translatableHintText?: MessageDescriptor,
+  errorText?: React.Node,
+|};
+
+export type RichSelectFieldOptionAction = {|
+  icon: React.Node,
+  tooltip: MessageDescriptor,
+  onClick: () => void,
+|};
+export type RichSelectFieldOption = {|
+  value: string,
+  label: string,
+  // Displayed before the label, in the list and for the selected value.
+  adornment?: React.Node,
+  // Consecutive options of different groups are separated by a divider, and
+  // the label of the group (from `groupLabels`), if any.
+  group?: string,
+  action?: RichSelectFieldOptionAction,
+|};
+export type RichSelectFieldExtraOption = {|
+  label: MessageDescriptor,
+  onClick: () => void,
+|};
+export type RichSelectFieldInterface = {|
+  focus: FieldFocusFunction,
+|};
+// $FlowFixMe[incompatible-type]
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<RichSelectFieldInterface>,
+}>;

@@ -1,0 +1,19 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+export type CompactToggleButton = {|
+  id: string,
+  renderIcon: (className?: string) => React.Node,
+  tooltip: React.Node,
+  onClick: () => void,
+  isActive: boolean,
+  label?: string,
+|};
+export type CompactToggleButtonsProps = {|
+  id: string,
+  noSeparator?: boolean,
+  buttons: CompactToggleButton[],
+  expand?: boolean,
+|};
+declare export default React.ComponentType<CompactToggleButtonsProps>;

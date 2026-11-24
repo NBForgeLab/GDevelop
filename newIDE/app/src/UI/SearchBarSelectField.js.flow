@@ -1,0 +1,43 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+
+type ValueProps = {|
+  value: number | string,
+  // event and index should not be used, and be removed eventually
+  onChange?: (
+    event: {| target: {| value: string |} |},
+    index: number,
+    text: string // Note that even for number values, a string is returned
+  ) => void,
+|};
+type Props = {|
+  ...ValueProps,
+  fullWidth?: boolean,
+  children: React.Node,
+  disabled?: boolean,
+  stopPropagationOnClick?: boolean,
+
+  style?: {
+    flex?: 1,
+    width?: 'auto',
+  },
+  margin?: 'none' | 'dense',
+  textAlign?: 'center',
+
+  helperMarkdownText?: ?string,
+
+  // If a hint text is specified, will be shown as an option for the empty
+  // value (""), disabled.
+  translatableHintText?: MessageDescriptor,
+|};
+
+export type SearchBarSelectFieldInterface = {| focus: () => void |};
+// $FlowFixMe[prop-missing]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-use]
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<SearchBarSelectFieldInterface>,
+}>;

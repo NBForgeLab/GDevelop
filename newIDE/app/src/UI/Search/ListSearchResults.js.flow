@@ -1,0 +1,17 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props<SearchItem> = {|
+  disableAutoTranslate?: boolean,
+  searchItems: ?Array<SearchItem>,
+  getSearchItemUniqueId: (item: SearchItem) => string,
+  renderSearchItem: (
+    item: SearchItem,
+    onHeightComputed: (number) => void
+  ) => React.Node,
+  error: ?Error,
+  onRetry: () => void,
+|};
+
+declare export var ListSearchResults: <SearchItem>(arg0: Props<SearchItem>) => any;

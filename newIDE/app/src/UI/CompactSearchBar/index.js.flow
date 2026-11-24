@@ -1,0 +1,22 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+
+export type CompactSearchBarInterface = {|
+  focus: () => void,
+  blur: () => void,
+|};
+export type CompactSearchBarProps = {|
+  value: string,
+  onChange: (newValue: string) => void,
+  onRequestSearch?: () => void,
+  id?: string,
+  disabled?: boolean,
+  errored?: boolean,
+  placeholder?: MessageDescriptor,
+|};
+declare export default React.ComponentType<{
+  ...CompactSearchBarProps,
+  +ref?: React.RefSetter<CompactSearchBarInterface>,
+}>;

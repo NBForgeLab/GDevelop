@@ -1,0 +1,15 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+export type CompactColorFieldProps = {|
+  color: string,
+  onChange: (newValue: string, alpha?: number) => void,
+  id?: string,
+  disabled?: boolean,
+  errored?: boolean,
+  placeholder?: string,
+  alpha?: number,
+  disableAlpha: true, // Support for alpha is not implemented yet.
+|};
+declare export var CompactColorField: React.ComponentType<CompactColorFieldProps>;
