@@ -1,0 +1,12 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type CubicBezierPoints } from '../../Utils/Easings';
+
+type Props = {|
+  points: CubicBezierPoints,
+  onSelect: (points: CubicBezierPoints) => void,
+|};
+
+declare export var presetGridWidth: any;
+declare export default React.ComponentType<Props>;

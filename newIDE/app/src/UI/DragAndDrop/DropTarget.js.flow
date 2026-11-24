@@ -1,0 +1,21 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type DropTargetMonitor, type ConnectDropTarget } from 'react-dnd';
+
+type Props<DraggedItemType> = {|
+  children: ({
+    connectDropTarget: ConnectDropTarget,
+    isOver: boolean,
+    isOverLazy: boolean,
+    canDrop: boolean,
+  }) => ?React.Node,
+  canDrop: (item: DraggedItemType) => boolean,
+  hover?: (monitor: DropTargetMonitor) => void,
+  drop: (monitor: DropTargetMonitor) => void,
+|};
+
+export type DropTargetComponent<DraggedItemType> = (
+  Props<DraggedItemType>
+) => React.Node;
+declare export var makeDropTarget: <DraggedItemType>(reactDndType: string) => DropTargetComponent<DraggedItemType>;

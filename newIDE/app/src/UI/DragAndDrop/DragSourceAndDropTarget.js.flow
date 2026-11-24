@@ -1,0 +1,44 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type ConnectDragSource, type DropTargetMonitor, type ConnectDropTarget, type ConnectDragPreview } from 'react-dnd';
+import { type TouchDragStart } from './TouchDragDelay';
+
+type Props<DraggedItemType> = {|
+  children: ({|
+    connectDragSource: ConnectDragSource,
+    connectDropTarget: ConnectDropTarget,
+    connectDragPreview: ConnectDragPreview,
+    isOver: boolean,
+    isOverLazy: boolean,
+    canDrop: boolean,
+    /**
+     * On a touch screen, true once the finger held the item long enough for
+     * a drag to start when it moves: show the item as "lifted".
+     */
+    isReadyToDrag: boolean,
+  |}) => ?React.Node,
+  beginDrag: () => DraggedItemType,
+  canDrag?: (item: DraggedItemType) => boolean,
+  canDrop: (item: DraggedItemType) => boolean,
+  drop: () => void,
+  endDrag?: () => void,
+  hover?: (monitor: DropTargetMonitor) => void,
+|};
+type Options = {|
+  /**
+   * When a finger touches the drag source, if it starts dragging immediately
+   * or only after staying still for a while. Use 'afterHold' for sources
+   * filling a row of a scrollable list (a quick move on them is a scroll),
+   * and 'immediate' for dedicated drag handles: touching a handle is never
+   * an attempt to scroll the list.
+   */
+  touchDragStart: TouchDragStart,
+|};
+
+export type DraggedItem = {|
+  name: string,
+  thumbnail?: string,
+  is3D?: boolean,
+|};
+declare export var makeDragSourceAndDropTarget: <DraggedItemType>(reactDndType: string, options: Options) => ((Props<DraggedItemType>) => React.Node);

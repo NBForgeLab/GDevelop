@@ -1,0 +1,72 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+
+type Props = {|
+  initialNodes: EditorMosaicNode,
+  centralNodeId: string,
+  editors: {
+    [string]: Editor | null,
+  },
+  onOpenedEditorsChanged?: () => void,
+  onPersistNodes?: EditorMosaicNode => void,
+  isTransparent?: boolean,
+  onDragOrResizedStarted?: () => void,
+  onDragOrResizedEnded?: () => void,
+|};
+
+export type Direction = 'row' | 'column';
+export type EditorMosaicNode =
+  | {|
+      direction: Direction,
+      splitPercentage: number,
+      first: EditorMosaicNode,
+      second: EditorMosaicNode,
+
+      // Visibility:
+      firstHidden?: boolean,
+      secondHidden?: boolean,
+
+      // The "original" node before visibility filtering. This allows
+      // to apply changes to split percentage made on the filtered view
+      // to the original node. See `filterHiddenNodes`.
+      source?: EditorMosaicNode,
+    |}
+  | string;
+export type EditorMosaicBranch = {|
+  direction: Direction,
+  splitPercentage: number,
+  first: EditorMosaicNode,
+  second: EditorMosaicNode,
+  firstHidden?: boolean,
+  secondHidden?: boolean,
+  source?: EditorMosaicNode,
+|};
+export type Editor = {|
+  type: 'primary' | 'secondary',
+  renderEditor: () => React.Node,
+  noTitleBar?: boolean,
+  noSoftKeyboardAvoidance?: boolean,
+  title?: MessageDescriptor,
+  toolbarControls?: Array<React.Node>,
+|};
+declare export var mosaicContainsNode: (mosaic: ?EditorMosaicNode, node: string) => boolean;
+export type EditorMosaicInterface = {|
+  getOpenedEditorNames: () => Array<string>,
+  toggleEditor: (
+    editorName: string,
+    position: 'left' | 'right' | 'bottom'
+  ) => boolean,
+  collapseEditor: (editorName: string) => boolean,
+  uncollapseEditor: (
+    editorName: string,
+    defaultSplitPercentage: number
+  ) => boolean,
+|};
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[missing-local-annot]
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<EditorMosaicInterface>,
+}>;

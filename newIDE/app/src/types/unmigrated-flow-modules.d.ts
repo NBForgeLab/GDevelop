@@ -193,3 +193,12 @@ declare module 'react-virtualized' {
 declare module 'three/src/math/MathUtils' {
   export function generateUUID(): string;
 }
+declare module 'blueimp-md5' {
+  function md5(value: string, key?: string, raw?: boolean): string;
+  export default md5;
+}
+declare module 'react-inner-image-zoom' {
+  import * as React from 'react';
+  const InnerImageZoom: React.ComponentType<any>;
+  export default InnerImageZoom;
+}

@@ -1,0 +1,5 @@
+// @flow
+// @flow-transitional-stub
+import React from 'react';
+
+declare export default React.ComponentType<any>;

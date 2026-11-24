@@ -1,0 +1,11 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  primary?: boolean,
+  isPlaying: boolean,
+  onClick: () => void,
+|};
+
+declare export default React.ComponentType<Props>;

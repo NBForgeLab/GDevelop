@@ -1,0 +1,10 @@
+// @flow
+// @flow-transitional-stub
+
+type AutoScrollOptions = {| edgeSize?: number, maxSpeed?: number |};
+
+declare export var useAutoScrollDuringDrag: (getContainer: () => ?HTMLElement, options?: AutoScrollOptions) => {|
+  startAutoScroll: () => void,
+  stopAutoScroll: () => void,
+|};
+declare export var useAutoScrollDuringAnyDrag: (getContainer: () => ?HTMLElement, options?: AutoScrollOptions) => void;
