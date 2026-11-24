@@ -1,0 +1,24 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import {
+  type PrivateGameTemplateListingData,
+  type PrivateAssetPackListingData,
+} from '../Utils/GDevelopServices/Shop';
+import { type ExampleShortHeader } from '../Utils/GDevelopServices/Example';
+
+type Props = {|
+  loadErrorMessage: React.Node,
+  path: string,
+  onMessageReceived: (data: GdGamesMessageEventData) => void,
+  supportedMessageIds: Array<string>,
+|};
+
+export type GdGamesMessageEventData = $ReadOnly<{
+  id?: string | any,
+  privateAssetPackListingData?: PrivateAssetPackListingData,
+  privateGameTemplateListingData?: PrivateGameTemplateListingData,
+  exampleShortHeader?: ExampleShortHeader,
+  gameId?: string,
+}>;
+declare export var GdGamesFrame: React.ComponentType<Props>;

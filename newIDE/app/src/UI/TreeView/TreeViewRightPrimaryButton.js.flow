@@ -1,0 +1,17 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type ButtonInterface } from '../../UI/Button';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+
+export type TreeViewRightPrimaryButtonProps = {|
+  label?: MessageDescriptor,
+  disabled?: boolean,
+  icon?: React.Node,
+  id?: ?string,
+  onClick: ?(MouseEvent) => void | Promise<void>,
+|};
+declare export var TreeViewRightPrimaryButton: React.ComponentType<{
+  ...TreeViewRightPrimaryButtonProps,
+  +ref?: React.RefSetter<ButtonInterface>,
+}>;

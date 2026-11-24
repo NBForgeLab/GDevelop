@@ -1,0 +1,22 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  /** The title of the new window. */
+  title: string,
+  /** The content to render in the new window. */
+  renderContent: (props: {
+    windowSize: { width: number, height: number },
+  }) => React.Node,
+  /** Called when the external window is closed by the user. */
+  onClose: () => void,
+  /** Initial width for the new window. */
+  initialWidth: number,
+  /** Initial height for the new window. */
+  initialHeight: number,
+  /** Called when the external window is ready (or null when closing). */
+  onWindowReady: (externalWindow: any) => void,
+|};
+
+declare export default React.ComponentType<Props>;

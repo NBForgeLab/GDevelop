@@ -1,0 +1,18 @@
+// @flow
+// @flow-transitional-stub
+import {
+  type MenuItemTemplate,
+  type ContextMenuImplementation,
+} from './Menu.flow';
+
+declare export default class MaterialUIMenuImplementation implements ContextMenuImplementation {
+  _onClose: () => void;
+  _portalContainer: ?HTMLElement;
+  constructor(arg0: {|
+    onClose: () => void,
+    portalContainer?: ?HTMLElement,
+  |}): void;
+  buildFromTemplate(template: Array<MenuItemTemplate>, forceUpdate?: () => void): any;
+  showMenu(): void;
+  getMenuProps(): any;
+}

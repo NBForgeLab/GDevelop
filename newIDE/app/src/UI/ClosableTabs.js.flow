@@ -1,0 +1,36 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type HTMLDataset } from '../Utils/HTMLDataset';
+
+type TabContentContainerProps = {|
+  active: boolean,
+  removePointerEvents?: boolean,
+  children: React.Node,
+|};
+type ClosableTabsProps = {|
+  hideLabels?: boolean,
+  renderTabs: ({| containerWidth: number |}) => React.Node,
+|};
+
+declare export class TabContentContainer extends React.Component<TabContentContainerProps> {}
+declare export var ClosableTabs: React.ComponentType<ClosableTabsProps>;
+export type ClosableTabProps = {|
+  id?: string,
+  data?: HTMLDataset,
+  active: boolean,
+  label: ?React.Node,
+  icon: ?React.Node,
+  renderCustomIcon?: ?(brightness: number) => React.Node,
+  closable: boolean,
+  onClose: () => void,
+  onCloseOthers: () => void,
+  onCloseAll: () => void,
+  onPopOut?: ?() => void,
+  popOutEnabled?: boolean,
+  onClick: () => void,
+  onActivated: () => void,
+  onHover: (boolean, options: {| isLabelTruncated: boolean |}) => void,
+  maxWidth: number,
+|};
+declare export function ClosableTab(arg0: ClosableTabProps): React.Node;

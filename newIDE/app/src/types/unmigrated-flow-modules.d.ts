@@ -202,3 +202,9 @@ declare module 'react-inner-image-zoom' {
   const InnerImageZoom: React.ComponentType<any>;
   export default InnerImageZoom;
 }
+declare module 'react-window' {
+  import * as React from 'react';
+  export const FixedSizeList: React.ComponentType<any>;
+  export const VariableSizeList: React.ComponentType<any>;
+  export function areEqual(prevProps: any, nextProps: any): boolean;
+}

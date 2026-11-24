@@ -1,0 +1,25 @@
+// @flow
+// @flow-transitional-stub
+
+type Props = {|
+  /**
+   * The element containing all the rows - including the ones that are not
+   * rendered (so its height must be `rowCount * rowHeight`).
+   */
+  containerRef: {| +current: ?Element |},
+  rowCount: number,
+  rowHeight: number,
+  /** Number of rows rendered before and after the ones on screen. */
+  overscanRowCount?: number,
+|};
+
+export type VisibleRowsRange = {|
+  /** Index of the first row to render. */
+  firstRowIndex: number,
+  /** Index *after* the last row to render (so it's an exclusive bound). */
+  afterLastRowIndex: number,
+|};
+declare export var useVisibleRowsRange: (arg0: Props) => {|
+  visibleRowsRange: VisibleRowsRange,
+  scrollRowIntoView: (rowIndex: number) => void,
+|};

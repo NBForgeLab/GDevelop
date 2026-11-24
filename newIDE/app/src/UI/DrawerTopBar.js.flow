@@ -1,0 +1,14 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  icon?: React.Node,
+  drawerAnchor?: 'left' | 'right',
+  title: React.Node,
+  onClose: () => void,
+  id: string,
+  disableSafeAreaTopMargin?: boolean,
+|};
+
+declare export default React.ComponentType<Props>;

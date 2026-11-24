@@ -1,0 +1,17 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  mediaItems: Array<MediaItem>,
+  /**
+   * Alt text inserted for each image tag.
+   * The string `{mediaIndex}` will be replaced with media actual index.
+   * For instance: "Asset pack preview image {mediaIndex}"
+   */
+  altTextTemplate: string,
+  horizontalOuterMarginToEatOnMobile?: number,
+|};
+
+export type MediaItem = {| kind: 'audio' | 'image', url: string |};
+declare export default React.ComponentType<Props>;

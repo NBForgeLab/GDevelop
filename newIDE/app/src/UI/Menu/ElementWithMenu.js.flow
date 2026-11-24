@@ -1,0 +1,21 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type I18n as I18nType } from '@lingui/core';
+import { type ContextMenuInterface } from './ContextMenu';
+import { type MenuItemTemplate } from './Menu.flow';
+
+type Props = {|
+  // $FlowFixMe[prop-missing]
+  element: React.Element<any>,
+  buildMenuTemplate: (i18n: I18nType) => Array<MenuItemTemplate>,
+  openMenuWithSecondaryClick?: boolean,
+  passExtraProps?: boolean,
+|};
+type State = {||};
+
+declare export default class ElementWithMenu extends React.Component<Props, State> {
+  _contextMenu: ?ContextMenuInterface;
+  _wrappedElement: ?any;
+  open: (event?: Event) => void;
+}

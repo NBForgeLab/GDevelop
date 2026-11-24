@@ -1,0 +1,9 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  difficultyLevel: string,
+|};
+
+declare export var ExampleDifficultyChip: React.ComponentType<Props>;

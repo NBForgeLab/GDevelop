@@ -1,0 +1,17 @@
+// @flow
+// @flow-transitional-stub
+import React from 'react';
+import { type I18n as I18nType } from '@lingui/core';
+import { type MenuItemTemplate } from './Menu.flow';
+
+type ContextMenuWrapperProps = {|
+  buildMenuTemplate: (i18n: I18nType, options: any) => Array<MenuItemTemplate>,
+|};
+
+export type ContextMenuInterface = {|
+  open: (x: number, y: number, options?: any) => void,
+|};
+declare export default React.ComponentType<{
+  ...ContextMenuWrapperProps,
+  +ref?: React.RefSetter<ContextMenuInterface>,
+}>;

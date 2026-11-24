@@ -1,0 +1,8 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+declare export var TREE_VIEW_ROW_HEIGHT: number;
+// $FlowFixMe[incompatible-type] - memo does not support having a generic in the props.
+// $FlowFixMe[missing-type-arg]
+declare export default React.ComponentType<any>;

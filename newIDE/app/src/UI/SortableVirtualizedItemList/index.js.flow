@@ -1,0 +1,43 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { List } from 'react-virtualized';
+import { type ItemSelectionEvent } from './ItemRow';
+import { type HTMLDataset } from '../../Utils/HTMLDataset';
+
+type Props<Item> = {|
+  height: number,
+  width: number,
+  fullList: Array<Item>,
+  selectedItems: Array<Item>,
+  onAddNewItem?: () => void,
+  addNewItemLabel?: React.Node | string,
+  addNewItemId?: string,
+  onRename: (Item, string) => void,
+  renderItemLabel?: Item => React.Node,
+  getItemName: Item => string,
+  getItemThumbnail?: Item => string,
+  getItemId?: (Item, index: number) => string,
+  getItemData?: (Item, index: number) => HTMLDataset,
+  isItemBold?: Item => boolean,
+  onItemSelected: (?Item, event?: ItemSelectionEvent) => void,
+  onEditItem?: Item => void,
+  renamedItem: ?Item,
+  erroredItems?: { [string]: '' | 'error' | 'warning' },
+  buildMenuTemplate: (Item, index: number) => any,
+  onMoveSelectionToItem: (destinationItem: Item) => void,
+  canMoveSelectionToItem?: ?(destinationItem: Item) => boolean,
+  reactDndType: string,
+|};
+
+declare export default class SortableVirtualizedItemList<Item> extends React.Component<
+  Props<Item>
+> {
+  // $FlowFixMe[value-as-type]
+  _list: ?List;
+  // $FlowFixMe[missing-local-annot]
+  DragSourceAndDropTarget: any;
+  forceUpdateGrid(): void;
+  scrollToItem(item: Item): void;
+  _renderItemRow(item: Item, index: number, isMobile: boolean): any;
+}

@@ -1,0 +1,17 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props<TabName> = {|
+  tabs: Array<EditorBottomTab<TabName>>,
+  currentTab: TabName,
+  onChangeTab: TabName => void,
+|};
+
+export type EditorBottomTab<TabName> = {|
+  value: TabName,
+  label: React.Node,
+  getIcon: (options: {| color: string, fontSize: string |}) => React.Node,
+  renderEditor: () => React.Node,
+|};
+declare export default (<TabName: string>(arg0: Props<TabName>) => React.Node);

@@ -1,0 +1,20 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type SettingsRowControlIds = {|
+  /** The id to give to the control. */
+  controlId: string,
+  /** The id of the label, to use as `aria-labelledby` on the control. */
+  labelId: string,
+|};
+type Props = {|
+  id?: string,
+  /** The name of the setting, displayed on the left. */
+  label: React.Node,
+  /** The control (toggle, select field, button...), aligned on the right. */
+  children?: React.Node,
+|};
+
+declare export var useSettingsRowControlIds: () => ?SettingsRowControlIds;
+declare export default React.ComponentType<Props>;

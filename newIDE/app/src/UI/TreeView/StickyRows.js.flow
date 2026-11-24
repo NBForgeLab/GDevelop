@@ -1,0 +1,26 @@
+// @flow
+// @flow-transitional-stub
+
+export type StickyRow = {| index: number, top: number, height: number |};
+declare export var STICKY_ROWS_MAX_HEIGHT_RATIO: number;
+declare export var STICKY_ROWS_DEFAULT_MAX_COUNT: number;
+declare export var computeParentIndexes: <Node: { +depth: number, ... }>(flattenedData: Node[]) => Array<number>;
+declare export var computeStickyRows: <Node: { +depth: number, ... }>(arg0: {|
+  flattenedData: Node[],
+  parentIndexes: Array<number>,
+  scrollOffset: number,
+  listHeight: number,
+  maxCount: number,
+  getRowTop: (index: number) => number,
+  getRowHeight: (index: number) => number,
+  getRowIndexAt: (offset: number) => number,
+|}) => StickyRow[];
+declare export var areStickyRowsEqual: (stickyRows: StickyRow[], otherStickyRows: StickyRow[]) => boolean;
+declare export var findSurfaceBackgroundColor: (element: ?HTMLElement) => string | null;
+declare export var getStickyAncestorsHeight: (arg0: {|
+  parentIndexes: Array<number>,
+  index: number,
+  maxCount: number,
+  listHeight: number,
+  getRowHeight: (index: number) => number,
+|}) => number;

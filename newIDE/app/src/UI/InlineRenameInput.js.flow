@@ -1,0 +1,14 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  initialValue: string,
+  /** Called with the new name (or the initial one if the edit is cancelled). */
+  onEndRenaming: (newName: string) => void,
+  /** Called when the input is unmounted. */
+  onBlur?: () => void,
+  onKeyDown?: (event: KeyboardEvent) => void,
+|};
+
+declare export default React.ComponentType<Props>;
