@@ -1,4 +1,3 @@
-// @flow
 import { allEasingNames, type CubicBezierPoints } from './Easings';
 import {
   findNamedEasingNameWithSamePoints,
@@ -28,11 +27,13 @@ const makeFakeEasing = (
 
 const makeFakeContainer = (easings: Array<any>): any => ({
   hasNamedEasingNamed: (name: string) =>
-    easings.some(easing => easing.getName() === name),
+    easings.some((easing) => easing.getName() === name),
+
   getNamedEasingsCount: () => easings.length,
   getNamedEasingAt: (index: number) => easings[index],
+
   getNamedEasing: (name: string) =>
-    easings.find(easing => easing.getName() === name),
+    easings.find((easing) => easing.getName() === name),
 });
 
 describe('validateNamedEasingName', () => {
@@ -65,7 +66,7 @@ describe('validateNamedEasingName', () => {
   });
 
   it('rejects a name that would break the string literal or is not an identifier', () => {
-    ['Popup"Open', 'Popup\\Open', 'Popup Open', '1Popup'].forEach(name => {
+    ['Popup"Open', 'Popup\\Open', 'Popup Open', '1Popup'].forEach((name) => {
       expect(
         getMessage(validateNamedEasingName(name, { existingNames }))
       ).toMatch(/letters, digits and underscores/i);
@@ -108,10 +109,7 @@ describe('named easings container helpers', () => {
       'ButtonPress',
     ]);
     expect(getNamedEasingPointsOrNull(container, 'PopupOpen')).toEqual([
-      0.34,
-      1.56,
-      0.64,
-      1,
+      0.34, 1.56, 0.64, 1,
     ]);
     expect(getNamedEasingPointsOrNull(container, 'Missing')).toBe(null);
     expect(getNamedEasingNames(null)).toEqual([]);
@@ -128,7 +126,9 @@ describe('getEasingChoicesWithNamedEasings', () => {
 });
 
 describe('findNamedEasingNameWithSamePoints', () => {
-  const pointsByName: { [string]: CubicBezierPoints } = {
+  const pointsByName: {
+    [key: string]: CubicBezierPoints;
+  } = {
     Wheel: [0.08, 3.35, 0.95, -1.08],
     PopupOpen: [0.34, 1.56, 0.64, 1],
   };

@@ -1,16 +1,12 @@
-// @flow
 import { markLegacySkyboxes } from './LegacySkyboxOrientation';
 import { makeTestProject } from '../fixtures/TestProject';
 
-const gd: libGDevelop = global.gd;
+const gd: libGDevelop = (global as any).gd;
 
 describe('markLegacySkyboxes', () => {
   it('marks the skyboxes without a top as legacy and keeps the others', () => {
     const { project, testLayout } = makeTestProject(gd);
-    const effects = testLayout
-      .getLayers()
-      .getLayer('')
-      .getEffects();
+    const effects = testLayout.getLayers().getLayer('').getEffects();
     effects.insertNewEffect('OldSky', 0).setEffectType('Scene3D::Skybox');
     const newSky = effects.insertNewEffect('NewSky', 1);
     newSky.setEffectType('Scene3D::Skybox');

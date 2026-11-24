@@ -1,0 +1,23 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+import { type ToolbarButtonConfig } from '../MainFrame/CustomToolbarButton';
+
+export type ResourceCustomPropertyType = 'string' | 'boolean' | 'number';
+export type ResourceCustomPropertyConfig = {|
+  name: string,
+  label: string,
+  type: ResourceCustomPropertyType,
+  description?: string,
+  resourceKinds?: Array<string>,
+  default?: string | number | boolean,
+|};
+export type ParsedProjectSettings = {
+  preferences?: { [string]: boolean | string | number },
+  toolbarButtons?: Array<ToolbarButtonConfig>,
+  shortcuts?: { [string]: string },
+  resourceCustomProperties?: Array<ResourceCustomPropertyConfig>,
+};
+declare export var getProjectDirectory: (projectFilePath: string) => string | null;
+declare export var parseToolbarButtons: (rawToolbarButtons: Array<mixed>, availableScripts: { [string]: string }) => Array<ToolbarButtonConfig>;
+declare export var parseResourceCustomProperties: (rawResourceCustomProperties: Array<mixed>) => Array<ResourceCustomPropertyConfig>;
+declare export var readProjectSettings: (projectFilePath: string) => Promise<ParsedProjectSettings | null>;

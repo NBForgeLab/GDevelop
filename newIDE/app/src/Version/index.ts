@@ -1,4 +1,3 @@
-// @flow
 import VersionMetadata from './VersionMetadata';
 import semverGreaterThan from 'semver/functions/gt';
 
@@ -10,7 +9,7 @@ let gdCoreVersionString = '';
 export const getGDCoreVersion = (): string => {
   if (gdCoreVersionString) return gdCoreVersionString;
 
-  const gd: libGDevelop = global.gd;
+  const gd = (global as typeof globalThis & { gd?: libGDevelop }).gd;
   gdCoreVersionString = gd ? gd.VersionWrapper.fullString() : 'Unknown';
   return gdCoreVersionString;
 };

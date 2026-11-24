@@ -1,0 +1,26 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+
+export type EventsScope = {|
+  project: gdProject,
+  layout?: ?gdLayout,
+  externalEvents?: ?gdExternalEvents,
+  eventsFunctionsExtension?: ?gdEventsFunctionsExtension,
+  eventsBasedBehavior?: ?gdEventsBasedBehavior,
+  eventsBasedObject?: ?gdEventsBasedObject,
+  eventsFunction?: ?gdEventsFunction,
+|};
+declare export class ProjectScopedContainersAccessor {
+  _scope: EventsScope;
+  _parameterObjectsContainer: gdObjectsContainer | null;
+  _parameterVariablesContainer: gdVariablesContainer | null;
+  _propertyVariablesContainer: gdVariablesContainer | null;
+  _parameterResourcesContainer: gdResourcesContainer | null;
+  _propertyResourcesContainer: gdResourcesContainer | null;
+  _eventPath: Array<gdBaseEvent>;
+  constructor(scope: EventsScope, parameterObjectsContainer?: gdObjectsContainer | null, parameterVariablesContainer?: gdVariablesContainer | null, propertyVariablesContainer?: gdVariablesContainer | null, parameterResourcesContainer?: gdResourcesContainer | null, propertyResourcesContainer?: gdResourcesContainer | null, eventPath?: Array<gdBaseEvent>): void;
+  getScope(): EventsScope;
+  get(): gdProjectScopedContainers;
+  makeNewProjectScopedContainersWithLocalVariables(event: gdBaseEvent): any;
+  forEachObject(func: (object: gdObject) => void): void;
+}

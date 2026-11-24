@@ -1,4 +1,3 @@
-// @flow
 import { t } from '@lingui/macro';
 import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
 import Window from '../Utils/Window';
@@ -97,43 +96,50 @@ export type CommandName =
   | 'IN_GAME_EDITOR_ORBIT_CAMERA';
 
 export const commandAreas = {
-  GENERAL: (t`General`: any),
-  PROJECT: (t`Project`: any),
-  SCENE: (t`Scene`: any),
-  SCENE_3D: (t`3D Editor`: any),
-  TILEMAP: (t`Tilemap tools`: any),
-  EVENTS: (t`Events`: any),
+  GENERAL: t`General`,
+  PROJECT: t`Project`,
+  SCENE: t`Scene`,
+  SCENE_3D: t`3D Editor`,
+  TILEMAP: t`Tilemap tools`,
+  EVENTS: t`Events`,
   // Only displayed when the IDE runs in development mode.
-  DEVELOPER: (t`Developer`: any),
+  DEVELOPER: t`Developer`,
 };
 
-export type CommandArea = $Keys<typeof commandAreas>;
+export type CommandArea = keyof typeof commandAreas;
 
 /**
  * The areas of the commands displayed to the user, in order: the developer
  * area is only displayed in development mode.
  */
 export const getDisplayedCommandAreaNames = (): Array<CommandArea> =>
-  Object.keys(commandAreas).filter(
-    areaName => areaName !== 'DEVELOPER' || Window.isDev()
+  (Object.keys(commandAreas) as Array<CommandArea>).filter(
+    (areaName) => areaName !== 'DEVELOPER' || Window.isDev()
   );
 
-type CommandMetadata = {|
-  area: CommandArea,
-  displayText: MessageDescriptor,
-  noShortcut?: boolean, // If true, command won't show up in shortcuts list
-  ghost?: boolean, // If true, command won't show up in palette
-  handledByElectron?: boolean, // If true, command shortcut is handled by Electron in desktop app
+type CommandMetadata = {
+  area: CommandArea;
+  displayText: MessageDescriptor;
+  // If true, command won't show up in shortcuts list
+  noShortcut?: boolean;
+  // If true, command won't show up in palette
+  ghost?: boolean;
+  // If true, command shortcut is handled by Electron in desktop app
+  handledByElectron?: boolean;
   /**
    * If true, the shortcut is handled by the in-game editor (the game running
    * in the embedded preview), which has the keyboard focus when it's used.
    * The IDE ignores these shortcuts, and the ones without modifier can't
    * clash with the IDE ones.
    */
-  handledByInGameEditor?: boolean,
-|};
+  handledByInGameEditor?: boolean;
+};
 
-const commandsList: { [CommandName]: CommandMetadata } = {
+const commandsList: {
+  [key in Exclude<CommandName, 'EDIT_NETWORK_PREVIEW'>]: CommandMetadata;
+} & {
+  EDIT_NETWORK_PREVIEW?: CommandMetadata;
+} = {
   // General commands
   QUIT_APP: {
     area: 'GENERAL',
@@ -541,8 +547,8 @@ const commandsList: { [CommandName]: CommandMetadata } = {
  * `InGameEditorSettings`) instead of being handled by the IDE.
  */
 export const getCommandNamesHandledByInGameEditor = (): Array<CommandName> =>
-  Object.keys(commandsList).filter(
-    commandName => !!commandsList[commandName].handledByInGameEditor
+  (Object.keys(commandsList) as Array<CommandName>).filter(
+    (commandName) => !!commandsList[commandName]?.handledByInGameEditor
   );
 
 export default commandsList;

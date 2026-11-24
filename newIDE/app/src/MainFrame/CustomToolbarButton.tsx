@@ -1,4 +1,3 @@
-// @flow
 import * as React from 'react';
 import IconButton from '../UI/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -9,19 +8,19 @@ export type ToolbarButtonHooksNames =
   | 'onPreviewStart'
   | 'onPreviewEnd';
 
-export type ToolbarButtonConfig = {|
-  name: string,
-  icon: string,
-  npmScript: string,
-  hook?: ToolbarButtonHooksNames,
-  keepTerminalOpen?: boolean,
-|};
+export type ToolbarButtonConfig = {
+  name: string;
+  icon: string;
+  npmScript: string;
+  hook?: ToolbarButtonHooksNames;
+  keepTerminalOpen?: boolean;
+};
 
-type Props = {|
-  name: string,
-  icon: string,
-  onClick: () => void,
-|};
+type Props = {
+  name: string;
+  icon: string;
+  onClick: () => void;
+};
 
 const iconContainerStyle = {
   width: 24,
@@ -32,7 +31,11 @@ const iconContainerStyle = {
   fontSize: 16,
 };
 
-const CustomToolbarButton = ({ name, icon, onClick }: Props): React.Node => {
+const CustomToolbarButton = ({
+  name,
+  icon,
+  onClick,
+}: Props): React.ReactNode => {
   return (
     <Tooltip title={name} placement="bottom" enterDelay={tooltipEnterDelay}>
       <IconButton size="small" onClick={onClick} color="default">

@@ -1,4 +1,3 @@
-// @flow
 import { t } from '@lingui/macro';
 import { type MessageDescriptor } from './i18n/MessageDescriptor.flow';
 import { type ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
@@ -9,13 +8,15 @@ import {
   type CubicBezierPoints,
 } from './Easings';
 
-const gd: libGDevelop = global.gd;
+const gd: libGDevelop = (global as any).gd;
 
 /**
  * Return the unquoted string if `value` is a quoted literal with no inner
  * quotes. Expressions (`"a" + "b"`, `VariableString(...)`) return null.
  */
-export const getQuotedStringLiteralOrNull = (value: string): ?string => {
+export const getQuotedStringLiteralOrNull = (
+  value: string
+): string | null | undefined => {
   if (value.length < 2 || value[0] !== '"' || value[value.length - 1] !== '"') {
     return null;
   }
@@ -31,19 +32,22 @@ const quoteEasingName = (name: string): string => `"${name}"`;
  * "stringWithSelector" ones that are displayed as easings.
  */
 export const canUseNamedEasings = (
-  parameterMetadata: ?gdParameterMetadata
+  parameterMetadata: gdParameterMetadata | null | undefined
 ): boolean => !!parameterMetadata && parameterMetadata.getType() === 'easing';
 
 export const getNamedEasingsContainerFromAccessor = (
-  projectScopedContainersAccessor: ?ProjectScopedContainersAccessor
-): ?gdNamedEasingsContainer =>
+  projectScopedContainersAccessor:
+    | ProjectScopedContainersAccessor
+    | null
+    | undefined
+): gdNamedEasingsContainer | null | undefined =>
   projectScopedContainersAccessor
     ? projectScopedContainersAccessor.get().getNamedEasings()
     : null;
 
 const getScopeEventsFunctionsExtensionOrNull = (
   projectScopedContainersAccessor: ProjectScopedContainersAccessor
-): ?gdEventsFunctionsExtension => {
+): gdEventsFunctionsExtension | null | undefined => {
   const { project } = projectScopedContainersAccessor.getScope();
   const extensionName = projectScopedContainersAccessor
     .get()
@@ -66,7 +70,7 @@ const getMutableNamedEasingsContainer = (
 };
 
 export const getNamedEasingNames = (
-  container: ?gdNamedEasingsContainer
+  container: gdNamedEasingsContainer | null | undefined
 ): Array<string> => {
   if (!container) return [];
   const names = [];
@@ -78,9 +82,9 @@ export const getNamedEasingNames = (
 };
 
 export const getNamedEasingPointsOrNull = (
-  container: ?gdNamedEasingsContainer,
+  container: gdNamedEasingsContainer | null | undefined,
   name: string
-): ?CubicBezierPoints => {
+): CubicBezierPoints | null | undefined => {
   if (!container || !container.hasNamedEasingNamed(name)) return null;
   const namedEasing = container.getNamedEasing(name);
   return [
@@ -92,10 +96,14 @@ export const getNamedEasingPointsOrNull = (
 };
 
 export const getNamedEasingPointsByName = (
-  container: ?gdNamedEasingsContainer
-): { [string]: CubicBezierPoints } => {
-  const pointsByName: { [string]: CubicBezierPoints } = {};
-  getNamedEasingNames(container).forEach(name => {
+  container: gdNamedEasingsContainer | null | undefined
+): {
+  [key: string]: CubicBezierPoints;
+} => {
+  const pointsByName: {
+    [key: string]: CubicBezierPoints;
+  } = {};
+  getNamedEasingNames(container).forEach((name) => {
     const points = getNamedEasingPointsOrNull(container, name);
     if (points) pointsByName[name] = points;
   });
@@ -108,7 +116,7 @@ export const getEasingChoicesWithNamedEasings = (
   namedEasingNames: Array<string>
 ): Array<string> =>
   namedEasingNames.concat(
-    builtInChoices.filter(name => namedEasingNames.indexOf(name) === -1)
+    builtInChoices.filter((name) => namedEasingNames.indexOf(name) === -1)
   );
 
 /**
@@ -117,7 +125,9 @@ export const getEasingChoicesWithNamedEasings = (
  */
 export const getEasingPreviewIdentifier = (
   easingName: string,
-  namedEasingPointsByName: { [string]: CubicBezierPoints }
+  namedEasingPointsByName: {
+    [key: string]: CubicBezierPoints;
+  }
 ): string => {
   const points = namedEasingPointsByName[easingName];
   return points ? formatCubicBezier(points) : easingName;
@@ -129,9 +139,11 @@ export const getEasingPreviewIdentifier = (
  */
 export const findNamedEasingNameWithSamePoints = (
   points: CubicBezierPoints,
-  namedEasingPointsByName: { [string]: CubicBezierPoints },
+  namedEasingPointsByName: {
+    [key: string]: CubicBezierPoints;
+  },
   ignoredName?: string
-): ?string => {
+): string | null | undefined => {
   const identifier = formatCubicBezier(points);
   const names = Object.keys(namedEasingPointsByName);
   for (let index = 0; index < names.length; index++) {
@@ -149,8 +161,11 @@ export const validateNamedEasingName = (
   {
     existingNames,
     ignoredName,
-  }: {| existingNames: Array<string>, ignoredName?: string |}
-): ?MessageDescriptor => {
+  }: {
+    existingNames: Array<string>;
+    ignoredName?: string;
+  }
+): MessageDescriptor | null | undefined => {
   const trimmedName = name.trim();
   if (!trimmedName) {
     return t`The name cannot be empty.`;
@@ -176,7 +191,7 @@ export const validateNamedEasingName = (
 export const getUnknownEasingWarning = (
   value: string,
   namedEasingNames: Array<string>
-): ?MessageDescriptor => {
+): MessageDescriptor | null | undefined => {
   const literal = getQuotedStringLiteralOrNull(value);
   if (!literal) return null;
   if (getBuiltInEasingFunction(literal)) return null;
@@ -219,13 +234,13 @@ export const insertNamedEasing = ({
   points,
   onChange,
   triggerUnsavedChanges,
-}: {|
-  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
-  name: string,
-  points: CubicBezierPoints,
-  onChange: string => void,
-  triggerUnsavedChanges: () => void,
-|}) => {
+}: {
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor;
+  name: string;
+  points: CubicBezierPoints;
+  onChange: (arg0: string) => void;
+  triggerUnsavedChanges: () => void;
+}) => {
   const container = getMutableNamedEasingsContainer(
     projectScopedContainersAccessor
   );
@@ -246,15 +261,15 @@ export const applyNamedEasingDefinition = ({
   currentValue,
   onChange,
   triggerUnsavedChanges,
-}: {|
-  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
-  oldName: string,
-  newName: string,
-  points: CubicBezierPoints,
-  currentValue: string,
-  onChange: string => void,
-  triggerUnsavedChanges: () => void,
-|}) => {
+}: {
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor;
+  oldName: string;
+  newName: string;
+  points: CubicBezierPoints;
+  currentValue: string;
+  onChange: (arg0: string) => void;
+  triggerUnsavedChanges: () => void;
+}) => {
   const container = getMutableNamedEasingsContainer(
     projectScopedContainersAccessor
   );
@@ -279,11 +294,11 @@ export const deleteNamedEasing = ({
   projectScopedContainersAccessor,
   name,
   triggerUnsavedChanges,
-}: {|
-  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
-  name: string,
-  triggerUnsavedChanges: () => void,
-|}) => {
+}: {
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor;
+  name: string;
+  triggerUnsavedChanges: () => void;
+}) => {
   const container = getMutableNamedEasingsContainer(
     projectScopedContainersAccessor
   );

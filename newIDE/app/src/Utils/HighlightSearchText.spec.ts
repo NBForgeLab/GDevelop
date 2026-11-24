@@ -1,4 +1,3 @@
-// @flow
 import {
   getHighlightSearchTextParts,
   mergeStylizedText,
@@ -6,7 +5,7 @@ import {
 } from './HighlightSearchText';
 import { makeTestProject } from '../fixtures/TestProject';
 
-const gd: libGDevelop = global.gd;
+const gd: libGDevelop = (global as any).gd;
 
 describe('HighlightSearchText', () => {
   describe('getHighlightSearchTextParts', () => {
@@ -50,10 +49,8 @@ describe('HighlightSearchText', () => {
 
   describe('applySyntaxColoring', () => {
     it('can apply syntax coloring on an expression', () => {
-      const {
-        project,
-        testSceneProjectScopedContainersAccessor,
-      } = makeTestProject(gd);
+      const { project, testSceneProjectScopedContainersAccessor } =
+        makeTestProject(gd);
       const text = '"Lorem ipsum" + "dolor sit amet"';
       const parser = new gd.ExpressionParser2();
       const rootNode = parser.parseExpression(text).get();
@@ -61,7 +58,8 @@ describe('HighlightSearchText', () => {
         applySyntaxColoring({
           text,
           platform: project.getCurrentPlatform(),
-          projectScopedContainers: testSceneProjectScopedContainersAccessor.get(),
+          projectScopedContainers:
+            testSceneProjectScopedContainersAccessor.get(),
           rootType: 'number',
           rootNode,
         })
@@ -101,10 +99,8 @@ describe('HighlightSearchText', () => {
 
   describe('mergeStylizedText', () => {
     it('can merge syntax coloring and search highlight with highlight over 1 color', () => {
-      const {
-        project,
-        testSceneProjectScopedContainersAccessor,
-      } = makeTestProject(gd);
+      const { project, testSceneProjectScopedContainersAccessor } =
+        makeTestProject(gd);
       const text = '"Lorem ipsum" + "dolor sit amet"';
       const parser = new gd.ExpressionParser2();
       const rootNode = parser.parseExpression(text).get();
@@ -120,7 +116,8 @@ describe('HighlightSearchText', () => {
           applySyntaxColoring({
             text,
             platform: project.getCurrentPlatform(),
-            projectScopedContainers: testSceneProjectScopedContainersAccessor.get(),
+            projectScopedContainers:
+              testSceneProjectScopedContainersAccessor.get(),
             rootType: 'number',
             rootNode,
           })
@@ -200,10 +197,8 @@ describe('HighlightSearchText', () => {
       parser.delete();
     });
     it('can merge syntax coloring and search highlight with highlight over several colors', () => {
-      const {
-        project,
-        testSceneProjectScopedContainersAccessor,
-      } = makeTestProject(gd);
+      const { project, testSceneProjectScopedContainersAccessor } =
+        makeTestProject(gd);
       const text = '"Lorem ipsum" + "dolor sit amet"';
       const parser = new gd.ExpressionParser2();
       const rootNode = parser.parseExpression(text).get();
@@ -219,7 +214,8 @@ describe('HighlightSearchText', () => {
           applySyntaxColoring({
             text,
             platform: project.getCurrentPlatform(),
-            projectScopedContainers: testSceneProjectScopedContainersAccessor.get(),
+            projectScopedContainers:
+              testSceneProjectScopedContainersAccessor.get(),
             rootType: 'number',
             rootNode,
           })

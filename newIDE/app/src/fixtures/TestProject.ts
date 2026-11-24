@@ -1,69 +1,66 @@
-// @flow
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
 
-/*::
-export type TestProject = {|
-  project: gdProject,
-  shapePainterObjectConfiguration: gdObjectConfiguration,
-  textObjectConfiguration: gdObjectConfiguration,
-  particleEmitterConfiguration: gdObjectConfiguration,
-  tiledSpriteObjectConfiguration: gdObjectConfiguration,
-  panelSpriteObject: gdObject,
-  spriteObjectConfiguration: gdSpriteObject,
-  emptySpriteObjectConfiguration: gdSpriteObject,
-  cube3dObject: gdObject,
-  textInputObject: gdObject,
-  customObject: gdObject,
-  spriteObject: gdObject,
-  emptySpriteObject: gdObject,
-  spriteObjectWithBehaviors: gdObject,
-  spriteObjectWithoutBehaviors: gdObject,
-  testSpriteObjectInstance: gdInitialInstance,
-  testLayout: gdLayout,
-  testProjectScopedContainersAccessor: ProjectScopedContainersAccessor,
-  testSceneProjectScopedContainersAccessor: ProjectScopedContainersAccessor,
-  group1: gdObjectGroup,
-  group2: gdObjectGroup,
-  group4WithLongsNames: gdObjectGroup,
-  emptyGroup: gdObjectGroup,
-  testLayoutInstance1: gdInitialInstance,
-  testLayoutInstance2: gdInitialInstance,
-  testLayoutInstance3: gdInitialInstance,
-  testInstruction: gdInstruction,
-  testExternalEvents1: gdExternalEvents,
-  testExternalEvents2: gdExternalEvents,
-  emptyLayout: gdLayout,
-  emptySceneProjectScopedContainersAccessor: ProjectScopedContainersAccessor,
-  emptyEventsList: gdEventsList,
-  testEventsFunction: gdEventsFunction,
-  testEventsFunctionsExtension: gdEventsFunctionsExtension,
-  testSerializedEvents: Object,
-  testSerializedEventsWithLotsOfObjects: Object,
-  testEventsBasedBehavior: gdEventsBasedBehavior,
-  testEventsBasedBehaviorProjectScopedContainersAccessor: ProjectScopedContainersAccessor,
-  testEmptyEventsBasedBehavior: gdEventsBasedBehavior,
-  testBehaviorEventsFunction: gdEventsFunction,
-  testBehaviorLifecycleEventsFunction: gdEventsFunction,
-  testEventsBasedObject: gdEventsBasedObject,
-  composedEventBasedObject: gdEventsBasedObject,
-  eventBasedObjectProjectScopedContainersAccessor: ProjectScopedContainersAccessor,
-  composedEventBasedObjectProjectScopedContainersAccessor: ProjectScopedContainersAccessor,
-  testObjectEventsFunction: gdEventsFunction,
-  layerWithEffects: gdLayer,
-  layerWith3DEffects: gdLayer,
-  layerWith2DEffects: gdLayer,
-  layerWithEffectWithoutEffectType: gdLayer,
-  layerWithoutEffects: gdLayer,
-  lightingLayer: gdLayer,
-  spriteObjectWithEffects: gdObject,
-  spriteObjectWithoutEffects: gdObject,
-  stringRelationalOperatorParameterMetadata: gdParameterMetadata,
-  numberRelationalOperatorParameterMetadata: gdParameterMetadata,
-  colorRelationalOperatorParameterMetadata: gdParameterMetadata,
-  unknownRelationalOperatorParameterMetadata: gdParameterMetadata,
-  emptyObjectsContainer: gdObjectsContainer,
-|};
-*/
+export type TestProject = {
+  project: gdProject;
+  shapePainterObjectConfiguration: gdObjectConfiguration;
+  textObjectConfiguration: gdObjectConfiguration;
+  particleEmitterConfiguration: gdObjectConfiguration;
+  tiledSpriteObjectConfiguration: gdObjectConfiguration;
+  panelSpriteObject: gdObject;
+  spriteObjectConfiguration: gdSpriteObject;
+  emptySpriteObjectConfiguration: gdSpriteObject;
+  cube3dObject: gdObject;
+  textInputObject: gdObject;
+  customObject: gdObject;
+  spriteObject: gdObject;
+  emptySpriteObject: gdObject;
+  spriteObjectWithBehaviors: gdObject;
+  spriteObjectWithoutBehaviors: gdObject;
+  testSpriteObjectInstance: gdInitialInstance;
+  testLayout: gdLayout;
+  testProjectScopedContainersAccessor: ProjectScopedContainersAccessor;
+  testSceneProjectScopedContainersAccessor: ProjectScopedContainersAccessor;
+  group1: gdObjectGroup;
+  group2: gdObjectGroup;
+  group4WithLongsNames: gdObjectGroup;
+  emptyGroup: gdObjectGroup;
+  testLayoutInstance1: gdInitialInstance;
+  testLayoutInstance2: gdInitialInstance;
+  testLayoutInstance3: gdInitialInstance;
+  testInstruction: gdInstruction;
+  testExternalEvents1: gdExternalEvents;
+  testExternalEvents2: gdExternalEvents;
+  emptyLayout: gdLayout;
+  emptySceneProjectScopedContainersAccessor: ProjectScopedContainersAccessor;
+  emptyEventsList: gdEventsList;
+  testEventsFunction: gdEventsFunction;
+  testEventsFunctionsExtension: gdEventsFunctionsExtension;
+  testSerializedEvents: Record<string, any>;
+  testSerializedEventsWithLotsOfObjects: Record<string, any>;
+  testEventsBasedBehavior: gdEventsBasedBehavior;
+  testEventsBasedBehaviorProjectScopedContainersAccessor: ProjectScopedContainersAccessor;
+  testEmptyEventsBasedBehavior: gdEventsBasedBehavior;
+  testBehaviorEventsFunction: gdEventsFunction;
+  testBehaviorLifecycleEventsFunction: gdEventsFunction;
+  testEventsBasedObject: gdEventsBasedObject;
+  composedEventBasedObject: gdEventsBasedObject;
+  eventBasedObjectProjectScopedContainersAccessor: ProjectScopedContainersAccessor;
+  composedEventBasedObjectProjectScopedContainersAccessor: ProjectScopedContainersAccessor;
+  testObjectEventsFunction: gdEventsFunction;
+  layerWithEffects: gdLayer;
+  layerWith3DEffects: gdLayer;
+  layerWith2DEffects: gdLayer;
+  layerWithEffectWithoutEffectType: gdLayer;
+  layerWithoutEffects: gdLayer;
+  lightingLayer: gdLayer;
+  spriteObjectWithEffects: gdObject;
+  spriteObjectWithoutEffects: gdObject;
+  stringRelationalOperatorParameterMetadata: gdParameterMetadata;
+  numberRelationalOperatorParameterMetadata: gdParameterMetadata;
+  colorRelationalOperatorParameterMetadata: gdParameterMetadata;
+  unknownRelationalOperatorParameterMetadata: gdParameterMetadata;
+  emptyObjectsContainer: gdObjectsContainer;
+};
 
 /**
  * Create a dummy project using libGD.js filled with a
@@ -71,7 +68,21 @@ export type TestProject = {|
  *
  * @param gd The GD instance to use to create the project.
  */
-export const makeTestProject = (gd /*: libGDevelop */) /*: TestProject */ => {
+export const makeTestProject = (gd: libGDevelop): TestProject => {
+  const objectsContainerSourceType =
+    gd.ObjectsContainer as unknown as typeof gd.ObjectsContainer_SourceType;
+  const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
+  const pushBackInstruction = (
+    list: gdInstructionsList,
+    instruction: gdInstruction
+  ) => {
+    (
+      list as gdInstructionsList & {
+        push_back: (instr: gdInstruction) => void;
+      }
+    ).push_back(instruction);
+  };
+
   // Create and expose a game project
   const project = gd.ProjectHelper.createNewGDJSProject();
 
@@ -192,22 +203,24 @@ export const makeTestProject = (gd /*: libGDevelop */) /*: TestProject */ => {
     .getObjects()
     .insertNewObject(project, 'Button::PanelSpriteButton', 'Button', 0);
 
-  const eventBasedObjectProjectScopedContainersAccessor = new ProjectScopedContainersAccessor(
-    {
-      project,
-      eventsFunctionsExtension: buttonExtension,
-      eventsBasedObject: buttonEventBasedObject,
-    },
-    new gd.ObjectsContainer(gd.ObjectsContainer.Function)
-  );
-  const composedEventBasedObjectProjectScopedContainersAccessor = new ProjectScopedContainersAccessor(
-    {
-      project,
-      eventsFunctionsExtension: buttonExtension,
-      eventsBasedObject: composedEventBasedObject,
-    },
-    new gd.ObjectsContainer(gd.ObjectsContainer.Function)
-  );
+  const eventBasedObjectProjectScopedContainersAccessor =
+    new ProjectScopedContainersAccessor(
+      {
+        project,
+        eventsFunctionsExtension: buttonExtension,
+        eventsBasedObject: buttonEventBasedObject,
+      },
+      new gd.ObjectsContainer(objectsContainerSourceType.Function)
+    );
+  const composedEventBasedObjectProjectScopedContainersAccessor =
+    new ProjectScopedContainersAccessor(
+      {
+        project,
+        eventsFunctionsExtension: buttonExtension,
+        eventsBasedObject: composedEventBasedObject,
+      },
+      new gd.ObjectsContainer(objectsContainerSourceType.Function)
+    );
 
   // Create and expose some objects
   const testLayout = project.insertNewLayout('TestLayout', 0);
@@ -405,26 +418,11 @@ export const makeTestProject = (gd /*: libGDevelop */) /*: TestProject */ => {
   const emptyGroup = new gd.ObjectGroup();
   emptyGroup.setName('EmptyGroup');
 
-  testLayout
-    .getObjects()
-    .getObjectGroups()
-    .insert(group1, 0);
-  testLayout
-    .getObjects()
-    .getObjectGroups()
-    .insert(group2, 1);
-  testLayout
-    .getObjects()
-    .getObjectGroups()
-    .insert(group3, 2);
-  testLayout
-    .getObjects()
-    .getObjectGroups()
-    .insert(group4WithLongsNames, 3);
-  testLayout
-    .getObjects()
-    .getObjectGroups()
-    .insert(emptyGroup, 4);
+  testLayout.getObjects().getObjectGroups().insert(group1, 0);
+  testLayout.getObjects().getObjectGroups().insert(group2, 1);
+  testLayout.getObjects().getObjectGroups().insert(group3, 2);
+  testLayout.getObjects().getObjectGroups().insert(group4WithLongsNames, 3);
+  testLayout.getObjects().getObjectGroups().insert(emptyGroup, 4);
 
   const testLayoutInstance1 = testLayout
     .getInitialInstances()
@@ -552,10 +550,10 @@ export const makeTestProject = (gd /*: libGDevelop */) /*: TestProject */ => {
 
   evt2.setAiGeneratedEventId('fake-ai-generated-event-id-1');
 
-  const groupEvent = gd.asGroupEvent(evt6);
+  const groupEvent = gd.asGroupEvent(asEvent(evt6));
   groupEvent.setName('Group #1');
 
-  const jsCodeEvent = gd.asJsCodeEvent(evt8);
+  const jsCodeEvent = gd.asJsCodeEvent(asEvent(evt8));
   jsCodeEvent.setInlineCode('console.log("Hello, World!");');
   jsCodeEvent.setParameterObjects('MyObject');
 
@@ -583,35 +581,53 @@ export const makeTestProject = (gd /*: libGDevelop */) /*: TestProject */ => {
     return action; // This leaks memory if not deleted
   };
 
-  var standardEvt = gd.asStandardEvent(evt);
-  standardEvt.getConditions().push_back(makeKeyPressedCondition('Space'));
-  standardEvt.getActions().push_back(makeDeleteAction('MyCharacter'));
+  var standardEvt = gd.asStandardEvent(asEvent(evt));
+  pushBackInstruction(
+    standardEvt.getConditions(),
+    makeKeyPressedCondition('Space')
+  );
+  pushBackInstruction(
+    standardEvt.getActions(),
+    makeDeleteAction('MyCharacter')
+  );
 
-  gd.asStandardEvent(evtWithInvalidParameters)
-    .getConditions()
-    .push_back(makeKeyPressedCondition(''));
-  gd.asStandardEvent(evtWithInvalidParameters)
-    .getConditions()
-    .push_back(makeKeyPressedCondition('Invalid key'));
-  gd.asStandardEvent(evtWithInvalidParameters)
-    .getConditions()
-    .push_back(makeMouseButtonPressedCondition(''));
+  pushBackInstruction(
+    gd.asStandardEvent(asEvent(evtWithInvalidParameters)).getConditions(),
+    makeKeyPressedCondition('')
+  );
+  pushBackInstruction(
+    gd.asStandardEvent(asEvent(evtWithInvalidParameters)).getConditions(),
+    makeKeyPressedCondition('Invalid key')
+  );
+  pushBackInstruction(
+    gd.asStandardEvent(asEvent(evtWithInvalidParameters)).getConditions(),
+    makeMouseButtonPressedCondition('')
+  );
 
   //Add a few sub events:
   {
     const subEvent = evt
       .getSubEvents()
       .insertNewEvent(project, 'BuiltinCommonInstructions::Standard', 0);
-    const subStandardEvt = gd.asStandardEvent(subEvent);
-    subStandardEvt.getConditions().push_back(makeKeyPressedCondition('Space'));
-    subStandardEvt.getActions().push_back(makeDeleteAction('MyCharacter1'));
-    subStandardEvt.getActions().push_back(makeDeleteAction('MyCharacter2'));
+    const subStandardEvt = gd.asStandardEvent(asEvent(subEvent));
+    pushBackInstruction(
+      subStandardEvt.getConditions(),
+      makeKeyPressedCondition('Space')
+    );
+    pushBackInstruction(
+      subStandardEvt.getActions(),
+      makeDeleteAction('MyCharacter1')
+    );
+    pushBackInstruction(
+      subStandardEvt.getActions(),
+      makeDeleteAction('MyCharacter2')
+    );
   }
   {
     const subEvent = evt
       .getSubEvents()
       .insertNewEvent(project, 'BuiltinCommonInstructions::Comment', 0);
-    const subCommentEvt = gd.asCommentEvent(subEvent);
+    const subCommentEvt = gd.asCommentEvent(asEvent(subEvent));
     subCommentEvt.setComment(
       'Kain is deified. The clans tell tales of him, few know the truth. He was mortal once, as were we all. However, his contempt for humanity drove him to create me and my brethren. I am Raziel, first born of his lieutenants. I stood with Kain and my brethren at the dawn of the empire. I have served him a millennium. Over time we became less human and more ... divine.'
     );
@@ -625,10 +641,16 @@ export const makeTestProject = (gd /*: libGDevelop */) /*: TestProject */ => {
         'BuiltinCommonInstructions::Standard',
         testLayout.getEvents().getEventsCount()
       );
-    const standardEvt = gd.asStandardEvent(evt);
+    const standardEvt = gd.asStandardEvent(asEvent(evt));
 
-    standardEvt.getConditions().push_back(makeKeyPressedCondition('Space'));
-    standardEvt.getActions().push_back(makeDeleteAction('OtherObject' + i));
+    pushBackInstruction(
+      standardEvt.getConditions(),
+      makeKeyPressedCondition('Space')
+    );
+    pushBackInstruction(
+      standardEvt.getActions(),
+      makeDeleteAction('OtherObject' + i)
+    );
   }
 
   // Add a disabled event with a sub event
@@ -640,22 +662,33 @@ export const makeTestProject = (gd /*: libGDevelop */) /*: TestProject */ => {
         'BuiltinCommonInstructions::Standard',
         testLayout.getEvents().getEventsCount()
       );
-    const disabledStandardEvt = gd.asStandardEvent(disabledEvent);
+    const disabledStandardEvt = gd.asStandardEvent(asEvent(disabledEvent));
     disabledStandardEvt.setDisabled(true);
-    disabledStandardEvt
-      .getConditions()
-      .push_back(makeKeyPressedCondition('Space'));
-    disabledStandardEvt
-      .getActions()
-      .push_back(makeDeleteAction('YetAnotherObject'));
+    pushBackInstruction(
+      disabledStandardEvt.getConditions(),
+      makeKeyPressedCondition('Space')
+    );
+    pushBackInstruction(
+      disabledStandardEvt.getActions(),
+      makeDeleteAction('YetAnotherObject')
+    );
 
     const subEvent = disabledStandardEvt
       .getSubEvents()
       .insertNewEvent(project, 'BuiltinCommonInstructions::Standard', 0);
-    const subStandardEvt = gd.asStandardEvent(subEvent);
-    subStandardEvt.getConditions().push_back(makeKeyPressedCondition('Space'));
-    subStandardEvt.getActions().push_back(makeDeleteAction('MyCharacter1'));
-    subStandardEvt.getActions().push_back(makeDeleteAction('MyCharacter2'));
+    const subStandardEvt = gd.asStandardEvent(asEvent(subEvent));
+    pushBackInstruction(
+      subStandardEvt.getConditions(),
+      makeKeyPressedCondition('Space')
+    );
+    pushBackInstruction(
+      subStandardEvt.getActions(),
+      makeDeleteAction('MyCharacter1')
+    );
+    pushBackInstruction(
+      subStandardEvt.getActions(),
+      makeDeleteAction('MyCharacter2')
+    );
   }
 
   const testInstruction = makeKeyPressedCondition('Space');
@@ -696,10 +729,11 @@ export const makeTestProject = (gd /*: libGDevelop */) /*: TestProject */ => {
   const emptyEventsList = new gd.EventsList();
 
   // Events functions extension
-  const someAlreadyInstalledExtension = project.insertNewEventsFunctionsExtension(
-    'SomeAlreadyInstalledExtension',
-    0
-  );
+  const someAlreadyInstalledExtension =
+    project.insertNewEventsFunctionsExtension(
+      'SomeAlreadyInstalledExtension',
+      0
+    );
   someAlreadyInstalledExtension.setNamespace('SomeAlreadyInstalledExtension');
   someAlreadyInstalledExtension.setName('SomeAlreadyInstalledExtension');
   someAlreadyInstalledExtension.setFullName(
@@ -708,10 +742,8 @@ export const makeTestProject = (gd /*: libGDevelop */) /*: TestProject */ => {
   someAlreadyInstalledExtension.setVersion('1.2.3');
 
   // Events functions extension
-  const testEventsFunctionsExtension = project.insertNewEventsFunctionsExtension(
-    'TestExt',
-    0
-  );
+  const testEventsFunctionsExtension =
+    project.insertNewEventsFunctionsExtension('TestExt', 0);
   testEventsFunctionsExtension.setNamespace('MyExt');
   testEventsFunctionsExtension.setVersion('1.1');
   testEventsFunctionsExtension.setName('My name');
@@ -969,33 +1001,29 @@ export const makeTestProject = (gd /*: libGDevelop */) /*: TestProject */ => {
     'whatever-this-is-not-recognised'
   );
 
-  const testProjectScopedContainersAccessor = new ProjectScopedContainersAccessor(
-    {
+  const testProjectScopedContainersAccessor =
+    new ProjectScopedContainersAccessor({
       project,
-    }
-  );
+    });
 
-  const testSceneProjectScopedContainersAccessor = new ProjectScopedContainersAccessor(
-    {
+  const testSceneProjectScopedContainersAccessor =
+    new ProjectScopedContainersAccessor({
       project,
       layout: testLayout,
-    }
-  );
+    });
 
-  const emptySceneProjectScopedContainersAccessor = new ProjectScopedContainersAccessor(
-    {
+  const emptySceneProjectScopedContainersAccessor =
+    new ProjectScopedContainersAccessor({
       project,
       layout: emptyLayout,
-    }
-  );
+    });
 
-  const testEventsBasedBehaviorProjectScopedContainersAccessor = new ProjectScopedContainersAccessor(
-    {
+  const testEventsBasedBehaviorProjectScopedContainersAccessor =
+    new ProjectScopedContainersAccessor({
       project,
       eventsFunctionsExtension: testEventsFunctionsExtension,
       eventsBasedBehavior: testEventsBasedBehavior,
-    }
-  );
+    });
 
   return {
     project,
@@ -1056,6 +1084,8 @@ export const makeTestProject = (gd /*: libGDevelop */) /*: TestProject */ => {
     numberRelationalOperatorParameterMetadata,
     colorRelationalOperatorParameterMetadata,
     unknownRelationalOperatorParameterMetadata,
-    emptyObjectsContainer: new gd.ObjectsContainer(gd.ObjectsContainer.Unknown),
+    emptyObjectsContainer: new gd.ObjectsContainer(
+      objectsContainerSourceType.Unknown
+    ),
   };
 };

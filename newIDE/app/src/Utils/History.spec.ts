@@ -1,4 +1,3 @@
-// @flow
 import {
   getHistoryInitialState,
   canRedo,
@@ -10,7 +9,7 @@ import {
   type HistoryState,
 } from './History';
 import { makeTestProject } from '../fixtures/TestProject';
-const gd: libGDevelop = global.gd;
+const gd: libGDevelop = (global as any).gd;
 
 describe('History', () => {
   it('retains both undo steps when scene edits are applied in one batch', () => {
@@ -20,12 +19,13 @@ describe('History', () => {
       futureActions: [],
       maxSize: 5,
     };
-    const updates = [10, 20].map(x => (history: HistoryState) =>
-      saveSnapshotToHistory(history, { x }, 'EDIT')
+    const updates = [10, 20].map(
+      (x) => (history: HistoryState) =>
+        saveSnapshotToHistory(history, { x }, 'EDIT')
     );
     const final = updates.reduce((history, update) => update(history), initial);
     expect(
-      final.previousActions.map(action => action.valueBeforeChange.x)
+      final.previousActions.map((action) => action.valueBeforeChange.x)
     ).toEqual([0, 10]);
     expect(final.currentValue.x).toBe(20);
     expect(initial.previousActions).toEqual([]);

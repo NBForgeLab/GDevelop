@@ -1,4 +1,3 @@
-// @flow
 import optionalRequire from './OptionalRequire';
 import YAML from 'yaml';
 import { SafeExtractor } from './SafeExtractor';
@@ -11,27 +10,35 @@ const path = optionalRequire('path');
 
 export type ResourceCustomPropertyType = 'string' | 'boolean' | 'number';
 
-export type ResourceCustomPropertyConfig = {|
-  name: string,
-  label: string,
-  type: ResourceCustomPropertyType,
-  description?: string,
-  resourceKinds?: Array<string>,
-  default?: string | number | boolean,
-|};
-
-export type ParsedProjectSettings = {
-  preferences?: { [string]: boolean | string | number },
-  toolbarButtons?: Array<ToolbarButtonConfig>,
-  shortcuts?: { [string]: string },
-  resourceCustomProperties?: Array<ResourceCustomPropertyConfig>,
+export type ResourceCustomPropertyConfig = {
+  name: string;
+  label: string;
+  type: ResourceCustomPropertyType;
+  description?: string;
+  resourceKinds?: Array<string>;
+  default?: string | number | boolean;
 };
 
-const ALLOWED_RESOURCE_CUSTOM_PROPERTY_TYPES: Array<ResourceCustomPropertyType> = [
-  'string',
-  'boolean',
-  'number',
-];
+export type ParsedProjectSettings = {
+  preferences?: {
+    [key: string]: boolean | string | number;
+  };
+  toolbarButtons?: Array<ToolbarButtonConfig>;
+  shortcuts?: {
+    [key: string]: string;
+  };
+  resourceCustomProperties?: Array<ResourceCustomPropertyConfig>;
+};
+
+const ALLOWED_RESOURCE_CUSTOM_PROPERTY_TYPES: Array<ResourceCustomPropertyType> =
+  ['string', 'boolean', 'number'];
+
+const isResourceCustomPropertyType = (
+  value: string
+): value is ResourceCustomPropertyType =>
+  (ALLOWED_RESOURCE_CUSTOM_PROPERTY_TYPES as ReadonlyArray<string>).includes(
+    value
+  );
 
 // Only allow safe characters in custom property names so they stay clean keys
 // in the resource metadata JSON.
@@ -52,8 +59,10 @@ export const getProjectDirectory = (projectFilePath: string): string | null => {
  * Exported for unit testing; file system is not needed.
  */
 export const parseToolbarButtons = (
-  rawToolbarButtons: Array<mixed>,
-  availableScripts: { [string]: string }
+  rawToolbarButtons: Array<unknown>,
+  availableScripts: {
+    [key: string]: string;
+  }
 ): Array<ToolbarButtonConfig> => {
   const availableHooks: ToolbarButtonHooksNames[] = [
     'onEditorReady',
@@ -89,7 +98,7 @@ export const parseToolbarButtons = (
         icon,
         npmScript,
       };
-      const matchedHook = hook && availableHooks.find(h => h === hook);
+      const matchedHook = hook && availableHooks.find((h) => h === hook);
       if (matchedHook) {
         toolbarButtonConfig.hook = matchedHook;
       }
@@ -113,7 +122,7 @@ export const parseToolbarButtons = (
  * Exported for unit testing; file system is not needed.
  */
 export const parseResourceCustomProperties = (
-  rawResourceCustomProperties: Array<mixed>
+  rawResourceCustomProperties: Array<unknown>
 ): Array<ResourceCustomPropertyConfig> => {
   const resourceCustomProperties: Array<ResourceCustomPropertyConfig> = [];
   const seenNames: Set<string> = new Set();
@@ -134,17 +143,14 @@ export const parseResourceCustomProperties = (
       );
       continue;
     }
-    if (
-      !type ||
-      !ALLOWED_RESOURCE_CUSTOM_PROPERTY_TYPES.includes((type: any))
-    ) {
+    if (!type || !isResourceCustomPropertyType(type)) {
       console.warn(
-        `[ProjectSettingsReader] Skipping resource custom property "${name}": invalid type "${type ||
-          ''}".`
+        `[ProjectSettingsReader] Skipping resource custom property "${name}": invalid type "${
+          type || ''
+        }".`
       );
       continue;
     }
-    // $FlowFixMe[incompatible-type] - type is checked against the allowed list above.
     const customPropertyType: ResourceCustomPropertyType = type;
 
     const label =
@@ -165,9 +171,10 @@ export const parseResourceCustomProperties = (
       'resourceKinds'
     );
     if (rawResourceKinds) {
-      const resourceKinds = rawResourceKinds
-        .map(rawKind => (typeof rawKind === 'string' ? rawKind : null))
-        .filter(Boolean);
+      const resourceKinds = rawResourceKinds.filter(
+        (rawKind): rawKind is string =>
+          typeof rawKind === 'string' && Boolean(rawKind)
+      );
       if (resourceKinds.length > 0) config.resourceKinds = resourceKinds;
     }
 
@@ -182,7 +189,7 @@ export const parseResourceCustomProperties = (
         `[ProjectSettingsReader] Duplicate resource custom property "${name}": the last definition wins.`
       );
       const existingIndex = resourceCustomProperties.findIndex(
-        customProperty => customProperty.name === name
+        (customProperty) => customProperty.name === name
       );
       if (existingIndex !== -1)
         resourceCustomProperties.splice(existingIndex, 1);
@@ -233,7 +240,9 @@ export const readProjectSettings = async (
       parsed,
       'preferences'
     );
-    const preferences: { [string]: boolean | string | number } = {};
+    const preferences: {
+      [key: string]: boolean | string | number;
+    } = {};
     if (rawPreferences) {
       for (const key of Object.keys(rawPreferences)) {
         const value = SafeExtractor.extractNumberOrStringOrBooleanProperty(
@@ -255,7 +264,9 @@ export const readProjectSettings = async (
 
     if (rawToolbarButtons && rawToolbarButtons.length > 0) {
       const packageJsonPath = path.join(projectDirectory, 'package.json');
-      let availableScripts: { [string]: string } = {};
+      let availableScripts: {
+        [key: string]: string;
+      } = {};
 
       try {
         const packageJsonContent = await fsPromises.readFile(packageJsonPath, {
@@ -283,7 +294,9 @@ export const readProjectSettings = async (
       parsed,
       'shortcuts'
     );
-    const shortcuts: { [string]: string } = {};
+    const shortcuts: {
+      [key: string]: string;
+    } = {};
     if (rawShortcuts) {
       for (const key of Object.keys(rawShortcuts)) {
         const value = SafeExtractor.extractStringProperty(rawShortcuts, key);
@@ -327,10 +340,9 @@ export const readProjectSettings = async (
     }
     return result;
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.error(
-      `[ProjectSettingsReader] Error reading gdevelop-settings.yaml: ${
-        error.message
-      }`
+      `[ProjectSettingsReader] Error reading gdevelop-settings.yaml: ${errorMessage}`
     );
     return null;
   }

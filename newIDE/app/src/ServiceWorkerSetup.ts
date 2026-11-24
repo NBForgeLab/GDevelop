@@ -1,10 +1,8 @@
-// @flow
 import optionalRequire from './Utils/OptionalRequire';
 import { isNativeMobileApp } from './Utils/Platform';
 import { getPublicUrl } from './Utils/BuildEnv';
 
 const PUBLIC_URL: string = getPublicUrl();
-// $FlowFixMe[cannot-resolve-name]
 const isDev = process.env.NODE_ENV !== 'production';
 
 const electron = optionalRequire('electron');
@@ -36,7 +34,7 @@ export function registerServiceWorker() {
 
     serviceWorker
       .register(swUrl)
-      .then(registration => {
+      .then((registration) => {
         registration.onupdatefound = () => {
           const installingWorker = registration.installing;
           if (installingWorker == null) {
@@ -62,7 +60,7 @@ export function registerServiceWorker() {
           };
         };
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Error during service worker registration:', error);
       });
 
@@ -73,7 +71,7 @@ export function registerServiceWorker() {
       // In development, the Date.now() cache-buster in the SW URL already ensures a fresh
       // script on every load — calling update() on top of it causes a Firefox error because
       // the ready registration's scriptURL no longer matches the newly registered URL.
-      serviceWorker.ready.then(registration => {
+      serviceWorker.ready.then((registration) => {
         registration.update();
       });
     }

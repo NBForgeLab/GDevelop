@@ -1,4 +1,3 @@
-// @flow
 import {
   filterAllowedPreferences,
   applyProjectPreferences,
@@ -78,14 +77,12 @@ preferences:
       });
 
       // Step 4: Apply to preferences via setMultipleValues
-      // $FlowFixMe[underconstrained-implicit-instantiation]
       const mockSetMultipleValues = jest.fn();
-      // $FlowFixMe[underconstrained-implicit-instantiation]
       const mockSetShortcutForCommand = jest.fn();
-      // $FlowFixMe[incompatible-type] - partial mock
+      // partial mock
       const mockPreferences: Preferences = {
-        // $FlowFixMe[incompatible-type] - partial mock
-        values: {},
+        values: { hiddenAlertMessages: {} },
+        showAlertMessage: jest.fn(),
         setMultipleValues: mockSetMultipleValues,
         setShortcutForCommand: mockSetShortcutForCommand,
       };
@@ -107,14 +104,12 @@ preferences:
     });
 
     test('shortcuts from gdevelop-settings.yaml are properly applied to preferences', () => {
-      // $FlowFixMe[underconstrained-implicit-instantiation]
       const mockSetMultipleValues = jest.fn();
-      // $FlowFixMe[underconstrained-implicit-instantiation]
       const mockSetShortcutForCommand = jest.fn();
-      // $FlowFixMe[incompatible-type] - partial mock
+      // partial mock
       const mockPreferences: Preferences = {
-        // $FlowFixMe[incompatible-type] - partial mock
-        values: {},
+        values: { hiddenAlertMessages: {} },
+        showAlertMessage: jest.fn(),
         setMultipleValues: mockSetMultipleValues,
         setShortcutForCommand: mockSetShortcutForCommand,
       };
@@ -179,8 +174,7 @@ preferences:
     };
 
     test('parses a button without a hook (backward-compatible)', () => {
-      // $FlowFixMe[incompatible-call] - test array is a subtype of Array<mixed>
-      const raw = ([{ name: 'Lint', icon: '🔍', npmScript: 'lint' }]: any);
+      const raw = [{ name: 'Lint', icon: '🔍', npmScript: 'lint' }];
       const result = parseToolbarButtons(raw, availableScripts);
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({
@@ -192,22 +186,20 @@ preferences:
     });
 
     test('parses a button with a valid hook', () => {
-      // $FlowFixMe[incompatible-call]
-      const raw = ([
+      const raw = [
         { name: 'Lint', icon: '🔍', npmScript: 'lint', hook: 'onPreviewStart' },
-      ]: any);
+      ];
       const result = parseToolbarButtons(raw, availableScripts);
       expect(result).toHaveLength(1);
       expect(result[0].hook).toBe('onPreviewStart');
     });
 
     test('parses all supported hook names', () => {
-      // $FlowFixMe[incompatible-call]
-      const raw = ([
+      const raw = [
         { name: 'A', icon: '1', npmScript: 'lint', hook: 'onEditorReady' },
         { name: 'B', icon: '2', npmScript: 'build', hook: 'onPreviewStart' },
         { name: 'C', icon: '3', npmScript: 'test', hook: 'onPreviewEnd' },
-      ]: any);
+      ];
       const result = parseToolbarButtons(raw, availableScripts);
       expect(result).toHaveLength(3);
       expect(result[0].hook).toBe('onEditorReady');
@@ -217,10 +209,9 @@ preferences:
 
     test('ignores an invalid hook name (logs warning, no hook field set)', () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-      // $FlowFixMe[incompatible-call]
-      const raw = ([
+      const raw = [
         { name: 'Lint', icon: '🔍', npmScript: 'lint', hook: 'onInvalidHook' },
-      ]: any);
+      ];
       const result = parseToolbarButtons(raw, availableScripts);
       expect(result).toHaveLength(1);
       expect(result[0].hook).toBeUndefined();
@@ -229,10 +220,7 @@ preferences:
 
     test('skips a button whose npmScript is not in package.json', () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-      // $FlowFixMe[incompatible-call]
-      const raw = ([
-        { name: 'Missing', icon: '❌', npmScript: 'nonexistent' },
-      ]: any);
+      const raw = [{ name: 'Missing', icon: '❌', npmScript: 'nonexistent' }];
       const result = parseToolbarButtons(raw, availableScripts);
       expect(result).toHaveLength(0);
       expect(warnSpy).toHaveBeenCalledWith(
@@ -245,10 +233,7 @@ preferences:
 
     test('skips a button with an unsafe script name', () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-      // $FlowFixMe[incompatible-call]
-      const raw = ([
-        { name: 'Dangerous', icon: '⚠️', npmScript: 'rm -rf /' },
-      ]: any);
+      const raw = [{ name: 'Dangerous', icon: '⚠️', npmScript: 'rm -rf /' }];
       const result = parseToolbarButtons(raw, {});
       expect(result).toHaveLength(0);
       expect(warnSpy).toHaveBeenCalledWith(
@@ -258,19 +243,17 @@ preferences:
     });
 
     test('skips buttons with missing required fields', () => {
-      // $FlowFixMe[incompatible-call]
-      const raw = ([
+      const raw = [
         { icon: '🔍', npmScript: 'lint' },
         { name: 'No Icon', npmScript: 'lint' },
         { name: 'No Script', icon: '🔍' },
-      ]: any);
+      ];
       const result = parseToolbarButtons(raw, availableScripts);
       expect(result).toHaveLength(0);
     });
 
     test('returns empty array when no scripts available (no package.json)', () => {
-      // $FlowFixMe[incompatible-call]
-      const raw = ([{ name: 'Lint', icon: '🔍', npmScript: 'lint' }]: any);
+      const raw = [{ name: 'Lint', icon: '🔍', npmScript: 'lint' }];
       const result = parseToolbarButtons(raw, {});
       expect(result).toHaveLength(0);
     });
@@ -278,12 +261,11 @@ preferences:
 
   describe('parseResourceCustomProperties', () => {
     test('parses string, number and boolean properties', () => {
-      // $FlowFixMe[incompatible-call]
-      const raw = ([
+      const raw = [
         { name: 'packTag', label: 'Packing tag', type: 'string' },
         { name: 'customScale', type: 'number', resourceKinds: ['image'] },
         { name: 'noResize', label: 'Do not resize', type: 'boolean' },
-      ]: any);
+      ];
       const result = parseResourceCustomProperties(raw);
       expect(result).toEqual([
         { name: 'packTag', label: 'Packing tag', type: 'string' },
@@ -298,8 +280,7 @@ preferences:
     });
 
     test('parses no-atlas, no-resize and scale-multiplier properties', () => {
-      // $FlowFixMe[incompatible-call]
-      const raw = ([
+      const raw = [
         { name: 'no-atlas', label: 'No atlas', type: 'boolean' },
         { name: 'no-resize', label: 'No resize', type: 'boolean' },
         {
@@ -308,7 +289,7 @@ preferences:
           type: 'number',
           resourceKinds: ['image'],
         },
-      ]: any);
+      ];
       const result = parseResourceCustomProperties(raw);
       expect(result).toEqual([
         { name: 'no-atlas', label: 'No atlas', type: 'boolean' },
@@ -323,8 +304,7 @@ preferences:
     });
 
     test('parses a property with a default value', () => {
-      // $FlowFixMe[incompatible-call]
-      const raw = ([
+      const raw = [
         {
           name: 'scale-multiplier',
           label: 'Scale multiplier',
@@ -332,7 +312,7 @@ preferences:
           resourceKinds: ['image'],
           default: 0.5,
         },
-      ]: any);
+      ];
       const result = parseResourceCustomProperties(raw);
       expect(result).toEqual([
         {
@@ -347,16 +327,14 @@ preferences:
 
     test('skips a property without a name', () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-      // $FlowFixMe[incompatible-call]
-      const raw = ([{ label: 'No name', type: 'string' }]: any);
+      const raw = [{ label: 'No name', type: 'string' }];
       expect(parseResourceCustomProperties(raw)).toHaveLength(0);
       warnSpy.mockRestore();
     });
 
     test('skips a property with an invalid type', () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-      // $FlowFixMe[incompatible-call]
-      const raw = ([{ name: 'weird', type: 'object' }]: any);
+      const raw = [{ name: 'weird', type: 'object' }];
       expect(parseResourceCustomProperties(raw)).toHaveLength(0);
       expect(warnSpy).toHaveBeenCalledWith(
         expect.stringContaining('invalid type "object"')
@@ -366,19 +344,17 @@ preferences:
 
     test('skips a property with an unsafe name', () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-      // $FlowFixMe[incompatible-call]
-      const raw = ([{ name: 'bad name!', type: 'string' }]: any);
+      const raw = [{ name: 'bad name!', type: 'string' }];
       expect(parseResourceCustomProperties(raw)).toHaveLength(0);
       warnSpy.mockRestore();
     });
 
     test('deduplicates by name, last definition wins', () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-      // $FlowFixMe[incompatible-call]
-      const raw = ([
+      const raw = [
         { name: 'tag', label: 'First', type: 'string' },
         { name: 'tag', label: 'Second', type: 'number' },
-      ]: any);
+      ];
       const result = parseResourceCustomProperties(raw);
       expect(result).toEqual([
         { name: 'tag', label: 'Second', type: 'number' },

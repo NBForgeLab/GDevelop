@@ -1,4 +1,3 @@
-// @flow
 export const selectableArea = 'selectable';
 export const selectedArea = 'selected';
 // On touch screens, the instruction held by the finger, ready to be dragged.

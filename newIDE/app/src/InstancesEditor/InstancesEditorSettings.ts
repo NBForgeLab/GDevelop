@@ -1,33 +1,27 @@
-// @flow
 import { rgbToHexNumber } from '../Utils/ColorTransformer';
 
-export type InstancesEditorSettings = {|
+export type InstancesEditorSettings = {
   /** Is grid shown? */
-  grid: boolean,
-  gridType: 'isometric' | 'rectangular',
-  gridWidth: number,
-  gridHeight: number,
-  gridDepth: number,
-  gridOffsetX: number,
-  gridOffsetY: number,
-  gridOffsetZ: number,
-  gridColor: number,
-  gridAlpha: number,
-
+  grid: boolean;
+  gridType: 'isometric' | 'rectangular';
+  gridWidth: number;
+  gridHeight: number;
+  gridDepth: number;
+  gridOffsetX: number;
+  gridOffsetY: number;
+  gridOffsetZ: number;
+  gridColor: number;
+  gridAlpha: number;
   /** Is snap to grid activated? */
-  snap: boolean,
-
+  snap: boolean;
   /** The zoom of the editor, 1 by default. */
-  zoomFactor: number,
-
+  zoomFactor: number;
   /** Is the window mask shown? */
-  windowMask: boolean,
-
+  windowMask: boolean;
   /** The name of the layer selected to place instances on. */
-  selectedLayer: string,
-
-  gameEditorMode: 'embedded-game' | 'instances-editor',
-|};
+  selectedLayer: string;
+  gameEditorMode: 'embedded-game' | 'instances-editor';
+};
 
 export const getRecommendedInitialZoomFactor = (
   largestSizeInPixels: number
@@ -71,21 +65,21 @@ export const prepareInstancesEditorSettings = (
 export const cloneInstancesEditorSettings = (
   instancesEditorSettings: InstancesEditorSettings
 ): {
-  gameEditorMode: 'embedded-game' | 'instances-editor',
-  grid: boolean,
-  gridAlpha: number,
-  gridColor: number,
-  gridDepth: number,
-  gridHeight: number,
-  gridOffsetX: number,
-  gridOffsetY: number,
-  gridOffsetZ: number,
-  gridType: 'isometric' | 'rectangular',
-  gridWidth: number,
-  selectedLayer: string,
-  snap: boolean,
-  windowMask: boolean,
-  zoomFactor: number,
+  gameEditorMode: 'embedded-game' | 'instances-editor';
+  grid: boolean;
+  gridAlpha: number;
+  gridColor: number;
+  gridDepth: number;
+  gridHeight: number;
+  gridOffsetX: number;
+  gridOffsetY: number;
+  gridOffsetZ: number;
+  gridType: 'isometric' | 'rectangular';
+  gridWidth: number;
+  selectedLayer: string;
+  snap: boolean;
+  windowMask: boolean;
+  zoomFactor: number;
 } => {
   return { ...instancesEditorSettings };
 };

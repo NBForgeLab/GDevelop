@@ -1,14 +1,15 @@
-// @flow
 import {
   type Preferences,
-  type ProjectSpecificPreferencesValues,
+  type PreferencesValues,
 } from '../MainFrame/Preferences/PreferencesContext';
 import { type CommandName } from '../CommandPalette/CommandsList';
 import { type ParsedProjectSettings } from './ProjectSettingsReader';
 
+type ProjectSpecificPreferencesValues = Partial<PreferencesValues>;
+
 /** Allowlist of preference keys that can be overridden per-project. */
-const allowedPreferenceKeys: $ReadOnlyArray<
-  $Keys<ProjectSpecificPreferencesValues>
+const allowedPreferenceKeys: ReadonlyArray<
+  Extract<keyof ProjectSpecificPreferencesValues, string>
 > = [
   'language',
   'autoDownloadUpdates',
@@ -58,7 +59,7 @@ const allowedPreferences: Set<string> = new Set(allowedPreferenceKeys);
  * Filters parsed preferences to only include allowed keys.
  */
 export const filterAllowedPreferences = (parsedPreferences: {
-  [string]: boolean | string | number,
+  [key: string]: boolean | string | number;
 }): ProjectSpecificPreferencesValues => {
   const filtered: ProjectSpecificPreferencesValues = {};
 
@@ -99,15 +100,15 @@ export const applyProjectPreferences = (
   if (rawPreferences) {
     const filtered = filterAllowedPreferences(rawPreferences);
     if (
-      // $FlowFixMe[method-unbinding]
       Object.prototype.hasOwnProperty.call(
         filtered,
         'showDeprecatedInstructionWarning'
       )
     ) {
-      filtered.showDeprecatedInstructionWarning = normalizeDeprecatedInstructionWarning(
-        filtered.showDeprecatedInstructionWarning
-      );
+      filtered.showDeprecatedInstructionWarning =
+        normalizeDeprecatedInstructionWarning(
+          filtered.showDeprecatedInstructionWarning
+        );
     }
     preferences.setMultipleValues(filtered);
   }
@@ -115,8 +116,7 @@ export const applyProjectPreferences = (
   if (parsedProjectSettings.shortcuts) {
     const shortcuts = parsedProjectSettings.shortcuts;
     for (const key of Object.keys(shortcuts)) {
-      // $FlowFixMe[incompatible-call]
-      const commandName: CommandName = (key: any);
+      const commandName = key as CommandName;
       preferences.setShortcutForCommand(commandName, shortcuts[key]);
     }
   }

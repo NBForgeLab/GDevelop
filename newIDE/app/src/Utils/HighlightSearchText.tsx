@@ -1,10 +1,9 @@
-// @flow
 import * as React from 'react';
 import { mapVector } from '../Utils/MapFor';
 import classNames from 'classnames';
 import { instructionParameter } from '../EventsSheet/EventsTree/ClassNames';
 
-const gd: libGDevelop = global.gd;
+const gd: libGDevelop = (global as any).gd;
 
 const GLOBAL_SEARCH_MATCH_CLASS_NAME = 'global-search-text-match';
 
@@ -15,26 +14,30 @@ const GLOBAL_SEARCH_MATCH_CLASS_NAME = 'global-search-text-match';
 export const escapeRegExpForSearch = (text: string): string =>
   text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-type HighlightSpanProps = {|
-  className?: string,
-  style?: { +[key: string]: string | number },
-  matchCase?: boolean,
-|};
+type HighlightSpanProps = {
+  className?: string;
+  style?: {
+    readonly [key: string]: string | number;
+  };
+  matchCase?: boolean;
+};
 
 export type TextStyle = {
-  startIndex: number,
-  endIndex: number,
+  startIndex: number;
+  endIndex: number;
   props: {
-    className?: string,
-    style?: { +[key: string]: string | number },
-  },
-  key: string,
-  children?: Array<TextStyle>,
+    className?: string;
+    style?: {
+      readonly [key: string]: string | number;
+    };
+  };
+  key: string;
+  children?: Array<TextStyle>;
 };
 
 export const getHighlightSearchTextParts = (
   text: string,
-  searchText: ?string,
+  searchText: string | null | undefined,
   spanProps?: HighlightSpanProps
 ): Array<TextStyle> => {
   const query = searchText ? searchText.trim() : '';
@@ -46,8 +49,10 @@ export const getHighlightSearchTextParts = (
 
   const { matchCase: _matchCase, ...spanPropsForDom } = spanProps || {};
   const props: {
-    className?: string,
-    style?: { +[key: string]: string | number },
+    className?: string;
+    style?: {
+      readonly [key: string]: string | number;
+    };
   } =
     spanProps && (spanProps.className != null || spanProps.style != null)
       ? spanPropsForDom
@@ -87,7 +92,7 @@ export const getHighlightSearchTextParts = (
 export const renderStylizedText = (
   text: string,
   parts: Array<TextStyle>
-): React.Node => {
+): React.ReactNode => {
   if (parts.length === 0) {
     return text;
   }
@@ -152,9 +157,9 @@ export const mergeStylizedText = (
  */
 export const highlightSearchText = (
   text: string,
-  searchText: ?string,
+  searchText: string | null | undefined,
   spanProps?: HighlightSpanProps
-): React.Node => {
+): React.ReactNode => {
   const parts = getHighlightSearchTextParts(text, searchText, spanProps);
   if (parts.length === 0) {
     return text;
@@ -168,20 +173,22 @@ export const highlightSearchText = (
 const getColorationName = (
   colorationKind: ExpressionColorationDescription_ColorationKind
 ) => {
+  const colorationKindEnum =
+    gd.ExpressionColorationDescription as unknown as typeof gd.ExpressionColorationDescription_ColorationKind;
   switch (colorationKind) {
-    case gd.ExpressionColorationDescription.Number:
+    case colorationKindEnum.Number:
       return 'number';
 
-    case gd.ExpressionColorationDescription.Object:
+    case colorationKindEnum.Object:
       return 'objectInExpression';
 
-    case gd.ExpressionColorationDescription.Variable:
+    case colorationKindEnum.Variable:
       return 'variable';
 
-    case gd.ExpressionColorationDescription.Operator:
+    case colorationKindEnum.Operator:
       return 'operator';
 
-    case gd.ExpressionColorationDescription.String:
+    case colorationKindEnum.String:
     default:
       return 'string';
   }
@@ -194,21 +201,22 @@ export const applySyntaxColoring = ({
   rootType,
   rootNode,
 }: {
-  text: string,
-  platform: gdPlatform,
-  projectScopedContainers: gdProjectScopedContainers,
-  rootType: string,
-  rootNode: gdExpressionNode,
+  text: string;
+  platform: gdPlatform;
+  projectScopedContainers: gdProjectScopedContainers;
+  rootType: string;
+  rootNode: gdExpressionNode;
 }): Array<TextStyle> => {
-  const colorationDescriptions = gd.ExpressionSyntaxColoringHelper.getColorationDescriptionsFor(
-    platform,
-    projectScopedContainers,
-    rootType,
-    rootNode
-  );
+  const colorationDescriptions =
+    gd.ExpressionSyntaxColoringHelper.getColorationDescriptionsFor(
+      platform,
+      projectScopedContainers,
+      rootType,
+      rootNode
+    );
   let nextCharacterIndex = 0;
   const coloredTextParts: Array<TextStyle> = [];
-  mapVector(colorationDescriptions, colorationDescription => {
+  mapVector(colorationDescriptions, (colorationDescription) => {
     const startPosition = colorationDescription.getStartPosition();
     if (startPosition > nextCharacterIndex) {
       coloredTextParts.push({
@@ -226,7 +234,6 @@ export const applySyntaxColoring = ({
       props: {
         className: classNames({
           [instructionParameter]: true,
-          //$FlowFixMe[invalid-computed-prop]
           [getColorationName(colorationDescription.getColorationKind())]: true,
         }),
       },

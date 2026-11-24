@@ -1,0 +1,38 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+import { type MessageDescriptor } from './i18n/MessageDescriptor.flow';
+import { type ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+import { type CubicBezierPoints } from './Easings';
+
+declare export var getQuotedStringLiteralOrNull: (value: string) => ?string;
+declare export var canUseNamedEasings: (parameterMetadata: ?gdParameterMetadata) => boolean;
+declare export var getNamedEasingsContainerFromAccessor: (projectScopedContainersAccessor: ?ProjectScopedContainersAccessor) => ?gdNamedEasingsContainer;
+declare export var getNamedEasingNames: (container: ?gdNamedEasingsContainer) => Array<string>;
+declare export var getNamedEasingPointsOrNull: (container: ?gdNamedEasingsContainer, name: string) => ?CubicBezierPoints;
+declare export var getNamedEasingPointsByName: (container: ?gdNamedEasingsContainer) => { [string]: CubicBezierPoints };
+declare export var getEasingChoicesWithNamedEasings: (builtInChoices: Array<string>, namedEasingNames: Array<string>) => Array<string>;
+declare export var getEasingPreviewIdentifier: (easingName: string, namedEasingPointsByName: { [string]: CubicBezierPoints }) => string;
+declare export var findNamedEasingNameWithSamePoints: (points: CubicBezierPoints, namedEasingPointsByName: { [string]: CubicBezierPoints }, ignoredName?: string) => ?string;
+declare export var validateNamedEasingName: (name: string, arg1: {| existingNames: Array<string>, ignoredName?: string |}) => ?MessageDescriptor;
+declare export var getUnknownEasingWarning: (value: string, namedEasingNames: Array<string>) => ?MessageDescriptor;
+declare export var insertNamedEasing: (arg0: {|
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  name: string,
+  points: CubicBezierPoints,
+  onChange: string => void,
+  triggerUnsavedChanges: () => void,
+|}) => void;
+declare export var applyNamedEasingDefinition: (arg0: {|
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  oldName: string,
+  newName: string,
+  points: CubicBezierPoints,
+  currentValue: string,
+  onChange: string => void,
+  triggerUnsavedChanges: () => void,
+|}) => void;
+declare export var deleteNamedEasing: (arg0: {|
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  name: string,
+  triggerUnsavedChanges: () => void,
+|}) => void;

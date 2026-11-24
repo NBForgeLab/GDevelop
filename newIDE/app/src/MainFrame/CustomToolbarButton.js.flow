@@ -1,0 +1,22 @@
+// @flow
+// @flow-transitional-stub [Phase 1]
+import * as React from 'react';
+
+type Props = {|
+  name: string,
+  icon: string,
+  onClick: () => void,
+|};
+
+export type ToolbarButtonHooksNames =
+  | 'onEditorReady'
+  | 'onPreviewStart'
+  | 'onPreviewEnd';
+export type ToolbarButtonConfig = {|
+  name: string,
+  icon: string,
+  npmScript: string,
+  hook?: ToolbarButtonHooksNames,
+  keepTerminalOpen?: boolean,
+|};
+declare export default React.ComponentType<Props>;

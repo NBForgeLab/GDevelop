@@ -1,11 +1,9 @@
-// @flow
-
 import { type InstancesEditorSettings } from '../InstancesEditor/InstancesEditorSettings';
 
 export const roundPositionsToGrid = (
   pos: [number, number],
   instancesEditorSettings: InstancesEditorSettings,
-  noGridSnap?: boolean = false
+  noGridSnap: boolean = false
 ): [number, number] => {
   const newPos = pos;
 
