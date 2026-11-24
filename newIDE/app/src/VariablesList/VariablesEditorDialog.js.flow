@@ -1,0 +1,49 @@
+// @flow
+// @flow-transitional-stub [Phase 3]
+import * as React from 'react';
+import { type HotReloadPreviewButtonProps } from '../HotReload/HotReloadPreviewButton';
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+
+type TabProps = {
+  id: string,
+  label: React.Node,
+  variablesContainer: gdVariablesContainer,
+  inheritedVariablesContainer?: gdVariablesContainer,
+  loopIndexVariableName?: string,
+  onRenameLoopIndexVariable?: (newName: string) => void,
+  onRemoveLoopIndexVariable?: () => void,
+  emptyPlaceholderTitle?: React.Node,
+  emptyPlaceholderDescription?: React.Node,
+  /**
+   * Deprecated - will be removed once we don't want to display completions
+   * for variables not declared but still used in events.
+   */
+  onComputeAllVariableNames: () => Array<string>,
+};
+type Props = {|
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  onCancel: () => void,
+  onApply: (selectedVariableName: string | null) => void,
+  open: boolean,
+  onEditObjectVariables?: () => void,
+  title: React.Node,
+  tabs: Array<TabProps>,
+  objectName?: ?string,
+  initialInstances?: ?gdInitialInstancesContainer,
+  initiallyOpenTabId?: string,
+  initiallySelectedVariable: VariableDialogOpeningProps | null,
+  isListLocked: boolean,
+
+  project: gdProject,
+  hotReloadPreviewButtonProps: HotReloadPreviewButtonProps | null,
+
+  helpPagePath: ?string,
+  id?: string,
+|};
+
+export type VariableDialogOpeningProps = {
+  variableName: string,
+  shouldCreate: boolean,
+  variableType: 'number' | 'string' | 'boolean' | null,
+};
+declare export default React.ComponentType<Props>;

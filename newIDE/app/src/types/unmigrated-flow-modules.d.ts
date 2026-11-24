@@ -56,10 +56,6 @@ declare module '*/ResourcesList' {
   const content: any;
   export default content;
 }
-declare module '*/VariablesList' {
-  const content: any;
-  export default content;
-}
 declare module '*/PropertiesEditor' {
   const content: any;
   export default content;
@@ -207,4 +203,128 @@ declare module 'react-window' {
   export const FixedSizeList: React.ComponentType<any>;
   export const VariableSizeList: React.ComponentType<any>;
   export function areEqual(prevProps: any, nextProps: any): boolean;
+}
+declare module 'three' {
+  export class Object3D {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class Group extends Object3D {}
+  export class Mesh extends Object3D {}
+  export class Scene extends Object3D {}
+  export class PerspectiveCamera extends Object3D {}
+  export class OrthographicCamera extends Object3D {}
+  export class HemisphereLight extends Object3D {}
+  export class DirectionalLight extends Object3D {}
+  export class AmbientLight extends Object3D {}
+  export class LineSegments extends Object3D {}
+  export class Box3 {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class BoxGeometry {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class PlaneGeometry {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class CylinderGeometry {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class SphereGeometry {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class EdgesGeometry {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class BufferAttribute {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class Color {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class Vector2 {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class Vector3 {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class Euler {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class Quaternion {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class Matrix4 {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class Raycaster {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class Plane {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class Sphere {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class LoadingManager {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class Material {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class MeshBasicMaterial extends Material {}
+  export class MeshStandardMaterial extends Material {}
+  export class LineBasicMaterial extends Material {}
+  export class Texture {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export class CanvasTexture extends Texture {}
+  export class WebGLRenderer {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+  export const DoubleSide: number;
+  export const FrontSide: number;
+  export const LinearFilter: number;
+  export const NearestFilter: number;
+  export const RepeatWrapping: number;
+  export const ClampToEdgeWrapping: number;
+  export const SRGBColorSpace: string;
+  export const THREE_ADDONS: any;
+  export const MathUtils: Record<string, any>;
+}
+declare module 'three/examples/jsm/utils/SkeletonUtils' {
+  export function clone(source: any): any;
+}
+declare module 'three/examples/jsm/loaders/GLTFLoader' {
+  export type GLTF = any;
+  export class GLTFLoader {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
+}
+declare module 'three/examples/jsm/loaders/DRACOLoader' {
+  export class DRACOLoader {
+    [key: string]: any;
+    constructor(...args: any[]);
+  }
 }

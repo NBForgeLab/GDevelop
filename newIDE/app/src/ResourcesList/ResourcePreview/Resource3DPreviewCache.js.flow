@@ -1,0 +1,9 @@
+// @flow
+// @flow-transitional-stub
+
+declare export var getCachedResource3DPreview: (url: string) => ?string;
+declare export var setCachedResource3DPreview: (url: string, preview: string) => void;
+declare export var burstResource3DPreviewCache: () => void;
+declare export var setResource3DPreviewRequester: (requester: ?(url: string) => Promise<?string>) => void;
+declare export var subscribeToResource3DPreviewRendered: (listener: () => void) => (() => void);
+declare export var getResource3DPreviewOrRequest: (url: string) => ?string;

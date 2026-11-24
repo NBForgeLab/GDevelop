@@ -1,0 +1,24 @@
+// @flow
+// @flow-transitional-stub [Phase 3]
+import * as React from 'react';
+import { type HotReloadPreviewButtonProps } from '../HotReload/HotReloadPreviewButton';
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+
+type Props = {|
+  project: gdProject,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  globalObjectsContainer: gdObjectsContainer | null,
+  objectsContainer: gdObjectsContainer,
+  initialInstances: gdInitialInstancesContainer | null,
+  objectGroup: gdObjectGroup,
+  onCancel: () => void,
+  onApply: (selectedVariableName: string | null) => void,
+  open: boolean,
+  initiallySelectedVariableName?: string,
+  shouldCreateInitiallySelectedVariable?: boolean,
+  hotReloadPreviewButtonProps?: ?HotReloadPreviewButtonProps,
+  onComputeAllVariableNames: () => Array<string>,
+  isListLocked: boolean,
+|};
+
+declare export default React.ComponentType<Props>;

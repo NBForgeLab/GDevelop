@@ -1,0 +1,395 @@
+import { mapFor } from '../Utils/MapFor';
+import { normalizeString } from '../Utils/Search';
+import { exceptionallyGuardAgainstDeadObject } from '../Utils/IsNullPtr';
+
+const gd: libGDevelop = (global as any).gd;
+
+// Resolve `gd.Variable` lazily at call time because `global.gd` is populated asynchronously.
+const getGdVariable = () =>
+  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
+
+type MovementType =
+  | 'ArrayToTopLevel'
+  | 'FromArrayToAnotherArray'
+  | 'FromArrayToStructure'
+  | 'FromStructureToAnotherStructure'
+  | 'FromStructureToArray'
+  | 'InsideSameArray'
+  | 'InsideSameStructure'
+  | 'InsideTopLevel'
+  | 'StructureToTopLevel'
+  | 'TopLevelToStructure'
+  | 'TopLevelToArray';
+
+type VariableLineage = Array<{
+  nodeId: string;
+  name: string;
+  variable: gdVariable;
+}>;
+
+type VariableContext = {
+  variable: gdVariable | null;
+  lineage: VariableLineage;
+  depth: number;
+  name: string | null;
+};
+
+export const inheritedPrefix = '$!';
+export const separator = '$.$';
+
+export const removeInheritedPrefix = (str: string): string =>
+  str.slice(inheritedPrefix.length, str.length);
+
+export const getDirectParentVariable = (
+  lineage: VariableLineage
+): gdVariable | null =>
+  lineage[lineage.length - 1] ? lineage[lineage.length - 1].variable : null;
+export const getDirectParentNodeId = (
+  lineage: VariableLineage
+): string | null =>
+  lineage[lineage.length - 1] ? lineage[lineage.length - 1].nodeId : null;
+export const getOldestAncestryVariable = (
+  lineage: VariableLineage
+): {
+  name: string;
+  nodeId: string;
+  variable: gdVariable;
+} | null => (lineage.length ? lineage[0] : null);
+
+export const isAnAncestryOf = (
+  variable: gdVariable,
+  lineage: VariableLineage
+): boolean => {
+  const lineageVariables = lineage.map((context) => context.variable);
+  return lineageVariables.includes(variable);
+};
+
+/**
+ * Brackets accessors are not handled, only the path elements before it are
+ * converted.
+ */
+export const getNodeIdFromVariableName = (variableName: string): string => {
+  const bracketIndex = variableName.indexOf('[');
+  const knownVariablePart =
+    bracketIndex < 0 ? variableName : variableName.substring(0, bracketIndex);
+  return knownVariablePart.replace(/\./g, '$$.$$');
+};
+
+export const getNodeIdFromVariableContext = (
+  variableContext: VariableContext
+): string | null => {
+  const variableName = variableContext.name;
+  if (!variableName) {
+    return null;
+  }
+  const parentPart = variableContext.lineage
+    .map(({ name }) => name)
+    .join(separator);
+  return (parentPart ? parentPart + separator : '') + variableName;
+};
+
+export const getVariableContextFromNodeId = (
+  nodeId: string,
+  variablesContainer: gdVariablesContainer
+): VariableContext => {
+  if (!exceptionallyGuardAgainstDeadObject(variablesContainer)) {
+    return {
+      variable: null,
+      name: null,
+      depth: 0,
+      lineage: [],
+    };
+  }
+  const bits = nodeId.split(separator);
+  let parentVariable: gdVariable | null = null;
+  let currentVariable: gdVariable | null = null;
+  let currentVariableName: string | null = null;
+  const lineage: VariableLineage = [];
+  const name: string | null = null;
+  let depth = -1;
+
+  while (depth < bits.length - 1) {
+    depth += 1;
+    currentVariableName = bits[depth];
+    if (depth === 0 && currentVariableName.startsWith(inheritedPrefix)) {
+      currentVariableName = removeInheritedPrefix(currentVariableName);
+    }
+    if (!parentVariable) {
+      currentVariable = variablesContainer.has(currentVariableName)
+        ? variablesContainer.get(currentVariableName)
+        : null;
+    } else {
+      if (parentVariable.getType() === getGdVariable().Array) {
+        const index = parseInt(currentVariableName, 10);
+        if (index >= parentVariable.getChildrenCount()) {
+          return { variable: null, lineage, depth, name };
+        }
+        currentVariable = parentVariable.getAtIndex(index);
+      } else {
+        if (!parentVariable.hasChild(currentVariableName)) {
+          return { variable: null, lineage, depth, name };
+        }
+        currentVariable = parentVariable.getChild(currentVariableName);
+      }
+    }
+    if (!currentVariable) {
+      break;
+    }
+    if (depth < bits.length - 1) {
+      lineage.push({
+        nodeId: bits.slice(0, depth + 1).join(separator),
+        name: currentVariableName,
+        variable: currentVariable,
+      });
+    }
+    parentVariable = currentVariable;
+  }
+  return {
+    variable: currentVariable,
+    name: currentVariableName,
+    depth,
+    lineage,
+  };
+};
+
+export const getVariablePathFromNodeId = (
+  nodeId: string,
+  variablesContainer: gdVariablesContainer
+): string => {
+  const variableContext = getVariableContextFromNodeId(
+    nodeId,
+    variablesContainer
+  );
+  const variablePath: Array<string | null> = variableContext.lineage.map(
+    (variable) => variable.name
+  );
+  variablePath.push(variableContext.name);
+  return variablePath.join('.');
+};
+
+export const getParentVariableContext = (
+  variableContext: VariableContext
+): VariableContext => {
+  if (variableContext.lineage.length === 0) {
+    return variableContext;
+  }
+  const parentContext =
+    variableContext.lineage[variableContext.lineage.length - 1];
+  return {
+    variable: parentContext.variable,
+    name: parentContext.name,
+    depth: variableContext.depth - 1,
+    lineage: variableContext.lineage.slice(
+      0,
+      variableContext.lineage.length - 1
+    ),
+  };
+};
+
+export const updateListOfNodesFollowingChangeName = (
+  list: string[],
+  oldNodeId: string,
+  newName: string
+): Array<string> => {
+  const newList: Array<string> = [...list];
+  const indexOfRenamedNode = newList.indexOf(oldNodeId);
+  const indicesOfChildrenOfRenamedNode = newList.map((otherNodeId, index) => {
+    if (otherNodeId.startsWith(`${oldNodeId}${separator}`)) {
+      return index;
+    }
+    return null;
+  });
+  const originalNodeIdBits = oldNodeId.split(separator);
+  const variableName = originalNodeIdBits[originalNodeIdBits.length - 1];
+  [indexOfRenamedNode, ...indicesOfChildrenOfRenamedNode].forEach((index) => {
+    if (index === null || index < 0) return;
+    const nodeIdToChange = newList[index];
+    const bitsToChange = nodeIdToChange.split(separator);
+    bitsToChange[bitsToChange.indexOf(variableName)] = newName;
+    newList.splice(index, 1, bitsToChange.join(separator));
+  });
+  return newList;
+};
+
+export const getMovementTypeWithinVariablesContainer = (
+  draggedVariableContext: VariableContext,
+  targetVariableContext: VariableContext
+): MovementType | null => {
+  const gdVariable = getGdVariable();
+  const { lineage: targetVariableLineage } = targetVariableContext;
+  const targetVariableParentVariable = getDirectParentVariable(
+    targetVariableLineage
+  );
+
+  const { lineage: draggedVariableLineage } = draggedVariableContext;
+  const draggedVariableParentVariable = getDirectParentVariable(
+    draggedVariableLineage
+  );
+
+  if (!!draggedVariableParentVariable && !!targetVariableParentVariable) {
+    if (
+      targetVariableParentVariable.getType() === gdVariable.Structure &&
+      draggedVariableParentVariable.getType() === gdVariable.Structure &&
+      draggedVariableParentVariable !== targetVariableParentVariable
+    )
+      return 'FromStructureToAnotherStructure';
+    if (
+      targetVariableParentVariable.getType() === gdVariable.Structure &&
+      draggedVariableParentVariable === targetVariableParentVariable
+    )
+      return 'InsideSameStructure';
+    if (
+      targetVariableParentVariable.getType() === gdVariable.Array &&
+      draggedVariableParentVariable.getType() === gdVariable.Array &&
+      draggedVariableParentVariable !== targetVariableParentVariable
+    )
+      return 'FromArrayToAnotherArray';
+    if (
+      targetVariableParentVariable.getType() === gdVariable.Array &&
+      draggedVariableParentVariable === targetVariableParentVariable
+    )
+      return 'InsideSameArray';
+    if (
+      targetVariableParentVariable.getType() === gdVariable.Array &&
+      draggedVariableParentVariable.getType() === gdVariable.Structure
+    )
+      return 'FromStructureToArray';
+    if (
+      targetVariableParentVariable.getType() === gdVariable.Structure &&
+      draggedVariableParentVariable.getType() === gdVariable.Array
+    )
+      return 'FromArrayToStructure';
+  }
+
+  if (!draggedVariableParentVariable && !targetVariableParentVariable)
+    return 'InsideTopLevel';
+  if (
+    !draggedVariableParentVariable &&
+    !!targetVariableParentVariable &&
+    targetVariableParentVariable.getType() === gdVariable.Structure
+  )
+    return 'TopLevelToStructure';
+  if (
+    !draggedVariableParentVariable &&
+    !!targetVariableParentVariable &&
+    targetVariableParentVariable.getType() === gdVariable.Array
+  )
+    return 'TopLevelToArray';
+  if (
+    !!draggedVariableParentVariable &&
+    !targetVariableParentVariable &&
+    draggedVariableParentVariable.getType() === gdVariable.Structure
+  )
+    return 'StructureToTopLevel';
+  if (
+    !!draggedVariableParentVariable &&
+    !targetVariableParentVariable &&
+    draggedVariableParentVariable.getType() === gdVariable.Array
+  )
+    return 'ArrayToTopLevel';
+
+  return null;
+};
+
+export const generateListOfNodesMatchingSearchInVariable = ({
+  variable,
+  variableName,
+  nodeId,
+  searchText,
+  acc,
+}: {
+  variable: gdVariable;
+  variableName: string;
+  nodeId: string;
+  searchText: string;
+  acc: Array<string>;
+}): Array<string> => {
+  const gdVariable = getGdVariable();
+  let newAcc: Array<string>;
+  let childrenNodes: Array<string>;
+  switch (variable.getType()) {
+    case gdVariable.Boolean:
+      if (normalizeString(variableName).includes(searchText)) {
+        return [nodeId];
+      }
+      return [];
+    case gdVariable.String:
+      if (
+        normalizeString(variableName).includes(searchText) ||
+        normalizeString(variable.getString()).includes(searchText)
+      ) {
+        return [nodeId];
+      }
+      return [];
+    case gdVariable.Number:
+      if (
+        normalizeString(variableName).includes(searchText) ||
+        variable.getValue().toString().includes(searchText)
+      ) {
+        return [nodeId];
+      }
+      return [];
+    case gdVariable.Array:
+      newAcc = [...acc];
+      if (normalizeString(variableName).includes(searchText)) {
+        newAcc.push(nodeId);
+      }
+      childrenNodes = mapFor(0, variable.getChildrenCount(), (index) => {
+        const childVariable = variable.getAtIndex(index);
+        return generateListOfNodesMatchingSearchInVariable({
+          variable: childVariable,
+          variableName: '',
+          nodeId: `${nodeId}${separator}${index}`,
+          searchText: searchText,
+          acc: newAcc,
+        });
+      }).flat();
+      return [...newAcc, ...childrenNodes];
+    case gdVariable.Structure:
+      newAcc = [...acc];
+      if (normalizeString(variableName).includes(searchText)) {
+        newAcc.push(nodeId);
+      }
+      childrenNodes = variable
+        .getAllChildrenNames()
+        .toJSArray()
+        .map((childName) => {
+          const childVariable = variable.getChild(childName);
+
+          return Array.from(
+            new Set(
+              generateListOfNodesMatchingSearchInVariable({
+                variable: childVariable,
+                variableName: childName,
+                nodeId: `${nodeId}${separator}${childName}`,
+                searchText: searchText,
+                acc,
+              })
+            )
+          );
+        })
+        .flat();
+
+      return [...newAcc, ...childrenNodes];
+    default:
+      return [];
+  }
+};
+
+export const generateListOfNodesMatchingSearchInVariablesContainer = (
+  variablesContainer: gdVariablesContainer,
+  searchText: string,
+  prefix?: string
+): Array<string> => {
+  return mapFor(0, variablesContainer.count(), (index) => {
+    const variable = variablesContainer.getAt(index);
+    const name = variablesContainer.getNameAt(index);
+    return generateListOfNodesMatchingSearchInVariable({
+      variable,
+      variableName: name,
+      nodeId: prefix ? `${prefix}${name}` : name,
+      searchText,
+      acc: [],
+    });
+  }).flat();
+};

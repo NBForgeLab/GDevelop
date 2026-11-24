@@ -1,0 +1,24 @@
+// @flow
+// @flow-transitional-stub
+
+declare class UrlsCache {
+  projectCache: { [number]: { [string]: string } };
+  _getProjectCache(project: gdProject): any;
+  getCachedUrl(project: gdProject, url: string): ?string;
+  cacheUrl(project: gdProject, url: string): string;
+  burstUrl(project: gdProject, url: string): void;
+  cacheLocalFileUrl(project: gdProject, filename: string, systemFilename: string, disableCacheBurst: boolean): string;
+}
+type LoadingOptions = {|
+  disableCacheBurst?: boolean,
+  isResourceForPixi?: boolean,
+|};
+
+declare export default class ResourcesLoader {
+  static _cache: UrlsCache;
+  static getModel3DPreviewUrl(project: gdProject, resourceName: string): ?string;
+  static burstUrlsCacheForResources(project: gdProject, resourcesNames: Array<string>): void;
+  static burstAllUrlsCache(): void;
+  static getFullUrl(project: gdProject, urlOrFilename: string, arg2: LoadingOptions): string;
+  static getResourceFullUrl(project: gdProject, resourceName: string, options: LoadingOptions): any;
+}

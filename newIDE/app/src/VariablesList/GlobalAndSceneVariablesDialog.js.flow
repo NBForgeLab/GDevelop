@@ -1,0 +1,19 @@
+// @flow
+// @flow-transitional-stub [Phase 3]
+import * as React from 'react';
+import { type VariableDialogOpeningProps } from './VariablesEditorDialog';
+import { type HotReloadPreviewButtonProps } from '../HotReload/HotReloadPreviewButton';
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+
+type Props = {|
+  open: boolean,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  onApply: (selectedVariableName: string | null) => void,
+  onCancel: () => void,
+  hotReloadPreviewButtonProps: HotReloadPreviewButtonProps | null,
+  isGlobalTabInitiallyOpen?: boolean,
+  initiallySelectedVariable: VariableDialogOpeningProps | null,
+  isListLocked: boolean,
+|};
+
+declare export default React.ComponentType<Props>;

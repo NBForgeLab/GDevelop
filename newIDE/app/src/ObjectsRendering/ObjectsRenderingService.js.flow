@@ -1,0 +1,4 @@
+// @flow
+// @flow-transitional-stub
+
+declare export default {| renderers: {| unknownObjectType: any, Sprite: any, "TiledSpriteObject::TiledSprite": any, "PanelSpriteObject::PanelSprite": any, "TextObject::Text": any, "PrimitiveDrawing::Drawer": any, "TextEntryObject::TextEntry": any, "ParticleSystem::ParticleEmitter": any |}, renderers3D: any, getThumbnail: any, createNewUnknownInstanceRenderer: any, createNewInstanceRenderer: any, registerInstanceRenderer: any, registerInstance3DRenderer: any, renderersCacheClearingMethods: Array<(project: gdProject) => void>, registerClearCache: any, registerModule: any, requireModule: any, rgbOrHexToHexNumber: any, hexNumberToRGBArray: any, gd: any, PIXI: any, THREE: any, THREE_ADDONS: {| SkeletonUtils: any |}, RenderedInstance: any, Rendered3DInstance: any |};

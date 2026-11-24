@@ -1,0 +1,70 @@
+// @flow
+// @flow-transitional-stub
+import { Spine, TextureAtlas } from '@esotericsoftware/spine-pixi-v7';
+import * as THREE from 'three';
+import { type ResourceKind } from '../ResourcesList/ResourceSource';
+
+type SpineTextureAtlasOrLoadingError = {|
+  // $FlowFixMe[value-as-type]
+  textureAtlas: ?TextureAtlas,
+  atlasAlias: ?string,
+  loadingError: ?Error,
+  loadingErrorReason:
+    | null
+    | 'invalid-atlas-resource'
+    | 'missing-texture-resources'
+    | 'atlas-resource-loading-error',
+|};
+
+export type SpineAliases = {|
+  skeletonAlias: string,
+  atlasAlias: string,
+|};
+export type SpineDataOrLoadingError = {|
+  aliases: ?SpineAliases,
+  loadingError: ?Error,
+  loadingErrorReason:
+    | null
+    | 'invalid-spine-resource'
+    | 'missing-texture-atlas-name'
+    | 'spine-resource-loading-error'
+    // Atlas loading error reasons:
+    | 'invalid-atlas-resource'
+    | 'missing-texture-resources'
+    | 'atlas-resource-loading-error',
+|};
+declare export var readEmbeddedResourcesMapping: (resource: gdResource) => {} | null;
+declare export default class PixiResourcesLoader {
+  static burstCache(): Promise<void>;
+  static _reloadEmbedderResources(project: gdProject, embeddedResourceName: string, embedderResourceKind: ResourceKind): Promise<void>;
+  static _doReloadResource(project: gdProject, resourceName: string): Promise<void>;
+  static reloadResource(project: gdProject, resourceName: string): Promise<void>;
+  static loadTextures(project: gdProject, resourceNames: Array<string>): Promise<void>;
+  static getPIXITexture(project: gdProject, resourceName: string): any;
+  static getThreeTexture(
+    project: gdProject,
+    resourceName: string
+    // $FlowFixMe[value-as-type]
+  ): Promise<THREE.Texture>;
+  static getThreeMaterial(project: gdProject, resourceName: string, arg2: {|
+      useTransparentTexture: boolean,
+      forceBasicMaterial: boolean,
+    |}): // $FlowFixMe[value-as-type]
+  Promise<THREE.Material>;
+  // $FlowFixMe[value-as-type]
+  static get3DModel(project: gdProject, resourceName: string): Promise<THREE.THREE_ADDONS.GLTF>;
+  static _getSpineTextureAtlas(project: gdProject, spineTextureAtlasName: string): Promise<SpineTextureAtlasOrLoadingError>;
+  static getSpineData(project: gdProject, spineName: string): Promise<SpineDataOrLoadingError>;
+  static createSpine(
+    project: gdProject,
+    spineName: string
+    // $FlowFixMe[value-as-type]
+  ): Promise<Spine | null>;
+  static getPIXIVideoTexture(project: gdProject, resourceName: string): any;
+  static loadFontFamily(project: gdProject, resourceName: string): Promise<string>;
+  static getFontFamily(project: gdProject, resourceName: string): any;
+  static getBitmapFontData(project: gdProject, resourceName: string): Promise<any>;
+  static getInvalidPIXITexture(): any;
+  static getLoadingPIXITexture(): any;
+  static getResourceJsonData(project: gdProject, resourceName: string): Promise<any>;
+}

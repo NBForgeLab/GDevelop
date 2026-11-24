@@ -1,0 +1,17 @@
+// @flow
+// @flow-transitional-stub [Phase 3]
+import * as React from 'react';
+import { type VariableDialogOpeningProps } from './VariablesEditorDialog';
+import { type HotReloadPreviewButtonProps } from '../HotReload/HotReloadPreviewButton';
+
+type Props = {|
+  open: boolean,
+  project: gdProject,
+  onApply: (selectedVariableName: string | null) => void,
+  onCancel: () => void,
+  hotReloadPreviewButtonProps: HotReloadPreviewButtonProps | null,
+  initiallySelectedVariable: VariableDialogOpeningProps | null,
+  isListLocked: boolean,
+|};
+
+declare export default React.ComponentType<Props>;

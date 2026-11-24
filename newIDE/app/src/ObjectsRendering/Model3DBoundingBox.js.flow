@@ -1,0 +1,12 @@
+// @flow
+// @flow-transitional-stub
+
+declare export var getModel3DBoundingBox: (threeObject: any, arg1: {|
+    rotationX: number,
+    rotationY: number,
+    rotationZ: number,
+    // True when the object is positioned by the origin of the model itself
+    // (`originLocation` = `ModelOrigin`), the only location that is not a
+    // point of the box.
+    keepsModelOrigin: boolean,
+  |}) => any;
