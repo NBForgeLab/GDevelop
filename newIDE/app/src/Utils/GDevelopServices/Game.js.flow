@@ -1,0 +1,219 @@
+// @flow
+// @flow-transitional-stub
+import { type I18n as I18nType } from '@lingui/core';
+import { type MessageByLocale } from '../i18n/MessageByLocale';
+import { type Filters } from './Filters';
+import { type UserPublicProfile } from './User';
+
+export type GameUploadType =
+  | 'game-thumbnail'
+  | 'game-screenshot'
+  | 'game-preview-video';
+export type SavedStatus = 'draft' | 'saved';
+export type CachedGameSlug = {
+  username: string,
+  gameSlug: string,
+};
+export type GameSlug = {
+  username: string,
+  gameSlug: string,
+  createdAt: number,
+};
+export type PublicGame = {
+  id: string,
+  gameName: string,
+  authorName: string, // this corresponds to the publisher name
+  publicWebBuildId?: ?string,
+  description?: string,
+  owners: Array<UserPublicProfile>,
+  authors: Array<UserPublicProfile>,
+  playWithKeyboard: boolean,
+  playWithGamepad: boolean,
+  playWithMobile: boolean,
+  orientation: string,
+  thumbnailUrl?: string,
+  screenshotUrls?: Array<string>,
+  previewVideoUrls?: Array<string>,
+  thumbnailVideoUrl?: string,
+  cachedLastWeekSessionsCount?: number,
+  cachedLastYearSessionsCount?: number,
+  categories?: string[],
+  userSlug?: string,
+  gameSlug?: string,
+  displayAdsOnGamePage: boolean,
+  acceptsGameComments?: boolean,
+  discoverable?: boolean,
+  donateLink: ?string,
+};
+export type Game = {|
+  id: string,
+  gameName: string,
+  categories?: string[],
+  authorName: string, // this corresponds to the publisher name
+  createdAt: number,
+  updatedAt?: number, // Some old games don't have this field
+  publicWebBuildId?: ?string,
+  description?: string,
+  thumbnailUrl?: string,
+  screenshotUrls?: Array<string>,
+  previewVideoUrls?: Array<string>,
+  thumbnailVideoUrl?: string,
+  cachedTotalSessionsCount?: number,
+  cachedLastYearSessionsCount?: number,
+  cachedLastWeekSessionsCount?: number,
+  discoverable?: boolean,
+  acceptsBuildComments?: boolean,
+  acceptsGameComments?: boolean,
+  displayAdsOnGamePage?: boolean,
+  cachedCurrentSlug?: CachedGameSlug,
+  orientation?: string,
+  playWithKeyboard: boolean,
+  playWithMobile: boolean,
+  playWithGamepad: boolean,
+  savedStatus?: SavedStatus,
+|};
+export type GameUpdatePayload = {|
+  gameName?: string,
+  categories?: string[],
+  authorName?: string,
+  publicWebBuildId?: ?string,
+  description?: string,
+  playWithKeyboard?: boolean,
+  playWithGamepad?: boolean,
+  playWithMobile?: boolean,
+  orientation?: string,
+  thumbnailUrl?: ?string,
+  screenshotUrls?: ?Array<string>,
+  previewVideoUrls?: ?Array<string>,
+  thumbnailVideoUrl?: string,
+  discoverable?: boolean,
+  acceptsBuildComments?: boolean,
+  acceptsGameComments?: boolean,
+  displayAdsOnGamePage?: boolean,
+  savedStatus?: SavedStatus,
+|};
+export type GameCategory = {
+  name: string,
+  type: 'user-defined' | 'admin-only',
+};
+export type ShowcasedGameLink = {
+  url: string,
+  type:
+    | 'app-store'
+    | 'play-store'
+    | 'play'
+    | 'download'
+    | 'download-win-mac-linux'
+    | 'learn-more',
+};
+export type ShowcasedGame = {
+  title: string,
+  author: string,
+  description: string,
+  genres: Array<string>,
+  platforms: Array<string>,
+  /** Represents the union of genres+platforms. */
+  tags: Array<string>,
+  imageUrls: Array<string>,
+  links: Array<ShowcasedGameLink>,
+  isFeatured: boolean,
+  bannerUrl: string,
+  bannerBackgroundPosition: string,
+  thumbnailUrl: string,
+  editorDescription: string,
+};
+export type AllShowcasedGames = {
+  showcasedGames: Array<ShowcasedGame>,
+  filters: Filters,
+};
+export type GameApiError = {|
+  code: 'game-deletion/leaderboards-exist',
+|};
+export type FeaturingType =
+  | 'games-platform-home'
+  | 'games-platform-game-page'
+  | 'games-platform-listing'
+  | 'games-platform-guaranteed-sessions';
+export type GameFeaturing = {|
+  gameId: string,
+  featuring: FeaturingType,
+  createdAt: number, // in seconds.
+  updatedAt: number, // in seconds.
+  expiresAt: number, // in seconds.
+|};
+export type GameUsageType =
+  | 'featuring-basic'
+  | 'featuring-pro'
+  | 'featuring-premium';
+export type MarketingPlan = {|
+  id: GameUsageType,
+  icon: string,
+  canExtend: boolean,
+  requiresManualContact: boolean,
+  includedFeaturings: FeaturingType[],
+  gameRequirements: {
+    hasThumbnail?: boolean,
+    isPublished?: boolean,
+    isDiscoverable?: boolean,
+  },
+  nameByLocale: MessageByLocale,
+  descriptionByLocale: MessageByLocale,
+  bulletPointsByLocale: Array<MessageByLocale>,
+  ownedBulletPointsByLocale: Array<MessageByLocale>,
+  additionalSuccessMessageByLocale: MessageByLocale,
+  showExpirationDate: boolean,
+|};
+export type GameLeaderboardEntry = {
+  count: number | null,
+  publicGame: PublicGame | null,
+};
+export type GameLeaderboard = {
+  name: string,
+  displayNameByLocale: MessageByLocale,
+  topGameCommentQualityRatings: GameLeaderboardEntry[],
+};
+// $FlowFixMe[cannot-resolve-name]
+declare export var client: Axios;
+declare export var getCategoryName: (category: string, i18n: I18nType) => any;
+declare export var getGameUrl: (game: ?Game) => any | null;
+declare export var getPublicGameUrl: (publicGame: ?PublicGame) => any | null;
+declare export var getAclsFromUserIds: (ownersIds: Array<string>) => Array<{| userId: string, level: string |}>;
+declare export var listAllShowcasedGames: () => Promise<AllShowcasedGames>;
+declare export var registerGame: (getAuthorizationHeader: () => Promise<string>, userId: string, arg2: {|
+    gameId: string,
+    gameName: string,
+    authorName: string,
+    templateSlug?: string,
+    savedStatus?: SavedStatus,
+  |}) => Promise<Game>;
+declare export var updateGame: (getAuthorizationHeader: () => Promise<string>, userId: string, gameId: string, arg3: GameUpdatePayload) => Promise<Game>;
+declare export var setGameUserAcls: (getAuthorizationHeader: () => Promise<string>, userId: string, gameId: string, acls: {|
+    ownership?: Array<{| userId: string, level: string |}>,
+    author?: Array<{| userId: string, level: string |}>,
+  |}) => Promise<void>;
+declare export var setGameSlug: (getAuthorizationHeader: () => Promise<string>, userId: string, gameId: string, userSlug: string, gameSlug: string) => Promise<void>;
+declare export var getGame: (getAuthorizationHeader: () => Promise<string>, userId: string, gameId: string) => Promise<Game>;
+declare export var deleteGame: (getAuthorizationHeader: () => Promise<string>, userId: string, gameId: string) => Promise<void>;
+declare export var getGames: (getAuthorizationHeader: () => Promise<string>, userId: string) => Promise<Array<Game>>;
+declare export var getPublicGame: (gameId: string) => Promise<PublicGame>;
+declare export var getGameCategories: () => Promise<GameCategory[]>;
+declare export var buyGameFeaturing: (getAuthorizationHeader: () => Promise<string>, arg1: {| gameId: string, userId: string, usageType: GameUsageType |}) => Promise<void>;
+declare export var listGameFeaturings: (getAuthorizationHeader: () => Promise<string>, arg1: {| gameId: string, userId: string |}) => Promise<GameFeaturing[]>;
+declare export var listMarketingPlans: () => Promise<MarketingPlan[]>;
+declare export var getRecommendedMarketingPlan: (getAuthorizationHeader: () => Promise<string>, arg1: {| gameId: string, userId: string |}) => Promise<MarketingPlan>;
+declare export var getGameCommentQualityRatingsLeaderboards: () => Promise<
+  Array<GameLeaderboard>
+>;
+declare export var createGameResourceSignedUrls: (arg0: {|
+  uploadType: GameUploadType,
+  files: Array<{|
+    contentType: string,
+  |}>,
+|}) => Promise<{|
+  signedUrls: Array<{|
+    signedUrl: string,
+    publicUrl: string,
+  |}>,
+|}>;
+declare export var getGameVideoUrl: (game: Game | PublicGame) => ?string;
+declare export var getGameMainImageUrl: (game: Game | PublicGame) => ?string;

@@ -15,7 +15,7 @@ import {
   formatOldBreakingChanges,
   formatBreakingChanges,
   isCompatibleWithGDevelopVersion,
-} from '../../Utils/Extension/ExtensionCompatibilityChecker.js';
+} from '../../Utils/Extension/ExtensionCompatibilityChecker';
 import LeftLoader from '../../UI/LeftLoader';
 import PlaceholderLoader from '../../UI/PlaceholderLoader';
 import PlaceholderError from '../../UI/PlaceholderError';

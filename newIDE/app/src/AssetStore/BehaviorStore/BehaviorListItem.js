@@ -1,7 +1,7 @@
 // @flow
 import * as React from 'react';
 import { type BehaviorShortHeader } from '../../Utils/GDevelopServices/Extension';
-import { isCompatibleWithGDevelopVersion } from '../../Utils/Extension/ExtensionCompatibilityChecker.js';
+import { isCompatibleWithGDevelopVersion } from '../../Utils/Extension/ExtensionCompatibilityChecker';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Text from '../../UI/Text';
 import { Trans } from '@lingui/macro';

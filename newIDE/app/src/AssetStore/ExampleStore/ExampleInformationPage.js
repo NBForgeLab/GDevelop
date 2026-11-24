@@ -2,7 +2,7 @@
 import { Trans } from '@lingui/macro';
 import * as React from 'react';
 import { type ExampleShortHeader } from '../../Utils/GDevelopServices/Example';
-import { isCompatibleWithGDevelopVersion } from '../../Utils/Extension/ExtensionCompatibilityChecker.js';
+import { isCompatibleWithGDevelopVersion } from '../../Utils/Extension/ExtensionCompatibilityChecker';
 import { MarkdownText } from '../../UI/MarkdownText';
 import Text from '../../UI/Text';
 import AlertMessage from '../../UI/AlertMessage';

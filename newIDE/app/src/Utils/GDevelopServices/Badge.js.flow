@@ -1,0 +1,46 @@
+// @flow
+// @flow-transitional-stub
+import { type Profile } from './Authentication';
+import { type MessageByLocale } from '../i18n/MessageByLocale';
+import { type AuthenticatedUser } from '../../Profile/AuthenticatedUserContext';
+
+declare export var TRIVIAL_FIRST_EVENT: string;
+declare export var TRIVIAL_FIRST_BEHAVIOR: string;
+declare export var TRIVIAL_FIRST_PREVIEW: string;
+declare export var TRIVIAL_FIRST_WEB_EXPORT: string;
+declare export var TRIVIAL_FIRST_EXTENSION: string;
+declare export var TRIVIAL_FIRST_EFFECT: string;
+declare export var TRIVIAL_FIRST_DEBUG: string;
+declare export var getTutorialCompletedAchievementId: (tutorialId: string) => string;
+export type Badge = {|
+  seen: boolean,
+  unlockedAt: string,
+  userId: string,
+  achievementId: string,
+|};
+export type Achievement = {
+  id: string,
+  category: string,
+  nameByLocale: MessageByLocale,
+  descriptionByLocale: MessageByLocale,
+  shortDescriptionByLocale: MessageByLocale,
+  rewardValueInCredits?: number,
+  iconUrl?: string,
+};
+export type AchievementWithBadgeData = {
+  ...Achievement,
+  seen?: boolean,
+  unlockedAt: ?Date,
+};
+declare export var createOrEnsureBadgeForUser: (arg0: {
+    badges: ?Array<Badge>,
+    profile: ?Profile,
+    getAuthorizationHeader: () => Promise<string>,
+    onBadgesChanged: () => Promise<void>,
+  }, achievementId: string) => Promise<?Badge>;
+declare export var addCreateBadgePreHookIfNotClaimed: <
+  T: (...args: Array<any>) => any
+>(authenticatedUser: AuthenticatedUser, achievementId: string, callback: T) => T;
+declare export var getAchievements: () => Promise<Array<Achievement>>;
+declare export var markBadgesAsSeen: (authenticatedUser: AuthenticatedUser) => Promise<?void>;
+declare export var compareAchievements: (a: AchievementWithBadgeData, b: AchievementWithBadgeData) => any | number;

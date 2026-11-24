@@ -1,0 +1,127 @@
+// @flow
+// @flow-transitional-stub
+
+type UploadOptions = {|
+  signedUrl: string,
+  contentType: string,
+  key: string,
+|};
+
+export type TargetName =
+  | 'winExe'
+  | 'winZip'
+  | 'macZip'
+  | 'linuxAppImage'
+  | 'androidApk'
+  | 'androidAppBundle'
+  | 'iosAppStore'
+  | 'iosDevelopment'
+  | 's3';
+export type BuildType =
+  | 'cordova-build'
+  | 'cordova-ios-build'
+  | 'electron-build'
+  | 'web-build';
+export type BuildDetectedError = {|
+  // A machine-readable code identifying the error. The human-readable message
+  // is resolved on the frontend from this code (see BuildDetectedErrors.js).
+  code: string,
+  // An optional page url giving more information about the error.
+  helpUrl?: string,
+|};
+export type Build = {
+  id: string,
+  gameId?: string, // not defined for old builds.
+  userId: string,
+  name?: string,
+  description?: string,
+  bucket?: string,
+  logsKey?: string,
+  apkKey?: string,
+  aabKey?: string,
+  windowsExeKey?: string,
+  windowsZipKey?: string,
+  macosZipKey?: string,
+  linuxAppImageKey?: string,
+  s3Key?: string,
+  iosAppStoreIpaKey?: string,
+  iosDevelopmentIpaKey?: string,
+  status: 'pending' | 'complete' | 'error',
+  type: BuildType,
+  targets?: Array<TargetName>,
+  createdAt?: number, // Not defined for old builds.
+  updatedAt: number,
+  // Common errors detected by analyzing the build log (e.g. a wrong app icon
+  // size). Empty or undefined when nothing known was detected.
+  detectedErrors?: Array<BuildDetectedError>,
+};
+export type BuildArtifactKeyName =
+  | 'apkKey'
+  | 'aabKey'
+  | 'windowsExeKey'
+  | 'windowsZipKey'
+  | 'macosZipKey'
+  | 'linuxAppImageKey'
+  | 's3Key'
+  | 'iosAppStoreIpaKey'
+  | 'iosDevelopmentIpaKey'
+  | 'logsKey';
+export type BuildSigningOptions = {|
+  keystore?: string,
+  certificateSerial?: string,
+  mobileProvisionUuid?: string,
+  authKeyApiKey?: string,
+|};
+export type AppleCertificateSigningCredential = {
+  type: 'apple-certificate',
+  name: string,
+  certificateSerial: string,
+  hasCertificateReady: boolean,
+  kind: 'development' | 'distribution' | 'unknown',
+  provisioningProfiles: Array<{
+    uuid: string,
+    name: string,
+  }>,
+};
+export type AppleAuthKeySigningCredential = {
+  type: 'apple-auth-key',
+  name: string,
+  apiKey: string,
+  apiIssuer: string,
+  hasAuthKeyReady: boolean,
+};
+export type SigningCredential =
+  | AppleCertificateSigningCredential
+  | AppleAuthKeySigningCredential;
+// $FlowFixMe[cannot-resolve-name]
+declare export var client: Axios;
+declare export var filterAppleCertificateSigningCredentials: (signingCredentials: Array<SigningCredential> | null) => Array<AppleCertificateSigningCredential> | null;
+declare export var filterAppleAuthKeySigningCredentials: (signingCredentials: Array<SigningCredential> | null) => Array<AppleAuthKeySigningCredential> | null;
+declare export var getBuildExtensionlessFilename: (arg0: {|
+  gameName: string,
+  gameVersion: string,
+|}) => string;
+declare export var getBuildArtifactUrl: (build: ?Build, keyName: BuildArtifactKeyName) => ?string;
+declare export var getBuildFileUploadOptions: () => Promise<UploadOptions>;
+declare export var buildElectron: (getAuthorizationHeader: () => Promise<string>, userId: string, key: string, targets: Array<TargetName>, gameId: string, options: {|
+    gameName: string,
+    gameVersion: string,
+  |}, payWithCredits: boolean) => Promise<Build>;
+declare export var buildWeb: (getAuthorizationHeader: () => Promise<string>, userId: string, key: string, gameId: string, options: {|
+    gameName: string,
+    gameVersion: string,
+  |}, payWithCredits: boolean) => Promise<Build>;
+declare export var buildCordovaAndroid: (getAuthorizationHeader: () => Promise<string>, userId: string, key: string, targets: Array<TargetName>, keystore: 'old' | 'new', gameId: string, options: {|
+    gameName: string,
+    gameVersion: string,
+  |}, payWithCredits: boolean) => Promise<Build>;
+declare export var buildCordovaIos: (getAuthorizationHeader: () => Promise<string>, userId: string, key: string, targets: Array<TargetName>, signing: BuildSigningOptions, gameId: string, options: {|
+    gameName: string,
+    gameVersion: string,
+  |}, payWithCredits: boolean) => Promise<Build>;
+declare export var getBuild: (getAuthorizationHeader: () => Promise<string>, userId: string, buildId: string) => Promise<Build>;
+declare export var getBuilds: (getAuthorizationHeader: () => Promise<string>, userId: string, gameId?: string) => Promise<Array<Build>>;
+declare export var updateBuild: (getAuthorizationHeader: () => Promise<string>, userId: string, buildId: string, arg3: {| name?: string, description?: string |}) => Promise<Build>;
+declare export var deleteBuild: (getAuthorizationHeader: () => Promise<string>, userId: string, buildId: string) => Promise<void>;
+declare export var getUserSigningCredentials: (getAuthorizationHeader: () => Promise<string>, userId: string) => Promise<Array<SigningCredential>>;
+declare export var signingCredentialApi: {| createCertificateSigningRequest: any, uploadCertificate: any, createCertificateP12: any, uploadMobileProvision: any, uploadAuthKey: any, deleteSigningCredential: any |};

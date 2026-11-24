@@ -1,0 +1,7 @@
+// @flow
+// @flow-transitional-stub
+
+declare export var userCancellationErrorName: string;
+declare export class UserCancellationError extends Error {
+  constructor(message: string): void;
+}

@@ -1,0 +1,167 @@
+// @flow
+// @flow-transitional-stub
+import { type AuthenticatedUser } from '../../Profile/AuthenticatedUserContext';
+
+type LeaderboardDuplicationPayload = {|
+  sourceLeaderboardId: string,
+  sourceGameId: string,
+|};
+
+export type LeaderboardSortOption = 'ASC' | 'DESC';
+export type LeaderboardVisibilityOption = 'HIDDEN' | 'PUBLIC';
+export type LeaderboardPlayerUnicityDisplayOption =
+  | 'FREE'
+  | 'PREFER_UNIQUE'
+  | 'PREFER_NON_UNIQUE';
+export type LeaderboardScoreFormattingCustom = {|
+  type: 'custom',
+  prefix: string,
+  suffix: string,
+  precision: number,
+|};
+export type LeaderboardScoreFormattingTimeUnit =
+  | 'hour'
+  | 'minute'
+  | 'second'
+  | 'millisecond';
+export type LeaderboardScoreFormattingTime = {|
+  type: 'time',
+  smallestUnit: LeaderboardScoreFormattingTimeUnit,
+  biggestUnit: LeaderboardScoreFormattingTimeUnit,
+|};
+export type LeaderboardScoreFormatting =
+  | LeaderboardScoreFormattingCustom
+  | LeaderboardScoreFormattingTime;
+export interface LeaderboardTheme {
+  backgroundColor: string;
+  textColor: string;
+  highlightBackgroundColor: string;
+  highlightTextColor: string;
+}
+export type LeaderboardCustomizationSettings = {|
+  defaultDisplayedEntriesNumber?: number,
+  scoreTitle: string,
+  scoreFormatting: LeaderboardScoreFormatting,
+  theme?: LeaderboardTheme,
+  useCustomCss?: boolean,
+  customCss?: string,
+|};
+export type Leaderboard = {|
+  id: string,
+  gameId: string,
+  name: string,
+  sort: LeaderboardSortOption,
+  startDatetime: string,
+  deletedAt?: string,
+  playerUnicityDisplayChoice: LeaderboardPlayerUnicityDisplayOption,
+  visibility: LeaderboardVisibilityOption,
+  customizationSettings?: LeaderboardCustomizationSettings,
+  primary?: boolean,
+  resetLaunchedAt?: string,
+  extremeAllowedScore?: number,
+  ignoreCustomPlayerNames?: boolean,
+  autoPlayerNamePrefix?: string,
+  disableLoginInLeaderboard?: string,
+|};
+export type LeaderboardUpdatePayload = {|
+  name?: string,
+  sort?: LeaderboardSortOption,
+  playerUnicityDisplayChoice?: LeaderboardPlayerUnicityDisplayOption,
+  visibility?: LeaderboardVisibilityOption,
+  customizationSettings?: LeaderboardCustomizationSettings,
+  primary?: boolean,
+  extremeAllowedScore?: number | null,
+  ignoreCustomPlayerNames?: boolean,
+  autoPlayerNamePrefix?: string,
+  disableLoginInLeaderboard?: boolean,
+|};
+export type LeaderboardEntry = {|
+  id: string,
+  leaderboardId: string,
+  playerId?: string,
+  playerName: string,
+  createdAt: string,
+  score: number,
+|};
+export type LobbyConfiguration = {|
+  gameId: string,
+  maxPlayers: number,
+  minPlayers: number,
+  canJoinAfterStart: boolean,
+|};
+declare export var shortenUuidForDisplay: (uuid: string) => string;
+// $FlowFixMe[cannot-resolve-name]
+declare export var client: Axios;
+declare export var listGameActiveLeaderboards: (getAuthorizationHeader: () => Promise<string>, userId: string, gameId: string) => Promise<?Array<Leaderboard>>;
+declare export var extractNextPageUriFromLinkHeader: (linkHeader: string) => ?string;
+declare export var listLeaderboardEntries: (gameId: string, leaderboardId: string, options: {| pageSize: number, onlyBestEntry: boolean, forceUri: ?string |}) => Promise<{|
+  entries: LeaderboardEntry[],
+  nextPageUri: ?string,
+|}>;
+declare export var createLeaderboard: (authenticatedUser: AuthenticatedUser, gameId: string, arg2: {| name: string, sort: LeaderboardSortOption |}) => Promise<?Leaderboard>;
+declare export var duplicateLeaderboard: (authenticatedUser: AuthenticatedUser, gameId: string, payload: LeaderboardDuplicationPayload) => Promise<Leaderboard>;
+declare export var updateLeaderboard: (authenticatedUser: AuthenticatedUser, gameId: string, leaderboardId: string, payload: LeaderboardUpdatePayload) => Promise<?Leaderboard>;
+declare export var resetLeaderboard: (authenticatedUser: AuthenticatedUser, gameId: string, leaderboardId: string) => Promise<?Leaderboard>;
+declare export var deleteLeaderboard: (authenticatedUser: AuthenticatedUser, gameId: string, leaderboardId: string) => Promise<?Leaderboard>;
+declare export var deleteLeaderboardEntry: (authenticatedUser: AuthenticatedUser, gameId: string, leaderboardId: string, entryId: string) => Promise<?Leaderboard>;
+export type CommentType = 'FEEDBACK' | 'REVIEW';
+export type GameRatings = {
+  version: number,
+  visuals: number,
+  sound: number,
+  fun: number,
+  easeOfUse: number,
+};
+export type Comment = {
+  id: string,
+  type: CommentType,
+  gameId: string,
+  buildId?: string,
+  text: string,
+  ratings?: GameRatings,
+  playerId?: string,
+  playerName?: string,
+  contact?: string,
+  createdAt: number,
+  processedAt?: number,
+  updatedAt: number,
+  qualityRatingPerRole?: {
+    owner?: string,
+  },
+};
+declare export var listComments: (getAuthorizationHeader: () => Promise<string>, userId: string, arg2: {|
+    gameId: string,
+    type: 'FEEDBACK' | 'REVIEW',
+  |}) => Promise<Array<Comment>>;
+declare export var canCommentBeRatedByOwner: (comment: Comment) => boolean;
+declare export var updateComment: (getAuthorizationHeader: () => Promise<string>, userId: string, arg2: {|
+    gameId: string,
+    commentId: string,
+    processed?: boolean,
+    qualityRating?: string,
+  |}) => Promise<any>;
+declare export var canUserCustomizeLeaderboardTheme: (authenticatedUser: AuthenticatedUser) => {|
+  canUseTheme: boolean,
+  canUseCustomCss: boolean,
+|};
+declare export var getRGBLeaderboardTheme: (leaderboardCustomizationSettings: ?LeaderboardCustomizationSettings) => LeaderboardTheme;
+declare export var getLobbyConfiguration: (getAuthorizationHeader: () => Promise<string>, userId: string, arg2: {|
+    gameId: string,
+  |}) => Promise<LobbyConfiguration>;
+declare export var updateLobbyConfiguration: (getAuthorizationHeader: () => Promise<string>, userId: string, arg2: {|
+    gameId: string,
+    maxPlayers: number,
+    minPlayers: number,
+    canJoinAfterStart: boolean,
+  |}) => Promise<LobbyConfiguration>;
+declare export var duplicateLobbyConfiguration: (arg0: {|
+  getAuthorizationHeader: () => Promise<string>,
+  userId: string,
+  gameId: string,
+  sourceGameId: string,
+|}) => Promise<LobbyConfiguration>;
+declare export var getPlayerToken: (arg0: {
+  getAuthorizationHeader: () => Promise<string>,
+  userId: string,
+  gameId: string,
+}) => Promise<string>;

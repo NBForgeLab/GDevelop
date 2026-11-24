@@ -1,0 +1,14 @@
+// @flow
+// @flow-transitional-stub
+import {
+  type ExtensionShortHeader,
+  type BehaviorShortHeader,
+  type ObjectShortHeader,
+} from '../GDevelopServices/Extension';
+
+export type ExtensionChange = { version: string, changes: string };
+declare export var isCompatibleWithGDevelopVersion: (ideVersion: string, requiredGDevelopVersion: ?string) => boolean;
+declare export var getBreakingChanges: (installedVersion: string, extension: ExtensionShortHeader | BehaviorShortHeader | ObjectShortHeader) => Array<ExtensionChange>;
+declare export var formatExtensionsBreakingChanges: (extensionsBreakingChanges: Map<ExtensionShortHeader, Array<ExtensionChange>>) => string;
+declare export var formatBreakingChanges: (extensionChange: Array<ExtensionChange>, indentation?: string) => string;
+declare export var formatOldBreakingChanges: (installedVersion: string, extension: ExtensionShortHeader | BehaviorShortHeader | ObjectShortHeader) => string;

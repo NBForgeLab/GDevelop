@@ -27,7 +27,7 @@ import {
   isCompatibleWithGDevelopVersion,
   formatExtensionsBreakingChanges,
   type ExtensionChange,
-} from '../../Utils/Extension/ExtensionCompatibilityChecker.js';
+} from '../../Utils/Extension/ExtensionCompatibilityChecker';
 import InAppTutorialContext from '../../InAppTutorial/InAppTutorialContext';
 import PromisePool from '@supercharge/promise-pool';
 import { retryIfFailed } from '../../Utils/RetryIfFailed';

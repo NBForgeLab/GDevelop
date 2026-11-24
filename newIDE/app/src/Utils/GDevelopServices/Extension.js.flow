@@ -1,0 +1,151 @@
+// @flow
+// @flow-transitional-stub
+import { type UserPublicProfile } from './User';
+
+type ExtensionTier = 'experimental' | 'reviewed' | 'installed';
+
+export type ExtensionDependency = {
+  extensionName: string,
+  extensionVersion: string,
+};
+export type ExtensionRegistryItemHeader = {
+  tier: ExtensionTier,
+  authorIds: Array<string>,
+  authors?: Array<UserPublicProfile>,
+  extensionNamespace: string,
+  fullName: string,
+  name: string,
+  version: string,
+  gdevelopVersion?: string,
+  url: string,
+  headerUrl: string,
+  tags: Array<string>,
+  category: string,
+  previewIconUrl: string,
+  changelog?: Array<{ version: string, breaking?: string }>,
+  requiredExtensions?: Array<ExtensionDependency>,
+  // Added by the editor.
+  isInstalled?: boolean,
+};
+export type EventsFunctionInsideExtensionShortHeader = {
+  description: string,
+  fullName: string,
+  functionType:
+    | 'StringExpression'
+    | 'Expression'
+    | 'Action'
+    | 'Condition'
+    | 'ExpressionAndCondition'
+    | 'ActionWithOperator',
+  name: string,
+};
+export type EventsBasedBehaviorInsideExtensionShortHeader = {
+  description: string,
+  fullName: string,
+  name: string,
+  objectType: string,
+  eventsFunctions: EventsFunctionInsideExtensionShortHeader[],
+};
+export type EventsBasedObjectInsideExtensionShortHeader = {
+  description: string,
+  fullName: string,
+  name: string,
+  defaultName: string,
+  eventsFunctions: EventsFunctionInsideExtensionShortHeader[],
+};
+export type ExtensionShortHeader = {
+  ...ExtensionRegistryItemHeader,
+  shortDescription: string,
+  eventsBasedBehaviorsCount: number,
+  eventsFunctionsCount: number,
+
+  eventsBasedBehaviors?: Array<EventsBasedBehaviorInsideExtensionShortHeader>,
+  eventsFunctions?: Array<EventsFunctionInsideExtensionShortHeader>,
+  eventsBasedObjects?: Array<EventsBasedObjectInsideExtensionShortHeader>,
+
+  helpPath: string,
+};
+export type ExtensionHeader = {
+  ...ExtensionShortHeader,
+  description: string,
+  iconUrl: string,
+};
+export type BehaviorShortHeader = {
+  ...ExtensionRegistryItemHeader,
+  description: string,
+  extensionName: string,
+  objectType: string,
+  /**
+   * All required behaviors including transitive ones.
+   */
+  allRequiredBehaviorTypes: Array<string>,
+  /** This attribute is computed.
+   * @see adaptBehaviorHeader
+   */
+  type: string,
+  /**
+   * Can only be true for `installed` extensions.
+   */
+  isDeprecated?: boolean,
+};
+export type ObjectShortHeader = {
+  ...ExtensionRegistryItemHeader,
+  description: string,
+  extensionName: string,
+  assetStoreTag: ?string,
+  /** This attribute is computed.
+   * @see adaptObjectHeader
+   */
+  type: string,
+  /**
+   * `true` when using the object would create a dependency cycle with the
+   * edited events-based object.
+   *
+   * This attribute is computed for `installed` extensions.
+   */
+  isDependentWithParent?: boolean,
+};
+export type SerializedExtension = {
+  name: string,
+  requiredExtensions?: Array<ExtensionDependency>,
+  // This type is inexact because the typing is not complete.
+};
+export type ExtensionsRegistry = {
+  version: string,
+  headers: Array<ExtensionShortHeader>,
+  views: {
+    default: {
+      firstIds: Array<string>,
+    },
+  },
+};
+export type BehaviorsRegistry = {
+  headers: Array<BehaviorShortHeader>,
+  views: {
+    default: {
+      firstIds: Array<{ extensionName: string, behaviorName: string }>,
+    },
+  },
+};
+export type ObjectsRegistry = {
+  headers: Array<ObjectShortHeader>,
+  views: {
+    default: {
+      firstIds: Array<{ extensionName: string, objectName: string }>,
+      secondIds: Array<{ extensionName: string, objectName: string }>,
+    },
+  },
+};
+// $FlowFixMe[cannot-resolve-name]
+declare export var client: Axios;
+// $FlowFixMe[cannot-resolve-name]
+declare export var cdnClient: Axios;
+declare export var getExtensionsRegistry: () => Promise<ExtensionsRegistry>;
+declare export var getBehaviorsRegistry: () => Promise<BehaviorsRegistry>;
+declare export var getObjectsRegistry: () => Promise<ObjectsRegistry>;
+declare export var getExtensionHeader: (extensionShortHeader:
+    | ExtensionShortHeader
+    | BehaviorShortHeader
+    | ObjectShortHeader) => Promise<ExtensionHeader>;
+declare export var getExtension: (extensionHeader: ExtensionShortHeader | BehaviorShortHeader) => Promise<SerializedExtension>;
+declare export var getUserExtensionShortHeaders: (authorId: string) => Promise<Array<ExtensionShortHeader>>;

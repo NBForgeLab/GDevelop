@@ -1,0 +1,327 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type AuthenticatedUser } from '../../Profile/AuthenticatedUserContext';
+import { type MessageByLocale } from '../i18n/MessageByLocale';
+import { type Subscription } from './Usage';
+import {
+  type Bundle,
+  type PrivateAssetPack,
+  type PrivateGameTemplate,
+} from '../../Utils/GDevelopServices/Asset';
+
+type StripeAndPaypalPrice = {|
+  value: number,
+  name: string,
+  usageType: string,
+  stripePriceId: string,
+  currency: 'USD' | 'EUR',
+|};
+type CreditPrice = {|
+  amount: number,
+  usageType: string,
+|};
+type RedeemableAttributes = {|
+  redeemConditions?: RedeemCondition[],
+|};
+type StripeAndPaypalSellableAttributes = {|
+  prices: StripeAndPaypalPrice[],
+  sellerStripeAccountId: string,
+  stripeProductId: string,
+|};
+type CreditsClaimableAttributes = {|
+  creditPrices: Array<CreditPrice>,
+|};
+type AppStoreProductAttributes = {|
+  appStoreProductId: string | null,
+  /** The thumbnails to use when on the app store - otherwise, use thumbnailUrls as usual. */
+  appStoreThumbnailUrls?: string[] | null,
+|};
+type ProductLicenseType = 'personal' | 'commercial' | 'unlimited' | 'default';
+
+// $FlowFixMe[cannot-resolve-name]
+declare export var client: Axios;
+export type ProductType =
+  | 'ASSET_PACK'
+  | 'GAME_TEMPLATE'
+  | 'CREDITS_PACKAGE'
+  | 'COURSE'
+  | 'COURSE_CHAPTER'
+  | 'BUNDLE';
+export type IncludedListableProduct = {|
+  productId: string,
+  productType: 'ASSET_PACK' | 'GAME_TEMPLATE' | 'COURSE' | 'CREDITS_PACKAGE',
+  usageType: string,
+|};
+export type IncludedRedemptionCode = {|
+  givenSubscriptionPlanId: string,
+  durationInDays: number,
+  estimatedPrices?: Array<{
+    value: number,
+    currency: 'USD' | 'EUR',
+  }>,
+|};
+export type ProductListingData = {|
+  id: string,
+  sellerId: string,
+  isSellerGDevelop: boolean,
+  productType: ProductType,
+  listing: ProductType,
+  name: string,
+  nameByLocale?: MessageByLocale,
+  description: string,
+  descriptionByLocale?: MessageByLocale,
+  categories: Array<string>,
+  updatedAt: string,
+  createdAt: string,
+  thumbnailUrls: string[],
+  includedListableProductIds?: string[],
+  includedListableProducts?: Array<IncludedListableProduct>,
+  includedRedemptionCodes?: Array<IncludedRedemptionCode>,
+  visibleUntil?: string,
+|};
+export type RedeemCondition = {
+  reason: 'subscription',
+  condition: string,
+  usageType: string,
+};
+export type PrivateAssetPackListingData = {|
+  ...ProductListingData,
+  ...StripeAndPaypalSellableAttributes,
+  ...AppStoreProductAttributes,
+  ...CreditsClaimableAttributes,
+  ...RedeemableAttributes,
+  productType: 'ASSET_PACK',
+  listing: 'ASSET_PACK',
+|};
+export type PrivateGameTemplateListingData = {|
+  ...ProductListingData,
+  ...StripeAndPaypalSellableAttributes,
+  ...AppStoreProductAttributes,
+  ...CreditsClaimableAttributes,
+  ...RedeemableAttributes,
+  productType: 'GAME_TEMPLATE',
+  listing: 'GAME_TEMPLATE',
+  /** The id of the game published on gd.games showcasing this template. */
+  showcasedGameId?: ?string,
+|};
+export type CreditsPackageListingData = {|
+  ...ProductListingData,
+  ...StripeAndPaypalSellableAttributes,
+  ...AppStoreProductAttributes,
+  productType: 'CREDITS_PACKAGE',
+  listing: 'CREDITS_PACKAGE',
+|};
+export type CourseChapterListingData = {|
+  ...ProductListingData,
+  ...CreditsClaimableAttributes,
+  productType: 'COURSE_CHAPTER',
+  listing: 'COURSE_CHAPTER',
+|};
+export type CourseListingData = {|
+  ...ProductListingData,
+  ...StripeAndPaypalSellableAttributes,
+  ...CreditsClaimableAttributes,
+  productType: 'COURSE',
+  listing: 'COURSE',
+|};
+export type BundleListingData = {|
+  ...ProductListingData,
+  ...AppStoreProductAttributes,
+  ...StripeAndPaypalSellableAttributes,
+  productType: 'BUNDLE',
+  listing: 'BUNDLE',
+|};
+export type GiftableProductListingData =
+  | PrivateAssetPackListingData
+  | PrivateGameTemplateListingData
+  | BundleListingData;
+export type PurchasePaymentDetails = {|
+  total: number | null,
+  currency?: string,
+|};
+export type Purchase = {|
+  id: string,
+  usageType: string,
+  productId: string,
+  buyerId: string,
+  /** Not set for a gift (or a purchase made without an account) until it's claimed. */
+  receiverId?: string,
+  createdAt: string,
+  cancelledAt?: string,
+  stripeCheckoutSessionId?: string,
+  stripeCustomerId?: string,
+  appStoreTransactionId?: string,
+  paypalPayerId?: string,
+  paypalOrderId?: string,
+  manualGiftReason?: string,
+  creditsAmount?: number,
+  productType: ProductType,
+  paymentDetails?: PurchasePaymentDetails | null,
+  /** Bought for someone else, who receives it by using the claimable token. */
+  isGift?: boolean,
+  /** Only sent to the buyer of a gift, or to the receiver of a purchase made without an account. */
+  claimableToken?: string,
+  claimedAt?: string,
+|};
+export type ProductLicense = {|
+  id: ProductLicenseType,
+  nameByLocale: MessageByLocale,
+  descriptionByLocale: MessageByLocale,
+|};
+declare export var getArchivedBundleListingData: (arg0: {|
+  bundle: Bundle,
+|}) => BundleListingData;
+declare export var getArchivedPrivateAssetPackListingData: (arg0: {|
+  assetPack: PrivateAssetPack,
+|}) => PrivateAssetPackListingData;
+declare export var getArchivedPrivateGameTemplateListingData: (arg0: {|
+  gameTemplate: PrivateGameTemplate,
+|}) => PrivateGameTemplateListingData;
+declare export var listListedPrivateAssetPacks: () => Promise<
+  Array<PrivateAssetPackListingData>
+>;
+declare export var listListedPrivateGameTemplates: () => Promise<
+  Array<PrivateGameTemplateListingData>
+>;
+declare export var listListedCreditsPackages: () => Promise<
+  Array<CreditsPackageListingData>
+>;
+declare export var listListedCourseChapters: () => Promise<
+  Array<CourseChapterListingData>
+>;
+declare export var listListedCourses: () => Promise<
+  Array<CourseListingData>
+>;
+declare export var listListedBundles: () => Promise<
+  Array<BundleListingData>
+>;
+declare export var getProduct: (productId: string) => Promise<GiftableProductListingData>;
+declare export var getGiftClaimUrl: (purchase: {
+  id: string,
+  productId: string,
+  claimableToken?: string,
+  ...
+}) => string | null;
+declare export var getListedBundle: (arg0: {|
+  bundleId: string,
+  visibility?: 'all',
+|}) => Promise<?BundleListingData>;
+declare export var listSellerAssetPacks: (arg0: {|
+  sellerId: string,
+|}) => Promise<Array<PrivateAssetPackListingData>>;
+declare export var listSellerGameTemplates: (arg0: {|
+  sellerId: string,
+|}) => Promise<Array<PrivateGameTemplateListingData>>;
+declare export var listUserPurchases: (getAuthorizationHeader: () => Promise<string>, arg1: {|
+    userId: string,
+    productType:
+      | 'asset-pack'
+      | 'game-template'
+      | 'credits-package'
+      | 'course'
+      | 'course-chapter'
+      | 'bundle',
+    role: 'receiver' | 'buyer',
+  |}) => Promise<Array<Purchase>>;
+export type PurchaseWithProductName = {|
+  ...Purchase,
+  productName: string | null,
+|};
+declare export var listInvoiceablePurchases: (getAuthorizationHeader: () => Promise<string>, userId: string) => Promise<Array<PurchaseWithProductName>>;
+declare export var generatePurchaseInvoice: (getAuthorizationHeader: () => Promise<string>, userId: string, purchaseId: string) => Promise<Blob>;
+declare export var getAuthorizationTokenForPrivateAssets: (getAuthorizationHeader: () => Promise<string>, arg1: {|
+    userId: string,
+  |}) => Promise<string>;
+declare export var getAuthorizationTokenForPrivateGameTemplates: (getAuthorizationHeader: () => Promise<string>, arg1: {|
+    userId: string,
+  |}) => Promise<string>;
+declare export var createProductAuthorizedUrl: (url: string, token: string) => string;
+declare export var isPrivateAssetResourceAuthorizedUrl: (url: string) => boolean;
+declare export var isPrivateGameTemplateResourceAuthorizedUrl: (url: string) => boolean;
+declare export var isProductAuthorizedResourceUrl: (url: string) => boolean;
+declare export var extractDecodedFilenameWithExtensionFromProductAuthorizedUrl: (productAuthorizedUrl: string) => string;
+declare export var getPurchaseCheckoutUrl: (arg0: {|
+  productId: string,
+  priceName: string,
+  userId?: string,
+  // Identifies buyers without an account.
+  userUuid?: string,
+  userEmail?: string,
+  password?: string,
+  language: string,
+  isGift?: boolean,
+|}) => string;
+declare export var getStripeCheckoutUrl: (arg0: {|
+  userId?: string,
+  userUuid?: string,
+  productId: string,
+  priceName: string,
+  userEmail?: string,
+  password?: string,
+  isGift?: boolean,
+|}) => string;
+declare export var fetchTokenForPrivateGameTemplateAuthorizationIfNeeded: (arg0: {|
+  authenticatedUser: AuthenticatedUser,
+  allResourcePaths: Array<string>,
+|}) => Promise<?string>;
+declare export var listProductLicenses: (arg0: {|
+  productType: 'asset-pack' | 'game-template',
+|}) => Promise<ProductLicense[]>;
+declare export var buyProductWithCredits: (getAuthorizationHeader: () => Promise<string>, arg1: {|
+    productId: string,
+    usageType: string,
+    userId: string,
+    password?: string,
+  |}) => Promise<void>;
+declare export var canRedeemProduct: (arg0: {|
+  redeemCondition: RedeemCondition,
+  subscription?: ?Subscription,
+|}) =>
+  | {| canRedeem: true |}
+  | {|
+      canRedeem: false,
+      reason?: 'subscription',
+      canUpgrade?: boolean,
+    |};
+declare export var getCalloutToGetSubscriptionOrClaimProduct: (arg0: {|
+  subscription: ?Subscription,
+  productListingData:
+    | PrivateAssetPackListingData
+    | PrivateGameTemplateListingData,
+  isAlreadyReceived: boolean,
+|}) => ?{|
+  message: React.Node,
+  actionLabel: ?React.Node,
+  canRedeemProduct: boolean,
+|};
+export type GivenAwayProduct = {|
+  /** Formatted as YYYY-MM. */
+  month: string,
+  productType: 'ASSET_PACK' | 'GAME_TEMPLATE',
+  productId: string,
+|};
+declare export var listGivenAwayProducts: () => Promise<
+  Array<GivenAwayProduct>
+>;
+declare export var getClaimableProductListingDatas: (arg0: {|
+  subscription: ?Subscription,
+  privateAssetPackListingDatas: ?Array<PrivateAssetPackListingData>,
+  privateGameTemplateListingDatas: ?Array<PrivateGameTemplateListingData>,
+  receivedAssetPacks: ?$ReadOnlyArray<{ +id: string, ... }>,
+  receivedGameTemplates: ?$ReadOnlyArray<{ +id: string, ... }>,
+|}) => Array<PrivateAssetPackListingData | PrivateGameTemplateListingData>;
+declare export var redeemProduct: (arg0: {|
+  productListingData:
+    | PrivateAssetPackListingData
+    | PrivateGameTemplateListingData,
+  getAuthorizationHeader: () => Promise<string>,
+  userId: string,
+  password: string,
+|}) => Promise<void>;
+declare export var claimPurchase: (arg0: {|
+  getAuthorizationHeader: () => Promise<string>,
+  userId: string,
+  purchaseId: string,
+  claimableToken: string,
+|}) => Promise<Purchase>;

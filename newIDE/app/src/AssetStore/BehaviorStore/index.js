@@ -7,7 +7,7 @@ import SearchBar from '../../UI/SearchBar';
 import {
   getBreakingChanges,
   isCompatibleWithGDevelopVersion,
-} from '../../Utils/Extension/ExtensionCompatibilityChecker.js';
+} from '../../Utils/Extension/ExtensionCompatibilityChecker';
 import { type BehaviorShortHeader } from '../../Utils/GDevelopServices/Extension';
 import { BehaviorStoreContext } from './BehaviorStoreContext';
 import { ListSearchResults } from '../../UI/Search/ListSearchResults';
