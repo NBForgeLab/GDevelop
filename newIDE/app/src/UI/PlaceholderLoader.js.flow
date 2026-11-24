@@ -1,0 +1,9 @@
+// @flow
+// @flow-transitional-stub
+
+type Props = {|
+  style?: any,
+  size?: number,
+|};
+
+declare export default (props: Props) => any;

@@ -1,0 +1,14 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type MuiThemeProviderProps = {|
+  children: React.Node,
+|};
+type Props = {|
+  children: React.Node,
+  forcedThemeName?: string,
+|};
+
+declare export var MuiThemeOnlyProvider: React.ComponentType<MuiThemeProviderProps>;
+declare export var FullThemeProvider: React.ComponentType<Props>;

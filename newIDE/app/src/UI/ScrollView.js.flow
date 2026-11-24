@@ -1,0 +1,34 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type HTMLDataset } from '../Utils/HTMLDataset';
+
+type Props = {|
+  children: React.Node,
+  id?: string,
+  data?: HTMLDataset,
+  /**
+   * If true, scrollbar won't be shown if the content is not clipped.
+   */
+  autoHideScrollbar?: ?boolean,
+  style?: ?Object,
+  onScroll?: ({ remainingScreensToBottom: number }) => void,
+|};
+
+export type ScrollBehaviorOptions = {|
+  behavior: 'smooth',
+|};
+export type ScrollViewInterface = {|
+  getDomElement: () => ?HTMLDivElement,
+  getScrollPosition: () => number,
+  scrollTo: (
+    target: ?React.Component<any, any> | ?React.ElementRef<any>
+  ) => void,
+  scrollToPosition: (number: number) => void,
+  scrollBy: (deltaY: number) => void,
+  scrollToBottom: (options?: ScrollBehaviorOptions) => void,
+|};
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<ScrollViewInterface>,
+}>;

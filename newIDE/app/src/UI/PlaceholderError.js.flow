@@ -1,0 +1,10 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  children: React.Node,
+  onRetry?: () => void | Promise<void>,
+|};
+
+declare export default React.ComponentType<Props>;

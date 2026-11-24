@@ -1,0 +1,12 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  children: (screenType: ScreenType) => React.Node,
+|};
+
+export type ScreenType = 'normal' | 'touch';
+declare export var ScreenTypeMeasurer: React.ComponentType<Props>;
+declare export var useScreenType: () => ScreenType;
+declare export var useShouldAutofocusInput: () => boolean;

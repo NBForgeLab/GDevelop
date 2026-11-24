@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  children: React.Node,
+  href: string,
+  onClick: () => void | Promise<void>,
+  disabled?: boolean,
+  color?: 'primary' | 'secondary' | 'inherit',
+|};
+
+declare export default React.ComponentType<Props>;

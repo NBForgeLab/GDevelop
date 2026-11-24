@@ -1,0 +1,10 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props<TColumnName> = {|
+  columnsRenderer: { [TColumnName]: () => React.Node },
+  getColumns: () => Array<{ columnName: TColumnName, ratio?: number }>,
+|};
+
+declare export var SelectColumns: React.ComponentType<Props<string>>;

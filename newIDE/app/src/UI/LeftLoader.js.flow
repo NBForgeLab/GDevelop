@@ -1,0 +1,9 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+declare export default React.ComponentType<{
+  children: React.Node,
+  isLoading: ?boolean,
+  reserveSpace?: boolean,
+}>;

@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  onSubmit: () => void | Promise<void>,
+  autoComplete?: 'on' | 'off',
+  name: string,
+  children: React.Node,
+  fullWidth?: boolean,
+|};
+
+declare export default React.ComponentType<Props>;

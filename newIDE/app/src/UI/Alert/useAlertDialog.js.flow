@@ -1,0 +1,17 @@
+// @flow
+// @flow-transitional-stub
+import {
+  type ShowAlertDialogOptions,
+  type ShowConfirmDeleteDialogOptions,
+  type ShowConfirmDialogOptions,
+  type ShowYesNoCancelDialogOptions,
+} from './AlertContext';
+
+declare export default () => {
+  showAlert: (options: ShowAlertDialogOptions) => Promise<void>,
+  showConfirmation: (options: ShowConfirmDialogOptions) => Promise<boolean>,
+  showDeleteConfirmation: (
+    options: ShowConfirmDeleteDialogOptions
+  ) => Promise<boolean>,
+  showYesNoCancel: (options: ShowYesNoCancelDialogOptions) => Promise<boolean>,
+};
