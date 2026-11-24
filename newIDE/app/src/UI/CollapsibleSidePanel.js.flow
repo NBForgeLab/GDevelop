@@ -1,0 +1,14 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  open: boolean,
+  /** The width of the panel when open, in pixels. */
+  width: number,
+  /** The side of the parent the panel is attached to, it slides out on it. */
+  anchor: 'left' | 'right',
+  children: React.Node,
+|};
+
+declare export default React.ComponentType<Props>;

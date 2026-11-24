@@ -1,0 +1,12 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type BreadcrumbStep =
+  | {| label: React.Node |}
+  | {| label: React.Node, onClick: () => void, href: string |};
+type Props = {|
+  steps: Array<BreadcrumbStep>,
+|};
+
+declare export default React.ComponentType<Props>;

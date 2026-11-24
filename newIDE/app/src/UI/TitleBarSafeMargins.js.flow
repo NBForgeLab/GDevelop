@@ -1,0 +1,10 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+declare export var TitleBarLeftSafeMargins: React.ComponentType<{|
+  backgroundColor?: string,
+|}>;
+declare export var TitleBarRightSafeMargins: React.ComponentType<{|
+  backgroundColor?: string,
+|}>;

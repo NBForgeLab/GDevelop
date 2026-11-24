@@ -1,0 +1,10 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  children: React.Node,
+  renderImage: (style: {| width: number, height: number |}) => React.Node,
+|};
+
+declare export var CalloutCard: React.ComponentType<Props>;

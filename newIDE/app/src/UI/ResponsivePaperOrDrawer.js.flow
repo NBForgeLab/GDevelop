@@ -1,0 +1,9 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+declare export var ResponsivePaperOrDrawer: React.ComponentType<{|
+  open: boolean,
+  onClose: () => void,
+  children: React.Node,
+|}>;

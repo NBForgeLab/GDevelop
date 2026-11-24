@@ -1,0 +1,17 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props<T> = {|
+  value: T,
+  min: number,
+  max: number,
+  step: number | null,
+  scale?: number => number,
+  valueLabelDisplay?: 'auto',
+  valueLabelFormat?: (value: number, index: number) => string,
+  marks?: boolean | {| value: number, label: React.Node |}[],
+  onChange: (value: T) => void,
+|};
+
+declare export default (<T: number | [number, number]>(props: Props<T>) => any);

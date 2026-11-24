@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub
+import React from 'react';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+
+type Props = {|
+  showImmediately: boolean,
+  showAfterDelay?: boolean,
+  message?: ?MessageDescriptor,
+  progress?: ?number,
+|};
+
+declare export default React.ComponentType<Props>;

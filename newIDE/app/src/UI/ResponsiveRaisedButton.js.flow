@@ -1,0 +1,6 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type RaisedButtonProps } from './RaisedButton';
+
+declare export default React.ComponentType<RaisedButtonProps>;

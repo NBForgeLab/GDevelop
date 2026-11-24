@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Tags = Array<string>;
+type TagsWithLabel = Array<{| label: string | React.Node, value: string |}>;
+type Props = {|
+  tags?: Tags,
+  tagsWithLabel?: TagsWithLabel,
+  onRemove: string => void,
+|};
+
+declare export default React.ComponentType<Props>;

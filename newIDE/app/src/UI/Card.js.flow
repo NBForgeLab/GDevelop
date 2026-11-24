@@ -1,0 +1,16 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  children: React.Node,
+  cardCornerAction?: React.Node,
+  header?: React.Node,
+  background?: 'medium' | 'dark',
+
+  disabled?: boolean,
+  isHighlighted?: boolean,
+  padding?: number,
+|};
+
+declare export default React.ComponentType<Props>;

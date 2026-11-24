@@ -1,0 +1,53 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type FieldFocusFunction } from '../EventsSheet/ParameterFields/ParameterFieldCommons';
+
+type ValueProps = {|
+  value: number | string,
+  // event and index should not be used, and be removed eventually
+  onChange?: (
+    event: {| target: {| value: string |} |},
+    index: number,
+    text: string // Note that even for number values, a string is returned
+  ) => void,
+|};
+type Props = {|
+  ...ValueProps,
+  fullWidth?: boolean,
+  children: React.Node,
+  disabled?: boolean,
+  stopPropagationOnClick?: boolean,
+  onFocus?: (event: SyntheticFocusEvent<HTMLInputElement>) => void,
+
+  id?: ?string,
+  style?: {
+    flex?: 1,
+    width?: 'auto',
+  },
+  inputStyle?: {| fontSize?: 14, color?: string |},
+  margin?: 'none' | 'dense',
+  disableUnderline?: true,
+  textAlign?: 'center',
+
+  floatingLabelText?: React.Node,
+  helperMarkdownText?: ?string,
+
+  // If a hint text is specified, will be shown as an option for the empty
+  // value (""), disabled.
+  translatableHintText?: MessageDescriptor,
+  errorText?: React.Node,
+|};
+
+export type SelectFieldInterface = {|
+  focus: FieldFocusFunction,
+|};
+// $FlowFixMe[prop-missing]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-use]
+// $FlowFixMe[incompatible-type]
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<SelectFieldInterface>,
+}>;

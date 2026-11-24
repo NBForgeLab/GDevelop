@@ -1,0 +1,12 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  src: ?string,
+  alt: ?string,
+  style?: Object,
+  loading?: 'lazy',
+|};
+
+declare export var ImageWithFallback: React.ComponentType<Props>;

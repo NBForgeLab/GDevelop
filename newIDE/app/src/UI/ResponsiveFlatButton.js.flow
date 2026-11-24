@@ -1,0 +1,6 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type FlatButtonProps } from './FlatButton';
+
+declare export default React.ComponentType<FlatButtonProps>;

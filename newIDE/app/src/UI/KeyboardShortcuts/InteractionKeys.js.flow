@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub
+
+type SupportedEvent = KeyboardEvent | SyntheticKeyboardEvent<any>;
+
+declare export var shouldCloseOrCancel: (event: SupportedEvent) => boolean;
+declare export var shouldValidate: (event: SupportedEvent) => false | boolean;
+declare export var shouldBrowsePrevious: (event: SupportedEvent) => false | boolean;
+declare export var shouldActivate: (event: SupportedEvent) => boolean;
+declare export var shouldSubmit: (event: SupportedEvent) => false | boolean;
+declare export var shouldZoom: (event: SupportedEvent | WheelEvent) => boolean;
+declare export var shouldFocusNextField: (event: SupportedEvent) => false | boolean;
+declare export var shouldFocusPreviousField: (event: SupportedEvent) => false | boolean;

@@ -1,0 +1,31 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  label: React.Node,
+  /** The meaning of the status. Grey if not specified. */
+  tone?: StatusChipTone,
+  /** An icon shown before the label: it is sized and colored by the chip. */
+  icon?: React.Node,
+  /** Show a spinner instead of the icon, for something being done. */
+  loading?: boolean,
+  /** An additional detail shown after the label (frames, duration...). */
+  details?: React.Node,
+  size?: 'small' | 'default',
+|};
+
+export type StatusChipTone =
+  | 'neutral'
+  | 'success'
+  | 'error'
+  | 'warning'
+  | 'info'
+  | 'progress';
+declare export var StatusSpinner: () => React.Node;
+declare export var StatusDot: () => React.Node;
+declare export default React.ComponentType<Props>;
+declare export var StatusIcon: React.ComponentType<{|
+  tone?: StatusChipTone,
+  icon: React.Node,
+|}>;

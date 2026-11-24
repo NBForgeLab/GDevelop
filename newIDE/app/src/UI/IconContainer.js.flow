@@ -1,0 +1,12 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  src: string,
+  alt: string,
+  size: number,
+|};
+
+declare export var iconWithBackgroundStyle: {| background: "linear-gradient(45deg, #FFFFFF33, #FFFFFF)", borderRadius: 4 |};
+declare export var IconContainer: React.ComponentType<Props>;

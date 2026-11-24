@@ -1,0 +1,18 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  src: ?string,
+  className?: string,
+  style?: Object,
+  /* img elements must have an alt prop, either with meaningful text, or an empty string for decorative images */
+  alt: ?string,
+  title?: ?string,
+  onError?: (?Error) => void,
+  onLoad?: (e: any) => void,
+  loading?: 'lazy',
+  imageRef?: { current: HTMLImageElement | null },
+|};
+
+declare export var CorsAwareImage: React.ComponentType<Props>;

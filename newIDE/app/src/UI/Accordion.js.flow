@@ -1,0 +1,46 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type AccordionHeadProps = {|
+  children: React.Node,
+  actions?: Array<React.Node>,
+  expandIcon?: React.Node,
+  noMargin?: boolean,
+|};
+type AccordionBodyProps = {|
+  children: React.Node,
+  style?: Object,
+
+  // Removes all padding in body container
+  disableGutters?: boolean,
+|};
+type AccordionActionsProps = {|
+  actions: Array<React.Node>,
+  secondaryActions?: Array<React.Node>,
+|};
+type AccordionProps = {|
+  // AccordionSummary, AccordionBody and/or AccordionDetails
+  children: React.Node,
+
+  defaultExpanded?: boolean,
+  disabled?: boolean,
+  kind?: 'answer',
+
+  // If `true`, renders body only if accordion is open
+  costlyBody?: boolean,
+
+  // Use accordion in controlled mode
+  expanded?: boolean,
+  onChange?: (event: any, open: boolean) => void,
+  id?: string,
+  noMargin?: boolean,
+|};
+
+declare export var AccordionHeader: React.ComponentType<AccordionHeadProps>;
+declare export var AccordionBody: React.ComponentType<AccordionBodyProps>;
+declare export var AccordionActions: React.ComponentType<AccordionActionsProps>;
+declare export var Accordion: React.ComponentType<{
+  ...AccordionProps,
+  +ref?: React.RefSetter<any>,
+}>;
