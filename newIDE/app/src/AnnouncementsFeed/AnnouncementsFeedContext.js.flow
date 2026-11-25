@@ -1,0 +1,17 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type Announcement, type Promotion } from '../Utils/GDevelopServices/Announcement';
+
+type AnnouncementsFeedState = {|
+  announcements: ?(Announcement[]),
+  promotions: ?(Promotion[]),
+  error: ?Error,
+  fetchAnnouncementsAndPromotions: () => Promise<void>,
+|};
+type AnnouncementsFeedStateProviderProps = {|
+  children: React.Node,
+|};
+
+declare export var AnnouncementsFeedContext: React.Context<AnnouncementsFeedState>;
+declare export var AnnouncementsFeedStateProvider: React.ComponentType<AnnouncementsFeedStateProviderProps>;

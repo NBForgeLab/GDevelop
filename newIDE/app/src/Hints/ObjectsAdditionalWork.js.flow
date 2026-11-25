@@ -1,0 +1,29 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type AlertMessageIdentifier } from '../MainFrame/Preferences/PreferencesContext';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+
+export type InfoBarDetails = {|
+  identifier: AlertMessageIdentifier,
+  message: MessageDescriptor,
+  touchScreenMessage: MessageDescriptor,
+|};
+
+type ObjectAddedOptions = {|
+  object: gdObject,
+  layersContainer: gdLayersContainer,
+  globalObjectsContainer: gdObjectsContainer | null,
+  objectsContainer: gdObjectsContainer,
+|};
+
+type InstanceAddedOptions = {|
+  instance: gdInitialInstance,
+  layersContainer: gdLayersContainer,
+  globalObjectsContainer: gdObjectsContainer | null,
+  objectsContainer: gdObjectsContainer,
+|};
+
+declare export var onObjectAdded: (options: ObjectAddedOptions) => ?InfoBarDetails;
+declare export var onInstanceAdded: (
+  options: InstanceAddedOptions
+) => ?InfoBarDetails;

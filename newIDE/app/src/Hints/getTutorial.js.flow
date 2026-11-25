@@ -1,0 +1,6 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type Tutorial } from '../Utils/GDevelopServices/Tutorial';
+import { type Preferences } from '../MainFrame/Preferences/PreferencesContext';
+
+declare export default (preferences: Preferences, tutorials: ?Array<Tutorial>, tutorialId: string) => null | Tutorial;

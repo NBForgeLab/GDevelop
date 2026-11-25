@@ -1,0 +1,11 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type SlowGraphicsRenderingReason } from '.';
+
+type Props = {|
+  /** Only for stories: the reason is otherwise detected on this computer. */
+  mockedSlowGraphicsRenderingReason?: SlowGraphicsRenderingReason,
+|};
+
+declare export default React.ComponentType<Props>;

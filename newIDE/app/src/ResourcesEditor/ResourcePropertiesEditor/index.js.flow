@@ -1,0 +1,22 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type I18n as I18nType } from '@lingui/core';
+import * as React from 'react';
+import ResourcesLoader from '../../ResourcesLoader';
+import { type ResourceManagementProps } from '../../ResourcesList/ResourceSource';
+
+type Props = {|
+  project: gdProject,
+  resourcesLoader: typeof ResourcesLoader,
+  resources: Array<gdResource>,
+  onResourcePathUpdated: () => void,
+  resourceManagementProps: ResourceManagementProps,
+  i18n: I18nType,
+|};
+
+export type ResourcePropertiesEditorInterface = {| forceUpdate: () => void |};
+
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<ResourcePropertiesEditorInterface>,
+}>;

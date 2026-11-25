@@ -1,3 +1,5 @@
+import { type ExpressionAutocompletion } from '../../ExpressionAutocompletion';
+
 export declare const getLastObjectParameter: (
   parameters: gdParameterMetadataContainer,
   parameterIndex: number
@@ -11,6 +13,10 @@ export declare const getLastObjectParameterObjectType: (
 export declare const tryExtractStringLiteralContent: (
   parameterValue: string | null | undefined
 ) => string | null | undefined;
+
+export declare const getParameterChoiceAutocompletions: (
+  parameterMetadata: gdParameterMetadata | null | undefined
+) => Array<ExpressionAutocompletion>;
 
 export declare const getParameterChoiceValues: (
   parameterMetadata: gdParameterMetadata | null | undefined

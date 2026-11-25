@@ -1,0 +1,8 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+
+type Props = {|
+  tutorialId: string,
+|};
+
+declare export default (arg0: Props) => any;

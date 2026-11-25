@@ -1,0 +1,45 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type AuthenticatedUser } from '../Profile/AuthenticatedUserContext';
+
+type ReplacePromptDialogProps = {|
+  leaderboardsToReplace: ?Array<string>,
+  onClose: () => void,
+  onTriggerReplace: () => void,
+|};
+type LeaderboardReplacerProgressDialogProps = {|
+  erroredLeaderboards: Array<{ leaderboardId: string, error: Error }>,
+  onRetry: ?() => void,
+  onAbandon: ?() => void,
+  progress: number,
+|};
+type UseLeaderboardReplacerOutput = {|
+  openLeaderboardReplacerDialogIfNeeded: (
+    project: gdProject,
+    sourceGameId: string
+  ) => void,
+
+  /**
+   * Render, if needed, the dialog that will show the progress of leaderboard replacement.
+   */
+  renderLeaderboardReplacerDialog: () => React.Node,
+|};
+type ErroredLeaderboard = {
+  leaderboardId: string,
+  error: Error,
+};
+
+declare export var ReplacePromptDialog: React.ComponentType<ReplacePromptDialogProps>;
+declare export var LeaderboardReplacerProgressDialog: React.ComponentType<LeaderboardReplacerProgressDialogProps>;
+declare export var replaceLeaderboardsInProject: (arg0: {|
+  authenticatedUser: AuthenticatedUser,
+  project: gdProject,
+  sourceGameId: string,
+  leaderboardsToReplace: Array<string>,
+  setProgress: (percent: number | ((percent: number) => number)) => void,
+|}) => Promise<{ leaderboardsWithErrors: Array<ErroredLeaderboard> }>;
+declare export var findLeaderboardsToReplaceInProject: (arg0: {|
+  project: gdProject,
+|}) => Array<string>;
+declare export var useLeaderboardReplacer: () => UseLeaderboardReplacerOutput;

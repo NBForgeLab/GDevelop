@@ -1,0 +1,12 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type OpenedVersionStatus } from '.';
+
+type Props = {|
+  openedVersionStatus: ?OpenedVersionStatus,
+  onQuit: () => Promise<void>,
+  disableQuitting: boolean,
+|};
+
+declare export default React.ComponentType<Props>;

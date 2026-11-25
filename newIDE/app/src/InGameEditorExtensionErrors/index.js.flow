@@ -1,0 +1,35 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type AiRequestFunctionCallOutput } from '../Utils/GDevelopServices/Generation';
+import { type GameCrashReport } from '../Utils/GDevelopServices/Analytics';
+
+export type InGameEditorExtensionError = {|
+  // Different each time the error appears again (after a hot reload).
+  id: number,
+  key: string,
+  extensionName: string | null,
+  // `onCreated`, `doStepPostEvents`, `onHotReloading`, `onDestroy`,
+  // `editorCallback` or `toolbar`.
+  phase: string,
+  // The object or behavior type running the code, if any.
+  type: string | null,
+  message: string,
+  stack: string,
+  count: number,
+|};
+declare export var setLatestInGameEditorExtensionErrors: (errors: Array<InGameEditorExtensionError>) => void;
+declare export var getLatestInGameEditorExtensionErrors: () => Array<InGameEditorExtensionError>;
+declare export var isInGameEditorExtensionErrorFromStore: (project: ?gdProject, arg1: InGameEditorExtensionError) => boolean;
+declare export var buildInGameEditorExtensionErrorGameCrashReport: (project: gdProject, arg1: InGameEditorExtensionError) => GameCrashReport;
+declare export var getInGameEditorExtensionErrorOrigin: (arg0: InGameEditorExtensionError) => string;
+declare export var getInGameEditorExtensionErrorCallChain: (stack: string) => string | null;
+declare export var getAskAiToFixInGameEditorExtensionErrorsText: (errors: Array<InGameEditorExtensionError>) => string;
+declare export var addInGameEditorExtensionErrorsToFunctionCallOutputs: (arg0: {|
+  functionCallOutputs: Array<AiRequestFunctionCallOutput>,
+  errors: Array<InGameEditorExtensionError>,
+  givenErrorIds: Set<number>,
+  project: ?gdProject,
+|}) => {|
+  functionCallOutputs: Array<AiRequestFunctionCallOutput>,
+  newlyGivenErrorIds: Array<number>,
+|};

@@ -1,0 +1,34 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import type { ExpandedCloudProjectVersion } from '../Utils/GDevelopServices/Project';
+import type { FileMetadata, StorageProvider } from '../ProjectsStorage';
+import type { OpenedVersionStatus } from '.';
+import type { MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+
+type Props = {|
+  getStorageProvider: () => StorageProvider,
+  fileMetadata: ?FileMetadata,
+  isSavingProject: boolean,
+  onOpenCloudProjectOnSpecificVersion: ({|
+    fileMetadata: FileMetadata,
+    versionId: string,
+    ignoreUnsavedChanges: boolean,
+    ignoreAutoSave: boolean,
+    openingMessage: MessageDescriptor,
+  |}) => Promise<void>,
+|};
+
+declare export default (arg0: Props) => {|
+  checkedOutVersionStatus: ?OpenedVersionStatus,
+  openVersionHistoryPanel: () => void,
+  renderVersionHistoryPanel: () => React.Node,
+  onQuitVersionHistory: () => Promise<void>,
+  onCheckoutVersion: (
+    version: ExpandedCloudProjectVersion,
+    options?: {| dontSaveCheckedOutVersionStatus?: boolean |}
+  ) => Promise<boolean>,
+  getOrLoadProjectVersion: (
+    versionId: string
+  ) => Promise<ExpandedCloudProjectVersion>,
+|};

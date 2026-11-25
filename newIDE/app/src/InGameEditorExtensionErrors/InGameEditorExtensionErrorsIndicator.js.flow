@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type InGameEditorExtensionError } from '.';
+
+type Props = {|
+  errors: Array<InGameEditorExtensionError>,
+  isFromStore: (error: InGameEditorExtensionError) => boolean,
+  onAskAiToFix: () => void,
+  onDismiss: () => void,
+|};
+
+declare export default React.ComponentType<Props>;

@@ -1,0 +1,9 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import type { VersionRestoringStatus } from '.';
+import type { GDevelopTheme } from '../UI/Theme';
+
+declare export var getStatusColor: (
+  gdevelopTheme: GDevelopTheme,
+  status: VersionRestoringStatus
+) => string;

@@ -1,0 +1,15 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+type Props = {|
+  project: gdProject,
+  objectType: string,
+  value: string,
+  onChange: string => void,
+  onFocus?: (event: SyntheticFocusEvent<HTMLInputElement>) => void,
+  disabled?: boolean,
+  eventsFunctionsExtension: gdEventsFunctionsExtension | null,
+|};
+
+declare export default function BehaviorTypeSelector(arg0: Props): React.Node;

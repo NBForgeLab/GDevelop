@@ -1,0 +1,12 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+type AnnouncementsFeedProps = {|
+  level?: 'urgent' | 'normal',
+  canClose?: boolean,
+  addMargins?: boolean,
+  hideLoader?: boolean,
+|};
+
+declare export var AnnouncementsFeed: React.ComponentType<AnnouncementsFeedProps>;

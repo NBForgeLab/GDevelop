@@ -1,0 +1,54 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type ResourcesListInterface } from '../ResourcesList';
+import { type ResourcePropertiesEditorInterface } from './ResourcePropertiesEditor';
+import { type EditorMosaicInterface } from '../UI/EditorMosaic';
+import { type ConfirmState } from '../UI/Alert/AlertContext';
+import {
+  type ResourceManagementProps,
+  type ResourceKind,
+} from '../ResourcesList/ResourceSource';
+import { type FileMetadata } from '../ProjectsStorage';
+import type { StorageProvider } from '../ProjectsStorage';
+
+type State = {|
+  selectedResources: Array<gdResource>,
+|};
+type Props = {|
+  setToolbar: React.Node => void,
+  project: gdProject,
+  onDeleteResource: (resource: gdResource, cb: (boolean) => void) => void,
+  onRenameResource: (
+    resource: gdResource,
+    newName: string,
+    cb: (boolean) => void
+  ) => void,
+  resourceManagementProps: ResourceManagementProps,
+  fileMetadata: ?FileMetadata,
+  storageProvider: StorageProvider,
+|};
+
+declare export default class ResourcesEditor extends React.Component<Props, State> {
+  static contextType: React.Context<ConfirmState>;
+  // $FlowFixMe[missing-local-annot]
+  static defaultProps: {| setToolbar: any |};
+  resourceExternallyChangedCallbackId: ?string;
+  editorMosaic: ?EditorMosaicInterface;
+  _propertiesEditor: ?ResourcePropertiesEditorInterface;
+  _resourcesList: ?ResourcesListInterface;
+  // $FlowFixMe[missing-local-annot]
+  resourcesLoader: any;
+  state: State;
+  refreshResourcesList(): void;
+  updateToolbar: () => void;
+  deleteResources: (resources: Array<gdResource>) => Promise<void>;
+  renameResource: (resource: gdResource, newName: string) => void;
+  _removeUnusedResources: (resourceKind: ResourceKind) => void;
+  _removeAllResourcesWithInvalidPath: () => void;
+  openProjectFolder: () => void;
+  toggleProperties: () => void;
+  _dropRemovedResourcesFromSelection: (selectedResourceNames: Array<string>, removedResourceNames: Array<string>) => void;
+  _onResourcesSelected: (selectedResources: Array<gdResource>) => void;
+  onResourceExternallyChanged: (resourceInfo: {| identifier: string |}) => void;
+}

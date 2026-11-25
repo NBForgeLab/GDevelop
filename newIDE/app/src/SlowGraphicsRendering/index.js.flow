@@ -1,0 +1,7 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+
+export type SlowGraphicsRenderingReason =
+  | 'software-rendering'
+  | 'integrated-graphics-card';
+declare export var useSlowGraphicsRenderingReason: () => SlowGraphicsRenderingReason | null;
