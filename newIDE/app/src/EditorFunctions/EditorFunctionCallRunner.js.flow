@@ -1,0 +1,91 @@
+// @flow
+// @flow-transitional-stub
+import { type I18n as I18nType } from '@lingui/core';
+import { type EventsGenerationResult } from '.';
+import { type EditorCallbacks, type EditorFunctionCall, type EditorFunctionCallResult, type EventsGenerationOptions, type AssetSearchAndInstallOptions, type AssetSearchAndInstallResult, type EffectAssetSearchAndInstallOptions, type EffectAssetSearchAndInstallResult, type RelatedAiRequestLastMessages, type ResourceSearchAndInstallOptions, type ResourceSearchAndInstallResult, type ToolOptions } from '.';
+import {
+  type SceneEventsOutsideEditorChanges,
+  type InstancesOutsideEditorChanges,
+  type ObjectsOutsideEditorChanges,
+  type ObjectGroupsOutsideEditorChanges,
+  type ProjectItemRenamedOutsideEditorChanges,
+  type WillDeleteSceneChanges,
+  type WillDeleteGameplayTestChanges,
+  type WillDeleteObjectChanges,
+  type ExtensionsOutsideEditorChanges,
+  type WillDeleteExtensionItemChanges,
+} from './OutsideEditorChanges';
+import { type EnsureExtensionInstalledOptions } from '../AiGeneration/UseEnsureExtensionInstalled';
+import { type AttachmentsForResources } from './AttachmentResources';
+
+type ProcessEditorFunctionCallsOptions = {|
+  project: ?gdProject,
+  functionCalls: Array<EditorFunctionCall>,
+  i18n: I18nType,
+  editorCallbacks: EditorCallbacks,
+  toolOptions: ToolOptions | null,
+  // The AI request's tools version (e.g. 'v12'), threaded to the functions so
+  // they can gate version-dependent behavior (e.g. isNoOpConsideredSuccess).
+  toolsVersion?: ?string,
+  // When true, a `run_script` call is exposed only non-mutating functions
+  // (explorer sub-agent scripts, which must stay read-only).
+  runScriptReadOnly?: boolean,
+  relatedAiRequestId: string | null,
+  getRelatedAiRequestLastMessages: () => RelatedAiRequestLastMessages,
+  generateEvents: (
+    options: EventsGenerationOptions
+  ) => Promise<EventsGenerationResult>,
+  onSceneEventsModifiedOutsideEditor: (
+    changes: SceneEventsOutsideEditorChanges
+  ) => void,
+  onInstancesModifiedOutsideEditor: (
+    changes: InstancesOutsideEditorChanges
+  ) => void,
+  onObjectsModifiedOutsideEditor: (
+    changes: ObjectsOutsideEditorChanges
+  ) => void,
+  onEffectsModifiedOutsideEditor: () => void,
+  onObjectGroupsModifiedOutsideEditor: (
+    changes: ObjectGroupsOutsideEditorChanges
+  ) => void,
+  onProjectItemRenamedOutsideEditor: (
+    changes: ProjectItemRenamedOutsideEditorChanges
+  ) => void,
+  onWillDeleteScene: (changes: WillDeleteSceneChanges) => Promise<void>,
+  onWillDeleteGameplayTest: (
+    changes: WillDeleteGameplayTestChanges
+  ) => Promise<void>,
+  onWillDeleteObject: (changes: WillDeleteObjectChanges) => void,
+  sendChangesToEditor: () => void,
+  onExtensionsModifiedOutsideEditor: (
+    changes: ExtensionsOutsideEditorChanges
+  ) => void,
+  ensureExtensionsUpToDate: () => Promise<void>,
+  reloadExtensionMetadata: (extensionName: string) => void,
+  onWillDeleteExtensionItem: (
+    changes: WillDeleteExtensionItemChanges
+  ) => Promise<void>,
+  ensureExtensionInstalled: (
+    options: EnsureExtensionInstalledOptions
+  ) => Promise<void>,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  searchAndInstallAsset: (
+    options: AssetSearchAndInstallOptions
+  ) => Promise<AssetSearchAndInstallResult>,
+  searchAndInstallEffectAsset: (
+    options: EffectAssetSearchAndInstallOptions
+  ) => Promise<EffectAssetSearchAndInstallResult>,
+  searchAndInstallResources: (
+    options: ResourceSearchAndInstallOptions
+  ) => Promise<ResourceSearchAndInstallResult>,
+  attachmentsForResources: AttachmentsForResources,
+  getAssetStoreTagForNewObject: (objectType: string) => string | null,
+|};
+
+declare export var processEditorFunctionCalls: (arg0: ProcessEditorFunctionCallsOptions) => Promise<{|
+  results: Array<EditorFunctionCallResult>,
+  createdSceneNames: Array<string>,
+  createdExternalLayoutNames: Array<string>,
+  createdProject: ?gdProject,
+|}>;

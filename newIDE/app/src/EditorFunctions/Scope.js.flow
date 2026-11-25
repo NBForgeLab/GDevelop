@@ -1,0 +1,102 @@
+// @flow
+// @flow-transitional-stub
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+import { type OutsideEditorChangesTarget } from './OutsideEditorChanges';
+
+export type ToolScopeType =
+  | 'project'
+  | 'scene'
+  | 'external_layout'
+  | 'external_events'
+  | 'extension'
+  | 'custom_behavior'
+  | 'custom_object'
+  | 'custom_object_variant';
+export type ToolScope = {|
+  type: ToolScopeType,
+  scene_name?: string,
+  external_layout_name?: string,
+  external_events_name?: string,
+  extension_name?: string,
+  custom_behavior_name?: string,
+  custom_object_name?: string,
+  variant_name?: string,
+|};
+export type ScopeFailure = {| success: false, message: string |};
+export type ResolvedScope = {|
+  success: true,
+  scope: ToolScope,
+  // 'scene "Level"', 'custom object "UI::Dialog" (default variant)'...
+  label: string,
+  layout: ?gdLayout,
+  externalLayout: ?gdExternalLayout,
+  externalEvents: ?gdExternalEvents,
+  eventsFunctionsExtension: ?gdEventsFunctionsExtension,
+  eventsBasedBehavior: ?gdEventsBasedBehavior,
+  eventsBasedObject: ?gdEventsBasedObject,
+  // `eventsBasedObject.getDefaultVariant()` for the default variant ("").
+  variant: ?gdEventsBasedObjectVariant,
+  isDefaultVariant: boolean,
+  objectsContainer: ?gdObjectsContainer,
+  // The global objects, visible from a scene. Null inside custom objects
+  // (children only see each other) and for the project scope (the global
+  // objects are then `objectsContainer`).
+  globalObjectsContainer: ?gdObjectsContainer,
+  initialInstances: ?gdInitialInstancesContainer,
+  layersContainer: ?gdLayersContainer,
+  // Set for extensions installed from the store: every mutation must refuse
+  // with this message.
+  readOnlyReason: ?string,
+|};
+declare export var isTypeOfProjectExtension: (project: gdProject, type: string) => boolean;
+declare export var OBJECTS_SCOPE_TYPES: Array<ToolScopeType>;
+declare export var ALL_SCOPE_TYPES: Array<ToolScopeType>;
+declare export var BOTH_GIVEN_DISAGREE_MESSAGE: string;
+declare export var NAMED_VARIANT_REJECTED_MESSAGE: string;
+declare export var makeStoreExtensionReadOnlyMessage: (extensionName: string) => string;
+declare export var parseScopeArgument: (args: any, arg1: {|
+    allowedTypes: Array<ToolScopeType>,
+    legacySceneNameField?: string,
+  |}) => ToolScope | null;
+declare export var requireScopeArgument: (args: any, arg1: {|
+    allowedTypes: Array<ToolScopeType>,
+    legacySceneNameField?: string,
+    defaultScope?: ToolScope,
+  |}) => ToolScope;
+declare export var getScopeLabel: (scope: ToolScope) => string;
+declare export var getScopeLabelFromArgs: (args: any) => string;
+declare export var getSceneNameFromArgs: (args: any) => string;
+export type FunctionTarget = {|
+  // `Ext::Fn` for a free function, `Ext::Beh.Fn` / `Ext::Obj.Fn` for the
+  // functions of a custom behavior or custom object.
+  functionReference: string,
+  extensionName: string,
+  functionName: string,
+  behaviorName?: string,
+  objectName?: string,
+|};
+declare export var getFunctionTargetFromArgs: (args: any) => FunctionTarget | null;
+declare export var getSceneNotFoundMessage: (project: gdProject, sceneName: string) => string;
+declare export var getExtensionNames: (project: gdProject) => Array<string>;
+declare export var getNamedVariantNames: (eventsBasedObject: gdEventsBasedObject) => Array<string>;
+declare export var resolveScope: (project: gdProject, scope: ToolScope) => ResolvedScope | ScopeFailure;
+declare export var resolveScopeFromArgs: (project: gdProject, args: any, options: {|
+    allowedTypes: Array<ToolScopeType>,
+    legacySceneNameField?: string,
+    defaultScope?: ToolScope,
+  |}) => ResolvedScope | ScopeFailure;
+declare export var getNamedVariantRejection: (resolvedScope: ResolvedScope) => ScopeFailure | null;
+declare export var getReadOnlyRejection: (resolvedScope: ResolvedScope) => ScopeFailure | null;
+declare export var complyVariantsAfterStructuralEdit: (project: gdProject, resolvedScope: ResolvedScope) => void;
+declare export var getOutsideEditorChangesTarget: (resolvedScope: ResolvedScope) => OutsideEditorChangesTarget;
+declare export var getScopeObjectsContainer: (resolvedScope: ResolvedScope) => gdObjectsContainer;
+declare export var getObjectLookupScopeText: (resolvedScope: ResolvedScope) => string;
+declare export var updateBehaviorsSharedDataInScope: (project: gdProject, resolvedScope: ResolvedScope) => void;
+declare export var renameLayerInScope: (project: gdProject, resolvedScope: ResolvedScope, oldName: string, newName: string) => void;
+declare export var removeLayerInScope: (project: gdProject, resolvedScope: ResolvedScope, layerName: string) => void;
+declare export var mergeLayersInScope: (project: gdProject, resolvedScope: ResolvedScope, originLayerName: string, targetLayerName: string) => void;
+declare export var withScopeObjectsContainersList: <T>(project: gdProject, resolvedScope: ResolvedScope, fn: (objectsContainersList: gdObjectsContainersList) => T) => T;
+declare export var makeScopeProjectScopedContainersAccessor: (project: gdProject, resolvedScope: ResolvedScope, eventsFunction: ?gdEventsFunction) => {| accessor: ProjectScopedContainersAccessor, dispose: () => void |};
+declare export var getFunctionsContainerOfScope: (resolvedScope: ResolvedScope) => ?gdEventsFunctionsContainer;
+declare export var getEventsFunctionInScope: (resolvedScope: ResolvedScope, functionName: ?string) => {| success: true, eventsFunction: gdEventsFunction |} | ScopeFailure;
+declare export var normalizeLegacyArguments: (args: any) => any;

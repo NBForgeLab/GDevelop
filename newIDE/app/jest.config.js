@@ -3,7 +3,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const setupTestsPath = fs.existsSync(path.join(__dirname, 'src', 'setupTests.ts'))
+const setupTestsPath = fs.existsSync(
+  path.join(__dirname, 'src', 'setupTests.ts')
+)
   ? '<rootDir>/src/setupTests.ts'
   : '<rootDir>/src/setupTests.js';
 
@@ -31,6 +33,7 @@ module.exports = {
   moduleNameMapper: {
     '^react-native$': 'react-native-web',
     '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy',
+    '^(.+\\.d\\.ts)\\?raw$': '$1',
   },
   moduleFileExtensions: [
     'web.js',

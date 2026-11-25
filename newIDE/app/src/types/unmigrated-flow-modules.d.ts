@@ -139,6 +139,14 @@ declare module '*.css' {
   const content: { [className: string]: string };
   export default content;
 }
+declare module '*.md' {
+  const content: string;
+  export default content;
+}
+declare module '*.d.ts?raw' {
+  const content: string;
+  export default content;
+}
 
 // Test and UI libraries without bundled TypeScript declarations
 declare module 'react-test-renderer' {

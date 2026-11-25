@@ -1,0 +1,14 @@
+// @flow
+// @flow-transitional-stub
+import { type I18n as I18nType } from '@lingui/core';
+import { type EventsFunctionCodeWriter } from '../EventsFunctionsExtensionsLoader';
+import {
+  type LaunchFunctionOptionsWithProject,
+  type LaunchFunctionOptionsWithoutProject,
+} from './index';
+
+declare export var makeFakeEventsFunctionCodeWriter: () => EventsFunctionCodeWriter;
+// $FlowFixMe[incompatible-type]
+declare export var makeFakeI18n: (fakeI18n?: any) => I18nType;
+declare export var makeFakeLaunchFunctionOptionsWithoutProject: () => LaunchFunctionOptionsWithoutProject;
+declare export var makeFakeLaunchFunctionOptionsWithProject: (project: gdProject) => LaunchFunctionOptionsWithProject;

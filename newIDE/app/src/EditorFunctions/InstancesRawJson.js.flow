@@ -1,0 +1,38 @@
+// @flow
+// @flow-transitional-stub
+import { type AtlasGrid } from './SimpleTileMapAtlasGrid';
+
+type NamedValue<T> = {| name: string, value: T |};
+type InstanceRawJson = {|
+  numberProperties: Array<NamedValue<number>>,
+  stringProperties: Array<NamedValue<string>>,
+  flippedX: boolean,
+  flippedY: boolean,
+  flippedZ: boolean,
+|};
+type TileMapAtlas = {|
+  tileSize: number,
+  grid: AtlasGrid,
+  storedGrid: AtlasGrid,
+|};
+
+export type InstancesRawJsonChangeResult =
+  | {| success: true, changes: Array<string>, haveObjectsChanged: boolean |}
+  | {| success: false, message: string |};
+declare export var getInstanceRawJson: (instance: gdInitialInstance) => InstanceRawJson;
+declare export var getChangedInstancesObjectNames: (instances: Array<gdInitialInstance>, changes: Array<any>) => Array<string>;
+declare export var loadTileMapAtlases: (arg0: {|
+  project: gdProject,
+  objectsContainer: gdObjectsContainer,
+  globalObjectsContainer: gdObjectsContainer | null,
+  objectNames: Array<string>,
+  PixiResourcesLoader: any,
+|}) => Promise<Map<string, TileMapAtlas>>;
+declare export var applyInstancesRawJson: (arg0: {|
+  project: gdProject,
+  objectsContainer: gdObjectsContainer,
+  globalObjectsContainer: gdObjectsContainer | null,
+  instances: Array<gdInitialInstance>,
+  changes: Array<any>,
+  tileMapAtlases: Map<string, TileMapAtlas>,
+|}) => InstancesRawJsonChangeResult;

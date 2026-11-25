@@ -1,0 +1,40 @@
+// @flow
+// @flow-transitional-stub
+import { type AssetShortHeader } from '../Utils/GDevelopServices/Asset';
+import { type EditorFunctionGenericOutput } from './index';
+
+export type ObjectSizeInfo = {|
+  // `width`/`height`/`centerX`/`centerY` are `null` when size is not known.
+  // `depth`/`originZ`/`centerZ` are `null` when the object is 2D.
+  width: number | null,
+  height: number | null,
+  depth: number | null,
+  // Offsets from the minimum corner of the object box: `origin*` is the point
+  // an instance x;y;z positions, `center*` the point rotations turn around.
+  originX: number,
+  originY: number,
+  originZ: number | null,
+  centerX: number | null,
+  centerY: number | null,
+  centerZ: number | null,
+|};
+declare export var ensureObjectSizeInfoLoaded: (object: gdObject, project: gdProject, pixiResourcesLoader: any) => Promise<void>;
+declare export var getObjectSizeInfo: (object: gdObject, project: gdProject, pixiResourcesLoader: any, assetShortHeader?: AssetShortHeader | null) => ObjectSizeInfo | null;
+declare export var getObjectSizeInfoHints: (objectSizeInfoByName: {
+  [string]: ObjectSizeInfo | null,
+}) => Array<{|
+  code: string,
+  message: string,
+  objectNames: Array<string>,
+|}>;
+declare export var extractRequiredString: (args: any, propertyName: string) => string;
+declare export var makeGenericFailure: (message: string) => EditorFunctionGenericOutput;
+declare export var makeLayerNotFoundFailure: (layerName: string, scopeLabel: string, layersContainer: gdLayersContainer) => EditorFunctionGenericOutput;
+declare export var shouldHideProperty: (property: gdPropertyDescriptor) => boolean;
+declare export var formatPropertiesList: (properties: gdMapStringPropertyDescriptor) => string;
+declare export var getSimplifiedInstance: (instance: gdInitialInstance, defaultSize: {
+    +width: number | null,
+    +height: number | null,
+    +depth: number | null,
+    ...
+  } | null) => Object;

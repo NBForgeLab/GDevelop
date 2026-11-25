@@ -1,0 +1,22 @@
+// @flow
+// @flow-transitional-stub
+import { type ResolvedScope, type ToolScopeType } from './Scope';
+
+declare export var MOVE_INSTANCES_SCOPE_TYPES: Array<ToolScopeType>;
+export type MoveInstancesOutputFields = {|
+  movedInstancesCount: number,
+  movedInstancesCountByObjectName: { [objectName: string]: number },
+|};
+export type MoveInstancesResult =
+  | {| success: false, message: string |}
+  | {|
+      success: true,
+      message: string,
+      targetScope: ResolvedScope,
+      ...MoveInstancesOutputFields,
+    |};
+declare export var moveInstancesToScope: (arg0: {|
+  project: gdProject,
+  sourceScope: ResolvedScope,
+  moveInstancesArgs: any,
+|}) => MoveInstancesResult;

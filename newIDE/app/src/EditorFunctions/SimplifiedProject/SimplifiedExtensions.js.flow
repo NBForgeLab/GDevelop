@@ -1,0 +1,178 @@
+// @flow
+// @flow-transitional-stub
+import type {
+  SimplifiedObject,
+  SimplifiedObjectGroup,
+  SimplifiedLayer,
+  SimplifiedVariable,
+  SimplifiedTest,
+} from './SimplifiedProject';
+
+export type SimplifiedParameter = {|
+  name: string,
+  type: string,
+  label?: string,
+  extraInfo?: string,
+  optional?: boolean,
+  // The `Object` (and `Behavior`) parameters every behavior/object function
+  // has: not declared by the author, offsetting the `_PARAMn_` sentence indexes.
+  isImplicit?: boolean,
+|};
+export type SimplifiedFunction = {|
+  functionName: string,
+  functionType: string,
+  fullName?: string,
+  description?: string,
+  sentence?: string,
+  isPrivate?: boolean,
+  isAsync?: boolean,
+  isDeprecated?: boolean,
+  isLifecycle?: boolean,
+  expressionType?: string,
+  getterName?: string,
+  parameters: Array<SimplifiedParameter>,
+  // What the events of the function can use, when it is not what the function
+  // declares: an `ActionWithOperator` takes the parameters of its getter plus
+  // the `Value` it sets. Absent when it is the same as `parameters`.
+  parametersForEvents?: Array<SimplifiedParameter>,
+  eventsCount: number,
+|};
+export type SimplifiedProperty = {|
+  propertyName: string,
+  type: string,
+  label?: string,
+  description?: string,
+  defaultValue?: string,
+  group?: string,
+  choices?: Array<{| value: string, label: string |}>,
+  extraInfo?: Array<string>,
+  hidden?: boolean,
+  advanced?: boolean,
+  deprecated?: boolean,
+  measurementUnit?: string,
+|};
+export type SimplifiedCustomBehavior = {|
+  behaviorName: string,
+  fullName?: string,
+  description?: string,
+  objectType?: string,
+  isPrivate?: boolean,
+  properties: Array<SimplifiedProperty>,
+  sharedProperties?: Array<SimplifiedProperty>,
+  functions: Array<SimplifiedFunction>,
+|};
+export type SimplifiedArea = {|
+  minX: number,
+  minY: number,
+  minZ: number,
+  maxX: number,
+  maxY: number,
+  maxZ: number,
+|};
+export type SimplifiedCustomObjectVariant = {|
+  variantName: string,
+  assetStoreAssetId?: string,
+  assetStoreOriginalName?: string,
+  area: SimplifiedArea,
+  layers: Array<SimplifiedLayer>,
+  // Same names and types as the default variant; behaviors and variables
+  // carry this variant's values.
+  childObjects: Array<SimplifiedObject>,
+  instancesDescription: string,
+  // Set when child objects are declared but no initial instance is placed.
+  // Extension code can still draw the object or create children at runtime.
+  hasNoChildInstance?: true,
+|};
+export type SimplifiedCustomObject = {|
+  objectName: string,
+  fullName?: string,
+  description?: string,
+  defaultName?: string,
+  isRenderedIn3D?: boolean,
+  isAnimatable?: boolean,
+  isTextContainer?: boolean,
+  isInnerAreaFollowingParentSize?: boolean,
+  isPrivate?: boolean,
+  area: SimplifiedArea,
+  properties: Array<SimplifiedProperty>,
+  functions: Array<SimplifiedFunction>,
+  childObjects: Array<SimplifiedObject>,
+  objectGroups?: Array<SimplifiedObjectGroup>,
+  layers: Array<SimplifiedLayer>,
+  instancesDescription: string,
+  // Same as on a variant: child objects declared, no instance of them placed.
+  hasNoChildInstance?: true,
+  variants?: Array<SimplifiedCustomObjectVariant>,
+|};
+export type SimplifiedExtensionDependency = {|
+  dependencyName: string,
+  type: string,
+  exportName?: string,
+  version?: string,
+|};
+export type SimplifiedExtension = {|
+  extensionName: string,
+  fullName: string,
+  shortDescription: string,
+  description?: string,
+  category?: string,
+  tags?: string,
+  version?: string,
+  author?: string,
+  isFromStore?: true,
+  originIdentifier?: string,
+  globalVariables?: Array<SimplifiedVariable>,
+  sceneVariables?: Array<SimplifiedVariable>,
+  freeFunctions?: Array<SimplifiedFunction>,
+  customBehaviors?: Array<SimplifiedCustomBehavior>,
+  customObjects?: Array<SimplifiedCustomObject>,
+  tests?: Array<SimplifiedTest>,
+  dependencies?: Array<SimplifiedExtensionDependency>,
+|};
+declare export var EXTENSION_STORE_ORIGIN_NAME: string;
+declare export var isExtensionFromStore: (eventsFunctionsExtension: gdEventsFunctionsExtension) => boolean;
+export type FunctionOwner = 'extension' | 'behavior' | 'object';
+declare export var getImplicitParametersCount: (owner: FunctionOwner) => number;
+declare export var isLifecycleFunction: (gd: libGDevelop, owner: FunctionOwner, functionName: string) => boolean;
+declare export var getFunctionTypeAsString: (gd: libGDevelop, eventsFunction: gdEventsFunction) => string;
+declare export var getSimplifiedParameter: (parameterMetadata: gdParameterMetadata, isImplicit: boolean) => SimplifiedParameter;
+declare export var getSimplifiedFunction: (gd: libGDevelop, eventsFunction: gdEventsFunction, owner: FunctionOwner, functionsContainer: gdEventsFunctionsContainer) => SimplifiedFunction;
+declare export var getSimplifiedFunctions: (gd: libGDevelop, eventsFunctionsContainer: gdEventsFunctionsContainer, owner: FunctionOwner) => Array<SimplifiedFunction>;
+declare export var getSimplifiedProperty: (property: gdNamedPropertyDescriptor) => SimplifiedProperty;
+declare export var getSimplifiedProperties: (propertiesContainer: gdPropertiesContainer) => Array<SimplifiedProperty>;
+declare export var getSimplifiedArea: (container: gdEventsBasedObject | gdEventsBasedObjectVariant) => SimplifiedArea;
+declare export var getSimplifiedDependencies: (eventsFunctionsExtension: gdEventsFunctionsExtension) => Array<SimplifiedExtensionDependency>;
+declare export var getSimplifiedTests: (testsContainer: gdTestsContainer) => Array<SimplifiedTest>;
+export type SimplifiedContainersBuilders = {|
+  getSimplifiedObjectsJson: (
+    objects: gdObjectsContainer
+  ) => Array<SimplifiedObject>,
+  getSimplifiedObjectGroups: (
+    objectGroups: gdObjectGroupsContainer,
+    objectsContainersList: gdObjectsContainersList
+  ) => Array<SimplifiedObjectGroup>,
+  getSimplifiedLayers: (layers: gdLayersContainer) => Array<SimplifiedLayer>,
+  getInstancesDescription: (
+    initialInstances: gdInitialInstancesContainer,
+    layers: gdLayersContainer,
+    containerKind: 'scene' | 'custom-object'
+  ) => string,
+  getSimplifiedVariablesContainer: (
+    container: gdVariablesContainer
+  ) => Array<SimplifiedVariable>,
+|};
+declare export var makeSimplifiedExtensionsBuilder: (gd: libGDevelop, builders: SimplifiedContainersBuilders) => {|
+  getSimplifiedExtension: (
+    eventsFunctionsExtension: gdEventsFunctionsExtension
+  ) => SimplifiedExtension,
+  getSimplifiedExtensions: (project: gdProject) => Array<SimplifiedExtension>,
+  getSimplifiedCustomObject: (
+    eventsBasedObject: gdEventsBasedObject
+  ) => SimplifiedCustomObject,
+  getSimplifiedCustomBehavior: (
+    eventsBasedBehavior: gdEventsBasedBehavior
+  ) => SimplifiedCustomBehavior,
+  getSimplifiedCustomObjectVariant: (
+    variant: gdEventsBasedObjectVariant
+  ) => SimplifiedCustomObjectVariant,
+|};

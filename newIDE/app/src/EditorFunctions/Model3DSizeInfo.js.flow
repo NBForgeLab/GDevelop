@@ -1,0 +1,8 @@
+// @flow
+// @flow-transitional-stub
+import { type ObjectSizeInfo } from './Utils';
+
+declare export var ensureModel3DMeasurementLoaded: (object: gdObject, project: gdProject, pixiResourcesLoader: any) => Promise<void>;
+declare export var ensureModel3DMeasurementsLoaded: (objects: Array<gdObject>, project: gdProject, pixiResourcesLoader: any) => Promise<void>;
+declare export var getModel3DObjectSizeInfo: (object: gdObject, project: gdProject) => ObjectSizeInfo | null;
+declare export var isModel3DObjectMeasured: (object: gdObject, project: gdProject) => boolean;

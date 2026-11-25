@@ -1,0 +1,83 @@
+// @flow
+// @flow-transitional-stub
+
+export type OutsideEditorChangesTarget = {|
+  scene: ?gdLayout,
+  externalLayout?: ?gdExternalLayout,
+  eventsBasedObject?: ?gdEventsBasedObject,
+  variantName?: ?string,
+|};
+declare export var getOutsideEditorChangesTargetKey: (target: {
+  +scene: ?gdLayout,
+  +externalLayout?: ?gdExternalLayout,
+  +eventsBasedObject?: ?gdEventsBasedObject,
+  +variantName?: ?string,
+  ...
+}) => string;
+export type SceneEventsOutsideEditorChanges = {|
+  scene: ?gdLayout,
+  // Set instead of `scene` when the events of a function of an extension
+  // were changed.
+  eventsFunction?: ?gdEventsFunction,
+  extensionName?: ?string,
+  // Set instead of `scene` when the events of external events were changed.
+  externalEvents?: ?gdExternalEvents,
+  newOrChangedAiGeneratedEventIds: Set<string>,
+|};
+declare export var getSceneEventsOutsideEditorChangesKey: (changes: SceneEventsOutsideEditorChanges) => string;
+export type InstancesOutsideEditorChanges = {|
+  ...OutsideEditorChangesTarget,
+|};
+export type ObjectsOutsideEditorChanges = {|
+  ...OutsideEditorChangesTarget,
+  isNewObjectTypeUsed: boolean,
+|};
+export type ObjectGroupsOutsideEditorChanges = {|
+  ...OutsideEditorChangesTarget,
+|};
+export type RenamableProjectItemKind =
+  | 'scene'
+  | 'external-layout'
+  | 'gameplay-test'
+  | 'extension'
+  | 'custom-object'
+  | 'custom-behavior'
+  | 'function';
+export type ProjectItemRenamedOutsideEditorChanges = {|
+  kind: RenamableProjectItemKind,
+  oldName: string,
+  newName: string,
+  extensionName?: string,
+  behaviorName?: string,
+  objectName?: string,
+|};
+export type ExtensionsOutsideEditorChanges = {|
+  extensionNames: Array<string>,
+  needsCodeRegeneration: boolean,
+  // Set when an extension of `extensionNames` was removed from the project.
+  deleted?: boolean,
+|};
+export type WillDeleteExtensionItemChanges = {|
+  kind:
+    | 'extension'
+    | 'custom-object'
+    | 'custom-object-variant'
+    | 'custom-behavior'
+    | 'function',
+  extensionName: string,
+  objectName?: string,
+  behaviorName?: string,
+  variantName?: string,
+  functionName?: string,
+|};
+export type WillDeleteSceneChanges = {|
+  scene?: gdLayout,
+  externalLayout?: gdExternalLayout,
+|};
+export type WillDeleteGameplayTestChanges = {|
+  gameplayTestProjectItemName: string,
+|};
+export type WillDeleteObjectChanges = {|
+  ...OutsideEditorChangesTarget,
+  objectName: string,
+|};

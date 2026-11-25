@@ -1,0 +1,4 @@
+// @flow
+// @flow-transitional-stub
+
+declare export var NON_SCRIPTABLE_FUNCTION_NAMES: Set<string>;

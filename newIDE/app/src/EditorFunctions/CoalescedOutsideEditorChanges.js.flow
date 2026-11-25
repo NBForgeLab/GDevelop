@@ -1,0 +1,39 @@
+// @flow
+// @flow-transitional-stub
+import { type SceneEventsOutsideEditorChanges, type InstancesOutsideEditorChanges, type ObjectsOutsideEditorChanges, type ObjectGroupsOutsideEditorChanges, type ExtensionsOutsideEditorChanges } from './OutsideEditorChanges';
+import { type EventsFunctionsExtensionsState } from '../EventsFunctionsExtensionsLoader/EventsFunctionsExtensionsContext';
+
+export type OutsideEditorChangesNotifications = {|
+  onSceneEventsModifiedOutsideEditor: (
+    changes: SceneEventsOutsideEditorChanges
+  ) => void,
+  onInstancesModifiedOutsideEditor: (
+    changes: InstancesOutsideEditorChanges
+  ) => void,
+  onObjectsModifiedOutsideEditor: (
+    changes: ObjectsOutsideEditorChanges
+  ) => void,
+  // The effects of a layer changed: the game shown by the editor reloads them.
+  onEffectsModifiedOutsideEditor: () => void,
+  onObjectGroupsModifiedOutsideEditor: (
+    changes: ObjectGroupsOutsideEditorChanges
+  ) => void,
+  onExtensionsModifiedOutsideEditor: (
+    changes: ExtensionsOutsideEditorChanges
+  ) => void,
+|};
+export type CoalescedOutsideEditorChanges = {|
+  // To give to the editor functions instead of the notifications: they
+  // accumulate the changes until `flush`.
+  ...OutsideEditorChangesNotifications,
+  ensureExtensionsUpToDate: () => Promise<void>,
+  reloadExtensionMetadata: (extensionName: string) => void,
+  /** Notify the editors once per change type and target. */
+  flush: () => void,
+|};
+declare export var makeCoalescedOutsideEditorChanges: (arg0: {|
+  project: ?gdProject,
+  eventsFunctionsExtensionsState: EventsFunctionsExtensionsState,
+  notifications: OutsideEditorChangesNotifications,
+  onExtensionsRegenerated: () => void,
+|}) => CoalescedOutsideEditorChanges;

@@ -1,0 +1,27 @@
+// @flow
+// @flow-transitional-stub
+import {
+  type AiGeneratedEventChange,
+  type AiGeneratedEventUndeclaredVariable,
+  type AiGeneratedEventMissingObjectBehavior,
+} from '../Utils/GDevelopServices/Generation';
+import { type ResolvedScope } from './Scope';
+
+declare export var applyEventsChanges: (project: gdProject, sceneEvents: gdEventsList, eventOperationsInput: Array<AiGeneratedEventChange>, aiGeneratedEventId: string) => {| applied: number, errors: Array<string> |};
+declare export var addUndeclaredVariables: (arg0: {|
+  project: gdProject,
+  resolvedScope: ResolvedScope,
+  undeclaredVariables: Array<AiGeneratedEventUndeclaredVariable>,
+|}) => void;
+declare export var addObjectUndeclaredVariables: (arg0: {|
+  project: gdProject,
+  resolvedScope: ResolvedScope,
+  objectName: string,
+  undeclaredVariables: Array<AiGeneratedEventUndeclaredVariable>,
+|}) => void;
+declare export var addMissingObjectBehaviors: (arg0: {|
+  project: gdProject,
+  resolvedScope: ResolvedScope,
+  objectName: string,
+  missingBehaviors: Array<AiGeneratedEventMissingObjectBehavior>,
+|}) => void;

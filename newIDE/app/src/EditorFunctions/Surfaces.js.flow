@@ -1,0 +1,82 @@
+// @flow
+// @flow-transitional-stub
+import { type ResolvedScope } from './Scope';
+import { type EditorCallbacks } from './index';
+import { type ObjectSizeInfo } from './Utils';
+
+type SurfaceUp = 'z' | '-y';
+type SurfaceOptions = {|
+  up: SurfaceUp,
+  // The only objects that are surfaces, or null for all of them.
+  includedObjectNames: Array<string> | null,
+  excludedObjectNames: Array<string>,
+|};
+type SurfacesMode = '3d' | '2d';
+type SurfaceBeneath = {|
+  z?: number,
+  y?: number,
+  objectName: string,
+  id: string,
+  gap: number,
+|};
+type SurfacePoint = {| x: number, y: number, z?: number |};
+type SurfaceGrid = {|
+  highest: SurfacePoint | null,
+  lowest: SurfacePoint | null,
+  xs: Array<number>,
+  ys?: Array<number>,
+  z?: Array<Array<number | null>>,
+  y?: Array<number | null>,
+|};
+
+declare export var parseSurfaceOptions: (arg0: {|
+  args: any,
+  argumentName: 'drop_to_surface' | 'surface_beneath',
+  // False in 2D, where the up direction is always `-y`.
+  isUpAllowed: boolean,
+  objectsContainer: gdObjectsContainer,
+  globalObjectsContainer: gdObjectsContainer | null,
+|}) => | {| success: true, options: SurfaceOptions | null |}
+  | {| success: false, message: string |};
+declare export var getInstanceBox: (arg0: {|
+  position: $ReadOnlyArray<number>,
+  size: $ReadOnlyArray<number>,
+  objectSizeInfo: ObjectSizeInfo | null,
+|}) => {| min: Array<number>, max: Array<number> |} | null;
+declare export var dropInstancesOnSurfaces: (arg0: {|
+  resolvedScope: ResolvedScope,
+  sendChangesToEditor: () => void,
+  editorCallbacks: EditorCallbacks,
+  instances: Array<gdInitialInstance>,
+  mode: SurfacesMode,
+  surfaceOptions: SurfaceOptions,
+  areInstancesPlacedByBrush: boolean,
+  isFromAboveEverything: boolean,
+  getInstanceSize: (instance: gdInitialInstance) => Array<number>,
+  objectSizeInfo: ObjectSizeInfo | null,
+|}) => Promise<
+  {| success: true, message: string |} | {| success: false, message: string |}
+>;
+export type InstanceWithBox = {|
+  instance: gdInitialInstance,
+  mode: SurfacesMode,
+  box: {| min: Array<number>, max: Array<number> |},
+|};
+declare export var getSurfacesOfInstances: (arg0: {|
+  resolvedScope: ResolvedScope,
+  sendChangesToEditor: () => void,
+  editorCallbacks: EditorCallbacks,
+  instancesWithBox: Array<InstanceWithBox>,
+  surfaceOptions: SurfaceOptions,
+  grid: number | null,
+|}) => Promise<
+  | {|
+      success: true,
+      message: string,
+      surfaces: Array<{|
+        surfaceBeneath: SurfaceBeneath | null,
+        surfaceGrid?: SurfaceGrid,
+      |}>,
+    |}
+  | {| success: false, message: string |}
+>;
