@@ -12,10 +12,6 @@ declare module '*/MainFrame' {
   const content: any;
   export default content;
 }
-declare module '*/SceneEditor' {
-  const content: any;
-  export default content;
-}
 declare module '*/EventsSheet' {
   const content: any;
   export default content;
@@ -45,6 +41,7 @@ declare module 'slugs' {
 declare module '@lingui/macro' {
   import * as React from 'react';
   export const Trans: React.ComponentType<any>;
+  export const Plural: React.ComponentType<any>;
   export const t: (strings: TemplateStringsArray, ...values: any[]) => string;
 }
 

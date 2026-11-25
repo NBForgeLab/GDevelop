@@ -1,0 +1,15 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type UnsavedChanges } from '../../MainFrame/UnsavedChangesContext';
+import { type ExtensionItemConfigurationAttribute } from '../../EventsFunctionsExtensionEditor';
+
+type Props = {|
+  project: gdProject,
+  eventsFunctionsExtension: gdEventsFunctionsExtension,
+  eventsBasedBehavior: gdEventsBasedBehavior,
+  unsavedChanges?: ?UnsavedChanges,
+  onConfigurationUpdated?: (?ExtensionItemConfigurationAttribute) => void,
+|};
+
+declare export default function EventsBasedBehaviorEditor(arg0: Props): React.Node;

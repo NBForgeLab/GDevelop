@@ -1,0 +1,64 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type UnsavedChanges } from '../../MainFrame/UnsavedChangesContext';
+import { type ExtensionItemConfigurationAttribute } from '../../EventsFunctionsExtensionEditor';
+import { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
+import { type VariableDialogOpeningProps } from '../../VariablesList/VariablesEditorDialog';
+
+type Props = {|
+  project: gdProject,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  globalObjectsContainer: gdObjectsContainer | null,
+  objectsContainer: gdObjectsContainer,
+  eventsFunction: gdEventsFunction,
+  eventsBasedBehavior: gdEventsBasedBehavior | null,
+  eventsBasedObject: gdEventsBasedObject | null,
+  eventsFunctionsContainer: gdEventsFunctionsContainer,
+  eventsFunctionsExtension: gdEventsFunctionsExtension,
+  onParametersOrGroupsUpdated: () => void,
+  helpPagePath?: string,
+  onConfigurationUpdated?: (?ExtensionItemConfigurationAttribute) => void,
+  freezeParameters?: boolean,
+  freezeEventsFunctionType?: boolean,
+  onMoveFreeEventsParameter?: (
+    eventsFunction: gdEventsFunction,
+    oldIndex: number,
+    newIndex: number,
+    done: (boolean) => void
+  ) => void,
+  onMoveBehaviorEventsParameter?: (
+    eventsBasedBehavior: gdEventsBasedBehavior,
+    eventsFunction: gdEventsFunction,
+    oldIndex: number,
+    newIndex: number,
+    done: (boolean) => void
+  ) => void,
+  onMoveObjectEventsParameter?: (
+    eventsBasedObject: gdEventsBasedObject,
+    eventsFunction: gdEventsFunction,
+    oldIndex: number,
+    newIndex: number,
+    done: (boolean) => void
+  ) => void,
+  onFunctionParameterWillBeRenamed: (
+    eventsFunction: gdEventsFunction,
+    oldName: string,
+    newName: string
+  ) => void,
+  onFunctionParameterTypeChanged: (
+    eventsFunction: gdEventsFunction,
+    parameterName: string
+  ) => void,
+  unsavedChanges?: ?UnsavedChanges,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+|};
+
+export type EventsFunctionConfigurationEditorInterface = {
+  editEventsFunctionParameter: VariableDialogOpeningProps => void,
+};
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<EventsFunctionConfigurationEditorInterface>,
+}>;

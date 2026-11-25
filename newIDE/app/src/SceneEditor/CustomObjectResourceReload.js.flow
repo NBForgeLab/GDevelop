@@ -1,0 +1,19 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+
+export type EventsBasedObjectChildrenEditedOptions = {|
+  editedObject?: ?gdObject,
+  hasResourceChanged?: boolean,
+|};
+
+declare export var getImageResourceNamesForEditedObject: (
+  project: gdProject,
+  editedObject: gdObject
+) => Array<string>;
+
+declare export var shouldResetObjectRendererForCustomObjectChildrenEdit: (options: {|
+  project: gdProject,
+  object: gdObject,
+  editedEventsBasedObject: gdEventsBasedObject,
+  editedObject?: ?gdObject,
+|}) => boolean;

@@ -244,3 +244,11 @@ export declare const sendChoosePlanClicked: (metadata: {
   pricingSystemId: string | null;
   dialogVariant?: string;
 }) => void;
+
+export declare const sendEventsExtractedAsFunction: (metadata: {
+  step: 'begin' | 'end';
+  parentEditor:
+    | 'scene-events-editor'
+    | 'extension-events-editor'
+    | 'external-events-editor';
+}) => void;

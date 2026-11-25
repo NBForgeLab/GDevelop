@@ -1,0 +1,20 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import React from 'react';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+
+type Props = {|
+  open: boolean,
+  layout: gdLayout,
+  project: gdProject,
+  onApply: () => void,
+  onClose: () => void,
+  onOpenMoreSettings?: ?() => void,
+  onEditVariables: () => void,
+  resourceManagementProps: ResourceManagementProps,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  onBackgroundColorChanged: () => void,
+|};
+
+declare export default React.ComponentType<Props>;

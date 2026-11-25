@@ -1,0 +1,16 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type ResourceManagementProps } from '../../ResourcesList/ResourceSource';
+
+type Props = {|
+  project: gdProject,
+  eventsFunctionsExtension: gdEventsFunctionsExtension,
+  onClose: () => void,
+  open: boolean,
+
+  // For source files:
+  resourceManagementProps: ResourceManagementProps,
+|};
+
+declare export default function OptionsEditorDialog(arg0: Props): React.Node;

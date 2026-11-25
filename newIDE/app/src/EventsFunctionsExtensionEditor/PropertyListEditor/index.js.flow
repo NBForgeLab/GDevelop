@@ -1,0 +1,30 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+declare export var propertiesRootFolderId: string;
+declare export var sharedPropertiesRootFolderId: string;
+
+declare export var getTreeViewItemIdFromPropertyFolderOrProperty: (
+  propertyFolderOrFunction: gdPropertyFolderOrProperty,
+  isSharedProperties: boolean
+) => string;
+
+declare export var usePropertyOverridingAlertDialog: () => (
+  existingPropertyNames: Array<string>
+) => Promise<boolean>;
+
+export type PropertyListEditorInterface = {|
+  forceUpdateList: () => void,
+  focusSearchBar: () => void,
+  setSelectedProperty: (
+    propertyName: string,
+    isSharedProperties: boolean
+  ) => void,
+  getSelectedProperty: () => {|
+    propertyName: string,
+    isSharedProperties: boolean,
+  |} | null,
+|};
+
+declare export default React.ComponentType<any>;

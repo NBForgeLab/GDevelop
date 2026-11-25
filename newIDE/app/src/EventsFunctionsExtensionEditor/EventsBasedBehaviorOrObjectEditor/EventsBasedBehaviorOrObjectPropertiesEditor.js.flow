@@ -1,0 +1,33 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
+
+type Props = {|
+  project: gdProject,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  extension: gdEventsFunctionsExtension,
+  eventsBasedBehavior: ?gdEventsBasedBehavior,
+  eventsBasedObject: ?gdEventsBasedObject,
+  properties: gdPropertiesContainer,
+  isSharedProperties?: boolean,
+  onPropertiesUpdated: () => void,
+  onFocusProperty: (propertyName: string) => void,
+  onRenameProperty: (oldName: string, newName: string) => void,
+  onPropertyTypeChanged: (propertyName: string) => void,
+  onEventsFunctionsAdded: () => void,
+  behaviorObjectType: string,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+|};
+
+declare export var fillBehaviorProperty: (projectScopedContainersAccessor: ProjectScopedContainersAccessor, eventsBasedBehavior: gdEventsBasedBehavior, property: gdNamedPropertyDescriptor, behaviorType: string) => void;
+export type EventsBasedBehaviorOrObjectPropertiesEditorInterface = {|
+  forceUpdate: () => void,
+  getPropertyEditorRef: (propertyName: string) => React.ElementRef<any>,
+  focusOnProperty: (propertyName: string) => void,
+|};
+declare export var EventsBasedBehaviorOrObjectPropertiesEditor: React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<EventsBasedBehaviorOrObjectPropertiesEditorInterface>,
+}>;

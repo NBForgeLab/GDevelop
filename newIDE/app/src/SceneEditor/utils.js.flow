@@ -1,0 +1,15 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+
+declare export var OPEN_OBJECTS_PANEL_BUTTON_ID: string;
+declare export var OPEN_OBJECT_GROUPS_PANEL_BUTTON_ID: string;
+declare export var OPEN_PROPERTIES_PANEL_BUTTON_ID: string;
+declare export var OPEN_INSTANCES_PANEL_BUTTON_ID: string;
+declare export var OPEN_LAYERS_PANEL_BUTTON_ID: string;
+declare export var TOOLBAR_COMMON_FORMATTED_BUTTON_IDS: any;
+export type EditorId =
+  | 'objects-list'
+  | 'properties'
+  | 'object-groups-list'
+  | 'instances-list'
+  | 'layers-list';

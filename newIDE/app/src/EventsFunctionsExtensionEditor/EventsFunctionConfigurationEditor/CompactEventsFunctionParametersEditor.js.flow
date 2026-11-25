@@ -1,0 +1,69 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
+import { type VariableDialogOpeningProps } from '../../VariablesList/VariablesEditorDialog';
+
+type Props = {|
+  project: gdProject,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  eventsFunction: gdEventsFunction,
+  eventsBasedBehavior: gdEventsBasedBehavior | null,
+  eventsBasedObject: gdEventsBasedObject | null,
+  eventsFunctionsContainer: gdEventsFunctionsContainer | null,
+  eventsFunctionsExtension: gdEventsFunctionsExtension | null,
+  onParametersUpdated: () => void,
+  helpPagePath?: string,
+  freezeParameters?: boolean,
+  onMoveFreeEventsParameter?: (
+    eventsFunction: gdEventsFunction,
+    oldIndex: number,
+    newIndex: number,
+    done: () => void
+  ) => void,
+  onMoveBehaviorEventsParameter?: (
+    eventsBasedBehavior: gdEventsBasedBehavior,
+    eventsFunction: gdEventsFunction,
+    oldIndex: number,
+    newIndex: number,
+    done: (boolean) => void
+  ) => void,
+  onMoveObjectEventsParameter?: (
+    eventsBasedObject: gdEventsBasedObject,
+    eventsFunction: gdEventsFunction,
+    oldIndex: number,
+    newIndex: number,
+    done: (boolean) => void
+  ) => void,
+  onFunctionParameterWillBeRenamed: (
+    eventsFunction: gdEventsFunction,
+    oldName: string,
+    newName: string
+  ) => void,
+  children?: React.Node,
+  onFunctionParameterTypeChanged: (
+    eventsFunction: gdEventsFunction,
+    parameterName: string
+  ) => void,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+|};
+
+declare export var useParameterOverridingAlertDialog: () => ((
+  existingParameterNames: Array<string>
+) => Promise<boolean>);
+declare export var fillBehaviorParameter: (projectScopedContainersAccessor: ProjectScopedContainersAccessor, eventsFunction: gdEventsFunction, parameter: gdParameterMetadata) => void;
+export type CompactEventsFunctionParametersEditorInterface = {
+  editEventsFunctionParameter: VariableDialogOpeningProps => void,
+};
+// $FlowFixMe[missing-local-annot]
+// $FlowFixMe[missing-local-annot]
+// $FlowFixMe[constant-condition]
+// $FlowFixMe[constant-condition]
+// $FlowFixMe[missing-local-annot]
+// $FlowFixMe[missing-local-annot]
+// $FlowFixMe[missing-local-annot]
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<CompactEventsFunctionParametersEditorInterface>,
+}>;

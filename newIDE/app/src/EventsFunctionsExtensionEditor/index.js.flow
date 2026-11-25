@@ -1,0 +1,227 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type I18n as I18nType } from '@lingui/core';
+import * as React from 'react';
+import { type EventsSheetInterface } from '../EventsSheet';
+import { type GameplayTestsCallbacks } from '../GameplayTests/GameplayTestRunner';
+import { type EditorMosaicInterface } from '../UI/EditorMosaic';
+import { type EventsFunctionConfigurationEditorInterface } from './EventsFunctionConfigurationEditor';
+import { type EventsFunctionsListInterface } from '../EventsFunctionsList';
+import { type EventsFunctionCreationParameters } from '../EventsFunctionsList/EventsFunctionTreeViewItemContent';
+import { type EventsBasedObjectCreationParameters } from '../EventsFunctionsList/EventsBasedObjectTreeViewItemContent';
+import { type EventsBasedBehaviorOrObjectEditorInterface } from './EventsBasedBehaviorOrObjectEditor';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+import { type EditorNavigatorInterface } from '../UI/EditorMosaic/EditorNavigator';
+import { type UnsavedChanges } from '../MainFrame/UnsavedChangesContext';
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+import { type HotReloadPreviewButtonProps } from '../HotReload/HotReloadPreviewButton';
+import { type PropertyListEditorInterface } from './PropertyListEditor';
+import type { EventPath } from '../Utils/EventPath';
+import type { SearchFilterParams } from '../Utils/Search';
+import { type VariableDialogOpeningProps } from '../VariablesList/VariablesEditorDialog';
+
+type Props = {|
+  project: gdProject,
+  eventsFunctionsExtension: gdEventsFunctionsExtension,
+  setToolbar: (?React.Node) => void,
+  resourceManagementProps: ResourceManagementProps,
+  openInstructionOrExpression: (type: string) => void,
+  onCreateEventsFunction: (
+    extensionName: string,
+    eventsFunction: gdEventsFunction,
+    editorIdentifier:
+      | 'scene-events-editor'
+      | 'extension-events-editor'
+      | 'external-events-editor'
+  ) => Promise<void>,
+  onBehaviorEdited?: () => void,
+  onObjectEdited?: () => void,
+  onFunctionEdited?: () => void,
+  initiallyFocusedFunctionName: ?string,
+  initiallyFocusedBehaviorName: ?string,
+  initiallyFocusedObjectName: ?string,
+  unsavedChanges?: ?UnsavedChanges,
+  onOpenCustomObjectEditor: gdEventsBasedObject => void,
+  hotReloadPreviewButtonProps: HotReloadPreviewButtonProps,
+  onEventsBasedObjectChildrenEdited: (
+    eventsBasedObject: gdEventsBasedObject
+  ) => void,
+  onRenamedEventsBasedObject: (
+    eventsFunctionsExtension: gdEventsFunctionsExtension,
+    oldName: string,
+    newName: string
+  ) => void,
+  onDeletedEventsBasedObject: (
+    eventsFunctionsExtension: gdEventsFunctionsExtension,
+    name: string
+  ) => void,
+  onEventsBasedObjectMoved: (
+    oldExtensionName: string,
+    newExtensionName: string,
+    oldObjectName: string,
+    newObjectName: string
+  ) => void,
+  onEventsBasedBehaviorMoved: (
+    oldExtensionName: string,
+    newExtensionName: string,
+    oldBehaviorName: string,
+    newBehaviorName: string
+  ) => void,
+  onEventsFunctionMoved: (
+    oldExtensionName: string,
+    newExtensionName: string,
+    oldFunctionName: string,
+    newFunctionName: string
+  ) => void,
+  onEventBasedObjectTypeChanged: () => void,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  gameplayTestsCallbacks: GameplayTestsCallbacks,
+|};
+type State = {|
+  selectedEventsFunction: ?gdEventsFunction,
+  selectedEventsBasedBehavior: ?gdEventsBasedBehavior,
+  editedEventsBasedBehavior: ?gdEventsBasedBehavior,
+  selectedEventsBasedObject: ?gdEventsBasedObject,
+  editedEventsBasedObject: ?gdEventsBasedObject,
+  editOptionsDialogOpen: boolean,
+  behaviorMethodSelectorDialogOpen: boolean,
+  objectMethodSelectorDialogOpen: boolean,
+  extensionFunctionSelectorDialogOpen: boolean,
+  eventsBasedObjectSelectorDialogOpen: boolean,
+  isMoveEventsBasedObjectDialogOpen: boolean,
+  isMoveEventsBasedBehaviorDialogOpen: boolean,
+  isMoveEventsFunctionDialogOpen: boolean,
+  variablesEditorOpen: { isGlobalTabInitiallyOpen: boolean } | null,
+  eventsBasedEntityPropertiesDialogOpen: VariableDialogOpeningProps | null,
+  onAddEventsFunctionCb: ?(
+    parameters: ?EventsFunctionCreationParameters
+  ) => void,
+  onAddEventsBasedObjectCb: ?(
+    parameters: ?EventsBasedObjectCreationParameters
+  ) => void,
+  doMoveEventsBasedObjectToCb:
+    | null
+    | ((destinationExtensionName: string) => void),
+  doMoveEventsBasedBehaviorToCb:
+    | null
+    | ((destinationExtensionName: string) => void),
+  doMoveEventsFunctionToCb:
+    | null
+    | ((destinationExtensionName: string) => Promise<void>),
+|};
+
+export type ExtensionItemConfigurationAttribute =
+  | 'type'
+  | 'isPrivate'
+  | 'isAsync'
+  | 'isDeprecated';
+declare export default class EventsFunctionsExtensionEditor extends React.Component<
+  Props,
+  State
+> {
+  editor: ?EventsSheetInterface;
+  eventsFunctionList: ?EventsFunctionsListInterface;
+  eventsBasedBehaviorEditor: ?EventsBasedBehaviorOrObjectEditorInterface;
+  eventsBasedObjectEditor: ?EventsBasedBehaviorOrObjectEditorInterface;
+  propertyListEditor: ?PropertyListEditorInterface;
+  eventsFunctionConfigurationEditor: ?EventsFunctionConfigurationEditorInterface;
+  _editorMosaic: ?EditorMosaicInterface;
+  _editorNavigator: ?EditorNavigatorInterface;
+  _globalObjectsContainer: gdObjectsContainer;
+  _objectsContainer: gdObjectsContainer;
+  _parameterVariablesContainer: gdVariablesContainer;
+  _propertyVariablesContainer: gdVariablesContainer;
+  _parameterResourcesContainer: gdResourcesContainer;
+  _propertyResourcesContainer: gdResourcesContainer;
+  _projectScopedContainersAccessor: ProjectScopedContainersAccessor | null;
+  _updateProjectScopedContainer: () => void;
+  _updateProjectScopedContainerFrom: (arg0: {|
+    eventsBasedBehavior?: ?gdEventsBasedBehavior,
+    eventsBasedObject?: ?gdEventsBasedObject,
+    eventsFunction?: ?gdEventsFunction,
+  |}) => void;
+  updateToolbar: () => void;
+  setGlobalSearchResults: (eventPaths: Array<EventPath>, focusedEventPath: EventPath, searchText: string, searchFilters?: SearchFilterParams) => void;
+  clearGlobalSearchResults: () => void;
+  scrollToEventPath: (eventPath: EventPath) => void;
+  selectAllEvents: () => void;
+  selectEventsFunctionByName: (functionName: string, behaviorName: ?string, objectName: ?string) => void;
+  _selectEventsFunction: (selectedEventsFunction: ?gdEventsFunction, selectedEventsBasedBehavior: ?gdEventsBasedBehavior, selectedEventsBasedObject: ?gdEventsBasedObject) => void;
+  _makeRenameEventsFunction: (i18n: I18nType) => any;
+  _renameFreeEventsFunction: (i18n: I18nType, eventsFunction: gdEventsFunction, newName: string, done: boolean => void) => void;
+  _renameBehaviorEventsFunction: (i18n: I18nType, eventsBasedBehavior: gdEventsBasedBehavior, eventsFunction: gdEventsFunction, newName: string, done: boolean => void) => void;
+  _renameObjectEventsFunction: (i18n: I18nType, eventsBasedObject: gdEventsBasedObject, eventsFunction: gdEventsFunction, newName: string, done: boolean => void) => void;
+  _makeMoveFreeEventsParameter: (i18n: I18nType) => any;
+  _makeMoveBehaviorEventsParameter: (i18n: I18nType) => any;
+  _makeMoveObjectEventsParameter: (i18n: I18nType) => any;
+  _onDeleteEventsFunction: (eventsFunction: gdEventsFunction, cb: boolean => void) => void;
+  deselectIfSelected: (arg0: {|
+    functionName?: string,
+    behaviorName?: string,
+    objectName?: string,
+  |}) => void;
+  onEventsModifiedOutsideEditor: (eventsFunction: gdEventsFunction, newOrChangedAiGeneratedEventIds: Set<string>) => void;
+  refreshAfterOutsideChanges: () => void;
+  selectEventsBasedBehaviorByName: (behaviorName: string) => void;
+  selectEventsBasedObjectByName: (eventBasedObjectName: string) => void;
+  _selectEventsBasedBehavior: (selectedEventsBasedBehavior: ?gdEventsBasedBehavior) => void;
+  _selectEventsBasedObject: (selectedEventsBasedObject: ?gdEventsBasedObject) => void;
+  _makeRenameEventsBasedBehavior: (i18n: I18nType) => any;
+  _makeRenameEventsBasedObject: (i18n: I18nType) => any;
+  _moveEventsBasedObjectTo: (eventsBasedObject: gdEventsBasedObject, doMoveEventsBasedObjectToCb: (destinationExtensionName: string) => void) => void;
+  _onCloseMoveEventsBasedObjectToDialog: (destinationExtensionName: string | null) => void;
+  _moveEventsBasedBehaviorTo: (eventsBasedBehavior: gdEventsBasedBehavior, doMoveEventsBasedBehaviorToCb: (destinationExtensionName: string) => void) => void;
+  _onCloseMoveEventsBasedBehaviorToDialog: (destinationExtensionName: string | null) => void;
+  _moveEventsFunctionTo: (doMoveEventsFunctionToCb: (
+      destinationExtensionName: string
+    ) => Promise<void>) => void;
+  _onCloseMoveEventsFunctionToDialog: (destinationExtensionName: string | null) => void;
+  _onEventsBasedBehaviorPasted: (eventsBasedBehavior: gdEventsBasedBehavior, sourceExtensionName: string, sourceEventsBasedBehaviorName: string) => void;
+  _onOpenGameplayTest: (testName: string) => void;
+  _onRenameGameplayTest: (oldName: string, newName: string) => void;
+  _onDeleteGameplayTest: (test: gdTest) => void;
+  _onRunGameplayTest: (testName: string) => void;
+  _onEventsBasedObjectPasted: (eventsBasedObject: gdEventsBasedObject, sourceExtensionName: string, sourceEventsBasedObjectName: string) => void;
+  _onEventsBasedBehaviorRenamed: () => void;
+  _onEventsBasedObjectRenamed: (eventsBasedObject: gdEventsBasedObject) => void;
+  _onDeleteEventsBasedBehavior: (eventsBasedBehavior: gdEventsBasedBehavior, cb: boolean => void) => void;
+  _onDeleteEventsBasedObject: (eventsBasedObject: gdEventsBasedObject, cb: boolean => void) => void;
+  _onCloseExtensionFunctionSelectorDialog: (parameters: ?EventsFunctionCreationParameters) => void;
+  _onCloseEventsBasedObjectSelectorDialog: (parameters: ?EventsBasedObjectCreationParameters) => void;
+  _onAddEventsBasedObject: (onAddEventsBasedObjectCb: (
+      parameters: ?EventsBasedObjectCreationParameters
+    ) => void) => void;
+  _onAddEventsFunction: (eventsBasedBehavior: ?gdEventsBasedBehavior, eventsBasedObject: ?gdEventsBasedObject, onAddEventsFunctionCb: (
+      parameters: ?EventsFunctionCreationParameters
+    ) => void) => void;
+  _onAddFreeEventsFunction: (onAddEventsFunctionCb: (
+      parameters: ?EventsFunctionCreationParameters
+    ) => void) => void;
+  _onAddBehaviorEventsFunction: (eventsBasedBehavior: gdEventsBasedBehavior, onAddEventsFunctionCb: (
+      parameters: ?EventsFunctionCreationParameters
+    ) => void) => void;
+  _onAddObjectEventsFunction: (eventsBasedObject: gdEventsBasedObject, onAddEventsFunctionCb: (
+      parameters: ?EventsFunctionCreationParameters
+    ) => void) => void;
+  _onCloseBehaviorMethodSelectorDialog: (parameters: ?EventsFunctionCreationParameters) => void;
+  _onCloseObjectMethodSelectorDialog: (parameters: ?EventsFunctionCreationParameters) => void;
+  _onEventsFunctionAdded: (selectedEventsFunction: gdEventsFunction, eventsBasedBehavior: ?gdEventsBasedBehavior, eventsBasedObject: ?gdEventsBasedObject) => void;
+  _onBehaviorEventsFunctionAdded: (eventsBasedBehavior: gdEventsBasedBehavior) => void;
+  _onObjectEventsFunctionAdded: (eventsBasedObject: gdEventsBasedObject) => void;
+  _onBehaviorPropertyRenamed: (eventsBasedBehavior: gdEventsBasedBehavior, oldName: string, newName: string) => void;
+  _onBehaviorSharedPropertyRenamed: (eventsBasedBehavior: gdEventsBasedBehavior, oldName: string, newName: string) => void;
+  _onObjectPropertyRenamed: (eventsBasedObject: gdEventsBasedObject, oldName: string, newName: string) => void;
+  _onFunctionParameterWillBeRenamed: (eventsFunction: gdEventsFunction, oldName: string, newName: string) => void;
+  _onFunctionParameterChangedOfType: (eventsFunction: gdEventsFunction, parameterName: string) => void;
+  _editOptions: (open?: boolean) => void;
+  _openVariableEditorDialog: (options?: { isGlobalTabInitiallyOpen: boolean } | null) => void;
+  onSelectionChanged: (oldSelectedEventsFunction: ?gdEventsFunction, oldEditedEventsBasedBehavior: ?gdEventsBasedBehavior, oldEditedEventsBasedObject: ?gdEventsBasedObject, newSelectedEventsFunction: ?gdEventsFunction, newEditedEventsBasedBehavior: ?gdEventsBasedBehavior, newEditedEventsBasedObject: ?gdEventsBasedObject) => void;
+  onFocusLost: () => void;
+  _onEditorNavigatorEditorChanged: (editorName: string) => void;
+  _onConfigurationUpdated: (attribute: ?ExtensionItemConfigurationAttribute) => void;
+  onBeginCreateEventsFunction: () => void;
+  onCreateEventsFunction: (extensionName: string, eventsFunction: gdEventsFunction) => Promise<void>;
+  _editEventsFunctionParameter: (props: VariableDialogOpeningProps) => void;
+  _openEventsBasedEntityPropertyEditorDialog: (props: VariableDialogOpeningProps) => void;
+}

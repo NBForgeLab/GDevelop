@@ -1,0 +1,19 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type UnsavedChanges } from '../../MainFrame/UnsavedChangesContext';
+import { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
+
+type Props = {|
+  project: gdProject,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  eventsFunctionsExtension: gdEventsFunctionsExtension,
+  eventsBasedObject: gdEventsBasedObject,
+  onOpenCustomObjectEditor: () => void,
+  unsavedChanges?: ?UnsavedChanges,
+  onEventsBasedObjectChildrenEdited: (
+    eventsBasedObject: gdEventsBasedObject
+  ) => void,
+|};
+
+declare export default function EventsBasedObjectEditor(arg0: Props): React.Node;

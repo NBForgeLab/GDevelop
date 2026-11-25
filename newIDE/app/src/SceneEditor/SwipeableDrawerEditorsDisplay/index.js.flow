@@ -1,0 +1,14 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import {
+  type SceneEditorsDisplayInterface,
+  type SceneEditorsDisplayProps,
+} from '../EditorsDisplay.flow';
+
+declare export var swipeableDrawerContainerId: string;
+// $FlowFixMe[incompatible-type]
+declare export default React.ComponentType<{
+  ...SceneEditorsDisplayProps,
+  +ref?: React.RefSetter<SceneEditorsDisplayInterface>,
+}>;

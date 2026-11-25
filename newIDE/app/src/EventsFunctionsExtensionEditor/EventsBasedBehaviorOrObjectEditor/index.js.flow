@@ -1,0 +1,41 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type UnsavedChanges } from '../../MainFrame/UnsavedChangesContext';
+import { type ExtensionItemConfigurationAttribute } from '../../EventsFunctionsExtensionEditor';
+import { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
+
+type Props = {|
+  project: gdProject,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  eventsFunctionsExtension: gdEventsFunctionsExtension,
+  eventsBasedBehavior?: ?gdEventsBasedBehavior,
+  eventsBasedObject?: ?gdEventsBasedObject,
+  onRenameProperty: (oldName: string, newName: string) => void,
+  onRenameSharedProperty: (oldName: string, newName: string) => void,
+  onPropertyTypeChanged: (propertyName: string) => void,
+  onFocusProperty: (propertyName: string, isSharedProperties: boolean) => void,
+  onPropertiesUpdated: () => void,
+  onEventsFunctionsAdded: () => void,
+  unsavedChanges?: ?UnsavedChanges,
+  onConfigurationUpdated?: (?ExtensionItemConfigurationAttribute) => void,
+  onOpenCustomObjectEditor: () => void,
+  onEventsBasedObjectChildrenEdited: (
+    eventsBasedObject: gdEventsBasedObject
+  ) => void,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  shouldHideAddPropertyButton?: boolean,
+|};
+
+export type EventsBasedBehaviorOrObjectEditorInterface = {|
+  forceUpdateProperties: () => void,
+  scrollToConfiguration: () => void,
+  scrollToProperty: (propertyName: string, isSharedProperties: boolean) => void,
+  focusOnProperty: (propertyName: string, isSharedProperties: boolean) => void,
+|};
+// $FlowFixMe[constant-condition]
+declare export var EventsBasedBehaviorOrObjectEditor: React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<EventsBasedBehaviorOrObjectEditorInterface>,
+}>;
