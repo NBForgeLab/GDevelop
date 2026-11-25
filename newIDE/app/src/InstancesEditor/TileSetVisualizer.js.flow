@@ -1,0 +1,69 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type TileMapCoordinates = {| x: number, y: number |};
+type Props = {|
+  project: gdProject,
+  objectConfiguration: gdObjectConfiguration,
+  tileMapTileSelection: ?TileMapTileSelection,
+  onSelectTileMapTile: (?TileMapTileSelection) => void,
+  allowMultipleSelection: boolean,
+  allowRectangleSelection: boolean,
+  showPaintingToolbar: boolean,
+  interactive: boolean,
+  onAtlasImageLoaded?: (
+    e: SyntheticEvent<HTMLImageElement>,
+    atlasResourceName: string
+  ) => void,
+  /**
+   * Needed to enable scrolling on touch devices when the user is not using
+   * a long touch to make a tile selection on the tile set.
+   */
+  onScrollY: number => void,
+|};
+
+declare export var getTileIdFromGridCoordinates: (arg0: {|
+  x: number,
+  y: number,
+  columnCount: number,
+|}) => number;
+declare export var getGridCoordinatesFromTileId: (arg0: {|
+  id: number,
+  columnCount: number,
+|}) => {| x: number, y: number |};
+export type TileMapPaintingSelection =
+  | {|
+      kind: 'rectangle',
+      coordinates: TileMapCoordinates[],
+      flipHorizontally: boolean,
+      flipVertically: boolean,
+    |}
+  | {|
+      kind: 'freehand',
+      coordinates: TileMapCoordinates[],
+      flipHorizontally: boolean,
+      flipVertically: boolean,
+    |}
+  | {|
+      kind: 'floodfill',
+      coordinates: TileMapCoordinates[],
+      flipHorizontally: boolean,
+      flipVertically: boolean,
+    |};
+export type TileMapTileSelection =
+  | {|
+      kind: 'multiple',
+      coordinates: TileMapCoordinates[],
+    |}
+  | TileMapPaintingSelection
+  | {|
+      kind: 'picker',
+    |}
+  | {|
+      kind: 'erase',
+    |};
+declare export var getTileMapPaintingSelection: (selection: ?TileMapTileSelection) => ?TileMapPaintingSelection;
+declare export var isTileMapPaintingSelection: (selection: TileMapTileSelection) => boolean;
+declare export var createSelectionWithPreviousTool: (previousTool: ?TileMapTileSelection, coordinates: TileMapCoordinates[], defaultFlips: {| horizontal: boolean, vertical: boolean |}) => TileMapTileSelection;
+declare export default React.ComponentType<Props>;

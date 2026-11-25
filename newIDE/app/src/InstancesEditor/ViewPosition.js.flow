@@ -1,0 +1,47 @@
+// @flow
+// @flow-transitional-stub
+import * as PIXI from 'pixi.js-legacy';
+import * as THREE from 'three';
+import Rectangle from '../Utils/Rectangle';
+import { type InstancesEditorSettings } from './InstancesEditorSettings';
+
+type Props = {|
+  initialViewX: number,
+  initialViewY: number,
+  width: number,
+  height: number,
+  instancesEditorSettings: InstancesEditorSettings,
+|};
+
+declare export default class ViewPosition {
+  viewX: number;
+  viewY: number;
+  _width: number;
+  _height: number;
+  instancesEditorSettings: InstancesEditorSettings;
+  // $FlowFixMe[missing-local-annot]
+  _pixiContainer: any;
+  constructor(arg0: Props): void;
+  setInstancesEditorSettings(instancesEditorSettings: InstancesEditorSettings): void;
+  resize(width: number, height: number): void;
+  getWidth(): number;
+  getHeight(): number;
+  containsPoint(x: number, y: number): boolean;
+  toSceneCoordinates: (x: number, y: number) => [number, number];
+  toSceneScale: (a: number) => number;
+  toCanvasScale: (a: number) => number;
+  toCanvasCoordinates: (x: number, y: number) => [number, number];
+  scrollBy(x: number, y: number): void;
+  scrollTo(x: number, y: number): void;
+  fitToRectangle(rectangle: Rectangle): number;
+  getViewX(): number;
+  getViewY(): number;
+  // $FlowFixMe[value-as-type]
+  applyTransformationToPixi(container: PIXI.Container): void;
+  applyTransformationToThree(
+    // $FlowFixMe[value-as-type]
+    threeCamera: THREE.Camera,
+    // $FlowFixMe[value-as-type]
+    threePlaneMesh: THREE.Mesh
+  ): void;
+}

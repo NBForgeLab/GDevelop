@@ -32,10 +32,6 @@ declare module '*/ExportAndShare' {
   const content: any;
   export default content;
 }
-declare module '*/InstancesEditor' {
-  const content: any;
-  export default content;
-}
 declare module '*/GameDashboard' {
   const content: any;
   export default content;
@@ -206,6 +202,7 @@ declare module 'three' {
   export class Scene extends Object3D {}
   export class PerspectiveCamera extends Object3D {}
   export class OrthographicCamera extends Object3D {}
+  export class Camera extends Object3D {}
   export class HemisphereLight extends Object3D {}
   export class DirectionalLight extends Object3D {}
   export class AmbientLight extends Object3D {}
@@ -284,12 +281,15 @@ declare module 'three' {
   }
   export class MeshBasicMaterial extends Material {}
   export class MeshStandardMaterial extends Material {}
+  export class ShaderMaterial extends Material {}
+  export type ShaderMaterialParameters = Record<string, any>;
   export class LineBasicMaterial extends Material {}
   export class Texture {
     [key: string]: any;
     constructor(...args: any[]);
   }
   export class CanvasTexture extends Texture {}
+  export class DataTexture extends Texture {}
   export class WebGLRenderer {
     [key: string]: any;
     constructor(...args: any[]);
