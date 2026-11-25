@@ -1,0 +1,10 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+type Props = {|
+  giftClaimUrl: string,
+  primary?: boolean,
+|};
+
+declare export default React.ComponentType<Props>;

@@ -1,0 +1,23 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type I18n as I18nType } from '@lingui/core';
+import * as React from 'react';
+import { type AssetShortHeader } from '../Utils/GDevelopServices/Asset';
+import { type ObjectShortHeader } from '../Utils/GDevelopServices/Extension';
+
+type CustomObjectPackResultsProps = {|
+  packTag: string,
+  onAssetSelect: (assetShortHeader: AssetShortHeader) => Promise<void>,
+  onBack: () => void,
+  isAssetBeingInstalled: boolean,
+|};
+type Props = {|
+  project: gdProject,
+  eventsFunctionsExtension: gdEventsFunctionsExtension | null,
+  eventsBasedObject: gdEventsBasedObject | null,
+  onObjectTypeSelected: ObjectShortHeader => void,
+  i18n: I18nType,
+|};
+
+declare export var CustomObjectPackResults: React.ComponentType<CustomObjectPackResultsProps>;
+declare export default function NewObjectFromScratch(arg0: Props): React.Node;

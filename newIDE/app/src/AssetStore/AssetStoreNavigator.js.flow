@@ -1,0 +1,79 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type FiltersState } from '../UI/Search/FiltersChooser';
+import {
+  type AssetShortHeader,
+  type PublicAssetPack,
+  type PrivateAssetPack,
+} from '../Utils/GDevelopServices/Asset';
+import {
+  type PrivateAssetPackListingData,
+  type PrivateGameTemplateListingData,
+  type BundleListingData,
+} from '../Utils/GDevelopServices/Shop';
+
+type AssetStoreNavigatorStateProviderProps = {|
+  children: React.Node,
+|};
+
+export type AssetStorePageState = {|
+  openedAssetPack: PublicAssetPack | PrivateAssetPack | null,
+  openedShopCategory: string | null,
+  openedAssetShortHeader: ?AssetShortHeader,
+  openedPrivateAssetPackListingData: ?PrivateAssetPackListingData,
+  openedPrivateGameTemplateListingData: ?PrivateGameTemplateListingData,
+  openedBundleListingData: ?BundleListingData,
+  selectedFolders: Array<string>,
+  filtersState: FiltersState,
+  pageBreakIndex?: ?number,
+  scrollPosition?: ?number,
+  displayAssets: boolean,
+  searchText?: string,
+|};
+export type NavigationState = {|
+  searchText: string,
+  setSearchText: string => void,
+  getCurrentPage: () => AssetStorePageState,
+  isRootPage: boolean,
+  backToPreviousPage: () => AssetStorePageState,
+  openHome: () => AssetStorePageState,
+  openAssetSwapping: () => AssetStorePageState,
+  clearHistory: () => void,
+  clearPreviousPageFromHistory: () => void,
+  openSearchResultPage: () => void,
+  openTagPage: string => void,
+  openShopCategoryPage: string => void,
+  openPackPage: ({|
+    assetPack: PublicAssetPack | PrivateAssetPack,
+    storeSearchText: boolean,
+    clearSearchText: boolean,
+  |}) => void,
+  openPrivateAssetPackInformationPage: ({|
+    privateAssetPackListingData: PrivateAssetPackListingData,
+    storeSearchText: boolean,
+    clearSearchText: boolean,
+  |}) => void,
+  openPrivateGameTemplateInformationPage: ({|
+    privateGameTemplateListingData: PrivateGameTemplateListingData,
+    storeSearchText: boolean,
+    clearSearchText: boolean,
+  |}) => void,
+  openBundleInformationPage: ({|
+    bundleListingData: BundleListingData,
+    storeSearchText: boolean,
+    clearSearchText: boolean,
+  |}) => void,
+  openAssetDetailPage: ({|
+    assetShortHeader: AssetShortHeader,
+    storeSearchText: boolean,
+    clearSearchText: boolean,
+  |}) => void,
+  navigateInsideFolder: string => void,
+  goBackToFolderIndex: number => void,
+|};
+declare export var assetStoreHomePageState: AssetStorePageState;
+declare export var isHomePage: (pageState: AssetStorePageState) => false | boolean;
+declare export var isSearchResultPage: (pageState: AssetStorePageState) => false | true;
+declare export var AssetStoreNavigatorContext: React.Context<NavigationState>;
+declare export var AssetStoreNavigatorStateProvider: React.ComponentType<AssetStoreNavigatorStateProviderProps>;

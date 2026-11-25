@@ -1,0 +1,33 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type I18n as I18nType } from '@lingui/core';
+import { type FiltersState } from '../../UI/Search/FiltersChooser';
+import { type ExtensionShortHeader } from '../../Utils/GDevelopServices/Extension';
+import { type Filters } from '../../Utils/GDevelopServices/Filters';
+import { type SearchResult } from '../../UI/Search/UseSearchStructuredItem';
+
+type ExtensionStoreState = {|
+  filters: ?Filters,
+  searchResults: ?Array<SearchResult<ExtensionShortHeader>>,
+  fetchExtensionsAndFilters: () => void,
+  error: ?Error,
+  searchText: string,
+  setSearchText: string => void,
+  allCategories: string[],
+  chosenCategory: string,
+  setChosenCategory: string => void,
+  translatedExtensionShortHeadersByName: {
+    [name: string]: ExtensionShortHeader,
+  },
+  filtersState: FiltersState,
+  hasExtensionNamed: (extensionName: string) => boolean,
+|};
+type ExtensionStoreStateProviderProps = {|
+  children: React.Node,
+  i18n: I18nType,
+  defaultSearchText?: string,
+|};
+
+declare export var ExtensionStoreContext: React.Context<ExtensionStoreState>;
+declare export var ExtensionStoreStateProvider: React.ComponentType<ExtensionStoreStateProviderProps>;

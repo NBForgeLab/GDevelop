@@ -94,3 +94,110 @@ export declare const sendCloudProjectCouldNotBeOpened: (metadata: {
 }) => void;
 
 export declare const sendExportLaunched: (exportKind: string) => void;
+
+export declare const sendAssetSwapFinished: (options: {
+  originalObjectName: string;
+  newObjectName: string;
+  objectType: string;
+}) => void;
+
+export declare const sendAssetSwapStart: (options: {
+  originalObjectName: string;
+  objectType: string;
+}) => void;
+
+export declare const sendExtensionAddedToProject: (name: string) => void;
+
+export declare const sendBundleBuyClicked: (options: {
+  bundleId: string;
+  bundleName: string;
+  bundleTag: string;
+  usageType: string;
+  priceValue: number | undefined;
+  priceCurrency: string | undefined;
+}) => void;
+
+export declare const sendBundleInformationOpened: (options: {
+  bundleId: string;
+  bundleName: string;
+  source: 'store' | 'learn' | 'web-link';
+  priceValue: number | undefined;
+  priceCurrency: string | undefined;
+}) => void;
+
+export declare const sendExampleDetailsOpened: (slug: string) => void;
+
+export declare const sendGameTemplateInformationOpened: (options: {
+  gameTemplateId: string;
+  gameTemplateName: string;
+  source: 'store' | 'examples-list' | 'homepage' | 'web-link';
+  priceValue: number | undefined;
+  priceCurrency: string | undefined;
+}) => void;
+
+export declare const sendExtensionDetailsOpened: (name: string) => void;
+
+export declare const sendAssetOpened: (options: {
+  id: string;
+  name: string;
+  assetPackName: string | null;
+  assetPackTag: string | null;
+  assetPackId: string | null;
+  assetPackKind: 'public' | 'private' | 'unknown';
+}) => void;
+
+export declare const sendAssetPackInformationOpened: (options: {
+  assetPackId: string;
+  assetPackName: string;
+  assetPackKind: 'public' | 'private' | 'unknown';
+  priceValue: number | undefined;
+  priceCurrency: string | undefined;
+}) => void;
+
+export declare const sendAssetPackOpened: (options: {
+  assetPackId: string | null;
+  assetPackName: string;
+  assetPackTag: string | null;
+  assetPackKind: 'public' | 'private' | 'unknown';
+  source: 'store-home' | 'author-profile' | 'new-object';
+}) => void;
+
+export declare const sendCourseInformationOpened: (options: {
+  courseId: string;
+  courseName: string;
+  source: 'store' | 'learn';
+  priceValue: number | undefined;
+  priceCurrency: string | undefined;
+}) => void;
+
+export declare const sendAssetAddedToProject: (options: {
+  id: string;
+  name: string;
+  assetPackName: string | null;
+  assetPackTag: string | null;
+  assetPackId: string | null;
+  assetPackKind: 'public' | 'private' | 'unknown';
+}) => void;
+
+export declare const sendNewObjectCreated: (name: string) => void;
+
+export declare const sendAssetPackBuyClicked: (options: {
+  assetPackId: string;
+  assetPackName: string;
+  assetPackTag: string;
+  assetPackKind: 'public' | 'private' | 'unknown';
+  priceValue: number | undefined;
+  priceCurrency: string | undefined;
+  usageType: string;
+}) => void;
+
+export declare const sendGameTemplateBuyClicked: (options: {
+  gameTemplateId: string;
+  gameTemplateName: string;
+  gameTemplateTag: string;
+  usageType: string;
+  priceValue: number | undefined;
+  priceCurrency: string | undefined;
+}) => void;
+
+export declare const sendTutorialOpened: (tutorialName: string) => void;

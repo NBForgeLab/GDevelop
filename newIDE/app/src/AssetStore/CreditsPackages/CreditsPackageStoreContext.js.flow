@@ -1,0 +1,36 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type CreditsPackageListingData } from '../../Utils/GDevelopServices/Shop';
+import { type CreditsPackagePlacementId } from '../../Credits/CreditsPackagesDialogDisplay';
+
+type CreditsPackageDialogOpeningOptions = {|
+  missingCredits?: number,
+  showCalloutTip?: boolean,
+  // Where the dialog is opened from: decides the wording of the dialog (and is
+  // used to A/B test it, see `CreditsPackagesDialogDisplay`).
+  placementId?: CreditsPackagePlacementId,
+|};
+type CreditsUsageDialogOptions = {|
+  title: React.Node,
+  message: React.Node,
+  onConfirm: () => Promise<void>,
+  successMessage: React.Node,
+  closeAutomaticallyAfterSuccess?: boolean,
+|};
+type CreditsPackageStoreState = {|
+  fetchCreditsPackages: () => void,
+  creditsPackageListingDatas: ?Array<CreditsPackageListingData>,
+  error: ?Error,
+  openCreditsPackageDialog: (?CreditsPackageDialogOpeningOptions) => void,
+  closeCreditsPackageDialog: () => void,
+  openCreditsUsageDialog: CreditsUsageDialogOptions => void,
+|};
+type CreditsPackageStoreStateProviderProps = {|
+  children: React.Node,
+|};
+
+declare export var initialCreditsPackageStoreState: CreditsPackageStoreState;
+declare export var CreditsPackageStoreContext: React.Context<CreditsPackageStoreState>;
+declare export var getCreditsAmountFromId: (id: string) => number;
+declare export var CreditsPackageStoreStateProvider: React.ComponentType<CreditsPackageStoreStateProviderProps>;

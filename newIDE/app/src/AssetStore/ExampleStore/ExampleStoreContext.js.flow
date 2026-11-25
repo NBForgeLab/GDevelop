@@ -1,0 +1,24 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type FiltersState } from '../../UI/Search/FiltersChooser';
+import { type ExampleShortHeader } from '../../Utils/GDevelopServices/Example';
+import { type Filters } from '../../Utils/GDevelopServices/Filters';
+import { type SearchResult } from '../../UI/Search/UseSearchStructuredItem';
+
+type ExampleStoreState = {|
+  exampleFilters: ?Filters,
+  exampleShortHeadersSearchResults: ?Array<SearchResult<ExampleShortHeader>>,
+  fetchExamplesAndFilters: () => void,
+  exampleShortHeaders: ?Array<ExampleShortHeader>,
+  error: ?Error,
+  searchText: string,
+  setSearchText: string => void,
+  filtersState: FiltersState,
+|};
+type ExampleStoreStateProviderProps = {|
+  children: React.Node,
+|};
+
+declare export var ExampleStoreContext: React.Context<ExampleStoreState>;
+declare export var ExampleStoreStateProvider: React.ComponentType<ExampleStoreStateProviderProps>;

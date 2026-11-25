@@ -20,10 +20,6 @@ declare module '*/EventsSheet' {
   const content: any;
   export default content;
 }
-declare module '*/AssetStore' {
-  const content: any;
-  export default content;
-}
 declare module '*/Debugger' {
   const content: any;
   export default content;

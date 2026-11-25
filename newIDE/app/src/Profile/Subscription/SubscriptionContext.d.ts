@@ -17,7 +17,10 @@ export type SubscriptionState = {
   }) => void;
   getCouponCode: () => string | null;
   clearCouponCode: () => void;
-  openRedeemCodeDialog: () => void;
+  openRedeemCodeDialog: (options?: {
+    codeToPrefill?: string;
+    autoSubmit?: boolean;
+  }) => void;
   isSubscriptionDialogOpen: boolean;
   [key: string]: any;
 };

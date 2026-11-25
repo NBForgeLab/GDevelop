@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type PrivateAssetPackListingData } from '../../Utils/GDevelopServices/Shop';
+
+type Props = {|
+  privateAssetPackListingData: PrivateAssetPackListingData,
+  usageType: string,
+  onClose: () => void,
+  simulateAppStoreProduct?: boolean,
+|};
+
+declare export default React.ComponentType<Props>;

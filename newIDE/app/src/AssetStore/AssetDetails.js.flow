@@ -1,0 +1,29 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type AssetShortHeader } from '../Utils/GDevelopServices/Asset';
+import {
+  type PrivateAssetPackListingData,
+  type PrivateGameTemplateListingData,
+} from '../Utils/GDevelopServices/Shop';
+
+type Props = {|
+  onTagSelection: (tag: string) => void,
+  assetShortHeader: AssetShortHeader,
+  onOpenDetails: (assetShortHeader: AssetShortHeader) => void,
+  onAssetLoaded?: () => void,
+  onPrivateAssetPackSelection: (assetPack: PrivateAssetPackListingData) => void,
+  onPrivateGameTemplateSelection: (
+    assetPack: PrivateGameTemplateListingData
+  ) => void,
+|};
+
+export type AssetDetailsInterface = {|
+  getScrollPosition: () => number,
+  scrollToPosition: (y: number) => void,
+|};
+// $FlowFixMe[invalid-computed-prop]
+declare export var AssetDetails: React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<AssetDetailsInterface>,
+}>;

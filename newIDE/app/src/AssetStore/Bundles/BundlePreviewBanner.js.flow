@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type I18n as I18nType } from '@lingui/core';
+import { type BundleListingData } from '../../Utils/GDevelopServices/Shop';
+
+type Props = {|
+  onDisplayBundle: (bundleListingData: BundleListingData) => void,
+  i18n: I18nType,
+  category: string,
+|};
+
+declare export default React.ComponentType<Props>;

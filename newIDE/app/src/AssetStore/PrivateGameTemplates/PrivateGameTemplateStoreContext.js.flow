@@ -1,0 +1,34 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type FiltersState } from '../../UI/Search/FiltersChooser';
+import { type Filters } from '../../Utils/GDevelopServices/Filters';
+import { type SearchResult } from '../../UI/Search/UseSearchStructuredItem';
+import { type PrivateGameTemplateListingData } from '../../Utils/GDevelopServices/Shop';
+
+type PrivateGameTemplateStoreState = {|
+  gameTemplateFilters: ?Filters,
+  fetchGameTemplates: () => void,
+  privateGameTemplateListingDatas: ?Array<PrivateGameTemplateListingData>,
+  error: ?Error,
+  shop: {
+    privateGameTemplateListingDatasSearchResults: ?Array<PrivateGameTemplateListingData>,
+    filtersState: FiltersState,
+    setInitialGameTemplateUserFriendlySlug: string => void,
+  },
+  exampleStore: {
+    privateGameTemplateListingDatasSearchResults: ?Array<
+      SearchResult<PrivateGameTemplateListingData>
+    >,
+    searchText: string,
+    setSearchText: string => void,
+    filtersState: FiltersState,
+  },
+|};
+type PrivateGameTemplateStoreStateProviderProps = {|
+  children: React.Node,
+|};
+
+declare export var initialPrivateGameTemplateStoreState: PrivateGameTemplateStoreState;
+declare export var PrivateGameTemplateStoreContext: React.Context<PrivateGameTemplateStoreState>;
+declare export var PrivateGameTemplateStoreStateProvider: React.ComponentType<PrivateGameTemplateStoreStateProviderProps>;

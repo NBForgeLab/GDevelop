@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type CreditsPackageListingData } from '../../Utils/GDevelopServices/Shop';
+
+type Props = {|
+  creditsPackageListingData: CreditsPackageListingData,
+  onClose: () => void,
+  onCloseWhenPurchaseSuccessful: () => void,
+  simulateAppStoreProduct?: boolean,
+|};
+
+declare export default React.ComponentType<Props>;

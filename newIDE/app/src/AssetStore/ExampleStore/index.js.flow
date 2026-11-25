@@ -1,0 +1,26 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type I18n as I18nType } from '@lingui/core';
+import { type ExampleShortHeader } from '../../Utils/GDevelopServices/Example';
+import { type PrivateGameTemplateListingData } from '../../Utils/GDevelopServices/Shop';
+import { type WindowSizeType } from '../../UI/Responsive/ResponsiveWindowMeasurer';
+
+type Props = {|
+  onSelectExampleShortHeader: ExampleShortHeader => void,
+  onSelectPrivateGameTemplateListingData: PrivateGameTemplateListingData => void,
+  i18n: I18nType,
+  onlyShowGames?: boolean,
+  hideStartingPoints?: boolean,
+  getColumnsFromWindowSize: (
+    windowSize: WindowSizeType,
+    isLandscape: boolean
+  ) => number,
+  hideSearch?: boolean,
+  limitRowsTo?: number,
+  showLoadMore?: boolean,
+  hidePremiumTemplates?: boolean,
+  disabled?: boolean,
+|};
+
+declare export default React.ComponentType<Props>;

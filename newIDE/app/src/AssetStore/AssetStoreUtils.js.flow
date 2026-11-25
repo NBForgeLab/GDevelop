@@ -1,0 +1,68 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import {
+  type PublicAssetPacks,
+  type PrivateAssetPack,
+  type PublicAssetPack,
+} from '../Utils/GDevelopServices/Asset';
+import { type PrivateAssetPackListingData, type PrivateGameTemplateListingData, type BundleListingData } from '../Utils/GDevelopServices/Shop';
+
+declare export var getAssetPackFromUserFriendlySlug: (arg0: {|
+  receivedAssetPacks: Array<PrivateAssetPack>,
+  publicAssetPacks: PublicAssetPacks,
+  userFriendlySlug: string,
+|}) => PublicAssetPack | PrivateAssetPack | null;
+declare export var getPrivateAssetPackListingDataFromUserFriendlySlug: (arg0: {|
+  privateAssetPackListingDatas: Array<PrivateAssetPackListingData>,
+  userFriendlySlug: string,
+|}) => ?PrivateAssetPackListingData;
+declare export var getPrivateGameTemplateListingDataFromUserFriendlySlug: (arg0: {|
+  privateGameTemplateListingDatas: Array<PrivateGameTemplateListingData>,
+  userFriendlySlug: string,
+|}) => ?PrivateGameTemplateListingData;
+declare export var getBundleListingDataFromUserFriendlySlug: (arg0: {|
+  bundleListingDatas: Array<BundleListingData>,
+  userFriendlySlug: string,
+|}) => ?BundleListingData;
+declare export var getBundleListingDataFromCategory: (arg0: {|
+  bundleListingDatas: Array<BundleListingData>,
+  category: string,
+|}) => ?BundleListingData;
+declare export var getBundleTiles: (arg0: {|
+  allBundleListingDatas: ?Array<BundleListingData>,
+  displayedBundleListingDatas: ?Array<BundleListingData>,
+  onBundleSelection: ?(BundleListingData) => void,
+  receivedBundles: ?Array<any>,
+  openedShopCategory?: ?string,
+  hasAssetFiltersApplied?: boolean,
+  onlyShowAssets?: boolean,
+|}) => Array<React.Node>;
+declare export var getGameTemplateTiles: (arg0: {|
+  allPrivateGameTemplateListingDatas: ?Array<PrivateGameTemplateListingData>,
+  displayedPrivateGameTemplateListingDatas: ?Array<PrivateGameTemplateListingData>,
+  onPrivateGameTemplateSelection: ?(PrivateGameTemplateListingData) => void,
+  receivedGameTemplates: ?Array<any>,
+  openedShopCategory?: ?string,
+  hasAssetFiltersApplied?: boolean,
+  hasAssetPackFiltersApplied?: boolean,
+  onlyShowAssets?: boolean,
+|}) => Array<React.Node>;
+declare export var getPublicAssetPackTiles: (arg0: {|
+  publicAssetPacks: ?(PublicAssetPack[]),
+  onPublicAssetPackSelection: ?(PublicAssetPack) => void,
+  openedShopCategory?: ?string,
+  hasAssetFiltersApplied?: boolean,
+|}) => Array<React.Node>;
+declare export var getAssetPackTiles: (arg0: {|
+  allPrivateAssetPackListingDatas: ?Array<PrivateAssetPackListingData>,
+  displayedPrivateAssetPackListingDatas: ?Array<PrivateAssetPackListingData>,
+  onPrivateAssetPackSelection: ?(PrivateAssetPackListingData) => void,
+  publicAssetPackTiles?: Array<React.Node>,
+  receivedAssetPacks: ?Array<any>,
+  openedShopCategory?: ?string,
+  hasAssetFiltersApplied?: boolean,
+|}) => {|
+  allAssetPackStandAloneTiles: Array<React.Node>,
+  allAssetPackBundleTiles: Array<React.Node>,
+|};

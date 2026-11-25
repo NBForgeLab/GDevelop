@@ -1,0 +1,72 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type I18n as I18nType } from '@lingui/core';
+import { type ExtensionShortHeader, type BehaviorShortHeader, type SerializedExtension, type ExtensionDependency } from '../../Utils/GDevelopServices/Extension';
+import { type EventsFunctionsExtensionsState } from '../../EventsFunctionsExtensionsLoader/EventsFunctionsExtensionsContext';
+import { type ObjectAsset } from '../../Utils/GDevelopServices/Asset';
+
+type CheckRequiredExtensionsArgs = {|
+  requiredExtensions: Array<ExtensionDependency>,
+  project: gdProject,
+  extensionShortHeadersByName: {
+    [name: string]: ExtensionShortHeader,
+  },
+  shouldAllowUnknownExtension?: boolean,
+|};
+
+export type RequiredExtensionInstallation = {|
+  requiredExtensionShortHeaders: Array<ExtensionShortHeader>,
+  missingExtensionShortHeaders: Array<ExtensionShortHeader>,
+  outOfDateExtensionShortHeaders: Array<ExtensionShortHeader>,
+  breakingChangesExtensionShortHeaders: Array<ExtensionShortHeader>,
+  incompatibleWithIdeExtensionShortHeaders: Array<ExtensionShortHeader>,
+  safeToUpdateExtensions: Array<ExtensionShortHeader>,
+  unknownExtensionDependencies: Array<ExtensionDependency>,
+  isGDevelopUpdateNeeded: boolean,
+|};
+declare export var ensureExtensionsRegistryLoaded: (extensionShortHeadersByName: {
+  [name: string]: ExtensionShortHeader,
+}) => Promise<{ [name: string]: ExtensionShortHeader }>;
+declare export var getExtensionHeader: (extensionShortHeadersByName: {
+    [name: string]: ExtensionShortHeader,
+  }, extensionName: string) => ExtensionShortHeader | null;
+declare export var checkRequiredExtensionsUpdate: (arg0: CheckRequiredExtensionsArgs) => Promise<RequiredExtensionInstallation>;
+declare export var useExtensionUpdateAlertDialog: () => (({
+  outOfDateExtensionShortHeaders: Array<ExtensionShortHeader>,
+  project: gdProject,
+  reason: 'asset' | 'extension' | 'behavior',
+}) => Promise<string>);
+export type RequiredExtensionOwners =
+  | Array<ObjectAsset>
+  | Array<ExtensionShortHeader>
+  | Array<BehaviorShortHeader>
+  | Array<SerializedExtension>;
+declare export var getRequiredExtensions: (requiredExtensionOwners: RequiredExtensionOwners) => Array<ExtensionDependency>;
+declare export var useInstallExtension: () => (({
+  importedSerializedExtensions: Array<SerializedExtension>,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  project: gdProject,
+  reason: 'asset' | 'extension' | 'behavior',
+  requiredExtensionInstallation: RequiredExtensionInstallation,
+  updateMode: 'all' | 'safeOnly',
+}) => Promise<boolean>);
+export type InstallRequiredExtensionsArgs = {|
+  requiredExtensionInstallation: RequiredExtensionInstallation,
+  shouldUpdateExtension: boolean,
+  eventsFunctionsExtensionsState: EventsFunctionsExtensionsState,
+  project: gdProject,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  importedSerializedExtensions: Array<SerializedExtension>,
+|};
+declare export var installRequiredExtensions: (arg0: InstallRequiredExtensionsArgs) => Promise<void>;
+declare export var addSerializedExtensionsToProject: (eventsFunctionsExtensionsState: EventsFunctionsExtensionsState, project: gdProject, serializedExtensions: Array<SerializedExtension>, fromStoreExtensionNames: Array<string>) => Promise<void>;
+declare export var useImportExtension: () => (({
+  i18n: I18nType,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  project: gdProject,
+  filePaths?: Array<string>,
+  skipUserPrompts?: boolean,
+}) => Promise<Array<string>>);

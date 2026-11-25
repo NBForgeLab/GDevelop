@@ -1,0 +1,23 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import React from 'react';
+import {
+  type ExtensionShortHeader,
+  type BehaviorShortHeader,
+  type ObjectShortHeader,
+} from '../../Utils/GDevelopServices/Extension';
+
+type Props = {|
+  extensionShortHeader:
+    | ExtensionShortHeader
+    | BehaviorShortHeader
+    | ObjectShortHeader,
+  isInstalling: boolean,
+  onClose: () => void,
+  onInstall?: () => Promise<void>,
+  onEdit?: () => void,
+  project: gdProject,
+|};
+
+declare export var useOutOfDateAlertDialog: () => (() => Promise<boolean>);
+declare export default React.ComponentType<Props>;

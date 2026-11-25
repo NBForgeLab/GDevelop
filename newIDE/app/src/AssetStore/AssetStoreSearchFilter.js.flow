@@ -1,0 +1,94 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { TagSearchFilter, type SearchFilter } from '../UI/Search/UseSearchItem';
+import {
+  type AssetShortHeader,
+  type PrivateAssetPack,
+  type PublicAssetPack,
+} from '../Utils/GDevelopServices/Asset';
+import { type PrivateAssetPackListingData } from '../Utils/GDevelopServices/Shop';
+import { type RGBColor } from '../Utils/ColorTransformer';
+
+declare export class TagAssetStoreSearchFilter extends TagSearchFilter<AssetShortHeader> {
+  constructor(tags?: Set<string>): void;
+}
+declare export var EFFECT_ASSETS_OBJECT_TYPE: string;
+declare export class ObjectTypeAssetStoreSearchFilter
+  implements SearchFilter<AssetShortHeader> {
+  objectTypes: Set<string>;
+  constructor(objectTypes?: Set<string>): void;
+  getPertinence(searchItem: AssetShortHeader): number;
+  hasFilters(): boolean;
+}
+declare export class LicenseAssetStoreSearchFilter
+  implements SearchFilter<AssetShortHeader> {
+  attributionFreeOnly: boolean;
+  static noAttributionLicenses: Array<string>;
+  constructor(attributionFreeOnly?: boolean): void;
+  getPertinence(searchItem: AssetShortHeader): number;
+  hasFilters(): boolean;
+}
+declare export class AssetPackTypeStoreSearchFilter
+  implements SearchFilter<PublicAssetPack | PrivateAssetPackListingData> {
+  isFree: boolean;
+  isPremium: boolean;
+  isOwned: boolean;
+  receivedAssetPacks: Array<PrivateAssetPack>;
+  constructor(options: {
+    isFree?: boolean,
+    isPremium?: boolean,
+    isOwned?: boolean,
+    receivedAssetPacks?: ?Array<PrivateAssetPack>,
+  }): void;
+  getPertinence(
+    searchItem: PublicAssetPack | PrivateAssetPackListingData
+  ): number;
+  hasFilters(): boolean;
+}
+declare export class AnimatedAssetStoreSearchFilter
+  implements SearchFilter<AssetShortHeader> {
+  mustBeAnimated: boolean;
+  mustHaveSeveralState: boolean;
+  constructor(mustBeAnimated?: boolean, mustHaveSeveralState?: boolean): void;
+  getPertinence(searchItem: AssetShortHeader): number;
+  hasFilters(): boolean;
+}
+declare export class DimensionAssetStoreSearchFilter
+  implements SearchFilter<AssetShortHeader> {
+  dimensionMin: number;
+  dimensionMax: number;
+  static boundMin: number;
+  static boundMax: number;
+  constructor(dimensionMin?: number, dimensionMax?: number): void;
+  getPertinence(searchItem: AssetShortHeader): number;
+  hasFilters(): boolean;
+}
+declare export class ColorAssetStoreSearchFilter
+  implements SearchFilter<AssetShortHeader> {
+  color: ?RGBColor;
+  constructor(color?: ?RGBColor): void;
+  getPertinence(searchItem: AssetShortHeader): number;
+  hasFilters(): boolean;
+}
+declare export var toAssetStoreType: (type: string) => string;
+declare export class AssetSwappingAssetStoreSearchFilter
+  implements SearchFilter<AssetShortHeader> {
+  isEnabled: boolean;
+  objectType: string;
+  hasSeveralStates: boolean;
+  other: ?AssetShortHeader;
+  tags: Array<string>;
+  constructor(
+    object?: ?gdObject,
+    assetShortHeader?: ?AssetShortHeader
+  ): void;
+  getPertinence(searchItem: AssetShortHeader): number;
+  hasFilters(): boolean;
+}
+declare export class SimilarAssetStoreSearchFilter
+  implements SearchFilter<AssetShortHeader> {
+  other: AssetShortHeader;
+  constructor(other: AssetShortHeader): void;
+  getPertinence(searchItem: AssetShortHeader): number;
+  hasFilters(): boolean;
+}

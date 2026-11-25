@@ -1,0 +1,15 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type BundleListingData } from '../../Utils/GDevelopServices/Shop';
+
+type Props = {|
+  bundleListingData: BundleListingData,
+  usageType: string,
+  onClose: () => void,
+  simulateAppStoreProduct?: boolean,
+  fastCheckout?: boolean,
+  onCloseAfterPurchaseDone?: () => void,
+|};
+
+declare export default React.ComponentType<Props>;

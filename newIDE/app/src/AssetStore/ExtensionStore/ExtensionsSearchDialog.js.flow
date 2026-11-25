@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+type Props = {|
+  project: gdProject,
+  onClose: () => void,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  onCreateNewExtension?: () => void,
+|};
+
+declare export default React.ComponentType<Props>;

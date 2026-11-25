@@ -1,0 +1,33 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type Course, type EffectTarget } from '../Utils/GDevelopServices/Asset';
+import { type PrivateGameTemplateListingData } from '../Utils/GDevelopServices/Shop';
+import { type CourseCompletion } from '../MainFrame/EditorContainers/HomePage/UseCourses';
+
+type Props = {|
+  onlyShowAssets?: boolean, // TODO: if we add more options, use an array instead.
+  displayPromotions?: boolean,
+  onOpenPrivateGameTemplateListingData?: (
+    privateGameTemplateListingData: PrivateGameTemplateListingData
+  ) => void,
+  onOpenProfile?: () => void,
+  courses?: ?Array<Course>,
+  onCourseOpen?: (courseId: string) => void,
+  getCourseCompletion?: (courseId: string) => CourseCompletion | null,
+  assetSwappedObject?: ?gdObject,
+  // Only list the assets of these object types, without packs.
+  fixedObjectTypes?: ?Array<string>,
+  // Only list the effect assets made for objects, or for layers.
+  fixedEffectTarget?: EffectTarget,
+  noResultsPlaceholder?: React.Node,
+|};
+
+export type AssetStoreInterface = {|
+  onClose: () => void,
+|};
+// $FlowFixMe[incompatible-type]
+declare export var AssetStore: React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<AssetStoreInterface>,
+}>;

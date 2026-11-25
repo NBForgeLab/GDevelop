@@ -1,0 +1,19 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type ProductLicense } from '../../Utils/GDevelopServices/Shop';
+
+type ProductLicenseStoreState = {|
+  fetchProductLicenses: ({
+    productType: 'game-template' | 'asset-pack',
+  }) => void,
+  assetPackLicenses: ?Array<ProductLicense>,
+  gameTemplateLicenses: ?Array<ProductLicense>,
+  error: ?Error,
+|};
+type ProductLicenseStoreStateProviderProps = {|
+  children: React.Node,
+|};
+
+declare export var ProductLicenseStoreContext: React.Context<ProductLicenseStoreState>;
+declare export var ProductLicenseStoreStateProvider: React.ComponentType<ProductLicenseStoreStateProviderProps>;

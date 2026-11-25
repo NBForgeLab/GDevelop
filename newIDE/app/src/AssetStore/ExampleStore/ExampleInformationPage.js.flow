@@ -1,0 +1,11 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type ExampleShortHeader } from '../../Utils/GDevelopServices/Example';
+
+type Props = {|
+  exampleShortHeader: ExampleShortHeader,
+|};
+
+declare export var openExampleInWebApp: (exampleShortHeader: ExampleShortHeader) => void;
+declare export default React.ComponentType<Props>;

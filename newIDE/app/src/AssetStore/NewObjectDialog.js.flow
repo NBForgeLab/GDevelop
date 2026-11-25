@@ -1,0 +1,53 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+import { type InstallAssetOutput } from './InstallAsset';
+import { type Asset, type AssetShortHeader } from '../Utils/GDevelopServices/Asset';
+import type { ObjectFolderOrObjectWithContext } from '../ObjectsList/EnumerateObjectFolderOrObject';
+
+type Props = {|
+  project: gdProject,
+  layout: ?gdLayout,
+  eventsFunctionsExtension: gdEventsFunctionsExtension | null,
+  eventsBasedObject: gdEventsBasedObject | null,
+  objectsContainer: gdObjectsContainer,
+  resourceManagementProps: ResourceManagementProps,
+  onClose: () => void,
+  onCreateNewObject: (type: string) => void,
+  onObjectsAddedFromAssets: InstallAssetOutput => void,
+  onLayerEffectAddedFromAssets?: () => void,
+  targetObjectFolderOrObjectWithContext?: ?ObjectFolderOrObjectWithContext,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+|};
+
+declare export var useProjectNeedToBeSavedAlertDialog: (canInstallPrivateAsset: () => boolean) => ((assetShortHeader: AssetShortHeader) => Promise<boolean>);
+declare export var useFetchAssets: () => ((
+  assetShortHeaders: Array<AssetShortHeader>
+) => Promise<Array<Asset>>);
+declare export var useInstallAsset: (arg0: {|
+  project: ?gdProject,
+  targetObjectFolderOrObjectWithContext?: ?ObjectFolderOrObjectWithContext,
+  resourceManagementProps: ResourceManagementProps,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+|}) => (({
+  assetShortHeader: AssetShortHeader,
+  objectsContainer: gdObjectsContainer,
+  requestedObjectName?: string,
+  setIsAssetBeingInstalled: boolean => void,
+}) => Promise<InstallAssetOutput | null>);
+declare export var useInstallEffectAsset: (arg0: {|
+  project: ?gdProject,
+  resourceManagementProps: ResourceManagementProps,
+|}) => (({
+  assetShortHeader: AssetShortHeader,
+  effectsContainer: gdEffectsContainer,
+  effectName: string,
+}) => Promise<gdEffect | null>);
+declare export var useChooseEffectNameForEffectAsset: () => (({|
+  assetShortHeader: AssetShortHeader,
+  effectsContainer: gdEffectsContainer,
+|}) => Promise<string | null>);
+declare export default React.ComponentType<Props>;

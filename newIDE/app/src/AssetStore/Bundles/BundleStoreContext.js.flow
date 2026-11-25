@@ -1,0 +1,26 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type FiltersState } from '../../UI/Search/FiltersChooser';
+import { type Filters } from '../../Utils/GDevelopServices/Filters';
+import { type BundleListingData } from '../../Utils/GDevelopServices/Shop';
+
+type BundleStoreState = {|
+  bundleFilters: ?Filters,
+  fetchBundles: () => void,
+  bundleListingDatas: ?Array<BundleListingData>,
+  error: ?Error,
+  shop: {
+    bundleListingDatasSearchResults: ?Array<BundleListingData>,
+    filtersState: FiltersState,
+    setInitialBundleUserFriendlySlug: string => void,
+    setInitialBundleCategory: string => void,
+  },
+|};
+type BundleStoreStateProviderProps = {|
+  children: React.Node,
+|};
+
+declare export var initialBundleStoreState: BundleStoreState;
+declare export var BundleStoreContext: React.Context<BundleStoreState>;
+declare export var BundleStoreStateProvider: React.ComponentType<BundleStoreStateProviderProps>;

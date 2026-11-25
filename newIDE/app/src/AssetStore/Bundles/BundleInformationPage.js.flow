@@ -1,0 +1,30 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type Course } from '../../Utils/GDevelopServices/Asset';
+import {
+  type PrivateAssetPackListingData,
+  type BundleListingData,
+  type PrivateGameTemplateListingData,
+  type CourseListingData,
+} from '../../Utils/GDevelopServices/Shop';
+import { type CourseCompletion } from '../../MainFrame/EditorContainers/HomePage/UseCourses';
+
+type Props = {|
+  bundleListingData: BundleListingData,
+  onBack?: () => void | Promise<void>,
+  onBundleOpen: BundleListingData => void,
+  onGameTemplateOpen: PrivateGameTemplateListingData => void,
+  onAssetPackOpen: (
+    privateAssetPackListingData: PrivateAssetPackListingData
+  ) => void,
+  onCourseOpen: CourseListingData => void,
+  courses: ?Array<Course>,
+  getCourseCompletion: (courseId: string) => CourseCompletion | null,
+  noPadding?: boolean,
+  noActions?: boolean,
+  fastCheckout?: boolean,
+  onCloseAfterPurchaseDone?: () => void,
+|};
+
+declare export default React.ComponentType<Props>;
