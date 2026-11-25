@@ -1,0 +1,22 @@
+import * as React from 'react';
+import { instructionInvalidParameter } from './ClassNames';
+
+type Props = {
+  children: React.ReactNode;
+  isEmpty?: boolean;
+};
+
+/**
+ * Displayed when a parameter is invalid
+ */
+const InvalidParameterValue = ({
+  children,
+  isEmpty,
+}: Props): React.ReactElement<any> =>
+  isEmpty ? (
+    <span className={instructionInvalidParameter}>&lt; {children} &gt;</span>
+  ) : (
+    <span className={instructionInvalidParameter}>{children}</span>
+  );
+
+export default InvalidParameterValue;

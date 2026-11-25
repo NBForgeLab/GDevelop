@@ -1,0 +1,78 @@
+// @flow
+// @flow-transitional-stub [Phase 5]
+import * as React from 'react';
+import type { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
+
+export type SortableTreeNode = {|
+  title: (node: {| node: SortableTreeNode |}) => React.Node,
+  children: Array<any>,
+  expanded: boolean,
+
+  eventsList: gdEventsList,
+  event: ?gdBaseEvent,
+  depth: number,
+  disabled: boolean,
+  indexInList: number,
+  rowIndex: number,
+  nodePath: Array<number>,
+  relativeNodePath: Array<number>,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  key: number | string,
+  isValidElseEvent: boolean,
+  isDisabledEvent: boolean,
+  isNonExecutableEvent: boolean,
+  fixedHeight?: ?number,
+|};
+
+type FlatDataEntry = {
+  node: SortableTreeNode,
+  path: Array<number | string>,
+  lowerSiblingCounts: Array<number>,
+  treeIndex: number,
+};
+
+type Props = {|
+  treeData: Array<SortableTreeNode>,
+  scaffoldBlockPxWidth: number,
+  onVisibilityToggle: ({| node: SortableTreeNode |}) => void,
+  rowHeight: ({ node: ?SortableTreeNode }) => number,
+  searchMethod?: ({
+    node: SortableTreeNode,
+    searchQuery: any,
+    path: Array<number | string>,
+    treeIndex: number,
+  }) => boolean,
+  searchQuery?: any,
+  searchFocusOffset?: ?number,
+  searchFocusedEvent?: ?gdBaseEvent,
+  className?: string,
+  eventsSheetWidth?: number,
+  reactVirtualizedListProps?: {
+    ref?: (list: {
+      scrollToRow: (row: number) => void,
+      recomputeRowHeights: () => void,
+      container: ?HTMLDivElement,
+    }) => void,
+    onScroll?: (event: {
+      scrollTop: number,
+      scrollHeight: number,
+      clientHeight: number,
+    }) => void,
+    scrollToAlignment?: string,
+  },
+|};
+
+declare export var getFlatDataFromTree: (arg0: {
+  treeData: Array<SortableTreeNode>,
+  getNodeKey: ({ treeIndex: number }) => number | string,
+  ignoreCollapsed?: boolean,
+}) => Array<FlatDataEntry>;
+
+declare export var getNodeAtPath: (arg0: {
+  treeData: Array<SortableTreeNode>,
+  path: $ReadOnlyArray<number | string>,
+  getNodeKey: ({ treeIndex: number }) => number | string,
+  ignoreCollapsed?: boolean,
+}) => ?{ node: SortableTreeNode, treeIndex: number };
+
+declare export default (props: Props) => React.MixedElement;

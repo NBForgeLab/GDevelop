@@ -1,0 +1,131 @@
+// @flow
+// @flow-transitional-stub [Phase 5]
+import * as React from 'react';
+import { type SortableTreeNode } from './SortableEventsTree';
+import {
+  type SelectionState,
+  type EventContext,
+  type InstructionsListContext,
+  type InstructionContext,
+  type ParameterContext,
+  type VariableDeclarationContext,
+} from '../SelectionHandler';
+import { type EventsScope } from '../../InstructionOrExpression/EventsScope';
+import { type ScreenType } from '../../UI/Responsive/ScreenTypeMeasurer';
+import { type WindowSizeType } from '../../UI/Responsive/ResponsiveWindowMeasurer';
+import { type Preferences } from '../../MainFrame/Preferences/PreferencesContext';
+import { type Tutorial } from '../../Utils/GDevelopServices/Tutorial';
+import { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
+
+type EventsTreeProps = {|
+  events: gdEventsList,
+  project: gdProject,
+  scope: EventsScope,
+  globalObjectsContainer: gdObjectsContainer,
+  objectsContainer: gdObjectsContainer,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  selection: SelectionState,
+  onAddNewInstruction: (
+    eventContext: EventContext,
+    InstructionsListContext
+  ) => void,
+  onPasteInstructions: (
+    eventContext: EventContext,
+    InstructionsListContext
+  ) => void,
+  onMoveToInstruction: (
+    eventContext: EventContext,
+    destinationContext: InstructionContext
+  ) => void,
+  onMoveToInstructionsList: (
+    eventContext: EventContext,
+    destinationContext: InstructionsListContext
+  ) => void,
+  onInstructionClick: (
+    eventContext: EventContext,
+    instructionContext: InstructionContext
+  ) => void,
+  onInstructionDoubleClick: (
+    eventContext: EventContext,
+    instructionContext: InstructionContext
+  ) => void,
+  onInstructionContextMenu: (
+    eventContext: EventContext,
+    x: number,
+    y: number,
+    InstructionContext
+  ) => void,
+  onAddInstructionContextMenu: (
+    eventContext: EventContext,
+    HTMLButtonElement,
+    InstructionsListContext
+  ) => void,
+  onParameterClick: (
+    eventContext: EventContext,
+    parameterContext: ParameterContext
+  ) => void,
+
+  onVariableDeclarationClick: (
+    eventContext: EventContext,
+    variableDeclarationContext: VariableDeclarationContext
+  ) => void,
+  onVariableDeclarationDoubleClick: (
+    eventContext: EventContext,
+    variableDeclarationContext: VariableDeclarationContext
+  ) => void,
+
+  onEventClick: (eventContext: EventContext) => void,
+  onEventContextMenu: (
+    x: number,
+    y: number,
+    eventContext: EventContext
+  ) => void,
+  onAddNewEvent: (eventType: string, eventsList: gdEventsList) => void,
+  onOpenExternalEvents: string => void,
+  onOpenLayout: string => void,
+  showObjectThumbnails: boolean,
+
+  searchResults: ?Array<gdBaseEvent>,
+  searchFocusOffset: ?number,
+  highlightedSearchText: ?string,
+  highlightedSearchMatchCase?: boolean,
+
+  onEventMoved: (previousRowIndex: number, nextRowIndex: number) => void,
+  onEndEditingEvent: (event: gdBaseEvent) => void,
+  onScroll?: () => void,
+
+  screenType: ScreenType,
+  windowSize: WindowSizeType,
+  eventsSheetWidth: number,
+  eventsSheetHeight: number,
+  fontSize?: number,
+  indentScale: number,
+
+  preferences: Preferences,
+  tutorials: ?Array<Tutorial>,
+
+  highlightedAiGeneratedEventIds: Set<string>,
+|};
+
+declare export var getIndentWidth: (windowSize: WindowSizeType) => number;
+export type EventsTreeInterface = {|
+  forceEventsUpdate: (cb?: () => void) => void,
+  foldAll: () => void,
+  unfoldToLevel: (level: number) => void,
+  getEventContextAtRowIndexes: (
+    rowIndexes: Array<number>
+  ) => Array<EventContext>,
+  scrollToRow: (row: number) => void,
+  scrollToInstruction: (
+    rowIndex: number,
+    listLabel: string,
+    instructionIndex: number
+  ) => void,
+  getEventRow: (event: gdBaseEvent) => number,
+  unfoldForEvent: (event: gdBaseEvent) => void,
+|};
+export type { SortableTreeNode };
+declare export default React.ComponentType<{
+  ...EventsTreeProps,
+  +ref?: React.RefSetter<EventsTreeInterface>,
+}>;
