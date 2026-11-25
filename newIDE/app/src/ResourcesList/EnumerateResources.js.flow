@@ -1,0 +1,4 @@
+// @flow
+// @flow-transitional-stub
+
+declare export var filterResourcesList: (list: Array<gdResource>, searchText: string) => Array<gdResource>;

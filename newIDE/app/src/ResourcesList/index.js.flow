@@ -1,0 +1,42 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type ResourceKind } from './ResourceSource';
+import { type FileMetadata } from '../ProjectsStorage';
+import { type ResourcesActionsMenuBuilder } from '../ProjectsStorage';
+
+type Props = {|
+  project: gdProject,
+  selectedResources: Array<gdResource>,
+  onSelectResources: (resources: Array<gdResource>) => void,
+  onDeleteResources: (resources: Array<gdResource>) => Promise<void>,
+  onRenameResource: (resource: gdResource, newName: string) => void,
+  fileMetadata: ?FileMetadata,
+  onRemoveUnusedResources: ResourceKind => void,
+  onRemoveAllResourcesWithInvalidPath: () => void,
+  getResourceActionsSpecificToStorageProvider?: ?ResourcesActionsMenuBuilder,
+|};
+
+declare export var getDefaultResourceThumbnail: (resource: gdResource) => string;
+export type ResourcesListInterface = {|
+  forceUpdateList: () => void,
+  checkMissingPaths: () => void,
+  focusList: () => void,
+|};
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-exact]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[prop-missing]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+/* $FlowFixMe[constant-condition] */
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<ResourcesListInterface>,
+  // $FlowFixMe[incompatible-type]
+}>;

@@ -1,0 +1,40 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+import { type Schema, type Instances, type FieldVisibility } from '../PropertiesEditor/PropertiesEditorSchema';
+import { type UnsavedChanges } from '../MainFrame/UnsavedChangesContext';
+
+declare export var styles: {| icon: {| fontSize: 18 |} |};
+declare export var filterSchema: (source: Schema, visibility: FieldVisibility) => Schema;
+declare export var isAnyPropertyModified: (schema: Schema, instances: Instances) => boolean;
+declare export var getSchemaWithOpenFullEditorButton: (arg0: {|
+  schema: Schema,
+  fullEditorLabel: ?string,
+  instance: gdBehavior,
+  onOpenFullEditor: () => void,
+|}) => Schema;
+declare export var CompactCollapsibleAdvancedSection: React.ComponentType<{
+  children?: React.Node,
+  uncollapsedByDefault?: boolean,
+}>;
+declare export var CompactPropertiesEditorByVisibility: React.ComponentType<{|
+  onInstancesModified?: Instances => void,
+  schema: Schema,
+  instances: Instances,
+  preventWrap?: boolean,
+  removeSpacers?: boolean,
+  customizeBasicSchema?: (Schema => Schema) | null,
+  placeholder: React.Node,
+  onRefreshAllFields: () => void,
+
+  // If set, render the "extra" description content from fields
+  // (see getExtraDescription).
+  renderExtraDescriptionText?: (extraDescription: string) => string,
+  unsavedChanges?: ?UnsavedChanges,
+
+  // Optional context:
+  project?: ?gdProject,
+  object?: ?gdObject,
+  resourceManagementProps?: ?ResourceManagementProps,
+|}>;

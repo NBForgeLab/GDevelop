@@ -1,0 +1,34 @@
+// @flow
+// @flow-transitional-stub
+import { type Schema, type Instance } from './PropertiesEditorSchema';
+
+type CommonProps = {|
+  defaultValueProperties:
+    | gdPropertiesContainer
+    | gdMapStringPropertyDescriptor
+    | null,
+  object?: ?gdObject,
+  visibility?: 'All' | 'Basic' | 'Advanced' | 'Deprecated',
+  showcaseNonDefaultValues?: boolean,
+  hideResourceProperties?: boolean,
+  /** The groups to show first, in this order (from the object or behavior metadata). */
+  propertyGroups?: ?gdVectorString,
+|};
+
+declare export var effectPropertiesMapToSchema: (arg0: {
+  ...CommonProps,
+  defaultValueProperties: gdMapStringPropertyDescriptor,
+}) => Schema;
+declare export var getMeasurementUnitShortLabel: (measurementUnit: gdMeasurementUnit) => string;
+declare export default (arg0: {
+  ...CommonProps,
+  getPropertyValue: (instance: Instance, propertyName: string) => string,
+  properties: gdMapStringPropertyDescriptor,
+  onUpdateProperty: (
+    instance: Instance,
+    propertyName: string,
+    newValue: string
+  ) => void,
+  layersContainer: gdLayersContainer | null,
+  shouldDisabledFieldsWithMixedValues: boolean,
+}) => Schema;

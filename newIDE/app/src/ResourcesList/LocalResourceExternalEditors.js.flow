@@ -1,0 +1,10 @@
+// @flow
+// @flow-transitional-stub
+import { type ResourceExternalEditor, type ExternalEditorBase64Resource } from './ResourceExternalEditor';
+
+declare export var downloadAndPrepareExternalEditorBase64Resources: (arg0: {|
+  project: gdProject,
+  resourceNames: Array<string>,
+|}) => Promise<Array<ExternalEditorBase64Resource>>;
+// $FlowFixMe[incompatible-type]
+declare export default Array<ResourceExternalEditor>;

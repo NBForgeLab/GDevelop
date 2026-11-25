@@ -1,0 +1,11 @@
+// @flow
+// @flow-transitional-stub
+
+type Props = {|
+  modelUrl: string,
+  expand?: boolean,
+  fullWidth?: boolean,
+  size?: number,
+|};
+
+declare export default (arg0: Props) => any;

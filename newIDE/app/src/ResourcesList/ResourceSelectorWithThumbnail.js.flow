@@ -1,0 +1,27 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import {
+  type ResourceManagementProps,
+  type ResourceKind,
+} from './ResourceSource';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+
+type Props = {|
+  project: gdProject,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  resourceManagementProps: ResourceManagementProps,
+  resourceKind: ResourceKind,
+  resourceName: string,
+  defaultNewResourceName?: string,
+  onChange: string => void,
+  floatingLabelText?: React.Node,
+  hintText?: MessageDescriptor,
+  helperMarkdownText?: ?string,
+  fallbackResourceKind?: ResourceKind,
+  id?: string,
+  disabled?: boolean,
+|};
+
+declare export default React.ComponentType<Props>;

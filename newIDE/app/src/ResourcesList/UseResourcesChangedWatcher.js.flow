@@ -1,0 +1,6 @@
+// @flow
+// @flow-transitional-stub
+
+type Props = {| project: gdProject, callback: () => any |};
+
+declare export default (arg0: Props) => { triggerResourcesHaveChanged: () => void };

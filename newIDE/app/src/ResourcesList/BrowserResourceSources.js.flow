@@ -1,0 +1,12 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type ResourceSource, type ResourceStoreChooserProps } from './ResourceSource';
+
+declare export var UrlChooser: React.ComponentType<ResourceStoreChooserProps>;
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+declare export default Array<ResourceSource>;

@@ -1,0 +1,11 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type Props = {|
+  label: string,
+  description: string,
+  elementsWithWords: string,
+|};
+
+declare export default function MeasurementUnitDocumentation(arg0: Props): React.Node;

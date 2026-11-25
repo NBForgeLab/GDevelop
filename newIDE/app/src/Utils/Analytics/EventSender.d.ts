@@ -10,3 +10,5 @@ export declare const sendErrorMessage: (
   rawError: any,
   errorId: string
 ) => void;
+
+export declare const sendExternalEditorOpened: (editorName: string) => void;

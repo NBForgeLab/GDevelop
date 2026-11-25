@@ -1,0 +1,32 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import {
+  type Schema,
+  type Instances,
+} from '../PropertiesEditor/PropertiesEditorSchema';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+import { type UnsavedChanges } from '../MainFrame/UnsavedChangesContext';
+
+type Props = {|
+  onInstancesModified?: Instances => void,
+  instances: Instances,
+  schema: Schema,
+  placeholder: React.Node,
+
+  // If set, render the "extra" description content from fields
+  // (see getExtraDescription).
+  renderExtraDescriptionText?: (extraDescription: string) => string,
+  unsavedChanges?: ?UnsavedChanges,
+
+  // Optional context:
+  project?: ?gdProject,
+  object?: ?gdObject,
+  projectScopedContainersAccessor?: ProjectScopedContainersAccessor,
+  resourceManagementProps?: ?ResourceManagementProps,
+  isAdvancedSectionInitiallyUncollapsed?: boolean,
+|};
+
+declare export var hasSchemaAnyProperty: (propertiesSchema: Schema) => boolean;
+declare export default React.ComponentType<Props>;

@@ -1,0 +1,16 @@
+// @flow
+// @flow-transitional-stub
+import { type ResourceSource } from './ResourceSource';
+
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[constant-condition]
+// $FlowFixMe[constant-condition]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-type]
+declare export default Array<ResourceSource>;

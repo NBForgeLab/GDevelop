@@ -1,0 +1,30 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+import { type UnsavedChanges } from '../MainFrame/UnsavedChangesContext';
+import { type Schema, type Instance, type Instances } from '../PropertiesEditor/PropertiesEditorSchema';
+
+type Props = {|
+  onInstancesModified?: Instances => void,
+  onRefreshAllFields: () => void,
+  instances: Instances,
+  schema: Schema,
+  mode?: 'column' | 'row',
+  preventWrap?: boolean,
+  removeSpacers?: boolean,
+  isHidden?: (Array<Instance>) => boolean,
+
+  // If set, render the "extra" description content from fields
+  // (see getExtraDescription).
+  renderExtraDescriptionText?: (extraDescription: string) => string,
+  unsavedChanges?: ?UnsavedChanges,
+
+  // Optional context:
+  project?: ?gdProject,
+  resourceManagementProps?: ?ResourceManagementProps,
+|};
+
+declare export var Separator: () => React.MixedElement;
+declare export var Level2Separator: () => React.MixedElement;
+declare export default React.ComponentType<Props>;

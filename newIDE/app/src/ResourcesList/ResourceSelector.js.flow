@@ -1,0 +1,39 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type ResourceManagementProps, type ResourceKind } from '../ResourcesList/ResourceSource';
+import { type FieldFocusFunction } from '../EventsSheet/ParameterFields/ParameterFieldCommons';
+import ResourcesLoader from '../ResourcesLoader';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+
+type Props = {|
+  project: gdProject,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  resourceManagementProps: ResourceManagementProps,
+  resourcesLoader: typeof ResourcesLoader,
+  resourceKind: ResourceKind,
+  fallbackResourceKind?: ?ResourceKind,
+  fullWidth?: boolean,
+  canBeReset?: boolean,
+  initialResourceName: string,
+  defaultNewResourceName?: string,
+  onChange: string => void,
+  floatingLabelText?: React.Node,
+  helperMarkdownText?: ?string,
+  hintText?: MessageDescriptor,
+  onRequestClose?: () => void,
+  onApply?: () => void,
+  margin?: 'none' | 'dense',
+  style?: {| alignSelf?: 'center' |},
+  id?: string,
+  disabled?: boolean,
+|};
+
+export type ResourceSelectorInterface = {| focus: FieldFocusFunction |};
+// $FlowFixMe[constant-condition]
+// $FlowFixMe[incompatible-type]
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<ResourceSelectorInterface>,
+}>;
