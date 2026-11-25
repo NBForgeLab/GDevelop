@@ -1,0 +1,20 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type ExpressionAutocompletion } from '../../../ExpressionAutocompletion';
+import { type ParameterRenderingServiceType } from '../ParameterFieldCommons';
+import { type AutocompletionAction } from './ExpressionAutocompletionsHandler';
+
+type Props = {|
+  project: ?gdProject,
+  expressionAutocompletions: Array<ExpressionAutocompletion>,
+  remainingCount: number,
+  selectedCompletionIndex: number,
+  additionalActions?: Array<AutocompletionAction>,
+  anchorEl: Element,
+  onChoose: (chosenExpressionAutocompletion: ExpressionAutocompletion) => void,
+  onScroll: () => void,
+  parameterRenderingService: ParameterRenderingServiceType,
+|};
+
+declare export default function ExpressionAutocompletionsDisplayer(arg0: Props): null | React.Node;

@@ -1,0 +1,35 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type ParameterFieldProps, type ParameterFieldInterface } from './ParameterFieldCommons';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+import { type VariableDialogOpeningProps } from '../../VariablesList/VariablesEditorDialog';
+import { type ExpressionType } from './GenericExpressionField';
+
+type Props = {
+  ...ParameterFieldProps,
+  variablesContainers: Array<gdVariablesContainer>,
+  getVariableSourceFromIdentifier: (
+    identifier: string,
+    projectScopedContainers: gdProjectScopedContainers
+  ) => VariablesContainer_SourceType,
+  openVariableEditorDialog: (VariableDialogOpeningProps => void) | null,
+  editEventsFunctionParameter: (VariableDialogOpeningProps => void) | null,
+  openEventsBasedEntityPropertyEditorDialog:
+    | (VariableDialogOpeningProps => void)
+    | null,
+  expressionType: ExpressionType,
+  expressionTypeExtraInfo?: string,
+};
+
+declare export var getRootVariableName: (name: string) => string;
+declare export var getVariableSourceIcon: (variableSourceType: VariablesContainer_SourceType) => any;
+declare export var getVariableTypeIcon: (variableType: Variable_Type) => any;
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<ParameterFieldInterface>,
+}>;
+declare export var renderVariableWithIcon: (arg0: ParameterInlineRendererProps, tooltip: string, getVariableSourceFromIdentifier: (
+    variableName: string,
+    projectScopedContainers: gdProjectScopedContainers
+  ) => VariablesContainer_SourceType) => React.MixedElement;

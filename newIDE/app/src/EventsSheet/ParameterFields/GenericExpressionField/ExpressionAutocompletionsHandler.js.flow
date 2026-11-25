@@ -1,0 +1,48 @@
+// @flow
+// @flow-transitional-stub [Phase 5]
+import * as React from 'react';
+import { type ExpressionAutocompletion } from '../../../ExpressionAutocompletion';
+import ListIcon from '../../../UI/ListIcon';
+import SvgIcon from '@material-ui/core/SvgIcon';
+import { type MessageDescriptor } from '../../../Utils/i18n/MessageDescriptor.flow';
+
+export type AutocompletionAction = {
+  id: string,
+  translatableValue: MessageDescriptor,
+  // $FlowFixMe[prop-missing]
+  renderIcon: () => React.Element<typeof ListIcon | typeof SvgIcon>,
+  onClick: () => void,
+};
+
+export type AutocompletionsState = {|
+  autocompletions: Array<ExpressionAutocompletion>,
+  additionalActions: Array<AutocompletionAction>,
+  selectedCompletionIndex: number,
+  renderEverything: boolean,
+|};
+
+declare export var getAutocompletionsInitialState: () => AutocompletionsState;
+declare export var getNonRenderedCount: (
+  state: AutocompletionsState
+) => number;
+declare export var getRenderedAutocompletions: (
+  state: AutocompletionsState
+) => Array<ExpressionAutocompletion>;
+declare export var setNewAutocompletions: (
+  state: AutocompletionsState,
+  autocompletions: Array<ExpressionAutocompletion>,
+  additionalActions?: Array<AutocompletionAction>
+) => AutocompletionsState;
+declare export var handleAutocompletionsScroll: (
+  state: AutocompletionsState
+) => AutocompletionsState;
+declare export var handleAutocompletionsKeyDown: (
+  state: AutocompletionsState,
+  arg1: {|
+    event: SyntheticKeyboardEvent<>,
+    onUpdateAutocompletions: () => void,
+    onInsertAutocompletion: (
+      expressionAutocompletion: ExpressionAutocompletion
+    ) => void,
+  |}
+) => AutocompletionsState;

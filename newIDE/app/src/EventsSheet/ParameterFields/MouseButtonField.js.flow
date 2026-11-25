@@ -1,0 +1,11 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import React from 'react';
+import { type ParameterFieldProps, type ParameterFieldInterface } from './ParameterFieldCommons';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+
+declare export default React.ComponentType<{
+  ...ParameterFieldProps,
+  +ref?: React.RefSetter<ParameterFieldInterface>,
+}>;
+declare export var renderInlineMouseButton: (arg0: ParameterInlineRendererProps) => string | React.MixedElement;

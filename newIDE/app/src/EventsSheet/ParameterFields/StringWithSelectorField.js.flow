@@ -1,0 +1,47 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import React from 'react';
+import { type ParameterFieldProps, type ParameterFieldInterface } from './ParameterFieldCommons';
+import { type RichSelectFieldExtraOption, type RichSelectFieldOptionAction } from '../../UI/RichSelectField';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+
+export type ChoiceAdornmentContext =
+  | 'field'
+  | 'inlineField'
+  | 'menu'
+  | 'eventsSheet';
+export type RenderChoiceAdornment = (
+  choice: string,
+  context: ChoiceAdornmentContext
+) => React.Node;
+export type StringWithSelectorFieldProps = {|
+  ...ParameterFieldProps,
+  // The choices to display. If not specified, they are read from the parameter metadata.
+  choices?: Array<string>,
+  // If specified, displayed next to each choice (an icon, a preview...).
+  renderChoiceAdornment?: RenderChoiceAdornment,
+  // Consecutive choices of different groups are separated by a divider, and
+  // the label of the group (from `choiceGroupLabels`), if any.
+  getChoiceGroup?: (choice: string) => string,
+  choiceGroupLabels?: { [group: string]: MessageDescriptor },
+  // If specified, a button shown at the end of a choice in the list.
+  getChoiceAction?: (choice: string) => ?RichSelectFieldOptionAction,
+  // Actions shown after the choices, below a divider.
+  extraOptions?: Array<RichSelectFieldExtraOption>,
+  // Shown under the field, after the parameter long description.
+  extraHelperMarkdownText?: ?string,
+  // Chosen when the value is empty. The first choice if not specified.
+  defaultChoice?: string,
+  // Return an error to show for the value, or null.
+  onExtractAdditionalErrors?: (value: string) => ?string,
+|};
+declare export var getSelectedChoice: (value: string, choices: Array<string>) => string | null;
+declare export default React.ComponentType<{
+  ...StringWithSelectorFieldProps,
+  +ref?: React.RefSetter<ParameterFieldInterface>,
+}>;
+declare export var renderInlineStringWithSelector: (props: ParameterInlineRendererProps, arg1: {|
+    choices: Array<string>,
+    renderChoiceAdornment: RenderChoiceAdornment,
+  |}) => React.Node;
