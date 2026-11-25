@@ -1,0 +1,10 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type SerializedExtension } from '../../Utils/GDevelopServices/Extension';
+
+declare export default class LocalEventsFunctionsExtensionOpener {
+  static chooseEventsFunctionExtensionFile: () => Promise<Array<string>>;
+  static readEventsFunctionExtensionFile: (filepath: string) => Promise<SerializedExtension>;
+  static chooseAssetPackFile: () => Promise<?string>;
+  static readAssetPackFile: (filepath: string) => Promise<Blob>;
+}

@@ -1,0 +1,22 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import type { Course, CourseChapter } from '../Utils/GDevelopServices/Asset';
+import type {
+  CourseCompletion,
+  CourseChapterCompletion,
+} from '../MainFrame/EditorContainers/HomePage/UseCourses';
+
+type Props = {|
+  course: ?Course,
+  getCourseChapters: (courseId: string) => ?Array<CourseChapter>,
+  getCourseCompletion: (courseId: string) => CourseCompletion | null,
+  getCourseChapterCompletion: (
+    courseId: string,
+    chapterId: string
+  ) => CourseChapterCompletion | null,
+  onDisplayCourse: () => void,
+|};
+
+declare export var freeChipStyle: {| height: 20, backgroundColor: "#8BE7C4", color: "#1D1D26" |};
+declare export default React.ComponentType<Props>;

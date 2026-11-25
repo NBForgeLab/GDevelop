@@ -175,6 +175,13 @@ declare module 'react-monaco-editor' {
   const MonacoEditor: React.ComponentType<any>;
   export default MonacoEditor;
 }
+declare module 'xxhashjs' {
+  const xxhashjs: {
+    h32: (input: string, seed: number) => { toNumber: () => number };
+    [key: string]: any;
+  };
+  export default xxhashjs;
+}
 declare module 'three' {
   export class Object3D {
     [key: string]: any;

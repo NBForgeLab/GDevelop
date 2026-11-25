@@ -1,0 +1,19 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import React from 'react';
+import { type InAppTutorialFlowFormattedStep, type EditorIdentifier } from '../Utils/GDevelopServices/InAppTutorial';
+
+type Props = {|
+  step: InAppTutorialFlowFormattedStep,
+  expectedEditor: {| editor: EditorIdentifier, scene?: string |} | null,
+  goToFallbackStep: () => void,
+  endTutorial: ({| reason: 'completed' | 'user-early-exit' |}) => void,
+  progress: number,
+  goToNextStep: () => void,
+|};
+
+declare export var queryElementOrItsMostVisuallySignificantParent: (elementToHighlightId: string) => {|
+  elementToHighlight: ?HTMLElement,
+  elementWithId: ?HTMLElement,
+|};
+declare export default React.ComponentType<Props>;

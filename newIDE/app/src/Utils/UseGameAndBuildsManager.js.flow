@@ -1,0 +1,37 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type Build } from './GDevelopServices/Build';
+import { type GameAvailabilityError } from '../GameDashboard/GameRegistration';
+import { type Game, type SavedStatus } from './GDevelopServices/Game';
+
+type Props = {|
+  project: ?gdProject,
+  copyLeaderboardsAndMultiplayerLobbiesFromGameId?: string,
+  onGameRegistered?: () => Promise<void>,
+|};
+
+declare export var getDefaultRegisterGameProperties: (arg0: {|
+  projectId: string,
+  projectName: ?string,
+  projectAuthor: ?string,
+  savedStatus: SavedStatus,
+|}) => {
+  authorName: string,
+  gameId: string,
+  gameName: string,
+  savedStatus: SavedStatus,
+};
+export type GameManager = {|
+  game: ?Game,
+  setGame: Game => void,
+  refreshGame: () => Promise<void>,
+  gameAvailabilityError: ?GameAvailabilityError,
+  registerGameIfNeeded: () => Promise<void>,
+|};
+export type GameAndBuildsManager = {|
+  ...GameManager,
+  gameBuilds: ?Array<Build>,
+  refreshGameBuilds: () => Promise<void>,
+|};
+declare export var useGameManager: (arg0: Props) => GameManager;
+declare export var useGameAndBuildsManager: (arg0: Props) => GameAndBuildsManager;

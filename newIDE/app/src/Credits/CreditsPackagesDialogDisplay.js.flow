@@ -1,0 +1,27 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import {
+  type CreditsPackageDialogDisplayConfig,
+  type CreditsPackageDialogVariantConfig,
+} from '../Utils/GDevelopServices/Usage';
+
+export type CreditsPackagePlacementId =
+  | 'ai-requests'
+  | 'asset-store'
+  | 'game-featuring'
+  | 'profile'
+  | 'unknown';
+
+export type CreditsPackageDialogVariant = 'standard' | 'ai' | 'compact';
+
+export type CreditsPackageDialogDisplay = {|
+  dialogVariant: CreditsPackageDialogVariant,
+|};
+
+declare export var resolveCreditsPackageDialogDisplay: (params: {|
+  placementId: CreditsPackagePlacementId,
+  displayConfig: ?CreditsPackageDialogDisplayConfig,
+  pickVariant?: (
+    variants: Array<CreditsPackageDialogVariantConfig>
+  ) => ?CreditsPackageDialogVariantConfig,
+|}) => CreditsPackageDialogDisplay;

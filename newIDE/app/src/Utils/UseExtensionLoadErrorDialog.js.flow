@@ -1,0 +1,25 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type ExtensionLoadingResult } from '../JsExtensionsLoader';
+
+type ExtensionLoadingResultWithPath = {|
+  extensionModulePath: string,
+  result: ExtensionLoadingResult,
+|};
+type ExtensionLoadErrorDialogProps = {|
+  erroredExtensionLoadingResults: Array<ExtensionLoadingResultWithPath>,
+  genericError: ?Error,
+  onClose: () => void,
+|};
+type UseExtensionLoadErrorDialogOutput = {|
+  setExtensionLoadingResults: ({|
+    results: Array<ExtensionLoadingResultWithPath>,
+    expectedNumberOfJSExtensionModulesLoaded: number,
+  |}) => void,
+  hasExtensionLoadErrors: boolean,
+  renderExtensionLoadErrorDialog: () => React.Node,
+|};
+
+declare export var ExtensionLoadErrorDialog: React.ComponentType<ExtensionLoadErrorDialogProps>;
+declare export var useExtensionLoadErrorDialog: () => UseExtensionLoadErrorDialogOutput;
