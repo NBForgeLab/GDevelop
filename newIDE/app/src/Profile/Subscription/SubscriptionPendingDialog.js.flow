@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import React from 'react';
+import { type AuthenticatedUser } from '../AuthenticatedUserContext';
+
+type Props = {|
+  onClose: () => void,
+  authenticatedUser: AuthenticatedUser,
+  onSuccess: () => void,
+  immediatelyShowSuccessMessage?: boolean,
+|};
+
+declare export default function SubscriptionPendingDialog(arg0: Props): React.Node;

@@ -28,8 +28,14 @@ export declare const breakingButtonV31ExtensionShortHeader: ExtensionShortHeader
 export declare const incompatibleButtonV4ExtensionShortHeader: ExtensionShortHeader;
 export declare const fakePrivateAssetPack1ListingData: PrivateAssetPackListingData;
 export declare const fakePrivateGameTemplateListingData: PrivateGameTemplateListingData;
+export declare const noSubscription: Subscription;
 export declare const subscriptionForGoldUser: Subscription;
 export declare const subscriptionForSilverUser: Subscription;
+export declare const subscriptionForStartupUser: Subscription;
+export declare const subscriptionForIndieUser: Subscription;
+export declare const subscriptionForProUser: Subscription;
+export declare const subscriptionForEducationPlan: Subscription;
+export declare const subscriptionForGoldUserFromEducationPlan: Subscription;
 export declare const fakeSilverAuthenticatedUser: AuthenticatedUser;
 export declare const gameRollingMetricsWithHoles: Array<GameMetrics>;
 export declare const gameRollingMetricsWithOnly19Days: Array<GameMetrics>;

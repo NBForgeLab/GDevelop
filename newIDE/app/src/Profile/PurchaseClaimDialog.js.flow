@@ -1,0 +1,16 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type GiftableProductListingData } from '../Utils/GDevelopServices/Shop';
+
+type Props = {|
+  claimedProductOptions: ClaimedProductOptions,
+  onClose: () => void,
+|};
+
+export type ClaimedProductOptions = {|
+  productListingData: GiftableProductListingData,
+  purchaseId: string,
+  claimableToken: string,
+|};
+declare export default React.ComponentType<Props>;

@@ -1,0 +1,127 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type EditUserChanges, type CommunityLinks } from '../Utils/GDevelopServices/User';
+import Authentication, {
+  type LoginForm,
+  type RegisterForm,
+  type ChangeEmailForm,
+  type AuthError,
+  type ForgotPasswordForm,
+  type IdentityProvider,
+} from '../Utils/GDevelopServices/Authentication';
+import { type User as FirebaseUser } from 'firebase/auth';
+import { type AuthenticatedUser } from './AuthenticatedUserContext';
+import { type PreferencesValues } from '../MainFrame/Preferences/PreferencesContext';
+import { type CloudProjectWithUserAccessInfo } from '../Utils/GDevelopServices/Project';
+import RequestDeduplicator from '../Utils/RequestDeduplicator';
+import { type ClaimedProductOptions } from './PurchaseClaimDialog';
+
+type Props = {|
+  authentication: Authentication,
+  preferencesValues: PreferencesValues,
+  children: React.Node,
+|};
+type State = {|
+  authenticatedUser: AuthenticatedUser,
+  loginDialogOpen: boolean,
+  loginWithPurchaseClaimDialogOpen: boolean,
+  createAccountDialogOpen: boolean,
+  createAccountWithPurchaseClaimDialogOpen: boolean,
+  loginInProgress: boolean,
+  createAccountInProgress: boolean,
+  editProfileDialogOpen: boolean,
+  editInProgress: boolean,
+  deleteInProgress: boolean,
+  apiCallError: ?AuthError,
+  resetPasswordDialogOpen: boolean,
+  emailVerificationDialogOpen: boolean,
+  emailVerificationDialogProps: {|
+    sendEmailAutomatically: boolean,
+    showSendEmailButton: boolean,
+  |},
+  forgotPasswordInProgress: boolean,
+  changeEmailDialogOpen: boolean,
+  changeEmailInProgress: boolean,
+  userSnackbarMessage: ?React.Node,
+|};
+
+declare export default class AuthenticatedUserProvider extends React.Component<
+  Props,
+  State
+> {
+  _automaticallyUpdateUserProfile: boolean;
+  _hasNotifiedUserAboutEmailVerification: boolean;
+  _abortController: ?AbortController;
+  _notificationPollingIntervalId: ?IntervalID;
+  // $FlowFixMe[missing-local-annot]
+  _cloudProjectListingDeduplicator: RequestDeduplicator<
+    Array<CloudProjectWithUserAccessInfo>
+  >;
+  _initializeAuthenticatedUser(): void;
+  _markAuthenticatedUserAsLoggedOut(): void;
+  // $FlowFixMe[value-as-type]
+  _reloadFirebaseProfile: () => Promise<?FirebaseUser>;
+  _fetchUserProfileWithoutThrowingErrors: (options?: ?{
+      dontNotifyAboutEmailVerification?: boolean,
+      resetState?: boolean,
+    }) => Promise<void>;
+  _fetchUserProfile: (options?: ?{
+      dontNotifyAboutEmailVerification?: boolean,
+      /**
+       * By default, fetching the user does not reset their attributes to a null state
+       * to avoid the UI displaying loaders everywhere. This boolean should be set
+       * to true when such a result is expected (during login for instance).
+       */
+      resetState?: boolean,
+    }) => Promise<void>;
+  _fetchUserSubscription: () => Promise<void>;
+  _fetchUserNotifications: () => Promise<void>;
+  _fetchUserUsages: () => Promise<void>;
+  _fetchEarningsBalance: () => Promise<void>;
+  _fetchUserLimits: () => Promise<void>;
+  _fetchUserSubscriptionLimitsAndUsages: () => Promise<void>;
+  _fetchUserAssetPacks: () => Promise<void>;
+  _fetchUserAssetShortHeaders: () => Promise<void>;
+  _fetchUserGameTemplates: () => Promise<void>;
+  _fetchUserBundles: () => Promise<void>;
+  _fetchUserGameTemplatePurchases: () => Promise<void>;
+  _fetchUserAssetPackPurchases: () => Promise<void>;
+  _fetchUserCoursePurchases: () => Promise<void>;
+  _fetchUserBundlePurchases: () => Promise<void>;
+  _fetchUserProducts: () => Promise<void>;
+  _fetchUserCloudProjects: () => Promise<void>;
+  _fetchUserBadges: () => Promise<void>;
+  _fetchAchievements: () => Promise<void>;
+  _notifyUserAboutEmailVerification: () => void;
+  _doLogout: () => Promise<void>;
+  _showLoginSnackbar: (authenticatedUser: AuthenticatedUser) => void;
+  _doLoginWithProvider: (provider: IdentityProvider) => Promise<void>;
+  _cancelLoginOrSignUp: () => void;
+  _doLogin: (form: LoginForm) => Promise<void>;
+  _doEdit: (payload: EditUserChanges, preferences: PreferencesValues) => Promise<void>;
+  _doCreateAccount: (form: RegisterForm, preferences: PreferencesValues) => Promise<void>;
+  _doDeleteAccount: () => Promise<void>;
+  _doForgotPassword: (form: ForgotPasswordForm) => Promise<void>;
+  _doSendEmailVerification: () => Promise<void>;
+  _doAcceptGameStatsEmail: (value: boolean) => Promise<void>;
+  _doChangeEmail: (form: ChangeEmailForm) => Promise<void>;
+  openEmailVerificationDialog: (arg0: {|
+    open?: boolean,
+    sendEmailAutomatically?: boolean,
+    showSendEmailButton?: boolean,
+  |}) => void;
+  openResetPassword: (open?: boolean) => void;
+  openLoginDialog: (open?: boolean) => void;
+  openLoginWithPurchaseClaimDialog: (open?: boolean, claimedProductOptions?: ?ClaimedProductOptions) => void;
+  showUserSnackbar: (arg0: {| message: ?React.Node |}) => void;
+  openEditProfileDialog: (open?: boolean) => void;
+  openCreateAccountDialog: (open?: boolean) => void;
+  openCreateAccountWithPurchaseClaimDialog: (open?: boolean, claimedProductOptions?: ?ClaimedProductOptions) => void;
+  openPurchaseClaimDialog: (claimedProductOptions?: ?ClaimedProductOptions) => void;
+  openChangeEmailDialog: (open?: boolean) => void;
+  _onUpdateGithubStar: (githubUsername: string, preferences: PreferencesValues) => any;
+  _onUpdateTiktokFollow: (communityLinks: CommunityLinks, preferences: PreferencesValues) => any;
+  _onUpdateTwitterFollow: (communityLinks: CommunityLinks, preferences: PreferencesValues) => any;
+  _onUpdateYoutubeSubscription: (communityLinks: CommunityLinks, preferences: PreferencesValues) => any;
+}

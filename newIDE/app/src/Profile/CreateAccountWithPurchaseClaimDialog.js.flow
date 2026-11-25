@@ -1,0 +1,21 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import {
+  type RegisterForm,
+  type AuthError,
+  type IdentityProvider,
+} from '../Utils/GDevelopServices/Authentication';
+import { type ClaimedProductOptions } from './PurchaseClaimDialog';
+
+type Props = {|
+  onClose: () => void,
+  onGoToLogin: () => void,
+  onCreateAccount: (form: RegisterForm) => Promise<void>,
+  onLoginWithProvider: (provider: IdentityProvider) => Promise<void>,
+  createAccountInProgress: boolean,
+  error: ?AuthError,
+  claimedProductOptions: ClaimedProductOptions,
+|};
+
+declare export default React.ComponentType<Props>;

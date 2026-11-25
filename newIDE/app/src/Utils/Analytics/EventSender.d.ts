@@ -1,3 +1,7 @@
+import type { User as FirebaseUser } from 'firebase/auth';
+import type { AuthenticatedUser } from '../../Profile/AuthenticatedUserContext';
+import type { SubscriptionAnalyticsMetadata } from '../../Profile/Subscription/SubscriptionContext';
+
 export declare const sendErrorMessage: (
   message: string,
   type:
@@ -201,3 +205,42 @@ export declare const sendGameTemplateBuyClicked: (options: {
 }) => void;
 
 export declare const sendTutorialOpened: (tutorialName: string) => void;
+
+export declare const onUserLogoutForAnalytics: () => void;
+
+export declare const sendSignupDone: (email: string) => void;
+
+export declare const identifyUserForAnalytics: (
+  authenticatedUser: AuthenticatedUser
+) => void;
+
+export declare const aliasUserForAnalyticsAfterSignUp: (
+  firebaseUser: FirebaseUser
+) => void;
+
+export declare const sendSocialFollowUpdated: (
+  achievementId: string,
+  metadata: { code: string }
+) => void;
+
+export declare const sendSubscriptionCheckDialogShown: (options: {
+  mode: string;
+  id: string;
+}) => void;
+
+export declare const sendSubscriptionCheckDismiss: () => void;
+
+export declare const sendSubscriptionDialogShown: (
+  metadata: SubscriptionAnalyticsMetadata
+) => void;
+
+export declare const sendCancelSubscriptionToChange: (metadata: {
+  planId: string;
+  pricingSystemId: string | null;
+}) => void;
+
+export declare const sendChoosePlanClicked: (metadata: {
+  planId: string | null;
+  pricingSystemId: string | null;
+  dialogVariant?: string;
+}) => void;

@@ -1,0 +1,12 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import React from 'react';
+
+type Props = {|
+  onClose: (hasJustRedeemedCode: boolean) => Promise<void>,
+  codeToPrefill?: string,
+  autoSubmit?: boolean,
+|};
+
+declare export var getRedeemCodeErrorText: (error: ?Error) => void | React.Node;
+declare export default function RedeemCodeDialog(arg0: Props): React.Node;

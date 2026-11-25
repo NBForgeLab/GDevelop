@@ -1,0 +1,41 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import {
+  type AuthError,
+  type Profile,
+  type UpdateGitHubStarResponse,
+  type UpdateTiktokFollowResponse,
+  type UpdateTwitterFollowResponse,
+  type UpdateYoutubeSubscriptionResponse,
+} from '../Utils/GDevelopServices/Authentication';
+import { type EditUserChanges, type CommunityLinks } from '../Utils/GDevelopServices/User';
+import { type Badge, type Achievement } from '../Utils/GDevelopServices/Badge';
+import { type Subscription, type Limits } from '../Utils/GDevelopServices/Usage';
+
+export type EditProfileDialogProps = {|
+  profile: Profile,
+  limits: ?Limits,
+  achievements: ?Array<Achievement>,
+  badges: ?Array<Badge>,
+  subscription: ?Subscription,
+  onClose: () => void,
+  onEdit: (form: EditUserChanges) => Promise<void>,
+  onUpdateGitHubStar: (
+    githubUsername: string
+  ) => Promise<UpdateGitHubStarResponse>,
+  onUpdateTiktokFollow: (
+    communityLinks: CommunityLinks
+  ) => Promise<UpdateTiktokFollowResponse>,
+  onUpdateTwitterFollow: (
+    communityLinks: CommunityLinks
+  ) => Promise<UpdateTwitterFollowResponse>,
+  onUpdateYoutubeSubscription: (
+    communityLinks: CommunityLinks
+  ) => Promise<UpdateYoutubeSubscriptionResponse>,
+  onDelete: () => Promise<void>,
+  actionInProgress: boolean,
+  error: ?AuthError,
+|};
+declare export var getUsernameErrorText: (error: ?AuthError) => any | void;
+declare export default React.ComponentType<EditProfileDialogProps>;

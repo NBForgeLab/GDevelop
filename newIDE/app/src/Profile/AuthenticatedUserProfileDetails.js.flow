@@ -1,0 +1,12 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type AuthenticatedUser } from './AuthenticatedUserContext';
+
+type Props = {|
+  onOpenEditProfileDialog: () => void,
+  onOpenChangeEmailDialog: () => void,
+  authenticatedUser: AuthenticatedUser,
+|};
+
+declare export default React.ComponentType<Props>;
