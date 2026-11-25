@@ -1,0 +1,10 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { Component } from 'react';
+
+type Props = {|
+  error: Error,
+  onClose: () => void,
+|};
+
+declare export default class BrowserPreviewErrorDialog extends Component<Props> {}

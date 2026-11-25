@@ -1,0 +1,31 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+
+declare export var getLocalTempDir: () => string;
+declare export var removeLocalTempDirOfCli: () => void;
+export type UrlFileDescriptor = {|
+  filePath: string,
+  url: string,
+|};
+declare export default class LocalFileSystem {
+  _downloadUrlsToLocalFiles: boolean;
+  _filesToDownload: { [string]: string };
+  constructor(options: ?{|
+      downloadUrlsToLocalFiles: boolean,
+    |}): void;
+  getAllUrlFilesIn: (pathPrefix: string) => Array<UrlFileDescriptor>;
+  mkDir: (path: string) => any;
+  dirExists: (path: string) => any;
+  clearDir: (path: string) => void;
+  getTempDir: () => any;
+  fileNameFrom: (fullPath: string) => any;
+  dirNameFrom: (fullPath: string) => any;
+  makeAbsolute: (filename: string, baseDirectory: string) => any;
+  makeRelative: (filename: string, baseDirectory: string) => any;
+  isAbsolute: (fullPath: string) => any;
+  copyFile: (source: string, dest: string) => any;
+  writeToFile: (file: string, contents: string) => any;
+  readFile: (file: string) => any;
+  readDir: (path: string, ext: string) => any;
+  fileExists: (filePath: string) => any;
+}

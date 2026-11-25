@@ -92,3 +92,5 @@ export declare const sendCloudProjectCouldNotBeOpened: (metadata: {
   userId: string;
   cloudProjectId: string;
 }) => void;
+
+export declare const sendExportLaunched: (exportKind: string) => void;

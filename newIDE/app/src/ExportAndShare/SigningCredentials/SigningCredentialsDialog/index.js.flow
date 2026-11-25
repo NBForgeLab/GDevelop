@@ -1,0 +1,21 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type AuthenticatedUser } from '../../../Profile/AuthenticatedUserContext';
+import { type SigningCredential } from '../../../Utils/GDevelopServices/Build';
+
+type UseGetUserSigningCredentialsOutput = {|
+  signingCredentials: Array<SigningCredential> | null,
+  onRefreshSigningCredentials: () => Promise<void>,
+  error: Error | null,
+|};
+type Props = {
+  signingCredentials: Array<SigningCredential> | null,
+  authenticatedUser: AuthenticatedUser,
+  error: Error | null,
+  onRefreshSigningCredentials: () => Promise<void>,
+  onClose: () => void,
+};
+
+declare export var useGetUserSigningCredentials: (authenticatedUser: AuthenticatedUser) => UseGetUserSigningCredentialsOutput;
+declare export var SigningCredentialsDialog: React.ComponentType<Props>;

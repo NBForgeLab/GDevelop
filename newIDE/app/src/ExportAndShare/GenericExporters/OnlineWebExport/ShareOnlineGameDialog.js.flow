@@ -1,0 +1,15 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+type Props = {|
+  buildOrGameUrl: ?string,
+  gameThumbnailUrl: ?string,
+  gameName: ?string,
+  isBuildPublished: boolean,
+  onOpenGameDashboard?: () => void,
+  onClose: () => void,
+  loadingText: ?React.Node,
+|};
+
+declare export default React.ComponentType<Props>;

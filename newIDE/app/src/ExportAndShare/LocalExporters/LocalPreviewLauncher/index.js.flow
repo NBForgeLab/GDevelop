@@ -1,0 +1,45 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import {
+  type PreviewOptions,
+  type PreviewLauncherProps,
+  type CaptureOptions,
+} from '../../PreviewLauncher.flow';
+import { type SubscriptionCheckerInterface } from '../../../Profile/Subscription/SubscriptionChecker';
+
+type State = {|
+  networkPreviewDialogOpen: boolean,
+  networkPreviewHost: ?string,
+  networkPreviewPort: ?number,
+  networkPreviewError: ?any,
+  hotReloadsCount: number,
+  previewGamePath: ?string,
+  previewBrowserWindowOptions: ?{
+    width: number,
+    height: number,
+    useContentSize: boolean,
+    title: string,
+    backgroundColor: string,
+  },
+  hideMenuBar: boolean,
+  alwaysOnTop: boolean,
+  numberOfWindows: number,
+  captureOptions: ?CaptureOptions,
+|};
+
+declare export default class LocalPreviewLauncher extends React.Component<
+  PreviewLauncherProps,
+  State
+> {
+  canDoNetworkPreview: () => any;
+  _networkPreviewSubscriptionChecker: ?SubscriptionCheckerInterface;
+  _hotReloadSubscriptionChecker: ?SubscriptionCheckerInterface;
+  _openPreviewBrowserWindow: () => void;
+  closePreview: (windowId: number) => void;
+  closeAllPreviews: () => void;
+  _openPreviewWindow: (project: gdProject, gamePath: string, options: PreviewOptions) => void;
+  launchPreview: (previewOptions: PreviewOptions) => Promise<any>;
+  getPreviewDebuggerServer(): any;
+  _checkSubscriptionForNetworkPreview: () => any;
+}

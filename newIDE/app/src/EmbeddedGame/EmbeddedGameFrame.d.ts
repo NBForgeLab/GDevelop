@@ -22,8 +22,7 @@ export type EditorCameraState = {
   positionY: number;
   positionZ: number;
   rotationAngle: number;
-  rotationX: number;
-  rotationY: number;
+  elevationAngle: number;
   distance: number;
 };
 
@@ -34,3 +33,7 @@ export declare const setEditorHotReloadNeeded: (
 export declare const isEditorHotReloadNeeded: () => boolean;
 
 export declare const EmbeddedGameFrame: React.ComponentType<any>;
+
+export declare const setEmbeddedGameFramePreviewLocation: (options: {
+  previewIndexHtmlLocation: string;
+}) => void;

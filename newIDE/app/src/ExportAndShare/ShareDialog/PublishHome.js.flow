@@ -1,0 +1,29 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import {
+  type Exporter,
+  type ExporterSection,
+  type ExporterSubSection,
+} from '.';
+import { type GameAndBuildsManager } from '../../Utils/UseGameAndBuildsManager';
+import { type FileMetadata } from '../../ProjectsStorage';
+
+type PublishHomeProps = {|
+  project: gdProject,
+  onSaveProject: () => Promise<?FileMetadata>,
+  isSavingProject: boolean,
+  gameAndBuildsManager: GameAndBuildsManager,
+  onChangeSubscription: () => void,
+  isNavigationDisabled: boolean,
+  setIsNavigationDisabled: (isNavigationDisabled: boolean) => void,
+  selectedExporter: ?Exporter,
+  onChooseSection: (section: ?ExporterSection) => void,
+  onChooseSubSection: (subSection: ?ExporterSubSection) => void,
+  chosenSection: ?ExporterSection,
+  chosenSubSection: ?ExporterSubSection,
+  allExportersRequireOnline?: boolean,
+  showOnlineWebExporterOnly?: boolean,
+|};
+
+declare export default React.ComponentType<PublishHomeProps>;

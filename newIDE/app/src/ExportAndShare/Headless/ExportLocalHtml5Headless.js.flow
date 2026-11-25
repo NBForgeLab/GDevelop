@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type I18n as I18nType } from '@lingui/core';
+
+type Options = {|
+  project: gdProject,
+  i18n: I18nType,
+  outputDir?: string,
+|};
+type Result = {| outputDir: string |};
+
+declare export var resolveHtml5OutputDir: (project: gdProject) => string;
+declare export var exportLocalHtml5Headless: (arg0: Options) => Promise<Result>;

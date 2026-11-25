@@ -1,0 +1,26 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import BrowserS3FileSystem from '../BrowserS3FileSystem';
+import {
+  type PreviewOptions,
+  type PreviewLauncherProps,
+} from '../../PreviewLauncher.flow';
+
+type State = {|
+  error: ?Error,
+|};
+
+declare export default class BrowserS3PreviewLauncher extends React.Component<
+  PreviewLauncherProps,
+  State
+> {
+  canDoNetworkPreview: () => any;
+  _preparePreviewFiles: () => Promise<{|
+    outputDir: string,
+    gdjsRoot: string,
+    browserS3FileSystem: BrowserS3FileSystem,
+  |}>;
+  launchPreview: (previewOptions: PreviewOptions) => Promise<any>;
+  getPreviewDebuggerServer(): any;
+}

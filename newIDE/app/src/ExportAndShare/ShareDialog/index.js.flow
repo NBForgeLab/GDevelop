@@ -1,0 +1,61 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type ExportPipeline } from '../ExportPipeline.flow';
+import { type FileMetadata, type StorageProvider } from '../../ProjectsStorage';
+import type { GamesList } from '../../GameDashboard/UseGamesList';
+
+type Props = {|
+  ...ShareDialogWithoutExportsProps,
+  /**
+   * Use `null` to hide automated exporters.
+   * It should be used with manualExporters set to `null` as well.
+   */
+  automatedExporters: ?Array<Exporter>,
+  /**
+   * Use `null` to hide manual exporters.
+   * It should be used with automatedExporters set to `null` as well.
+   */
+  manualExporters: ?Array<Exporter>,
+  // GDevelop's game platform exporter.
+  onlineWebExporter: Exporter,
+  /**
+   * If true, all exporters will be disabled if the user is offline.
+   * This is mainly helpful on browser, where we need to download resources
+   * before exporting.
+   */
+  allExportersRequireOnline?: boolean,
+|};
+
+export type ShareTab = 'invite' | 'publish';
+export type ExporterSection = 'browser' | 'desktop' | 'android' | 'ios';
+export type ExporterSubSection = 'online' | 'offline' | 'facebook';
+export type ExporterKey =
+  | 'onlinewebexport'
+  | 'onlineelectronexport'
+  | 'onlinecordovaexport'
+  | 'onlinecordovaiosexport'
+  | 'webexport'
+  | 'facebookinstantgamesexport'
+  | 'electronexport'
+  | 'cordovaexport';
+export type Exporter = {|
+  name: React.Node,
+  tabName: React.Node,
+  helpPage: string,
+  disabled?: boolean,
+  key: ExporterKey,
+  exportPipeline: ExportPipeline<any, any, any, any, any>,
+|};
+export type ShareDialogWithoutExportsProps = {|
+  project: ?gdProject,
+  onSaveProject: () => Promise<?FileMetadata>,
+  isSavingProject: boolean,
+  onClose: () => void,
+  onChangeSubscription: () => void,
+  initialTab: ?ShareTab,
+  fileMetadata: ?FileMetadata,
+  storageProvider: StorageProvider,
+  gamesList: GamesList,
+|};
+declare export default React.ComponentType<Props>;
