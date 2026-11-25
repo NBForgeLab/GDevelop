@@ -1,0 +1,6 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type ResourceMover } from './index';
+
+// $FlowFixMe[constant-condition]
+declare export default ResourceMover;

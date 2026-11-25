@@ -1,0 +1,14 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+export type GameRegistrationProps = {|
+  project: ?gdProject,
+  suggestAdditionalActions?: boolean,
+  hideLoader?: boolean,
+  onGameRegistered?: () => void | Promise<void>,
+  customRegistrationMessage?: React.Node,
+  icon?: React.Node,
+|};
+export type GameAvailabilityError = 'not-found' | 'not-owned' | 'unexpected';
+declare export var GameRegistration: React.ComponentType<GameRegistrationProps>;

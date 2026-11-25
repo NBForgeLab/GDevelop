@@ -1,0 +1,26 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+export type DashboardWidgetSize = 'full' | 'half' | 'oneThird' | 'twoThirds';
+
+type GameDashboardWidgetName =
+  | 'analytics'
+  | 'feedback'
+  | 'services'
+  | 'projects'
+  | 'builds'
+  | 'wallet'
+  | 'earnings';
+
+type Props = {|
+  title: React.Node,
+  topRightAction?: React.Node,
+  renderSubtitle?: ?() => React.Node,
+  widgetSize: DashboardWidgetSize,
+  children?: React.Node,
+  minHeight?: boolean,
+  widgetName: GameDashboardWidgetName,
+|};
+
+declare export default React.ComponentType<Props>;

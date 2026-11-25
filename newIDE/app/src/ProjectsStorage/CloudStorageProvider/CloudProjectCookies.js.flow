@@ -1,0 +1,4 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+
+declare export var clearCloudProjectCookies: any;

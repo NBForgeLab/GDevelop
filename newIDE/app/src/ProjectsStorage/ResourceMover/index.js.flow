@@ -1,0 +1,49 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type StorageProviderOperations, type StorageProvider } from '../index';
+import { type AuthenticatedUser } from '../../Profile/AuthenticatedUserContext';
+import { type FileMetadata } from '..';
+
+type UseResourceMoverOutput = {|
+  /**
+   * Launch the moving of the resources, when saving a project in a new location.
+   */
+  ensureResourcesAreMoved: (
+    options: MoveAllProjectResourcesOptionsWithoutProgress
+  ) => Promise<void>,
+  /**
+   * Render, if needed, the dialog that will show the progress of resources moving.
+   */
+  renderResourceMoverDialog: () => React.Node,
+|};
+
+export type MoveAllProjectResourcesOptionsWithoutProgress = {|
+  project: gdProject,
+  oldFileMetadata: FileMetadata,
+  oldStorageProvider: StorageProvider,
+  oldStorageProviderOperations: StorageProviderOperations,
+  newFileMetadata: FileMetadata,
+  newStorageProvider: StorageProvider,
+  newStorageProviderOperations: StorageProviderOperations,
+  authenticatedUser: AuthenticatedUser,
+|};
+export type MoveAllProjectResourcesOptions = {|
+  ...MoveAllProjectResourcesOptionsWithoutProgress,
+  onProgress: (number, number) => void,
+|};
+export type MoveAllProjectResourcesResult = {|
+  erroredResources: Array<{|
+    resourceName: string,
+    error: Error,
+  |}>,
+|};
+export type MoveAllProjectResourcesFunction = (
+  options: MoveAllProjectResourcesOptions
+) => Promise<MoveAllProjectResourcesResult>;
+export type ResourceMover = {|
+  moveAllProjectResources: MoveAllProjectResourcesFunction,
+|};
+declare export var useResourceMover: (arg0: {|
+  resourceMover: ResourceMover,
+|}) => UseResourceMoverOutput;

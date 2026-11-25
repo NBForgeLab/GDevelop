@@ -1,0 +1,24 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type AuthenticatedUser } from '../../Profile/AuthenticatedUserContext';
+import { type FileMetadata } from '..';
+import ProjectCache from '../../Utils/ProjectCache';
+
+declare export var getProjectCache: () => ProjectCache;
+declare export var generateOnOpen: (authenticatedUser: AuthenticatedUser) => ((
+  fileMetadata: FileMetadata,
+  onProgress?: (progress: number, message: MessageDescriptor) => void
+) => Promise<{ content: any }>);
+declare export var generateOnEnsureCanAccessResources: (authenticatedUser: AuthenticatedUser) => ((
+  project: gdProject,
+  fileMetadata: FileMetadata,
+  onProgress?: (progress: number, message: MessageDescriptor) => void
+) => Promise<void>);
+declare export var generateGetAutoSaveCreationDate: (authenticatedUser: AuthenticatedUser) => | ((
+      fileMetadata: FileMetadata,
+      compareLastModified: boolean
+    ) => Promise<?number>)
+  | void;
+declare export var generateOnGetAutoSave: (authenticatedUser: AuthenticatedUser) => ((fileMetadata: FileMetadata) => Promise<FileMetadata>) | void;
+declare export var burstCloudProjectAutoSaveCache: () => Promise<void>;

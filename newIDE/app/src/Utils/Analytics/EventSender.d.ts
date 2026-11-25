@@ -39,3 +39,56 @@ export declare const sendAiRequestMessageSent: (metadata: {
   aiRequestId: string;
   outputLength: number;
 }) => void;
+
+export type SubscriptionDialogDisplayReason =
+  | 'Disable GDevelop splash at startup'
+  | 'Debugger'
+  | 'Hot reloading'
+  | 'Preview over wifi'
+  | 'Landing dialog at opening'
+  | 'Leaderboard count per game limit reached'
+  | 'Cloud Project limit reached'
+  | 'Consult profile'
+  | 'Build limit reached'
+  | 'Leaderboard customization'
+  | 'Generate project from prompt'
+  | 'Version history'
+  | 'Add collaborators on project'
+  | 'Claim asset pack'
+  | 'Callout in Classroom tab'
+  | 'Unlock build type'
+  | 'Manage subscription as teacher'
+  | 'Unlock course chapter'
+  | 'Account get premium'
+  | 'AI requests (subscribe)'
+  | 'AI requests (upgrade)'
+  | 'AI requests history'
+  | 'Coupon code entered'
+  | 'Restore deleted project';
+
+export type SubscriptionPlacementId =
+  | 'builds'
+  | 'debugger'
+  | 'gdevelop-branding'
+  | 'generate-from-prompt'
+  | 'hot-reloading'
+  | 'leaderboards-customization'
+  | 'leaderboards'
+  | 'max-projects-reached'
+  | 'opening-from-link'
+  | 'preview-wifi'
+  | 'profile'
+  | 'invite-collaborators'
+  | 'version-history'
+  | 'claim-asset-pack'
+  | 'unlock-course-chapter'
+  | 'account-get-premium'
+  | 'education'
+  | 'ai-requests'
+  | 'redeem-code'
+  | 'restore-deleted-project';
+
+export declare const sendCloudProjectCouldNotBeOpened: (metadata: {
+  userId: string;
+  cloudProjectId: string;
+}) => void;

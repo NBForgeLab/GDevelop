@@ -1,0 +1,23 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import React from 'react';
+import {
+  type LeaderboardSortOption,
+  type Leaderboard,
+} from '../../Utils/GDevelopServices/Play';
+
+type Props = {
+  open: boolean,
+  leaderboard: Leaderboard,
+  onSave: LeaderboardOptions => Promise<void>,
+  onClose: () => void,
+};
+
+export type LeaderboardOptions = {|
+  sort: LeaderboardSortOption,
+  extremeAllowedScore: ?number,
+  autoPlayerNamePrefix: string,
+  ignoreCustomPlayerNames: boolean,
+  disableLoginInLeaderboard: boolean,
+|};
+declare export default React.ComponentType<Props>;

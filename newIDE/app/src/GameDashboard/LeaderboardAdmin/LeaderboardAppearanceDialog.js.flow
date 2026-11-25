@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import React from 'react';
+import { type LeaderboardCustomizationSettings } from '../../Utils/GDevelopServices/Play';
+
+type Props = {
+  open: boolean,
+  leaderboardCustomizationSettings: ?LeaderboardCustomizationSettings,
+  onSave: LeaderboardCustomizationSettings => Promise<void>,
+  onClose: () => void,
+};
+
+declare export default React.ComponentType<Props>;

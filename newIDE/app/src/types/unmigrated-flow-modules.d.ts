@@ -28,10 +28,6 @@ declare module '*/ExportAndShare' {
   const content: any;
   export default content;
 }
-declare module '*/GameDashboard' {
-  const content: any;
-  export default content;
-}
 declare module '*/Debugger' {
   const content: any;
   export default content;

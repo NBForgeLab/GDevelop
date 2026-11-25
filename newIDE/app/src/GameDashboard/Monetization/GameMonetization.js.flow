@@ -1,0 +1,11 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type Game } from '../../Utils/GDevelopServices/Game';
+
+type Props = {|
+  game: Game,
+  onGameUpdated: (updatedGame: Game) => void,
+|};
+
+declare export default React.ComponentType<Props>;

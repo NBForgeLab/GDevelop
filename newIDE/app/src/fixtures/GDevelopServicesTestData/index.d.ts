@@ -5,6 +5,8 @@ import type {
   PrivateGameTemplateListingData,
 } from '../../Utils/GDevelopServices/Shop';
 import type { Subscription } from '../../Utils/GDevelopServices/Usage';
+import type { GameMetrics } from '../../Utils/GDevelopServices/Analytics';
+import type { AuthenticatedUser } from '../../Profile/AuthenticatedUserContext';
 
 export declare const fakeAssetShortHeader1: AssetShortHeader;
 export declare const buttonV2ExtensionShortHeader: ExtensionShortHeader;
@@ -14,3 +16,6 @@ export declare const fakePrivateAssetPack1ListingData: PrivateAssetPackListingDa
 export declare const fakePrivateGameTemplateListingData: PrivateGameTemplateListingData;
 export declare const subscriptionForGoldUser: Subscription;
 export declare const subscriptionForSilverUser: Subscription;
+export declare const fakeSilverAuthenticatedUser: AuthenticatedUser;
+export declare const gameRollingMetricsWithHoles: Array<GameMetrics>;
+export declare const gameRollingMetricsWithOnly19Days: Array<GameMetrics>;

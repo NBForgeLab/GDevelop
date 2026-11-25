@@ -1,0 +1,7 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type MoveAllProjectResourcesOptions, type MoveAllProjectResourcesResult } from './index';
+
+declare export var moveAllLocalResourcesToCloudResources: (arg0: MoveAllProjectResourcesOptions) => Promise<MoveAllProjectResourcesResult>;
+// $FlowFixMe[constant-condition]
+declare export default {| moveAllProjectResources: any |};

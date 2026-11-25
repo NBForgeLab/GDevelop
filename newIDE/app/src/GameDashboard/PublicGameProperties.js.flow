@@ -1,0 +1,53 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import React from 'react';
+import { type Game, type PublicGame } from '../Utils/GDevelopServices/Game';
+
+type Props = {|
+  gameId: string,
+  disabled?: boolean,
+  onGameUpdated?: (game: Game) => void,
+  onUpdatingGame?: (isUpdatingGame: boolean) => void,
+  // Properties visible in the project properties and game dialogs.
+  setName: string => void,
+  name: string,
+  setDescription: string => void,
+  description: ?string,
+  setAuthorIds: (string[]) => void,
+  setAuthorUsernames: (string[]) => void,
+  authorIds: string[],
+  setOrientation: string => void,
+  orientation: string,
+  // Properties only visible in the game dialog.
+  setCategories?: (string[]) => void,
+  categories?: string[],
+  setOwnerIds?: (string[]) => void,
+  ownerIds?: string[],
+  setPlayableWithKeyboard?: boolean => void,
+  playWithKeyboard?: boolean,
+  setPlayableWithGamepad?: boolean => void,
+  playWithGamepad?: boolean,
+  setPlayableWithMobile?: boolean => void,
+  playWithMobile?: boolean,
+  userSlug?: string,
+  setUserSlug?: string => void,
+  gameSlug?: string,
+  setGameSlug?: string => void,
+  setDiscoverable?: boolean => void,
+  isPublishedOnGdGames?: boolean,
+  setIsPublishedOnGdGames?: boolean => void,
+  acceptsAdvertisementsOnGdGames?: boolean,
+  setAcceptsAdvertisementsOnGdGames?: boolean => void,
+  acceptsGameComments?: boolean,
+  setAcceptsGameComments?: boolean => void,
+  discoverable?: boolean,
+  displayThumbnail?: boolean,
+  thumbnailUrl?: ?string,
+  /** When set, the video of the game is displayed below the thumbnail. */
+  publicGame?: ?PublicGame,
+  canBePublishedOnGdGames?: boolean,
+|};
+
+declare export var cleanUpGameSlug: (gameSlug: string) => string;
+declare export function PublicGameProperties(arg0: Props): React.Node;
+declare export default React.ComponentType<Props>;
