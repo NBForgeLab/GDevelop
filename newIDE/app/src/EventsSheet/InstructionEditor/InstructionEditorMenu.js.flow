@@ -1,0 +1,40 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type I18n as I18nType } from '@lingui/core';
+import * as React from 'react';
+import { type ResourceManagementProps } from '../../ResourcesList/ResourceSource';
+import { type EventsScope } from '../../InstructionOrExpression/EventsScope';
+import { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
+import { type VariableDialogOpeningProps } from '../../VariablesList/VariablesEditorDialog';
+
+type Props = {|
+  project: gdProject,
+  scope: EventsScope,
+  globalObjectsContainer: gdObjectsContainer,
+  objectsContainer: gdObjectsContainer,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  instruction: gdInstruction,
+  isCondition: boolean,
+  resourceManagementProps: ResourceManagementProps,
+  style?: Object,
+  anchorEl: ?HTMLElement,
+  isNewInstruction: boolean,
+  onCancel: () => void,
+  onSubmit: () => void,
+  open: boolean,
+  openInstructionOrExpression: (type: string) => void,
+  i18n: I18nType,
+  canPasteInstructions: boolean, // Unused
+  onPasteInstructions: () => void, // Unused
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  onCreateNewExtensionWithBehavior:
+    | ((project: gdProject, object: gdObject) => void)
+    | null,
+  editEventsFunctionParameter: (VariableDialogOpeningProps => void) | null,
+  openEventsBasedEntityPropertyEditorDialog:
+    | (VariableDialogOpeningProps => void)
+    | null,
+|};
+
+declare export default React.ComponentType<Props>;

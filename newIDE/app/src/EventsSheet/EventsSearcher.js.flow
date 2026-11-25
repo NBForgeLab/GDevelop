@@ -1,0 +1,67 @@
+// @flow
+// @flow-transitional-stub [Phase 5]
+import * as React from 'react';
+import { type SelectionState } from './SelectionHandler';
+import type { SearchFilterParams } from '../Utils/Search';
+
+export type SearchInEventsInputs = {|
+  searchInSelection: boolean,
+  searchText: string,
+  searchFilterParams: Required<
+    Omit<SearchFilterParams, 'includeStoreExtensions'>
+  >,
+|};
+
+export type ReplaceInEventsInputs = {|
+  searchInSelection: boolean,
+  searchText: string,
+  replaceText: string,
+  matchCase: boolean,
+  searchInConditions: boolean,
+  searchInActions: boolean,
+  searchInEventStrings: boolean,
+|};
+
+type State = {|
+  eventsSearchResults: ?gdVectorEventsSearchResult,
+  searchFocusOffset: ?number,
+|};
+
+type Props = {|
+  globalObjectsContainer: gdObjectsContainer,
+  objectsContainer: gdObjectsContainer,
+  events: gdEventsList,
+  selection: SelectionState,
+  project: gdProject,
+  children: (props: {|
+    eventsSearchResultEvents: ?Array<gdBaseEvent>,
+    searchFocusOffset: ?number,
+    searchInEvents: (SearchInEventsInputs, cb: () => void) => void,
+    replaceInEvents: (
+      ReplaceInEventsInputs,
+      cb: () => void
+    ) => Array<gdBaseEvent>,
+    goToNextSearchResult: () => ?gdBaseEvent,
+    goToPreviousSearchResult: () => ?gdBaseEvent,
+    clearSearchResults: () => void,
+  |}) => React.Node,
+|};
+
+declare export default class EventsSearcher extends React.Component<
+  Props,
+  State
+> {
+  _resultEvents: ?Array<gdBaseEvent>;
+  componentWillUnmount(): void;
+  reset: () => void;
+  _doReplaceInEvents: (
+    inputs: ReplaceInEventsInputs,
+    cb: () => void
+  ) => Array<gdBaseEvent>;
+  _doSearchInEvents: (inputs: SearchInEventsInputs, cb: () => void) => void;
+  _updateListOfResultEvents: () => void;
+  _goToSearchResults: (step: number) => ?gdBaseEvent;
+  _goToPreviousSearchResult: () => ?gdBaseEvent;
+  _goToNextSearchResult: () => ?gdBaseEvent;
+  render(): any;
+}

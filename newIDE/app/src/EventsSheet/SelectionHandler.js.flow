@@ -1,0 +1,73 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+
+export type InstructionsListContext = {|
+  isCondition: boolean,
+  instrsList: gdInstructionsList,
+|};
+export type InstructionContext = {|
+  isCondition: boolean,
+  instrsList: gdInstructionsList,
+  instruction: gdInstruction,
+  indexInList: number,
+|};
+export type ParameterContext = {|
+  isCondition: boolean,
+  instrsList: gdInstructionsList,
+  instruction: gdInstruction,
+  indexInList: number,
+  parameterIndex: number,
+  domEvent?: any,
+|};
+export type VariableDeclarationContext = {|
+  variablesContainer: gdVariablesContainer,
+  variableName: string,
+|};
+export type EventContext = {|
+  eventsList: gdEventsList,
+  event: gdBaseEvent,
+  indexInList: number,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+|};
+export type InstructionContextWithEventContext = {
+  ...InstructionContext,
+  eventContext: EventContext,
+};
+export type SelectionState = {|
+  // Arrays are in order of selection (last selected element at the last position).
+  selectedInstructions: Array<InstructionContextWithEventContext>,
+  selectedInstructionsLists: Array<InstructionsListContext>,
+  selectedEvents: Array<EventContext>,
+|};
+declare export var getInitialSelection: () => SelectionState;
+declare export var getSelectedEvents: (selection: SelectionState) => Array<gdBaseEvent>;
+declare export var getLastSelectedEvent: (selection: SelectionState) => gdBaseEvent | null;
+declare export var getSelectedEventContexts: (selection: SelectionState) => Array<EventContext>;
+declare export var getLastSelectedEventContext: (selection: SelectionState) => EventContext | null;
+declare export var getLastSelectedEventContextWhichCanHaveSubEvents: (selection: SelectionState) => EventContext | null;
+declare export var getLastSelectedEventContextWhichCanHaveVariables: (selection: SelectionState) => EventContext | null;
+declare export var getSelectedTopMostOnlyEventContexts: (selection: SelectionState) => Array<EventContext>;
+declare export var getLastSelectedTopMostOnlyEventContext: (selection: SelectionState) => EventContext | null;
+declare export var getSelectedInstructions: (selection: SelectionState) => Array<gdInstruction>;
+declare export var getSelectedInstructionsLocatingEvents: (selection: SelectionState) => Array<gdBaseEvent>;
+declare export var getSelectedInstructionsContexts: (selection: SelectionState) => Array<InstructionContextWithEventContext>;
+declare export var getSelectedInstructionsListsContexts: (selection: SelectionState) => Array<InstructionsListContext>;
+declare export var getLastSelectedInstructionContext: (selection: SelectionState) => InstructionContextWithEventContext | null;
+declare export var getLastSelectedInstructionEventContextWhichCanHaveSubEvents: (selection: SelectionState) => EventContext | null;
+declare export var getLastSelectedInstructionEventContextWhichCanHaveVariables: (selection: SelectionState) => EventContext | null;
+declare export var getLastSelectedInstructionsListsContext: (selection: SelectionState) => InstructionsListContext | null;
+declare export var isEventSelected: (selection: SelectionState, event: Object) => boolean;
+declare export var isInstructionSelected: (selection: SelectionState, instruction: gdInstruction) => boolean;
+declare export var isInstructionsListSelected: (selection: SelectionState, instructionsList: gdInstructionsList) => boolean;
+declare export var hasEventSelected: (selection: SelectionState) => boolean;
+declare export var hasInstructionSelected: (selection: SelectionState) => boolean;
+declare export var hasSelectedAtLeastOneCondition: (selection: SelectionState) => boolean;
+declare export var hasInstructionsListSelected: (selection: SelectionState) => boolean;
+declare export var hasSomethingSelected: (selection: SelectionState) => boolean;
+declare export var clearSelection: () => SelectionState;
+declare export var selectEvent: (selection: SelectionState, eventContext: EventContext, multiSelection?: boolean) => SelectionState;
+declare export var selectEvents: (eventContexts: Array<EventContext>) => SelectionState;
+declare export var selectInstruction: (eventContext: EventContext, selection: SelectionState, instructionContext: InstructionContext, multiSelection?: boolean) => SelectionState;
+declare export var selectInstructionsList: (selection: SelectionState, instructionsListContext: InstructionsListContext, multiSelection?: boolean) => SelectionState;
+declare export var selectEventsAfterHistoryChange: (eventContexts: Array<EventContext>) => SelectionState;

@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+type Props = {|
+  children: React.Node,
+  anchorEl: ?HTMLElement,
+  open: boolean,
+  onRequestClose: () => void,
+  onApply: () => void,
+|};
+
+declare export default function InlinePopover(props: Props): React.Node;

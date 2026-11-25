@@ -1,0 +1,9 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+
+export type EventMetadata = {|
+  type: string,
+  fullName: string,
+  description: string,
+|};
+declare export var enumerateEventsMetadata: () => Array<EventMetadata>;

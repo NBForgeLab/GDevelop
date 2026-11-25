@@ -1,0 +1,21 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { Component } from 'react';
+import { type I18n as I18nType } from '@lingui/core';
+import { type ExpressionTreeNode } from '../../../InstructionOrExpression/CreateTree';
+import { type EnumeratedExpressionMetadata } from '../../../InstructionOrExpression/EnumeratedInstructionOrExpressionMetadata';
+import { type EventsScope } from '../../../InstructionOrExpression/EventsScope';
+
+type Props = {|
+  expressionType: string,
+  focusOnMount?: boolean,
+  selectedType: string,
+  onChoose: (type: string, EnumeratedExpressionMetadata) => void,
+  scope: EventsScope,
+  i18n: I18nType,
+|};
+
+declare export default class ExpressionSelector extends Component<Props, {||}> {
+  instructionsInfo: Array<EnumeratedExpressionMetadata>;
+  instructionsInfoTree: ExpressionTreeNode;
+}

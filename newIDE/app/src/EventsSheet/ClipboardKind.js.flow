@@ -1,0 +1,12 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type SelectionState, type InstructionsListContext } from './SelectionHandler';
+
+declare export var CLIPBOARD_KIND: string;
+declare export var hasClipboardEvents: () => boolean;
+declare export var hasClipboardConditions: () => boolean;
+declare export var hasClipboardActions: () => boolean;
+declare export var copySelectionToClipboard: (selection: SelectionState, getIndexes: (Array<gdBaseEvent>) => Array<number>) => void;
+declare export var pasteEventsFromClipboardInSelection: (project: gdProject, selection: SelectionState) => boolean;
+declare export var pasteInstructionsFromClipboardInSelection: (project: gdProject, selection: SelectionState) => boolean;
+declare export var pasteInstructionsFromClipboardInInstructionsList: (project: gdProject, instructionsListContext: InstructionsListContext) => void | boolean;

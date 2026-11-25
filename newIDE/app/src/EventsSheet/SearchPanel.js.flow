@@ -1,0 +1,39 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import {
+  type SearchInEventsInputs,
+  type ReplaceInEventsInputs,
+} from './EventsSearcher';
+
+type SearchTypeTab = 'search-and-replace' | 'search-in-event-sentences';
+type Props = {|
+  onSearchInEvents: SearchInEventsInputs => void,
+  onReplaceInEvents: ReplaceInEventsInputs => void,
+  onCloseSearchPanel: () => void,
+  resultsCount: ?number,
+  hasEventSelected: boolean,
+  onGoToPreviousSearchResult: () => ?gdBaseEvent,
+  onGoToNextSearchResult: () => ?gdBaseEvent,
+  searchFocusOffset: ?number,
+  initialSearchFilterParams: InitialSearchFilterParams,
+|};
+
+export type InitialSearchFilterParams = {|
+  initialSearchText?: string,
+  initialMatchCase?: boolean,
+  initialTab?: SearchTypeTab,
+  initialSearchInConditions?: boolean,
+  initialSearchInActions?: boolean,
+  initialSearchInEventStrings?: boolean,
+  initialSearchInInstructionNames?: boolean,
+|};
+export type SearchPanelInterface = {|
+  focus: () => void,
+  markSearchResultsDirty: () => void,
+  isSearchOngoing: () => boolean,
+|};
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<SearchPanelInterface>,
+}>;

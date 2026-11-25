@@ -1,0 +1,35 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type I18n as I18nType } from '@lingui/core';
+import { type EnumeratedInstructionMetadata } from '../../InstructionOrExpression/EnumeratedInstructionOrExpressionMetadata';
+import { type EventsScope } from '../../InstructionOrExpression/EventsScope';
+import { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
+
+type Props = {|
+  project: gdProject,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  scope: EventsScope,
+  currentTab: TabName,
+  onChangeTab: TabName => void,
+  isCondition: boolean,
+  focusOnMount?: boolean,
+  chosenInstructionType: ?string,
+  onChooseInstruction: (type: string, EnumeratedInstructionMetadata) => void,
+  chosenObjectName: ?string,
+  onChooseObject: (objectName: string) => void,
+  onSearchStartOrReset?: () => void,
+  style?: Object,
+  onOpenExtensionStore: ({ searchText: string }) => void,
+  i18n: I18nType,
+|};
+
+declare export var styles: {| noObjectsText: {| opacity: 0.7 |}, indentedListItem: {| paddingLeft: 45 |}, treeViewContainer: {| flex: 1 |}, treeViewAutoSizer: {| width: "100%" |} |};
+export type TabName = 'objects' | 'free-instructions';
+export type InstructionOrObjectSelectorInterface = {|
+  reEnumerateInstructions: (i18n: I18nType) => void,
+|};
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<InstructionOrObjectSelectorInterface>,
+}>;

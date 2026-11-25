@@ -1,0 +1,281 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type I18n as I18nType } from '@lingui/core';
+import * as React from 'react';
+import { type EventsTreeInterface } from './EventsTree';
+import KeyboardShortcuts from '../UI/KeyboardShortcuts';
+import { type ShortcutMap } from '../KeyboardShortcuts/DefaultShortcuts';
+import { type ContextMenuInterface } from '../UI/Menu/ContextMenu';
+import { type HistoryState, type RevertableActionType } from '../Utils/History';
+import { type SelectionState, type EventContext, type InstructionsListContext, type InstructionContext, type ParameterContext, type InstructionContextWithEventContext, type VariableDeclarationContext } from './SelectionHandler';
+import { type EventsContextResult } from './EventsContextAnalyzerDialog';
+import { type SearchPanelInterface } from './SearchPanel';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+import EventsSearcher, {
+  type ReplaceInEventsInputs,
+  type SearchInEventsInputs,
+} from './EventsSearcher';
+import { type EventMetadata } from './EnumerateEventsMetadata';
+import { type Preferences } from '../MainFrame/Preferences/PreferencesContext';
+import { type EventsScope } from '../InstructionOrExpression/EventsScope';
+import type { EventPath } from '../Utils/EventPath';
+import { type ScreenType } from '../UI/Responsive/ScreenTypeMeasurer';
+import { type WindowSizeType } from '../UI/Responsive/ResponsiveWindowMeasurer';
+import { type UnsavedChanges } from '../MainFrame/UnsavedChangesContext';
+import { type AuthenticatedUser } from '../Profile/AuthenticatedUserContext';
+import { type LeaderboardState } from '../Leaderboard/LeaderboardContext';
+import { type Tutorial } from '../Utils/GDevelopServices/Tutorial';
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+import { type HotReloadPreviewButtonProps } from '../HotReload/HotReloadPreviewButton';
+import type { SearchFilterParams } from '../Utils/Search';
+import { type VariableDialogOpeningProps } from '../VariablesList/VariablesEditorDialog';
+
+type Props = {|
+  project: gdProject,
+  scope: EventsScope,
+  globalObjectsContainer: gdObjectsContainer,
+  objectsContainer: gdObjectsContainer,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  events: gdEventsList,
+  setToolbar: (?React.Node) => void,
+  onOpenSettings?: ?() => void,
+  settingsIcon?: React.Node,
+  onOpenExternalEvents: string => void,
+  onOpenLayout: string => void,
+  resourceManagementProps: ResourceManagementProps,
+  openInstructionOrExpression: (type: string) => void,
+  onCreateEventsFunction: (
+    extensionName: string,
+    eventsFunction: gdEventsFunction
+  ) => Promise<void>,
+  onBeginCreateEventsFunction: () => void,
+  unsavedChanges?: ?UnsavedChanges,
+  isActive: boolean,
+  hotReloadPreviewButtonProps: HotReloadPreviewButtonProps,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  onCreateNewExtensionWithBehavior:
+    | ((project: gdProject, object: gdObject) => void)
+    | null,
+  editEventsFunctionParameter: (VariableDialogOpeningProps => void) | null,
+  openEventsBasedEntityPropertyEditorDialog:
+    | (VariableDialogOpeningProps => void)
+    | null,
+|};
+type ComponentProps = {|
+  ...Props,
+  windowSize: WindowSizeType,
+  screenType: ScreenType,
+  authenticatedUser: AuthenticatedUser,
+  preferences: Preferences,
+  tutorials: ?Array<Tutorial>,
+  leaderboardsManager: ?LeaderboardState,
+  shortcutMap: ShortcutMap,
+  highlightedAiGeneratedEventIds: Set<string>,
+|};
+type SearchHighlight = {|
+  results: Array<gdBaseEvent>,
+  focusOffset: number,
+  text: string,
+  searchFilterParams: SearchFilterParams,
+|};
+type State = {|
+  eventsHistory: HistoryState,
+
+  editedInstruction: {
+    // TODO: This could be adapted to be a InstructionContext
+    isCondition: boolean,
+    instruction: ?gdInstruction,
+    instrsList: ?gdInstructionsList,
+    indexInList: ?number,
+    eventContext: ?EventContext,
+  },
+  editedParameter: {
+    // TODO: This could be adapted to be a ParameterContext
+    isCondition: boolean,
+    instruction: ?gdInstruction,
+    instrsList: ?gdInstructionsList,
+    parameterIndex: number,
+    eventContext: ?EventContext,
+  },
+  editedVariable: {
+    variablesContainer: gdVariablesContainer,
+    variableName: string,
+    shouldCreate: boolean,
+    variableType: 'number' | 'string' | 'boolean' | null,
+    eventContext: ?EventContext,
+  } | null,
+
+  selection: SelectionState,
+
+  inlineEditing: boolean,
+  inlineEditingAnchorEl: ?HTMLElement,
+  inlineInstructionEditorAnchorEl: ?HTMLElement,
+  inlineEditingPreviousValue: ?string,
+
+  analyzedEventsContextResult: ?EventsContextResult,
+
+  serializedEventsToExtract: ?Object,
+
+  textEditedEvent: ?gdBaseEvent,
+
+  showSearchPanel: boolean,
+  searchHighlight: ?SearchHighlight,
+  localSearchText: string,
+  localSearchMatchCase: boolean,
+  navigationHighlightEvent: ?gdBaseEvent,
+
+  layoutVariablesDialogOpen: boolean,
+
+  allEventsMetadata: Array<EventMetadata>,
+
+  fontSize: number,
+|};
+type EventInsertionContext = {|
+  eventsList: gdEventsList,
+  indexInList: number,
+|};
+type OutOfEditorChanges = {|
+  newOrChangedAiGeneratedEventIds: Set<string>,
+|};
+
+export type ChangeContext = {|
+  events?: Array<EventContext>,
+  instructions?: Array<InstructionContextWithEventContext>,
+|};
+declare export class EventsSheetComponentWithoutHandle extends React.Component<
+  ComponentProps,
+  State
+> {
+  _eventsTree: ?EventsTreeInterface;
+  _eventSearcher: ?EventsSearcher;
+  _searchPanel: ?SearchPanelInterface;
+  // $FlowFixMe[missing-local-annot]
+  _containerDiv: React$RefObject<HTMLDivElement | null>;
+  // $FlowFixMe[missing-local-annot]
+  _containerDivLastKnownSize: any;
+  // $FlowFixMe[missing-local-annot]
+  _keyboardShortcuts: KeyboardShortcuts;
+  eventContextMenu: ?ContextMenuInterface;
+  resourceExternallyChangedCallbackId: ?string;
+  instructionContextMenu: ?ContextMenuInterface;
+  addNewEvent: (
+    type: string,
+    context: ?EventInsertionContext
+  ) => Array<gdBaseEvent>;
+  constructor(props: ComponentProps): void;
+  onResourceExternallyChanged: (resourceInfo: any) => void;
+  onEventsModifiedOutsideEditor: () => void;
+  scrollToEventPath: (eventPath: EventPath) => void;
+  setGlobalSearchResults: (eventPaths: Array<EventPath>, focusedEventPath: EventPath, searchText: string, searchFilters?: SearchFilterParams) => void;
+  clearGlobalSearchResults: () => void;
+  updateToolbar(): void;
+  _updateToolbar(): void;
+  _addStandardEvent: () => void;
+  _addCommentEvent: () => void;
+  _toggleSearchPanel: () => void;
+  _closeSearchPanel: () => void;
+  addSubEvent: () => void;
+  _selectionCanHaveSubEvents: () => any;
+  addLocalVariable: () => void;
+  _selectionCanHaveLocalVariables: () => any;
+  _selectionCanToggleDisabled: () => any;
+  _addNewEvent: (type: string, context?: ?EventInsertionContext) => Array<gdBaseEvent>;
+  openEventTextDialog: () => void;
+  closeEventTextDialog: () => void;
+  _buildInstructionContextMenu: (i18n: I18nType) => any;
+  openAddInstructionContextMenu: (eventContext: EventContext, button: HTMLButtonElement, instructionsListContext: InstructionsListContext) => void;
+  openInstructionEditor: (eventContext: EventContext, instructionContext: InstructionContext | InstructionsListContext, inlineInstructionEditorAnchorEl?: ?HTMLButtonElement) => void;
+  openSceneVariables: (open?: boolean) => void;
+  openVariablesEditor: (eventContext: EventContext, variableDeclarationContext: VariableDeclarationContext, shouldCreateVariable?: any) => void;
+  closeInstructionEditor(saveChanges?: boolean): void;
+  moveSelectionToInstruction: (eventContext: EventContext, destinationContext: InstructionContext) => void;
+  moveSelectionToInstructionsList: (eventContext: EventContext, destinationContext: InstructionsListContext, indexInList?: ?number) => void;
+  selectEvent: (eventContext: EventContext) => void;
+  selectAllEvents: () => void;
+  deselectAll: () => void;
+  _handleEscape: () => void;
+  collapseAll: () => void;
+  expandToLevel: (level: number) => void;
+  _buildEventContextMenu: (i18n: I18nType) => any;
+  _selectionIsStandardEvent: () => any;
+  _selectionIsElseEvent: () => any;
+  _asLoopEvent: (event: gdBaseEvent) => any | null;
+  _getLastSelectedLoopEventContext: () => EventContext | null;
+  _selectionIsLoopEvent: () => any;
+  _selectionHasIndexVariable: () => any;
+  _selectionIsForEachEvent: () => boolean;
+  _selectionForEachHasOrderBy: () => boolean;
+  _addOrdering: () => void;
+  _removeOrdering: () => void;
+  _addLoopIndexVariable: () => void;
+  _removeLoopIndexVariable: () => void;
+  _replaceSelectedEventType: (eventType: string) => void;
+  openEventContextMenu: (x: number, y: number, eventContext: EventContext) => void;
+  openInstructionContextMenu: (eventContext: EventContext, x: number, y: number, instructionContext: InstructionContext) => void;
+  selectInstruction: (eventContext: EventContext, instructionContext: InstructionContext) => void;
+  openParameterEditor: (eventContext: EventContext, parameterContext: ParameterContext) => void;
+  closeParameterEditor: (shouldCancel: boolean) => void;
+  toggleDisabled: () => void;
+  deleteSelection: (arg0?: {
+    deleteInstructions?: boolean,
+    deleteEvents?: boolean,
+    shouldSaveInHistory?: boolean,
+  }) => void;
+  copySelection: () => void;
+  cutSelection: () => void;
+  pasteEvents: () => void;
+  pasteInstructions: () => void;
+  pasteEventsOrInstructions: () => void;
+  pasteInstructionsInInstructionsList: (eventContext: EventContext, instructionsListContext: InstructionsListContext) => void;
+  _invertSelectedConditions: () => void;
+  _hasSelectedOptionallyAsyncActions: () => boolean;
+  _toggleAwaitingActions: () => void;
+  _onEndEditingStringEvent: (event: gdBaseEvent) => void;
+  _getChangedEventRows: (events: Array<gdBaseEvent>) => any;
+  _saveChangesToHistory: (actionType: RevertableActionType, positions: {
+      positionsBeforeAction: Array<number>,
+      positionAfterAction: Array<number>,
+      instructionIndex?: ?number,
+      instructionListLabel?: ?string,
+    }, cb?: ?Function) => void;
+  undo: () => void;
+  redo: () => void;
+  onZoomEvent: (towards: 'IN' | 'OUT') => ((domEvent?: KeyboardEvent) => void);
+  _openEventsContextAnalyzer: () => void;
+  _closeEventsContextAnalyzer: () => void;
+  extractEventsToFunction: () => void;
+  moveEventsIntoNewGroup: () => void;
+  _replaceSelectionByEventsFunction: (extensionName: string, eventsFunction: gdEventsFunction) => void;
+  _replaceSelectionByGroupOfEvents: (eventsList: gdEventsList) => void;
+  _ensureUnfoldedAndScrollTo: (cb: () => ?gdBaseEvent) => ?gdBaseEvent;
+  _goToNextFromGlobalSearch: () => ?gdBaseEvent;
+  _goToPreviousFromGlobalSearch: () => ?gdBaseEvent;
+  _replaceInEvents: (doReplaceInEvents: (
+      inputs: ReplaceInEventsInputs,
+      cb: () => void
+    ) => Array<gdBaseEvent>, inputs: ReplaceInEventsInputs) => void;
+  _searchInEvents: (doSearchInEvents: (inputs: SearchInEventsInputs, cb: () => void) => void, inputs: SearchInEventsInputs) => void;
+  _onEventMoved: (previousRowIndex: number, nextRowIndex: number) => void;
+  _renderInstructionEditorDialog: () => any;
+  _ensureFocused: () => void;
+  _onEventsSheetBlur: (event: SyntheticFocusEvent<HTMLDivElement>) => void;
+}
+export type EventsSheetInterface = {|
+  updateToolbar: () => void,
+  onResourceExternallyChanged: ({| identifier: string |}) => void,
+  onEventsModifiedOutsideEditor: (changes: OutOfEditorChanges) => void,
+  scrollToEventPath: (eventPath: EventPath) => void,
+  setGlobalSearchResults: (
+    eventPaths: Array<EventPath>,
+    focusedEventPath: EventPath,
+    searchText: string,
+    searchFilters?: SearchFilterParams
+  ) => void,
+  clearGlobalSearchResults: () => void,
+  selectAllEvents: () => void,
+|};
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<EventsSheetInterface>,
+}>;
