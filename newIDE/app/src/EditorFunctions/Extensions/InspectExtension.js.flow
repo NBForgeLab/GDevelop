@@ -1,0 +1,105 @@
+// @flow
+// @flow-transitional-stub
+import { type EditorFunction } from '../index';
+import { type SimplifiedBehavior, type SimplifiedLayer, type SimplifiedTest, type SimplifiedVariable } from '../SimplifiedProject/SimplifiedProject';
+import { type FunctionOwner, type SimplifiedArea, type SimplifiedCustomBehavior, type SimplifiedCustomObject, type SimplifiedExtensionDependency, type SimplifiedFunction, type SimplifiedProperty } from '../SimplifiedProject/SimplifiedExtensions';
+
+type InspectedCustomObjectSummary = {|
+  objectName: string,
+  objectType: string,
+  fullName?: string,
+  isPrivate?: boolean,
+  signature: string,
+|};
+type InspectedCustomBehaviorSummary = {|
+  behaviorName: string,
+  behaviorType: string,
+  fullName?: string,
+  objectType?: string,
+  isPrivate?: boolean,
+  signature: string,
+|};
+type InspectedFreeFunctionSummary = {|
+  functionName: string,
+  functionType: string,
+  isPrivate?: boolean,
+  isLifecycle?: boolean,
+  signature: string,
+|};
+type InspectedLayer = {|
+  ...SimplifiedLayer,
+  visible: boolean,
+  effects: Array<{| effectName: string, effectType: string |}>,
+|};
+
+export type InspectedFunction = {|
+  ...SimplifiedFunction,
+  // Only set at the function level (the drill-down on `function_name`).
+  owner?: FunctionOwner,
+  callForm?: string,
+  instructionType?: string,
+  // Set when a non-lifecycle function has no call form (no metadata yet).
+  callFormUnavailableReason?: string,
+  lifecycleDescription?: string,
+|};
+export type InspectedCustomObject = {|
+  ...SimplifiedCustomObject,
+  objectType: string,
+  variantNames: Array<string>,
+  functions: Array<InspectedFunction>,
+|};
+export type InspectedCustomBehavior = {|
+  ...SimplifiedCustomBehavior,
+  behaviorType: string,
+  sharedProperties: Array<SimplifiedProperty>,
+  functions: Array<InspectedFunction>,
+|};
+export type InspectedExtension = {|
+  extensionName: string,
+  fullName: string,
+  shortDescription: string,
+  description?: string,
+  category?: string,
+  tags?: string,
+  version?: string,
+  author?: string,
+  isReadOnly: boolean,
+  readOnlyReason?: string,
+  originIdentifier?: string,
+  globalVariables: Array<SimplifiedVariable>,
+  sceneVariables: Array<SimplifiedVariable>,
+  dependencies: Array<SimplifiedExtensionDependency>,
+  tests: Array<SimplifiedTest>,
+  customObjects: Array<InspectedCustomObjectSummary>,
+  customBehaviors: Array<InspectedCustomBehaviorSummary>,
+  freeFunctions: Array<InspectedFreeFunctionSummary>,
+|};
+export type InspectedVariant = {|
+  variantName: string,
+  isDefaultVariant: boolean,
+  area: SimplifiedArea,
+  layers: Array<InspectedLayer>,
+  childObjects: Array<{|
+    objectName: string,
+    objectType: string,
+    behaviors: Array<SimplifiedBehavior>,
+    objectVariables: Array<SimplifiedVariable>,
+    configuration: string,
+  |}>,
+  objectGroups: Array<{|
+    objectGroupName: string,
+    objectNames: Array<string>,
+  |}>,
+  instances: Array<Object>,
+  assetStoreAssetId?: string,
+  assetStoreOriginalName?: string,
+|};
+export type CallFormContext = {|
+  extensionName: string,
+  owner: FunctionOwner,
+  // `Ext::Obj` / `Ext::Beh` for object and behavior functions, null for free ones.
+  ownerType: string | null,
+|};
+declare export var getCallFormsAndInstructionType: (platform: gdPlatform, context: CallFormContext, simplifiedFunction: SimplifiedFunction, getterFunction: SimplifiedFunction | null) => {| callForms: Array<string>, instructionType: string | null |};
+declare export var makeCallFormContext: (extensionName: string, owner: FunctionOwner, ownerName: string | null) => CallFormContext;
+declare export var inspectExtension: EditorFunction;

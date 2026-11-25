@@ -1,0 +1,530 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type AiGeneratedEvent } from '../Utils/GDevelopServices/Generation';
+import { type EventsTextRenderingError } from '../EventsSheet/EventsTree/TextRenderer';
+import { type ScopeSummary, type JsCodeExcerpt } from '../EventsSheet/EventsTree/TextRenderer/EventScriptSourceView';
+import { type I18n as I18nType } from '@lingui/core';
+import { type SimplifiedBehavior, type SimplifiedVariable } from './SimplifiedProject/SimplifiedProject';
+import { type AttachmentsForResources } from './AttachmentResources';
+import type {
+  SceneEventsOutsideEditorChanges,
+  ExtensionsOutsideEditorChanges,
+  WillDeleteExtensionItemChanges,
+  InstancesOutsideEditorChanges,
+  ObjectsOutsideEditorChanges,
+  ObjectGroupsOutsideEditorChanges,
+  ProjectItemRenamedOutsideEditorChanges,
+  WillDeleteSceneChanges,
+  WillDeleteGameplayTestChanges,
+  WillDeleteObjectChanges,
+} from './OutsideEditorChanges';
+import {
+  type AssetShortHeader,
+  type EffectTarget,
+} from '../Utils/GDevelopServices/Asset';
+import { type ExampleShortHeader } from '../Utils/GDevelopServices/Example';
+import { type EnsureExtensionInstalledOptions } from '../AiGeneration/UseEnsureExtensionInstalled';
+import { type ObjectSizeInfo } from './Utils';
+import { type ToolScope } from './Scope';
+import { type InspectedCustomBehavior, type InspectedCustomObject, type InspectedExtension, type InspectedFunction, type InspectedVariant } from './Extensions/InspectExtension';
+
+export type HintEntry = {|
+  code: string,
+  message: string,
+  objectNames: Array<string>,
+|};
+export type EditorFunctionCall = {|
+  name: string,
+  arguments: string,
+  call_id: string,
+|};
+export type EditorFunctionCallResult =
+  | {|
+      status: 'working',
+      call_id: string,
+    |}
+  | {|
+      status: 'finished',
+      call_id: string,
+      success: boolean,
+      output: any,
+      didModifyProject?: true,
+    |}
+  | {|
+      status: 'aborted',
+      call_id: string,
+    |};
+export type ResourceSearchAndInstallOptions = {|
+  resources: Array<{
+    resourceName: string,
+    resourceKind: string,
+  }>,
+|};
+export type SingleResourceSearchAndInstallResult = {|
+  resourceName: string,
+  resourceKind: string,
+  status:
+    | 'resource-installed'
+    | 'nothing-found'
+    | 'resource-already-exists'
+    | 'error',
+  error?: string,
+|};
+export type ResourceSearchAndInstallResult = {|
+  results: Array<SingleResourceSearchAndInstallResult>,
+|};
+export type EditorFunctionGenericOutput = {|
+  success: boolean,
+  meta?: {
+    newSceneNames?: Array<string>,
+    // External layouts created by the call (`create_scene` with
+    // `as_external_layout_of_scene`): opened by the editor like new scenes.
+    newExternalLayoutNames?: Array<string>,
+    createdProject?: gdProject,
+    // For `run_script`: true when ANY call the script made modified the
+    // project (so the editor refreshes even if the script ultimately failed).
+    didModifyProject?: boolean,
+  },
+  // `run_script` (script-based agents) output payload. Present only for
+  // `run_script` calls.
+  functionCallRecords?: Array<Object>,
+  consoleLogs?: Array<string>,
+  returnValue?: any,
+  error?: {|
+    message: string,
+    lineNumber: number | null,
+    lastCalledFunctionName: string | null,
+  |} | null,
+  message?: string,
+  // `read_game_project_json` output payload: the value at the requested path
+  // of the simplified project (its shape entirely depends on the path).
+  result?: any,
+  // `run_gameplay_test` output payload. Present only for gameplay test runs.
+  status?: string,
+  testName?: string,
+  framesExecuted?: number,
+  durationMs?: number,
+  gameTimeMs?: number,
+  assertions?: Array<Object>,
+  errors?: Array<string>,
+  eventLog?: Array<Object>,
+  finalState?: Object | null,
+  screenshots?: Array<Object>,
+  performance?: Object | null,
+  // Set to true (v12+) when a mutating call was a no-op because the requested
+  // state already matched the current state. Lets the no-op rate be counted
+  // from `functionCallRecords`/CloudWatch without any new telemetry.
+  nothingChanged?: boolean,
+  eventsAsText?: string,
+  // Per-event/instruction rendering failures (the rest still rendered).
+  eventsRenderingErrors?: Array<EventsTextRenderingError>,
+  objectName?: string,
+  behaviorName?: string,
+  // `inspect_behavior_properties`, for an object synchronized with other players.
+  isSynchronizedOverNetwork?: boolean,
+  properties?: any,
+  sharedProperties?: any,
+  instances?: any,
+  layers?: any,
+  effects?: any,
+  sceneNames?: Array<string>,
+  resources?: any,
+  resourcesSummary?: any,
+  behaviors?: Array<SimplifiedBehavior>,
+  // `add_behavior`: the behavior name the editor assigned, per object — a
+  // declared output type, because nothing else lets a script know it.
+  addedBehaviors?: Array<{|
+    objectName: string,
+    behaviorName: string,
+    behaviorType: string,
+  |}>,
+  // `change_gameplay_tests`: the ordered tests of the scope after the changes
+  // (capped), so renames/reorders/deletions are self-verifying.
+  tests?: Array<{| test_name: string, description: string |}>,
+  variables?: Array<SimplifiedVariable>,
+  // `inspect_extension` output payload: the extension level is always there,
+  // the other levels only when their selector argument is given.
+  extension?: InspectedExtension,
+  customObject?: InspectedCustomObject,
+  customBehavior?: InspectedCustomBehavior,
+  functionDeclaration?: InspectedFunction,
+  variant?: InspectedVariant,
+  // The extension authoring functions (`create_extension`,
+  // `change_extension_properties`, `create_custom_object`,
+  // `change_custom_object`): the FINAL names of what was created or changed.
+  extensionName?: string,
+  customObjectName?: string,
+  objectType?: string,
+  variantNames?: Array<string>,
+  // Custom behaviors and functions: the type to write in the events and, for
+  // a function, how to call it from EventScript.
+  customBehaviorName?: string,
+  behaviorType?: string,
+  functionType?: string,
+  callForms?: Array<string>,
+  reminder?: string,
+  animationNames?: string,
+  // `inspect_object_properties_effects` with `include_raw_json`.
+  rawJson?: Object,
+  frameImageSizes?: {
+    [imageName: string]: {| width: number, height: number |},
+  },
+  modelAnimationSources?: Array<string>,
+  // EventScript source view (see `read_events_source`):
+  eventScript?: string,
+  selectedEventIds?: Array<string>,
+  jsCodeExcerpt?: JsCodeExcerpt,
+  // `generate_events` with `edits`: the numbered lines around the edits.
+  editedEventSnippets?: Array<{|
+    eventId: string,
+    replacements: string,
+    snippet: string,
+  |}>,
+  truncated?: boolean,
+  notes?: Array<string>,
+  generatedEventsErrorDiagnostics?: string,
+  aiGeneratedEventId?: string,
+  warnings?: string,
+
+  initializedProject?: boolean,
+  initializedFromTemplateSlug?: string,
+  eventsAsTextByScene?: { [string]: string },
+
+  // Used for de-duplication of outputs:
+  eventsForSceneNamed?: string,
+  // `read_events_source` in external events: their name.
+  eventsForExternalEventsNamed?: string,
+  // `read_events_source` in a function of an extension: the scope read, the
+  // function read and what its events can use.
+  eventsForScopeLabel?: string,
+  functionName?: string,
+  scopeSummary?: ScopeSummary,
+  instancesForSceneNamed?: string,
+  instancesOnlyForObjectsNamed?: string, // Must be combined with `instancesForSceneNamed`.
+  propertiesLayersEffectsForSceneNamed?: string,
+  objectPropertiesDeduplicationKey?: string,
+
+  // Set instead of (or next to) the `*ForSceneNamed` fields when the scope is
+  // not a scene: the instances of an external layout, or a custom object
+  // variant (`scopeLabel` being the label of the scope: `custom object
+  // "UI::Dialog" (default variant)`).
+  instancesForExternalLayoutNamed?: string,
+  instancesForScopeLabel?: string,
+  propertiesLayersEffectsForScopeLabel?: string,
+  // `change_scene_properties_layers_effects_groups.move_instances`.
+  movedInstancesCount?: number,
+  movedInstancesCountByObjectName?: { [objectName: string]: number },
+  // `inspect_scene_properties_layers_effects` on a custom object variant: a
+  // variant has no scene properties, but an area, groups and an asset store id.
+  isDefaultVariant?: boolean,
+  area?: {|
+    minX: number,
+    minY: number,
+    minZ: number,
+    maxX: number,
+    maxY: number,
+    maxZ: number,
+  |},
+  objectGroups?: Array<{|
+    objectGroupName: string,
+    objectNames: Array<string>,
+  |}>,
+  assetStoreAssetId?: string,
+
+  // Used when new resources are added by a function call:
+  newlyAddedResources?: Array<SingleResourceSearchAndInstallResult>,
+
+  // Default size, origin and center of the object(s) being operated on, keyed by object name:
+  objectSizeInfo?: { [string]: ObjectSizeInfo | null },
+
+  // Explanation of the coordinate semantics of `instances` positions:
+  positionSemantics?: string,
+
+  hints?: Array<HintEntry>,
+
+  // Set to true when the function call was aborted mid-execution (e.g. the AI
+  // request was suspended while event generation was still polling).
+  aborted?: true,
+|};
+export type EventsGenerationResult =
+  | {|
+      generationCompleted: true,
+      aiGeneratedEvent: AiGeneratedEvent,
+    |}
+  | {|
+      generationCompleted: false,
+      errorMessage: string,
+    |}
+  | {|
+      generationAborted: true,
+    |};
+export type EventBatch = {|
+  eventsDescription: string,
+  eventScript: string | null,
+  placementRelation: string,
+  placementTargetEventId: string | null,
+  placementExpectedParentEventId: string | null,
+  placementRationale: string | null,
+  // Anchor echo for replace placements (proof the replaced event was read):
+  expectedEventSource: string | null,
+  // The actual current source of the target event, that the backend
+  // compares the anchor against:
+  placementTargetEventSource: string | null,
+  // `eventScript` was built from `edits` (its compile errors are always
+  // reported):
+  isEventScriptFromEdits: boolean,
+|};
+export type EventsGenerationOptions = {|
+  // Where the events are generated: a scene, or a function of an extension
+  // (`functionName` set). `sceneName` is the scene name (or '' for a
+  // function), kept for the generation API.
+  scope: ToolScope,
+  functionName: string | null,
+  sceneName: string,
+  eventsDescription: string | null,
+  eventBatches: Array<EventBatch> | null,
+  extensionNamesList: string,
+  objectsList: string,
+  existingEventsJson: string | null,
+  placementHint: string | null,
+  relatedAiRequestId: string | null,
+  estimatedComplexity: number | null,
+|};
+export type AssetSearchAndInstallResult = {|
+  status: 'asset-installed' | 'nothing-found' | 'error',
+  message: string,
+  createdObjects: Array<gdObject>,
+  assetShortHeader: AssetShortHeader | null,
+  isTheFirstOfItsTypeInProject: boolean,
+|};
+export type AssetSearchAndInstallOptions = {|
+  objectsContainer: gdObjectsContainer,
+  objectName: string,
+  objectType: string | null,
+  searchTerms: string,
+  description: string,
+  twoDimensionalViewKind: string,
+  exactOrPartialAssetId?: string | null,
+  relatedAiRequestId?: string | null,
+  lastUserMessage?: string | null,
+  lastAssistantMessages?: string[],
+|};
+export type EffectAssetSearchAndInstallOptions = {|
+  effectsContainer: gdEffectsContainer,
+  effectTarget: EffectTarget,
+  effectName: string,
+  effectType: string | null,
+  exactOrPartialAssetId: string,
+  relatedAiRequestId?: string | null,
+  lastUserMessage?: string | null,
+  lastAssistantMessages?: string[],
+|};
+export type EffectAssetSearchAndInstallResult = {|
+  status: 'asset-installed' | 'nothing-found' | 'error',
+  message: string,
+  effect: gdEffect | null,
+  assetShortHeader: AssetShortHeader | null,
+|};
+export type EditorCallbacks = {|
+  onOpenLayout: (
+    sceneName: string,
+    options: {|
+      openEventsEditor: boolean,
+      openSceneEditor: boolean,
+      focusWhenOpened:
+        | 'scene-or-events-otherwise'
+        | 'scene'
+        | 'events'
+        | 'none',
+    |}
+  ) => void,
+  onOpenExternalLayout: (externalLayoutName: string) => void,
+  onCreateProject: ({|
+    name: string,
+    exampleSlug: string | null,
+    projectFileUrl?: string | null,
+  |}) => Promise<{|
+    createdProject: gdProject | null,
+    exampleSlug: string | null,
+  |}>,
+  onOpenEventsFunctionsExtension: (
+    extensionName: string,
+    options: {|
+      functionName?: string,
+      behaviorName?: string,
+      objectName?: string,
+    |}
+  ) => void,
+  onOpenCustomObjectEditor: (
+    extensionName: string,
+    objectName: string,
+    variantName: string
+  ) => void,
+|};
+export type ToolOptions = {
+  includeEventsJson?: boolean,
+  ...
+};
+export type RenderForEditorOptions = {|
+  project: ?gdProject,
+  args: any,
+  editorCallbacks: EditorCallbacks,
+  shouldShowDetails: boolean,
+  editorFunctionCallResultOutput: any,
+  // Loaded examples from the example store, when available, so a function can
+  // resolve a template slug to its display name. May be null while still loading.
+  exampleShortHeaders?: ?Array<ExampleShortHeader>,
+|};
+export type RelatedAiRequestLastMessages = {|
+  lastUserMessage: string | null,
+  lastAssistantMessages: string[],
+|};
+export type LaunchFunctionOptionsWithoutProject = {|
+  PixiResourcesLoader: any,
+  args: any,
+  editorCallbacks: EditorCallbacks,
+  toolOptions: ToolOptions | null,
+  // The AI request's tools version (e.g. 'v12'). Threaded so functions can gate
+  // version-dependent behavior (e.g. `isNoOpConsideredSuccess`). May be null
+  // when unknown (treated as pre-v12).
+  toolsVersion?: ?string,
+  // When true, `run_script` exposes only non-mutating functions (explorer
+  // sub-agent scripts, which must stay read-only). Ignored by other functions.
+  runScriptReadOnly?: boolean,
+  // True for a function called by a `run_script` script: its output stays in
+  // the script (only its logs reach the AI), so it can be larger.
+  +isCalledFromScript?: boolean,
+  i18n: I18nType,
+  relatedAiRequestId: string | null,
+  getRelatedAiRequestLastMessages: () => RelatedAiRequestLastMessages,
+  generateEvents: (
+    options: EventsGenerationOptions
+  ) => Promise<EventsGenerationResult>,
+  onSceneEventsModifiedOutsideEditor: (
+    changes: SceneEventsOutsideEditorChanges
+  ) => void,
+  onInstancesModifiedOutsideEditor: (
+    changes: InstancesOutsideEditorChanges
+  ) => void,
+  onObjectsModifiedOutsideEditor: (
+    changes: ObjectsOutsideEditorChanges
+  ) => void,
+  // The effects of a layer changed: the game shown by the editor reloads them.
+  onEffectsModifiedOutsideEditor: () => void,
+  onObjectGroupsModifiedOutsideEditor: (
+    changes: ObjectGroupsOutsideEditorChanges
+  ) => void,
+  onProjectItemRenamedOutsideEditor: (
+    changes: ProjectItemRenamedOutsideEditorChanges
+  ) => void,
+  onWillDeleteScene: (changes: WillDeleteSceneChanges) => Promise<void>,
+  onWillDeleteGameplayTest: (
+    changes: WillDeleteGameplayTestChanges
+  ) => Promise<void>,
+  onWillDeleteObject: (changes: WillDeleteObjectChanges) => void,
+  // The changes of scenes, objects and instances are sent to the editor once
+  // per batch of calls: this sends the ones made so far, so that the game
+  // shown by the editor has them.
+  sendChangesToEditor: () => void,
+  // Extensions authored by the AI (see `OutsideEditorChanges.js`): the
+  // changes are coalesced per batch, `ensureExtensionsUpToDate` flushes them
+  // (regenerating the extensions) when a function needs fresh metadata, and
+  // `onWillDeleteExtensionItem` must be awaited before a deletion.
+  onExtensionsModifiedOutsideEditor: (
+    changes: ExtensionsOutsideEditorChanges
+  ) => void,
+  ensureExtensionsUpToDate: () => Promise<void>,
+  // Regenerates the metadata of one extension: its declarations only (no code
+  // generation, and the code regeneration pending for the batch stays
+  // pending), so a function just changed is described as it is now.
+  reloadExtensionMetadata: (extensionName: string) => void,
+  onWillDeleteExtensionItem: (
+    changes: WillDeleteExtensionItemChanges
+  ) => Promise<void>,
+  ensureExtensionInstalled: (
+    options: EnsureExtensionInstalledOptions
+  ) => Promise<void>,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  searchAndInstallAsset: (
+    options: AssetSearchAndInstallOptions
+  ) => Promise<AssetSearchAndInstallResult>,
+  searchAndInstallEffectAsset: (
+    options: EffectAssetSearchAndInstallOptions
+  ) => Promise<EffectAssetSearchAndInstallResult>,
+  searchAndInstallResources: (
+    options: ResourceSearchAndInstallOptions
+  ) => Promise<ResourceSearchAndInstallResult>,
+  attachmentsForResources: AttachmentsForResources,
+  /**
+   * Returns the asset store tag for a given object type, when the type is
+   * mainly meant to be picked from the asset store (e.g. premade UI objects).
+   * Reads from the remote objects registry so it works even before the
+   * underlying extension is installed. Returns null if no tag is set or if
+   * the registry is not loaded yet.
+   */
+  getAssetStoreTagForNewObject: (objectType: string) => string | null,
+|};
+export type LaunchFunctionCollaborators = Omit<
+  LaunchFunctionOptionsWithoutProject,
+  'args'
+>;
+export type LaunchFunctionOptionsWithProject = {|
+  ...LaunchFunctionOptionsWithoutProject,
+  project: gdProject,
+|};
+export type EditorFunction = {|
+  // Optional: a function with no renderForEditor renders nothing in the chat
+  // (e.g. backend-only tools, or the plan shown separately). Such calls are
+  // skipped in ChatMessages so they don't create an empty bubble.
+  renderForEditor?: (
+    options: RenderForEditorOptions
+  ) => {|
+    text: React.Node,
+    details?: ?React.Node,
+    hasDetailsToShow?: boolean,
+  |},
+  launchFunction: (
+    options: LaunchFunctionOptionsWithProject
+  ) => Promise<EditorFunctionGenericOutput>,
+  /** True if this function modifies the project (triggers unsaved changes tracking). */
+  modifiesProject: boolean,
+  /**
+   * Optional: refine `modifiesProject` per call from its (parsed) arguments -
+   * used to gate edits behind a user confirmation when auto-edit is off.
+   */
+  getModifiesProject?: (args: any) => boolean,
+|};
+export type EditorFunctionWithoutProject = {|
+  // Optional: a function with no renderForEditor renders nothing in the chat
+  // (e.g. backend-only tools, or the plan shown separately). Such calls are
+  // skipped in ChatMessages so they don't create an empty bubble.
+  renderForEditor?: (
+    options: RenderForEditorOptions
+  ) => {|
+    text: React.Node,
+    details?: ?React.Node,
+    hasDetailsToShow?: boolean,
+  |},
+  launchFunction: (
+    options: LaunchFunctionOptionsWithoutProject
+  ) => Promise<EditorFunctionGenericOutput>,
+  /** True if this function modifies the project (triggers unsaved changes tracking). */
+  modifiesProject: boolean,
+  /**
+   * Optional: refine `modifiesProject` per call from its (parsed) arguments -
+   * used to gate edits behind a user confirmation when auto-edit is off.
+   */
+  getModifiesProject?: (args: any) => boolean,
+|};
+declare export var getPropertyValue: (arg0: {|
+  properties: gdMapStringPropertyDescriptor | null,
+  propertyName: string,
+|}) => string | null;
+declare export var noEventsInSceneText: string;
+declare export var noEventsInFunctionText: string;
+declare export var editorFunctions: { [string]: EditorFunction };
+declare export var editorFunctionsWithoutProject: {
+  [string]: EditorFunctionWithoutProject,
+};

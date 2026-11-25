@@ -48,10 +48,6 @@ declare module '*/BehaviorsEditor' {
   const content: any;
   export default content;
 }
-declare module '*/EditorFunctions' {
-  const content: any;
-  export default content;
-}
 
 declare module '*/locales/LocalesMetadata' {
   export interface LocaleMetadata {
