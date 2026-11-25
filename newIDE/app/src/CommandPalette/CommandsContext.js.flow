@@ -1,0 +1,10 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+type Props = {
+  children: React.Node,
+};
+
+declare export var CommandsContextProvider: React.ComponentType<Props>;
+declare export default React.Context<any>;

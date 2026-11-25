@@ -1,0 +1,26 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+export type Log = {
+  message: string,
+  type: 'info' | 'warning' | 'error',
+  group: string,
+  internal?: boolean,
+  timestamp: number,
+};
+declare export class LogsManager {
+  logs: Array<Log>;
+  groups: Set<string>;
+  _onNewLog: Set<() => void>;
+  _onNewGroup: Set<() => void>;
+  _pendingLogs: Array<Log>;
+  _pendingCommit: boolean;
+  _commitLogs(): void;
+  addLog(log: Log): void;
+  on(event: 'group' | 'log', handler: () => void): void;
+  off(event: 'group' | 'log', handler: () => void): void;
+}
+declare export var DebuggerConsole: React.ComponentType<{
+  logsManager: LogsManager,
+}>;

@@ -1,0 +1,19 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+
+type Props = {|
+  loadingScreen: gdLoadingScreen,
+  watermark: gdWatermark,
+  onLoadingScreenUpdated: () => void,
+  onChangeSubscription: () => Promise<void> | void,
+
+  // For resources:
+  project: gdProject,
+  resourceManagementProps: ResourceManagementProps,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+|};
+
+declare export var LoadingScreenEditor: React.ComponentType<Props>;

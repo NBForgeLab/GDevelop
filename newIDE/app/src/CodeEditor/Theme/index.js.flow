@@ -1,0 +1,10 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+
+type CodeEditorTheme = {|
+  name: string,
+  themeName: string,
+  themeData?: any,
+|};
+
+declare export var getAllThemes: () => Array<CodeEditorTheme>;

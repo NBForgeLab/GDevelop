@@ -1,0 +1,29 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import {
+  type CommandManagerInterface,
+  type Command,
+  type NamedCommand,
+} from './CommandManager';
+import { type CommandName } from './CommandsList';
+
+type Props = {|
+  children: React.Node,
+  active: boolean,
+|};
+
+declare export class TabCommandManager implements CommandManagerInterface {
+  _commands: { [CommandName]: Command };
+  _windowCommandManager: CommandManagerInterface;
+  _isActive: boolean;
+  constructor(windowCommandManager: CommandManagerInterface): void;
+  setActive: (active: boolean) => void;
+  registerCommand: (commandName: CommandName, command: Command) => void;
+  deregisterCommand: (commandName: CommandName, command?: Command) => void;
+  registerAllCommandsToWindowManager: () => void;
+  deregisterAllCommandsFromWindowManager: () => void;
+  getAllNamedCommands: () => Array<NamedCommand>;
+  getNamedCommand: (commandName: CommandName) => ?NamedCommand;
+}
+declare export default React.ComponentType<Props>;

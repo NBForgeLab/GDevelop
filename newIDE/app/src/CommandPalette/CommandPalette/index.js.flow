@@ -1,0 +1,11 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import React from 'react';
+import { type CommandName } from '../CommandsList';
+
+export type CommandPaletteInterface = {|
+  open: (open?: boolean) => void,
+  launchCommand: (commandName: CommandName) => void,
+|};
+// $FlowFixMe[incompatible-type]
+declare export default React.ComponentType<any>;

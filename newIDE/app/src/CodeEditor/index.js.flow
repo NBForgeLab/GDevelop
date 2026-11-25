@@ -1,0 +1,33 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+export type State = {|
+  MonacoEditor: ?any,
+  error: ?Error,
+|};
+export type Props = {|
+  value: string,
+  onChange: string => void,
+  initialScrollTop: number,
+  initialCursorColumn: number,
+  initialCursorLine: number,
+  saveEditorState: ({
+    scrollTop: number,
+    cursorColumn: number,
+    cursorLine: number,
+  }) => void,
+  width?: number,
+  height?: number,
+  onEditorMounted?: () => void,
+  onFocus: () => void,
+  onBlur: () => void,
+  /**
+   * Diagnostics whose message contains one of these texts are not shown
+   * in this editor. Useful when the code is run in a way the TypeScript
+   * language service can not know about (a gameplay test, for example, is
+   * run inside an async function, so top-level `await` is allowed).
+   */
+  suppressedDiagnosticsMessages?: Array<string>,
+|};
+declare export var CodeEditor: React.ComponentType<Props>;

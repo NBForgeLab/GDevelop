@@ -1,0 +1,24 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import CommandManager, {
+  type CommandManagerInterface,
+  type Command,
+  type NamedCommand,
+} from './CommandManager';
+import { type CommandName } from './CommandsList';
+
+type Props = {|
+  children: React.Node,
+|};
+
+declare export class WindowCommandManager implements CommandManagerInterface {
+  _windowCommands: CommandManager;
+  _sharedCommandManager: CommandManagerInterface;
+  constructor(sharedCommandManager: CommandManagerInterface): void;
+  registerCommand: (commandName: CommandName, command: Command) => void;
+  deregisterCommand: (commandName: CommandName, command?: Command) => void;
+  getNamedCommand: (commandName: CommandName) => ?NamedCommand;
+  getAllNamedCommands: () => Array<NamedCommand>;
+}
+declare export default React.ComponentType<Props>;

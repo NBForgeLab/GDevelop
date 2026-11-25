@@ -1,0 +1,10 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type ProfilerMeasuresSection } from '..';
+
+type Props = {|
+  profilerMeasures: ?ProfilerMeasuresSection,
+|};
+
+declare export default React.ComponentType<Props>;

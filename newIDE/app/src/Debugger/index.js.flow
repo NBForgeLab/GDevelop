@@ -1,0 +1,65 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import DebuggerContent from './DebuggerContent';
+import {
+  type PreviewDebuggerServer,
+  type DebuggerId,
+  type DebuggerStatus,
+} from '../ExportAndShare/PreviewLauncher.flow';
+import { type Log, LogsManager } from './DebuggerConsole';
+
+type Props = {|
+  project: gdProject,
+  setToolbar: React.Node => void,
+  previewDebuggerServer: PreviewDebuggerServer,
+|};
+type State = {|
+  debuggerServerState: 'started' | 'starting' | 'stopped',
+  debuggerServerError: ?any,
+  debuggerIds: Array<DebuggerId>,
+  unregisterDebuggerServerCallbacks: ?() => void,
+
+  debuggerGameData: { [DebuggerId]: any },
+  profilerOutputs: { [DebuggerId]: ProfilerOutput },
+  profilingInProgress: { [DebuggerId]: boolean },
+  debuggerStatus: { [DebuggerId]: DebuggerStatus },
+  selectedId: DebuggerId,
+  logs: { [DebuggerId]: Array<Log> },
+|};
+
+export type ProfilerMeasuresSection = {|
+  time: number,
+  subsections: { [string]: ProfilerMeasuresSection },
+|};
+export type ProfilerOutput = {|
+  framesAverageMeasures: ProfilerMeasuresSection,
+  stats: {
+    framesCount: number,
+    // Optional: only sent by game engines recent enough to measure them,
+    // and only meaningful for a game that renders in 3D.
+    shaderProgramsCount?: number,
+    shaderProgramCompilationsCount?: number,
+    framesWithShaderCompilationCount?: number,
+    averageDrawCallsCount?: number,
+    averageTrianglesCount?: number,
+    geometriesCount?: number,
+    texturesCount?: number,
+  },
+|};
+declare export default class Debugger extends React.Component<Props, State> {
+  _debuggerContents: { [DebuggerId]: ?DebuggerContent };
+  _debuggerLogs: Map<DebuggerId, LogsManager>;
+  updateToolbar: () => void;
+  _getLogsManager(id: DebuggerId): LogsManager;
+  _registerServerCallbacks: () => void;
+  _handleMessage: (id: DebuggerId, data: any) => void;
+  _play: (id: DebuggerId) => void;
+  _pause: (id: DebuggerId) => void;
+  _refresh: (id: DebuggerId) => void;
+  _edit: (id: DebuggerId, path: Array<string>, newValue: any) => any;
+  _call: (id: DebuggerId, path: Array<string>, args: Array<any>) => any;
+  _startProfiler: (id: DebuggerId) => void;
+  _stopProfiler: (id: DebuggerId) => void;
+  _hasSelectedDebugger: () => any;
+}

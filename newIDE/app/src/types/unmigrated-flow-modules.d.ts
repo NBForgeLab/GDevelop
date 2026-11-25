@@ -16,10 +16,6 @@ declare module '*/EventsSheet' {
   const content: any;
   export default content;
 }
-declare module '*/Debugger' {
-  const content: any;
-  export default content;
-}
 
 declare module '*/locales/LocalesMetadata' {
   export interface LocaleMetadata {
@@ -168,6 +164,16 @@ declare module 'react-window' {
   export const FixedSizeList: React.ComponentType<any>;
   export const VariableSizeList: React.ComponentType<any>;
   export function areEqual(prevProps: any, nextProps: any): boolean;
+}
+declare module 'react-json-view' {
+  import * as React from 'react';
+  const ReactJson: React.ComponentType<any>;
+  export default ReactJson;
+}
+declare module 'react-monaco-editor' {
+  import * as React from 'react';
+  const MonacoEditor: React.ComponentType<any>;
+  export default MonacoEditor;
 }
 declare module 'three' {
   export class Object3D {
