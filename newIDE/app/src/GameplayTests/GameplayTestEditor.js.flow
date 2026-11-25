@@ -1,0 +1,29 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import {
+  type GameplayTestResult,
+  type GameplayTestScope,
+} from './GameplayTestRunner';
+
+type Props = {|
+  project: gdProject,
+  test: gdTest,
+  scope: GameplayTestScope,
+  isRunning: boolean,
+  runningFrame: number | null,
+  lastResult: GameplayTestResult | null,
+  onEditWithAi: () => void,
+  onTestModified: () => void,
+  onOpenedEditorsChanged: () => void,
+|};
+
+export type GameplayTestEditorInterface = {|
+  forceUpdate: () => void,
+  togglePropertiesPanel: () => void,
+  isPropertiesPanelShown: () => boolean,
+|};
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<GameplayTestEditorInterface>,
+}>;

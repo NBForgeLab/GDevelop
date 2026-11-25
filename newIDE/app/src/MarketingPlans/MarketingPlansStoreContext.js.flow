@@ -1,0 +1,16 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type MarketingPlan } from '../Utils/GDevelopServices/Game';
+
+type MarketingPlansStoreState = {|
+  fetchMarketingPlans: () => void,
+  marketingPlans: ?Array<MarketingPlan>,
+  error: ?Error,
+|};
+type MarketingPlansStoreStateProviderProps = {|
+  children: React.Node,
+|};
+
+declare export var MarketingPlansStoreContext: React.Context<MarketingPlansStoreState>;
+declare export var MarketingPlansStoreStateProvider: React.ComponentType<MarketingPlansStoreStateProviderProps>;

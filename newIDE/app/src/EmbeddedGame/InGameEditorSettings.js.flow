@@ -1,0 +1,20 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type CommandName } from '../CommandPalette/CommandsList';
+
+export type InGameEditorSettings = {
+  theme: {
+    iconButtonSelectedBackgroundColor: string,
+    iconButtonSelectedColor: string,
+    toolbarBackgroundColor: string,
+    toolbarSeparatorColor: string,
+    textColorPrimary: string,
+  },
+  /**
+   * The shortcuts handled by the in-game editor, by command name, in the same
+   * format as the IDE shortcuts (for example "Shift+KeyW"). An empty string
+   * means that the command has no shortcut.
+   */
+  shortcuts: { [CommandName]: string },
+};
+declare export var useInGameEditorSettings: () => InGameEditorSettings;

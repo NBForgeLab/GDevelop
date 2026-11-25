@@ -1,0 +1,5 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+
+declare export var setupInstructionParameters: (project: gdProject, projectScopedContainersAccessor: ProjectScopedContainersAccessor, instruction: gdInstruction, instructionMetadata: gdInstructionMetadata, objectName: ?string) => boolean;

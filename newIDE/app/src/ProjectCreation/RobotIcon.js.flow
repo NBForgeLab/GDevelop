@@ -1,0 +1,7 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+type Props = {| rotating?: boolean, size?: number, sad?: boolean |};
+
+declare export default function RobotIcon(arg0: Props): React.MixedElement;

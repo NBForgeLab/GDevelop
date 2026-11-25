@@ -1,0 +1,7 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+
+declare export var useAutomatedRegularInGameEditorRestart: (arg0: {|
+  onRestartInGameEditor: (reason: string) => void,
+  gameEditorMode: 'embedded-game' | 'instances-editor',
+|}) => void;

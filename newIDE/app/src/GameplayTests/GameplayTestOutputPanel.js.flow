@@ -1,0 +1,20 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+type Props = {|
+  lines: Array<GameplayTestOutputLine>,
+  /** Shown instead of the output when there is nothing to display. */
+  placeholder: React.Node,
+  /** Show a button to copy the whole output to the clipboard. */
+  canCopy?: boolean,
+  maxHeight?: number,
+|};
+
+export type GameplayTestOutputLine = {|
+  level: 'log' | 'info' | 'warn' | 'error',
+  message: string,
+  /** A prefix shown before the message, in a dimmed color (frame number...). */
+  prefix?: ?string,
+|};
+declare export var GameplayTestOutputPanel: React.ComponentType<Props>;

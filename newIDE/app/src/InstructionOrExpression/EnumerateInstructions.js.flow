@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type I18n as I18nType } from '@lingui/core';
+import { type EnumeratedInstructionMetadata } from './EnumeratedInstructionOrExpressionMetadata';
+
+declare export var getExtensionPrefix: (extension: gdPlatformExtension, i18n: I18nType) => string;
+declare export var enumerateAllInstructions: (isCondition: boolean, project: gdProject, i18n: I18nType) => Array<EnumeratedInstructionMetadata>;
+declare export var enumerateObjectAndBehaviorsInstructions: (isCondition: boolean, globalObjectsContainer: gdObjectsContainer, objectsContainer: gdObjectsContainer, objectName: string, project: gdProject, i18n: I18nType) => Array<EnumeratedInstructionMetadata>;
+declare export var enumerateFreeInstructions: (isCondition: boolean, project: gdProject, i18n: I18nType) => Array<EnumeratedInstructionMetadata>;
+export type InstructionFilteringOptions = {|
+  searchText: string,
+|};
+declare export var getObjectParameterIndex: (instructionMetadata: gdInstructionMetadata) => number;

@@ -1,0 +1,35 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+type ChipProps = {|
+  status: GameplayTestDisplayStatus,
+  /** An additional detail shown next to the status (frames, duration...). */
+  details?: React.Node,
+  size?: 'small' | 'default',
+|};
+
+export type GameplayTestDisplayStatus =
+  | 'never-run'
+  | 'launching'
+  | 'running'
+  | 'passed'
+  | 'failed'
+  | 'error'
+  | 'stopped'
+  | 'timeout'
+  // The run was frozen because GDevelop was left in the background (the
+  // browser stops running games in a hidden page) and did not finish. Says
+  // nothing about the game: not a failure.
+  | 'paused'
+  // The game preview could not be started (the browser storage is full...):
+  // the test did not run.
+  | 'unavailable';
+declare export var getDisplayStatusFromTest: (test: gdTest) => GameplayTestDisplayStatus;
+declare export var formatRunDuration: (durationMs: number) => string;
+declare export var isGameplayTestStatusInProgress: (status: GameplayTestDisplayStatus) => boolean;
+declare export var getGameplayTestStatusLabel: (status: GameplayTestDisplayStatus) => React.Node;
+declare export var GameplayTestStatusChip: React.ComponentType<ChipProps>;
+declare export var GameplayTestStatusIcon: React.ComponentType<{|
+  status: GameplayTestDisplayStatus,
+|}>;

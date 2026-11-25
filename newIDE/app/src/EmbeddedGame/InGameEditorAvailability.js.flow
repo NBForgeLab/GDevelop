@@ -1,0 +1,8 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+
+export type InGameEditorUnavailabilityReason =
+  | 'webgl2-not-supported'
+  | 'renderer-creation-failed';
+declare export var setInGameEditorRendererCreationFailed: (failed: boolean) => void;
+declare export var useInGameEditorUnavailabilityReason: () => InGameEditorUnavailabilityReason | null;

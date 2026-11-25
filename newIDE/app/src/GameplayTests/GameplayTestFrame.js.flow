@@ -1,0 +1,68 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type PreviewDebuggerServer } from '../ExportAndShare/PreviewLauncher.flow';
+import { type GameplayTestDisplayStatus } from './GameplayTestStatusIndicator';
+
+type HiddenPauseBannerProps = {|
+  hiddenPause: GameplayTestFrameHiddenPause,
+  onDismiss: () => void,
+|};
+type Size = {| width: number, height: number |};
+type GameplayTestFrameLayoutProps = {|
+  runStatus: GameplayTestFrameRunStatus | null,
+  /** Set when the run was frozen because the editor was in the background. */
+  hiddenPause: GameplayTestFrameHiddenPause | null,
+  onDismissHiddenPause: () => void,
+  isMinimized: boolean,
+  onToggleMinimized: () => void,
+  onStopRequested: () => void,
+  /**
+   * The game resolution: the game window is fixed at exactly this size,
+   * the frame only displays it zoomed.
+   */
+  gameResolution: Size,
+  /**
+   * The game itself (an iframe running the preview). It is always rendered,
+   * even when minimized, so that the test keeps running.
+   */
+  children: React.Node,
+|};
+type Props = {|
+  previewDebuggerServer: ?PreviewDebuggerServer,
+  onStopRequested: () => void,
+|};
+
+export type GameplayTestFrameHiddenPause = {|
+  /** How long the game was frozen, in total. */
+  pausedMs: number,
+  /**
+   * Whether the run was given up on (it stayed frozen for too long) rather
+   * than resumed when the editor came back.
+   */
+  isRunInterrupted: boolean,
+|};
+declare export var GameplayTestHiddenPauseBanner: React.ComponentType<HiddenPauseBannerProps>;
+export type GameplayTestFrameRunStatus = {|
+  testName: string,
+  status: GameplayTestDisplayStatus,
+  /** The frame reached by the test, if it started playing. */
+  frame: number | null,
+  durationMs: number | null,
+  /** The position of the test in the batch being run (0-based) and its size. */
+  testIndex: number,
+  testsCount: number,
+|};
+declare export var GameplayTestFrameLayout: React.ComponentType<GameplayTestFrameLayoutProps>;
+declare export var setGameplayTestFramePreviewLocation: (arg0: {|
+  previewIndexHtmlLocation: string,
+  /**
+   * The game resolution: the game window is fixed at exactly this size,
+   * the frame only displays it zoomed.
+   */
+  gameResolution: Size,
+|}) => void;
+declare export var clearGameplayTestFramePreview: () => void;
+declare export var setGameplayTestFrameRunStatus: (runStatus: GameplayTestFrameRunStatus | null) => void;
+declare export var setGameplayTestFrameHiddenPause: (hiddenPause: GameplayTestFrameHiddenPause | null) => void;
+declare export var GameplayTestFrame: React.ComponentType<Props>;

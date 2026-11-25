@@ -1,0 +1,79 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type PreviewDebuggerServer } from '../ExportAndShare/PreviewLauncher.flow';
+
+type AttachToPreviewOptions = {|
+  previewIndexHtmlLocation: string,
+|};
+type ChangeViewPositionCommand =
+  | 'centerViewOnLastSelectedInstance'
+  | 'zoomToInitialPosition'
+  | 'zoomToFitContent'
+  | 'zoomToFitSelection';
+type SwitchToSceneEditionOptions = {|
+  ...PreviewInGameEditorTarget,
+  ...HotReloadSteps,
+|};
+type Props = {|
+  previewDebuggerServer: PreviewDebuggerServer | null,
+  enabled: boolean,
+  // Switch the scene editors to the in-game editor.
+  onEnable: () => void,
+  onLaunchPreviewForInGameEdition: ({|
+    ...PreviewInGameEditorTarget,
+    ...HotReloadSteps,
+    editorCameraState3D: EditorCameraState | null,
+  |}) => Promise<void>,
+  // Shown at the bottom of the game, above it (like indicators).
+  children?: React.Node,
+|};
+
+export type PreviewInGameEditorTarget = {|
+  editorId: string,
+  sceneName: string | null,
+  externalLayoutName: string | null,
+  eventsBasedObjectType: string | null,
+  eventsBasedObjectVariantName: string | null,
+|};
+export type HotReloadSteps = {|
+  /**
+   * Set to `true` when the `ProjectData` must be reloaded.
+   */
+  shouldReloadProjectData: boolean,
+  /**
+   * Set to `true` when GDJS libraries must be reloaded.
+   */
+  shouldReloadLibraries: boolean,
+  /**
+   * Set to `true` when the resources must be reloaded in memory.
+   */
+  shouldReloadResources: boolean,
+  /**
+   * Set to `true` when an hard reload is needed.
+   */
+  shouldHardReload: boolean,
+
+  /**
+   * The reason for the hot reload. Used for debugging purposes.
+   */
+  reasons: Array<string>,
+|};
+export type EditorCameraState = {|
+  cameraMode: 'free' | 'orbit',
+  positionX: number,
+  positionY: number,
+  positionZ: number,
+  rotationAngle: number,
+  elevationAngle: number,
+  distance: number,
+|};
+declare export var setEmbeddedGameFramePreviewLocation: (arg0: AttachToPreviewOptions) => void;
+declare export var switchToSceneEdition: (options: SwitchToSceneEditionOptions) => void;
+declare export var setEditorHotReloadNeeded: (hotReloadSteps: HotReloadSteps) => void;
+declare export var isEditorHotReloadNeeded: () => boolean;
+declare export var setCameraState: (editorId: string, cameraState: EditorCameraState) => void;
+declare export var switchInGameEditorIfNoHotReloadIsNeeded: (previewInGameEditorTarget: PreviewInGameEditorTarget) => void;
+declare export var preventGameFramePointerEvents: (enabled: boolean) => void;
+declare export var changeViewPosition: (command: ChangeViewPositionCommand) => void;
+declare export var EmbeddedGameFrame: React.ComponentType<Props>;

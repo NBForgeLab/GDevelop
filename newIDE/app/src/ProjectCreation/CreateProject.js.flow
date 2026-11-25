@@ -1,0 +1,30 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type StorageProvider, type FileMetadata } from '../ProjectsStorage';
+import {
+  type ExampleProjectSetup,
+  type NewProjectCreationSource,
+} from './NewProjectSetupDialog';
+
+export type NewProjectAnalyticsMetadata = {|
+  exampleUrl: string,
+  exampleSlug: string,
+  exampleCompositeSlug: string,
+  creationSource: NewProjectCreationSource,
+|};
+export type NewProjectSource = {|
+  project: ?gdProject,
+  storageProvider: ?StorageProvider,
+  fileMetadata: ?FileMetadata,
+  templateSlug?: ?string,
+  analyticsMetadata: NewProjectAnalyticsMetadata,
+|};
+declare export var addDefaultLightToLayer: (layer: gdLayer) => void;
+declare export var addDefaultLightToAllLayers: (layout: gdLayout) => void;
+declare export var createNewEmptyProject: (arg0: {|
+  creationSource: NewProjectCreationSource,
+|}) => NewProjectSource;
+declare export var createNewProjectFromTutorialTemplate: (tutorialTemplateUrl: string, tutorialId: string) => NewProjectSource;
+declare export var createNewProjectFromCourseChapterTemplate: (templateUrl: string, courseChapterId: string) => NewProjectSource;
+declare export var createNewProjectFromPrivateGameTemplate: (privateGameTemplateUrl: string, privateGameTemplateTag: string) => NewProjectSource;
+declare export var createNewProjectFromExampleShortHeader: (arg0: ExampleProjectSetup) => Promise<?NewProjectSource>;

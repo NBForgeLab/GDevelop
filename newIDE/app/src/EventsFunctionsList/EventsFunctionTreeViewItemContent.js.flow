@@ -1,0 +1,45 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+
+export type EventsFunctionCreationParameters = {|
+  functionType: EventsFunction_FunctionType,
+  name: ?string,
+|};
+
+export type EventsFunctionCallbacks = {|
+  onSelectEventsFunction: (
+    selectedEventsFunction: ?gdEventsFunction,
+    selectedEventsBasedBehavior: ?gdEventsBasedBehavior,
+    selectedEventsBasedObject: ?gdEventsBasedObject
+  ) => void,
+  onDeleteEventsFunction: (
+    eventsFunction: gdEventsFunction,
+    cb: (boolean) => void
+  ) => void,
+  onRenameEventsFunction: (
+    eventsBasedBehavior: ?gdEventsBasedBehavior,
+    eventsBasedObject: ?gdEventsBasedObject,
+    eventsFunction: gdEventsFunction,
+    newName: string,
+    cb: (boolean) => void
+  ) => void,
+  onAddEventsFunction: (
+    eventsBasedBehavior: ?gdEventsBasedBehavior,
+    eventsBasedObject: ?gdEventsBasedObject,
+    (parameters: ?EventsFunctionCreationParameters) => void
+  ) => void,
+  onEventsFunctionAdded: (
+    eventsFunction: gdEventsFunction,
+    eventsBasedBehavior: ?gdEventsBasedBehavior,
+    eventsBasedObject: ?gdEventsBasedObject
+  ) => void,
+  moveEventsFunctionTo: (
+    (destinationExtensionName: string) => Promise<void>
+  ) => void,
+  onEventsFunctionMoved: (
+    oldExtensionName: string,
+    newExtensionName: string,
+    oldObjectName: string,
+    newObjectName: string
+  ) => void,
+|};
