@@ -1,0 +1,22 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+
+declare export var useOpenAssetFile: () => () => Promise<{|
+  assetPackBlob: Blob | null,
+|}>;
+
+type Props = {|
+  project: gdProject,
+  objectsContainer: gdObjectsContainer,
+  resourceManagementProps: ResourceManagementProps,
+  onEventsBasedObjectChildrenEdited: (
+    eventsBasedObject: gdEventsBasedObject
+  ) => void,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  onClose: () => void,
+|};
+
+declare export default React.ComponentType<Props>;

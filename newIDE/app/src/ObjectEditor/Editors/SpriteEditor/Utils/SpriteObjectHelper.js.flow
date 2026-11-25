@@ -1,0 +1,129 @@
+// @flow
+// @flow-transitional-stub
+declare export var getCurrentElements: (
+  animations: gdSpriteAnimationList,
+  animationIndex: number,
+  directionIndex: number,
+  spriteIndex: number
+) =>
+  | { animation: null, direction: null, sprite: null }
+  | { animation: gdAnimation, direction: null, sprite: null }
+  | {
+      animation: gdAnimation,
+      direction: gdDirection,
+      sprite: gdSprite | null,
+    };
+
+declare export var getTotalSpritesCount: (
+  animations: gdSpriteAnimationList
+) => number;
+
+declare export var getAllPointNames: (
+  animations: gdSpriteAnimationList
+) => Array<any>;
+
+declare export var copyPoint: (
+  originalPoint: gdPoint,
+  destinationPoint: gdPoint
+) => void;
+
+declare export var copySpritePoints: (
+  originalSprite: gdSprite,
+  destinationSprite: gdSprite
+) => void;
+
+declare export var copyAnimationsSpritePoints: (
+  originalSprite: gdSprite,
+  animation: gdAnimation
+) => void;
+
+declare export var isSamePoint: (
+  point1: gdPoint,
+  point2: gdPoint
+) => false | boolean;
+
+declare export var haveSamePoints: (
+  sprite1: gdSprite,
+  sprite2: gdSprite
+) => any | boolean;
+
+declare export var allDirectionSpritesHaveSamePointsAs: (
+  originalSprite: gdSprite,
+  direction: gdDirection
+) => any;
+
+declare export var allAnimationSpritesHaveSamePointsAs: (
+  originalSprite: gdSprite,
+  animation: gdAnimation
+) => any;
+
+declare export var allObjectSpritesHaveSamePointsAs: (
+  originalSprite: gdSprite,
+  animations: gdSpriteAnimationList
+) => any;
+
+declare export var copySpritePolygons: (
+  originalSprite: gdSprite,
+  destinationSprite: gdSprite
+) => void;
+
+declare export var copyAnimationsSpriteCollisionMasks: (
+  originalSprite: gdSprite,
+  animation: gdAnimation
+) => void;
+
+declare export var isSamePolygon: (
+  polygon1: gdPolygon2d,
+  polygon2: gdPolygon2d
+) => any | boolean;
+
+declare export var haveSameCollisionMasks: (
+  sprite1: gdSprite,
+  sprite2: gdSprite
+) => any | boolean;
+
+declare export var allDirectionSpritesHaveSameCollisionMasksAs: (
+  originalSprite: gdSprite,
+  direction: gdDirection
+) => any;
+
+declare export var allAnimationSpritesHaveSameCollisionMasksAs: (
+  originalSprite: gdSprite,
+  animation: gdAnimation
+) => any;
+
+declare export var allObjectSpritesHaveSameCollisionMaskAs: (
+  originalSprite: gdSprite,
+  animations: gdSpriteAnimationList
+) => any;
+
+declare export var isFirstSpriteUsingFullImageCollisionMask: (
+  animations: gdSpriteAnimationList
+) => boolean;
+
+declare export var deleteSpritesByIndexes: (
+  direction: gdDirection,
+  spriteIndexes: Array<number>
+) => void;
+
+declare export var duplicateSpritesByIndexes: (
+  direction: gdDirection,
+  spriteIndexes: Array<number>
+) => void;
+
+declare export var getSpriteIndexAfterMove: (
+  index: number,
+  oldIndex: number,
+  newIndex: number
+) => number;
+
+declare export var hasAnyFrame: (animations: gdSpriteAnimationList) => boolean;
+
+declare export var getFirstAnimationFrame: (
+  animations: gdSpriteAnimationList
+) => gdSprite | null;
+
+declare export var setCollisionMaskOnAllFrames: (
+  animations: gdSpriteAnimationList,
+  collisionMask: gdVectorPolygon2d | null
+) => void;

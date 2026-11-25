@@ -1,0 +1,33 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type ResourceManagementProps } from '../../../ResourcesList/ResourceSource';
+import { type UnsavedChanges } from '../../../MainFrame/UnsavedChangesContext';
+import { type ScrollViewInterface } from '../../../UI/ScrollView';
+
+export type AnimationListInterface = {|
+  forceUpdate: () => void,
+  addAnimation: () => void,
+|};
+
+type AnimationListProps = {|
+  project: gdProject,
+  layout: gdLayout | null,
+  eventsFunctionsExtension: gdEventsFunctionsExtension | null,
+  eventsBasedObject: gdEventsBasedObject | null,
+  object?: gdObject,
+  objectName: string,
+  resourceManagementProps: ResourceManagementProps,
+  onSizeUpdated: () => void,
+  onObjectUpdated?: () => void,
+  unsavedChanges?: UnsavedChanges,
+  animations: gdSpriteAnimationList,
+  isAnimationListLocked?: boolean,
+  scrollView: { current: ?ScrollViewInterface },
+  onCreateMatchingSpriteCollisionMask: () => Promise<void>,
+|};
+
+declare export default React.ComponentType<{
+  ...AnimationListProps,
+  +ref?: React.RefSetter<AnimationListInterface>,
+}>;

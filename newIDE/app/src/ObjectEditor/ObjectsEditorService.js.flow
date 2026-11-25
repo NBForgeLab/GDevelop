@@ -1,0 +1,16 @@
+// @flow
+// @flow-transitional-stub
+declare var ObjectsEditorService: {
+  getEditorConfiguration: (project: gdProject, objectType: string) => any,
+  registerEditorConfiguration: (
+    objectType: string,
+    editorConfiguration: any
+  ) => void,
+  getDefaultObjectJsImplementationPropertiesEditor: (options: {
+    helpPagePath: string,
+  }) => any,
+  getCustomObjectPropertiesEditor: (options: { helpPagePath: string }) => any,
+  editorConfigurations: { [string]: any },
+};
+
+declare export default typeof ObjectsEditorService;

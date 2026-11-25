@@ -1,0 +1,68 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+import { type UnsavedChanges } from '../MainFrame/UnsavedChangesContext';
+import { type HotReloadPreviewButtonProps } from '../HotReload/HotReloadPreviewButton';
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+
+export type ObjectEditorTab =
+  | 'properties'
+  | 'behaviors'
+  | 'variables'
+  | 'effects';
+
+type Props = {|
+  open: boolean,
+  object: ?gdObject,
+
+  onApply: (
+    hasResourceChanged: boolean,
+    hasAnyEffectBeenAdded: boolean
+  ) => void,
+  onCancel: () => void,
+
+  // Object renaming:
+  onRename: string => void,
+  getValidatedObjectOrGroupName: string => string,
+
+  // Passed down to object editors:
+  project: gdProject,
+  layout: gdLayout | null,
+  eventsFunctionsExtension: gdEventsFunctionsExtension | null,
+  eventsBasedObject: gdEventsBasedObject | null,
+  layersContainer: gdLayersContainer,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  onComputeAllVariableNames: () => Array<string>,
+  resourceManagementProps: ResourceManagementProps,
+  unsavedChanges?: UnsavedChanges,
+  onUpdateBehaviorsSharedData: () => void,
+  initialTab: ?ObjectEditorTab,
+
+  // Preview:
+  hotReloadPreviewButtonProps: HotReloadPreviewButtonProps,
+  openBehaviorEvents: (extensionName: string, behaviorName: string) => void,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  onCreateNewExtensionWithBehavior:
+    | ((project: gdProject, object: gdObject) => void)
+    | null,
+  onOpenEventBasedObjectEditor: (
+    extensionName: string,
+    eventsBasedObjectName: string
+  ) => void,
+  onOpenEventBasedObjectVariantEditor: (
+    extensionName: string,
+    eventsBasedObjectName: string,
+    variantName: string
+  ) => void,
+  onDeleteEventsBasedObjectVariant: (
+    eventsFunctionsExtension: gdEventsFunctionsExtension,
+    eventBasedObject: gdEventsBasedObject,
+    variant: gdEventsBasedObjectVariant
+  ) => void,
+  isBehaviorListLocked: boolean,
+  isVariableListLocked: boolean,
+|};
+
+declare export default React.ComponentType<Props>;

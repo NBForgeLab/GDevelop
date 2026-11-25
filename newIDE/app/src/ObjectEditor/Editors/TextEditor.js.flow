@@ -1,0 +1,6 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type EditorProps } from './EditorProps.flow';
+
+declare export default React.ComponentType<EditorProps>;

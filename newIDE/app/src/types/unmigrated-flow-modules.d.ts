@@ -24,10 +24,6 @@ declare module '*/AssetStore' {
   const content: any;
   export default content;
 }
-declare module '*/ObjectEditor' {
-  const content: any;
-  export default content;
-}
 declare module '*/ExportAndShare' {
   const content: any;
   export default content;

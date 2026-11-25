@@ -17,3 +17,7 @@ export declare const sendBehaviorAdded: (metadata: {
   behaviorType: string;
   parentEditor: 'behaviors-editor' | 'instruction-editor-dialog';
 }) => void;
+
+export declare const sendBehaviorsEditorShown: (metadata: {
+  parentEditor: 'object-editor-dialog';
+}) => void;

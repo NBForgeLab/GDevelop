@@ -1,0 +1,46 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type I18n as I18nType } from '@lingui/core';
+import { type EditorProps } from '../EditorProps.flow';
+
+declare export var ChildrenOverridingDepreciationAlert: () => React.Node;
+
+declare export var getVariantName: (
+  eventBasedObject: gdEventsBasedObject | null,
+  customObjectConfiguration: gdCustomObjectConfiguration
+) => string;
+
+declare export var getVariant: (
+  eventBasedObject: gdEventsBasedObject,
+  customObjectConfiguration: gdCustomObjectConfiguration
+) => gdEventsBasedObjectVariant;
+
+declare export var isVariantEditable: (
+  customObjectConfiguration: gdCustomObjectConfiguration | null,
+  eventsBasedObject: gdEventsBasedObject | null,
+  eventsFunctionsExtension: gdEventsFunctionsExtension | null
+) => boolean;
+
+declare export var duplicateVariant: (
+  newName: string,
+  customObjectConfiguration: gdCustomObjectConfiguration | null,
+  eventsBasedObject: gdEventsBasedObject | null,
+  eventsFunctionsExtension: gdEventsFunctionsExtension | null,
+  project: gdProject,
+  i18n: I18nType
+) => void;
+
+declare export var deleteVariant: (
+  customObjectConfiguration: gdCustomObjectConfiguration | null,
+  eventsBasedObject: gdEventsBasedObject | null,
+  eventsFunctionsExtension: gdEventsFunctionsExtension | null,
+  project: gdProject,
+  onDeleteEventsBasedObjectVariant: ?(
+    eventsFunctionsExtension: gdEventsFunctionsExtension,
+    eventBasedObject: gdEventsBasedObject,
+    variant: gdEventsBasedObjectVariant
+  ) => void
+) => void;
+
+declare export default React.ComponentType<EditorProps>;

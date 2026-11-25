@@ -1,0 +1,7 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+declare export default function EmptyEditor(props: {
+  renderObjectNameField?: () => React.Node,
+}): React.Node;

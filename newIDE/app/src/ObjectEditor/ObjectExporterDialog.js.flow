@@ -1,0 +1,28 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+type DownloadResourcesAsBlobsOptionsWithoutProgress = {
+  project: gdProject,
+  resourceNames: Array<string>,
+  onAddBlobFile: (resourceName: string, blob: Blob) => void,
+};
+
+type DownloadResourcesAsBlobsOptions = {
+  ...DownloadResourcesAsBlobsOptionsWithoutProgress,
+  onProgress: (count: number, total: number) => void,
+};
+
+declare export var downloadResourcesAsBlobs: (
+  options: DownloadResourcesAsBlobsOptions
+) => Promise<{
+  erroredResources: Array<empty>,
+}>;
+
+type Props = {|
+  project: gdProject,
+  layout: gdLayout,
+  onClose: () => void,
+|};
+
+declare export default React.ComponentType<Props>;
