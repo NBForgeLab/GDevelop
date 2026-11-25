@@ -1,0 +1,20 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import {
+  type Quota,
+  type SubscriptionPlanWithPricingSystems,
+} from '../../Utils/GDevelopServices/Usage';
+
+type Props = {|
+  suggestedSubscriptionPlan: ?SubscriptionPlanWithPricingSystems,
+  hasSubscription: boolean,
+  availableCredits: number,
+  canSwitchToGDevelopCredits: boolean,
+  quota: ?Quota,
+  onUpgradeSubscription: () => void,
+  onSwitchToGDevelopCredits: () => void,
+  onBuyCredits: () => void,
+|};
+
+declare export var AiCreditsLimitRow: (props: Props) => React.Node;

@@ -1,0 +1,22 @@
+// @flow
+// @flow-transitional-stub
+import { type ResourceManagementProps } from '../../ResourcesList/ResourceSource';
+import {
+  type FileMetadata,
+  type StorageProvider,
+  type SaveAsLocation,
+} from '../../ProjectsStorage';
+import { type AttachmentsForResources } from '../../EditorFunctions/AttachmentResources';
+
+declare export var useAttachmentsForResources: (arg0: {|
+  project: ?gdProject,
+  resourceManagementProps: ResourceManagementProps,
+  fileMetadata: ?FileMetadata,
+  onSaveProjectAsWithStorageProvider?: (
+    options: ?{|
+      requestedStorageProvider?: StorageProvider,
+      forcedSavedAsLocation?: SaveAsLocation,
+      createdProject?: gdProject,
+    |}
+  ) => Promise<?FileMetadata>,
+|}) => AttachmentsForResources;

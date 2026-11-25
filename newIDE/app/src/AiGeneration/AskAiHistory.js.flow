@@ -1,0 +1,31 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+
+export type AskAiHistoryLayout = 'side-panel' | 'left-drawer' | 'right-drawer';
+
+declare export var askAiHistoryWidth: number;
+
+type Props = {|
+  layout: AskAiHistoryLayout,
+  open: boolean,
+  onClose: () => void,
+  onOpenAiRequest: (aiRequestId: string) => void,
+  onStartNewChat: () => void,
+  canStartNewChat: boolean,
+  selectedAiRequestId: string | null,
+|};
+
+type AskAiHistoryContentProps = {|
+  onOpenAiRequest: (aiRequestId: string) => void,
+  onStartNewChat: () => void,
+  canStartNewChat: boolean,
+  selectedAiRequestId: string | null,
+  className?: string,
+|};
+
+declare export var AskAiHistoryContent: (
+  props: AskAiHistoryContentProps
+) => React.Node;
+
+declare export var AskAiHistory: (props: Props) => React.Node;

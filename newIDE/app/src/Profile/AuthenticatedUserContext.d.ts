@@ -109,6 +109,8 @@ export type AuthenticatedUser = {
   achievements: Array<Achievement> | null | undefined;
 };
 
+export declare const initialAuthenticatedUser: AuthenticatedUser;
+
 declare const AuthenticatedUserContext: React.Context<AuthenticatedUser>;
 
 export default AuthenticatedUserContext;

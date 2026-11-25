@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub
+
+export type AskAiPrefill = {|
+  userRequestText: string,
+  inCurrentChat: boolean,
+|};
+
+declare export var requestAskAiPrefill: (prefill: AskAiPrefill) => void;
+
+declare export var registerAskAiPrefillListener: (
+  newListener: (prefill: AskAiPrefill) => void
+) => () => void;

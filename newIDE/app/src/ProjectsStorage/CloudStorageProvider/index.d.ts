@@ -1,6 +1,5 @@
-declare const CloudStorageProvider: {
-  internalName: string;
-  [key: string]: any;
-};
+import { type StorageProvider } from '../index';
+
+declare const CloudStorageProvider: StorageProvider;
 
 export default CloudStorageProvider;

@@ -1,0 +1,17 @@
+// @flow
+// @flow-transitional-stub
+
+declare export var prepareAiUserContent: (options: {|
+  getAuthorizationHeader: () => Promise<string>,
+  userId: string,
+  simplifiedProjectJson: string | null,
+  projectSpecificExtensionsSummaryJson: string | null,
+  eventsJson?: string | null,
+|}) => Promise<{
+  eventsJson: null | string,
+  eventsJsonUserRelativeKey: null | string,
+  gameProjectJson: null | string,
+  gameProjectJsonUserRelativeKey: null | string,
+  projectSpecificExtensionsSummaryJson: null | string,
+  projectSpecificExtensionsSummaryJsonUserRelativeKey: null | string,
+}>;

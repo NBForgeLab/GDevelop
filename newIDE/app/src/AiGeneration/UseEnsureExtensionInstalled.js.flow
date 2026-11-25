@@ -1,0 +1,20 @@
+// @flow
+// @flow-transitional-stub
+import { type I18n as I18nType } from '@lingui/core';
+
+export type EnsureExtensionInstalledOptions = {|
+  extensionName: string,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+|};
+
+type _UseEnsureExtensionInstalledReturnType = {|
+  ensureExtensionInstalled: (
+    options: EnsureExtensionInstalledOptions
+  ) => Promise<void>,
+|};
+
+declare export var useEnsureExtensionInstalled: (options: {|
+  project: ?gdProject,
+  i18n: I18nType,
+|}) => _UseEnsureExtensionInstalledReturnType;

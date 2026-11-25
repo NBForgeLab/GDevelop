@@ -1,0 +1,47 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type I18n as I18nType } from '@lingui/core';
+import {
+  type NewProjectSetup,
+  type ExampleProjectSetup,
+} from '../ProjectCreation/NewProjectSetupDialog';
+import { type FileMetadata, type StorageProvider } from '../ProjectsStorage';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+import { type CreateProjectResult } from '../Utils/UseCreateProject';
+import { type OpenAskAiOptions } from './Utils';
+
+type Props = {|
+  project: ?gdProject,
+  resourceManagementProps: ResourceManagementProps,
+  fileMetadata: ?FileMetadata,
+  storageProvider: ?StorageProvider,
+  i18n: I18nType,
+  onCreateProjectFromExample: (
+    exampleProjectSetup: ExampleProjectSetup
+  ) => Promise<CreateProjectResult>,
+  onCreateEmptyProject: (
+    newProjectSetup: NewProjectSetup
+  ) => Promise<CreateProjectResult>,
+  onOpenLayout: (
+    sceneName: string,
+    options: {|
+      openEventsEditor: boolean,
+      openSceneEditor: boolean,
+      focusWhenOpened:
+        | 'scene-or-events-otherwise'
+        | 'scene'
+        | 'events'
+        | 'none',
+    |}
+  ) => void,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  onCloseAskAi: () => void,
+  onOpenAskAi?: (?OpenAskAiOptions) => void,
+  onCloseDialog?: () => void,
+  closeProject?: () => Promise<void>,
+  dismissableIdentifier?: string,
+|};
+
+declare export var AskAiStandAloneForm: (props: Props) => null | React.Node;

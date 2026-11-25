@@ -1,0 +1,84 @@
+// @flow
+// @flow-transitional-stub
+import {
+  type AiRequest,
+  type AiRequestMessage,
+  type AiRequestMessageAssistantFunctionCall,
+  type AiRequestFunctionCallOutput,
+  type AiRequestPlan,
+  type AiRequestSummary,
+  type AiRequestUserMessage,
+} from '../Utils/GDevelopServices/Generation';
+import {
+  type EditorFunctionCallResult,
+  type RelatedAiRequestLastMessages,
+} from '../EditorFunctions';
+
+declare export var getUserRequestText: (
+  message: AiRequestUserMessage
+) => string;
+
+declare export var getAiRequestSummaryTitle: (
+  aiRequestSummary: AiRequestSummary
+) => string;
+
+declare export var MAX_AI_REQUEST_RETRIES_IN_A_ROW: number;
+
+declare export var canRetryAiRequest: (aiRequest: AiRequest) => boolean;
+
+declare export var getFunctionCallToFunctionCallOutputMap: (options: {|
+  aiRequest: AiRequest,
+|}) => Map<
+  AiRequestMessageAssistantFunctionCall,
+  AiRequestFunctionCallOutput | null
+>;
+
+declare export var getFunctionCallsToProcess: (options: {|
+  aiRequest: AiRequest,
+  editorFunctionCallResults: Array<EditorFunctionCallResult> | null,
+|}) => Array<AiRequestMessageAssistantFunctionCall>;
+
+declare export var getAllSubAgentFunctionCalls: (options: {|
+  aiRequest: AiRequest,
+|}) => Array<AiRequestMessageAssistantFunctionCall>;
+
+declare export var getSubAgentKind: (options: {|
+  aiRequest: AiRequest,
+  aiRequests: { [string]: AiRequest },
+|}) => 'edit' | 'explorer' | null;
+
+declare export var getPendingSubAgentFunctionCalls: (options: {|
+  aiRequest: AiRequest,
+|}) => Array<AiRequestMessageAssistantFunctionCall>;
+
+declare export var getFunctionCallNameByCallId: (options: {|
+  aiRequest: AiRequest,
+  callId: string,
+|}) => string | null;
+
+declare export var getLatestActivePlan: (
+  aiRequest: AiRequest
+) => AiRequestPlan | null;
+
+declare export var aiRequestShouldBeWatched: (aiRequest: AiRequest) => boolean;
+
+declare export var aiRequestPollSawActivity: (
+  previousAiRequest: ?AiRequest,
+  fetchedAiRequest: AiRequest
+) => boolean;
+
+declare export var aiRequestHasWorkInProgress: (
+  aiRequest: AiRequest,
+  editorFunctionCallResults: Array<EditorFunctionCallResult> | null
+) => boolean;
+
+declare export var getFunctionCallOutputsFromEditorFunctionCallResults: (
+  editorFunctionCallResults: Array<EditorFunctionCallResult> | null
+) => {|
+  hasUnfinishedResult: boolean,
+  functionCallOutputs: Array<AiRequestFunctionCallOutput>,
+|};
+
+declare export var getLastMessagesFromAiRequestOutput: (
+  output: Array<AiRequestMessage>
+) => RelatedAiRequestLastMessages;

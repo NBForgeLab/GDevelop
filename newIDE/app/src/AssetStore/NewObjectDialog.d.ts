@@ -24,9 +24,12 @@ export declare const useInstallAsset: (options: {
   resourceManagementProps: ResourceManagementProps;
   onWillInstallExtension: (extensionNames: Array<string>) => void;
   onExtensionInstalled: (extensionNames: Array<string>) => void;
-}) => (
-  assetShortHeader: AssetShortHeader
-) => Promise<InstallAssetOutput | null>;
+}) => (options: {
+  assetShortHeader: AssetShortHeader;
+  objectsContainer: gdObjectsContainer;
+  requestedObjectName?: string;
+  setIsAssetBeingInstalled: (isAssetBeingInstalled: boolean) => void;
+}) => Promise<InstallAssetOutput | null>;
 
 export declare const useInstallEffectAsset: (options: {
   project: gdProject | null | undefined;

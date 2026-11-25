@@ -1,0 +1,12 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type EditApprovalRequest } from '../Utils';
+
+type Props = {|
+  pendingEditApproval: EditApprovalRequest,
+  onResolveEditApproval: (accepted: boolean) => void,
+  onAcceptAndEnableAutoEdit: () => void,
+|};
+
+declare export var EditApprovalRow: (props: Props) => React.Node;

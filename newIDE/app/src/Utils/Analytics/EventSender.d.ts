@@ -21,3 +21,21 @@ export declare const sendBehaviorAdded: (metadata: {
 export declare const sendBehaviorsEditorShown: (metadata: {
   parentEditor: 'object-editor-dialog';
 }) => void;
+
+export declare const sendAiRequestStarted: (metadata: {
+  simplifiedProjectJsonLength: number;
+  projectSpecificExtensionsSummaryJsonLength: number;
+  payWithCredits: boolean;
+  storageProviderName: string | null;
+  mode: string;
+  aiRequestId: string;
+}) => void;
+
+export declare const sendAiRequestMessageSent: (metadata: {
+  simplifiedProjectJsonLength: number;
+  projectSpecificExtensionsSummaryJsonLength: number;
+  payWithCredits: boolean;
+  mode: string;
+  aiRequestId: string;
+  outputLength: number;
+}) => void;
