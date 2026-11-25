@@ -1,0 +1,50 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type EnumeratedEffectMetadata } from './EnumerateEffects';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+
+type UseManageEffectsState = {|
+  allEffectMetadata: Array<EnumeratedEffectMetadata>,
+  draggedEffect: {| current: ?gdEffect |},
+  addEffect: (effectType: string) => void,
+  onEffectAddedFromStore: (effect: gdEffect) => void,
+  copyAllEffects: () => void,
+  copyEffect: (effect: gdEffect) => void,
+  duplicatedUniqueEffectMetadata: ?EnumeratedEffectMetadata,
+  isClipboardContainingEffects: boolean,
+  moveEffect: (targetEffect: gdEffect) => void,
+  pasteEffectsAtTheEnd: () => Promise<void>,
+  pasteEffectsBefore: (effect: gdEffect) => Promise<void>,
+  removeEffect: (effect: gdEffect) => void,
+  resetJustAddedEffectName: () => void,
+  justAddedEffectName: ?string,
+|};
+type Props = {|
+  project: gdProject,
+  resourceManagementProps: ResourceManagementProps,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  effectsContainer: gdEffectsContainer,
+  onEffectsUpdated: () => void,
+  onEffectsRenamed: (oldName: string, newName: string) => void,
+  onEffectAdded: () => void,
+  target: 'object' | 'layer',
+  layerRenderingType: string,
+|};
+
+declare export var useEffectOverridingAlertDialog: () => ((
+  existingEffectNames: Array<string>
+) => Promise<boolean>);
+declare export var getEnumeratedEffectMetadata: (allEffectDescriptions: Array<EnumeratedEffectMetadata>, effectType: string) => ?EnumeratedEffectMetadata;
+declare export var getEffects2DCount: (platform: gdPlatform, effectsContainer: gdEffectsContainer) => number;
+declare export var getEffects3DCount: (platform: gdPlatform, effectsContainer: gdEffectsContainer) => number;
+declare export var useManageEffects: (arg0: {|
+  effectsContainer: gdEffectsContainer,
+  project: gdProject,
+  onEffectsUpdated: () => void,
+  onEffectAdded: () => void,
+  onUpdate: () => void,
+  target: 'object' | 'layer',
+|}) => UseManageEffectsState;
+declare export default function EffectsList(props: Props): React.Node;

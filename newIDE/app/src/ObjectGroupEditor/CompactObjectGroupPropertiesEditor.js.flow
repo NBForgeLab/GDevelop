@@ -1,0 +1,56 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type UnsavedChanges } from '../MainFrame/UnsavedChangesContext';
+import { type HistoryHandler } from '../VariablesList/VariablesList';
+import { type ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+import { type ObjectGroupEditorTab } from './EditedObjectGroupEditorDialog';
+
+type Props = {|
+  project: gdProject,
+  resourceManagementProps: ResourceManagementProps,
+  layout?: ?gdLayout,
+  eventsFunctionsExtension: gdEventsFunctionsExtension | null,
+  /** Only set when a default variant is edited */
+  eventsBasedObject: gdEventsBasedObject | null,
+  objectsContainer: gdObjectsContainer,
+  globalObjectsContainer: gdObjectsContainer | null,
+  initialInstances: gdInitialInstancesContainer,
+  layersContainer: gdLayersContainer,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  unsavedChanges?: ?UnsavedChanges,
+  historyHandler?: HistoryHandler,
+
+  objectGroup: gdObjectGroup,
+  isObjectListLocked: boolean,
+  isVariableListLocked: boolean,
+  isBehaviorListLocked: boolean,
+  onEditObjectGroup: (
+    objectGroup: gdObjectGroup,
+    initialTab?: ?ObjectGroupEditorTab
+  ) => void,
+
+  onUpdateBehaviorsSharedData: () => void,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  onCreateNewExtensionWithBehavior:
+    | ((project: gdProject, object: gdObject) => void)
+    | null,
+|};
+
+declare export var styles: {| icon: {| fontSize: 18 |}, scrollView: {| paddingTop: any, overflowX: "hidden" |}, hiddenContent: {| display: "none" |}, subPanelContentContainer: {| display: "flex", flexDirection: "column", flex: 1, paddingLeft: any, paddingRight: any |} |};
+export type CompactObjectGroupPropertiesEditorInterface = {|
+  /**
+   * Rebuild the merged variables container from the objects of the group.
+   * To be called when the group may have been edited elsewhere (in the object
+   * group editor dialog, by an undo/redo...): the variables of a group are
+   * not stored anywhere - they are the ones common to all its objects - so
+   * they must be recomputed to display changes made outside this editor.
+   */
+  refreshVariables: () => void,
+|};
+declare export var CompactObjectGroupPropertiesEditor: React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<CompactObjectGroupPropertiesEditorInterface>,
+}>;

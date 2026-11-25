@@ -1,0 +1,27 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+import { type HotReloadPreviewButtonProps } from '../HotReload/HotReloadPreviewButton';
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+
+type Props = {|
+  project: gdProject,
+  resourceManagementProps: ResourceManagementProps,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  layout: gdLayout | null,
+  eventsFunctionsExtension: gdEventsFunctionsExtension | null,
+  eventsBasedObject: gdEventsBasedObject | null,
+  layer: gdLayer,
+  initialInstances: gdInitialInstancesContainer,
+
+  initialTab: 'properties' | 'effects',
+
+  onCancel: () => void,
+  onApply: (hasAnyEffectBeenAdded: boolean) => void,
+
+  // Preview:
+  hotReloadPreviewButtonProps: HotReloadPreviewButtonProps,
+|};
+
+declare export default React.ComponentType<Props>;

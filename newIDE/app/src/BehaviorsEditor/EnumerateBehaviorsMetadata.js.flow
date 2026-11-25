@@ -1,0 +1,18 @@
+// @flow
+// @flow-transitional-stub
+
+export type EnumeratedBehaviorMetadata = {|
+  extension: gdPlatformExtension,
+  behaviorMetadata: gdBehaviorMetadata,
+  type: string,
+  objectType: string,
+  defaultName: string,
+  fullName: string,
+  description: string,
+  previewIconUrl: string,
+  category: string,
+  tags: Array<string>,
+|};
+declare export var enumerateBehaviorsMetadata: (platform: gdPlatform, project: gdProject, eventsFunctionsExtension: gdEventsFunctionsExtension | null) => Array<EnumeratedBehaviorMetadata>;
+declare export var filterEnumeratedBehaviorMetadata: (list: Array<EnumeratedBehaviorMetadata>, searchText: string) => Array<EnumeratedBehaviorMetadata>;
+declare export var isBehaviorDefaultCapability: (behaviorMetadata: gdBehaviorMetadata) => boolean;

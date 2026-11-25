@@ -1,0 +1,10 @@
+// @flow
+// @flow-transitional-stub
+
+type Props = {|
+  layersContainer: gdLayersContainer,
+  onEditLayerEffects: (layer: gdLayer) => void,
+  onEditLayer: (layer: gdLayer) => void,
+|};
+
+declare export default (props: Props) => void;

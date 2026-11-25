@@ -1,0 +1,142 @@
+// @flow
+// @flow-transitional-stub
+import { type I18n as I18nType } from '@lingui/core';
+import * as React from 'react';
+import { type ObjectEditorTab } from '../ObjectEditor/ObjectEditorDialog';
+import type { ObjectWithContext } from '../ObjectsList/EnumerateObjects';
+import { type MenuButton } from '../UI/TreeView';
+import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type UnsavedChanges } from '../MainFrame/UnsavedChangesContext';
+import { type HotReloadPreviewButtonProps } from '../HotReload/HotReloadPreviewButton';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+import { type ObjectFolderOrObjectWithContext } from './EnumerateObjectFolderOrObject';
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+import { type HTMLDataset } from '../Utils/HTMLDataset';
+import type { MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import type { EventsScope } from '../InstructionOrExpression/EventsScope';
+
+type Props = {|
+  project: gdProject,
+  layout: ?gdLayout,
+  eventsFunctionsExtension: gdEventsFunctionsExtension | null,
+  eventsBasedObject: gdEventsBasedObject | null,
+  initialInstances?: gdInitialInstancesContainer,
+  /** The objects retrieved from ProjectScopedContainers must never be kept in a
+   * state as they may be temporary copies.
+   * It also contains "fake" objects like "Object" for the parent of custom objects.
+   * It's useful to check if an object name is taken, but not to edit ObjectsContainer.
+   * Also see `ProjectScopedContainers::MakeNewProjectScopedContainersForEventsBasedObject`.
+   * Search for "ProjectScopedContainers wrongly containing temporary objects containers or objects"
+   * in the codebase.
+   */
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+
+  // These 2 containers always contains the "real" objects.
+  // TODO: they should be replaced by projectScopedContainersAccessor, but we can't use this
+  // as `ProjectScopedContainers` may return temporary objects that can't be edited or have references
+  // to them kept.
+  // Search for "ProjectScopedContainers wrongly containing temporary objects containers or objects"
+  // in the codebase.
+  globalObjectsContainer: gdObjectsContainer | null,
+  objectsContainer: gdObjectsContainer,
+
+  onSelectAllInstancesOfObjectInLayout?: string => void,
+  resourceManagementProps: ResourceManagementProps,
+  onDeleteObjects: (
+    objectWithContext: ObjectWithContext[],
+    cb: (boolean) => void
+  ) => void,
+  onRenameObjectFolderOrObjectWithContextFinish: (
+    objectFolderOrObjectWithContext: ObjectFolderOrObjectWithContext,
+    newName: string,
+    cb: (boolean) => void
+  ) => void,
+  selectedObjectFolderOrObjectsWithContext: Array<ObjectFolderOrObjectWithContext>,
+
+  beforeSetAsGlobalObject?: (objectName: string) => boolean,
+  canSetAsGlobalObject?: boolean,
+  onSetAsGlobalObject: (object: gdObject) => void,
+
+  onEditObject: (object: gdObject, initialTab?: ?ObjectEditorTab) => void,
+  onOpenEventBasedObjectEditor: (
+    extensionName: string,
+    eventsBasedObjectName: string
+  ) => void,
+  onOpenEventBasedObjectVariantEditor: (
+    extensionName: string,
+    eventsBasedObjectName: string,
+    variantName: string
+  ) => void,
+  onExportAssets: () => void,
+  onImportAssets: () => void,
+  onObjectCreated: (
+    objects: Array<gdObject>,
+    isTheFirstOfItsTypeInProject: boolean
+  ) => void,
+  // An effect from the asset store was put on a layer: the game shown by the
+  // editor must reload it.
+  onEffectAdded: () => void,
+  onObjectEdited: (
+    objectWithContext: ObjectWithContext,
+    hasResourceChanged: boolean
+  ) => void,
+  onObjectFolderOrObjectsWithContextSelected: (
+    Array<ObjectFolderOrObjectWithContext>
+  ) => void,
+  onObjectPasted?: gdObject => void,
+  getValidatedObjectOrGroupName: (newName: string, global: boolean) => string,
+  onAddObjectInstance: (objectName: string) => void,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+
+  getThumbnail: (
+    project: gdProject,
+    objectConfiguration: gdObjectConfiguration
+  ) => string,
+  unsavedChanges?: ?UnsavedChanges,
+  hotReloadPreviewButtonProps: HotReloadPreviewButtonProps,
+  isListLocked: boolean,
+|};
+
+declare export var getLabelsForObjectsAndGroupsLists: (scope: EventsScope) => {|
+  localScopeObjectsTitle: MessageDescriptor,
+  higherScopeObjectsTitle: MessageDescriptor | null,
+  localScopeGroupsTitle: MessageDescriptor | null,
+  higherScopeGroupsTitle: MessageDescriptor | null,
+|};
+declare export var getTreeViewItemIdFromObjectFolderOrObject: (objectFolderOrObject: gdObjectFolderOrObject) => string;
+export interface TreeViewItemContent {
+  getName(): string | React.Node;
+  getId(): string;
+  getHtmlId(index: number): ?string;
+  getDataSet(): ?HTMLDataset;
+  getThumbnail(): ?string;
+  onClick(): void;
+  buildMenuTemplate(i18n: I18nType, index: number): Array<MenuItemTemplate>;
+  getRightButton(i18n: I18nType): ?MenuButton;
+  renderRightComponent(i18n: I18nType): ?React.Node;
+  rename(newName: string): void;
+  edit(): void;
+  delete(): void;
+  copy(): void;
+  paste(): void;
+  cut(): void;
+  duplicate(): void;
+  getIndex(): number;
+  isDescendantOf(treeViewItemContent: TreeViewItemContent): boolean;
+  isSibling(treeViewItemContent: TreeViewItemContent): boolean;
+  isGlobal(): boolean;
+  is3D(): boolean;
+  getObjectFolderOrObject(): gdObjectFolderOrObject | null;
+}
+declare export var objectWithContextReactDndType: string;
+export type ObjectsListInterface = {|
+  forceUpdateList: () => void,
+  openNewObjectDialog: () => void,
+  closeNewObjectDialog: () => void,
+|};
+/* $FlowFixMe[incompatible-type] */
+declare export default React.ComponentType<{
+  ...Props,
+  +ref?: React.RefSetter<ObjectsListInterface>,
+}>;

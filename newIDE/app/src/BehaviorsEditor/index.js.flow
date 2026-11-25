@@ -1,0 +1,64 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
+
+type UseManageBehaviorsState = {|
+  // Operations:
+  changeBehaviorName: (behavior: gdBehavior, newName: string) => void,
+  removeBehavior: (behaviorName: string) => void,
+  copyBehavior: (behaviorName: string) => void,
+  copyAllBehaviors: () => void,
+  pasteBehaviors: () => Promise<void>,
+  openNewBehaviorDialog: () => void,
+  resetJustAddedBehaviorName: () => void,
+
+  // Visual state:
+  newBehaviorDialog: React.Node,
+  justAddedBehaviorName: ?string,
+|};
+type Props = {|
+  project: gdProject,
+  eventsFunctionsExtension: gdEventsFunctionsExtension | null,
+  objects: Array<gdObject>,
+  layersContainer: gdLayersContainer,
+  isChildObject: boolean,
+  onUpdateBehaviorsSharedData: () => void,
+  onSizeUpdated?: ?() => void,
+  resourceManagementProps: ResourceManagementProps,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  onBehaviorsUpdated: () => void,
+  openBehaviorEvents: (
+    extensionName: string,
+    behaviorName: string
+  ) => Promise<void>,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  onCreateNewExtensionWithBehavior:
+    | ((project: gdProject, object: gdObject) => void)
+    | null,
+  isListLocked: boolean,
+|};
+
+declare export var useBehaviorOverridingAlertDialog: () => ((
+  existingBehaviorNames: Array<string>
+) => Promise<boolean>);
+declare export var useManageObjectBehaviors: (arg0: {
+  project: gdProject,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  objects: Array<gdObject>,
+  isChildObject: boolean,
+  eventsFunctionsExtension: gdEventsFunctionsExtension | null,
+  onUpdate: () => void,
+  onSizeUpdated?: ?() => void,
+  onBehaviorsUpdated?: ?() => void,
+  onUpdateBehaviorsSharedData: () => void,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  allVisibleBehaviorNames: Array<string>,
+  onCreateNewExtensionWithBehavior:
+    | ((project: gdProject, object: gdObject) => void)
+    | null,
+}) => UseManageBehaviorsState;
+declare export default React.ComponentType<Props>;

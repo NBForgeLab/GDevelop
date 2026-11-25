@@ -44,10 +44,6 @@ declare module '*/AiGeneration' {
   const content: any;
   export default content;
 }
-declare module '*/BehaviorsEditor' {
-  const content: any;
-  export default content;
-}
 
 declare module '*/locales/LocalesMetadata' {
   export interface LocaleMetadata {

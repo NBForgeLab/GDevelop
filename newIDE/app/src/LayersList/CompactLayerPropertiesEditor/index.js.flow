@@ -1,0 +1,25 @@
+// @flow
+// @flow-transitional-stub
+import { type I18n as I18nType } from '@lingui/core';
+import * as React from 'react';
+import { type UnsavedChanges } from '../../MainFrame/UnsavedChangesContext';
+import { type ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
+import { type ResourceManagementProps } from '../../ResourcesList/ResourceSource';
+
+type Props = {|
+  project: gdProject,
+  resourceManagementProps: ResourceManagementProps,
+  layersContainer: gdLayersContainer,
+  projectScopedContainersAccessor: ProjectScopedContainersAccessor,
+  unsavedChanges?: ?UnsavedChanges,
+  i18n: I18nType,
+
+  layer: gdLayer,
+  onEditLayer: (layer: gdLayer) => void,
+  onEditLayerEffects: (layer: gdLayer) => void,
+  onLayersModified: (layers: Array<gdLayer>) => void,
+  onEffectAdded: () => void,
+|};
+
+declare export var styles: {| icon: {| fontSize: 18 |}, scrollView: {| paddingTop: any, overflowX: "hidden" |}, hiddenContent: {| display: "none" |}, subPanelContentContainer: {| display: "flex", flexDirection: "column", flex: 1, paddingLeft: any, paddingRight: any |} |};
+declare export var CompactLayerPropertiesEditor: React.ComponentType<Props>;

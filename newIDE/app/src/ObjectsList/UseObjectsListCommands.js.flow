@@ -1,0 +1,12 @@
+// @flow
+// @flow-transitional-stub
+
+type Props = {|
+  project: gdProject,
+  globalObjectsContainer: gdObjectsContainer | null,
+  objectsContainer: gdObjectsContainer,
+  onEditObject: (object: gdObject, initialTab?: ?string) => void,
+  onEditObjectVariables: (object: gdObject) => void,
+|};
+
+declare export default (props: Props) => void;

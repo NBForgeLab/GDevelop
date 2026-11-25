@@ -1,0 +1,26 @@
+// @flow
+// @flow-transitional-stub
+
+type EnumearatedObjectFolderOrObject = {|
+  path: string,
+  folder: gdObjectFolderOrObject,
+|};
+
+export type ObjectFolderOrObjectWithContext = {|
+  objectFolderOrObject: gdObjectFolderOrObject,
+  global: boolean,
+|};
+declare export var getObjectFolderOrObjectUnifiedName: (objectFolderOrObject: gdObjectFolderOrObject) => string;
+declare export var enumerateObjectsInFolder: (folder: gdObjectFolderOrObject) => Array<gdObject>;
+declare export var enumerateFoldersInFolder: (folder: gdObjectFolderOrObject) => Array<EnumearatedObjectFolderOrObject>;
+declare export var enumerateFoldersInContainer: (container: gdObjectsContainer) => Array<EnumearatedObjectFolderOrObject>;
+declare export var getObjectsInFolder: (objectFolderOrObject: gdObjectFolderOrObject) => gdObject[];
+declare export var getFoldersAscendanceWithoutRootFolder: (objectFolderOrObject: gdObjectFolderOrObject) => gdObjectFolderOrObject[];
+declare export var getSelectionTopLevelItems: <T>(items: $ReadOnlyArray<T>, getObjectFolderOrObject: (item: T) => gdObjectFolderOrObject | null) => Array<T>;
+declare export var getSelectionTopLevelNodes: (items: Array<ObjectFolderOrObjectWithContext>) => Array<ObjectFolderOrObjectWithContext>;
+declare export var enumerateAllChildrenInFolder: (folder: gdObjectFolderOrObject) => Array<gdObjectFolderOrObject>;
+declare export var isSelectableWhileSearching: (objectFolderOrObject: gdObjectFolderOrObject, searchText: string) => boolean;
+declare export var enumerateAllChildrenInFolderMatchingSearch: (folder: gdObjectFolderOrObject, searchText: string) => Array<gdObjectFolderOrObject>;
+declare export var dropDescendantsOfRemovedFolders: (removedObjectFolderOrObjects: Array<gdObjectFolderOrObject>, next: Array<ObjectFolderOrObjectWithContext>) => Array<ObjectFolderOrObjectWithContext>;
+declare export var getObjectsToDeleteFromSelection: (topLevelObjectFolderOrObjects: Array<gdObjectFolderOrObject>) => Array<gdObject>;
+declare export var removeEmptyFoldersFromSelection: (topLevelObjectFolderOrObjects: Array<gdObjectFolderOrObject>) => void;

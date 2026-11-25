@@ -12,3 +12,8 @@ export declare const sendErrorMessage: (
 ) => void;
 
 export declare const sendExternalEditorOpened: (editorName: string) => void;
+
+export declare const sendBehaviorAdded: (metadata: {
+  behaviorType: string;
+  parentEditor: 'behaviors-editor' | 'instruction-editor-dialog';
+}) => void;

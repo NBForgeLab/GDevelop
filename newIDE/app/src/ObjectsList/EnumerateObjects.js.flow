@@ -1,0 +1,51 @@
+// @flow
+// @flow-transitional-stub
+
+export type EnumeratedObjectMetadata = {|
+  extension: gdPlatformExtension,
+  objectMetadata: gdObjectMetadata,
+  type: string,
+  name: string,
+  fullName: string,
+  description: string,
+  iconFilename: string,
+  category: string,
+  isRenderedIn3D: boolean,
+  assetStoreTag?: string,
+  isDependentWithParent?: boolean,
+  tags: Array<string>,
+|};
+export type ObjectWithContext = {|
+  object: gdObject,
+  global: boolean,
+|};
+export type GroupWithContext = {|
+  group: gdObjectGroup,
+  global: boolean,
+|};
+export type ObjectWithContextList = Array<ObjectWithContext>;
+export type GroupWithContextList = Array<GroupWithContext>;
+declare export var isSameGroupWithContext: (groupWithContext: ?GroupWithContext) => ((other: ?GroupWithContext) => ?(false | boolean));
+declare export var isSameObjectWithContext: (objectWithContext: ?ObjectWithContext) => ((other: ?ObjectWithContext) => ?(false | boolean));
+declare export var enumerateObjects: (globalObjectsContainer: gdObjectsContainer | null, objectsContainer: gdObjectsContainer, filters?: ?{| type?: string, names?: Array<string> |}) => {
+  allObjectsList: ObjectWithContextList,
+  containerObjectsList: ObjectWithContextList,
+  projectObjectsList: ObjectWithContextList,
+};
+declare export var enumerateObjectTypes: (project: gdProject, eventsFunctionsExtension: gdEventsFunctionsExtension | null) => Array<EnumeratedObjectMetadata>;
+export type ObjectFilteringOptions = {|
+  searchText: string,
+  hideExactMatches?: boolean,
+|};
+declare export var filterObjectsList: (list: ObjectWithContextList, arg1: ObjectFilteringOptions) => ObjectWithContextList;
+export type GroupFilteringOptions = {|
+  searchText: string,
+  hideExactMatches?: boolean,
+|};
+declare export var filterGroupsList: (list: GroupWithContextList, arg1: GroupFilteringOptions) => GroupWithContextList;
+declare export var enumerateGroups: (objectGroups: gdObjectGroupsContainer) => Array<gdObjectGroup>;
+declare export var enumerateObjectsAndGroups: (objectsContainersList: gdObjectsContainersList, objectType?: ?string, requiredBehaviorTypes?: Array<string>) => | { allGroupsList: Array<empty>, allObjectsList: Array<empty> }
+  | {
+      allGroupsList: GroupWithContextList,
+      allObjectsList: ObjectWithContextList,
+    };
