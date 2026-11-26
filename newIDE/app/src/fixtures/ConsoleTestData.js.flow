@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type Log, LogsManager } from '../Debugger/DebuggerConsole';
+
+declare class MockLogsManager extends LogsManager {
+  logs: Array<Log>;
+  groups: Set<string>;
+  on(): void;
+  off(): void;
+  addLog(): void;
+}
+
+declare export default MockLogsManager;

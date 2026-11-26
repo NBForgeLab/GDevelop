@@ -1,5 +1,3 @@
-// @flow
-// $FlowFixMe[underconstrained-implicit-instantiation]
 let testExtensionsAdded = new WeakSet();
 
 /** A fake behavior implementation with no property. */
@@ -7,23 +5,20 @@ const makeFakeBehaviorWithoutProperty = (
   gd: libGDevelop
 ): gdBehaviorJsImplementation => {
   const fakeBehavior = new gd.BehaviorJsImplementation();
-  // $FlowFixMe[incompatible-type] - ignore Flow warning as we're creating a behavior
-  // $FlowFixMe[cannot-write]
-  fakeBehavior.updateProperty = function(
+  // ignore Flow warning as we're creating a behavior
+  fakeBehavior.updateProperty = function (
     behaviorContent,
     propertyName,
     newValue
   ) {
     return false;
   };
-  // $FlowFixMe[incompatible-type] - ignore Flow warning as we're creating a behavior
-  // $FlowFixMe[cannot-write]
-  fakeBehavior.getProperties = function(behaviorContent) {
+  // ignore Flow warning as we're creating a behavior
+  fakeBehavior.getProperties = function (behaviorContent) {
     return new gd.MapStringPropertyDescriptor();
   };
-  // $FlowFixMe[incompatible-type] - ignore Flow warning as we're creating a behavior
-  // $FlowFixMe[cannot-write]
-  fakeBehavior.initializeContent = function(behaviorContent) {};
+  // ignore Flow warning as we're creating a behavior
+  fakeBehavior.initializeContent = function (behaviorContent) {};
   return fakeBehavior;
 };
 
@@ -38,9 +33,8 @@ const makeFakeBehaviorRequiring = (
   label: string
 ): gdBehaviorJsImplementation => {
   const fakeBehavior = new gd.BehaviorJsImplementation();
-  // $FlowFixMe[incompatible-type] - ignore Flow warning as we're creating a behavior
-  // $FlowFixMe[cannot-write]
-  fakeBehavior.updateProperty = function(
+  // ignore Flow warning as we're creating a behavior
+  fakeBehavior.updateProperty = function (
     behaviorContent,
     propertyName,
     newValue
@@ -51,9 +45,8 @@ const makeFakeBehaviorRequiring = (
     }
     return false;
   };
-  // $FlowFixMe[incompatible-type] - ignore Flow warning as we're creating a behavior
-  // $FlowFixMe[cannot-write]
-  fakeBehavior.getProperties = function(behaviorContent) {
+  // ignore Flow warning as we're creating a behavior
+  fakeBehavior.getProperties = function (behaviorContent) {
     const behaviorProperties = new gd.MapStringPropertyDescriptor();
     behaviorProperties
       .getOrCreate('requiredBehavior')
@@ -63,9 +56,8 @@ const makeFakeBehaviorRequiring = (
       .addExtraInfo(requiredBehaviorType);
     return behaviorProperties;
   };
-  // $FlowFixMe[incompatible-type] - ignore Flow warning as we're creating a behavior
-  // $FlowFixMe[cannot-write]
-  fakeBehavior.initializeContent = function(behaviorContent) {
+  // ignore Flow warning as we're creating a behavior
+  fakeBehavior.initializeContent = function (behaviorContent) {
     behaviorContent.setStringAttribute('requiredBehavior', '');
   };
   return fakeBehavior;
@@ -129,7 +121,8 @@ export const declareFakeEffects = (extension: gdPlatformExtension) => {
     .addIncludeFile(
       'Extensions/Effects/fake-effect-with-various-parameters.js'
     );
-  const variousParametersEffectProperties = variousParametersEffect.getProperties();
+  const variousParametersEffectProperties =
+    variousParametersEffect.getProperties();
   variousParametersEffectProperties
     .getOrCreate('intensity')
     .setValue('1')
@@ -241,9 +234,8 @@ export const makeTestExtensions = (gd: libGDevelop) => {
     );
     extension.setShortDescription('Fake behavior with two properties');
     const fakeBehavior = new gd.BehaviorJsImplementation();
-    // $FlowFixMe[incompatible-type] - ignore Flow warning as we're creating a behavior
-    // $FlowFixMe[cannot-write]
-    fakeBehavior.updateProperty = function(
+    // ignore Flow warning as we're creating a behavior
+    fakeBehavior.updateProperty = function (
       behaviorContent,
       propertyName,
       newValue
@@ -259,9 +251,8 @@ export const makeTestExtensions = (gd: libGDevelop) => {
 
       return false;
     };
-    // $FlowFixMe[incompatible-type] - ignore Flow warning as we're creating a behavior
-    // $FlowFixMe[cannot-write]
-    fakeBehavior.getProperties = function(behaviorContent) {
+    // ignore Flow warning as we're creating a behavior
+    fakeBehavior.getProperties = function (behaviorContent) {
       var behaviorProperties = new gd.MapStringPropertyDescriptor();
 
       behaviorProperties
@@ -278,9 +269,8 @@ export const makeTestExtensions = (gd: libGDevelop) => {
 
       return behaviorProperties;
     };
-    // $FlowFixMe[incompatible-type] - ignore Flow warning as we're creating a behavior
-    // $FlowFixMe[cannot-write]
-    fakeBehavior.initializeContent = function(behaviorContent) {
+    // ignore Flow warning as we're creating a behavior
+    fakeBehavior.initializeContent = function (behaviorContent) {
       behaviorContent.setStringAttribute('property1', 'Initial value 1');
       behaviorContent.setBoolAttribute('property2', true);
     };
@@ -293,7 +283,7 @@ export const makeTestExtensions = (gd: libGDevelop) => {
       '',
       'res/functions/extension_black.svg',
       'FakeBehavior', // Class name is the name, actually unused
-      fakeBehavior,
+      fakeBehavior as unknown as gdBehavior,
       new gd.BehaviorsSharedData()
     );
     behavior
@@ -328,24 +318,21 @@ export const makeTestExtensions = (gd: libGDevelop) => {
       'MIT'
     );
     const fakeBehavior = new gd.BehaviorJsImplementation();
-    // $FlowFixMe[incompatible-type] - ignore Flow warning as we're creating a behavior
-    // $FlowFixMe[cannot-write]
-    fakeBehavior.updateProperty = function(
+    // ignore Flow warning as we're creating a behavior
+    fakeBehavior.updateProperty = function (
       behaviorContent,
       propertyName,
       newValue
     ) {
       return false;
     };
-    // $FlowFixMe[incompatible-type] - ignore Flow warning as we're creating a behavior
-    // $FlowFixMe[cannot-write]
-    fakeBehavior.getProperties = function(behaviorContent) {
+    // ignore Flow warning as we're creating a behavior
+    fakeBehavior.getProperties = function (behaviorContent) {
       var behaviorProperties = new gd.MapStringPropertyDescriptor();
       return behaviorProperties;
     };
-    // $FlowFixMe[incompatible-type] - ignore Flow warning as we're creating a behavior
-    // $FlowFixMe[cannot-write]
-    fakeBehavior.initializeContent = function(behaviorContent) {};
+    // ignore Flow warning as we're creating a behavior
+    fakeBehavior.initializeContent = function (behaviorContent) {};
 
     extension
       .addBehavior(
@@ -356,7 +343,7 @@ export const makeTestExtensions = (gd: libGDevelop) => {
         '',
         'res/functions/extension_black.svg',
         'FakeTextBehavior', // Class name is the name, actually unused
-        fakeBehavior,
+        fakeBehavior as unknown as gdBehavior,
         new gd.BehaviorsSharedData()
       )
       .setObjectType('TextObject::Text');
@@ -375,15 +362,10 @@ export const makeTestExtensions = (gd: libGDevelop) => {
     );
     const fakeObject = new gd.ObjectJsImplementation();
 
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[cannot-write]
-    fakeObject.updateProperty = function(propertyName, newValue) {
+    fakeObject.updateProperty = function (propertyName, newValue) {
       return false;
     };
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[missing-this-annot]
-    // $FlowFixMe[cannot-write]
-    fakeObject.getProperties = function() {
+    fakeObject.getProperties = function () {
       const objectProperties = new gd.MapStringPropertyDescriptor();
       const objectContent = this.content;
 
@@ -395,24 +377,18 @@ export const makeTestExtensions = (gd: libGDevelop) => {
 
       return objectProperties;
     };
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[prop-missing]
     fakeObject.content = {
       text: 'Some text.',
     };
 
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[cannot-write]
-    fakeObject.updateInitialInstanceProperty = function(
+    fakeObject.updateInitialInstanceProperty = function (
       instance,
       propertyName,
       newValue
     ) {
       return false;
     };
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[cannot-write]
-    fakeObject.getInitialInstanceProperties = function(instance) {
+    fakeObject.getInitialInstanceProperties = function (instance) {
       var instanceProperties = new gd.MapStringPropertyDescriptor();
       return instanceProperties;
     };
@@ -456,19 +432,19 @@ export const makeTestExtensions = (gd: libGDevelop) => {
       .addInstructionOrExpressionGroupMetadata('3D')
       .setIcon('res/conditions/3d_box.svg');
     const Cube3DObject = new gd.ObjectJsImplementation();
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[cannot-write]
-    Cube3DObject.getProperties = function(objectContent) {
+    (Cube3DObject as unknown as Record<string, any>).getProperties = function (
+      objectContent: any
+    ) {
       const objectProperties = new gd.MapStringPropertyDescriptor();
       return objectProperties;
     };
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[cannot-write]
-    Cube3DObject.getInitialInstanceProperties = function(
-      content,
-      instance,
-      project,
-      layout
+    (
+      Cube3DObject as unknown as Record<string, any>
+    ).getInitialInstanceProperties = function (
+      content: any,
+      instance: any,
+      project: any,
+      layout: any
     ) {
       const instanceProperties = new gd.MapStringPropertyDescriptor();
       return instanceProperties;
@@ -496,24 +472,18 @@ export const makeTestExtensions = (gd: libGDevelop) => {
         '',
         'res/conditions/3d_box.svg',
         'Base3DBehavior', // Class name is the name, actually unused
-        makeFakeBehaviorWithoutProperty(gd),
+        makeFakeBehaviorWithoutProperty(gd) as unknown as gdBehavior,
         new gd.BehaviorsSharedData()
       )
       .setHidden();
 
     const Model3DObject = new gd.ObjectJsImplementation();
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[cannot-write]
-    // $FlowFixMe[missing-this-annot]
-    Model3DObject.updateProperty = function(propertyName, newValue) {
+    Model3DObject.updateProperty = function (propertyName, newValue) {
       if (propertyName !== 'modelResourceName') return false;
       this.content.modelResourceName = newValue;
       return true;
     };
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[cannot-write]
-    // $FlowFixMe[missing-this-annot]
-    Model3DObject.getProperties = function() {
+    Model3DObject.getProperties = function () {
       const objectProperties = new gd.MapStringPropertyDescriptor();
       objectProperties
         .getOrCreate('modelResourceName')
@@ -522,18 +492,16 @@ export const makeTestExtensions = (gd: libGDevelop) => {
         .setLabel('3D model');
       return objectProperties;
     };
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[prop-missing]
     Model3DObject.content = {
       modelResourceName: '',
     };
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[cannot-write]
-    Model3DObject.getInitialInstanceProperties = function(
-      content,
-      instance,
-      project,
-      layout
+    (
+      Model3DObject as unknown as Record<string, any>
+    ).getInitialInstanceProperties = function (
+      content: any,
+      instance: any,
+      project: any,
+      layout: any
     ) {
       const instanceProperties = new gd.MapStringPropertyDescriptor();
       return instanceProperties;
@@ -577,7 +545,7 @@ export const makeTestExtensions = (gd: libGDevelop) => {
           gd,
           'FakeScene3D::Base3DBehavior',
           '3D capability'
-        ),
+        ) as unknown as gdBehavior,
         new gd.BehaviorsSharedData()
       )
       // Like the real physics engines: not offered on the children of a
@@ -607,7 +575,7 @@ export const makeTestExtensions = (gd: libGDevelop) => {
         gd,
         'AnimatableCapability::AnimatableBehavior',
         'Animatable capability'
-      ),
+      ) as unknown as gdBehavior,
       new gd.BehaviorsSharedData()
     );
     platform.addNewExtension(extension);
@@ -629,22 +597,18 @@ export const makeTestExtensions = (gd: libGDevelop) => {
       .setIcon('JsPlatform/Extensions/text_input.svg');
 
     const textInputObject = new gd.ObjectJsImplementation();
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[cannot-write]
-    textInputObject.getProperties = function() {
+    textInputObject.getProperties = function () {
       const objectProperties = new gd.MapStringPropertyDescriptor();
       return objectProperties;
     };
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[prop-missing]
     textInputObject.content = {};
 
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[cannot-write]
-    textInputObject.getInitialInstanceProperties = function(
-      instance,
-      project,
-      layout
+    (
+      textInputObject as unknown as Record<string, any>
+    ).getInitialInstanceProperties = function (
+      instance: any,
+      project: any,
+      layout: any
     ) {
       const instanceProperties = new gd.MapStringPropertyDescriptor();
 
@@ -663,9 +627,7 @@ export const makeTestExtensions = (gd: libGDevelop) => {
       return instanceProperties;
     };
 
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[cannot-write]
-    textInputObject.updateInitialInstanceProperty = function(
+    textInputObject.updateInitialInstanceProperty = function (
       instance,
       propertyName,
       newValue
@@ -706,14 +668,10 @@ export const makeTestExtensions = (gd: libGDevelop) => {
       'MIT'
     );
     const simpleTileMapObject = new gd.ObjectJsImplementation();
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[cannot-write]
-    simpleTileMapObject.getProperties = function() {
+    simpleTileMapObject.getProperties = function () {
       const objectProperties = new gd.MapStringPropertyDescriptor();
       return objectProperties;
     };
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[prop-missing]
     simpleTileMapObject.content = {
       atlasImage: '',
       rowCount: 1,
@@ -721,9 +679,7 @@ export const makeTestExtensions = (gd: libGDevelop) => {
       tileSize: 8,
       tilesWithHitBox: '',
     };
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[cannot-write]
-    simpleTileMapObject.getInitialInstanceProperties = function(instance) {
+    simpleTileMapObject.getInitialInstanceProperties = function (instance) {
       const instanceProperties = new gd.MapStringPropertyDescriptor();
       instanceProperties
         .getOrCreate('tilemap')
@@ -733,9 +689,7 @@ export const makeTestExtensions = (gd: libGDevelop) => {
         .setHidden(true);
       return instanceProperties;
     };
-    // $FlowFixMe[incompatible-type]
-    // $FlowFixMe[cannot-write]
-    simpleTileMapObject.updateInitialInstanceProperty = function(
+    simpleTileMapObject.updateInitialInstanceProperty = function (
       instance,
       propertyName,
       newValue

@@ -1,9 +1,9 @@
-// @flow
 import {
   type Usages,
   type Subscription,
   type SubscriptionPlanPricingSystem,
   type Limits,
+  type UserEarningsBalance,
 } from '../../Utils/GDevelopServices/Usage';
 import { User as FirebaseUser } from 'firebase/auth';
 import { type Profile } from '../../Utils/GDevelopServices/Authentication';
@@ -52,38 +52,37 @@ import {
   type TextBasedCourseChapter,
 } from '../../Utils/GDevelopServices/Asset';
 
-// $FlowFixMe[value-as-type]
 export const indieFirebaseUser: FirebaseUser = {
   uid: 'indie-user',
   providerId: 'fake-provider.com',
   email: 'indie-user@example.com',
   emailVerified: false,
-};
+} as unknown as FirebaseUser;
 
-// $FlowFixMe[value-as-type]
 export const indieVerifiedFirebaseUser: FirebaseUser = {
   uid: 'indie-user',
   providerId: 'fake-provider.com',
   email: 'indie-user@example.com',
   emailVerified: true,
-};
+} as unknown as FirebaseUser;
 
-export const cloudProjectsForIndieUser: Array<CloudProjectWithUserAccessInfo> = [
-  {
-    id: 'af7a8282-746d-4d3a-8cb8-bb8cd9372143',
-    name: 'Worms 2D',
-    createdAt: '2022-02-05T00:36:53.972Z',
-    updatedAt: '2022-02-07T00:36:53.972Z',
-    lastModifiedAt: '2022-02-07T00:36:53.972Z',
-  },
-  {
-    id: 'fb4d878a-1935-4916-b681-f9235475d35c',
-    name: 'Crash Bandicoot',
-    createdAt: '2020-01-24T00:36:53.972Z',
-    updatedAt: '2022-02-07T00:36:53.972Z',
-    lastModifiedAt: '2020-02-06T00:36:53.972Z',
-  },
-];
+export const cloudProjectsForIndieUser: Array<CloudProjectWithUserAccessInfo> =
+  [
+    {
+      id: 'af7a8282-746d-4d3a-8cb8-bb8cd9372143',
+      name: 'Worms 2D',
+      createdAt: '2022-02-05T00:36:53.972Z',
+      updatedAt: '2022-02-07T00:36:53.972Z',
+      lastModifiedAt: '2022-02-07T00:36:53.972Z',
+    },
+    {
+      id: 'fb4d878a-1935-4916-b681-f9235475d35c',
+      name: 'Crash Bandicoot',
+      createdAt: '2020-01-24T00:36:53.972Z',
+      updatedAt: '2022-02-07T00:36:53.972Z',
+      lastModifiedAt: '2020-02-06T00:36:53.972Z',
+    },
+  ];
 
 export const tenCloudProjects: Array<CloudProjectWithUserAccessInfo> = [
   {
@@ -187,14 +186,14 @@ export const indieUserProfile: Profile = {
   },
 };
 
-export const userEarningsBalance = {
+export const userEarningsBalance: UserEarningsBalance = {
   userId: 'userId',
   amountInMilliUSDs: 6730,
   amountInCredits: 890,
   minAmountToCashoutInMilliUSDs: 60000,
   updatedAt: 1515084391000,
 };
-export const userEarningsBalanceEmpty = {
+export const userEarningsBalanceEmpty: UserEarningsBalance = {
   userId: 'userId',
   amountInMilliUSDs: 0,
   amountInCredits: 0,
@@ -607,7 +606,6 @@ export const limitsForNoSubscriptionUser: Limits = {
     userBalance: {
       amount: 0,
     },
-    // $FlowFixMe[incompatible-type]
     prices,
     purchasableQuantities: {},
   },
@@ -671,7 +669,6 @@ export const limitsForSilverUser: Limits = {
     userBalance: {
       amount: 0,
     },
-    // $FlowFixMe[incompatible-type]
     prices,
     purchasableQuantities: {},
   },
@@ -735,7 +732,6 @@ export const limitsForGoldUser: Limits = {
     userBalance: {
       amount: 0,
     },
-    // $FlowFixMe[incompatible-type]
     prices,
     purchasableQuantities: {},
   },
@@ -811,7 +807,6 @@ export const limitsForTeacherUser: Limits = {
     userBalance: {
       amount: 0,
     },
-    // $FlowFixMe[incompatible-type]
     prices,
     purchasableQuantities: {},
   },
@@ -884,7 +879,6 @@ export const limitsForStudentUser: Limits = {
     userBalance: {
       amount: 0,
     },
-    // $FlowFixMe[incompatible-type]
     prices,
     purchasableQuantities: {},
   },
@@ -948,7 +942,6 @@ export const limitsForStartupUser: Limits = {
     userBalance: {
       amount: 0,
     },
-    // $FlowFixMe[incompatible-type]
     prices,
     purchasableQuantities: {},
   },
@@ -1007,7 +1000,6 @@ export const limitsReached: Limits = {
     userBalance: {
       amount: 0,
     },
-    // $FlowFixMe[incompatible-type]
     prices,
     purchasableQuantities: {},
   },
@@ -1066,7 +1058,6 @@ export const limitsForNoSubscriptionUserWithCredits: Limits = {
     userBalance: {
       amount: 1000,
     },
-    // $FlowFixMe[incompatible-type]
     prices,
     purchasableQuantities: {},
   },
@@ -1208,12 +1199,13 @@ export const fakeSilverAuthenticatedUser: AuthenticatedUser = {
   subscriptionPricingSystem: silverMonthlyPricingSystem,
   limits: limitsForSilverUser,
 };
-export const fakeSilverButCancelAtPeriodEndAuthenticatedUser: AuthenticatedUser = {
-  ...defaultAuthenticatedUserWithNoSubscription,
-  subscription: silverSubscriptionButCancelAtPeriodEnd,
-  subscriptionPricingSystem: silverMonthlyPricingSystem,
-  limits: limitsForSilverUser,
-};
+export const fakeSilverButCancelAtPeriodEndAuthenticatedUser: AuthenticatedUser =
+  {
+    ...defaultAuthenticatedUserWithNoSubscription,
+    subscription: silverSubscriptionButCancelAtPeriodEnd,
+    subscriptionPricingSystem: silverMonthlyPricingSystem,
+    limits: limitsForSilverUser,
+  };
 export const fakeSilverAuthenticatedUserWithCloudProjects: AuthenticatedUser = {
   ...defaultAuthenticatedUserWithNoSubscription,
   subscription: subscriptionForSilverUser,
@@ -1265,17 +1257,19 @@ export const fakeAuthenticatedUserWithNoSubscription: AuthenticatedUser = {
   limits: limitsForNoSubscriptionUser,
 };
 
-export const fakeAuthenticatedUserWithValidSilverRedemptionCode: AuthenticatedUser = {
-  ...fakeAuthenticatedUserWithNoSubscription,
-  subscription: silverSubscriptionWithRedemptionCode,
-  limits: limitsForSilverUser,
-};
+export const fakeAuthenticatedUserWithValidSilverRedemptionCode: AuthenticatedUser =
+  {
+    ...fakeAuthenticatedUserWithNoSubscription,
+    subscription: silverSubscriptionWithRedemptionCode,
+    limits: limitsForSilverUser,
+  };
 
-export const fakeAuthenticatedUserWithExpiredSilverRedemptionCode: AuthenticatedUser = {
-  ...fakeAuthenticatedUserWithNoSubscription,
-  subscription: silverSubscriptionWithExpiredRedemptionCode,
-  limits: limitsForSilverUser,
-};
+export const fakeAuthenticatedUserWithExpiredSilverRedemptionCode: AuthenticatedUser =
+  {
+    ...fakeAuthenticatedUserWithNoSubscription,
+    subscription: silverSubscriptionWithExpiredRedemptionCode,
+    limits: limitsForSilverUser,
+  };
 
 export const fakeAuthenticatedUserWithLegacyIndieSubscription = {
   ...fakeSilverAuthenticatedUser,
@@ -1291,12 +1285,13 @@ export const fakeAuthenticatedUserWithLegacyProSubscription = {
   limits: limitsForGoldUser,
 };
 
-export const fakeAuthenticatedUserWithNoSubscriptionAndTooManyCloudProjects: AuthenticatedUser = {
-  ...fakeSilverAuthenticatedUser,
-  cloudProjects: tenCloudProjects,
-  subscription: noSubscription,
-  limits: limitsReached,
-};
+export const fakeAuthenticatedUserWithNoSubscriptionAndTooManyCloudProjects: AuthenticatedUser =
+  {
+    ...fakeSilverAuthenticatedUser,
+    cloudProjects: tenCloudProjects,
+    subscription: noSubscription,
+    limits: limitsReached,
+  };
 
 export const fakeAuthenticatedUserWithEmailVerified: AuthenticatedUser = {
   ...defaultAuthenticatedUserWithNoSubscription,
@@ -1341,25 +1336,27 @@ export const fakeAuthenticatedUserWithGitHubStarBadge: AuthenticatedUser = {
   ],
 };
 
-export const fakeAuthenticatedUserWithNoSubscriptionAndCredits: AuthenticatedUser = {
-  ...fakeSilverAuthenticatedUser,
-  subscription: noSubscription,
-  limits: limitsForNoSubscriptionUserWithCredits,
-};
+export const fakeAuthenticatedUserWithNoSubscriptionAndCredits: AuthenticatedUser =
+  {
+    ...fakeSilverAuthenticatedUser,
+    subscription: noSubscription,
+    limits: limitsForNoSubscriptionUserWithCredits,
+  };
 
-export const fakeAuthenticatedUserWithQuestionsQuotaReached: AuthenticatedUser = {
-  ...fakeAuthenticatedUserWithNoSubscription,
-  limits: {
-    ...limitsForNoSubscriptionUser,
-    quotas: {
-      ...limitsForNoSubscriptionUser.quotas,
-      'ask-question': {
-        ...limitsForNoSubscriptionUser.quotas['ask-question'],
-        limitReached: true,
+export const fakeAuthenticatedUserWithQuestionsQuotaReached: AuthenticatedUser =
+  {
+    ...fakeAuthenticatedUserWithNoSubscription,
+    limits: {
+      ...limitsForNoSubscriptionUser,
+      quotas: {
+        ...limitsForNoSubscriptionUser.quotas,
+        'ask-question': {
+          ...limitsForNoSubscriptionUser.quotas['ask-question'],
+          limitReached: true,
+        },
       },
     },
-  },
-};
+  };
 
 export const fakeNotAuthenticatedUser: AuthenticatedUser = {
   ...defaultAuthenticatedUserWithNoSubscription,
@@ -1375,31 +1372,28 @@ export const fakeNotAuthenticatedUser: AuthenticatedUser = {
   limits: null,
 };
 
-// $FlowFixMe[incompatible-type]
 export const release: Release = {
   name: '5.0.0-beta62',
   publishedAt: '2019-01-14T23:32:41Z',
   url: 'https://github.com/4ian/GDevelop/releases/tag/v5.0.0-beta62',
   description:
     '> 💌Before listing the new features/improvements/bug fixes, a huge thanks to the contributors that allowed this new version to be what it is: @blurymind, @Bouh, @Lizard-13, @Wend1go, @zatsme 👏 GDevelop is growing thanks to you!\r\n\r\n## ✨New features\r\n\r\n* **Functions** are now "out of alpha testing" and always shown in the project manager. Functions are a powerful way to create new conditions, actions and expression using events. This allow to make your events and the logic of your game easier to understand and create. This also allow you to share common functions between games and create advanced features that are easy to use. [Learn more about functions on the wiki](https://wiki.gdevelop.io/gdevelop5/events/functions)\r\n* A brand new Physics engine: **Physics Engine 2.0**. (Thanks @Lizard-13 for creating it, testing it, improving it and creating examples and tests, and @zatsme for various update and examples!). While still based on the same internal physics engine, it is much more complete and powerful than the previous one:\r\n  * Support for a lot of joints (revolute, gear, mouse, prismatic, rope, pulley, wheel and more!)\r\n  * Support more options for bodies\r\n  * Support more shape and even custom polygons for objects.\r\n  * Look at the updated and **new examples** to learn how to use it and to see what\'s possible!\r\n\r\n  > Your existing games will continue to work with the old physics engine. You can still continue to use it. For new games, prefer to use the new Physics Engine 2.0. In your existing game, you can also replace *the behavior of all of your objects* by the new behavior, and replace *all the conditions and actions* by the conditions and actions from the new engine.\r\n* New **Screenshot** action, to take in-game screenshot for games running on Windows/macOS/Linux. (thanks @Wend1go!)\r\n  * This also come with new expressions to access to the **file system paths**, useful to save the screenshots in a folder of the user.\r\n\r\n## 💝 Improvements\r\n\r\n* Display missing files in resource editor as red (thanks @blurymind!)\r\n* Add option to set scale mode ("sampling") of the game to nearest (for "pixel perfect" or 8bit games) in the game properties.\r\n* Usability: autoclose project manager when opening an editor (thanks @blurymind!)\r\n* Add button to choose a new file for a resource in the resource editor (thanks @blurymind!)\r\n* New "Pixel perfect platform engine" example.\r\n* Usability: add shortcut to open Project Manager and focus search field when opening it.\r\n* Updated "Isometric Game" starter game to have better collision handling and mobile support.\r\n* Add GetAngle/GetXVelocity and GetYVelocity expressions to top-down movement behavior.\r\n* Extensions written in JavaScript can now be used to create new type of objects.\r\n* Usability: icons in the list of instructions or expressions are now displayed.\r\n\r\n## 🐛 Bug fixes \r\n\r\n* Update **Facebook Instant Games export** to have the now required bundle file (fbapp-config.json).\r\n* Fix the sentence in the events sheet of a Facebook Instant Games action. (thanks @Bouh!)\r\n* Fix descriptions of Storage actions to make clear that no "real" files are written.\r\n* Fix Left Shift key\r\n* Fix middle mouse button (thanks @Bouh!)\r\n* Fix visual artifacts when rendering rescaled games\r\n* Fix platform engine 1-pixel offset bug\r\n* Fix initial opacity undefined for text objects (thanks @Lizard-13)\r\n* Fix the condition checking if the cursor is on an object (thanks @Lizard-13)\r\n* Avoid crash of the debugger with Particle Emitters\r\n* Add explicit "OK" button in message box to fix issue on Linux\r\n* Usability: hide object drop-down list after an object is selected\r\n* Fix login dialog not showing on top of export dialog',
-};
+} as unknown as Release;
 
-// $FlowFixMe[incompatible-type]
 export const releaseWithBreakingChange: Release = {
   name: '5.0.0-beta60',
   publishedAt: '2019-01-07T23:32:41Z',
   url: 'https://github.com/4ian/GDevelop/releases/tag/v5.0.0-beta60',
   description:
     '> ⚠️ Blabla, beware there is a breaking change!!!\r\n\r\n## ✨New features\r\n\r\n* **Functions** are now "out of alpha testing" and always shown in the project manager. Functions are a powerful way to create new conditions, actions and expression using events. This allow to make your events and the logic of your game easier to understand and create. This also allow you to share common functions between games and create advanced features that are easy to use. [Learn more about functions on the wiki](https://wiki.gdevelop.io/gdevelop5/events/functions)\r\n* A brand new Physics engine: **Physics Engine 2.0**. (Thanks @Lizard-13 for creating it, testing it, improving it and creating examples and tests, and @zatsme for various update and examples!). While still based on the same internal physics engine, it is much more complete and powerful than the previous one:\r\n  * Support for a lot of joints (revolute, gear, mouse, prismatic, rope, pulley, wheel and more!)\r\n  * Support more options for bodies\r\n  * Support more shape and even custom polygons for objects.\r\n  * Look at the updated and **new examples** to learn how to use it and to see what\'s possible!\r\n\r\n  > Your existing games will continue to work with the old physics engine. You can still continue to use it. For new games, prefer to use the new Physics Engine 2.0. In your existing game, you can also replace *the behavior of all of your objects* by the new behavior, and replace *all the conditions and actions* by the conditions and actions from the new engine.\r\n* New **Screenshot** action, to take in-game screenshot for games running on Windows/macOS/Linux. (thanks @Wend1go!)\r\n  * This also come with new expressions to access to the **file system paths**, useful to save the screenshots in a folder of the user.\r\n\r\n## 💝 Improvements\r\n\r\n* Display missing files in resource editor as red (thanks @blurymind!)\r\n* Add option to set scale mode ("sampling") of the game to nearest (for "pixel perfect" or 8bit games) in the game properties.\r\n* Usability: autoclose project manager when opening an editor (thanks @blurymind!)\r\n* Add button to choose a new file for a resource in the resource editor (thanks @blurymind!)\r\n* New "Pixel perfect platform engine" example.\r\n* Usability: add shortcut to open Project Manager and focus search field when opening it.\r\n* Updated "Isometric Game" starter game to have better collision handling and mobile support.\r\n* Add GetAngle/GetXVelocity and GetYVelocity expressions to top-down movement behavior.\r\n* Extensions written in JavaScript can now be used to create new type of objects.\r\n* Usability: icons in the list of instructions or expressions are now displayed.\r\n\r\n## 🐛 Bug fixes \r\n\r\n* Update **Facebook Instant Games export** to have the now required bundle file (fbapp-config.json).\r\n* Fix the sentence in the events sheet of a Facebook Instant Games action. (thanks @Bouh!)\r\n* Fix descriptions of Storage actions to make clear that no "real" files are written.\r\n* Fix Left Shift key\r\n* Fix middle mouse button (thanks @Bouh!)\r\n* Fix visual artifacts when rendering rescaled games\r\n* Fix platform engine 1-pixel offset bug\r\n* Fix initial opacity undefined for text objects (thanks @Lizard-13)\r\n* Fix the condition checking if the cursor is on an object (thanks @Lizard-13)\r\n* Avoid crash of the debugger with Particle Emitters\r\n* Add explicit "OK" button in message box to fix issue on Linux\r\n* Usability: hide object drop-down list after an object is selected\r\n* Fix login dialog not showing on top of export dialog',
-};
+} as unknown as Release;
 
-// $FlowFixMe[incompatible-type]
 export const releaseWithoutDescription: Release = {
   name: '5.0.0-beta60',
   publishedAt: '2019-01-07T23:32:41Z',
   url: 'https://github.com/4ian/GDevelop/releases/tag/v5.0.0-beta60',
   description: null,
-};
+} as unknown as Release;
 
 export const erroredCordovaBuild: Build = {
   id: 'errored-build-id',
@@ -1623,14 +1617,14 @@ export const fakeSkyboxAsset: Asset = {
         name: 'Skybox',
         doubleParameters: {},
         stringParameters: Object.fromEntries(
-          skyboxFaces.map(face => [
+          skyboxFaces.map((face) => [
             `${face.toLowerCase()}FaceResourceName`,
             `Sunny Day_${face}.png`,
           ])
         ),
         booleanParameters: {},
       },
-      resources: skyboxFaces.map(face => ({
+      resources: skyboxFaces.map((face) => ({
         name: `Sunny Day_${face}.png`,
         file: `https://asset-resources.gdevelop.io/public-resources/3D Skyboxes/${'a'.repeat(
           64
@@ -1732,8 +1726,7 @@ export const fakeAssetWithCustomObject: Asset = {
       },
       resources: [
         {
-          file:
-            'https://resources.gdevelop-app.com/assets/Custom objects/object_YellowButton_Hovered.png',
+          file: 'https://resources.gdevelop-app.com/assets/Custom objects/object_YellowButton_Hovered.png',
           kind: 'image',
           metadata: '',
           name: 'object_YellowButton_Hovered.png',
@@ -1745,8 +1738,7 @@ export const fakeAssetWithCustomObject: Asset = {
           },
         },
         {
-          file:
-            'https://resources.gdevelop-app.com/assets/Custom objects/object_YellowButton_Idle.png',
+          file: 'https://resources.gdevelop-app.com/assets/Custom objects/object_YellowButton_Idle.png',
           kind: 'image',
           metadata: '',
           name: 'object_YellowButton_Idle.png',
@@ -1758,8 +1750,7 @@ export const fakeAssetWithCustomObject: Asset = {
           },
         },
         {
-          file:
-            'https://resources.gdevelop-app.com/assets/Custom objects/object_YellowButton_Pressed.png',
+          file: 'https://resources.gdevelop-app.com/assets/Custom objects/object_YellowButton_Pressed.png',
           kind: 'image',
           metadata: '',
           name: 'object_YellowButton_Pressed.png',
@@ -1973,10 +1964,11 @@ export const fireBulletExtensionHeader: ExtensionHeader = {
   iconUrl: 'https://resources.gdevelop-app.com/assets/Icons/repeat.svg',
 };
 
-export const uncompatibleFireBulletExtensionShortHeader: ExtensionShortHeader = {
-  ...fireBulletExtensionShortHeader,
-  gdevelopVersion: '2000.0.0',
-};
+export const uncompatibleFireBulletExtensionShortHeader: ExtensionShortHeader =
+  {
+    ...fireBulletExtensionShortHeader,
+    gdevelopVersion: '2000.0.0',
+  };
 
 export const alreadyInstalledExtensionShortHeader: ExtensionShortHeader = {
   ...fireBulletExtensionShortHeader,
@@ -1990,11 +1982,12 @@ export const newerVersionExtensionShortHeader: ExtensionShortHeader = {
   version: '1.2.4',
 };
 
-export const alreadyInstalledCommunityExtensionShortHeader: ExtensionShortHeader = {
-  ...fireBulletExtensionShortHeader,
-  tier: 'experimental',
-  name: 'SomeAlreadyInstalledExtension',
-};
+export const alreadyInstalledCommunityExtensionShortHeader: ExtensionShortHeader =
+  {
+    ...fireBulletExtensionShortHeader,
+    tier: 'experimental',
+    name: 'SomeAlreadyInstalledExtension',
+  };
 
 export const flashExtensionShortHeader: ExtensionShortHeader = {
   tier: 'reviewed',
@@ -2083,8 +2076,7 @@ export const communityTierExtensionShortHeader: ExtensionShortHeader = {
   fullName: 'Fake experimental extension',
   name: 'FakeCommunityExtension',
   version: '0.0.2',
-  url:
-    'https://resources.gdevelop-app.com/extensions/FakeCommunityExtension.json',
+  url: 'https://resources.gdevelop-app.com/extensions/FakeCommunityExtension.json',
   headerUrl:
     'https://resources.gdevelop-app.com/extensions/FakeCommunityExtension-header.json',
   tags: ['fire', 'bullets', 'spawn', 'firerate'],
@@ -2144,7 +2136,6 @@ export const game2: Game = {
 };
 
 export const getPublicGameFromGame = (game: Game): PublicGame => {
-  // $FlowFixMe[incompatible-type]
   const publicGame: PublicGame = {
     ...game,
     donateLink: null,
@@ -2184,25 +2175,27 @@ export const gameWithDisplayAdsOnGamePageDisabled: Game = {
   displayAdsOnGamePage: false,
 };
 
-export const fakeFileMetadataAndStorageProviderNameForLocalProject: FileMetadataAndStorageProviderName = {
-  fileMetadata: {
-    fileIdentifier: 'localProject',
-    name: 'Local project',
-    lastModifiedDate: Date.now(),
-    gameId: 'localProject',
-  },
-  storageProviderName: 'LocalFile',
-};
+export const fakeFileMetadataAndStorageProviderNameForLocalProject: FileMetadataAndStorageProviderName =
+  {
+    fileMetadata: {
+      fileIdentifier: 'localProject',
+      name: 'Local project',
+      lastModifiedDate: Date.now(),
+      gameId: 'localProject',
+    },
+    storageProviderName: 'LocalFile',
+  };
 
-export const fakeFileMetadataAndStorageProviderNameForCloudProject: FileMetadataAndStorageProviderName = {
-  fileMetadata: {
-    fileIdentifier: 'cloudProject',
-    name: 'Cloud project',
-    lastModifiedDate: Date.now(),
-    gameId: 'cloudProject',
-  },
-  storageProviderName: 'Cloud',
-};
+export const fakeFileMetadataAndStorageProviderNameForCloudProject: FileMetadataAndStorageProviderName =
+  {
+    fileMetadata: {
+      fileIdentifier: 'cloudProject',
+      name: 'Cloud project',
+      lastModifiedDate: Date.now(),
+      gameId: 'cloudProject',
+    },
+    storageProviderName: 'Cloud',
+  };
 
 export const allGameCategoriesMocked = [
   {
@@ -2389,33 +2382,17 @@ const deleteDurationMetrics = (
   return gameMetrics;
 };
 
-// $FlowFixMe[incompatible-type]
-export const gameRollingMetricsFor364Days: GameMetrics[] = generateGameRollingMetricsFor364Days();
-export const gameRollingMetricsWithUndefinedDurationMetrics: GameMetrics[] = deleteDurationMetrics(
-  // $FlowFixMe[incompatible-type]
-  generateGameRollingMetricsFor364Days(),
-  17
-);
-export const gameRollingMetricsWithOnly19Days: GameMetrics[] = gameRollingMetricsFor364Days.slice(
-  0,
-  19
-);
-export const gameRollingMetricsWithOnly1Day: GameMetrics[] = gameRollingMetricsFor364Days.slice(
-  0,
-  1
-);
+export const gameRollingMetricsFor364Days: GameMetrics[] =
+  generateGameRollingMetricsFor364Days();
+export const gameRollingMetricsWithUndefinedDurationMetrics: GameMetrics[] =
+  deleteDurationMetrics(generateGameRollingMetricsFor364Days(), 17);
+export const gameRollingMetricsWithOnly19Days: GameMetrics[] =
+  gameRollingMetricsFor364Days.slice(0, 19);
+export const gameRollingMetricsWithOnly1Day: GameMetrics[] =
+  gameRollingMetricsFor364Days.slice(0, 1);
 export const gameRollingMetricsWithHoles: GameMetrics[] = [
-  4,
-  12,
-  13,
-  25,
-  33,
-  107,
-  108,
-  109,
-  110,
-  230,
-].map(index => gameRollingMetricsFor364Days[index]);
+  4, 12, 13, 25, 33, 107, 108, 109, 110, 230,
+].map((index) => gameRollingMetricsFor364Days[index]);
 export const gameRollingMetricsWithoutPlayersAndRetention1: GameMetrics[] = [
   {
     date: '2020-10-01',
@@ -2452,8 +2429,7 @@ export const showcasedGame1: ShowcasedGame = {
   ],
   links: [
     {
-      url:
-        'https://itunes.apple.com/us/app/lil-bubs-hello-earth/id1123383033?mt=8',
+      url: 'https://itunes.apple.com/us/app/lil-bubs-hello-earth/id1123383033?mt=8',
       type: 'app-store',
     },
     {
@@ -2526,35 +2502,36 @@ export const geometryMonsterExampleShortHeader: ExampleShortHeader = {
   codeSizeLevel: 'small',
 };
 
-export const fakePrivateGameTemplateListingData: PrivateGameTemplateListingData = {
-  name: 'Fake private game template',
-  description: 'This is a fake private game template',
-  id: 'fake-id',
-  sellerId: 'fake-seller-id',
-  isSellerGDevelop: false,
-  productType: 'GAME_TEMPLATE',
-  listing: 'GAME_TEMPLATE',
-  categories: ['adventure'],
-  updatedAt: '2020-01-01',
-  createdAt: '2020-01-01',
-  thumbnailUrls: [
-    'https://resources.gdevelop-app.com/staging/private-assets/French Food/thumbnail1.png',
-  ],
-  prices: [
-    {
-      name: 'commercial_USD',
-      value: 499,
-      currency: 'USD',
-      usageType: 'commercial',
-      stripePriceId: 'price_1JHhXYZfakeStripePriceId',
-    },
-  ],
-  creditPrices: [],
-  appStoreProductId: 'fake-app-store-product-id',
-  includedListableProductIds: [],
-  sellerStripeAccountId: 'fake-seller-stripe-account-id',
-  stripeProductId: 'fake-stripe-product-id',
-};
+export const fakePrivateGameTemplateListingData: PrivateGameTemplateListingData =
+  {
+    name: 'Fake private game template',
+    description: 'This is a fake private game template',
+    id: 'fake-id',
+    sellerId: 'fake-seller-id',
+    isSellerGDevelop: false,
+    productType: 'GAME_TEMPLATE',
+    listing: 'GAME_TEMPLATE',
+    categories: ['adventure'],
+    updatedAt: '2020-01-01',
+    createdAt: '2020-01-01',
+    thumbnailUrls: [
+      'https://resources.gdevelop-app.com/staging/private-assets/French Food/thumbnail1.png',
+    ],
+    prices: [
+      {
+        name: 'commercial_USD',
+        value: 499,
+        currency: 'USD',
+        usageType: 'commercial',
+        stripePriceId: 'price_1JHhXYZfakeStripePriceId',
+      },
+    ],
+    creditPrices: [],
+    appStoreProductId: 'fake-app-store-product-id',
+    includedListableProductIds: [],
+    sellerStripeAccountId: 'fake-seller-stripe-account-id',
+    stripeProductId: 'fake-stripe-product-id',
+  };
 
 export const fakeAssetPacks: PublicAssetPacks = {
   starterPacks: [
@@ -2825,8 +2802,7 @@ export const fakeBundle: Bundle = {
   longDescription:
     'This is the best bundle about french food and sounds. It includes everything you need to create a French-themed game.',
   longDescriptionByLocale: {
-    en:
-      'This is the best bundle about french food and sounds. It includes everything you need to create a French-themed game.',
+    en: 'This is the best bundle about french food and sounds. It includes everything you need to create a French-themed game.',
   },
   includedProducts: [
     {
@@ -2853,8 +2829,7 @@ export const commentUnprocessed: Comment = {
   type: 'FEEDBACK',
   gameId: 'complete-game-id',
   buildId: 'complete-build-id',
-  text:
-    "This is my honest feedback: I think the art is cute. Specially on the screen when it jumps over the chickens. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. ",
+  text: "This is my honest feedback: I think the art is cute. Specially on the screen when it jumps over the chickens. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. ",
   ratings: {
     version: 1,
     visuals: 2,
@@ -2907,8 +2882,7 @@ export const commentProcessed: Comment = {
   type: 'FEEDBACK',
   gameId: 'complete-game-id',
   buildId: 'complete-build-id',
-  text:
-    'It was a great experience playing this game, I really enjoyed myself. The music was great. Be careful with the difficulty though, it was too easy to win.',
+  text: 'It was a great experience playing this game, I really enjoyed myself. The music was great. Be careful with the difficulty though, it was too easy to win.',
   ratings: {
     version: 1,
     visuals: 2,
@@ -2934,8 +2908,7 @@ export const fakeAnnouncements: Announcement[] = [
       en: 'Some title',
     },
     markdownMessageByLocale: {
-      en:
-        'Something to announce which is really really cool [with a link](https://gdevelop.io) and *other* **markdown** ~~formatting~~!',
+      en: 'Something to announce which is really really cool [with a link](https://gdevelop.io) and *other* **markdown** ~~formatting~~!',
     },
   },
   {
@@ -2946,8 +2919,7 @@ export const fakeAnnouncements: Announcement[] = [
       en: 'Some title',
     },
     markdownMessageByLocale: {
-      en:
-        'Something nothing important but urgent to announce, with a button and [with a link](https://gdevelop.io) too.',
+      en: 'Something nothing important but urgent to announce, with a button and [with a link](https://gdevelop.io) too.',
     },
     buttonLabelByLocale: { en: 'View' },
     buttonUrl: 'https://gdevelop.io',
@@ -2973,8 +2945,7 @@ export const fakeAnnouncements: Announcement[] = [
       en: 'Some title',
     },
     markdownMessageByLocale: {
-      en:
-        'Something important but not urgent to announce, with a big image.\n\n![some image](https://raw.githubusercontent.com/4ian/GDevelop/master/newIDE/GDevelop%20banner.png)',
+      en: 'Something important but not urgent to announce, with a big image.\n\n![some image](https://raw.githubusercontent.com/4ian/GDevelop/master/newIDE/GDevelop%20banner.png)',
     },
     buttonLabelByLocale: { en: 'View' },
     buttonUrl: 'https://gdevelop.io',
@@ -2986,12 +2957,10 @@ export const fakeAnnouncements: Announcement[] = [
       en: '',
     },
     markdownMessageByLocale: {
-      en:
-        '[![GDevelop Mega pack](https://resources.gdevelop.io/announcements/GDevelops_Mega_Pack_Updated.png)](https://play.google.com/store/apps/details?id=io.gdevelop.ide)',
+      en: '[![GDevelop Mega pack](https://resources.gdevelop.io/announcements/GDevelops_Mega_Pack_Updated.png)](https://play.google.com/store/apps/details?id=io.gdevelop.ide)',
     },
     mobileMarkdownMessageByLocale: {
-      en:
-        '[![GDevelop Mega pack](https://resources.gdevelop.io/announcements/GDevelops_Mega_Pack_Mobile.jpg)](https://play.google.com/store/apps/details?id=io.gdevelop.ide)',
+      en: '[![GDevelop Mega pack](https://resources.gdevelop.io/announcements/GDevelops_Mega_Pack_Mobile.jpg)](https://play.google.com/store/apps/details?id=io.gdevelop.ide)',
     },
   },
 ];
@@ -3021,8 +2990,7 @@ export const fakeGameTemplateLicenses = [
       en: 'Unlimited commercial use',
     },
     descriptionByLocale: {
-      en:
-        'Use this game template for unlimited commercial games, on an unlimited number of projects and platforms.',
+      en: 'Use this game template for unlimited commercial games, on an unlimited number of projects and platforms.',
     },
   },
 ];
@@ -3052,8 +3020,7 @@ export const fakeAssetPackLicenses = [
       en: 'Unlimited commercial use',
     },
     descriptionByLocale: {
-      en:
-        'Use these assets for unlimited commercial games, on an unlimited number of projects and platforms.',
+      en: 'Use these assets for unlimited commercial games, on an unlimited number of projects and platforms.',
     },
   },
 ];
@@ -3280,8 +3247,7 @@ export const basicFeaturingMarketingPlan = {
     },
   ],
   additionalSuccessMessageByLocale: {
-    en:
-      'Ensure that your game is public and you have configured a thumbnail for gd.games. This can take a few minutes for your game to be visible on the platform.',
+    en: 'Ensure that your game is public and you have configured a thumbnail for gd.games. This can take a few minutes for your game to be visible on the platform.',
     'fr-FR':
       'Assurez-vous que votre jeu est public et que vous avez configuré une miniature pour gd.games. Il peut falloir quelques minutes pour que votre jeu soit visible sur la plateforme.',
     'ar-SA':
@@ -3317,18 +3283,15 @@ export const videoBasedCourseChapter: VideoBasedCourseChapter = {
   tasks: [
     {
       title: 'Discover the different types of objects',
-      text:
-        'Complete the six tasks below by dragging the premade objects from the object list in to the scene’s default view window to match the image of the scene shown below.',
+      text: 'Complete the six tasks below by dragging the premade objects from the object list in to the scene’s default view window to match the image of the scene shown below.',
       imageUrls: [
         'https://public-resources.gdevelop.io/staging/course/images/6900ffbe-4a0e-4f1c-9ad8-b9aa495daf17.png',
       ],
     },
     {
       title: 'Create a background with a Tiled sprite',
-      text:
-        'Drag the **Tiled_Sprite** object into the game scene from the object list, and adjust its width to fill the entire default rectangular game window.\n\n',
-      hint:
-        '(A tiled sprite will repeat the image used in the object instead of stretching when it is scaled. It is also the only object that can be adjusted with an X/Y offset, making it ideal for scrolling backgrounds or repeating images in your game.)',
+      text: 'Drag the **Tiled_Sprite** object into the game scene from the object list, and adjust its width to fill the entire default rectangular game window.\n\n',
+      hint: '(A tiled sprite will repeat the image used in the object instead of stretching when it is scaled. It is also the only object that can be adjusted with an X/Y offset, making it ideal for scrolling backgrounds or repeating images in your game.)',
       answer: {
         imageUrls: [
           'https://public-resources.gdevelop.io/staging/course/images/40c07f00-8c66-4b6c-b092-fa4a8e00a3d6.png',
@@ -3337,10 +3300,8 @@ export const videoBasedCourseChapter: VideoBasedCourseChapter = {
     },
     {
       title: 'Change the animation of a Sprite',
-      text:
-        "Drag the **Sprite** object into the game scene from the object list, and in the properties panel, change the object's animation number to match the character in the image above.\n\n",
-      hint:
-        '(A sprite is the only object that supports multiple image frames for animations. These animations can be played, paused, or switched during gameplay. Each animation can be given a name, but are automatically given a number based on its position in the list (e.g., 0, 1, 2, 3, etc.).)',
+      text: "Drag the **Sprite** object into the game scene from the object list, and in the properties panel, change the object's animation number to match the character in the image above.\n\n",
+      hint: '(A sprite is the only object that supports multiple image frames for animations. These animations can be played, paused, or switched during gameplay. Each animation can be given a name, but are automatically given a number based on its position in the list (e.g., 0, 1, 2, 3, etc.).)',
       answer: {
         imageUrls: [
           'https://public-resources.gdevelop.io/staging/course/images/22338211-c869-45d2-9d15-0868d9588142.png',
@@ -3349,10 +3310,8 @@ export const videoBasedCourseChapter: VideoBasedCourseChapter = {
     },
     {
       title: 'Create a dialogue box with a Panel sprite(9-patch)',
-      text:
-        'Drag the **Panel_Sprite(9-patch)** object into the game scene from the object list, and resize it to match the size shown in the image above.\n\n',
-      hint:
-        '(A panel sprite(9 patch) is used for text boxes and any UI elements with repeating patterns and a rectangular border. They’re called 9-patch because images are broken into 9 “patches” that have different rules applied to them when the object is stretched.)',
+      text: 'Drag the **Panel_Sprite(9-patch)** object into the game scene from the object list, and resize it to match the size shown in the image above.\n\n',
+      hint: '(A panel sprite(9 patch) is used for text boxes and any UI elements with repeating patterns and a rectangular border. They’re called 9-patch because images are broken into 9 “patches” that have different rules applied to them when the object is stretched.)',
       imageUrls: [
         'https://public-resources.gdevelop.io/staging/course/images/74933b88-cbd9-4690-87e4-b3dfe583a93e.png',
       ],
@@ -3364,10 +3323,8 @@ export const videoBasedCourseChapter: VideoBasedCourseChapter = {
     },
     {
       title: 'Adding and modifying Text in the game',
-      text:
-        'Open the Text object, change the object’s font to **CantoraOne-Regular from the drop down menu**, set the color to white, adjust the font size, and change the text to match the image above.\n\nDrag the **Text** object into the game scene from the object list to match the position in the image above.\n\n',
-      hint:
-        '(There are three different types of text objects in the engine, each serving a different purpose, and they can all have their text changed while the game is running with the use of events. Which you’ll learn more about in later chapters.)',
+      text: 'Open the Text object, change the object’s font to **CantoraOne-Regular from the drop down menu**, set the color to white, adjust the font size, and change the text to match the image above.\n\nDrag the **Text** object into the game scene from the object list to match the position in the image above.\n\n',
+      hint: '(There are three different types of text objects in the engine, each serving a different purpose, and they can all have their text changed while the game is running with the use of events. Which you’ll learn more about in later chapters.)',
       answer: {
         imageUrls: [
           'https://public-resources.gdevelop.io/staging/course/images/a73da7b8-dc84-4130-917e-7341ed263f5a.png',
@@ -3376,10 +3333,8 @@ export const videoBasedCourseChapter: VideoBasedCourseChapter = {
     },
     {
       title: 'Add functionality with a Panel sprite button',
-      text:
-        'Drag the **Button** object into the game scene from the object list, and resize it to match the size shown in the image above.\n\n',
-      hint:
-        '(A panel sprite button is useful because it makes it easy to check if the player has clicked on the button, and automatically handles the animations and state of the button.)',
+      text: 'Drag the **Button** object into the game scene from the object list, and resize it to match the size shown in the image above.\n\n',
+      hint: '(A panel sprite button is useful because it makes it easy to check if the player has clicked on the button, and automatically handles the animations and state of the button.)',
       answer: {
         imageUrls: [
           'https://public-resources.gdevelop.io/staging/course/images/01138252-6128-459c-9cce-c5b728d46479.png',
@@ -3388,10 +3343,8 @@ export const videoBasedCourseChapter: VideoBasedCourseChapter = {
     },
     {
       title: 'Display values with a Resource bar',
-      text:
-        'Open the Resource_Bar object, change it’s initial value to 4 and the maximum value to 5, and then scroll down to the bottom and change the default width of its background to 450, so the object will match the size and value of the object in the image above when you preview the game.\n\nDrag the **Resource_Bar** object into the game scene from the object list to match the position of the object in the image above.\n\nThen in the effects tab inside of the object, add the “Drop Shadow” effect and set its color to black with the color picker tool, or change the “Color of the shadow” text field to 0;0;0.\n\n',
-      hint:
-        '(When you come across a text field for a color, it will always be presented with a color picker tool next to it. You can pick any color by clicking/tapping the color box, and it will automatically change the text field for you.)',
+      text: 'Open the Resource_Bar object, change it’s initial value to 4 and the maximum value to 5, and then scroll down to the bottom and change the default width of its background to 450, so the object will match the size and value of the object in the image above when you preview the game.\n\nDrag the **Resource_Bar** object into the game scene from the object list to match the position of the object in the image above.\n\nThen in the effects tab inside of the object, add the “Drop Shadow” effect and set its color to black with the color picker tool, or change the “Color of the shadow” text field to 0;0;0.\n\n',
+      hint: '(When you come across a text field for a color, it will always be presented with a color picker tool next to it. You can pick any color by clicking/tapping the color box, and it will automatically change the text field for you.)',
       imageUrls: [
         'https://public-resources.gdevelop.io/staging/course/images/0c7a1d3b-b2ca-45ad-a832-d51649a5b08d.png',
       ],
@@ -3405,10 +3358,8 @@ export const videoBasedCourseChapter: VideoBasedCourseChapter = {
     },
     {
       title: 'Discover how instance z-ordering works',
-      text:
-        'When placing new instances of objects into the game scene, their z-order is automatically set to 1 higher than the instance with the highest z-order in the scene.\n\nTo see object z-order in action, open the properties panel, select the background Tiled_Sprite object, and increase its z-order in the properties one at a time to see it rise above the other objects in the scene. (You can lower it’s Z-Order again after trying this.)\n\n',
-      hint:
-        '(Z-order values determine which elements are in front or behind of others on the same layer, which is useful for games where the player character needs to be in front of certain elements but behind others.)',
+      text: 'When placing new instances of objects into the game scene, their z-order is automatically set to 1 higher than the instance with the highest z-order in the scene.\n\nTo see object z-order in action, open the properties panel, select the background Tiled_Sprite object, and increase its z-order in the properties one at a time to see it rise above the other objects in the scene. (You can lower it’s Z-Order again after trying this.)\n\n',
+      hint: '(Z-order values determine which elements are in front or behind of others on the same layer, which is useful for games where the player character needs to be in front of certain elements but behind others.)',
       answer: {
         imageUrls: [
           'https://public-resources.gdevelop.io/staging/course/images/f699f117-23e5-4856-9412-5cad48573a60.png',
@@ -3417,10 +3368,8 @@ export const videoBasedCourseChapter: VideoBasedCourseChapter = {
     },
     {
       title: 'Change alignments with object points',
-      text:
-        'Switch to the **PointsAndCollisions** game scene from the project manager, preview the game, and observe how this scene’s logic is currently set up for the **Circle** sprite object to follow the cursor whenever the left mouse button or touch is held. \n\nBy default, the Circle object will not be centered on that point because the action positions the object based on its [origin point](https://wiki.gdevelop.io/gdevelop5/objects/sprite/edit-points/), which is located at the top-left of the image.\n\nOpen the Circle object and, through the button in the bottom left corner, change the Circle object’s origin point to be centered in the middle of the image. Then preview the game again to see that the Circle sprite object is now centered on the cursor or point of touch.\n\n',
-      hint:
-        '(Take note that this doesn’t need to be done for every object in your game; typically, you only change an object’s origin point when it is required for positioning, rotation, or z-ordering based on the origin point’s position.)',
+      text: 'Switch to the **PointsAndCollisions** game scene from the project manager, preview the game, and observe how this scene’s logic is currently set up for the **Circle** sprite object to follow the cursor whenever the left mouse button or touch is held. \n\nBy default, the Circle object will not be centered on that point because the action positions the object based on its [origin point](https://wiki.gdevelop.io/gdevelop5/objects/sprite/edit-points/), which is located at the top-left of the image.\n\nOpen the Circle object and, through the button in the bottom left corner, change the Circle object’s origin point to be centered in the middle of the image. Then preview the game again to see that the Circle sprite object is now centered on the cursor or point of touch.\n\n',
+      hint: '(Take note that this doesn’t need to be done for every object in your game; typically, you only change an object’s origin point when it is required for positioning, rotation, or z-ordering based on the origin point’s position.)',
       answer: {
         imageUrls: [
           'https://public-resources.gdevelop.io/staging/course/images/7a74918f-ebab-4ff2-9263-5628565747fc.png',
@@ -3430,10 +3379,8 @@ export const videoBasedCourseChapter: VideoBasedCourseChapter = {
     },
     {
       title: 'Adjust collision checks with collision masks',
-      text:
-        'Place the **Collision** object into the game scene and, while previewing the game, move the **Circle** object so it touches the Collision object. The Circle object’s animation will change when the collision occurs, but the collision happens before the images appear to overlap.\n\nOpen both the Circle and Collision objects and, through the button in the bottom left corner, adjust the collision masks of both objects so they roughly match their images.(You can add a new point(Vertex) with the “Add a vertex” button.)\n\nThen preview the game again to see how the collision detection has become more accurate.\n\n',
-      hint:
-        '(Take note that only sprite and tilemap objects have adjustable collision masks. Most other objects will use their entire height and width as their collision mask, and some objects, like particles, have no collision mask at all.)',
+      text: 'Place the **Collision** object into the game scene and, while previewing the game, move the **Circle** object so it touches the Collision object. The Circle object’s animation will change when the collision occurs, but the collision happens before the images appear to overlap.\n\nOpen both the Circle and Collision objects and, through the button in the bottom left corner, adjust the collision masks of both objects so they roughly match their images.(You can add a new point(Vertex) with the “Add a vertex” button.)\n\nThen preview the game again to see how the collision detection has become more accurate.\n\n',
+      hint: '(Take note that only sprite and tilemap objects have adjustable collision masks. Most other objects will use their entire height and width as their collision mask, and some objects, like particles, have no collision mask at all.)',
       answer: {
         imageUrls: [
           'https://public-resources.gdevelop.io/staging/course/images/8e0a7b37-d8f9-448c-9eeb-9d73eac97b07.png',
@@ -3453,85 +3400,69 @@ export const textBasedCourseChapter: TextBasedCourseChapter = {
   items: [
     {
       type: 'text',
-      text:
-        "Welcome to this comprehensive course on User Interface (UI) and User Experience (UX)! Whether you're a solo developer or part of a small team, understanding these principles is crucial for creating cohesive UI controllers, designing smooth experiences, and testing with your players before the official launch of your game.",
+      text: "Welcome to this comprehensive course on User Interface (UI) and User Experience (UX)! Whether you're a solo developer or part of a small team, understanding these principles is crucial for creating cohesive UI controllers, designing smooth experiences, and testing with your players before the official launch of your game.",
     },
     {
       type: 'text',
-      text:
-        "Throughout this course, we'll explore the fundamental concepts of UI and UX design, breaking down complex theory and topics into practical easy-to-apply guidelines. You’ll also receive practical tools and data bases available online for free to enhance your game development process.",
+      text: "Throughout this course, we'll explore the fundamental concepts of UI and UX design, breaking down complex theory and topics into practical easy-to-apply guidelines. You’ll also receive practical tools and data bases available online for free to enhance your game development process.",
     },
     {
       type: 'text',
-      text:
-        "While we won't dive into advanced design concepts and practices, you'll gain enough knowledge to make informed decisions about your game's interface and game progression. By the end of this course, you'll have a solid foundation in UI/UX principles like visual hierarchy, typography, color theory, and how these elements work together to create intuitive game interfaces. ",
+      text: "While we won't dive into advanced design concepts and practices, you'll gain enough knowledge to make informed decisions about your game's interface and game progression. By the end of this course, you'll have a solid foundation in UI/UX principles like visual hierarchy, typography, color theory, and how these elements work together to create intuitive game interfaces. ",
     },
     {
       type: 'text',
-      text:
-        "Let's start by understanding the basics of UI and UX, and how they contribute to creating successful games:",
+      text: "Let's start by understanding the basics of UI and UX, and how they contribute to creating successful games:",
     },
     {
       type: 'text',
-      text:
-        '- **What is the role of UI and UX to make good games?**\n\n  A game UI is made up game assets and sprites; while game mechanics, game play and level of difficulty are UX. Imagine a game without game art and without sounds. You will probably be clicking buttons without any feedback on your progress. That wouldn’t be fun.\n\n  However, with beautiful art and animations (UI), good sound design, motivating game progression and feedback on your progress (UX), what could be “just clicking buttons” becomes fun and exciting!  This is why video-games are the perfect example of UI/UX!',
+      text: '- **What is the role of UI and UX to make good games?**\n\n  A game UI is made up game assets and sprites; while game mechanics, game play and level of difficulty are UX. Imagine a game without game art and without sounds. You will probably be clicking buttons without any feedback on your progress. That wouldn’t be fun.\n\n  However, with beautiful art and animations (UI), good sound design, motivating game progression and feedback on your progress (UX), what could be “just clicking buttons” becomes fun and exciting!  This is why video-games are the perfect example of UI/UX!',
     },
     {
       type: 'image',
-      url:
-        'https://public-resources.gdevelop.io/staging/course/images/0426867a-ae95-485a-885d-16a46bb9886f.png',
+      url: 'https://public-resources.gdevelop.io/staging/course/images/0426867a-ae95-485a-885d-16a46bb9886f.png',
       caption: '*Monstra by Game Creator MOHMOH available on gd.games*',
     },
     {
       type: 'text',
-      text:
-        "- **Ok, but what is User Interface and what's its purpose?**\n\n  A game's UI consists of buttons, progress bars, character animations, settings screens, and stats. These components communicate essential information to players clearly and simply, helping them understand the game state and make informed decisions.",
+      text: "- **Ok, but what is User Interface and what's its purpose?**\n\n  A game's UI consists of buttons, progress bars, character animations, settings screens, and stats. These components communicate essential information to players clearly and simply, helping them understand the game state and make informed decisions.",
     },
     {
       type: 'text',
-      text:
-        '- **And what is “User Experience”, and what’s its purpose?**\n\n  It’s the overall experience of a player while they interact with a game or application. It includes how intuitive, enjoyable, and accessible the experience feels from the moment they launch the game to when they stop playing.',
+      text: '- **And what is “User Experience”, and what’s its purpose?**\n\n  It’s the overall experience of a player while they interact with a game or application. It includes how intuitive, enjoyable, and accessible the experience feels from the moment they launch the game to when they stop playing.',
     },
     {
       type: 'text',
-      text:
-        '- **What are the visual elements of UI interfaces?**\n\n  The main blocks of UI design are Letters, color and Shape. But when we talk about interaction we also have Sound and Movement.',
+      text: '- **What are the visual elements of UI interfaces?**\n\n  The main blocks of UI design are Letters, color and Shape. But when we talk about interaction we also have Sound and Movement.',
     },
     {
       type: 'text',
-      text:
-        '- **Let’s quickly talk about letters:**\n\n  Did you know that ”making letters” is a job? “Typography Designers” -which is their official name- create letters to fit physical supports like print, desktop and mobile. They also make sure they can be read up close or far away, as well as by people with cognitive disabilities. For example: it has been proven that people with dyslexia can benefit from specific traits in letter design, which is how the font “Dyslexie” was designed.',
+      text: '- **Let’s quickly talk about letters:**\n\n  Did you know that ”making letters” is a job? “Typography Designers” -which is their official name- create letters to fit physical supports like print, desktop and mobile. They also make sure they can be read up close or far away, as well as by people with cognitive disabilities. For example: it has been proven that people with dyslexia can benefit from specific traits in letter design, which is how the font “Dyslexie” was designed.',
     },
     {
       type: 'image',
-      url:
-        'https://public-resources.gdevelop.io/staging/course/images/2e9daaf5-c2a8-4401-8446-6b7bd6f38771.png',
+      url: 'https://public-resources.gdevelop.io/staging/course/images/2e9daaf5-c2a8-4401-8446-6b7bd6f38771.png',
     },
     {
       type: 'text',
-      text:
-        "&#9;While you don't need to be a type designer to select fonts, this course will provide practical guidelines to ensure your chosen font family creates a positive experience for your players.",
+      text: "&#9;While you don't need to be a type designer to select fonts, this course will provide practical guidelines to ensure your chosen font family creates a positive experience for your players.",
     },
     { type: 'text', text: '- **Let’s talk about color**' },
     {
       type: 'text',
-      text:
-        '&#9;Color is a fascinating phenomenon that occurs when surfaces reflect light, which our eyes then perceive. What makes color especially interesting is that it exists in our eyes—meaning different people can perceive the same color in different ways:',
+      text: '&#9;Color is a fascinating phenomenon that occurs when surfaces reflect light, which our eyes then perceive. What makes color especially interesting is that it exists in our eyes—meaning different people can perceive the same color in different ways:',
     },
     {
       type: 'text',
-      text:
-        '&#9;In 2015 *this* dress became viral because certain people saw a red/golden dress, while others saw a blue/black dress… ',
+      text: '&#9;In 2015 *this* dress became viral because certain people saw a red/golden dress, while others saw a blue/black dress… ',
     },
     {
       type: 'image',
-      url:
-        'https://public-resources.gdevelop.io/staging/course/images/d079a8a9-4ebf-4933-b02a-6fc9b95e0d46.png',
+      url: 'https://public-resources.gdevelop.io/staging/course/images/d079a8a9-4ebf-4933-b02a-6fc9b95e0d46.png',
     },
     {
       type: 'text',
-      text:
-        '&#9;During this course you will learn how to understand and work with color and color palette models, as well as creating for people perceiving color differently.',
+      text: '&#9;During this course you will learn how to understand and work with color and color palette models, as well as creating for people perceiving color differently.',
     },
     {
       type: 'task',
@@ -3539,21 +3470,18 @@ export const textBasedCourseChapter: TextBasedCourseChapter = {
       items: [
         {
           type: 'text',
-          text:
-            'Look at how your eyes process color: stare at the red dot in this Mona Lisa image for 20 seconds, then close your eyes.\n\nWhat causes you to see the image in different colors when your eyes are closed?',
+          text: 'Look at how your eyes process color: stare at the red dot in this Mona Lisa image for 20 seconds, then close your eyes.\n\nWhat causes you to see the image in different colors when your eyes are closed?',
         },
         {
           type: 'image',
-          url:
-            'https://public-resources.gdevelop.io/staging/course/images/f97e3d55-326b-49a2-9fa3-49673822115c.jpg',
+          url: 'https://public-resources.gdevelop.io/staging/course/images/f97e3d55-326b-49a2-9fa3-49673822115c.jpg',
         },
       ],
       answer: {
         items: [
           {
             type: 'text',
-            text:
-              'The image has its original colors inverted: dark colors appear lighter, and light sections appear darker. When you stare at the image for 20 seconds, the photoreceptors in your eyes become overstimulated, causing fatigue and loss of sensitivity. This is why you see a different image when your eyes are closed and resting.\n\nThese same photoreceptors are what cause people with color blindness to see colors differently than you do. At the end of this course, you will learn how to include them in your color palette choices.',
+            text: 'The image has its original colors inverted: dark colors appear lighter, and light sections appear darker. When you stare at the image for 20 seconds, the photoreceptors in your eyes become overstimulated, causing fatigue and loss of sensitivity. This is why you see a different image when your eyes are closed and resting.\n\nThese same photoreceptors are what cause people with color blindness to see colors differently than you do. At the end of this course, you will learn how to include them in your color palette choices.',
           },
         ],
       },
@@ -3569,14 +3497,12 @@ export const textBasedCourseChapterWithCallout: TextBasedCourseChapter = {
   items: [
     {
       type: 'text',
-      text:
-        "Let's explore how JavaScript events can control objects in your game.",
+      text: "Let's explore how JavaScript events can control objects in your game.",
     },
     {
       type: 'callout',
       kind: 'info',
-      text:
-        '3 Ceci est un encaddré **informatif**. Il utilise les couleurs `blue` par défaut. Il est parfait pour fournir des détails supplémentaires ou des précisions techniques. Les blocs de `code` sont également bien formatés.',
+      text: '3 Ceci est un encaddré **informatif**. Il utilise les couleurs `blue` par défaut. Il est parfait pour fournir des détails supplémentaires ou des précisions techniques. Les blocs de `code` sont également bien formatés.',
     },
   ],
   id: 'callout javascript',
@@ -3589,8 +3515,7 @@ export const textBasedCourseChapterWithCode: TextBasedCourseChapter = {
   items: [
     {
       type: 'text',
-      text:
-        "Let's explore how JavaScript events can control objects in your game.",
+      text: "Let's explore how JavaScript events can control objects in your game.",
     },
     {
       type: 'code',
@@ -3608,8 +3533,7 @@ export const textBasedCourseChapterWithCode: TextBasedCourseChapter = {
     },
     {
       type: 'text',
-      text:
-        'This example shows how to run a small helper to trigger a jump when the player hits the floor.',
+      text: 'This example shows how to run a small helper to trigger a jump when the player hits the floor.',
     },
   ],
   id: 'scripting-basics',
@@ -3622,8 +3546,7 @@ export const textBasedCourseChapterWithTables: TextBasedCourseChapter = {
   items: [
     {
       type: 'text',
-      text:
-        "Tables can help you compare the different values you plan to use in your game. Let's review some balancing examples.",
+      text: "Tables can help you compare the different values you plan to use in your game. Let's review some balancing examples.",
     },
     {
       type: 'table',
@@ -3644,8 +3567,7 @@ export const textBasedCourseChapterWithTables: TextBasedCourseChapter = {
     },
     {
       type: 'text',
-      text:
-        'You can also layout drop chances to ensure players know what to expect from rewards.',
+      text: 'You can also layout drop chances to ensure players know what to expect from rewards.',
     },
     {
       type: 'table',
@@ -3659,8 +3581,7 @@ export const textBasedCourseChapterWithTables: TextBasedCourseChapter = {
     },
     {
       type: 'text',
-      text:
-        'Finally, outline how crafting costs scale so you can adjust your economy quickly during playtests.',
+      text: 'Finally, outline how crafting costs scale so you can adjust your economy quickly during playtests.',
     },
     {
       type: 'table',
@@ -3688,8 +3609,7 @@ export const lockedCourseChapter: LockedVideoBasedCourseChapter = {
 export const premiumCourse: Course = {
   id: 'premium-course',
   imageUrlByLocale: {
-    en:
-      'https://public-resources.gdevelop.io/course/gdevelop-premium-course.jpeg',
+    en: 'https://public-resources.gdevelop.io/course/gdevelop-premium-course.jpeg',
   },
   titleByLocale: {
     en: 'Complete GDevelop Master course',
@@ -3710,8 +3630,7 @@ export const premiumCourse: Course = {
     'zh-CN': 'GDevelop完整大师课程',
   },
   shortDescriptionByLocale: {
-    en:
-      'Master the skills to create, polish and release your own game to the world. This chapter-by-chapter course is designed to let you learn everything you need to know about GDevelop and gamedev.',
+    en: 'Master the skills to create, polish and release your own game to the world. This chapter-by-chapter course is designed to let you learn everything you need to know about GDevelop and gamedev.',
     'fr-FR':
       'Maîtrisez les compétences pour créer, peaufiner et publier votre propre jeu. Ce cours chapitre par chapitre est conçu pour vous apprendre tout ce qu’il faut savoir sur GDevelop et le développement de jeux.',
     'ar-SA':

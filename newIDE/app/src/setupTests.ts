@@ -29,19 +29,19 @@ const wasmBinary = fs.readFileSync(
 // the source files are using `global.gd` as a "top level" object (after imports).
 // This is a side effect, so this file must be imported before any test.
 // See also GDevelopJsInitializerDecorator.js for Storybook.
-global.gd = {
+(global as any).gd = {
   I_AM_NOT_YET_INITIALIZED_YOU_MUST_USE_GD_INSIDE_A_TEST_ONLY: true,
 };
 
-beforeAll(done => {
-  initializeGDevelopJs({ wasmBinary }).then(module => {
+beforeAll((done) => {
+  initializeGDevelopJs({ wasmBinary }).then((module: Record<string, any>) => {
     // We're **updating** the global "gd" object here. This is done so that
     // the source files that are using `global.gd` have the proper reference to the
     // object.
-    delete global.gd
-      .I_AM_NOT_YET_INITIALIZED_YOU_MUST_USE_GD_INSIDE_A_TEST_ONLY;
+    const gdGlobal = (global as any).gd as Record<string, any>;
+    delete gdGlobal.I_AM_NOT_YET_INITIALIZED_YOU_MUST_USE_GD_INSIDE_A_TEST_ONLY;
     for (var key in module) {
-      global.gd[key] = module[key];
+      gdGlobal[key] = module[key];
     }
     done();
   });
@@ -88,7 +88,7 @@ beforeEach(() => {
 });
 
 if (typeof window !== 'undefined' && typeof window.matchMedia !== 'function') {
-  window.matchMedia = query => ({
+  window.matchMedia = (query) => ({
     matches: false,
     media: query,
     onchange: null,

@@ -317,3 +317,14 @@ declare module 'three/examples/jsm/loaders/DRACOLoader' {
     constructor(...args: any[]);
   }
 }
+declare module 'libGD.js-for-tests-only' {
+  const initializeGDevelopJs: (options?: {
+    wasmBinary?: Uint8Array | Buffer;
+    locateFile?: (path: string, prefix: string) => string;
+  }) => Promise<any>;
+  export = initializeGDevelopJs;
+}
+declare module 'GDJS-for-web-app-only/*' {
+  const extensionModule: any;
+  export = extensionModule;
+}

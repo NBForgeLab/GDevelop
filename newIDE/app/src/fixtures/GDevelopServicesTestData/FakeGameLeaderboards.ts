@@ -1,4 +1,3 @@
-// @flow
 import { type GameLeaderboard } from '../../Utils/GDevelopServices/Game';
 
 export const fakeGameLeaderboards: GameLeaderboard[] = [
@@ -8,11 +7,9 @@ export const fakeGameLeaderboards: GameLeaderboard[] = [
       en: 'Top weekly games with rated comments',
     },
     topGameCommentQualityRatings: [
-      // $FlowFixMe[incompatible-type]
       {
         gameId: '3c1098a5-3313-42e8-b35b-0d4842e83d19',
         count: 5,
-        // $FlowFixMe[incompatible-type]
         publicGame: {
           id: '3c1098a5-3313-42e8-b35b-0d4842e83d19',
           gameName: 'FPS Game Template',
@@ -89,11 +86,9 @@ export const fakeGameLeaderboards: GameLeaderboard[] = [
           donateLink: null,
         },
       },
-      // $FlowFixMe[incompatible-type]
       {
         gameId: '2ca4e2e4-9a2d-4a61-b704-b74f660b4b25',
         count: 1,
-        // $FlowFixMe[incompatible-type]
         publicGame: {
           id: '2ca4e2e4-9a2d-4a61-b704-b74f660b4b25',
           gameName: 'Infinite Jump',
@@ -178,11 +173,9 @@ export const fakeGameLeaderboards: GameLeaderboard[] = [
       en: 'Top daily games with rated comments',
     },
     topGameCommentQualityRatings: [
-      // $FlowFixMe[incompatible-type]
       {
         gameId: '3c1098a5-3313-42e8-b35b-0d4842e83d19',
         count: 2,
-        // $FlowFixMe[incompatible-type]
         publicGame: {
           id: '3c1098a5-3313-42e8-b35b-0d4842e83d19',
           gameName: 'FPS Game Template',
@@ -261,4 +254,4 @@ export const fakeGameLeaderboards: GameLeaderboard[] = [
       },
     ],
   },
-];
+] as unknown as GameLeaderboard[];

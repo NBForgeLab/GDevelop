@@ -1,0 +1,35 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type ExportPipeline } from '../ExportAndShare/ExportPipeline.flow';
+import {
+  type UrlFileDescriptor,
+  type TextFileDescriptor,
+  type BlobFileDescriptor,
+} from '../Utils/BrowserArchiver';
+
+type ExportState = null;
+type PreparedExporter = null;
+type ExportOutput = {|
+  textFiles: Array<TextFileDescriptor>,
+  urlFiles: Array<UrlFileDescriptor>,
+|};
+type ResourcesDownloadOutput = {|
+  textFiles: Array<TextFileDescriptor>,
+  blobFiles: Array<BlobFileDescriptor>,
+|};
+type CompressionOutput = Blob;
+
+declare export var fakeBrowserOnlineWebExportPipeline: ExportPipeline<
+  ExportState,
+  PreparedExporter,
+  ExportOutput,
+  ResourcesDownloadOutput,
+  CompressionOutput
+>;
+declare export var fakeErroringBrowserOnlineWebExportPipeline: ExportPipeline<
+  ExportState,
+  PreparedExporter,
+  ExportOutput,
+  ResourcesDownloadOutput,
+  CompressionOutput
+>;

@@ -1,4 +1,3 @@
-// @flow
 import * as React from 'react';
 import { type Build } from '../Utils/GDevelopServices/Build';
 import { type AuthenticatedUser } from '../Profile/AuthenticatedUserContext';
@@ -17,18 +16,17 @@ import { ExplanationHeader } from '../ExportAndShare/GenericExporters/OnlineWebE
 import { delay } from '../Utils/Delay';
 import OnlineWebExportFlow from '../ExportAndShare/GenericExporters/OnlineWebExport/OnlineWebExportFlow';
 type ExportState = null;
-
 type PreparedExporter = null;
 
-type ExportOutput = {|
-  textFiles: Array<TextFileDescriptor>,
-  urlFiles: Array<UrlFileDescriptor>,
-|};
+type ExportOutput = {
+  textFiles: Array<TextFileDescriptor>;
+  urlFiles: Array<UrlFileDescriptor>;
+};
 
-type ResourcesDownloadOutput = {|
-  textFiles: Array<TextFileDescriptor>,
-  blobFiles: Array<BlobFileDescriptor>,
-|};
+type ResourcesDownloadOutput = {
+  textFiles: Array<TextFileDescriptor>;
+  blobFiles: Array<BlobFileDescriptor>;
+};
 
 type CompressionOutput = Blob;
 
@@ -71,7 +69,13 @@ export const fakeBrowserOnlineWebExportPipeline: ExportPipeline<
   launchExport: async (
     context: ExportPipelineContext<ExportState>,
     preparedExporter: PreparedExporter,
-    fallbackAuthor: ?{ id: string, username: string }
+    fallbackAuthor:
+      | {
+          id: string;
+          username: string;
+        }
+      | null
+      | undefined
   ): Promise<ExportOutput> => {
     await delay(1000);
     return { urlFiles: [], textFiles: [] };
@@ -106,10 +110,10 @@ export const fakeBrowserOnlineWebExportPipeline: ExportPipeline<
     authenticatedUser: AuthenticatedUser,
     uploadBucketKey: string,
     gameId: string,
-    options: {|
-      gameName: string,
-      gameVersion: string,
-    |},
+    options: {
+      gameName: string;
+      gameVersion: string;
+    },
     payWithCredits: boolean
   ): Promise<Build> => {
     await delay(1000);

@@ -1,4 +1,3 @@
-// @flow
 import Window from '../Utils/Window';
 import { getIDEVersionWithHash } from '../Version';
 
@@ -10,7 +9,9 @@ type FileSet =
   | 'cocos2d-js'
   | 'facebook-instant-games';
 
-const filesToDownload: { [FileSet]: Array<string> } = {
+const filesToDownload: {
+  [key in FileSet]: Array<string>;
+} = {
   preview: ['/Runtime/index.html'],
   web: ['/Runtime/index.html', '/Runtime/Electron/LICENSE.GDevelop.txt'],
   'cocos2d-js': [
@@ -37,14 +38,17 @@ const filesToDownload: { [FileSet]: Array<string> } = {
   ],
 };
 
-export type TextFileDescriptor = {| text: string, filePath: string |};
+export type TextFileDescriptor = {
+  text: string;
+  filePath: string;
+};
 
 export const findGDJS = (
   fileSet: FileSet
-): Promise<{|
-  gdjsRoot: string,
-  filesContent: Array<TextFileDescriptor>,
-|}> => {
+): Promise<{
+  gdjsRoot: string;
+  filesContent: Array<TextFileDescriptor>;
+}> => {
   // Get GDJS for this version. If you updated the version,
   // run `newIDE/web-app/scripts/deploy-GDJS-Runtime` script.
   let gdjsRoot = `https://resources.gdevelop-app.com/GDJS-${getIDEVersionWithHash()}`;
@@ -63,24 +67,24 @@ export const findGDJS = (
   }
 
   return Promise.all(
-    filesToDownload[fileSet].map(relativeFilePath => {
+    filesToDownload[fileSet].map((relativeFilePath) => {
       const url = gdjsRoot + relativeFilePath;
 
       // Don't do any caching, rely on the browser cache only.
-      return fetch(url).then(response => {
+      return fetch(url).then((response) => {
         if (!response.ok) {
           console.error(`Error while downloading "${url}"`, response);
           throw new Error(
             `Error while downloading "${url}" (status: ${response.status})`
           );
         }
-        return response.text().then(text => ({
+        return response.text().then((text) => ({
           filePath: url,
           text,
         }));
       });
     })
-  ).then(filesContent => {
+  ).then((filesContent) => {
     return {
       gdjsRoot,
       filesContent,

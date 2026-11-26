@@ -1,10 +1,8 @@
-// @flow
 import type {
   AiRequest,
   AiRequestError,
 } from '../../Utils/GDevelopServices/Generation';
 
-// $FlowFixMe[incompatible-type]
 export const agentAiRequest: AiRequest = {
   id: '01JT3FTKKTTR99BW00PW7VA0TS',
   createdAt: '2025-04-30T13:57:49.818Z',
@@ -49,8 +47,7 @@ export const agentAiRequest: AiRequest = {
       content: [
         {
           annotations: [],
-          text:
-            'I have created a scene called `Level1`. Now I will create Mario and add the `PlatformerObjectBehavior` to him.',
+          text: 'I have created a scene called `Level1`. Now I will create Mario and add the `PlatformerObjectBehavior` to him.',
           type: 'output_text',
           status: 'completed',
         },
@@ -84,8 +81,7 @@ export const agentAiRequest: AiRequest = {
       content: [
         {
           annotations: [],
-          text:
-            'I have created the [Sprite](object_type:Sprite) object `Mario`. Now I will add the [PlatformBehavior::PlatformerObjectBehavior](behavior_type:PlatformBehavior::PlatformerObjectBehavior) to it so it can move and jump.',
+          text: 'I have created the [Sprite](object_type:Sprite) object `Mario`. Now I will add the [PlatformBehavior::PlatformerObjectBehavior](behavior_type:PlatformBehavior::PlatformerObjectBehavior) to it so it can move and jump.',
           type: 'output_text',
           status: 'completed',
         },
@@ -119,8 +115,7 @@ export const agentAiRequest: AiRequest = {
       content: [
         {
           annotations: [],
-          text:
-            'I have added the [PlatformBehavior::PlatformerObjectBehavior](behavior_type:PlatformBehavior::PlatformerObjectBehavior) to the object `Mario`. Now I will create the ground and add the [PlatformBehavior::PlatformBehavior](behavior_type:PlatformBehavior::PlatformBehavior) to it.',
+          text: 'I have added the [PlatformBehavior::PlatformerObjectBehavior](behavior_type:PlatformBehavior::PlatformerObjectBehavior) to the object `Mario`. Now I will create the ground and add the [PlatformBehavior::PlatformBehavior](behavior_type:PlatformBehavior::PlatformBehavior) to it.',
           type: 'output_text',
           status: 'completed',
         },
@@ -175,8 +170,7 @@ export const agentAiRequest: AiRequest = {
       content: [
         {
           annotations: [],
-          text:
-            'I have created the [TiledSpriteObject::TiledSprite](object_type:TiledSpriteObject::TiledSprite) object `Ground` and added the [PlatformBehavior::Platform](behavior_type:PlatformBehavior::Platform) to it. Now I will add instances of `Mario` and `Ground` to the scene.',
+          text: 'I have created the [TiledSpriteObject::TiledSprite](object_type:TiledSpriteObject::TiledSprite) object `Ground` and added the [PlatformBehavior::Platform](behavior_type:PlatformBehavior::Platform) to it. Now I will add instances of `Mario` and `Ground` to the scene.',
           type: 'output_text',
           status: 'completed',
         },
@@ -243,8 +237,7 @@ export const agentAiRequest: AiRequest = {
       content: [
         {
           annotations: [],
-          text:
-            'I have added instances of `Mario` and `Ground` to the scene. Now I will add events to allow `Mario` to move.',
+          text: 'I have added instances of `Mario` and `Ground` to the scene. Now I will add events to allow `Mario` to move.',
           type: 'output_text',
           status: 'completed',
         },
@@ -277,8 +270,7 @@ export const agentAiRequest: AiRequest = {
       content: [
         {
           annotations: [],
-          text:
-            'I have added the basic movement controls for `Mario`. Now I will add more ground tiles.',
+          text: 'I have added the basic movement controls for `Mario`. Now I will add more ground tiles.',
           type: 'output_text',
           status: 'completed',
         },
@@ -396,8 +388,7 @@ export const agentAiRequest: AiRequest = {
       content: [
         {
           annotations: [],
-          text:
-            'I have added more ground tiles. Now I will add a coin object for `Mario` to collect.',
+          text: 'I have added more ground tiles. Now I will add a coin object for `Mario` to collect.',
           type: 'output_text',
           status: 'completed',
         },
@@ -452,8 +443,7 @@ export const agentAiRequest: AiRequest = {
       content: [
         {
           annotations: [],
-          text:
-            'I have added a coin to the scene. Now I will add an event to allow `Mario` to collect the `Coin`.',
+          text: 'I have added a coin to the scene. Now I will add an event to allow `Mario` to collect the `Coin`.',
           type: 'output_text',
           status: 'completed',
         },
@@ -486,8 +476,7 @@ export const agentAiRequest: AiRequest = {
       content: [
         {
           annotations: [],
-          text:
-            "I have added the event for `Mario` collecting the `Coin`. Now I will add a text object to display the player's score.",
+          text: "I have added the event for `Mario` collecting the `Coin`. Now I will add a text object to display the player's score.",
           type: 'output_text',
           status: 'completed',
         },
@@ -562,8 +551,7 @@ export const agentAiRequest: AiRequest = {
       content: [
         {
           annotations: [],
-          text:
-            'I have added the score display. Now I will add a simple enemy object that moves back and forth.',
+          text: 'I have added the score display. Now I will add a simple enemy object that moves back and forth.',
           type: 'output_text',
           status: 'completed',
         },
@@ -639,8 +627,7 @@ export const agentAiRequest: AiRequest = {
       content: [
         {
           annotations: [],
-          text:
-            'I have added an enemy to the scene. Now I will add an event to handle collisions between `Mario` and the `Enemy`.',
+          text: 'I have added an enemy to the scene. Now I will add an event to handle collisions between `Mario` and the `Enemy`.',
           type: 'output_text',
           status: 'completed',
         },
@@ -673,8 +660,7 @@ export const agentAiRequest: AiRequest = {
       content: [
         {
           annotations: [],
-          text:
-            "I have added a basic enemy that restarts the scene when it collides with `Mario`. This fulfills the user's request at a basic level.",
+          text: "I have added a basic enemy that restarts the scene when it collides with `Mario`. This fulfills the user's request at a basic level.",
           type: 'output_text',
           status: 'completed',
         },
@@ -694,9 +680,8 @@ export const agentAiRequest: AiRequest = {
       'f17d837afbc438714419cc3fd616ae45e8433c4bd6e3a340f695573993221d6c',
     finalModelPublicId: 'g2f1-g',
   },
-};
+} as unknown as AiRequest;
 
-// $FlowFixMe[incompatible-type]
 export const agentAiRequestWithFunctionCallToDo: AiRequest = {
   id: '01JTBDS436B6M695G44BMTHW5D',
   createdAt: '2025-05-03T15:55:59.462Z',
@@ -741,8 +726,7 @@ export const agentAiRequestWithFunctionCallToDo: AiRequest = {
       content: [
         {
           annotations: [],
-          text:
-            "Okay, I've created a new scene called \"MyScene\". Now, I'll add a player object to the scene. I'll use a `Sprite` object for the player.\n",
+          text: "Okay, I've created a new scene called \"MyScene\". Now, I'll add a player object to the scene. I'll use a `Sprite` object for the player.\n",
           type: 'output_text',
           status: 'completed',
         },
@@ -776,8 +760,7 @@ export const agentAiRequestWithFunctionCallToDo: AiRequest = {
       content: [
         {
           annotations: [],
-          text:
-            'Okay, I apologize for the mistake. I will add the [PlatformBehavior::PlatformerObjectBehavior](object_type:PlatformBehavior::PlatformerObjectBehavior) behavior to the player object.\n',
+          text: 'Okay, I apologize for the mistake. I will add the [PlatformBehavior::PlatformerObjectBehavior](object_type:PlatformBehavior::PlatformerObjectBehavior) behavior to the player object.\n',
           type: 'output_text',
           status: 'completed',
         },
@@ -811,8 +794,7 @@ export const agentAiRequestWithFunctionCallToDo: AiRequest = {
       content: [
         {
           annotations: [],
-          text:
-            "Now I'll add a platform object so the player can jump on it. I'll use a `Sprite` object for the platform and add the [PlatformBehavior::PlatformBehavior](object_type:PlatformBehavior::PlatformBehavior) behavior to it.\n",
+          text: "Now I'll add a platform object so the player can jump on it. I'll use a `Sprite` object for the platform and add the [PlatformBehavior::PlatformBehavior](object_type:PlatformBehavior::PlatformBehavior) behavior to it.\n",
           type: 'output_text',
           status: 'completed',
         },
@@ -867,8 +849,7 @@ export const agentAiRequestWithFunctionCallToDo: AiRequest = {
       content: [
         {
           annotations: [],
-          text:
-            'Now I will add the instances of the player and the platform to the scene.\n',
+          text: 'Now I will add the instances of the player and the platform to the scene.\n',
           type: 'output_text',
           status: 'completed',
         },
@@ -903,235 +884,231 @@ export const agentAiRequestWithFunctionCallToDo: AiRequest = {
       '0c5d381cf49bf2877bab7ef0bdfa0e8928757272105c42500071ea537cf43069',
     finalModelPublicId: 'g2f1-g',
   },
-};
+} as unknown as AiRequest;
 
-// $FlowFixMe[incompatible-type]
-export const agentAiRequestWithFailedAndIgnoredFunctionCallOutputs: AiRequest = {
-  id: '01JVHV6WW8M30ZZN0B3DSJZVAG',
-  createdAt: '2025-05-18T14:01:50.728Z',
-  updatedAt: '2025-05-18T14:10:14.372Z',
-  status: 'ready',
-  userId: 'wWP8BSlAW0UP4NeaHa2LcmmDzmH2',
-  output: [
-    {
-      role: 'user',
-      type: 'message',
-      content: [
-        {
-          type: 'user_request',
-          status: 'completed',
-          text: 'some request here',
-        },
-      ],
-      status: 'completed',
+export const agentAiRequestWithFailedAndIgnoredFunctionCallOutputs: AiRequest =
+  {
+    id: '01JVHV6WW8M30ZZN0B3DSJZVAG',
+    createdAt: '2025-05-18T14:01:50.728Z',
+    updatedAt: '2025-05-18T14:10:14.372Z',
+    status: 'ready',
+    userId: 'wWP8BSlAW0UP4NeaHa2LcmmDzmH2',
+    output: [
+      {
+        role: 'user',
+        type: 'message',
+        content: [
+          {
+            type: 'user_request',
+            status: 'completed',
+            text: 'some request here',
+          },
+        ],
+        status: 'completed',
+      },
+      {
+        role: 'assistant',
+        type: 'message',
+        content: [
+          {
+            name: 'create_scene',
+            arguments: '{"scene_name":"ShooterScene"}',
+            type: 'function_call',
+            status: 'completed',
+            call_id: 'tool_0_create_scene',
+          },
+        ],
+        status: 'completed',
+      },
+      {
+        type: 'function_call_output',
+        output: '{"ignored":true,"message":"This was ignored."}',
+        call_id: 'tool_0_create_scene',
+      },
+      {
+        role: 'assistant',
+        type: 'message',
+        content: [
+          {
+            annotations: [],
+            text: "Now, let's add some events to the `ShooterScene` to make the game work. I'll add events to:\n- Create the player\n- Make the player shoot bullets\n- Create enemies\n- Handle collisions between bullets and enemies\n",
+            type: 'output_text',
+            status: 'completed',
+          },
+        ],
+        status: 'completed',
+      },
+      {
+        role: 'assistant',
+        type: 'message',
+        content: [
+          {
+            name: 'add_scene_events',
+            arguments:
+              '{"events_description":"At the beginning of the scene, create the Player at position 100, 100. Every 0.5 seconds, create an Enemy at a random position. When the Player presses the space key, fire a Bullet. When a Bullet collides with an Enemy, delete both objects.","scene_name":"ShooterScene","extension_names_list":"TopDownMovementBehavior, FireBullet::FireBullet, LinearMovement::LinearMovementByAngle, DestroyOutsideBehavior","objects_list":"Player, Bullet, Enemy"}',
+            type: 'function_call',
+            status: 'completed',
+            call_id: 'tool_0_add_scene_events',
+          },
+        ],
+        status: 'completed',
+      },
+      {
+        type: 'function_call_output',
+        output:
+          '{"success":true,"message":"Properly modified or added new event(s)."}',
+        call_id: 'tool_0_add_scene_events',
+      },
+      {
+        role: 'assistant',
+        type: 'message',
+        content: [
+          {
+            annotations: [],
+            text: 'I have created the basic structure of a shooter game. I have created a scene, added a player that can move and shoot, a bullet, and an enemy. I have also added events to create the player and enemies, make the player shoot, and handle collisions between bullets and enemies.\n\nTo continue improving the game, you could:\n- Add score\n- Add different types of enemies\n- Add power-ups\n- Improve the graphics\n- Add sound effects\n',
+            type: 'output_text',
+            status: 'completed',
+          },
+        ],
+        status: 'completed',
+      },
+      {
+        role: 'user',
+        type: 'message',
+        content: [
+          {
+            type: 'user_request',
+            status: 'completed',
+            text: 'Delete all events',
+          },
+        ],
+        status: 'completed',
+      },
+      {
+        role: 'assistant',
+        type: 'message',
+        content: [
+          {
+            name: 'read_scene_events',
+            arguments: '{"scene_name":"ShooterScene"}',
+            type: 'function_call',
+            status: 'completed',
+            call_id: 'tool_0_read_scene_events',
+          },
+        ],
+        status: 'completed',
+      },
+      {
+        type: 'function_call_output',
+        output:
+          '{"success":true,"eventsForSceneNamed":"ShooterScene","eventsAsText":"<event-0>\\n Conditions:\\n - At the beginning of the scene\\n Actions:\\n - Create object Player at position 100;100 (layer: )\\n</event-0>\\n<event-1>\\n Conditions:\\n - The timer \\"EnemySpawnTimer\\" > 0.5 seconds\\n Actions:\\n - Create object Enemy at position Random(800);Random(600) (layer: )\\n - Start (or reset) the timer \\"EnemySpawnTimer\\"\\n</event-1>\\n<event-2>\\n Conditions:\\n - \\"Space\\" key is pressed\\n Actions:\\n - Fire Bullet from Player, at position Player.X(); Player.Y(), toward angle Player.Angle() and speed 400 px/s\\n</event-2>\\n<event-3>\\n Conditions:\\n - Bullet is in collision with Enemy\\n Actions:\\n - Delete Bullet\\n - Delete Enemy\\n</event-3>"}',
+        call_id: 'tool_0_read_scene_events',
+      },
+      {
+        role: 'assistant',
+        type: 'message',
+        content: [
+          {
+            name: 'add_scene_events',
+            arguments:
+              '{"events_description":"","scene_name":"ShooterScene","extension_names_list":"","objects_list":""}',
+            type: 'function_call',
+            status: 'completed',
+            call_id: 'tool_0_add_scene_events',
+          },
+        ],
+        status: 'completed',
+      },
+      {
+        type: 'function_call_output',
+        output:
+          '{"success":false,"message":"Error when launching or completing events generation ([\\"eventsDescription is a required field\\"]). Consider trying again or a different approach."}',
+        call_id: 'tool_0_add_scene_events',
+      },
+      {
+        role: 'assistant',
+        type: 'message',
+        content: [
+          {
+            annotations: [],
+            text: "I can't delete all events with an empty `events_description`. I will try to delete each event by replacing it with an empty event.\n",
+            type: 'output_text',
+            status: 'completed',
+          },
+        ],
+        status: 'completed',
+      },
+      {
+        role: 'assistant',
+        type: 'message',
+        content: [
+          {
+            name: 'add_scene_events',
+            arguments:
+              '{"placement_hint":"replace event named `<event-0>`","events_description":"","objects_list":"Player","extension_names_list":"Sprite","scene_name":"ShooterScene"}',
+            type: 'function_call',
+            status: 'completed',
+            call_id: 'tool_0_add_scene_events',
+          },
+        ],
+        status: 'completed',
+      },
+      {
+        type: 'function_call_output',
+        output:
+          '{"success":false,"message":"Error when launching or completing events generation ([\\"eventsDescription is a required field\\"]). Consider trying again or a different approach."}',
+        call_id: 'tool_0_add_scene_events',
+      },
+      {
+        role: 'assistant',
+        type: 'message',
+        content: [
+          {
+            annotations: [],
+            text: 'I will try to add an event that does nothing to replace the existing events.\n',
+            type: 'output_text',
+            status: 'completed',
+          },
+        ],
+        status: 'completed',
+      },
+      {
+        role: 'assistant',
+        type: 'message',
+        content: [
+          {
+            name: 'add_scene_events',
+            arguments:
+              '{"events_description":"Do nothing","objects_list":"","scene_name":"ShooterScene","extension_names_list":"","placement_hint":"replace event named `<event-0>`"}',
+            type: 'function_call',
+            status: 'completed',
+            call_id: 'tool_0_add_scene_events',
+          },
+        ],
+        status: 'completed',
+      },
+    ],
+    error: null,
+    mode: 'agent',
+    toolsVersion: 'v1',
+    // gameId: '5742919b-25fa-448c-9fe2-668839ffa63f',
+    fileMetadata: {
+      name: 'Sassy Hill (AI starter)',
+      gameId: '5742919b-25fa-448c-9fe2-668839ffa63f',
+      lastModifiedDate: 1747490933026,
+      fileIdentifier: '/Users/florian/Downloads/test aigen.json',
     },
-    {
-      role: 'assistant',
-      type: 'message',
-      content: [
-        {
-          name: 'create_scene',
-          arguments: '{"scene_name":"ShooterScene"}',
-          type: 'function_call',
-          status: 'completed',
-          call_id: 'tool_0_create_scene',
-        },
-      ],
-      status: 'completed',
+    storageProviderName: 'LocalFile',
+    stats: {
+      lastRunUserPromptTemplateHash:
+        '281ae340b8fc94b8915a4243beee520355a2c9873dd495a4ed174b667e98094e',
+      lastOutputRetriesCount: 0,
+      remainingMissingPrefixedTypes: [],
+      lastRunSystemPromptHash:
+        'a1c039caba27a4190b2a1674607ba306294828f3781c3a33cbcc908929840b48',
+      finalModelPublicId: 'g2f1-g',
     },
-    {
-      type: 'function_call_output',
-      output: '{"ignored":true,"message":"This was ignored."}',
-      call_id: 'tool_0_create_scene',
-    },
-    {
-      role: 'assistant',
-      type: 'message',
-      content: [
-        {
-          annotations: [],
-          text:
-            "Now, let's add some events to the `ShooterScene` to make the game work. I'll add events to:\n- Create the player\n- Make the player shoot bullets\n- Create enemies\n- Handle collisions between bullets and enemies\n",
-          type: 'output_text',
-          status: 'completed',
-        },
-      ],
-      status: 'completed',
-    },
-    {
-      role: 'assistant',
-      type: 'message',
-      content: [
-        {
-          name: 'add_scene_events',
-          arguments:
-            '{"events_description":"At the beginning of the scene, create the Player at position 100, 100. Every 0.5 seconds, create an Enemy at a random position. When the Player presses the space key, fire a Bullet. When a Bullet collides with an Enemy, delete both objects.","scene_name":"ShooterScene","extension_names_list":"TopDownMovementBehavior, FireBullet::FireBullet, LinearMovement::LinearMovementByAngle, DestroyOutsideBehavior","objects_list":"Player, Bullet, Enemy"}',
-          type: 'function_call',
-          status: 'completed',
-          call_id: 'tool_0_add_scene_events',
-        },
-      ],
-      status: 'completed',
-    },
-    {
-      type: 'function_call_output',
-      output:
-        '{"success":true,"message":"Properly modified or added new event(s)."}',
-      call_id: 'tool_0_add_scene_events',
-    },
-    {
-      role: 'assistant',
-      type: 'message',
-      content: [
-        {
-          annotations: [],
-          text:
-            'I have created the basic structure of a shooter game. I have created a scene, added a player that can move and shoot, a bullet, and an enemy. I have also added events to create the player and enemies, make the player shoot, and handle collisions between bullets and enemies.\n\nTo continue improving the game, you could:\n- Add score\n- Add different types of enemies\n- Add power-ups\n- Improve the graphics\n- Add sound effects\n',
-          type: 'output_text',
-          status: 'completed',
-        },
-      ],
-      status: 'completed',
-    },
-    {
-      role: 'user',
-      type: 'message',
-      content: [
-        {
-          type: 'user_request',
-          status: 'completed',
-          text: 'Delete all events',
-        },
-      ],
-      status: 'completed',
-    },
-    {
-      role: 'assistant',
-      type: 'message',
-      content: [
-        {
-          name: 'read_scene_events',
-          arguments: '{"scene_name":"ShooterScene"}',
-          type: 'function_call',
-          status: 'completed',
-          call_id: 'tool_0_read_scene_events',
-        },
-      ],
-      status: 'completed',
-    },
-    {
-      type: 'function_call_output',
-      output:
-        '{"success":true,"eventsForSceneNamed":"ShooterScene","eventsAsText":"<event-0>\\n Conditions:\\n - At the beginning of the scene\\n Actions:\\n - Create object Player at position 100;100 (layer: )\\n</event-0>\\n<event-1>\\n Conditions:\\n - The timer \\"EnemySpawnTimer\\" > 0.5 seconds\\n Actions:\\n - Create object Enemy at position Random(800);Random(600) (layer: )\\n - Start (or reset) the timer \\"EnemySpawnTimer\\"\\n</event-1>\\n<event-2>\\n Conditions:\\n - \\"Space\\" key is pressed\\n Actions:\\n - Fire Bullet from Player, at position Player.X(); Player.Y(), toward angle Player.Angle() and speed 400 px/s\\n</event-2>\\n<event-3>\\n Conditions:\\n - Bullet is in collision with Enemy\\n Actions:\\n - Delete Bullet\\n - Delete Enemy\\n</event-3>"}',
-      call_id: 'tool_0_read_scene_events',
-    },
-    {
-      role: 'assistant',
-      type: 'message',
-      content: [
-        {
-          name: 'add_scene_events',
-          arguments:
-            '{"events_description":"","scene_name":"ShooterScene","extension_names_list":"","objects_list":""}',
-          type: 'function_call',
-          status: 'completed',
-          call_id: 'tool_0_add_scene_events',
-        },
-      ],
-      status: 'completed',
-    },
-    {
-      type: 'function_call_output',
-      output:
-        '{"success":false,"message":"Error when launching or completing events generation ([\\"eventsDescription is a required field\\"]). Consider trying again or a different approach."}',
-      call_id: 'tool_0_add_scene_events',
-    },
-    {
-      role: 'assistant',
-      type: 'message',
-      content: [
-        {
-          annotations: [],
-          text:
-            "I can't delete all events with an empty `events_description`. I will try to delete each event by replacing it with an empty event.\n",
-          type: 'output_text',
-          status: 'completed',
-        },
-      ],
-      status: 'completed',
-    },
-    {
-      role: 'assistant',
-      type: 'message',
-      content: [
-        {
-          name: 'add_scene_events',
-          arguments:
-            '{"placement_hint":"replace event named `<event-0>`","events_description":"","objects_list":"Player","extension_names_list":"Sprite","scene_name":"ShooterScene"}',
-          type: 'function_call',
-          status: 'completed',
-          call_id: 'tool_0_add_scene_events',
-        },
-      ],
-      status: 'completed',
-    },
-    {
-      type: 'function_call_output',
-      output:
-        '{"success":false,"message":"Error when launching or completing events generation ([\\"eventsDescription is a required field\\"]). Consider trying again or a different approach."}',
-      call_id: 'tool_0_add_scene_events',
-    },
-    {
-      role: 'assistant',
-      type: 'message',
-      content: [
-        {
-          annotations: [],
-          text:
-            'I will try to add an event that does nothing to replace the existing events.\n',
-          type: 'output_text',
-          status: 'completed',
-        },
-      ],
-      status: 'completed',
-    },
-    {
-      role: 'assistant',
-      type: 'message',
-      content: [
-        {
-          name: 'add_scene_events',
-          arguments:
-            '{"events_description":"Do nothing","objects_list":"","scene_name":"ShooterScene","extension_names_list":"","placement_hint":"replace event named `<event-0>`"}',
-          type: 'function_call',
-          status: 'completed',
-          call_id: 'tool_0_add_scene_events',
-        },
-      ],
-      status: 'completed',
-    },
-  ],
-  error: null,
-  mode: 'agent',
-  toolsVersion: 'v1',
-  // gameId: '5742919b-25fa-448c-9fe2-668839ffa63f',
-  fileMetadata: {
-    name: 'Sassy Hill (AI starter)',
-    gameId: '5742919b-25fa-448c-9fe2-668839ffa63f',
-    lastModifiedDate: 1747490933026,
-    fileIdentifier: '/Users/florian/Downloads/test aigen.json',
-  },
-  storageProviderName: 'LocalFile',
-  stats: {
-    lastRunUserPromptTemplateHash:
-      '281ae340b8fc94b8915a4243beee520355a2c9873dd495a4ed174b667e98094e',
-    lastOutputRetriesCount: 0,
-    remainingMissingPrefixedTypes: [],
-    lastRunSystemPromptHash:
-      'a1c039caba27a4190b2a1674607ba306294828f3781c3a33cbcc908929840b48',
-    finalModelPublicId: 'g2f1-g',
-  },
-};
+  } as unknown as AiRequest;
 
 /**
  * The errors reported by the API on a failed AI request. Their codes are what

@@ -1,4 +1,3 @@
-// @flow
 import React from 'react';
 import MainFrame from './MainFrame';
 import Window from './Utils/Window';
@@ -34,9 +33,9 @@ import LocalResourceMover from './ProjectsStorage/ResourceMover/LocalResourceMov
 import LocalResourceFetcher from './ProjectsStorage/ResourceFetcher/LocalResourceFetcher';
 import LocalLoginProvider from './LoginProvider/LocalLoginProvider';
 
-const gd: libGDevelop = global.gd;
+const gd: libGDevelop = (global as any).gd;
 
-export const create = (authentication: Authentication): React.Node => {
+export const create = (authentication: Authentication): React.ReactNode => {
   Window.setUpContextMenu();
   const loginProvider = new LocalLoginProvider(authentication.auth);
   authentication.setLoginProvider(loginProvider);
@@ -49,11 +48,7 @@ export const create = (authentication: Authentication): React.Node => {
       authentication={authentication}
       disableCheckForUpdates={!!appArguments['disable-update-check']}
       makeEventsFunctionCodeWriter={makeLocalEventsFunctionCodeWriter}
-      // $FlowFixMe[incompatible-type]
-      // $FlowFixMe[incompatible-exact]
       eventsFunctionsExtensionWriter={LocalEventsFunctionsExtensionWriter}
-      // $FlowFixMe[incompatible-type]
-      // $FlowFixMe[incompatible-exact]
       eventsFunctionsExtensionOpener={LocalEventsFunctionsExtensionOpener}
     >
       {({ i18n }) => (
@@ -87,10 +82,9 @@ export const create = (authentication: Authentication): React.Node => {
                 />
               )}
               renderPreviewLauncher={(props, ref) => (
-                // $FlowFixMe[incompatible-type]
                 <LocalPreviewLauncher {...props} ref={ref} />
               )}
-              renderShareDialog={props => (
+              renderShareDialog={(props) => (
                 <ShareDialog
                   project={props.project}
                   onSaveProject={props.onSaveProject}
@@ -107,7 +101,13 @@ export const create = (authentication: Authentication): React.Node => {
                 />
               )}
               renderGDJSDevelopmentWatcher={
-                isDev ? ({ onGDJSUpdated }) => <LocalGDJSDevelopmentWatcher onGDJSUpdated={onGDJSUpdated} /> : null
+                isDev
+                  ? ({ onGDJSUpdated }) => (
+                      <LocalGDJSDevelopmentWatcher
+                        onGDJSUpdated={onGDJSUpdated}
+                      />
+                    )
+                  : null
               }
               storageProviders={storageProviders}
               resourceMover={LocalResourceMover}

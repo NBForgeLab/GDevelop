@@ -1,4 +1,3 @@
-// @flow
 import * as React from 'react';
 import MainFrame from './MainFrame';
 import Window from './Utils/Window';
@@ -34,7 +33,7 @@ import BrowserLoginProvider from './LoginProvider/BrowserLoginProvider';
 import { isServiceWorkerSupported } from './ServiceWorkerSetup';
 import { ensureBrowserSWPreviewSession } from './ExportAndShare/BrowserExporters/BrowserSWPreviewLauncher/BrowserSWPreviewIndexedDB';
 
-export const create = (authentication: Authentication): React.Node => {
+export const create = (authentication: Authentication): React.ReactNode => {
   Window.setUpContextMenu();
   const loginProvider = new BrowserLoginProvider(authentication.auth);
   authentication.setLoginProvider(loginProvider);
@@ -56,11 +55,7 @@ export const create = (authentication: Authentication): React.Node => {
           ? makeBrowserSWEventsFunctionCodeWriter
           : makeBrowserS3EventsFunctionCodeWriter
       }
-      // $FlowFixMe[incompatible-type]
-      // $FlowFixMe[incompatible-exact]
       eventsFunctionsExtensionWriter={BrowserEventsFunctionsExtensionWriter}
-      // $FlowFixMe[incompatible-type]
-      // $FlowFixMe[incompatible-exact]
       eventsFunctionsExtensionOpener={BrowserEventsFunctionsExtensionOpener}
     >
       {({ i18n }) => (
@@ -85,14 +80,12 @@ export const create = (authentication: Authentication): React.Node => {
               useCliCommandRunner={() => {}}
               renderPreviewLauncher={(props, ref) =>
                 canUseBrowserSW ? (
-                  // $FlowFixMe[incompatible-type]
                   <BrowserSWPreviewLauncher {...props} ref={ref} />
                 ) : (
-                  // $FlowFixMe[incompatible-type]
                   <BrowserS3PreviewLauncher {...props} ref={ref} />
                 )
               }
-              renderShareDialog={props => (
+              renderShareDialog={(props) => (
                 <ShareDialog
                   project={props.project}
                   onSaveProject={props.onSaveProject}

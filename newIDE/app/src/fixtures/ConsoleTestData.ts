@@ -1,4 +1,3 @@
-// @flow
 import { type Log, LogsManager } from '../Debugger/DebuggerConsole';
 
 class MockLogsManager extends LogsManager {
@@ -43,4 +42,4 @@ class MockLogsManager extends LogsManager {
   addLog() {}
 }
 
-export default (new MockLogsManager(): MockLogsManager);
+export default new MockLogsManager() as MockLogsManager;

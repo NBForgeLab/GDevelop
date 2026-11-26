@@ -1,12 +1,15 @@
-// @flow
 import { type BehaviorsRegistry } from '../../Utils/GDevelopServices/Extension';
 import { type BehaviorShortHeader } from '../../Utils/GDevelopServices/Extension';
 
-export const fakeBehaviorsRegistry: BehaviorsRegistry & {
+export const fakeBehaviorsRegistry: Omit<BehaviorsRegistry, 'headers'> & {
   // The service gives CSV but it's converted on the fly to an array.
   // The type attribute is evaluated from extensionName and name.
-  headers: Array<BehaviorShortHeader & { tags: any, type: any }>,
-  // $FlowFixMe[incompatible-type]
+  headers: Array<
+    Omit<BehaviorShortHeader, 'tags' | 'type'> & {
+      tags: any;
+      type: any;
+    }
+  >;
 } = {
   views: {
     default: {
@@ -23,7 +26,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
     },
   },
   headers: [
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'reviewed',
       authorIds: ['IWykYNRvhCZBN3vEgKEbBPOR3Oc2'],
@@ -34,7 +36,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       url: 'https://resources.gdevelop-app.com/extensions/Billboard.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/Billboard-header.json',
-      // $FlowFixMe[incompatible-type]
       tags: '3d',
       category: 'Visual effect',
       previewIconUrl:
@@ -44,10 +45,8 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         'Rotate to always face the camera (only the front face of the cube should be enabled).',
       objectType: 'Scene3D::Cube3DObject',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
     },
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'reviewed',
       authorIds: ['wWP8BSlAW0UP4NeaHa2LcmmDzmH2'],
@@ -58,7 +57,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       url: 'https://resources.gdevelop-app.com/extensions/Bounce.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/Bounce-header.json',
-      // $FlowFixMe[incompatible-type]
       tags: 'bounce,bullet,ricochet',
       category: 'Movement',
       previewIconUrl:
@@ -68,7 +66,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         'Provides an action to make the object bounce from another object it just touched. Add a permanent force to the object and, when in collision with another one, use the action to make it bounce realistically.',
       objectType: '',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
       authors: [
         {
@@ -83,7 +80,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         },
       ],
     },
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'reviewed',
       authorIds: [
@@ -97,7 +93,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       url: 'https://resources.gdevelop-app.com/extensions/FireBullet.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/FireBullet-header.json',
-      // $FlowFixMe[incompatible-type]
       tags: 'fire,bullet,spawn,firerate,reload,weapon,ranged,ammo,overheat',
       category: 'Game mechanic',
       previewIconUrl:
@@ -106,7 +101,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       description: 'Fire bullets, manage ammo, reloading, and overheating.',
       objectType: '',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
       authors: [
         {
@@ -131,7 +125,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         },
       ],
     },
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'reviewed',
       authorIds: ['wWP8BSlAW0UP4NeaHa2LcmmDzmH2'],
@@ -142,7 +135,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       url: 'https://resources.gdevelop-app.com/extensions/Flash.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/Flash-header.json',
-      // $FlowFixMe[incompatible-type]
       tags: 'flash,blink,visible,invisible,hit,damage',
       category: 'Visual effect',
       previewIconUrl:
@@ -152,10 +144,8 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         'Make the object flash (blink) for a period of time, so that it is alternately visible and invisible.\nTrigger the effect by using the Flash action.',
       objectType: '',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
     },
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'reviewed',
       authorIds: ['2OwwM8ToR9dx9RJ2sAKTcrLmCB92'],
@@ -166,7 +156,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       url: 'https://resources.gdevelop-app.com/extensions/Gamepads.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/Gamepads-header.json',
-      // $FlowFixMe[incompatible-type]
       tags: 'controllers,gamepads,joysticks,axis,xbox,ps4',
       category: 'Input',
       previewIconUrl:
@@ -175,7 +164,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       description: 'Control a platformer character with a gamepad.',
       objectType: '',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
       authors: [
         {
@@ -190,7 +178,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         },
       ],
     },
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'reviewed',
       authorIds: ['2OwwM8ToR9dx9RJ2sAKTcrLmCB92'],
@@ -201,7 +188,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       url: 'https://resources.gdevelop-app.com/extensions/Gamepads.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/Gamepads-header.json',
-      // $FlowFixMe[incompatible-type]
       tags: 'controllers,gamepads,joysticks,axis,xbox,ps4',
       category: 'Input',
       previewIconUrl:
@@ -210,7 +196,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       description: 'Control a top-down character with a gamepad.',
       objectType: '',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
       authors: [
         {
@@ -225,7 +210,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         },
       ],
     },
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'reviewed',
       authorIds: [
@@ -239,7 +223,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       url: 'https://resources.gdevelop-app.com/extensions/Health.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/Health-header.json',
-      // $FlowFixMe[incompatible-type]
       tags: 'health,life,damage,hit,heal,shield,regeneration,armor',
       category: 'Game mechanic',
       previewIconUrl:
@@ -249,7 +232,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         'Manage health (life) points including a protective shield and armor.',
       objectType: '',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
       authors: [
         {
@@ -274,7 +256,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         },
       ],
     },
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'reviewed',
       authorIds: ['IWykYNRvhCZBN3vEgKEbBPOR3Oc2'],
@@ -285,7 +266,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       url: 'https://resources.gdevelop-app.com/extensions/SmoothCamera.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/SmoothCamera-header.json',
-      // $FlowFixMe[incompatible-type]
       tags: 'camera,scrolling,follow,smooth',
       category: 'Camera',
       previewIconUrl:
@@ -294,7 +274,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       description: 'Smoothly scroll to follow an object.',
       objectType: '',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
       authors: [
         {
@@ -309,7 +288,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         },
       ],
     },
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'reviewed',
       authorIds: ['IWykYNRvhCZBN3vEgKEbBPOR3Oc2'],
@@ -320,7 +298,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       url: 'https://resources.gdevelop-app.com/extensions/SmoothCamera.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/SmoothCamera-header.json',
-      // $FlowFixMe[incompatible-type]
       tags: 'camera,scrolling,follow,smooth',
       category: 'Camera',
       previewIconUrl:
@@ -330,7 +307,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         'Smoothly scroll to follow a character and stabilize the camera when jumping.',
       objectType: '',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
       authors: [
         {
@@ -345,7 +321,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         },
       ],
     },
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'reviewed',
       authorIds: [
@@ -356,13 +331,10 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       fullName: 'Platformer multitouch controller mapper',
       name: 'PlatformerMultitouchMapper',
       version: '1.2.2',
-      url:
-        'https://resources.gdevelop-app.com/extensions/SpriteMultitouchJoystick.json',
+      url: 'https://resources.gdevelop-app.com/extensions/SpriteMultitouchJoystick.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/SpriteMultitouchJoystick-header.json',
-      tags:
-        // $FlowFixMe[incompatible-type]
-        'multitouch,joystick,thumbstick,controller,touchscreen,twin stick,shooter,virtual',
+      tags: 'multitouch,joystick,thumbstick,controller,touchscreen,twin stick,shooter,virtual',
       category: 'Input',
       previewIconUrl:
         'https://resources.gdevelop-app.com/assets/Icons/Line Hero Pack/Master/SVG/Videogames/Videogames_controller_joystick_arrows_direction.svg',
@@ -371,7 +343,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         'Control a platformer character with a multitouch controller.',
       objectType: '',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
       authors: [
         {
@@ -396,7 +367,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         },
       ],
     },
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'reviewed',
       authorIds: [
@@ -407,13 +377,10 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       fullName: 'Top-down multitouch controller mapper',
       name: 'TopDownMultitouchMapper',
       version: '1.2.2',
-      url:
-        'https://resources.gdevelop-app.com/extensions/SpriteMultitouchJoystick.json',
+      url: 'https://resources.gdevelop-app.com/extensions/SpriteMultitouchJoystick.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/SpriteMultitouchJoystick-header.json',
-      tags:
-        // $FlowFixMe[incompatible-type]
-        'multitouch,joystick,thumbstick,controller,touchscreen,twin stick,shooter,virtual',
+      tags: 'multitouch,joystick,thumbstick,controller,touchscreen,twin stick,shooter,virtual',
       category: 'Input',
       previewIconUrl:
         'https://resources.gdevelop-app.com/assets/Icons/Line Hero Pack/Master/SVG/Videogames/Videogames_controller_joystick_arrows_direction.svg',
@@ -421,7 +388,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       description: 'Control a top-down character with a multitouch controller.',
       objectType: '',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
       authors: [
         {
@@ -446,7 +412,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         },
       ],
     },
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'reviewed',
       authorIds: [
@@ -460,7 +425,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       url: 'https://resources.gdevelop-app.com/extensions/StayOnScreen.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/StayOnScreen-header.json',
-      // $FlowFixMe[incompatible-type]
       tags: 'positioning,camera,screen',
       category: 'Movement',
       previewIconUrl:
@@ -470,7 +434,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         'Force the object to stay visible on the screen by setting back its position inside the viewport of the camera.',
       objectType: '',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
       authors: [
         {
@@ -495,7 +458,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         },
       ],
     },
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'reviewed',
       authorIds: [],
@@ -506,7 +468,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       url: 'https://resources.gdevelop-app.com/extensions/YSort.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/YSort-header.json',
-      // $FlowFixMe[incompatible-type]
       tags: 'z-order,y-sort,depth,fake-depth,isometric,rpg',
       category: 'Visual effect',
       previewIconUrl:
@@ -516,11 +477,9 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         'Set the depth (Z-order) of the instance to the value of its Y position in the scene, creating an illusion of depth. The origin point of the object is used to determine the Z-order.',
       objectType: '',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
       authors: [],
     },
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'experimental',
       authorIds: [
@@ -534,7 +493,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       url: 'https://resources.gdevelop-app.com/extensions/JointConnector.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/JointConnector-header.json',
-      // $FlowFixMe[incompatible-type]
       tags: 'joint,ragdoll,physics,spring,rope,weld,revolute,distance',
       category: 'General',
       previewIconUrl:
@@ -544,7 +502,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         'Create and manage revolute joints between two objects.\nAlso known as a hinge joint because the objects act like they are connected with a hinge that pivots.',
       objectType: '',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
       authors: [
         {
@@ -569,7 +526,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         },
       ],
     },
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'experimental',
       authorIds: [
@@ -583,7 +539,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       url: 'https://resources.gdevelop-app.com/extensions/JointConnector.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/JointConnector-header.json',
-      // $FlowFixMe[incompatible-type]
       tags: 'joint,ragdoll,physics,spring,rope,weld,revolute,distance',
       category: 'General',
       previewIconUrl:
@@ -593,7 +548,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         'Create and manage weld joints between two objects.\nAlso known as a static joint because the objects stay glued in the same relative position to each other.',
       objectType: '',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
       authors: [
         {
@@ -618,7 +572,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         },
       ],
     },
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'experimental',
       authorIds: [
@@ -632,7 +585,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       url: 'https://resources.gdevelop-app.com/extensions/JointConnector.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/JointConnector-header.json',
-      // $FlowFixMe[incompatible-type]
       tags: 'joint,ragdoll,physics,spring,rope,weld,revolute,distance',
       category: 'General',
       previewIconUrl:
@@ -642,7 +594,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         'Create and manage distance joints between two objects. \nActs like a spring because the objects try to stay the same distance apart.',
       objectType: '',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
       authors: [
         {
@@ -667,7 +618,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         },
       ],
     },
-    // $FlowFixMe[incompatible-type]
     {
       tier: 'experimental',
       authorIds: [
@@ -681,7 +631,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
       url: 'https://resources.gdevelop-app.com/extensions/JointConnector.json',
       headerUrl:
         'https://resources.gdevelop-app.com/extensions/JointConnector-header.json',
-      // $FlowFixMe[incompatible-type]
       tags: 'joint,ragdoll,physics,spring,rope,weld,revolute,distance',
       category: 'General',
       previewIconUrl:
@@ -691,7 +640,6 @@ export const fakeBehaviorsRegistry: BehaviorsRegistry & {
         'Create and manage rope joints between two objects. \nObjects can get closer, but they cannot exceed the starting distance from each other.\n',
       objectType: '',
       allRequiredBehaviorTypes: [],
-      // $FlowFixMe[incompatible-type]
       type: null,
       authors: [
         {

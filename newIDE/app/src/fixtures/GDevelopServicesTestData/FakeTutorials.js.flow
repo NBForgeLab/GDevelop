@@ -1,0 +1,8 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type Tutorial } from '../../Utils/GDevelopServices/Tutorial';
+import { type PrivatePdfTutorial } from '../../Utils/GDevelopServices/Asset';
+
+declare export var fakeEducationCurriculumPrivatePdfTutorial: PrivatePdfTutorial;
+declare export var fakeEducationCurriculumPrivateTutorial: Tutorial;
+declare export var fakeTutorials: Array<Tutorial>;

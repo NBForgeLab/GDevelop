@@ -1,9 +1,6 @@
-// @flow
-
 import 'element-closest';
-// $FlowFixMe[missing-export]
-import React, { Component, type Element } from 'react';
-// $FlowFixMe[cannot-resolve-module] - react-dom/client is available in React 18
+import React, { Component, type ReactNode } from 'react';
+// react-dom/client is available in React 18
 import { createRoot } from 'react-dom/client';
 import Authentication from './Utils/GDevelopServices/Authentication';
 import {
@@ -18,7 +15,7 @@ import { showErrorBox } from './UI/Messages/MessageBox';
 import VersionMetadata from './Version/VersionMetadata';
 import { getThemeWindowBackgroundColor } from './UI/Theme';
 
-const GD_STARTUP_TIMES = global.GD_STARTUP_TIMES || [];
+const GD_STARTUP_TIMES = (global as any).GD_STARTUP_TIMES || [];
 
 // No i18n in this file
 
@@ -35,7 +32,7 @@ global.process = global.process || {
 document.getElementsByTagName('body')[0].style.backgroundColor =
   getThemeWindowBackgroundColor();
 
-const styles = {
+const styles: { loadingMessage: React.CSSProperties } = {
   loadingMessage: {
     position: 'absolute',
     top: 'calc(50% + 80px)',
@@ -50,19 +47,17 @@ const styles = {
   },
 };
 
-type State = {|
-  loadingMessage: string,
-  App: ?Element<any>,
-|};
+type State = {
+  loadingMessage: string;
+  App: ReactNode;
+};
 
-class Bootstrapper extends Component<{}, State> {
-  // $FlowFixMe[missing-local-annot]
-  state = {
+class Bootstrapper extends Component<Record<string, never>, State> {
+  state: any = {
     loadingMessage: '',
     App: null,
   };
-  // $FlowFixMe[missing-local-annot]
-  authentication = new Authentication();
+  authentication: any = new Authentication();
 
   componentDidMount() {
     installAnalyticsEvents();
@@ -73,7 +68,7 @@ class Bootstrapper extends Component<{}, State> {
       `./libGD.js?cache-buster=${VersionMetadata.versionWithHash}`
     ).then(() => {
       GD_STARTUP_TIMES.push(['libGDLoadedTime', performance.now()]);
-      const initializeGDevelopJs = global.initializeGDevelopJs;
+      const initializeGDevelopJs = (global as any).initializeGDevelopJs;
       if (!initializeGDevelopJs) {
         this.handleEditorLoadError(
           new Error('Missing initializeGDevelopJs in libGD.js')
@@ -92,8 +87,8 @@ class Bootstrapper extends Component<{}, State> {
           // app.asar archive, which is completely wrong.
           return path + `?cache-buster=${VersionMetadata.versionWithHash}`;
         },
-      }).then(gd => {
-        global.gd = gd;
+      }).then((gd: any) => {
+        (global as any).gd = gd;
         GD_STARTUP_TIMES.push([
           'libGD.js initialization done',
           performance.now(),
@@ -102,7 +97,7 @@ class Bootstrapper extends Component<{}, State> {
 
         if (electron) {
           import(/* webpackChunkName: "local-app" */ './LocalApp')
-            .then(module =>
+            .then((module) =>
               this.setState({
                 App: module.create(this.authentication),
                 loadingMessage: '',
@@ -111,7 +106,7 @@ class Bootstrapper extends Component<{}, State> {
             .catch(this.handleEditorLoadError);
         } else {
           import(/* webpackChunkName: "browser-app" */ './BrowserApp')
-            .then(module =>
+            .then((module) =>
               this.setState({
                 App: module.create(this.authentication),
                 loadingMessage: '',
@@ -123,8 +118,7 @@ class Bootstrapper extends Component<{}, State> {
     }, this.handleEditorLoadError);
   }
 
-  // $FlowFixMe[missing-local-annot]
-  handleEditorLoadError = rawError => {
+  handleEditorLoadError = (rawError: any) => {
     const message = !electron
       ? 'Please check your internet connectivity, close the tab and reopen it.'
       : 'Please restart the application or reinstall the latest version if the problem persists.';
@@ -139,7 +133,6 @@ class Bootstrapper extends Component<{}, State> {
     });
   };
 
-  // $FlowFixMe[missing-local-annot]
   render() {
     const { App, loadingMessage } = this.state;
 

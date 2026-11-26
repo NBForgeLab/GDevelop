@@ -1,0 +1,5 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+
+declare export var declareFakeEffects: (extension: gdPlatformExtension) => void;
+declare export var makeTestExtensions: (gd: libGDevelop) => void;
