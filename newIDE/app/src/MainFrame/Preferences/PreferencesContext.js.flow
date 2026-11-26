@@ -1,0 +1,279 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import type {
+  ResourceKind,
+  ResourceImportationBehavior,
+} from '../../ResourcesList/ResourceSource';
+import { type EditorMosaicNode } from '../../UI/EditorMosaic';
+import { type FileMetadataAndStorageProviderName } from '../../ProjectsStorage';
+import { type ShortcutMap } from '../../KeyboardShortcuts/DefaultShortcuts';
+import { type CommandName } from '../../CommandPalette/CommandsList';
+import { type EditorTabsPersistedState } from '../EditorTabs/EditorTabsHandler';
+import { type GamesDashboardOrderBy } from '../../GameDashboard/GamesList';
+
+export type AlertMessageIdentifier =
+  | 'default-additional-work'
+  | 'automatic-lighting-layer'
+  | 'object-moved-in-lighting-layer'
+  | 'use-non-smoothed-textures'
+  | 'use-pixel-rounding'
+  | 'use-nearest-scale-mode'
+  | 'maximum-fps-too-low'
+  | 'minimum-fps-too-low'
+  | 'function-extractor-explanation'
+  | 'events-based-behavior-explanation'
+  | 'empty-events-based-behavior-explanation'
+  | 'events-based-object-explanation'
+  | 'empty-events-based-object-explanation'
+  | 'too-much-effects'
+  | 'effects-usage'
+  | 'lighting-layer-usage'
+  | 'resource-properties-panel-explanation'
+  | 'physics2-shape-collisions'
+  | 'lifecycle-events-function-included-only-if-extension-used'
+  | 'p2p-is-networking'
+  | 'p2p-dataloss'
+  | 'command-palette-shortcut'
+  | 'asset-installed-explanation'
+  | 'extension-installed-explanation'
+  | 'project-should-have-unique-package-name'
+  | 'slow-graphics-rendering';
+export type EditorMosaicName =
+  | 'scene-editor'
+  | 'debugger'
+  | 'resources-editor'
+  | 'events-functions-extension-editor'
+  | 'gameplay-test-editor';
+export type InAppTutorialUserProgress = {|
+  step: number,
+  /** Rounded progress in percentage */
+  progress: Array<number>,
+  fileMetadataAndStorageProviderName?: FileMetadataAndStorageProviderName,
+  projectData: {| [key: string]: string |},
+|};
+export type InAppTutorialProgressDatabase = {
+  [tutorialId: string]: {
+    [userId: string]: InAppTutorialUserProgress,
+  },
+};
+declare export var allAlertMessages: Array<{
+  key: AlertMessageIdentifier,
+  label: React.Node,
+}>;
+export type EditorStateForPropertyPanel = {
+  scrollPosition: number,
+  collapsedSections: { [string]: boolean },
+};
+export type EditorStateForProject = {|
+  editorTabs: EditorTabsPersistedState | null,
+  propertiesPanel: {
+    [string]: {
+      [string]: EditorStateForPropertyPanel,
+    },
+  },
+|};
+// $FlowFixMe[deprecated-utility]
+export type EditorStateForProjectUpdate = $Shape<EditorStateForProject>;
+export type PreferencesValues = {|
+  language: string,
+  autoDownloadUpdates: boolean,
+  themeName: string,
+  codeEditorThemeName: string,
+  hiddenAlertMessages: { [AlertMessageIdentifier]: boolean },
+  hiddenTutorialHints: { [string]: boolean },
+  hiddenAnnouncements: { [string]: boolean },
+  hiddenAskAiStandAloneForms: { [string]: boolean },
+  autoDisplayChangelog: boolean,
+  lastLaunchedVersion: ?string,
+  eventsSheetShowObjectThumbnails: boolean,
+  autosaveOnPreview: boolean,
+  useGDJSDevelopmentWatcher: boolean,
+  eventsSheetUseAssignmentOperators: boolean,
+  eventsSheetIndentScale: number,
+  eventsSheetZoomLevel: number,
+  showEffectParameterNames: boolean,
+  projectLastUsedPaths: { [string]: { [ResourceKind]: string } },
+  defaultEditorMosaicNodes: { [EditorMosaicName]: ?EditorMosaicNode },
+  recentProjectFiles: Array<FileMetadataAndStorageProviderName>,
+  autoOpenMostRecentProject: boolean,
+  hasProjectOpened: boolean,
+  userShortcutMap: ShortcutMap,
+  newObjectDialogDefaultTab: 'asset-store' | 'new-object',
+  newEffectDialogDefaultTab: 'asset-store' | 'from-scratch',
+  shareDialogDefaultTab: 'invite' | 'publish',
+  isMenuBarHiddenInPreview: boolean,
+  isAlwaysOnTopInPreview: boolean,
+  backdropClickBehavior: 'nothing' | 'apply' | 'cancel',
+  resourcesImporationBehavior: ResourceImportationBehavior,
+  eventsSheetCancelInlineParameter: 'cancel' | 'apply',
+  showExperimentalExtensions: boolean,
+  showCreateSectionByDefault: boolean,
+  showInAppTutorialDeveloperMode: boolean,
+  showDeprecatedInstructionWarning:
+    | 'no'
+    | 'icon'
+    | 'icon-and-deprecated-warning-text',
+  openDiagnosticReportAutomatically: boolean,
+  blockPreviewAndExportOnDiagnosticErrors: boolean,
+  use3DEditor: boolean,
+  showBasicProfilingCounters: boolean,
+  inAppTutorialsProgress: InAppTutorialProgressDatabase,
+  newProjectsDefaultFolder: string,
+  newProjectsDefaultStorageProviderName: string,
+  useShortcutToClosePreviewWindow: boolean,
+  watchProjectFolderFilesForLocalProjects: boolean,
+  /** The month (YYYY-MM) when the claimable products dialog was last shown. */
+  lastClaimableProductsDialogMonth: ?string,
+  autoDisplayClaimableProductsDialog: boolean,
+  newFeaturesAcknowledgements: {
+    [featureId: string]: {| dates: [number] |},
+  },
+  displaySaveReminder: {| activated: boolean |}, // Store as object in case we need to add options.
+  editorStateByProject: { [string]: EditorStateForProject },
+  fetchPlayerTokenForPreviewAutomatically: boolean,
+  previewCrashReportUploadLevel: string,
+  gamesDashboardOrderBy: GamesDashboardOrderBy,
+  takeScreenshotOnPreview: boolean,
+  gameplayTestFramePosition: {| left: number, bottom: number |} | null,
+  gameplayTestFrameZoomFactor: number | null,
+  showAiAskButtonInTitleBar: boolean,
+  automaticallyUseCreditsForAiRequests: boolean,
+  automaticallyApplyAiRequestEditsByProjectId: { [string]: boolean },
+  useBackgroundSerializerForSaving: boolean,
+  disableNpmScriptConfirmation: boolean,
+  showJsTypeError: boolean,
+  canonicalEventSerialization: boolean,
+|};
+// $FlowFixMe[deprecated-utility]
+export type ProjectSpecificPreferencesValues = $Shape<PreferencesValues>;
+export type Preferences = {|
+  values: PreferencesValues,
+  setMultipleValues: (updates: ProjectSpecificPreferencesValues) => void,
+  setLanguage: (language: string) => void,
+  setThemeName: (themeName: string) => void,
+  setCodeEditorThemeName: (codeEditorThemeName: string) => void,
+  setAutoDownloadUpdates: (enabled: boolean) => void,
+  checkUpdates: (forceDownload?: boolean) => void,
+  setAutoDisplayChangelog: (enabled: boolean) => void,
+  showAlertMessage: (identifier: AlertMessageIdentifier, show: boolean) => void,
+  showAllAlertMessages: () => void,
+  showTutorialHint: (identifier: string, show: boolean) => void,
+  showAllTutorialHints: () => void,
+  showAnnouncement: (identifier: string, show: boolean) => void,
+  showAllAnnouncements: () => void,
+  showAskAiStandAloneForm: (identifier: string, show: boolean) => void,
+  showAllAskAiStandAloneForms: () => void,
+  verifyIfIsNewVersion: () => boolean,
+  setEventsSheetShowObjectThumbnails: (enabled: boolean) => void,
+  setAutosaveOnPreview: (enabled: boolean) => void,
+  setUseGDJSDevelopmentWatcher: (enabled: boolean) => void,
+  setEventsSheetUseAssignmentOperators: (enabled: boolean) => void,
+  setEventsSheetIndentScale: (scale: number) => void,
+  setEventsSheetZoomLevel: (zoomLevel: number) => void,
+  setShowEffectParameterNames: (enabled: boolean) => void,
+  getLastUsedPath: (project: gdProject, kind: ResourceKind) => string,
+  setLastUsedPath: (
+    project: gdProject,
+    kind: ResourceKind,
+    path: string
+  ) => void,
+  getDefaultEditorMosaicNode: (name: EditorMosaicName) => ?EditorMosaicNode,
+  setDefaultEditorMosaicNode: (
+    name: EditorMosaicName,
+    node: ?EditorMosaicNode
+  ) => void,
+  getRecentProjectFiles: (
+    options: ?{| limit: number |}
+  ) => Array<FileMetadataAndStorageProviderName>,
+  insertRecentProjectFile: (
+    fileMetadata: FileMetadataAndStorageProviderName
+  ) => void,
+  removeRecentProjectFile: (
+    fileMetadata: FileMetadataAndStorageProviderName
+  ) => void,
+  getAutoOpenMostRecentProject: () => boolean,
+  setAutoOpenMostRecentProject: (enabled: boolean) => void,
+  hadProjectOpenedDuringLastSession: () => boolean,
+  setHasProjectOpened: (enabled: boolean) => void,
+  resetShortcutsToDefault: () => void,
+  setShortcutForCommand: (commandName: CommandName, shortcut: string) => void,
+  getNewObjectDialogDefaultTab: () => 'asset-store' | 'new-object',
+  setNewObjectDialogDefaultTab: ('asset-store' | 'new-object') => void,
+  getNewEffectDialogDefaultTab: () => 'asset-store' | 'from-scratch',
+  setNewEffectDialogDefaultTab: ('asset-store' | 'from-scratch') => void,
+  getShareDialogDefaultTab: () => 'invite' | 'publish',
+  setShareDialogDefaultTab: ('invite' | 'publish') => void,
+  getIsMenuBarHiddenInPreview: () => boolean,
+  setIsMenuBarHiddenInPreview: (enabled: boolean) => void,
+  setBackdropClickBehavior: (value: string) => void,
+  setResourcesImporationBehavior: (value: string) => void,
+  getIsAlwaysOnTopInPreview: () => boolean,
+  setIsAlwaysOnTopInPreview: (enabled: boolean) => void,
+  setEventsSheetCancelInlineParameter: (value: string) => void,
+  setShowExperimentalExtensions: (enabled: boolean) => void,
+  setShowCreateSectionByDefault: (enabled: boolean) => void,
+  setShowInAppTutorialDeveloperMode: (enabled: boolean) => void,
+  setOpenDiagnosticReportAutomatically: (enabled: boolean) => void,
+  getOpenDiagnosticReportAutomatically: () => boolean,
+  setBlockPreviewAndExportOnDiagnosticErrors: (enabled: boolean) => void,
+  getBlockPreviewAndExportOnDiagnosticErrors: () => boolean,
+  setShowDeprecatedInstructionWarning: (
+    value: 'no' | 'icon' | 'icon-and-deprecated-warning-text'
+  ) => void,
+  getShowDeprecatedInstructionWarning: () =>
+    | 'no'
+    | 'icon'
+    | 'icon-and-deprecated-warning-text',
+  setUse3DEditor: (enabled: boolean) => void,
+  getUse3DEditor: () => boolean,
+  setShowBasicProfilingCounters: (enabled: boolean) => void,
+  setDisableNpmScriptConfirmation: (enabled: boolean) => void,
+  setNewProjectsDefaultStorageProviderName: (name: string) => void,
+  saveTutorialProgress: ({|
+    tutorialId: string,
+    userId: ?string,
+    ...InAppTutorialUserProgress,
+  |}) => void,
+  getTutorialProgress: ({|
+    tutorialId: string,
+    userId: ?string,
+  |}) => ?InAppTutorialUserProgress,
+  setNewProjectsDefaultFolder: (newProjectsDefaultFolder: string) => void,
+  setUseShortcutToClosePreviewWindow: (enabled: boolean) => void,
+  setWatchProjectFolderFilesForLocalProjects: (enabled: boolean) => void,
+  setLastClaimableProductsDialogMonth: (month: string) => void,
+  setAutoDisplayClaimableProductsDialog: (enabled: boolean) => void,
+  setNewFeaturesAcknowledgements: ({
+    [featureId: string]: {| dates: [number] |},
+  }) => void,
+  setDisplaySaveReminder: ({| activated: boolean |}) => void,
+  getEditorStateForProject: (projectId: string) => ?EditorStateForProject,
+  setEditorStateForProject: (
+    projectId: string,
+    editorState: EditorStateForProjectUpdate | null
+  ) => void,
+  setFetchPlayerTokenForPreviewAutomatically: (enabled: boolean) => void,
+  setPreviewCrashReportUploadLevel: (level: string) => void,
+  setGamesDashboardOrderBy: (
+    orderBy: 'lastModifiedAt' | 'totalSessions' | 'weeklySessions'
+  ) => void,
+  setTakeScreenshotOnPreview: (enabled: boolean) => void,
+  setGameplayTestFramePosition: (position: {|
+    left: number,
+    bottom: number,
+  |}) => void,
+  setGameplayTestFrameZoomFactor: (zoomFactor: number) => void,
+  setShowAiAskButtonInTitleBar: (enabled: boolean) => void,
+  setAutomaticallyUseCreditsForAiRequests: (enabled: boolean) => void,
+  setAutomaticallyApplyAiRequestEditsForProjectId: (
+    projectId: string,
+    enabled: boolean
+  ) => void,
+  setUseBackgroundSerializerForSaving: (enabled: boolean) => void,
+  setShowJsTypeError: (enabled: boolean) => void,
+  setCanonicalEventSerialization: (enabled: boolean) => void,
+|};
+declare export var initialPreferences: {| values: {| language: "en", autoDownloadUpdates: true, themeName: string, codeEditorThemeName: "vs-dark", hiddenAlertMessages: any, hiddenTutorialHints: any, hiddenAnnouncements: any, hiddenAskAiStandAloneForms: any, autoDisplayChangelog: true, lastLaunchedVersion: any, eventsSheetShowObjectThumbnails: true, autosaveOnPreview: true, useGDJSDevelopmentWatcher: true, eventsSheetUseAssignmentOperators: false, eventsSheetZoomLevel: 14, eventsSheetIndentScale: 1, showEffectParameterNames: false, projectLastUsedPaths: any, defaultEditorMosaicNodes: any, recentProjectFiles: Array<empty>, autoOpenMostRecentProject: true, hasProjectOpened: false, userShortcutMap: any, newObjectDialogDefaultTab: string, newEffectDialogDefaultTab: "asset-store", shareDialogDefaultTab: "publish", isMenuBarHiddenInPreview: true, isAlwaysOnTopInPreview: false, backdropClickBehavior: "nothing", resourcesImporationBehavior: "ask", eventsSheetCancelInlineParameter: "apply", showExperimentalExtensions: false, showCreateSectionByDefault: false, showInAppTutorialDeveloperMode: false, openDiagnosticReportAutomatically: true, blockPreviewAndExportOnDiagnosticErrors: false, showDeprecatedInstructionWarning: "no", use3DEditor: boolean, showBasicProfilingCounters: false, inAppTutorialsProgress: any, newProjectsDefaultFolder: string, newProjectsDefaultStorageProviderName: "Cloud", useShortcutToClosePreviewWindow: true, watchProjectFolderFilesForLocalProjects: true, lastClaimableProductsDialogMonth: any, autoDisplayClaimableProductsDialog: true, newFeaturesAcknowledgements: any, displaySaveReminder: {| activated: true |}, editorStateByProject: any, fetchPlayerTokenForPreviewAutomatically: true, previewCrashReportUploadLevel: "exclude-javascript-code-events", gamesDashboardOrderBy: "lastModifiedAt", takeScreenshotOnPreview: true, gameplayTestFramePosition: any, gameplayTestFrameZoomFactor: any, showAiAskButtonInTitleBar: true, automaticallyUseCreditsForAiRequests: false, automaticallyApplyAiRequestEditsByProjectId: any, useBackgroundSerializerForSaving: false, disableNpmScriptConfirmation: false, showJsTypeError: false, canonicalEventSerialization: false |}, setMultipleValues: any, setLanguage: any, setThemeName: any, setCodeEditorThemeName: any, setAutoDownloadUpdates: any, checkUpdates: any, setAutoDisplayChangelog: any, showAlertMessage: any, showAllAlertMessages: any, showTutorialHint: any, showAllTutorialHints: any, showAnnouncement: any, showAllAnnouncements: any, showAskAiStandAloneForm: any, showAllAskAiStandAloneForms: any, verifyIfIsNewVersion: any, setEventsSheetShowObjectThumbnails: any, setAutosaveOnPreview: any, setUseGDJSDevelopmentWatcher: any, setEventsSheetUseAssignmentOperators: any, setEventsSheetIndentScale: any, setEventsSheetZoomLevel: any, setShowEffectParameterNames: any, getLastUsedPath: any, setLastUsedPath: any, getDefaultEditorMosaicNode: any, setDefaultEditorMosaicNode: any, getRecentProjectFiles: any, insertRecentProjectFile: any, removeRecentProjectFile: any, getAutoOpenMostRecentProject: any, setAutoOpenMostRecentProject: any, hadProjectOpenedDuringLastSession: any, setHasProjectOpened: any, resetShortcutsToDefault: any, setShortcutForCommand: any, getNewObjectDialogDefaultTab: any, setNewObjectDialogDefaultTab: any, getNewEffectDialogDefaultTab: any, setNewEffectDialogDefaultTab: any, getShareDialogDefaultTab: any, setShareDialogDefaultTab: any, getIsMenuBarHiddenInPreview: any, setIsMenuBarHiddenInPreview: any, setBackdropClickBehavior: any, setResourcesImporationBehavior: any, getIsAlwaysOnTopInPreview: any, setIsAlwaysOnTopInPreview: any, setEventsSheetCancelInlineParameter: any, setShowExperimentalExtensions: any, setShowCreateSectionByDefault: any, setShowInAppTutorialDeveloperMode: any, setShowDeprecatedInstructionWarning: any, getOpenDiagnosticReportAutomatically: any, setOpenDiagnosticReportAutomatically: any, getBlockPreviewAndExportOnDiagnosticErrors: any, setBlockPreviewAndExportOnDiagnosticErrors: any, getShowDeprecatedInstructionWarning: any, setUse3DEditor: any, getUse3DEditor: any, setShowBasicProfilingCounters: any, setDisableNpmScriptConfirmation: any, saveTutorialProgress: any, getTutorialProgress: any, setNewProjectsDefaultFolder: any, setNewProjectsDefaultStorageProviderName: any, setUseShortcutToClosePreviewWindow: any, setWatchProjectFolderFilesForLocalProjects: any, setLastClaimableProductsDialogMonth: any, setAutoDisplayClaimableProductsDialog: any, setNewFeaturesAcknowledgements: any, setDisplaySaveReminder: any, getEditorStateForProject: any, setEditorStateForProject: any, setFetchPlayerTokenForPreviewAutomatically: any, setPreviewCrashReportUploadLevel: any, setGamesDashboardOrderBy: any, setTakeScreenshotOnPreview: any, setGameplayTestFramePosition: any, setGameplayTestFrameZoomFactor: any, setShowAiAskButtonInTitleBar: any, setAutomaticallyUseCreditsForAiRequests: any, setAutomaticallyApplyAiRequestEditsForProjectId: any, setUseBackgroundSerializerForSaving: any, setShowJsTypeError: any, setCanonicalEventSerialization: any |};
+// $FlowFixMe[incompatible-type]
+declare export default React.Context<Preferences>;

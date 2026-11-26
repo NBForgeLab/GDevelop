@@ -8,10 +8,6 @@
 // `.js` module instead of adding entries here.
 
 // Top-level unmigrated Flow directory entrypoints (single wildcard only)
-declare module '*/MainFrame' {
-  const content: any;
-  export default content;
-}
 declare module '*/EventsSheet' {
   const content: any;
   export default content;
@@ -70,6 +66,7 @@ declare module '@lingui/react' {
   import * as React from 'react';
   export const I18n: React.ComponentType<{
     children: (args: { i18n: any }) => React.ReactNode;
+    update?: boolean;
   }>;
   export const I18nProvider: React.ComponentType<any>;
 }
@@ -115,7 +112,9 @@ declare module '*.d.ts?raw' {
 
 // Test and UI libraries without bundled TypeScript declarations
 declare module 'react-test-renderer' {
+  import * as React from 'react';
   export const act: (callback: () => void | Promise<void>) => any;
+  export const create: (element: React.ReactElement<any>) => any;
   const content: any;
   export default content;
 }

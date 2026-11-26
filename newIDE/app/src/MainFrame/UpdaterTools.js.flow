@@ -1,0 +1,31 @@
+// @flow
+// @flow-transitional-stub
+import { type I18n } from '@lingui/core';
+import React from 'react';
+
+type ServiceWorkerUpdateStatus =
+  | 'unknown'
+  | 'not-installed'
+  | 'installed'
+  | 'update-installing'
+  | 'update-ready';
+
+export type ElectronUpdateStatus = {
+  message: string,
+  status:
+    | 'checking-for-update'
+    | 'update-available'
+    | 'update-not-available'
+    | 'error'
+    | 'download-progress'
+    | 'update-downloaded'
+    | 'unknown',
+  info?: {| version?: string |},
+};
+declare export var getElectronUpdateNotificationTitle: (updateStatus: ElectronUpdateStatus, i18n: I18n) => string;
+declare export var getElectronUpdateNotificationBody: (updateStatus: ElectronUpdateStatus, i18n: I18n, autoDownloadUpdates: boolean) => string;
+declare export var getElectronUpdateStatusLabel: (status: string) => string | React.Node;
+declare export var getElectronUpdateButtonLabel: (status: string) => React.Node;
+declare export var canDownloadElectronUpdate: (status: string) => boolean;
+declare export var useServiceWorkerUpdateStatus: () => ServiceWorkerUpdateStatus;
+declare export var getServiceWorkerStatusLabel: (status: ServiceWorkerUpdateStatus) => React.Node;

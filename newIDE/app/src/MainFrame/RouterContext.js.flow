@@ -1,0 +1,53 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+type RouteKey =
+  | 'initial-dialog'
+  | 'game-id'
+  | 'games-dashboard-tab'
+  | 'asset-pack'
+  | 'game-template'
+  | 'bundle'
+  | 'bundle-category'
+  | 'tutorial-id'
+  | 'course-id'
+  | 'create-from-example'
+  | 'recommended-plan-id'
+  | 'playable-game-id'
+  | 'purchase-id'
+  | 'claimable-token'
+  | 'product-id'
+  | 'coupon-code'
+  | 'new-project';
+type Props = {|
+  children?: React.Node,
+|};
+
+export type Route =
+  | 'onboarding' // For compatibility when there was only one tutorial.
+  | 'guided-lesson' // New way of opening a tutorial.
+  | 'signup'
+  | 'profile'
+  | 'subscription'
+  | 'games-dashboard'
+  | 'asset-store' // For compatibility when there was only asset packs.
+  | 'store' // New way of opening the store.
+  | 'build' // Old way of opening the build section
+  | 'create' // New way of opening the build section
+  | 'education'
+  | 'learn'
+  | 'play'
+  | 'standalone'
+  | 'ask-ai'
+  | 'credits-purchase';
+export type RouteArguments = { [RouteKey]: string };
+export type Router = {|
+  routeArguments: RouteArguments,
+  removeRouteArguments: (RouteKey[]) => void,
+  addRouteArguments: RouteArguments => void,
+  navigateToRoute: (route: Route, additionalArgument?: RouteArguments) => void,
+|};
+declare export var initialRouterState: Router;
+declare export default React.Context<Router>;
+declare export var RouterContextProvider: React.ComponentType<Props>;

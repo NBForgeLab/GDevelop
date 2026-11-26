@@ -80,12 +80,12 @@ preferences:
       const mockSetMultipleValues = jest.fn();
       const mockSetShortcutForCommand = jest.fn();
       // partial mock
-      const mockPreferences: Preferences = {
+      const mockPreferences = {
         values: { hiddenAlertMessages: {} },
         showAlertMessage: jest.fn(),
         setMultipleValues: mockSetMultipleValues,
         setShortcutForCommand: mockSetShortcutForCommand,
-      };
+      } as unknown as Preferences;
 
       applyProjectPreferences({ preferences: rawPreferences }, mockPreferences);
 
@@ -107,12 +107,12 @@ preferences:
       const mockSetMultipleValues = jest.fn();
       const mockSetShortcutForCommand = jest.fn();
       // partial mock
-      const mockPreferences: Preferences = {
+      const mockPreferences = {
         values: { hiddenAlertMessages: {} },
         showAlertMessage: jest.fn(),
         setMultipleValues: mockSetMultipleValues,
         setShortcutForCommand: mockSetShortcutForCommand,
-      };
+      } as unknown as Preferences;
 
       applyProjectPreferences(
         {

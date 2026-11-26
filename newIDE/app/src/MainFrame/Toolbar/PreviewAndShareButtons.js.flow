@@ -1,0 +1,27 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import { type PreviewState } from '../PreviewState';
+
+export type PreviewAndShareButtonsProps = {|
+  onPreviewWithoutHotReload: (?{ numberOfWindows: number }) => Promise<void>,
+  onOpenDebugger: () => void,
+  onNetworkPreview: () => void,
+  onHotReloadPreview: () => void,
+  onNetworkPreview: () => Promise<void>,
+  onHotReloadPreview: () => Promise<void>,
+  onLaunchPreviewWithDiagnosticReport: () => Promise<void>,
+  setPreviewOverride: ({|
+    isPreviewOverriden: boolean,
+    overridenPreviewLayoutName: ?string,
+    overridenPreviewExternalLayoutName: ?string,
+  |}) => void,
+  canDoNetworkPreview: boolean,
+  isPreviewEnabled: boolean,
+  hasPreviewsRunning: boolean,
+  previewState: PreviewState,
+  openShareDialog: () => void,
+  isSharingEnabled: boolean,
+|};
+// $FlowFixMe[incompatible-type]
+declare export default React.ComponentType<PreviewAndShareButtonsProps>;

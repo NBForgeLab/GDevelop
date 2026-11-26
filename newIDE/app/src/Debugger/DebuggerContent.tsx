@@ -5,6 +5,7 @@ import * as React from 'react';
 import EditorMosaic, {
   type Editor,
   type EditorMosaicInterface,
+  type EditorMosaicNode,
 } from '../UI/EditorMosaic';
 import Background from '../UI/Background';
 import get from 'lodash/get';
@@ -51,7 +52,7 @@ type State = {
   rawMode: boolean;
 };
 
-const initialMosaicEditorNodes = {
+const initialMosaicEditorNodes: EditorMosaicNode = {
   direction: 'column',
   first: {
     direction: 'row',

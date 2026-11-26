@@ -6,6 +6,7 @@ import PreferencesContext from '../../MainFrame/Preferences/PreferencesContext';
 import EditorMosaic, {
   type Editor,
   type EditorMosaicInterface,
+  type EditorMosaicNode,
 } from '../../UI/EditorMosaic';
 import InstancesEditor from '../../InstancesEditor';
 import LayersList, { type LayersListInterface } from '../../LayersList';
@@ -37,7 +38,7 @@ import { InGameEditorUnavailableMessage } from '../../EmbeddedGame/InGameEditorU
 import { useInGameEditorUnavailabilityReason } from '../../EmbeddedGame/InGameEditorAvailability';
 import { exceptionallyGuardAgainstDeadObject } from '../../Utils/IsNullPtr';
 
-const initialMosaicEditorNodes = {
+const initialMosaicEditorNodes: EditorMosaicNode = {
   direction: 'row',
   first: 'properties',
   splitPercentage: 23,

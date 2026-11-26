@@ -1,0 +1,9 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type BuildMainMenuProps, type MainMenuCallbacks, type MainMenuExtraCallbacks } from './MainMenu';
+
+declare export default (arg0: {|
+  props: BuildMainMenuProps,
+  callbacks: MainMenuCallbacks,
+  extraCallbacks: MainMenuExtraCallbacks,
+|}) => null;

@@ -1,0 +1,87 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type I18n as I18nType } from '@lingui/core';
+import { type CommandPaletteInterface } from '../CommandPalette/CommandPalette';
+import { type Preferences } from './Preferences/PreferencesContext';
+import { type CliEditorFunctionCall, type CliEditorFunctionCallsReport, type CliEditorFunctionsEditorCallbacks, type CliProjectCreationCallbacks } from './CliEditorFunctions';
+import { type FileMetadata } from '../ProjectsStorage';
+import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
+import { type OpenAskAiOptions } from '../AiGeneration/Utils';
+
+type CliCommandContext = {|
+  preferences: Preferences,
+  commandArgs: Array<string>,
+  cliOptions: CliOptions,
+  // True when the command was routed to an editor that has the project
+  // opened (instead of opening it headless).
+  isRunInOpenedEditor: boolean,
+  importExtension: ImportExtension,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  saveProject: SaveProject,
+  runEditorFunctionCalls: RunEditorFunctionCalls,
+  triggerUnsavedChanges: () => void,
+  // `SERVE_MCP`: lets the tool calls of the MCP server run.
+  onMcpProjectReady: () => void,
+|};
+type Props = {|
+  project: ?gdProject,
+  i18n: I18nType,
+  fileMetadata: ?FileMetadata,
+  fileIdentifier: ?string,
+  storageProviderName: ?string,
+  resourceManagementProps: ResourceManagementProps,
+  // What the editor functions notify (to refresh the opened editors) or wait
+  // for (to close the editors of what they delete).
+  editorFunctionsEditorCallbacks: CliEditorFunctionsEditorCallbacks,
+  commandPaletteRef: {| current: ?CommandPaletteInterface |},
+  importExtension: ImportExtension,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  saveProject: SaveProject,
+  // Resolves once the project's `gdevelop-settings.yaml` has been read and
+  // applied to the preferences, so the command runner can rely on `preferences`
+  // as the single source of truth without racing the project load.
+  ensureProjectSettingsApplied: () => Promise<void>,
+  // To create the project an agent connected to the editor works on.
+  projectCreationCallbacks: CliProjectCreationCallbacks,
+  openAskAi: (?OpenAskAiOptions) => void,
+|};
+
+export type ImportExtension = (options: {|
+  i18n: I18nType,
+  project: gdProject,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  filePaths?: Array<string>,
+  skipUserPrompts?: boolean,
+|}) => Promise<Array<string>>;
+export type SaveProject = (options?: {|
+  skipNewVersionWarning: boolean,
+|}) => Promise<?FileMetadata>;
+export type CliOptions = {|
+  resultsPath: string | null,
+  // Print the result of the command as JSON on stdout (the logs are then
+  // printed on stderr).
+  json: boolean,
+  // Don't save the project changed by the command.
+  dryRun: boolean,
+  // Only allow the functions that don't modify the project.
+  readOnly: boolean,
+|};
+export type RunEditorFunctionCalls = (
+  functionCalls: Array<CliEditorFunctionCall>,
+  options: {| runScriptReadOnly: boolean |}
+) => Promise<CliEditorFunctionCallsReport>;
+export type CliCommandRunner = (
+  project: gdProject,
+  i18n: I18nType,
+  context: CliCommandContext
+) => Promise<void>;
+declare export var shouldBlockOnDiagnosticErrorsForCli: (preferences: {
+  +getBlockPreviewAndExportOnDiagnosticErrors: () => boolean,
+  ...
+}) => boolean;
+declare export var isGameplayTestSelected: (testName: string, testNamesOrFilters: Array<string>) => boolean;
+declare export var getAwaitableCliRunner: (commandName: string) => ?CliCommandRunner;
+declare export var useCliCommandRunner: (arg0: Props) => void;

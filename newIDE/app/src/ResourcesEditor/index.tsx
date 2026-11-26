@@ -10,6 +10,7 @@ import Toolbar from './Toolbar';
 import EditorMosaic, {
   type Editor,
   type EditorMosaicInterface,
+  type EditorMosaicNode,
 } from '../UI/EditorMosaic';
 import ResourcesLoader from '../ResourcesLoader';
 import optionalRequire from '../Utils/OptionalRequire';
@@ -63,7 +64,7 @@ type Props = {
   storageProvider: StorageProvider;
 };
 
-const initialMosaicEditorNodes = {
+const initialMosaicEditorNodes: EditorMosaicNode = {
   direction: 'row',
   first: 'properties',
   second: 'resources-list',

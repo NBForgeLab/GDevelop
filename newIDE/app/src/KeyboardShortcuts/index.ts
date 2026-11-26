@@ -445,7 +445,10 @@ const getElectronKeyString = (code: string) => {
 /**
  * Converts given shortcut string into an Electron accelerator string
  */
-export const getElectronAccelerator = (shortcutString: string): string => {
+export const getElectronAccelerator = (
+  shortcutString: string | null | undefined
+): string => {
+  if (!shortcutString) return '';
   return shortcutString
     .split('+')
     .map<string>((keyCode) => {

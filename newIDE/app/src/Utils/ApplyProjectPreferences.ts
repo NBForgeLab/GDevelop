@@ -65,7 +65,7 @@ export const filterAllowedPreferences = (parsedPreferences: {
 
   for (const [key, value] of Object.entries(parsedPreferences)) {
     if (allowedPreferences.has(key)) {
-      filtered[key] = value;
+      (filtered as Record<string, any>)[key] = value;
     }
   }
 
@@ -107,7 +107,7 @@ export const applyProjectPreferences = (
     ) {
       filtered.showDeprecatedInstructionWarning =
         normalizeDeprecatedInstructionWarning(
-          filtered.showDeprecatedInstructionWarning
+          filtered.showDeprecatedInstructionWarning || 'no'
         );
     }
     preferences.setMultipleValues(filtered);

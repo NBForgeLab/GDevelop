@@ -1,0 +1,24 @@
+// @flow
+// @flow-transitional-stub
+import * as React from 'react';
+import type { ScriptEntry } from '../../Utils/NpmScriptExecutor';
+import type { ToolbarButtonConfig } from '../CustomToolbarButton';
+
+type Props = {|
+  toolbarButtons: Array<ToolbarButtonConfig>,
+  fileIdentifier: ?string,
+  /**
+   * Number of currently active non-edition preview windows, derived from
+   * debugger connections. Note: hook callbacks fire *after* the preview window
+   * connects (post-launch), not before the launch begins.
+   */
+  previewCount: number,
+|};
+type ReturnType = {|
+  triggerNpmScript: TriggerNpmScript,
+  renderNpmScriptConfirmDialog: () => React.Node,
+  projectPath: ?string,
+|};
+
+export type TriggerNpmScript = (entry: ScriptEntry) => void;
+declare export default (arg0: Props) => ReturnType;

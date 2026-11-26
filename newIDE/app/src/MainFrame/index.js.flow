@@ -1,0 +1,84 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type OpenAskAiOptions } from '../AiGeneration/Utils';
+import { type PreviewLauncherInterface, type PreviewLauncherProps, type PreviewLauncherComponent } from '../ExportAndShare/PreviewLauncher.flow';
+import {
+  type ResourceSource,
+  type ResourceManagementProps,
+} from '../ResourcesList/ResourceSource';
+import { type ResourceExternalEditor } from '../ResourcesList/ResourceExternalEditor';
+import { type JsExtensionsLoader } from '../JsExtensionsLoader';
+import { type I18n } from '@lingui/core';
+import { type ShareDialogWithoutExportsProps } from '../ExportAndShare/ShareDialog';
+import { type StorageProvider, type StorageProviderOperations, type FileMetadata, type ResourcesActionsMenuBuilder } from '../ProjectsStorage';
+import {
+  type BuildMainMenuProps,
+  type MainMenuCallbacks,
+  type MainMenuExtraCallbacks,
+} from './MainMenu';
+import { type CommandPaletteInterface } from '../CommandPalette/CommandPalette';
+import {
+  type ImportExtension,
+  type SaveProject,
+} from './LocalCliCommandRunner';
+import {
+  type CliEditorFunctionsEditorCallbacks,
+  type CliProjectCreationCallbacks,
+} from './CliEditorFunctions';
+import { type ResourceMover } from '../ProjectsStorage/ResourceMover';
+import { type ResourceFetcher } from '../ProjectsStorage/ResourceFetcher';
+
+type CliCommandRunnerOptions = {|
+  project: ?gdProject,
+  i18n: I18n,
+  fileMetadata: ?FileMetadata,
+  fileIdentifier: ?string,
+  storageProviderName: ?string,
+  resourceManagementProps: ResourceManagementProps,
+  editorFunctionsEditorCallbacks: CliEditorFunctionsEditorCallbacks,
+  commandPaletteRef: {| current: ?CommandPaletteInterface |},
+  importExtension: ImportExtension,
+  onWillInstallExtension: (extensionNames: Array<string>) => void,
+  onExtensionInstalled: (extensionNames: Array<string>) => void,
+  saveProject: SaveProject,
+  ensureProjectSettingsApplied: () => Promise<void>,
+  projectCreationCallbacks: CliProjectCreationCallbacks,
+  openAskAi: (?OpenAskAiOptions) => void,
+|};
+
+export type Props = {|
+  renderMainMenu?: (
+    BuildMainMenuProps,
+    MainMenuCallbacks,
+    MainMenuExtraCallbacks
+  ) => React.Node,
+  renderPreviewLauncher?: (
+    props: PreviewLauncherProps,
+    ref: (previewLauncher: ?PreviewLauncherInterface) => void
+    // $FlowFixMe[prop-missing]
+  ) => React.Element<PreviewLauncherComponent>,
+  onEditObject?: gdObject => void,
+  storageProviders: Array<StorageProvider>,
+  resourceMover: ResourceMover,
+  resourceFetcher: ResourceFetcher,
+  getStorageProviderOperations: (
+    storageProvider?: ?StorageProvider
+  ) => StorageProviderOperations,
+  getStorageProviderResourceOperations: () => ?ResourcesActionsMenuBuilder,
+  getStorageProvider: () => StorageProvider,
+  resourceSources: Array<ResourceSource>,
+  resourceExternalEditors: Array<ResourceExternalEditor>,
+  requestUpdate?: () => void,
+  renderShareDialog: ShareDialogWithoutExportsProps => React.Node,
+  renderGDJSDevelopmentWatcher?: ?({|
+    onGDJSUpdated: () => Promise<void> | void,
+  |}) => React.Node,
+  extensionsLoader?: JsExtensionsLoader,
+  initialFileMetadataToOpen: ?FileMetadata,
+  initialExampleSlugToOpen: ?string,
+  i18n: I18n,
+  useCliCommandRunner: (options: CliCommandRunnerOptions) => void,
+  onExportHtml5External?: (project: gdProject, i18n: I18n) => Promise<void>,
+|};
+declare export default React.ComponentType<Props>;

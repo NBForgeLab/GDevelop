@@ -1,0 +1,11 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+export type PreviewVideoRecording = {|
+  /** The id of the game of the project opened in the editor, if any. */
+  currentProjectGameId: ?string,
+  /** Launch a preview where the user records the preview video of the opened project. */
+  onRecordPreviewVideo: () => Promise<void>,
+|};
+declare export default React.Context<PreviewVideoRecording>;

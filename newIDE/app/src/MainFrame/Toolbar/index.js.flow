@@ -1,0 +1,35 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type PreviewAndShareButtonsProps } from './PreviewAndShareButtons';
+import type { OpenedVersionStatus } from '../../VersionHistory';
+import { type ToolbarButtonConfig } from '../CustomToolbarButton';
+import { type FileMetadata } from '../../ProjectsStorage';
+import { type TriggerNpmScript } from '../NpmScriptRunner/useNpmScriptRunner';
+
+export type MainFrameToolbarProps = {|
+  showProjectButtons: boolean,
+  showPreviewAndShareButtons: boolean,
+  openShareDialog: () => void,
+  onSave: (options?: {|
+    skipNewVersionWarning: boolean,
+  |}) => Promise<?FileMetadata>,
+  canSave: boolean,
+  onOpenVersionHistory: () => void,
+  checkedOutVersionStatus?: ?OpenedVersionStatus,
+  onQuitVersionHistory: () => Promise<void>,
+  canQuitVersionHistory: boolean,
+  hidden: boolean,
+  toolbarButtons: Array<ToolbarButtonConfig>,
+  projectPath: ?string,
+  triggerNpmScript: TriggerNpmScript,
+
+  ...PreviewAndShareButtonsProps,
+|};
+export type ToolbarInterface = {|
+  setEditorToolbar: (React.Node | null) => void,
+|};
+declare export default React.ComponentType<{
+  ...MainFrameToolbarProps,
+  +ref?: React.RefSetter<ToolbarInterface>,
+}>;

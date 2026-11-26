@@ -37,7 +37,7 @@ type PaletteMode = 'closed' | 'command' | 'option';
 
 const CommandPalette = React.forwardRef<
   CommandPaletteInterface,
-  Record<string, never>
+  Record<never, never>
 >((props, ref) => {
   const classes = useStyles();
   const paperClasses = useStylesForPaper();
