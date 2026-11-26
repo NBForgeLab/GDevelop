@@ -1,0 +1,5 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type HotReloadPreviewButtonProps } from '../HotReload/HotReloadPreviewButton';
+
+declare export default HotReloadPreviewButtonProps;

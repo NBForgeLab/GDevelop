@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+declare export var emptySubscriptionPlanMockData: any;
+declare export var MockTeamProvider: React.ComponentType<{|
+  children: React.Node,
+  loading: boolean,
+  noGroups?: boolean,
+  noMembers?: boolean,
+  noActiveMembers?: boolean,
+  teamSize?: number,
+|}>;

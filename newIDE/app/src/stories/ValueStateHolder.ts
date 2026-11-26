@@ -1,0 +1,26 @@
+import * as React from 'react';
+
+type Props = {
+  initialValue: any;
+  render: (value: any, onChange: (value: any) => void) => React.ReactNode;
+};
+
+type State = {
+  value: any;
+};
+
+export default class ValueStateHolder extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      value: props.initialValue,
+    };
+  }
+
+  _handleChange = (value: any): any => this.setState({ value });
+
+  render(): any {
+    return this.props.render(this.state.value, this._handleChange);
+  }
+}

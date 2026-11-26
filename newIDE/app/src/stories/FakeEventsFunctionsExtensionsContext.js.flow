@@ -1,0 +1,9 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type EventsFunctionsExtensionsState } from '../EventsFunctionsExtensionsLoader/EventsFunctionsExtensionsContext';
+
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-exact]
+// $FlowFixMe[incompatible-type]
+// $FlowFixMe[incompatible-exact]
+declare export var fakeEventsFunctionsExtensionsState: EventsFunctionsExtensionsState;

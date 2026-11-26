@@ -1,0 +1,14 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import {
+  type Leaderboard,
+  type LeaderboardEntry,
+} from '../Utils/GDevelopServices/Play';
+
+declare export var mockedLeaderboards: Leaderboard[];
+// $FlowFixMe[incompatible-type]
+declare export var mockedEntries: LeaderboardEntry[];
+declare export default React.ComponentType<{|
+  children: React.Node,
+|}>;

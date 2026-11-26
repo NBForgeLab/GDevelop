@@ -1,0 +1,9 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+declare export default React.ComponentType<{
+  children: React.Node,
+  object: any,
+  methodName?: string,
+}>;

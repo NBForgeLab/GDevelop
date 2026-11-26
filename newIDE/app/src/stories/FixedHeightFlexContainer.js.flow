@@ -1,0 +1,13 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+type Props = {
+  children: React.Node,
+  height: number | string,
+  width?: number | string,
+  alignItems?: 'center',
+  justifyContent?: 'center',
+};
+
+declare export default React.ComponentType<Props>;

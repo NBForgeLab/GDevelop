@@ -1,0 +1,8 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type StoryDecorator } from '@storybook/react';
+import { type TestProject } from '../fixtures/TestProject';
+
+// $FlowFixMe[incompatible-type] - make a "bad" object on purpose to ease debugging
+declare export var testProject: TestProject;
+declare export default StoryDecorator;
