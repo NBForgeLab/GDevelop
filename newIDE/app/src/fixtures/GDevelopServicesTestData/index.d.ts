@@ -7,7 +7,7 @@ import type {
   PrivateAssetPackListingData,
   PrivateGameTemplateListingData,
 } from '../../Utils/GDevelopServices/Shop';
-import type { Subscription } from '../../Utils/GDevelopServices/Usage';
+import type { Limits, Subscription } from '../../Utils/GDevelopServices/Usage';
 import type { GameMetrics } from '../../Utils/GDevelopServices/Analytics';
 import type { AuthenticatedUser } from '../../Profile/AuthenticatedUserContext';
 
@@ -29,6 +29,7 @@ export declare const incompatibleButtonV4ExtensionShortHeader: ExtensionShortHea
 export declare const fakePrivateAssetPack1ListingData: PrivateAssetPackListingData;
 export declare const fakePrivateGameTemplateListingData: PrivateGameTemplateListingData;
 export declare const noSubscription: Subscription;
+export declare const limitsForStudentUser: Limits;
 export declare const subscriptionForGoldUser: Subscription;
 export declare const subscriptionForSilverUser: Subscription;
 export declare const subscriptionForStartupUser: Subscription;

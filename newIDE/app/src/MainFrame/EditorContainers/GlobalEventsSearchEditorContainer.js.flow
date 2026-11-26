@@ -1,0 +1,39 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import type {
+  RenderEditorContainerProps,
+  RenderEditorContainerPropsWithRef,
+} from './BaseEditor';
+import type {
+  SceneEventsOutsideEditorChanges,
+  InstancesOutsideEditorChanges,
+  ObjectsOutsideEditorChanges,
+  ObjectGroupsOutsideEditorChanges,
+  WillDeleteObjectChanges,
+  ExtensionsOutsideEditorChanges,
+} from '../../EditorFunctions/OutsideEditorChanges';
+import { type ObjectWithContext } from '../../ObjectsList/EnumerateObjects';
+import { type HotReloadSteps } from '../../EmbeddedGame/EmbeddedGameFrame';
+import { type GlobalEventsSearchEditorInterface } from './GlobalSearch/GlobalEventsSearchEditor';
+
+declare export class GlobalEventsSearchEditorContainer extends React.Component<RenderEditorContainerProps> {
+  _globalEventsSearchEditorRef: ?GlobalEventsSearchEditorInterface;
+  getProject(): ?gdProject;
+  getLayout(): ?gdLayout;
+  updateToolbar(): void;
+  forceUpdateEditor(): void;
+  focusInitialField(): void;
+  onEventsBasedObjectChildrenEdited(eventsBasedObject: gdEventsBasedObject, options?: {| editedObject?: ?gdObject, hasResourceChanged?: boolean |}): void;
+  onSceneObjectEdited(scene: gdLayout, objectWithContext: ObjectWithContext, hasResourceChanged?: boolean): void;
+  onSceneObjectsDeleted(scene: gdLayout): void;
+  onSceneEventsModifiedOutsideEditor(changes: SceneEventsOutsideEditorChanges): void;
+  notifyChangesToInGameEditor(hotReloadSteps: HotReloadSteps): void;
+  switchInGameEditorIfNoHotReloadIsNeeded(): void;
+  onInstancesModifiedOutsideEditor(changes: InstancesOutsideEditorChanges): void;
+  onObjectsModifiedOutsideEditor(changes: ObjectsOutsideEditorChanges): void;
+  onWillDeleteObject(changes: WillDeleteObjectChanges): void;
+  onExtensionsModifiedOutsideEditor(changes: ExtensionsOutsideEditorChanges): void;
+  onObjectGroupsModifiedOutsideEditor(changes: ObjectGroupsOutsideEditorChanges): void;
+}
+declare export var renderGlobalEventsSearchEditorContainer: (props: RenderEditorContainerPropsWithRef) => React.Node;

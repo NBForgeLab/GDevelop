@@ -1,0 +1,26 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+type UseGamesPlatformFrameProps = {|
+  fetchAndOpenNewProjectSetupDialogForExample: string => Promise<void>,
+  onOpenProfileDialog: () => void,
+|};
+
+export type IframePosition = {|
+  isMobile: boolean,
+  top: number,
+  left: number,
+  width: number,
+  height: number,
+|};
+export type GamesPlatformFrameTools = {|
+  startTimeoutToUnloadIframe: () => void,
+  loadIframeOrRemoveTimeout: () => void,
+  iframeLoaded: boolean,
+  iframeVisible: boolean,
+  iframeErrored: boolean,
+  updateIframePosition: (position: IframePosition) => void,
+  renderGamesPlatformFrame: () => React.Node,
+|};
+declare export var useGamesPlatformFrame: (arg0: UseGamesPlatformFrameProps) => GamesPlatformFrameTools;

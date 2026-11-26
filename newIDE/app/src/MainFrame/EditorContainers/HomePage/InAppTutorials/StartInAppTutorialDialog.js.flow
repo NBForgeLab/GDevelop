@@ -1,0 +1,15 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+
+type Props = {|
+  open: boolean,
+  tutorialId: string,
+  onClose: () => void,
+  tutorialCompletionStatus: 'notStarted' | 'started' | 'complete',
+  isProjectOpened?: boolean,
+  isProjectOpening: boolean,
+  startTutorial: (scenario: 'resume' | 'startOver' | 'start') => Promise<void>,
+|};
+
+declare export default React.ComponentType<Props>;

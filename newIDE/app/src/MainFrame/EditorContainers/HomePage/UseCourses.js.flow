@@ -1,0 +1,48 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type I18n as I18nType } from '@lingui/core';
+import { type Course, type CourseChapter } from '../../../Utils/GDevelopServices/Asset';
+import { type CourseListingData } from '../../../Utils/GDevelopServices/Shop';
+
+export type CourseChapterCompletion = {|
+  completedTasks: number,
+  tasks: number,
+|};
+export type CourseCompletion = {|
+  percentage: number,
+  completedChapters: number,
+  chapters: number,
+|};
+declare export default () => {
+  areCoursesFetched: boolean,
+  courses: ?Array<Course>,
+  fetchCourses: () => Promise<Array<Course>>,
+  getChapterCompletion: (
+    courseId: string,
+    chapterId: string
+  ) => CourseChapterCompletion | null,
+  getCourseChapters: (courseId: string) => null | Array<CourseChapter>,
+  getCourseCompletion: (courseId: string) => CourseCompletion | null,
+  isTaskCompleted: (chapterId: string, taskIndex: number) => false | boolean,
+  onBuyCourse: (
+    course: Course,
+    password: string,
+    i18n: I18nType
+  ) => Promise<void>,
+  onBuyCourseWithCredits: (
+    course: Course,
+    password: string,
+    i18n: I18nType
+  ) => Promise<void>,
+  onCompleteTask: (
+    chapterId: string,
+    taskIndex: number,
+    completed: boolean
+  ) => void,
+  onSelectCourse: (courseId: string | null) => void,
+  purchasingCourseListingData: ?CourseListingData,
+  selectedCourse: null | Course,
+  setPurchasingCourseListingData: (
+    (?CourseListingData | ((?CourseListingData) => ?CourseListingData))
+  ) => void,
+};

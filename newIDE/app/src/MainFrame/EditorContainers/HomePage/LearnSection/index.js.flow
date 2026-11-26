@@ -1,0 +1,60 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type I18n as I18nType } from '@lingui/core';
+import * as React from 'react';
+import { type CourseListingData, type PrivateGameTemplateListingData } from '../../../../Utils/GDevelopServices/Shop';
+import type {
+  CourseChapter,
+  Course,
+} from '../../../../Utils/GDevelopServices/Asset';
+import type { CourseChapterCompletion, CourseCompletion } from '../UseCourses';
+import { type LearnCategory } from './Utils';
+import { type ExampleShortHeader } from '../../../../Utils/GDevelopServices/Example';
+import { type OpenAskAiOptions } from '../../../../AiGeneration/Utils';
+
+type Props = {|
+  selectInAppTutorial: (tutorialId: string) => void,
+  selectedCategory: LearnCategory,
+  onSelectCategory: LearnCategory => void,
+  onOpenTemplateFromTutorial: string => Promise<void>,
+  onOpenTemplateFromCourseChapter: CourseChapter => Promise<void>,
+  previewedCourse: ?Course,
+  onSelectCourse: (courseId: string | null) => void,
+  course: ?Course,
+  courses: ?(Course[]),
+  getCourseChapters: (courseId: string) => ?Array<CourseChapter>,
+  onCompleteCourseTask: (
+    chapterId: string,
+    taskIndex: number,
+    completed: boolean
+  ) => void,
+  isCourseTaskCompleted: (chapterId: string, taskIndex: number) => boolean,
+  getCourseChapterCompletion: (
+    courseId: string,
+    chapterId: string
+  ) => CourseChapterCompletion | null,
+  getCourseCompletion: (courseId: string) => CourseCompletion | null,
+  onBuyCourseWithCredits: (
+    Course: Course,
+    password: string,
+    i18n: I18nType
+  ) => Promise<void>,
+  onBuyCourse: (
+    Course: Course,
+    password: string,
+    i18n: I18nType
+  ) => Promise<void>,
+  purchasingCourseListingData: ?CourseListingData,
+  setPurchasingCourseListingData: (CourseListingData | null) => void,
+  onOpenAskAi: (?OpenAskAiOptions) => void,
+  onOpenNewProjectSetupDialog: () => void,
+  onSelectPrivateGameTemplateListingData: (
+    privateGameTemplateListingData: PrivateGameTemplateListingData
+  ) => void,
+  onSelectExampleShortHeader: (exampleShortHeader: ExampleShortHeader) => void,
+  initialBundleUserFriendlySlug: ?string,
+  initialBundleCategory: ?string,
+  clearInitialBundleValues: () => void,
+|};
+
+declare export default React.ComponentType<Props>;

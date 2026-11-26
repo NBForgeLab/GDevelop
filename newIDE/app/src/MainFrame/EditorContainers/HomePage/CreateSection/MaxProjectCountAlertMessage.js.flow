@@ -1,0 +1,11 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import * as React from 'react';
+import { type AuthenticatedUser } from '../../../../Profile/AuthenticatedUserContext';
+
+type Props = {|
+  margin?: 'dense',
+|};
+
+declare export var checkIfHasTooManyCloudProjects: (authenticatedUser: AuthenticatedUser) => boolean;
+declare export var MaxProjectCountAlertMessage: React.ComponentType<Props>;

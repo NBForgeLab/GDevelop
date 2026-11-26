@@ -1,0 +1,54 @@
+// @flow
+// @flow-transitional-stub [Phase 5]
+import { type I18n as I18nType } from '@lingui/core';
+import * as React from 'react';
+import {
+  type TutorialCategory,
+  type Tutorial,
+} from '../../../../Utils/GDevelopServices/Tutorial';
+import { type WindowSizeType } from '../../../../UI/Responsive/ResponsiveWindowMeasurer';
+import { type Limits } from '../../../../Utils/GDevelopServices/Usage';
+import { type ImageTileComponent } from '../../../../UI/ImageTileGrid';
+
+export type LearnCategory =
+  | TutorialCategory
+  | null
+  | 'all-tutorials'
+  | 'all-courses'
+  | 'in-app-tutorials';
+
+declare export var TUTORIAL_CATEGORY_TEXTS: {|
+  'full-game': {| title: React.Node, description: React.Node |},
+  'game-mechanic': {| title: React.Node, description: React.Node |},
+  'official-beginner': {| title: React.Node, description: React.Node |},
+  'official-intermediate': {| title: React.Node, description: React.Node |},
+  'official-advanced': {| title: React.Node, description: React.Node |},
+  'education-curriculum': {| title: React.Node, description: React.Node |},
+  course: {| title: React.Node, description: React.Node |},
+  recommendations: {| title: React.Node, description: null |},
+|};
+
+declare export var getColumnsFromWindowSize: (
+  windowSize: WindowSizeType,
+  isLandscape: boolean
+) => number;
+
+declare export var getChipColorFromTutorialCategory: (
+  category: TutorialCategory
+) => string | null;
+
+declare export var getChipTextFromTutorialCategory: (
+  category: TutorialCategory,
+  i18n: I18nType
+) => string | null;
+
+type FormatTutorialToImageTileComponentProps = {|
+  i18n: I18nType,
+  limits: ?Limits,
+  tutorial: Tutorial,
+  onSelectTutorial: (tutorial: Tutorial) => void,
+|};
+
+declare export var formatTutorialToImageTileComponent: (
+  props: FormatTutorialToImageTileComponentProps
+) => ImageTileComponent;

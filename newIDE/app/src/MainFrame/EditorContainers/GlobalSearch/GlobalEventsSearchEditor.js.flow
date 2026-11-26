@@ -1,0 +1,20 @@
+// @flow
+// @flow-transitional-stub [Phase 5]
+import * as React from 'react';
+import type { NavigateToEventFromGlobalSearchParams } from '../../../Utils/Search';
+
+type GlobalEventsSearchEditorProps = {|
+  project: gdProject,
+  onNavigateToEventFromGlobalSearch: (
+    params: NavigateToEventFromGlobalSearchParams
+  ) => void,
+|};
+
+export type GlobalEventsSearchEditorInterface = {|
+  focusInitialField: () => void,
+|};
+
+declare export var GlobalEventsSearchEditor: React.ComponentType<{
+  ...GlobalEventsSearchEditorProps,
+  +ref?: React.RefSetter<GlobalEventsSearchEditorInterface>,
+}>;

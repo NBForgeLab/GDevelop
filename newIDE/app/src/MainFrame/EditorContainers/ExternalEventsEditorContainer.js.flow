@@ -1,0 +1,67 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import React from 'react';
+import { type EventsSheetInterface } from '../../EventsSheet';
+import {
+  type RenderEditorContainerProps,
+  type RenderEditorContainerPropsWithRef,
+} from './BaseEditor';
+import {
+  type SceneEventsOutsideEditorChanges,
+  type InstancesOutsideEditorChanges,
+  type ObjectsOutsideEditorChanges,
+  type ObjectGroupsOutsideEditorChanges,
+  type WillDeleteObjectChanges,
+  type ExtensionsOutsideEditorChanges,
+} from '../../EditorFunctions/OutsideEditorChanges';
+import { type ExternalProperties } from './ExternalPropertiesDialog';
+import { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
+import { type ObjectWithContext } from '../../ObjectsList/EnumerateObjects';
+import { type HotReloadSteps } from '../../EmbeddedGame/EmbeddedGameFrame';
+import type { EventPath } from '../../Utils/EventPath';
+import type { SearchFilterParams } from '../../Utils/Search';
+import { type EventsScope } from '../../InstructionOrExpression/EventsScope';
+
+type State = {|
+  externalPropertiesDialogOpen: boolean,
+|};
+
+declare export class ExternalEventsEditorContainer extends React.Component<
+  RenderEditorContainerProps,
+  State
+> {
+  editor: ?EventsSheetInterface;
+  _projectScopedContainersAccessor: ProjectScopedContainersAccessor | null;
+  _scope: EventsScope | null;
+  _associatedLayoutName: string | null;
+  resourceExternallyChangedCallbackId: ?string;
+  constructor(props: RenderEditorContainerProps): void;
+  _rebuildProjectScopedContainersAccessor(): void;
+  onResourceExternallyChanged: (resourceInfo: {| identifier: string |}) => void;
+  getProject(): ?gdProject;
+  updateToolbar(): void;
+  scrollToEventPath(eventPath: EventPath): void;
+  setGlobalSearchResults(eventPaths: Array<EventPath>, focusedEventPath: EventPath, searchText: string, searchFilters?: SearchFilterParams): void;
+  clearGlobalSearchResults(): void;
+  selectAllInsideEditor(): void;
+  forceUpdateEditor(): void;
+  onEventsBasedObjectChildrenEdited(eventsBasedObject: gdEventsBasedObject, options?: {| editedObject?: ?gdObject, hasResourceChanged?: boolean |}): void;
+  onSceneObjectEdited(scene: gdLayout, objectWithContext: ObjectWithContext, hasResourceChanged?: boolean): void;
+  onSceneObjectsDeleted(scene: gdLayout): void;
+  onSceneEventsModifiedOutsideEditor(changes: SceneEventsOutsideEditorChanges): void;
+  notifyChangesToInGameEditor(hotReloadSteps: HotReloadSteps): void;
+  switchInGameEditorIfNoHotReloadIsNeeded(): void;
+  onInstancesModifiedOutsideEditor(changes: InstancesOutsideEditorChanges): void;
+  onObjectsModifiedOutsideEditor(changes: ObjectsOutsideEditorChanges): void;
+  onWillDeleteObject(changes: WillDeleteObjectChanges): void;
+  onExtensionsModifiedOutsideEditor(changes: ExtensionsOutsideEditorChanges): void;
+  onObjectGroupsModifiedOutsideEditor(changes: ObjectGroupsOutsideEditorChanges): void;
+  getExternalEvents(): ?gdExternalEvents;
+  getLayout(): ?gdLayout;
+  getAssociatedLayoutName(): string | null;
+  saveExternalProperties: (externalProps: ExternalProperties) => void;
+  openExternalPropertiesDialog: () => void;
+  onBeginCreateEventsFunction: () => void;
+  onCreateEventsFunction: (extensionName: string, eventsFunction: gdEventsFunction) => Promise<void>;
+}
+declare export var renderExternalEventsEditorContainer: (props: RenderEditorContainerPropsWithRef) => React.Node;

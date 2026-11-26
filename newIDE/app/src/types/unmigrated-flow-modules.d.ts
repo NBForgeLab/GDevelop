@@ -175,6 +175,14 @@ declare module 'react-monaco-editor' {
   const MonacoEditor: React.ComponentType<any>;
   export default MonacoEditor;
 }
+declare module 'https://resources.gdevelop.io/a/ggm-web.js' {
+  const ggm: {
+    initialize: (container: HTMLElement) => Promise<void>;
+    [key: string]: any;
+  };
+  export default ggm;
+}
+
 declare module 'xxhashjs' {
   const xxhashjs: {
     h32: (input: string, seed: number) => { toNumber: () => number };
