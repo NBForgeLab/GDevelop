@@ -1,4 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 4]
-
-declare export var enumerateAssetStoreIds: (project: gdProject, objectsContainer: ?gdObjectsContainer) => Set<string>;

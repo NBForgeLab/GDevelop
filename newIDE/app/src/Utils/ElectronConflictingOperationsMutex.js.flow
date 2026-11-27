@@ -1,7 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-declare export var safelyDoFsOperation: <T>(fn: () => Promise<T>) => Promise<T>;
-declare export var notifyWindowClosed: (targetId: string) => void;
-declare export var startWindowClosingIfSafe: (targetId: string) => boolean;
-declare export var waitToSafelyStartWindowClosing: (targetId: string) => Promise<void>;

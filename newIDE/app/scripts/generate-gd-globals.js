@@ -4,7 +4,6 @@ const path = require('path');
 
 const rootDir = path.resolve(__dirname, '../../..');
 const typesDtsPath = path.join(rootDir, 'GDevelop.js', 'types.d.ts');
-const flowTypesDir = path.join(rootDir, 'GDevelop.js', 'types');
 const targetPath = path.join(__dirname, '../src/types/gd-globals.d.ts');
 
 if (!fs.existsSync(typesDtsPath)) {
@@ -46,28 +45,6 @@ const tsTypes = new Set(
   })
 );
 
-// Collect Flow names
-const flowClasses = new Set();
-const flowEnumsOrTypes = new Set();
-if (fs.existsSync(flowTypesDir)) {
-  const files = fs.readdirSync(flowTypesDir);
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const content = fs.readFileSync(path.join(flowTypesDir, file), 'utf8');
-    const classMatches = findAllMatches(content, /declare class (\w+)/g);
-    for (let j = 0; j < classMatches.length; j++) {
-      flowClasses.add(classMatches[j][1]);
-    }
-    const typeMatches = findAllMatches(
-      content,
-      /(?:declare type|type) (\w+)/g
-    );
-    for (let k = 0; k < typeMatches.length; k++) {
-      flowEnumsOrTypes.add(typeMatches[k][1]);
-    }
-  }
-}
-
 // Generate alias mappings
 const lines = [];
 lines.push(
@@ -107,18 +84,6 @@ for (let i = 0; i < sortedClasses.length; i++) {
 // Ensure special Flow aliases
 if (!tsClasses.has('jsExporter')) {
   lines.push('  type gdjsExporter = gd.Exporter;');
-}
-
-// Check any remaining Flow classes not yet covered
-const sortedFlowClasses = Array.from(flowClasses).sort();
-for (let i = 0; i < sortedFlowClasses.length; i++) {
-  const flowClass = sortedFlowClasses[i];
-  if (flowClass.indexOf('gd') === 0) {
-    const stripped = flowClass.slice(2);
-    if (tsClasses.has(stripped)) continue;
-    if (flowClass === 'gdObject' || flowClass === 'gdjsExporter') continue;
-    console.warn('Unmapped Flow class: ' + flowClass);
-  }
 }
 
 lines.push('', '  // Enums');

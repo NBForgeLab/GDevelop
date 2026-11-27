@@ -1,5 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 4]
-import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
-
-declare export default ResourceManagementProps;

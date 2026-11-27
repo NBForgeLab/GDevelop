@@ -1,5 +1,5 @@
 {
-  "//": "This configuration is for scripts only. TypeScript is not used in the newIDE sources (instead, Flow is used).",
+  "//": "TypeScript configuration for Node.js scripts in newIDE/app/scripts.",
   "compilerOptions": {
     "noEmit": true,
     "allowJs": true,
@@ -9,8 +9,8 @@
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "strictPropertyInitialization": true,
-    "lib": ["DOM", "ES5", "ES2015", "ES2016", "ES2017", "ES2018", "ES2019"],
-    "target": "es5",
+    "lib": ["DOM", "DOM.Iterable", "ES2020", "ES2021", "ES2022", "ESNext.Disposable"],
+    "target": "ES2020",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -21,5 +21,10 @@
     "resolveJsonModule": true,
     "isolatedModules": true
   },
-  "include": ["**/*.js", "lib.es5.d.ts"]
+  "include": [
+    "**/*.js",
+    "lib.es5.d.ts",
+    "../src/types/gd-globals.d.ts",
+    "../../../GDevelop.js/types.d.ts"
+  ]
 }

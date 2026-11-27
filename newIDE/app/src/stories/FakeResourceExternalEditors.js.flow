@@ -1,5 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 4]
-import { type ResourceExternalEditor } from '../ResourcesList/ResourceExternalEditor';
-
-declare export default Array<ResourceExternalEditor>;

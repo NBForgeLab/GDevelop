@@ -1,6 +1,6 @@
-# Prettier 1.15.3 has troubles handling the generic typing with Flow in these legacy .js files.
-# (Can be removed once migrated to TypeScript and formatted with Prettier 3.)
+# Vendored third-party JavaScript implementations.
 src/Utils/Sha256.js
+src/Utils/Crypto/sha512.js
 
 # Generated TypeScript files and external-facing public API declarations.
 src/types/gd-globals.d.ts

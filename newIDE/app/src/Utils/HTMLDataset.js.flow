@@ -1,6 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-export type HTMLDataset = {| [key: string]: ?string |};
-
-declare export var dataObjectToProps: (object: ?HTMLDataset) => void | {};

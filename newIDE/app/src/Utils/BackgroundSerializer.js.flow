@@ -1,6 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-declare export function serializeInBackground(type: 'SERIALIZE_TO_JSON' | 'SERIALIZE_TO_JS_OBJECT', serializable: gdSerializable): Promise<any>;
-declare export var serializeToJSONInBackground: (serializable: gdSerializable) => Promise<string>;
-declare export var serializeToJSObjectInBackground: (serializable: gdSerializable) => Promise<Object>;

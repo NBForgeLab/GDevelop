@@ -1,9 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 4]
-
-export type GameplayTestCallbacks = {|
-  onOpenGameplayTest: (testName: string) => void,
-  onRenameGameplayTest: (oldName: string, newName: string) => void,
-  onDeleteGameplayTest: (test: gdTest) => void,
-  onRunGameplayTest: (testName: string) => void | Promise<void>,
-|};

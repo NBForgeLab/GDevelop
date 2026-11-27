@@ -1,7 +1,0 @@
-// @flow
-// @flow-transitional-stub
-
-type Props = {| useCumulatedValue: boolean |};
-
-declare export var useSoftKeyboardBottomOffset: (props?: Props) => number;
-declare export var getAvoidSoftKeyboardStyle: (softKeyboardBottomOffset: number) => { transform: string, transition: string, willChange: string };

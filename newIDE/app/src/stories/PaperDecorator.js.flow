@@ -1,6 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 4]
-import { type StoryDecorator } from '@storybook/react';
-
-declare export var getPaperDecorator: (background: 'medium' | 'dark') => StoryDecorator;
-declare export default StoryDecorator;

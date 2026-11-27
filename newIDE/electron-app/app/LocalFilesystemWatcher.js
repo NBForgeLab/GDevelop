@@ -1,4 +1,3 @@
-// @flow
 const fileWatcher = require('chokidar');
 const path = require('path');
 

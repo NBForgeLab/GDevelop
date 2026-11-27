@@ -1,4 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-declare export default function getObjectByName(globalObjectsContainer: gdObjectsContainer | null, objectsContainer?: ?gdObjectsContainer, objectName: string): ?gdObject;

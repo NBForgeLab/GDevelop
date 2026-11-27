@@ -1,9 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-type Configuration = {|
-  times: number,
-  backoff?: { initialDelay: number, factor?: number },
-|};
-
-declare export var retryIfFailed: <T>(arg0: Configuration, fn: () => Promise<T>) => Promise<T>;

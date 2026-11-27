@@ -9,7 +9,6 @@ import {
   init as initCjsLexer,
   parse as parseCjsExports,
 } from 'cjs-module-lexer';
-import { transformSync as babelTransformSync } from '@babel/core';
 
 let cjsLexerInitPromise = null;
 const ensureCjsLexer = () => {
@@ -20,7 +19,6 @@ const ensureCjsLexer = () => {
 };
 
 const require = createRequire(import.meta.url);
-const presetFlow = require('@babel/preset-flow');
 let sucraseTransform = null;
 try {
   ({ transform: sucraseTransform } = require('sucrase'));
@@ -191,7 +189,7 @@ const createRawTextAssetsPlugin = () => ({
 /**
  * Rewrites `.worker` imports inside the decoupled WorkerFactory modules to Vite `?worker`
  * imports while leaving the factories untouched for Storybook/Webpack's `worker-loader`.
- * Classic workers that call `importScripts` are served as Flow-stripped classic scripts
+ * Classic workers that call `importScripts` are served as classic scripts
  * in `vite` dev mode because dev `?worker` defaults to `{ type: 'module' }`.
  */
 const createWorkerRedirectPlugin = ({ command }) => ({
@@ -231,14 +229,6 @@ const createWorkerRedirectPlugin = ({ command }) => ({
             }
           );
           transformedCode = transformed.code;
-        } else {
-          const transformed = babelTransformSync(source, {
-            filename: absWorkerPath,
-            babelrc: false,
-            configFile: false,
-            presets: [presetFlow],
-          });
-          transformedCode = (transformed && transformed.code) || source;
         }
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
@@ -282,33 +272,8 @@ const createWorkerRedirectPlugin = ({ command }) => ({
   },
 });
 
-const stripFlowForEsbuildScan = (source, filePath) => {
-  if (sucraseTransform) {
-    try {
-      return sucraseTransform(source, {
-        transforms: ['flow', 'jsx'],
-        jsxRuntime: 'classic',
-        disableESTransforms: true,
-        filePath,
-      }).code;
-    } catch (_) {
-      // Fall back to Babel for Flow constructs Sucrase does not accept (e.g. unnamed tuple params).
-    }
-  }
-  const transformed = babelTransformSync(source, {
-    filename: filePath,
-    babelrc: false,
-    configFile: false,
-    presets: [presetFlow],
-    parserOpts: {
-      plugins: ['jsx'],
-    },
-  });
-  return (transformed && transformed.code) || source;
-};
-
-const createFlowEsbuildScannerPlugin = () => ({
-  name: 'flow-remove-types-scanner',
+const createEsbuildScannerPlugin = () => ({
+  name: 'gdevelop-esbuild-scanner',
   setup(build) {
     build.onLoad({ filter: REACT_VIRTUALIZED_ON_SCROLL_RE }, args => {
       const source = fs.readFileSync(args.path, 'utf8');
@@ -328,9 +293,8 @@ const createFlowEsbuildScannerPlugin = () => ({
           loader: args.path.endsWith('.tsx') ? 'tsx' : 'ts',
         };
       }
-      const source = fs.readFileSync(args.path, 'utf8');
       return {
-        contents: stripFlowForEsbuildScan(source, args.path),
+        contents: fs.readFileSync(args.path, 'utf8'),
         loader: 'jsx',
       };
     });
@@ -347,12 +311,12 @@ const createReactVirtualizedFixPlugin = () => ({
 });
 
 /**
- * Strips Flow types and compiles classic JSX with Sucrase on non-macro `.js` source
- * files before `@vitejs/plugin-react` runs, letting Babel skip files that do not need
- * `@lingui/macro` or Fast Refresh instrumentation.
+ * Strips TypeScript types and compiles classic JSX with Sucrase on non-macro
+ * source files before `@vitejs/plugin-react` runs, letting Babel skip files that
+ * do not need `@lingui/macro` or Fast Refresh instrumentation.
  */
-const createFastFlowJsxPlugin = ({ macroFileIds, sucraseHandledIds }) => ({
-  name: 'gdevelop-fast-flow-jsx',
+const createFastTsJsxPlugin = ({ macroFileIds, sucraseHandledIds }) => ({
+  name: 'gdevelop-fast-ts-jsx',
   enforce: 'pre',
   transform(code, id) {
     const cleanId = id.split('?')[0];
@@ -377,13 +341,18 @@ const createFastFlowJsxPlugin = ({ macroFileIds, sucraseHandledIds }) => ({
       return null;
     }
 
+    const isTypeScript = cleanId.endsWith('.ts') || cleanId.endsWith('.tsx');
+    const isJsx = cleanId.endsWith('.jsx');
+    if (!isTypeScript && !isJsx) {
+      return null;
+    }
+
     try {
-      const isTypeScript = cleanId.endsWith('.ts') || cleanId.endsWith('.tsx');
       const transforms = isTypeScript
         ? cleanId.endsWith('.tsx')
           ? ['typescript', 'jsx']
           : ['typescript']
-        : ['flow', 'jsx'];
+        : ['jsx'];
       const transformed = sucraseTransform(code, {
         transforms,
         jsxRuntime: 'classic',
@@ -401,7 +370,7 @@ const createFastFlowJsxPlugin = ({ macroFileIds, sucraseHandledIds }) => ({
           : null,
       };
     } catch (_) {
-      // Fall back to Babel for Flow syntax Sucrase does not support (e.g. unnamed tuple types).
+      // Fall back to Babel if Sucrase cannot transform the file.
       return null;
     }
   },
@@ -428,7 +397,7 @@ const createBabelReactPlugins = ({ macroFileIds, sucraseHandledIds }) =>
         configFile: false,
         presets: [
           ['@babel/preset-react', { runtime: 'classic' }],
-          isTypeScript ? '@babel/preset-typescript' : '@babel/preset-flow',
+          ...(isTypeScript ? ['@babel/preset-typescript'] : []),
         ],
         plugins: macroFileIds.has(cleanId) ? ['babel-plugin-macros'] : [],
       };
@@ -439,7 +408,7 @@ const createTransformPipelinePlugins = () => {
   const macroFileIds = new Set();
   const sucraseHandledIds = new Set();
   return [
-    createFastFlowJsxPlugin({ macroFileIds, sucraseHandledIds }),
+    createFastTsJsxPlugin({ macroFileIds, sucraseHandledIds }),
     createBabelReactPlugins({ macroFileIds, sucraseHandledIds }),
   ];
 };
@@ -655,7 +624,7 @@ export default defineConfig(({ command, mode }) => {
       ],
       esbuildOptions: {
         loader: { '.js': 'jsx' },
-        plugins: [createFlowEsbuildScannerPlugin()],
+        plugins: [createEsbuildScannerPlugin()],
       },
     },
     build: {

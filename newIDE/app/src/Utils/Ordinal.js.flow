@@ -1,5 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-import * as React from 'react';
-
-declare export var rankLabel: { [key: string | number]: React.Node };

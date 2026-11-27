@@ -1,4 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 4]
-
-declare export function isExtensionNameTaken(name: string, project: gdProject): boolean;

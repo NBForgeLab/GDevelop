@@ -1,6 +1,0 @@
-// @flow
-// @flow-transitional-stub
-import { type EditorFunction } from '.';
-
-declare export var runGameplayTest: EditorFunction;
-declare export var changeGameplayTests: EditorFunction;

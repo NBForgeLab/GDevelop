@@ -4,7 +4,7 @@ GDevelop relies on some dependencies that can have special requirements.
 
 ## Note on TypeScript
 
-**TypeScript** here is only used to check the types in the `scripts/` files. The IDE uses Flow for static typing. TypeScript is used in the game engine too (see GDJS and Extensions folders).
+**TypeScript** is used across the IDE (`newIDE/app/src`), build/utility `scripts/`, and the game engine (`GDJS` and `Extensions` folders).
 
 ## Storybook
 

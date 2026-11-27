@@ -1,6 +1,0 @@
-// @flow
-declare export function isNullPtr(
-  gd: libGDevelop,
-  object: gdEmscriptenObject
-): boolean;
-declare export function exceptionallyGuardAgainstDeadObject<T>(obj: ?T): ?T;

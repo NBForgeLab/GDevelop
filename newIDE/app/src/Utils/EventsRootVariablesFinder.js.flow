@@ -1,8 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-declare export default class EventsRootVariablesFinder {
-  static findAllGlobalVariables(platform: gdPlatform, project: gdProject): string[];
-  static findAllLayoutVariables(platform: gdPlatform, project: gdProject, layout: gdLayout): string[];
-  static findAllObjectVariables(platform: gdPlatform, project: gdProject, layout: gdLayout, objectName: string): string[];
-}

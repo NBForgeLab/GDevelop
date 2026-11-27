@@ -1,38 +1,11 @@
-// @flow
-// Note: this file does not use export/imports and use Flow comments to allow its usage from Node.js
+// Note: this file uses CommonJS syntax so it can be required directly from Node.js (types are in index.d.ts).
 
 const some = require('lodash/some');
-/*flow-include
-export type TranslationFunction = (string) => string;
-
-export type JsExtensionModule = {
-  createExtension(_: TranslationFunction, gd: any): gdPlatformExtension,
-  runExtensionSanityTests(gd: any, extension: gdPlatformExtension): Array<string>,
-};
-
-export type ExtensionLoadingResult = {|
-  error: boolean,
-  message: string,
-  dangerous?: boolean,
-  rawError?: any,
-|};
-
-export interface JsExtensionsLoader {
-  loadAllExtensions(_: TranslationFunction): Promise<{|
-    results: Array<{| extensionModulePath: string, result: ExtensionLoadingResult |}>,
-    expectedNumberOfJSExtensionModulesLoaded: number,
-  |}>,
-}
-*/
 
 /**
  * Run extensions tests and check for any non-empty results.
  */
-const runExtensionSanityTests = (
-  gd /*: any */,
-  extension /*: gdPlatformExtension*/,
-  jsExtensionModule /*: JsExtensionModule*/
-) /*: ExtensionLoadingResult*/ => {
+const runExtensionSanityTests = (gd, extension, jsExtensionModule) => {
   if (!jsExtensionModule.runExtensionSanityTests) {
     return {
       error: true,
@@ -60,12 +33,7 @@ const runExtensionSanityTests = (
  * Load an extension from the specified JavaScript module, which is supposed
  * to contain a "createExtension" function returning a gd.PlatformExtension.
  */
-const loadExtension = (
-  _ /*: TranslationFunction */,
-  gd /*: any */,
-  platform /*: gdJsPlatform*/,
-  jsExtensionModule /*: JsExtensionModule*/
-) /*: ExtensionLoadingResult*/ => {
+const loadExtension = (_, gd, platform, jsExtensionModule) => {
   if (!jsExtensionModule.createExtension) {
     return {
       message:

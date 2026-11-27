@@ -1,9 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-import * as React from 'react';
-
-export type Props = {|
-  children: ({| width: number, height: number |}) => React.Node,
-|};
-
-declare export var FullSizeMeasurer: React.ComponentType<Props>;

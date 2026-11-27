@@ -1,7 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 4]
-import { type CommandName } from '../CommandPalette/CommandsList';
-
-export type ShortcutMap = { [CommandName]: string };
-declare export var defaultSecondaryShortcuts: ShortcutMap;
-declare export default ShortcutMap;

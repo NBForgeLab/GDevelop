@@ -1,6 +1,0 @@
-// @flow
-declare export function roundTo(value: number, precision: number): number;
-declare export function toFixedWithoutTrailingZeros(
-  value: number,
-  precision: number
-): string;

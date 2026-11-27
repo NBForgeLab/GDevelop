@@ -1,5 +1,4 @@
-// @flow
-// Note: this file don't use export/imports nor Flow to allow its usage from Node.js
+// Note: this file does not use ES import/export syntax so it can be required directly from Node.js.
 
 const optionalRequire = require('../Utils/OptionalRequire');
 const remote = optionalRequire('@electron/remote');
@@ -9,17 +8,13 @@ const path = optionalRequire('path');
 const process = optionalRequire('process');
 var isDarwin = process && /^darwin/.test(process.platform);
 
-const tryPath = (
-  path /*: string*/,
-  onExists /*: string => void*/,
-  onNoAccess /*: Function*/
-) =>
-  fs.access(path, fs.constants.R_OK, err => {
+const tryPath = (path, onExists, onNoAccess) =>
+  fs.access(path, fs.constants.R_OK, (err) => {
     if (!err) onExists(path);
     else onNoAccess();
   });
 
-const findGDJS = () /*: Promise<{|gdjsRoot: string|}> */ => {
+const findGDJS = () => {
   if (!path || !process || !fs) return Promise.reject(new Error('Unsupported'));
 
   const appPath = app ? app.getAppPath() : process.cwd();
@@ -30,8 +25,7 @@ const findGDJS = () /*: Promise<{|gdjsRoot: string|}> */ => {
   const rootPath = path.join(appPath, pathToRoot);
 
   return new Promise((resolve, reject) => {
-    // $FlowFixMe[missing-local-annot]
-    const onFound = gdjsRoot => resolve({ gdjsRoot });
+    const onFound = (gdjsRoot) => resolve({ gdjsRoot });
     const onNotFound = () => reject(new Error('Could not find GDJS'));
 
     // First try to find GDJS in the parent folder (when newIDE is inside IDE)

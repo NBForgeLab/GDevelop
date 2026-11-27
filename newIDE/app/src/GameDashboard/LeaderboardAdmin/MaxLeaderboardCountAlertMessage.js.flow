@@ -1,8 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 4]
-import * as React from 'react';
-import { type AuthenticatedUser } from '../../Profile/AuthenticatedUserContext';
-import { type Leaderboard } from '../../Utils/GDevelopServices/Play';
-
-declare export var checkIfHasTooManyLeaderboards: (authenticatedUser: AuthenticatedUser, leaderboards: ?Array<Leaderboard>) => ?(false | boolean);
-declare export default () => null | React.Node;

@@ -1,8 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-declare export var startNativeAppActivity: (activityName: string) => (() => void);
-declare export var updateNativeAppLifecycleContext: (newContext: {
-  [string]: any,
-}) => void;
-declare export var startNativeAppBackgroundWork: () => (() => void);

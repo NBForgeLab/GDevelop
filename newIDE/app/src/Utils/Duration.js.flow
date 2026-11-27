@@ -1,5 +1,0 @@
-// @flow
-declare export function formatDuration(
-  durationInSeconds: number,
-  options?: {| noNullDuration: boolean |}
-): string;

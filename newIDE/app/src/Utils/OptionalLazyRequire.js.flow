@@ -1,4 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-declare export default function optionalLazyRequire(moduleName: string): () => ?any;

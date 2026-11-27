@@ -1,7 +1,0 @@
-// @flow
-// @flow-transitional-stub
-import * as React from 'react';
-
-type Props = {| iconUrl: string, isPremium: boolean |};
-
-declare export default function UserAvatar(arg0: Props): React.MixedElement | React.Node;

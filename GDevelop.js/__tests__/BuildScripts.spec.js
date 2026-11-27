@@ -339,7 +339,6 @@ describe('GDevelop.js build scripts', () => {
         'updateGDBindings',
         'make',
         'copyToNewIDE',
-        'generateFlowTypes',
         'generateTSTypes',
       ]);
       expect(result.skippedStepIds).toEqual([]);
@@ -373,11 +372,6 @@ describe('GDevelop.js build scripts', () => {
         {
           type: 'node',
           script: path.join('scripts', 'copy-to-newIDE.js'),
-          cwd: gdevelopJsRoot,
-        },
-        {
-          type: 'node',
-          script: path.join('scripts', 'generate-types.js'),
           cwd: gdevelopJsRoot,
         },
         {
@@ -418,7 +412,6 @@ describe('GDevelop.js build scripts', () => {
       expect(executedNodes).toEqual([
         path.join('scripts', 'sync-versions.js'),
         path.join('scripts', 'copy-to-newIDE.js'),
-        path.join('scripts', 'generate-types.js'),
         path.join('scripts', 'generate-dts.mjs'),
       ]);
     });

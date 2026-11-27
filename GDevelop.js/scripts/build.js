@@ -347,12 +347,6 @@ function createBuildPlan({
           cwd: paths.gdevelopJsRoot,
         },
         {
-          id: 'generateFlowTypes',
-          type: 'node',
-          script: 'scripts/generate-types.js',
-          cwd: paths.gdevelopJsRoot,
-        },
-        {
           id: 'generateTSTypes',
           type: 'node',
           script: 'scripts/generate-dts.mjs',

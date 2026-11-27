@@ -1,5 +1,0 @@
-// @flow
-// @flow-transitional-stub
-
-export type ButtonInterface = { focus: () => void };
-declare export var focusButton: (button: ButtonInterface) => void;

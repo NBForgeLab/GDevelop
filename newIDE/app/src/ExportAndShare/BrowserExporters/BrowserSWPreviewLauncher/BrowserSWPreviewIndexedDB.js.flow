@@ -1,8 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 4]
-
-declare export var getBrowserSWPreviewRootUrl: () => string;
-declare export var getBrowserSWPreviewBaseUrl: () => string;
-declare export var putFile: (path: string, bytes: ArrayBuffer, contentType: string) => Promise<void>;
-declare export var deleteFilesWithPrefix: (pathPrefix: string) => Promise<number>;
-declare export var ensureBrowserSWPreviewSession: () => Promise<void>;

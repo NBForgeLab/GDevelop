@@ -1,6 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-declare export default function useValueWithInit<T>(init: () => T): T;
-
-declare export function useRefWithInit<T>(init: () => T): {| current: T |};

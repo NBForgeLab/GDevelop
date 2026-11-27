@@ -1,6 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-declare export var getProgramOpeningCount: () => number;
-declare export var incrementProgramOpeningCount: () => void;
-declare export var countDailyAggregatedEventOccurrence: (key: string) => number | null;

@@ -68,7 +68,7 @@ Unit tests, type checking and auto-formatting of the code can be launched with t
 ```bash
 cd newIDE/app
 npm run test # or yarn test
-npm run flow # or yarn flow
+npm run check-types # or yarn check-types
 npm run format # or yarn format
 ```
 
@@ -86,9 +86,9 @@ You can then _launch a preview_ in GDevelop.
 
 ### Recommended tools for development
 
-Any text editor is fine, but it's a good idea to have one with _Prettier_ (code formatting), _ESLint_ (code linting) and _Flow_ (type checking) integration. [Modern JavaScript is used for the editor](https://github.com/4ian/GDevelop/blob/master/newIDE/docs/Supported-JavaScript-features-and-coding-style.md).
+Any text editor is fine, but it's a good idea to have one with _Prettier_ (code formatting), _ESLint_ (code linting) and _TypeScript_ integration. [Modern JavaScript/TypeScript is used for the editor](https://github.com/4ian/GDevelop/blob/master/newIDE/docs/Supported-JavaScript-features-and-coding-style.md).
 
-👉 You can use [Visual Studio Code](https://code.visualstudio.com) with these extensions: [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode), [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and [Flow Language Support](https://github.com/flowtype/flow-for-vscode).
+👉 You can use [Visual Studio Code](https://code.visualstudio.com) with these extensions: [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) and [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint).
 
 ### Testing and developing with the cloud storage providers (Google Drive, Dropbox, OneDrive, etc...)
 

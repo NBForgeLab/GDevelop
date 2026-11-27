@@ -1,4 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-declare export var useOptimisticState: <T>(initialState: T, functionToDebounce: (newState: T, args: any) => Promise<void>) => [T, (T, any) => void, (T) => void];

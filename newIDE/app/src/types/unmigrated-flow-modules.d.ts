@@ -1,17 +1,5 @@
-// Ambient typings for unmigrated top-level Flow subsystems, untyped third-party
-// packages, and static assets.
-//
-// NOTE: TypeScript only allows at most a single `*` wildcard in ambient module
-// names (no double-wildcard `*/Foo/*` patterns - TS5061) and forbids relative
-// specifiers (`./` or `../` - TS2436). For individual unmigrated Flow modules
-// imported by TypeScript files, author a companion `.d.ts` file next to the
-// `.js` module instead of adding entries here.
-
-// Top-level unmigrated Flow directory entrypoints (single wildcard only)
-declare module '*/EventsSheet' {
-  const content: any;
-  export default content;
-}
+// Ambient declarations for generated locales, untyped third-party packages,
+// and static assets.
 
 declare module '*/locales/LocalesMetadata' {
   export interface LocaleMetadata {

@@ -1,5 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-export type ScriptEntry = {| script: string, keepTerminalOpen?: boolean |};
-declare export var runNpmScript: (projectPath: string, entry: ScriptEntry) => boolean;

@@ -1,4 +1,3 @@
-// @flow
 const chokidar = require('chokidar');
 const debounce = require('lodash.debounce');
 const electron = require('electron');

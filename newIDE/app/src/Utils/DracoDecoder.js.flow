@@ -1,9 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-declare export var dracoDecoderPath: string;
-export type DracoDecoderFiles = {|
-  dracoWasmWrapperJs: ArrayBuffer,
-  dracoDecoderWasm: ArrayBuffer,
-|};
-declare export var loadDracoDecoderFiles: () => Promise<DracoDecoderFiles>;

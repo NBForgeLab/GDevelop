@@ -105,7 +105,6 @@ blocks:
               (cd GDJS && git checkout package-lock.json && npm i)
             - cd newIDE/app
             - npm run postinstall
-            - npm run flow
             - npm run check-types
             - npm run check-script-types
 

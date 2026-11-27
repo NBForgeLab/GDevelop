@@ -1,6 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-declare export var isRelativePathToDocumentationRoot: (path: string) => boolean;
-declare export var isDocumentationAbsoluteUrl: (path: string) => boolean;
-declare export var getHelpLink: (path: string, anchor?: string) => string;

@@ -1,7 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-import { type InstancesEditorSettings } from '../InstancesEditor/InstancesEditorSettings';
-
-declare export var roundPositionsToGrid: (pos: [number, number], instancesEditorSettings: InstancesEditorSettings, noGridSnap?: boolean) => [number, number];
-declare export var roundPosition: (pos: [number, number], gridWidth: number, gridHeight: number, gridOffsetX: number, gridOffsetY: number, gridType: string) => void;
-declare export var roundPositionForResizing: (pos: [number, number], gridWidth: number, gridHeight: number, gridOffsetX: number, gridOffsetY: number, gridType: string) => void;

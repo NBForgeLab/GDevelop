@@ -1,5 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 4]
-import { type StorageProvider } from '../index';
-
-declare export default StorageProvider;

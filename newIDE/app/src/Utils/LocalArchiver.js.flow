@@ -1,8 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-declare export var archiveLocalFolder: (arg0: {|
-  path: string,
-  outputFilename: string,
-  sizeLimit?: number,
-|}) => Promise<string>;

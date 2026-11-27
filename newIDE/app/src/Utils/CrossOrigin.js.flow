@@ -1,6 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-declare export var checkIfIsGDevelopCloudBucketUrl: (url: string) => boolean;
-declare export var checkIfCredentialsRequired: (url: string) => boolean;
-declare export var addGDevelopResourceTokenIfRequired: (url: string) => string;

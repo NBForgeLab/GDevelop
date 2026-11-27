@@ -8,7 +8,6 @@
     "@babel/core": "^7.22.5",
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@babel/preset-env": "^7.22.14",
-    "@babel/preset-flow": "^7.27.1",
     "@babel/preset-react": "^7.22.5",
     "@babel/preset-typescript": "^7.29.7",
     "@lingui/cli": "^2.7.3",
@@ -39,8 +38,6 @@
     "eslint": "^8.57.1",
     "eslint-config-react-app": "^7.0.1",
     "file-loader": "^6.2.0",
-    "flow-bin": "0.299.0",
-    "flow-coverage-report": "^0.4.0",
     "folder-hash": "^3.0.0",
     "husky": "^9.1.7",
     "identity-obj-proxy": "^3.0.0",
@@ -51,7 +48,6 @@
     "minimist": "1.2.5",
     "patch-package": "^6.4.7",
     "prettier": "3.4.2",
-    "prettier-legacy": "npm:prettier@1.15.3",
     "react-app-polyfill": "^3.0.0",
     "recursive-copy": "^2.0.14",
     "recursive-readdir": "^2.2.2",
@@ -152,19 +148,17 @@
     "build": "npm run import-resources && vite build && node scripts/check-build-output.js && node scripts/make-service-worker.js --build",
     "build:dev": "npm run import-resources && vite build --mode development && node scripts/check-build-output.js && node scripts/copy-GDJS-Runtime-to-build.js && node scripts/make-service-worker.js --build",
     "preview": "vite preview --port 3000",
-    "format": "node scripts/run-prettier.js --write",
-    "check-format": "node scripts/run-prettier.js --list-different",
+    "format": "prettier --config .prettierrc --ignore-path .prettierignore --write \"src/!(locales)/**/*.{js,jsx,ts,tsx}\" \"src/*.{js,jsx,ts,tsx}\"",
+    "check-format": "prettier --config .prettierrc --ignore-path .prettierignore --list-different \"src/!(locales)/**/*.{js,jsx,ts,tsx}\" \"src/*.{js,jsx,ts,tsx}\"",
     "lint": "eslint src/ --max-warnings=0",
     "test": "jest --env=node",
     "test:watch": "jest --env=node --watch",
-    "flow": "flow",
     "check-types": "tsc --noEmit --project tsconfig.json",
     "check-script-types": "cd scripts && tsc",
     "generate-gd-globals": "node scripts/generate-gd-globals.js",
     "storybook": "storybook dev -p 9009",
     "build-storybook": "storybook build -o build-storybook",
     "analyze-test-coverage": "jest --env=node --coverage",
-    "analyze-flow-coverage": "flow-coverage-report",
     "analyze-source-map": "source-map-explorer build/assets/*.js",
     "extract-all-translations": "node scripts/extract-all-translations.js",
     "compile-translations": "node scripts/compile-translations.js",
@@ -215,27 +209,13 @@
       }
     ]
   },
-  "flow-coverage-report": {
-    "includeGlob": [
-      "src/**/*.js"
-    ],
-    "excludeGlob": [
-      "node_modules/**",
-      "src/locales/**"
-    ],
-    "type": [
-      "text",
-      "html",
-      "json"
-    ]
-  },
   "lint-staged": {
     "src/!(locales)/**/*.{js,jsx,ts,tsx}": [
-      "node scripts/run-prettier.js --write",
+      "prettier --config .prettierrc --ignore-path .prettierignore --write",
       "eslint --max-warnings=0"
     ],
-    "src/*.{ts,tsx}": [
-      "node scripts/run-prettier.js --write",
+    "src/*.{js,jsx,ts,tsx}": [
+      "prettier --config .prettierrc --ignore-path .prettierignore --write",
       "eslint --max-warnings=0"
     ]
   },

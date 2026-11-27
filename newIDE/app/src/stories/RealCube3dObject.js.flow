@@ -1,4 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 4]
-
-declare export var getRealCube3dObject: () => gdObject;

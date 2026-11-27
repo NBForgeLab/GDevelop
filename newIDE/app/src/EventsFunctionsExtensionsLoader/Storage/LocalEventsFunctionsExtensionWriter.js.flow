@@ -1,7 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 4]
-
-declare export default class LocalEventsFunctionsExtensionWriter {
-  static chooseEventsFunctionExtensionFile: (extensionName?: string) => Promise<?string>;
-  static writeSerializedObject: (serializedObject: Object, filepath: string) => Promise<void>;
-}

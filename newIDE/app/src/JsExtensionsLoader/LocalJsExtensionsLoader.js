@@ -1,59 +1,36 @@
-// @flow
-// Note: this file does not use export/imports and use Flow comments to allow its usage from Node.js
+// Note: this file uses CommonJS syntax so it can be required directly from Node.js (types are in LocalJsExtensionsLoader.d.ts).
 
 const { loadExtension } = require('.');
 const optionalRequire = require('../Utils/OptionalRequire');
 const { findJsExtensionModules } = require('./LocalJsExtensionsFinder');
 
-/*flow-include
-import type {JsExtensionsLoader, TranslationFunction} from '.';
-import ObjectsEditorService from '../ObjectEditor/ObjectsEditorService';
-import ObjectsRenderingService from '../ObjectsRendering/ObjectsRenderingService';
-
-type MakeExtensionsLoaderArguments = {|
-  gd: any,
-  objectsEditorService: typeof ObjectsEditorService,
-  objectsRenderingService: typeof ObjectsRenderingService,
-  filterExamples: boolean,
-  onFindGDJS?: ?() => Promise<{gdjsRoot: string}>
-|};
-
-type GetExpectedNumberOfJSExtensionModulesArguments = {|
-  filterExamples: boolean,
-|};
-*/
-
 // This value is hardcoded to allow raising an error if the number of JS extensions
 // loaded is different from the expected one, which may lead
 // to projects corruption in the future if the app is still used.
 // If a new extension is added, update this value.
-// Also remember to add the extension in the list of extensions in BrowserJsExtensionsLoader.js
-function getExpectedNumberOfJSExtensionModules(
-  { filterExamples } /*: GetExpectedNumberOfJSExtensionModulesArguments*/
-) /*:number*/ {
+// Also remember to add the extension in the list of extensions in BrowserJsExtensionsLoader.ts
+function getExpectedNumberOfJSExtensionModules({ filterExamples }) {
   return 30 + (filterExamples ? 0 : 1);
 }
 
 /**
  * Loader that will find all JS extensions declared in GDJS/Runtime/Extensions/xxx/JsExtension.js.
  * If you add a new extension and also want it to be available for the web-app version, add it in
- * BrowserJsExtensionsLoader.js
+ * BrowserJsExtensionsLoader.ts
  */
-module.exports = function makeExtensionsLoader(
-  {
-    gd,
-    objectsEditorService,
-    objectsRenderingService,
-    filterExamples,
-    onFindGDJS,
-  } /*: MakeExtensionsLoaderArguments*/
-) /*: JsExtensionsLoader*/ {
+module.exports = function makeExtensionsLoader({
+  gd,
+  objectsEditorService,
+  objectsRenderingService,
+  filterExamples,
+  onFindGDJS,
+}) {
   return {
-    loadAllExtensions: (_ /*: TranslationFunction */) => {
+    loadAllExtensions: (_) => {
       return findJsExtensionModules({ filterExamples, onFindGDJS }).then(
-        extensionModulePaths => {
+        (extensionModulePaths) => {
           return Promise.all(
-            extensionModulePaths.map(extensionModulePath => {
+            extensionModulePaths.map((extensionModulePath) => {
               let extensionModule = null;
               try {
                 extensionModule = optionalRequire(extensionModulePath, {
@@ -112,16 +89,15 @@ module.exports = function makeExtensionsLoader(
                 ),
               };
             })
-          ).then(results => {
+          ).then((results) => {
             return {
               results,
-              expectedNumberOfJSExtensionModulesLoaded: getExpectedNumberOfJSExtensionModules(
-                { filterExamples }
-              ),
+              expectedNumberOfJSExtensionModulesLoaded:
+                getExpectedNumberOfJSExtensionModules({ filterExamples }),
             };
           });
         },
-        err => {
+        (err) => {
           console.error(`Unable to find JS extensions modules`);
           throw err;
         }

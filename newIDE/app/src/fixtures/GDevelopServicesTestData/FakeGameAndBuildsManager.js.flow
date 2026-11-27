@@ -1,8 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 4]
-import { type GameAndBuildsManager } from '../../Utils/UseGameAndBuildsManager';
-
-declare export var fakeEmptyGameAndBuildsManager: GameAndBuildsManager;
-declare export var fakeGameAndBuildsManager: GameAndBuildsManager;
-declare export var fakeNotOwnedGameAndBuildsManager: GameAndBuildsManager;
-declare export var fakeUnexpectedErrorGameAndBuildsManager: GameAndBuildsManager;

@@ -15,10 +15,6 @@
   ],
   "overrides": [
     {
-      "test": ["**/*.js", "**/*.jsx"],
-      "presets": ["@babel/preset-flow"]
-    },
-    {
       "test": ["**/*.ts", "**/*.tsx"],
       "presets": ["@babel/preset-typescript"]
     }

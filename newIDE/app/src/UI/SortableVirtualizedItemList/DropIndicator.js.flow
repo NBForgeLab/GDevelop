@@ -1,7 +1,0 @@
-// @flow
-// @flow-transitional-stub
-import * as React from 'react';
-
-type Props = {| canDrop: boolean, zIndex?: 1 |};
-
-declare export default function DropIndicator(arg0: Props): React.MixedElement;

@@ -1,8 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 4]
-import React from 'react';
-
-declare export default React.ComponentType<{|
-  includeCancelInformation?: boolean,
-  noMargin?: boolean,
-|}>;

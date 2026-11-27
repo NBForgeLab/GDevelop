@@ -1,4 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-declare export function getOrCreate<K, V>(map: Map<K, V>, key: K, createValue: () => V): V;

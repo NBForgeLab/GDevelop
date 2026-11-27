@@ -1,6 +1,4 @@
-// @flow
-// Note: this file does not use export/imports and use Flow comments *and* JS doc to allow its usage
-// from both Flow (in the IDE) and TypeScript (in Node.js).
+// Note: this file uses CommonJS syntax and JSDoc annotations so it can be used from both the IDE and Node.js (types are in MapFor.d.ts).
 
 /**
  * @template T
@@ -9,11 +7,7 @@
  * @param {(i: number) => T} func
  * @returns {Array<T>}
  */
-const mapFor = /*:: <T> */ (
-  start /*: number */,
-  end /*: number */,
-  func /*: (number) => T */
-) /*: Array<T> */ => {
+const mapFor = (start, end, func) => {
   const result = [];
   for (let i = start; i < end; i++) {
     result.push(func(i));
@@ -28,24 +22,13 @@ const mapFor = /*:: <T> */ (
  * @param {(i: number) => T} func
  * @returns {Array<T>}
  */
-const mapReverseFor = /*:: <T> */ (
-  start /*: number */,
-  end /*: number */,
-  func /*: (number) => T */
-) /*: Array<T> */ => {
+const mapReverseFor = (start, end, func) => {
   const result = [];
   for (let i = end - 1; i >= start; i--) {
     result.push(func(i));
   }
   return result;
 };
-
-/*flow-include
-interface CppVector<T> {
-  size(): number;
-  at(number): T;
-}
-*/
 
 /**
  * @template T
@@ -54,15 +37,12 @@ interface CppVector<T> {
 
 /**
  * @template T, U
- * @param {CppVector<T>} start
+ * @param {CppVector<T>} cppVector
  * @param {(item: T, i: number) => U} func
  * @returns {Array<U>}
  */
-const mapVector = /*:: <T, U> */ (
-  cppVector /*: CppVector<T> */,
-  func /*: (T, number) => U */
-) /*: Array<U> */ => {
-  return mapFor(0, cppVector.size(), i => func(cppVector.at(i), i));
+const mapVector = (cppVector, func) => {
+  return mapFor(0, cppVector.size(), (i) => func(cppVector.at(i), i));
 };
 
 module.exports = {

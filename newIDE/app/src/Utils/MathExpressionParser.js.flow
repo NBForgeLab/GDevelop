@@ -1,7 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-declare export function shuntingYard(tokens: string[]): Array<string>;
-declare export function evalReversePolishNotation(tokens: string[]): number;
-declare export function tokenize(expression: string): Array<string>;
-declare export function calculate(expression: string): number;

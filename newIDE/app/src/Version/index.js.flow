@@ -1,7 +1,0 @@
-// @flow
-// @flow-transitional-stub [Phase 1]
-
-declare export var getIDEVersion: () => string;
-declare export var getIDEVersionWithHash: () => string;
-declare export var getGDCoreVersion: () => string;
-declare export var shouldHideExtension: (project: gdProject, extension: gdPlatformExtension) => boolean;
