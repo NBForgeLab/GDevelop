@@ -89,9 +89,12 @@ module.exports = {
       type: 'asset/source',
     });
 
-    // Web workers.
+    // Web workers. Use enforce: 'post' so worker-loader's pitch phase runs
+    // before babel-loader and includes babel-loader in the child compilation
+    // for TypeScript worker files.
     config.module.rules.push({
       test: /\.worker\.(js|ts)$/,
+      enforce: 'post',
       use: {
         loader: require.resolve('worker-loader'),
         options: {

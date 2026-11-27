@@ -1,0 +1,8 @@
+// @flow
+// @flow-transitional-stub [Phase 4]
+import { type PrivateAssetPackListingData, type PrivateGameTemplateListingData } from '../../../../Utils/GDevelopServices/Shop';
+
+declare export var claimableAssetPackListingData: PrivateAssetPackListingData;
+declare export var nextMonthAssetPackListingData: PrivateAssetPackListingData;
+declare export var claimableGameTemplateListingData: PrivateGameTemplateListingData;
+declare export var nextMonthGameTemplateListingData: PrivateGameTemplateListingData;

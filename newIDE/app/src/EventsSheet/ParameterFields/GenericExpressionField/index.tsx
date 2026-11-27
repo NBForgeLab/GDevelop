@@ -239,7 +239,7 @@ export const extractErrors = (
 
 export default class ExpressionField extends React.Component<Props, State> {
   static contextType: React.Context<Preferences> = PreferencesContext;
-  declare context: React.ContextType<typeof PreferencesContext>;
+  context!: React.ContextType<typeof PreferencesContext>;
 
   _field: SemiControlledTextFieldInterface | null | undefined = null;
   _fieldElementWidth: number | null | undefined = null;
