@@ -112,9 +112,9 @@ export const MarkdownText = (props: Props): React.ReactElement<any> => {
           components={markdownCustomComponents}
           remarkPlugins={[remarkGfm]}
         >
-          {props.translatableSource
+          {(props.translatableSource
             ? i18n._(props.translatableSource)
-            : props.source}
+            : props.source) || ''}
         </ReactMarkdown>
       )}
     </I18n>

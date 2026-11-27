@@ -216,7 +216,7 @@ export default class TextEditor extends React.Component<EditorProps> {
             this.forceUpdate();
           }}
           floatingLabelText={<Trans>Choose a font</Trans>}
-          hintText={<Trans>Choose a font</Trans>}
+          hintText={t`Choose a font`}
         />
         <Line noMargin>
           <SemiControlledTextField

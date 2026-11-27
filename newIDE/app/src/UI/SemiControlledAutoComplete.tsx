@@ -381,7 +381,9 @@ export default React.forwardRef<SemiControlledAutoCompleteInterface, Props>(
                     placeholder:
                       typeof props.hintText === 'string'
                         ? props.hintText
-                        : i18n._(props.hintText),
+                        : props.hintText
+                          ? i18n._(props.hintText)
+                          : undefined,
                   }}
                   inputProps={{
                     ...inputProps,

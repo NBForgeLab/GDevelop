@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { VariableSizeList, areEqual } from 'react-window';
+import { VariableSizeList, areEqual, type Align } from 'react-window';
 import { useIsDragging } from '../../UI/DragAndDrop/UseIsDragging';
 import classNames from 'classnames';
 import { AutoSizer } from 'react-virtualized';
@@ -75,14 +75,11 @@ type Props = {
       scrollHeight: number;
       clientHeight: number;
     }) => void;
-    scrollToAlignment?: string;
+    scrollToAlignment?: Align;
   };
 };
 
-type VariableSizeListInstance = {
-  resetAfterIndex: (index: number, shouldForceUpdate?: boolean) => void;
-  scrollToItem: (index: number, align?: string) => void;
-};
+type VariableSizeListInstance = VariableSizeList<RowItemData>;
 
 // -- Tree walk utilities --
 

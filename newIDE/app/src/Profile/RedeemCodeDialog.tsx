@@ -256,6 +256,7 @@ export default function RedeemCodeDialog({
                       You currently have a subscription, applied thanks to a
                       redemption code, valid until{' '}
                       {!!subscription &&
+                        !!subscription.redemptionCodeValidUntil &&
                         i18n.date(subscription.redemptionCodeValidUntil)}
                       . If you redeem another code, your existing subscription
                       will be canceled and not redeemable anymore!

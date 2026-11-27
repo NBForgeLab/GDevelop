@@ -3,7 +3,7 @@ import * as React from 'react';
 import PlaceholderLoader from '../PlaceholderLoader';
 import PlaceholderError from '../PlaceholderError';
 import ErrorBoundary from '../ErrorBoundary';
-import { AutoSizer, Grid } from 'react-virtualized';
+import { AutoSizer, Grid, type GridCellProps } from 'react-virtualized';
 import EmptyMessage from '../EmptyMessage';
 
 type Props<SearchItem> = {
@@ -31,10 +31,7 @@ const styles: {
   grid: { overflowX: 'hidden' },
 };
 
-type GridInstance = {
-  state: { scrollTop: number };
-  scrollToPosition: (params: { scrollLeft: number; scrollTop: number }) => void;
-};
+type GridInstance = Grid;
 
 export type BoxSearchResultsInterface = {
   getScrollPosition: () => number;
@@ -127,32 +124,27 @@ const BoxSearchResultsInner = <SearchItem,>(
               key,
               rowIndex,
               style,
-            }: {
-              columnIndex: number;
-              key: string;
-              rowIndex: number;
-              style: {
-                left: number;
-                top: number;
-                width: number;
-                height: number;
-              };
-            }) {
+            }: GridCellProps) {
               const indexInList = rowIndex * columnCount + columnIndex;
               const searchItem =
                 indexInList < currentSearchItems.length
                   ? currentSearchItems[indexInList]
                   : null;
+              const left = typeof style.left === 'number' ? style.left : 0;
+              const top = typeof style.top === 'number' ? style.top : 0;
+              const width = typeof style.width === 'number' ? style.width : 0;
+              const height =
+                typeof style.height === 'number' ? style.height : 0;
 
               return (
                 <div
                   key={key}
                   style={{
                     ...style,
-                    left: style.left + spacing / 2,
-                    top: style.top + spacing / 2,
-                    width: style.width - spacing,
-                    height: style.height - spacing,
+                    left: left + spacing / 2,
+                    top: top + spacing / 2,
+                    width: width - spacing,
+                    height: height - spacing,
                   }}
                 >
                   {searchItem

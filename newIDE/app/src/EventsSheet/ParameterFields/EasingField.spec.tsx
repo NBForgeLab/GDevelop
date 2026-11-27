@@ -97,8 +97,8 @@ describe('getEasingChoicesWithCustomValue', () => {
 });
 
 describe('getCustomEasingHelperMarkdown', () => {
-  const i18n: I18nType = {
-    _: (message: any, values: any) => {
+  const i18n = {
+    _: (message: any, values?: any): string => {
       const text =
         typeof message === 'string'
           ? message
@@ -109,7 +109,7 @@ describe('getCustomEasingHelperMarkdown', () => {
         (match: string, key: string) => replacements[key] || match
       );
     },
-  };
+  } as unknown as I18nType;
 
   it('tells the user to keep quotes around a cubic-bezier value', () => {
     const helperMarkdown = getCustomEasingHelperMarkdown(i18n);

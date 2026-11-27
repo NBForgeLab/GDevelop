@@ -1,3 +1,5 @@
-// MessageDescriptor is the result of calling "t" macro.
-// It can be passed to i18n_
-export type MessageDescriptor = string | Record<string, any>;
+import { type MessageDescriptor as LinguiMessageDescriptor } from '@lingui/core';
+
+// MessageDescriptor is the result of calling "t" macro, or a plain string.
+// It can be passed to i18n._
+export type MessageDescriptor = LinguiMessageDescriptor | string;

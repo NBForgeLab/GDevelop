@@ -29,7 +29,7 @@ const renderField = ({
           ]}
           extraOptions={[
             {
-              label: { id: 'Custom...', message: 'Custom...' },
+              label: { id: 'Custom...', defaults: 'Custom...' },
               onClick: onExtraOptionClick,
             },
           ]}
@@ -99,14 +99,14 @@ describe('RichSelectField', () => {
                 group: 'first',
                 action: {
                   icon: 'edit',
-                  tooltip: { id: 'Edit', message: 'Edit' },
+                  tooltip: { id: 'Edit', defaults: 'Edit' },
                   onClick: onActionClick,
                 },
               },
               { value: 'b', label: 'B', group: 'first' },
               { value: 'c', label: 'C', group: 'second' },
             ]}
-            groupLabels={{ second: { id: 'Second', message: 'Second' } }}
+            groupLabels={{ second: { id: 'Second', defaults: 'Second' } }}
           />
         </I18nProvider>
       );

@@ -113,7 +113,7 @@ export const CompactTextAreaField = ({
               disabled={disabled}
               value={value === null ? '' : value}
               onChange={(e) => onChange(e.currentTarget.value)}
-              placeholder={i18n._(placeholder)}
+              placeholder={placeholder ? i18n._(placeholder) : undefined}
               onKeyDown={
                 onSubmit
                   ? (e) => {

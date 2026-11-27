@@ -94,7 +94,7 @@ export const getLabelsForObjectsAndGroupsLists = (
 ): {
   localScopeObjectsTitle: MessageDescriptor;
   higherScopeObjectsTitle: MessageDescriptor | null;
-  localScopeGroupsTitle: MessageDescriptor | null;
+  localScopeGroupsTitle: MessageDescriptor;
   higherScopeGroupsTitle: MessageDescriptor | null;
 } => {
   if (scope.layout) {
@@ -1245,6 +1245,7 @@ const ObjectsList = React.forwardRef<ObjectsListInterface, Props>(
       (i18n: I18nType): Array<TreeViewItem> => {
         const treeViewItems: Array<TreeViewItem> = [
           globalObjectsRootFolder &&
+            labels.higherScopeObjectsTitle &&
             new ObjectFolderTreeViewItem({
               objectFolderOrObject: globalObjectsRootFolder,
               global: true,

@@ -64,7 +64,7 @@ const enumerateExpressionMetadataMap = (
 export const enumerateFreeExpressions = (
   type: string,
   project: gdProject,
-  i18n: I18nType
+  i18n: I18nType | null | undefined
 ): Array<EnumeratedExpressionMetadata> => {
   const allExtensions = gd
     .asPlatform(gd.JsPlatform.get())

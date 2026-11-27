@@ -24,8 +24,10 @@ import Slider from '../UI/Slider';
 import AuthenticatedUserContext from '../Profile/AuthenticatedUserContext';
 import { AssetStoreNavigatorContext } from './AssetStoreNavigator';
 
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
+
 type Choice = {
-  label: React.ReactNode;
+  label: MessageDescriptor;
   value: string;
 };
 

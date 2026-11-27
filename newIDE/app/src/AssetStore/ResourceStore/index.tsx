@@ -29,6 +29,13 @@ import PlaceholderError from '../../UI/PlaceholderError';
 import Paper from '../../UI/Paper';
 import PlaceholderLoader from '../../UI/PlaceholderLoader';
 
+type AudioResourceStoreRowData = {
+  items: AudioResourceV2[];
+  onClickPlay: (arg0: number) => void;
+  onSelect: (arg0: number) => void;
+  selectedResourceIndex: number;
+};
+
 const AudioResourceStoreRow = ({
   index,
   style,
@@ -36,12 +43,7 @@ const AudioResourceStoreRow = ({
 }: {
   index: number;
   style: React.CSSProperties;
-  data: {
-    items: AudioResourceV2[];
-    onClickPlay: (arg0: number) => void;
-    onSelect: (arg0: number) => void;
-    selectedResourceIndex: number;
-  };
+  data: AudioResourceStoreRowData;
 }) => {
   const resource = data.items[index];
   if (resource.type !== 'audio') return null;
@@ -94,10 +96,6 @@ type ResourceListAndFiltersProps<T> = {
   onRetry: () => void;
 };
 
-type FixedSizeListInstance = {
-  scrollToItem: (index: number, align?: string) => void;
-};
-
 const AudioResourceListAndFilters = ({
   searchResults,
   isFiltersPanelOpen,
@@ -108,7 +106,7 @@ const AudioResourceListAndFilters = ({
   onSelectResource,
 }: ResourceListAndFiltersProps<AudioResourceV2>) => {
   const soundPlayerRef = React.useRef<SoundPlayerInterface | null>(null);
-  const listRef = React.useRef<FixedSizeListInstance | null>(null);
+  const listRef = React.useRef<List<AudioResourceStoreRowData> | null>(null);
   const shouldPlayAfterResourceSelectionRef = React.useRef<boolean>(false);
   const { getAuthorsDisplayLinks } = React.useContext(ResourceStoreContext);
   const selectedResource =
@@ -201,7 +199,7 @@ const AudioResourceListAndFilters = ({
                         items: searchResults,
                         onClickPlay,
                         onSelect: onSelectResource,
-                        selectedResourceIndex,
+                        selectedResourceIndex: selectedResourceIndex ?? -1,
                       }}
                     >
                       {AudioResourceStoreRow}
@@ -302,7 +300,7 @@ const FontResourceListAndFilters = ({
                     itemSize={130}
                     itemData={{
                       items: searchResults,
-                      selectedResourceIndex,
+                      selectedResourceIndex: selectedResourceIndex ?? -1,
                       onSelect: onSelectResource,
                     }}
                   >

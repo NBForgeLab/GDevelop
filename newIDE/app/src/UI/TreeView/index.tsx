@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FixedSizeList } from 'react-window';
+import { FixedSizeList, type ListChildComponentProps } from 'react-window';
 import memoizeOne from 'memoize-one';
 import classes from './TreeView.module.css';
 import ContextMenu, { type ContextMenuInterface } from '../Menu/ContextMenu';
@@ -286,11 +286,6 @@ const getEndOfListDropTarget = <Item extends ItemBaseAttributes>(
 // dropped at the end of a list filling its whole height.
 const END_OF_LIST_DROP_ZONE_HEIGHT = TREE_VIEW_ROW_HEIGHT;
 
-type FixedSizeListInstance = {
-  scrollTo: (scrollOffset: number) => void;
-  scrollToItem: (index: number, align?: string) => void;
-};
-
 const InnerTreeView = <Item extends ItemBaseAttributes>(
   {
     height,
@@ -335,7 +330,7 @@ const InnerTreeView = <Item extends ItemBaseAttributes>(
   >(null);
   const contextMenuRef = React.useRef<ContextMenuInterface | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const listRef = React.useRef<FixedSizeListInstance | null>(null);
+  const listRef = React.useRef<FixedSizeList<ItemData<Item>> | null>(null);
   const [openedDuringSearchNodeIds, setOpenedDuringSearchNodeIds] =
     React.useState<string[]>([]);
   const { isMobile } = useResponsiveWindowSize();
@@ -985,14 +980,12 @@ const InnerTreeView = <Item extends ItemBaseAttributes>(
 
   const renderList = () => (
     <>
-      <FixedSizeList
+      <FixedSizeList<ItemData<Item>>
         height={height}
         itemCount={flattenedData.length}
         itemSize={TREE_VIEW_ROW_HEIGHT}
         width={typeof width === 'number' ? width : '100%'}
         itemKey={(index: number) => flattenedData[index].id}
-        // Flow does not seem to accept the generic used in FixedSizeList
-        // can itself use a generic.
         itemData={itemData}
         ref={listRef}
         outerRef={listOuterRef}
@@ -1006,7 +999,11 @@ const InnerTreeView = <Item extends ItemBaseAttributes>(
         //   making the item disappear (because of virtualization).
         overscanCount={20}
       >
-        {TreeViewRow}
+        {
+          TreeViewRow as React.ComponentType<
+            ListChildComponentProps<ItemData<Item>>
+          >
+        }
       </FixedSizeList>
       {enableStickyAncestors && stickyRows.length > 0 && (
         <div

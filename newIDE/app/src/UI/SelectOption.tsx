@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { I18n } from '@lingui/react';
+import { type I18n as I18nType } from '@lingui/core';
 import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import GDevelopThemeContext from './Theme/GDevelopThemeContext';
 
@@ -10,6 +11,29 @@ type Props = {
   label: MessageDescriptor | React.ReactNode;
   disabled?: boolean;
   shouldNotTranslate?: boolean;
+};
+
+const isMessageDescriptorObject = (
+  label: MessageDescriptor | React.ReactNode
+): label is Exclude<MessageDescriptor, string> =>
+  typeof label === 'object' &&
+  label !== null &&
+  'id' in label &&
+  typeof label.id === 'string' &&
+  !React.isValidElement(label);
+
+const formatSelectOptionLabel = (
+  label: MessageDescriptor | React.ReactNode,
+  i18n: I18nType,
+  shouldNotTranslate?: boolean
+): React.ReactNode => {
+  if (isMessageDescriptorObject(label)) {
+    return shouldNotTranslate ? label.defaults || label.id : i18n._(label);
+  }
+  if (typeof label === 'string') {
+    return shouldNotTranslate ? label : i18n._(label);
+  }
+  return label;
 };
 
 /**
@@ -31,7 +55,7 @@ const SelectOption = (props: Props): React.ReactNode => {
             backgroundColor: gdevelopTheme.palette.canvasColor,
           }}
         >
-          {props.shouldNotTranslate ? props.label : i18n._(props.label)}
+          {formatSelectOptionLabel(props.label, i18n, props.shouldNotTranslate)}
         </option>
       )}
     </I18n>

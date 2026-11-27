@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { VariableSizeList } from 'react-window';
+import { VariableSizeList, type ListChildComponentProps } from 'react-window';
 import memoizeOne from 'memoize-one';
 import classes from './TreeView.module.css';
 import { useResponsiveWindowSize } from '../Responsive/ResponsiveWindowMeasurer';
@@ -156,12 +156,6 @@ type Props<Item> = {
   enableStickyAncestors?: boolean;
 };
 
-type VariableSizeListInstance = {
-  resetAfterIndex: (index: number, shouldForceUpdate?: boolean) => void;
-  scrollTo: (scrollOffset: number) => void;
-  scrollToItem: (index: number, align?: string) => void;
-};
-
 const ReadOnlyTreeView = <Item extends ItemBaseAttributes>(
   {
     height,
@@ -197,7 +191,7 @@ const ReadOnlyTreeView = <Item extends ItemBaseAttributes>(
     initiallyOpenedNodeIds || []
   );
   const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const listRef = React.useRef<VariableSizeListInstance | null>(null);
+  const listRef = React.useRef<VariableSizeList<ItemData<Item>> | null>(null);
   const [openedDuringSearchNodeIds, setOpenedDuringSearchNodeIds] =
     React.useState<string[]>([]);
   const { isMobile } = useResponsiveWindowSize();
@@ -851,15 +845,13 @@ const ReadOnlyTreeView = <Item extends ItemBaseAttributes>(
       onKeyDown={onKeyDown}
       ref={containerRef}
     >
-      <VariableSizeList
+      <VariableSizeList<ItemData<Item>>
         height={height}
         itemCount={flattenedData.length}
         estimatedItemSize={estimatedItemSize}
         itemSize={(index: number) => getItemHeight(flattenedData[index].item)}
         width={typeof width === 'number' ? width : '100%'}
         itemKey={(index: number) => flattenedData[index].id}
-        // Flow does not seem to accept the generic used in VariableSizeList
-        // can itself use a generic.
         itemData={itemData}
         ref={listRef}
         outerRef={listOuterRef}
@@ -870,7 +862,11 @@ const ReadOnlyTreeView = <Item extends ItemBaseAttributes>(
         overscanCount={20}
         onItemsRendered={() => setIsRendered(true)}
       >
-        {ReadOnlyTreeViewRow}
+        {
+          ReadOnlyTreeViewRow as React.ComponentType<
+            ListChildComponentProps<ItemData<Item>>
+          >
+        }
       </VariableSizeList>
       {enableStickyAncestors && stickyRows.length > 0 && (
         <div

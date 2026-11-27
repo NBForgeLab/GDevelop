@@ -121,7 +121,7 @@ const isBehaviorInstruction = (
 
 export const getExtensionPrefix = (
   extension: gdPlatformExtension,
-  i18n: I18nType
+  i18n: I18nType | null | undefined
 ): string => {
   return (
     translateExtensionCategory(extension.getCategory(), i18n) +
@@ -137,7 +137,7 @@ const enumerateExtraBehaviorInstructions = (
   prefix: string,
   scope: InstructionOrExpressionScope,
   project: gdProject,
-  i18n: I18nType
+  i18n: I18nType | null | undefined
 ): Array<EnumeratedInstructionMetadata> => {
   if (shouldHideExtension(project, extension)) {
     return [];
@@ -176,7 +176,7 @@ const enumerateExtraObjectInstructions = (
   objectBehaviorTypes: Set<string> | undefined,
   scope: InstructionOrExpressionScope,
   project: gdProject,
-  i18n: I18nType
+  i18n: I18nType | null | undefined
 ): Array<EnumeratedInstructionMetadata> => {
   if (shouldHideExtension(project, extension)) {
     return [];
@@ -276,7 +276,7 @@ const enumerateInstruction = (
   type: string,
   instrMetadata: gdInstructionMetadata,
   scope: InstructionOrExpressionScope,
-  i18n: I18nType,
+  i18n: I18nType | null | undefined,
   ignoresGroups: boolean = false
 ): EnumeratedInstructionMetadata => {
   const displayedName = instrMetadata.getFullName();
@@ -317,7 +317,7 @@ const enumerateExtensionInstructions = (
   prefix: string,
   instructions: gdMapStringInstructionMetadata,
   scope: InstructionOrExpressionScope,
-  i18n: I18nType,
+  i18n: I18nType | null | undefined,
   objectType?: string,
   objectBehaviorTypes?: Set<string>
 ): Array<EnumeratedInstructionMetadata> => {
@@ -360,7 +360,7 @@ const enumerateExtensionInstructions = (
 export const enumerateAllInstructions = (
   isCondition: boolean,
   project: gdProject,
-  i18n: I18nType
+  i18n: I18nType | null | undefined
 ): Array<EnumeratedInstructionMetadata> => {
   let allInstructions: Array<EnumeratedInstructionMetadata> = [];
 
@@ -466,7 +466,7 @@ export const enumerateObjectAndBehaviorsInstructions = (
   objectsContainer: gdObjectsContainer,
   objectName: string,
   project: gdProject,
-  i18n: I18nType
+  i18n: I18nType | null | undefined
 ): Array<EnumeratedInstructionMetadata> => {
   let allInstructions: Array<EnumeratedInstructionMetadata> = [];
 

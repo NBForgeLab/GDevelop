@@ -44,18 +44,10 @@ type Props<Item> = {
   reactDndType: string;
 };
 
-type VirtualizedListInstance = {
-  forceUpdateGrid: () => void;
-  scrollToRow: (index: number) => void;
-  props: {
-    style: React.CSSProperties;
-  };
-};
-
 export default class SortableVirtualizedItemList<Item> extends React.Component<
   Props<Item>
 > {
-  _list: VirtualizedListInstance | null | undefined;
+  _list: List | null | undefined;
   DragSourceAndDropTarget = makeDragSourceAndDropTarget<DraggedItem>(
     this.props.reactDndType,
     { touchDragStart: 'afterHold' }
@@ -152,9 +144,9 @@ export default class SortableVirtualizedItemList<Item> extends React.Component<
           <ScreenTypeMeasurer>
             {(screenType) => (
               <List
-                ref={(list: VirtualizedListInstance | null) =>
-                  (this._list = list)
-                }
+                ref={(list: List | null) => {
+                  this._list = list;
+                }}
                 // We override this function to avoid a bug in react-virtualized
                 // where the overscanCellsCount is not taken into account after a scroll
                 // see https://github.com/bvaughn/react-virtualized/issues/1582#issuecomment-785073746
@@ -226,7 +218,7 @@ export default class SortableVirtualizedItemList<Item> extends React.Component<
                           // Find the React-Virtualized list and prevent it from scrolling whilst dragging
                           // by setting the overflow to 'hidden' and then back to 'auto' when the drag is finished.
                           if (screenType === 'touch') {
-                            if (this._list) {
+                            if (this._list && this._list.props.style) {
                               this._list.props.style.overflow = 'hidden';
                             }
                           }
@@ -260,7 +252,7 @@ export default class SortableVirtualizedItemList<Item> extends React.Component<
                         endDrag={() => {
                           // Re-enable scrolling on touch screens.
                           if (screenType !== 'touch') return;
-                          if (this._list) {
+                          if (this._list && this._list.props.style) {
                             this._list.props.style.overflow = 'auto';
                             this.forceUpdate();
                           }

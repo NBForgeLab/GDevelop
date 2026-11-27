@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Measure from 'react-measure';
+import Measure, { type ContentRect } from 'react-measure';
 import { makeStyles } from '@material-ui/core/styles';
 import CardMedia from '@material-ui/core/CardMedia';
 import Grid from '@material-ui/core/Grid';
@@ -159,8 +159,10 @@ const ResponsiveMediaGallery = ({
       >
         <Measure
           bounds
-          onResize={(contentRect: { bounds: { width: number } }) => {
-            setMobileGridClientWidth(contentRect.bounds.width);
+          onResize={(contentRect: ContentRect) => {
+            if (contentRect.bounds) {
+              setMobileGridClientWidth(contentRect.bounds.width);
+            }
           }}
         >
           {({

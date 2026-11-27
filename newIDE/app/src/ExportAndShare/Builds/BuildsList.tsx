@@ -1,5 +1,6 @@
 import { t, Trans } from '@lingui/macro';
 import * as React from 'react';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 
 import { Column, Line } from '../../UI/Grid';
 import EmptyMessage from '../../UI/EmptyMessage';
@@ -36,7 +37,7 @@ type BuildFilter = BuildType | 'all-build';
 const buildFilterOptions: Array<{
   key: BuildFilter;
   value: BuildFilter;
-  label: React.ReactNode;
+  label: MessageDescriptor;
 }> = [
   {
     key: 'all-build',

@@ -372,7 +372,7 @@ const createField = (
         const choices: Array<FieldChoices> = mapFor(
           0,
           object.getConfiguration().getAnimationsCount(),
-          (i) => {
+          (i): FieldChoices | null => {
             const animationName = object.getConfiguration().getAnimationName(i);
             return animationName === ''
               ? null

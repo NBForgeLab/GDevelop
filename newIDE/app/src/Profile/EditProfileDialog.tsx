@@ -124,7 +124,7 @@ const CommunityLinkWithFollow = <
   disabled: boolean;
   maxLength: number;
   prefix: string;
-  translatableHintText?: string;
+  translatableHintText?: MessageDescriptor;
   icon: React.ReactNode;
 }) => {
   const { showAlert } = useAlertDialog();
@@ -217,7 +217,7 @@ const CommunityLinkLine = ({
   value: string;
   onChange: (e: any, value: string) => void;
   disabled: boolean;
-  translatableHintText?: string;
+  translatableHintText?: MessageDescriptor;
 }) => {
   const config = communityLinksConfig[id];
 

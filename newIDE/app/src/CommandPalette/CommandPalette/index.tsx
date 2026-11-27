@@ -145,7 +145,9 @@ const CommandPalette = React.forwardRef<
             <AutocompletePicker
               i18n={i18n}
               items={selectedCommand.generateOptions()}
-              placeholder={commandsList[selectedCommand.name] || ''}
+              placeholder={
+                commandsList[selectedCommand.name]?.displayText || ''
+              }
               onClose={closeDialog}
               onSelect={handleOptionChoose}
             />

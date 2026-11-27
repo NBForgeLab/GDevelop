@@ -605,15 +605,16 @@ const ObjectGroupsList = React.forwardRef<ObjectGroupsListInterface, Props>(
           : [];
 
         const treeViewItems = [
-          globalObjectGroups && {
-            label: i18n._(labels.higherScopeGroupsTitle),
-            children:
-              globalObjectGroupsList.length > 0
-                ? globalObjectGroupsList
-                : [getGlobalGroupsEmptyPlaceholder(i18n)],
-            isRoot: true,
-            id: globalGroupsRootFolderId,
-          },
+          globalObjectGroups &&
+            labels.higherScopeGroupsTitle && {
+              label: i18n._(labels.higherScopeGroupsTitle),
+              children:
+                globalObjectGroupsList.length > 0
+                  ? globalObjectGroupsList
+                  : [getGlobalGroupsEmptyPlaceholder(i18n)],
+              isRoot: true,
+              id: globalGroupsRootFolderId,
+            },
           {
             label: i18n._(labels.localScopeGroupsTitle),
             children:

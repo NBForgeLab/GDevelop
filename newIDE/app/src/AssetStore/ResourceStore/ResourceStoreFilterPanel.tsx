@@ -16,6 +16,7 @@ import CompactSelectField from '../../UI/CompactSelectField';
 import SelectOption from '../../UI/SelectOption';
 import TagChips from '../../UI/TagChips';
 import { languageNames } from '../../Utils/LanguageName';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 
 const languageChoices = [
   { value: '', label: '', disabled: true },
@@ -26,7 +27,7 @@ const languageChoices = [
 ];
 
 type Choice = {
-  label: React.ReactNode;
+  label: MessageDescriptor;
   value: string;
   disabled?: boolean;
 };
@@ -34,6 +35,7 @@ type Choice = {
 type ValueWithLabel = {
   label: React.ReactNode;
   value: string;
+  disabled?: boolean;
 };
 
 type SingleChoiceFilterProps = {
@@ -86,7 +88,7 @@ const durationMarks = DurationResourceStoreSearchFilter.durationMarks.map(
 type MultipleChoiceWithClosableTagsFilterProps = {
   filterKey: string;
   title: React.ReactNode | null | undefined;
-  choices: Choice[];
+  choices: ValueWithLabel[];
   values: ValueWithLabel[];
   onChange: (newValue: ValueWithLabel[]) => void;
 };

@@ -216,7 +216,7 @@ export const CompactTextAreaFieldWithControls = React.forwardRef<
                 disabled={disabled}
                 value={value === null ? '' : value}
                 onChange={(e) => onChange(e.currentTarget.value)}
-                placeholder={i18n._(placeholder)}
+                placeholder={placeholder ? i18n._(placeholder) : undefined}
                 onKeyDown={handleKeyDown}
                 onPaste={handlePaste}
                 rows={rows || 3}

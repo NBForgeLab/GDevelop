@@ -166,6 +166,7 @@ export default React.forwardRef<ParameterFieldInterface, ParameterFieldProps>(
                           t`Your game may not be registered, create one in the leaderboard manager.`
                         );
                       }
+                      return null;
                     }}
                   />
                 )

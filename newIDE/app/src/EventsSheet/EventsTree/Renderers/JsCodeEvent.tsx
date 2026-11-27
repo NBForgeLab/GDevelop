@@ -286,13 +286,7 @@ export default class JsCodeEvent extends React.Component<
 
     return (
       <Measure bounds>
-        {({
-          measureRef,
-          contentRect,
-        }: {
-          measureRef: React.Ref<HTMLDivElement>;
-          contentRect: { bounds: { width: number } };
-        }) => (
+        {({ measureRef, contentRect }) => (
           <div
             style={styles.container}
             className={classNames({
@@ -310,7 +304,7 @@ export default class JsCodeEvent extends React.Component<
               initialCursorColumn={jsCodeEvent.getCursorColumn()}
               initialCursorLine={jsCodeEvent.getCursorLine()}
               saveEditorState={this.saveEditorState}
-              width={contentRect.bounds.width - 5}
+              width={(contentRect.bounds ? contentRect.bounds.width : 0) - 5}
               height={this._getCodeEditorHeight()}
               onEditorMounted={() => {
                 this.props.onUpdate();

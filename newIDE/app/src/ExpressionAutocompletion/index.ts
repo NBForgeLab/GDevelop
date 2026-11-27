@@ -130,7 +130,7 @@ const getAutocompletionsForFreeExpressions = function (
   expressionAutocompletionContext: ExpressionAutocompletionContext,
   completionDescription: gdExpressionCompletionDescription,
   project: gdProject,
-  i18n: I18nType
+  i18n: I18nType | null | undefined
 ): Array<ExpressionAutocompletion> {
   const prefix: string = completionDescription.getPrefix();
   const type: string = completionDescription.getType();
@@ -460,7 +460,7 @@ export const getAutocompletionsFromDescriptions = (
   expressionAutocompletionContext: ExpressionAutocompletionContext,
   expressionCompletionDescriptions: gdVectorExpressionCompletionDescription,
   project: gdProject,
-  i18n: I18nType
+  i18n: I18nType | null | undefined
 ): Array<ExpressionAutocompletion> => {
   const { gd } = expressionAutocompletionContext;
   const expressionCompletionDescription =

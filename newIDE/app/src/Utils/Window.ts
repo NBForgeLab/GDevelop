@@ -267,9 +267,7 @@ export default class Window {
     }
 
     const argumentsObject: AppArguments = {};
-    const params: globalThis.URLSearchParams = new URLSearchParams(
-      window.location.search
-    );
+    const params = new URLSearchParams(window.location.search);
     params.forEach((value: string, name: string) => {
       argumentsObject[name] = value;
     });

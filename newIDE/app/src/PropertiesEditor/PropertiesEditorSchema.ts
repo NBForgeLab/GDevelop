@@ -2,6 +2,7 @@ import { type I18n as I18nType } from '@lingui/core';
 import * as React from 'react';
 import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import { type ResourceKind } from '../ResourcesList/ResourceSource';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 
 // An "instance" here is the objects for which properties are shown
 export type Instance = Record<string, any>; // This could be improved using generics.
@@ -31,7 +32,7 @@ export type ValueFieldCommonProperties = {
 
 export type FieldChoices = {
   value: string;
-  label: string;
+  label: MessageDescriptor;
   labelIsUserDefined?: boolean;
 };
 
@@ -57,13 +58,7 @@ export type PrimitiveValueField =
       valueType: 'string';
       getValue: (instance: Instance) => string | null;
       setValue: (instance: Instance, newValue: string) => void;
-      getChoices?:
-        | (() => Array<{
-            value: string;
-            label: string;
-            labelIsUserDefined?: boolean;
-          }>)
-        | null;
+      getChoices?: (() => Array<FieldChoices>) | null;
       isHiddenWhenOnlyOneChoice?: boolean;
       isAutocompleted?: boolean;
       isAllowingAnyValue?: boolean;

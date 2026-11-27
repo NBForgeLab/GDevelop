@@ -3,7 +3,7 @@ import { type I18n as I18nType } from '@lingui/core';
 
 export const translateExtensionCategory = (
   category: string,
-  i18n: I18nType
+  i18n: I18nType | null | undefined
 ): string => {
   if (!i18n) {
     return category;

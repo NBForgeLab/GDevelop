@@ -2,10 +2,12 @@ import { type I18n as I18nType } from '@lingui/core';
 import { getAnnouncementContent } from '../AnnouncementFormatting';
 import { type Announcement } from '../../Utils/GDevelopServices/Announcement';
 
-const makeFakeI18n = (): I18nType => ({
-  _: (message: { id: string }) => message.id,
-  language: 'en',
-});
+const makeFakeI18n = (): I18nType =>
+  ({
+    _: (message: string | { id: string }) =>
+      typeof message === 'string' ? message : message.id,
+    language: 'en',
+  }) as unknown as I18nType;
 
 describe('getAnnouncementContent', () => {
   it('should return an object with title and message when announcement has a title', () => {

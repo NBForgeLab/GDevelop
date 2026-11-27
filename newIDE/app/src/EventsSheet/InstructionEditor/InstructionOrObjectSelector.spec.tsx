@@ -54,10 +54,10 @@ it('enumerates once while typing and rebuilds once on an explicit refresh', () =
   layout.getObjects().insertNewObject(project, 'Sprite', 'Player', 0);
   const scope = { project, layout };
   const containers = new ProjectScopedContainersAccessor(scope);
-  const i18n: I18nType = {
+  const i18n = {
     _: (message: { id?: string } | string) =>
-      typeof message === 'string' ? message : message.id || message,
-  };
+      typeof message === 'string' ? message : message.id || '',
+  } as unknown as I18nType;
   const instruction = {
     type: 'Keyboard',
     displayedName: 'Keyboard',

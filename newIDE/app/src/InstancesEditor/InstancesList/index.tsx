@@ -4,6 +4,7 @@ import {
   AutoSizer,
   Table as RVTable,
   Column as RVColumn,
+  type TableHeaderProps,
 } from 'react-virtualized';
 import IconButton from '../../UI/IconButton';
 import KeyboardShortcuts from '../../UI/KeyboardShortcuts';
@@ -85,12 +86,7 @@ const renderSortableHeader = ({
   label,
   sortBy,
   sortDirection,
-}: {
-  dataKey: string;
-  label: React.ReactNode;
-  sortBy: string;
-  sortDirection: string;
-}) => {
+}: TableHeaderProps) => {
   const isActive = dataKey === sortBy;
   return (
     <span

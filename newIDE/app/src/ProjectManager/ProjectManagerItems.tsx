@@ -4,6 +4,7 @@ import { I18n } from '@lingui/react';
 import { type I18n as I18nType } from '@lingui/core';
 
 import { type ConnectDragSource, type ConnectDropTarget } from 'react-dnd';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import { type HTMLDataset } from '../Utils/HTMLDataset';
 import { IconContainer, iconWithBackgroundStyle } from '../UI/IconContainer';
@@ -114,7 +115,7 @@ type ItemProps = {
   leftIcon: React.ReactElement<any>;
   onEdit: () => void;
   onDelete: () => void;
-  addLabel: string;
+  addLabel: MessageDescriptor;
   onAdd: () => void;
   onRename: (arg0: string) => void;
   onEditName: () => void;
