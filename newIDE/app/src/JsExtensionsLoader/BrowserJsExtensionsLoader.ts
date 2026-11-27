@@ -1,11 +1,11 @@
 import {
   type JsExtensionsLoader,
+  type JsExtensionObjectsEditorService,
+  type JsExtensionObjectsRenderingService,
   type ExtensionLoadingResult,
   type TranslationFunction,
   loadExtension,
 } from '.';
-import ObjectsEditorService from '../ObjectEditor/ObjectsEditorService';
-import ObjectsRenderingService from '../ObjectsRendering/ObjectsRenderingService';
 const gd: libGDevelop = global.gd;
 
 // The list of "JsExtension.js" files to be bundled in the webapp, keyed by their extension name.
@@ -184,8 +184,8 @@ const getExpectedNumberOfJSExtensionModules = ({
 };
 
 type MakeExtensionsLoaderArguments = {
-  objectsEditorService: typeof ObjectsEditorService;
-  objectsRenderingService: typeof ObjectsRenderingService;
+  objectsEditorService: JsExtensionObjectsEditorService | null;
+  objectsRenderingService: JsExtensionObjectsRenderingService | null;
   filterExamples: boolean;
 };
 

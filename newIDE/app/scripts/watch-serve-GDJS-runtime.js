@@ -101,6 +101,10 @@ const importGDJSRuntime = () => {
  * Callback for file changes, debounced to avoid running too frequently
  */
 const onWatchEvent = debounce(
+  /**
+   * @param {string} event
+   * @param {string} filePath
+   */
   (event, filePath) => {
     const eventName = event || 'unknown-event';
     const resolvedFilename =
@@ -215,15 +219,12 @@ process.on('SIGTERM', shutdown);
 process.on('SIGHUP', shutdown);
 
 // Start the server (used to serve the game engine to the web-app).
-server.on('error', error => {
-  // @ts-ignore
+server.on('error', (/** @type {NodeJS.ErrnoException} */ error) => {
   if (error.code === 'EADDRINUSE') {
     console.error(
       `❌ Error: Port ${PORT} is already in use and can't be used to serve the game engine to the web-app.`
     );
-  }
-  // @ts-ignore
-  else if (error.code === 'EACCES') {
+  } else if (error.code === 'EACCES') {
     console.error(
       `❌ Error: Permission denied to bind to port ${PORT} and can't be used to serve the game engine to the web-app.`
     );

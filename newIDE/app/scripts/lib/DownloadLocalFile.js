@@ -23,7 +23,9 @@ const downloadLocalFile = async (url, outputPath) => {
 
     await new Promise((resolve, reject) => {
       const writer = fs.createWriteStream(temporaryPath);
+      /** @type {Error | null} */
       let error = null;
+      /** @param {Error} err */
       const onError = err => {
         error = err;
         writer.close();

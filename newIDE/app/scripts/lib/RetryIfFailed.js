@@ -1,5 +1,9 @@
 // @ts-check
 
+/**
+ * @param {number} ms
+ * @returns {Promise<void>}
+ */
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 /**

@@ -2,6 +2,7 @@
 /**
  * Launch this script to generate a reference of all expressions supported by GDevelop.
  */
+/** @type {(options?: unknown) => Promise<libGDevelop>} */
 const initializeGDevelopJs = require('../public/libGD.js');
 const { mapVector } = require('./lib/MapFor');
 const makeExtensionsLoader = require('./lib/LocalJsExtensionsLoader');
@@ -75,7 +76,7 @@ const generateExtensionSeparatorText = () => {
 };
 
 /**
- * @type {any} gd
+ * @param {libGDevelop} gd
  * @returns {Array<ExtensionReference>}
  */
 const generateAllExtensionReferences = gd => {
@@ -153,7 +154,10 @@ You can also [search for new features in list of extensions](/gdevelop5/extensio
   return [headerText, { text: groupedContent }, footerText];
 };
 
-/** @returns {RawText} */
+/**
+ * @param {{ extension: PlatformExtension, depth: number }} options
+ * @returns {RawText}
+ */
 const generateExtensionHeaderText = ({ extension, depth }) => {
   return {
     text:
@@ -167,12 +171,18 @@ ${extension.getDescription()} ${generateReadMoreLink(extension.getHelpPath())}
   };
 };
 
-/** @returns {String} */
+/**
+ * @param {{ extension: PlatformExtension }} options
+ * @returns {string}
+ */
 const generateBuiltInExtensionNote = ({ extension }) => {
   return `The ${extension.getFullName()} extension is always installed in all GDevelop projects: there is no need to add it from the Project Manager.\n\n`;
 };
 
-/** @returns {RawText} */
+/**
+ * @param {{ extension: PlatformExtension }} options
+ * @returns {RawText}
+ */
 const generateExtensionFooterText = ({ extension }) => {
   return {
     text:
@@ -346,11 +356,14 @@ const generateAllExpressionsRawTexts = extensionReferences => {
   return allExpressionsRawTexts;
 };
 
+/**
+ * @param {string} str
+ * @returns {string}
+ */
 const noopTranslationFunction = str => str;
 
 initializeGDevelopJs().then(async gd => {
   try {
-    // @ts-ignore - not passing onFindGDJS - is it still useful?
     const loadingResults = await makeExtensionsLoader({
       gd,
       objectsEditorService: null,

@@ -1,3 +1,4 @@
+import { type JsExtensionObjectsRenderingService } from '../JsExtensionsLoader';
 import RenderedUnknownInstance from './Renderers/RenderedUnknownInstance';
 import RenderedSpriteInstance from './Renderers/RenderedSpriteInstance';
 import RenderedTiledSpriteInstance from './Renderers/RenderedTiledSpriteInstance';
@@ -315,4 +316,4 @@ const ObjectsRenderingService = {
   Rendered3DInstance, // Expose the base class for 3D renderers so that it can be used by renderers
 };
 
-export default ObjectsRenderingService;
+export default ObjectsRenderingService satisfies JsExtensionObjectsRenderingService;

@@ -9,6 +9,8 @@ const { mapVector } = require('./MapFor');
 /** @typedef {import('../../../../GDevelop.js/types').Platform} Platform */
 /** @typedef {import('../../../../GDevelop.js/types').PlatformExtension} PlatformExtension */
 /** @typedef {import('../../../../GDevelop.js/types').EventsFunctionsExtension} EventsFunctionsExtension */
+/** @typedef {import('../../../../GDevelop.js/types').MapStringInstructionMetadata} MapStringInstructionMetadata */
+/** @typedef {import('../../../../GDevelop.js/types').InstructionMetadata} InstructionMetadata */
 /** @typedef {import('../../../../GDevelop.js/types').MapStringExpressionMetadata} MapStringExpressionMetadata */
 /** @typedef {import('../../../../GDevelop.js/types').ExpressionMetadata} ExpressionMetadata */
 /** @typedef {import('../../../../GDevelop.js/types').ObjectMetadata} ObjectMetadata */
@@ -60,6 +62,13 @@ const { mapVector } = require('./MapFor');
  * @prop {Array<BehaviorReference>} behaviorReferences Reference of all extension behaviors.
  */
 
+/**
+ * @template T
+ * @param {T | null | undefined} value
+ * @returns {value is T}
+ */
+const isNonNull = value => value !== null && value !== undefined;
+
 /** @returns {RawText} */
 const generateObjectNoExpressionsText = () => {
   return {
@@ -74,7 +83,15 @@ const generateBehaviorNoExpressionsText = () => {
   };
 };
 
-/** @returns {RawText} */
+/**
+ * @param {{
+ *   extension: PlatformExtension,
+ *   behaviorMetadata: BehaviorMetadata,
+ *   showExtensionName: boolean,
+ *   showHelpLink: boolean,
+ * }} options
+ * @returns {RawText}
+ */
 const generateBehaviorHeaderText = ({
   extension,
   behaviorMetadata,
@@ -100,7 +117,15 @@ ${behaviorMetadata.getDescription()} ${generateReadMoreLink(helpPath)}
   };
 };
 
-/** @returns {RawText} */
+/**
+ * @param {{
+ *   extension: PlatformExtension,
+ *   objectMetadata: ObjectMetadata,
+ *   showExtensionName: boolean,
+ *   showHelpLink: boolean,
+ * }} options
+ * @returns {RawText}
+ */
 const generateObjectHeaderText = ({
   extension,
   objectMetadata,
@@ -160,6 +185,10 @@ const generateHeader = ({ headerName, depth }) => {
   };
 };
 
+/**
+ * @param {Array<RawText>} rawTexts
+ * @returns {string}
+ */
 const rawTextsToString = rawTexts =>
   rawTexts
     .map(({ text }) => {
@@ -167,6 +196,10 @@ const rawTextsToString = rawTexts =>
     })
     .join('\n');
 
+/**
+ * @param {string} str
+ * @returns {string}
+ */
 const sanitizeExpressionDescription = str => {
   return (
     str
@@ -178,10 +211,19 @@ const sanitizeExpressionDescription = str => {
   );
 };
 
+/**
+ * @param {string} type
+ * @param {string} check
+ * @returns {boolean}
+ */
 const caseInsensitiveCheck = (type, check) => {
   return type.toLowerCase() === check.toLowerCase();
 };
 
+/**
+ * @param {string} type
+ * @returns {string}
+ */
 const translateTypeToHumanReadableDescription = type => {
   if (caseInsensitiveCheck(type, 'number')) return '🔢 Number';
   if (caseInsensitiveCheck(type, 'expression')) return '🔢 Number';
@@ -246,6 +288,10 @@ const translateTypeToHumanReadableDescription = type => {
   return type;
 };
 
+/**
+ * @param {string} type
+ * @returns {string}
+ */
 const translateTypeToHumanReadableType = type => {
   if (caseInsensitiveCheck(type, 'number')) return 'number';
   if (caseInsensitiveCheck(type, 'expression')) return 'number';
@@ -385,7 +431,16 @@ const getParameterExtraInfoDescription = parameterMetadata => {
   return '';
 };
 
-/** @returns {ReferenceText} */
+/**
+ * @param {{
+ *   instructionType: string,
+ *   instructionMetadata: InstructionMetadata,
+ *   isCondition: boolean,
+ *   objectMetadata?: ObjectMetadata,
+ *   behaviorMetadata?: BehaviorMetadata,
+ * }} options
+ * @returns {ReferenceText}
+ */
 const generateInstructionReferenceRowsText = ({
   instructionType,
   instructionMetadata,
@@ -394,6 +449,7 @@ const generateInstructionReferenceRowsText = ({
   behaviorMetadata,
 }) => {
   const paramPadding = '    ';
+  /** @type {Array<number>} */
   const codeOnlyParametersIndexes = [];
   /** @type {Set<string>} */
   const hints = new Set();
@@ -515,7 +571,9 @@ const generateExpressionReferenceRowsText = ({
   objectMetadata,
   behaviorMetadata,
 }) => {
+  /** @type {Array<string>} */
   let parameterRows = [];
+  /** @type {Array<string>} */
   let parameterStrings = [];
   mapFor(0, expressionMetadata.getParameters().getParametersCount(), index => {
     if ((!!objectMetadata && index < 1) || (!!behaviorMetadata && index < 2)) {
@@ -572,7 +630,12 @@ const generateExpressionReferenceRowsText = ({
 };
 
 /**
- * @param {{ instructionsMetadata?: any, areConditions: boolean, objectMetadata?: any, behaviorMetadata?: any }} metadata
+ * @param {{
+ *   instructionsMetadata: MapStringInstructionMetadata,
+ *   areConditions: boolean,
+ *   objectMetadata?: ObjectMetadata,
+ *   behaviorMetadata?: BehaviorMetadata,
+ * }} metadata
  * @returns {Array<ReferenceText>}
  */
 const generateInstructionsReferenceRowsTexts = ({
@@ -583,7 +646,6 @@ const generateInstructionsReferenceRowsTexts = ({
 }) => {
   /** @type {Array<string>} */
   const instructionTypes = instructionsMetadata.keys().toJSArray();
-  // @ts-ignore
   return instructionTypes
     .map(instructionType => {
       const instructionMetadata = instructionsMetadata.get(instructionType);
@@ -599,7 +661,7 @@ const generateInstructionsReferenceRowsTexts = ({
         behaviorMetadata,
       });
     })
-    .filter(Boolean);
+    .filter(isNonNull);
 };
 
 /**
@@ -613,7 +675,6 @@ const generateExpressionsReferenceRowsTexts = ({
 }) => {
   /** @type {Array<string>} */
   const expressionTypes = expressionsMetadata.keys().toJSArray();
-  // @ts-ignore
   return expressionTypes
     .map(expressionType => {
       const expressionMetadata = expressionsMetadata.get(expressionType);
@@ -628,7 +689,7 @@ const generateExpressionsReferenceRowsTexts = ({
         behaviorMetadata,
       });
     })
-    .filter(Boolean);
+    .filter(isNonNull);
 };
 
 /**
@@ -1004,8 +1065,8 @@ const generateExtensionReference = ({
 
 /**
  * @param {ExtensionReference} extensionReference
- * @param {({extension, depth}) => RawText} generateExtensionHeaderText
- * @param {({extension}) => RawText} generateExtensionFooterText
+ * @param {(options: { extension: PlatformExtension, depth: number }) => RawText} generateExtensionHeaderText
+ * @param {(options: { extension: PlatformExtension }) => RawText} generateExtensionFooterText
  * @returns {Array<RawText>}
  */
 const generateExtensionRawText = (
@@ -1022,6 +1083,11 @@ const generateExtensionRawText = (
     behaviorReferences,
   } = extensionReference;
 
+  /**
+   * @param {Array<RawText>} texts
+   * @param {{ headerName: string, depth: number }} options
+   * @returns {Array<RawText>}
+   */
   const withHeaderIfNotEmpty = (texts, { headerName, depth }) => {
     if (!texts.length) return [];
 

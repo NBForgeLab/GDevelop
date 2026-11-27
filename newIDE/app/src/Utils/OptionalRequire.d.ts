@@ -3,4 +3,4 @@ declare function optionalRequire(
   config?: { rethrowException?: boolean }
 ): any;
 
-export default optionalRequire;
+export = optionalRequire;

@@ -3,7 +3,7 @@
 /**
  * @template T
  * @param {Array<T>} array
- * @param {(T) => string} getKey
+ * @param {(item: T) => string} getKey
  * @returns {Record<string, Array<T>>}
  */
 const groupBy = (array, getKey) => {

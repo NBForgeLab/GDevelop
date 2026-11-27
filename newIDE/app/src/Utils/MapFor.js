@@ -1,3 +1,4 @@
+// @ts-check
 // Note: this file uses CommonJS syntax and JSDoc annotations so it can be used from both the IDE and Node.js (types are in MapFor.d.ts).
 
 /**
@@ -45,8 +46,11 @@ const mapVector = (cppVector, func) => {
   return mapFor(0, cppVector.size(), (i) => func(cppVector.at(i), i));
 };
 
-module.exports = {
+/** @type {typeof import('./MapFor')} */
+const MapForExports = {
   mapFor,
   mapReverseFor,
   mapVector,
 };
+
+module.exports = MapForExports;

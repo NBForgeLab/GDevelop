@@ -1,10 +1,17 @@
-// Note: this file does not use export/imports nor Flow to allow its usage from Node.js
+// @ts-check
+// Note: this file does not use export/imports to allow its usage from Node.js
 
 const { findGDJS } = require('../GameEngineFinder/LocalGDJSFinder');
 const optionalRequire = require('../Utils/OptionalRequire');
+/** @type {typeof import('path')} */
 const path = optionalRequire('path');
+/** @type {typeof import('fs')} */
 const fs = optionalRequire('fs');
 
+/**
+ * @param {string} extensionFolderPath
+ * @returns {Promise<string | null>}
+ */
 const checkIfPathHasJsExtensionModule = (extensionFolderPath) => {
   return new Promise((resolve) => {
     const jsExtensionModulePath = path.join(
@@ -21,6 +28,13 @@ const checkIfPathHasJsExtensionModule = (extensionFolderPath) => {
   });
 };
 
+/**
+ * @param {{
+ *   filterExamples: boolean,
+ *   onFindGDJS?: (() => Promise<{ gdjsRoot: string }>) | null | undefined,
+ * }} options
+ * @returns {Promise<Array<string>>}
+ */
 const findJsExtensionModules = ({ filterExamples, onFindGDJS }) => {
   return (onFindGDJS ? onFindGDJS() : findGDJS()).then(({ gdjsRoot }) => {
     const extensionsRoot = path.join(gdjsRoot, 'Runtime', 'Extensions');
@@ -46,13 +60,22 @@ const findJsExtensionModules = ({ filterExamples, onFindGDJS }) => {
             )
           )
         ).then((modulePaths) => {
-          resolve(modulePaths.filter((modulePath) => !!modulePath));
+          resolve(
+            modulePaths.filter(
+              /** @type {(modulePath: string | null) => modulePath is string} */ (
+                (modulePath) => !!modulePath
+              )
+            )
+          );
         }, reject);
       });
     });
   });
 };
 
-module.exports = {
+/** @type {typeof import('./LocalJsExtensionsFinder')} */
+const LocalJsExtensionsFinder = {
   findJsExtensionModules,
 };
+
+module.exports = LocalJsExtensionsFinder;

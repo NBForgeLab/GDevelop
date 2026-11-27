@@ -1,11 +1,10 @@
 {
-  "//": "TypeScript configuration for Node.js scripts in newIDE/app/scripts.",
+  "//": "TypeScript configuration for Node.js scripts in newIDE/app/scripts and shared CommonJS modules in newIDE/app/src.",
   "compilerOptions": {
     "noEmit": true,
     "allowJs": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": false,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "strictPropertyInitialization": true,
@@ -23,6 +22,12 @@
   },
   "include": [
     "**/*.js",
+    "../src/GameEngineFinder/LocalGDJSFinder.js",
+    "../src/JsExtensionsLoader/index.js",
+    "../src/JsExtensionsLoader/LocalJsExtensionsFinder.js",
+    "../src/JsExtensionsLoader/LocalJsExtensionsLoader.js",
+    "../src/Utils/MapFor.js",
+    "../src/Utils/OptionalRequire.js",
     "lib.es5.d.ts",
     "../src/types/gd-globals.d.ts",
     "../../../GDevelop.js/types.d.ts"

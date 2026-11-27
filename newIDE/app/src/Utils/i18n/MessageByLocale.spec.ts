@@ -69,38 +69,38 @@ describe('MessageByLocale', () => {
     });
     test('handles type errors gracefully', () => {
       expect(
-        // @ts-expect-error [flow-migrated: incompatible-type]
+        // @ts-expect-error Intentionally pass a non-object value to verify runtime fallback.
         selectMessageByLocale(makeFakeI18n({ language: 'fr' }), 'Test')
       ).toBe('Test');
 
-      // @ts-expect-error [flow-migrated: incompatible-type]
+      // @ts-expect-error Intentionally pass a non-object value to verify runtime fallback.
       expect(selectMessageByLocale(makeFakeI18n({ language: 'fr' }), 0)).toBe(
         ''
       );
 
-      // @ts-expect-error [flow-migrated: incompatible-type]
+      // @ts-expect-error Intentionally pass a non-object value to verify runtime fallback.
       expect(selectMessageByLocale(makeFakeI18n({ language: 'fr' }), 123)).toBe(
         ''
       );
 
-      // @ts-expect-error [flow-migrated: incompatible-type]
+      // @ts-expect-error Intentionally pass an array to verify runtime fallback.
       expect(selectMessageByLocale(makeFakeI18n({ language: 'fr' }), [])).toBe(
         ''
       );
       expect(
-        // @ts-expect-error [flow-migrated: incompatible-type]
+        // @ts-expect-error Intentionally pass null to verify runtime fallback.
         selectMessageByLocale(makeFakeI18n({ language: 'fr' }), null)
       ).toBe('');
       expect(
-        // @ts-expect-error [flow-migrated: incompatible-type]
+        // @ts-expect-error Intentionally pass undefined to verify runtime fallback.
         selectMessageByLocale(makeFakeI18n({ language: 'fr' }), undefined)
       ).toBe('');
       expect(
-        // @ts-expect-error [flow-migrated: incompatible-type]
+        // @ts-expect-error Intentionally pass a boolean to verify runtime fallback.
         selectMessageByLocale(makeFakeI18n({ language: 'fr' }), false)
       ).toBe('');
       expect(
-        // @ts-expect-error [flow-migrated: incompatible-type]
+        // @ts-expect-error Intentionally pass a boolean to verify runtime fallback.
         selectMessageByLocale(makeFakeI18n({ language: 'fr' }), true)
       ).toBe('');
     });

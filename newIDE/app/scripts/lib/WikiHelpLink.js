@@ -48,6 +48,7 @@ const generateReadMoreLink = helpPagePath => {
   return `[Read more explanations about it.](${url})`;
 };
 
+/** @type {Record<string, string>} */
 const renamedExtensionNames = {
   AdMob: 'Admob',
   BuiltinFile: 'Storage',
@@ -67,6 +68,10 @@ const getExtensionFolderName = extensionName => {
   );
 };
 
+/**
+ * @param {string} iconUrl
+ * @returns {string}
+ */
 const generateSvgImageIcon = iconUrl => {
   return `<img src="${iconUrl}" class="extension-icon"></img>`;
 };

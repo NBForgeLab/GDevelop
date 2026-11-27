@@ -13,6 +13,7 @@ const buildPath = path.join(__dirname, '..', buildFolderName);
  * compilation - see `Resource3DPreview.worker.js`.
  */
 const checkBuildOutput = () => {
+  /** @type {string[]} */
   const errors = [];
 
   /** @param {string} directory @param {RegExp} pattern */

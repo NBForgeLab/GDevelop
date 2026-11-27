@@ -1,3 +1,4 @@
+// @ts-check
 // Note: this file don't use export/imports to allow its usage from Node.js
 const nodeRequire = require('node-require-function')(); //TODO
 
@@ -10,6 +11,8 @@ const nodeRequire = require('node-require-function')(); //TODO
  * at the app startup. Only use optionalRequire for "well-known" Node.js modules (fs, path...)
  *
  * @param {string} moduleName The name of the module. For example: `fs`.
+ * @param {{ rethrowException?: boolean }} [config]
+ * @returns {any}
  */
 const optionalRequire = (
   moduleName,
@@ -18,10 +21,12 @@ const optionalRequire = (
   }
 ) => {
   try {
-    if (global.require) {
+    /** @type {{ require?: (id: string) => any }} */
+    const globalWithOptionalRequire = global;
+    if (globalWithOptionalRequire.require) {
       // Electron will expose require on global object. Use it, with an
       // expression to avoid webpack to try to bundle the call to require.
-      return global['require'](moduleName);
+      return globalWithOptionalRequire['require'](moduleName);
     } else if (nodeRequire) {
       //Node.js
       // nodeRequire is Node.js' require function that is properly extracted
@@ -38,4 +43,7 @@ const optionalRequire = (
   }
 };
 
-module.exports = optionalRequire;
+/** @type {typeof import('./OptionalRequire')} */
+const exportedOptionalRequire = optionalRequire;
+
+module.exports = exportedOptionalRequire;

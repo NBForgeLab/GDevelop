@@ -149,13 +149,33 @@ const uploadFileToAzureBlob = (fileUploadUrl, filePath) =>
     fs.createReadStream(filePath).pipe(request);
   });
 
+/**
+ * @param {unknown} error
+ * @returns {string}
+ */
 const formatApiError = error => {
-  if (error.response) {
-    return `${error.response.status} ${JSON.stringify(error.response.data)}`;
+  if (
+    error &&
+    typeof error === 'object' &&
+    'response' in error &&
+    error.response &&
+    typeof error.response === 'object'
+  ) {
+    const response = /** @type {{ status?: number, data?: unknown }} */ (
+      error.response
+    );
+    return `${response.status} ${JSON.stringify(response.data)}`;
   }
-  return error.message || String(error);
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return String(error);
 };
 
+/**
+ * @param {number} timeInMs
+ * @returns {Promise<void>}
+ */
 const sleep = timeInMs => new Promise(resolve => setTimeout(resolve, timeInMs));
 
 (async () => {
@@ -212,6 +232,11 @@ const sleep = timeInMs => new Promise(resolve => setTimeout(resolve, timeInMs));
 
   // Create a new submission, which is a copy of the last published one.
   shell.echo(`ℹ️ Creating a new submission...`);
+  /** @type {{
+    id: string,
+    fileUploadUrl: string,
+    applicationPackages: Array<{ fileName?: string, fileStatus: string }>
+  }} */
   let submission;
   try {
     const response = await api.post('/submissions');
@@ -282,6 +307,12 @@ const sleep = timeInMs => new Promise(resolve => setTimeout(resolve, timeInMs));
   // Print any errors/warnings reported for the submission. Warnings (for example,
   // about pricing and availability) can prevent the new Partner Center submission
   // experience from accepting the commit, leaving the submission stuck in draft.
+  /**
+   * @param {{
+   *   errors?: Array<{ code: string, details: string }>,
+   *   warnings?: Array<{ code: string, details: string }>
+   * } | null | undefined} statusDetails
+   */
   const printStatusDetails = statusDetails => {
     if (!statusDetails) return;
     (statusDetails.errors || []).forEach(error => {

@@ -1,9 +1,18 @@
+// @ts-check
 // Note: this file uses CommonJS syntax so it can be required directly from Node.js (types are in index.d.ts).
 
 const some = require('lodash/some');
 
+/** @typedef {import('./index').TranslationFunction} TranslationFunction */
+/** @typedef {import('./index').JsExtensionModule} JsExtensionModule */
+/** @typedef {import('./index').ExtensionLoadingResult} ExtensionLoadingResult */
+
 /**
  * Run extensions tests and check for any non-empty results.
+ * @param {libGDevelop} gd
+ * @param {gdPlatformExtension} extension
+ * @param {JsExtensionModule} jsExtensionModule
+ * @returns {ExtensionLoadingResult}
  */
 const runExtensionSanityTests = (gd, extension, jsExtensionModule) => {
   if (!jsExtensionModule.runExtensionSanityTests) {
@@ -32,6 +41,11 @@ const runExtensionSanityTests = (gd, extension, jsExtensionModule) => {
 /**
  * Load an extension from the specified JavaScript module, which is supposed
  * to contain a "createExtension" function returning a gd.PlatformExtension.
+ * @param {TranslationFunction} _
+ * @param {libGDevelop} gd
+ * @param {gdJsPlatform} platform
+ * @param {JsExtensionModule} jsExtensionModule
+ * @returns {ExtensionLoadingResult}
  */
 const loadExtension = (_, gd, platform, jsExtensionModule) => {
   if (!jsExtensionModule.createExtension) {
@@ -88,7 +102,10 @@ const loadExtension = (_, gd, platform, jsExtensionModule) => {
   };
 };
 
-module.exports = {
+/** @type {Pick<typeof import('./index'), 'runExtensionSanityTests' | 'loadExtension'>} */
+const JsExtensionsLoaderHelpers = {
   runExtensionSanityTests,
   loadExtension,
 };
+
+module.exports = JsExtensionsLoaderHelpers;

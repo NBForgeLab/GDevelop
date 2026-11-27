@@ -174,10 +174,12 @@ const main = (branch, commitSha) => {
     return;
   }
   const { number } = pullRequests[0];
-  /** @type {string[]} */
-  const changedFilePaths = JSON.parse(
+  /** @type {{ files: Array<{ path: string }> }} */
+  const prDetails = JSON.parse(
     gh(['pr', 'view', String(number), '--json', 'files'])
-  ).files.map(file => file.path);
+  );
+  /** @type {string[]} */
+  const changedFilePaths = prDetails.files.map(file => file.path);
 
   const commentIds = gh([
     'api',

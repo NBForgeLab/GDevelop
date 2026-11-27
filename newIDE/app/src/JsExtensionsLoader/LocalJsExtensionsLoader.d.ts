@@ -1,22 +1,13 @@
-import type { JsExtensionsLoader } from './index';
-
-type ObjectsEditorServiceLike = {
-  registerEditorConfiguration: (
-    objectType: string,
-    editorConfiguration: any
-  ) => void;
-  editorConfigurations: Record<string, any>;
-};
-
-type ObjectsRenderingServiceLike = {
-  renderers: Record<string, any>;
-  renderers3D: Record<string, any>;
-};
+import type {
+  JsExtensionObjectsEditorService,
+  JsExtensionObjectsRenderingService,
+  JsExtensionsLoader,
+} from './index';
 
 type MakeExtensionsLoaderArguments = {
-  gd: any;
-  objectsEditorService: ObjectsEditorServiceLike | null;
-  objectsRenderingService: ObjectsRenderingServiceLike | null;
+  gd: libGDevelop;
+  objectsEditorService: JsExtensionObjectsEditorService | null;
+  objectsRenderingService: JsExtensionObjectsRenderingService | null;
   filterExamples: boolean;
   onFindGDJS?: (() => Promise<{ gdjsRoot: string }>) | null | undefined;
 };

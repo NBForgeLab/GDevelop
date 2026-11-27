@@ -75,6 +75,7 @@ const fail = msg => {
   // 1. Get the Linux portable zip — either from a local path passed in via
   //    --zipPath (e.g. when chained after a build-linux job) or by
   //    downloading the latest version from S3.
+  /** @type {string} */
   let portableZipPath;
   if (localZipPath) {
     if (!fs.existsSync(localZipPath)) {
@@ -223,6 +224,7 @@ function findExecutable(root) {
  * @param {string} dest
  */
 function cloneExampleSparse(repoUrl, repoBranch, slug, dest) {
+  /** @param {string} cmd */
   const sh = cmd => {
     const r = shell.exec(cmd, { cwd: dest, silent: false });
     if (r.code !== 0) {
@@ -279,6 +281,10 @@ function runCliExport(gdevelopBinary, gameJsonPath) {
   });
 }
 
+/**
+ * @param {number} n
+ * @returns {string}
+ */
 function formatBytes(n) {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KiB`;

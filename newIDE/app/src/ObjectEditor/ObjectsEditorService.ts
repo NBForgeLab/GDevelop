@@ -1,3 +1,9 @@
+import * as React from 'react';
+import { type EditorProps } from './Editors/EditorProps';
+import {
+  type JsExtensionObjectsEditorService,
+  type ObjectEditorConfiguration,
+} from '../JsExtensionsLoader';
 import TextEditor from './Editors/TextEditor';
 import TiledSpriteEditor from './Editors/TiledSpriteEditor';
 import PanelSpriteEditor from './Editors/PanelSpriteEditor';
@@ -14,7 +20,14 @@ import SimpleTileMapEditor from './Editors/SimpleTileMapEditor';
 
 const gd: libGDevelop = global.gd;
 
-const editorConfigurations: Record<string, any> = {
+type EditorConfiguration<
+  TObjectConfiguration extends gdObjectConfiguration = gdObjectConfiguration,
+> = ObjectEditorConfiguration<
+  TObjectConfiguration,
+  React.ComponentType<EditorProps>
+>;
+
+const editorConfigurations: Record<string, EditorConfiguration<any>> = {
   Sprite: {
     component: SpriteEditor,
     createNewObject: (): gdSpriteObject => new gd.SpriteObject(),
@@ -131,7 +144,10 @@ const editorConfigurations: Record<string, any> = {
  * A service returning editor components for each object type.
  */
 const ObjectsEditorService = {
-  getEditorConfiguration(project: gdProject, objectType: string): any {
+  getEditorConfiguration(
+    project: gdProject,
+    objectType: string
+  ): EditorConfiguration<any> {
     if (editorConfigurations[objectType]) {
       return editorConfigurations[objectType];
     }
@@ -151,7 +167,10 @@ const ObjectsEditorService = {
       helpPagePath: '',
     });
   },
-  registerEditorConfiguration(objectType: string, editorConfiguration: any) {
+  registerEditorConfiguration(
+    objectType: string,
+    editorConfiguration: EditorConfiguration<any>
+  ) {
     if (!editorConfiguration.component) {
       console.warn(
         `Tried to register editor configuration for object "${objectType}", but "component" property is not defined.`
@@ -182,7 +201,7 @@ const ObjectsEditorService = {
   },
   getDefaultObjectJsImplementationPropertiesEditor(options: {
     helpPagePath: string;
-  }): any {
+  }): EditorConfiguration<gdObjectJsImplementation> {
     return {
       component: ObjectPropertiesEditor,
       createNewObject: (
@@ -196,7 +215,9 @@ const ObjectsEditorService = {
       helpPagePath: options.helpPagePath,
     };
   },
-  getCustomObjectPropertiesEditor(options: { helpPagePath: string }): any {
+  getCustomObjectPropertiesEditor(options: {
+    helpPagePath: string;
+  }): EditorConfiguration<gdCustomObjectConfiguration> {
     return {
       component: CustomObjectPropertiesEditor,
       createNewObject: (
@@ -215,4 +236,4 @@ const ObjectsEditorService = {
   editorConfigurations,
 };
 
-export default ObjectsEditorService;
+export default ObjectsEditorService satisfies JsExtensionObjectsEditorService;

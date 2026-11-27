@@ -54,6 +54,7 @@ if (!commitHash) {
   );
 }
 
+/** @type {Record<string, { url: string, outputFilename: string }>} */
 const artifactsToDownload = {
   // Windows:
   'Windows exe': {

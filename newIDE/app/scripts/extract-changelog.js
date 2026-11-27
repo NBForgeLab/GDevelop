@@ -23,6 +23,10 @@ const gdevelopTeamEmailHashes = [
   '5e17262c55afd148038ee9e4b469dbc923422adfd768e717c6326a39cf29415163e15f85960cdbda2aeb3d751d610e25d594a7783f6801aec24403421deaf815',
 ];
 
+/**
+ * @param {{ email: string, nickname: string }} author
+ * @returns {boolean}
+ */
 const isMemberOfGDevelopTeam = ({ email, nickname }) => {
   if (['4ian', 'AlexandreSi', 'ClementPasteau', 'D8H'].includes(nickname)) {
     return true;
@@ -78,7 +82,10 @@ const templatesGitPath = args['templatesGitPath'];
   hidden: boolean
 }} GitEnrichedCommitInfo */
 
-/** Helpers to read information from a git repository. */
+/**
+ * Helpers to read information from a git repository.
+ * @param {string} repoPath
+ */
 const getGitTools = repoPath => {
   /**
    * @param {string} options
@@ -109,6 +116,7 @@ const getGitTools = repoPath => {
         .toString('utf-8')
         .trim();
     },
+    /** @param {string} tag */
     getTagIsoDate: tag => {
       return child
         .execSync(`git tag -l ${tag} --format='%(creatordate:iso8601)'`, {
@@ -117,7 +125,9 @@ const getGitTools = repoPath => {
         .toString('utf-8')
         .trim();
     },
+    /** @param {string} tag */
     extractCommitsSinceTag: tag => extractCommits(`${tag}..HEAD`),
+    /** @param {string} date */
     extractCommitsSinceDate: date => extractCommits(`--after="${date}"`),
   };
 };
@@ -192,6 +202,7 @@ const enrichCommits = rawCommits => {
   );
 };
 
+/** @type {Record<string, string>} */
 let authorEmailsToNicknames = {};
 
 /**
@@ -211,6 +222,10 @@ const findAuthorNicknameInCommits = async commits => {
     });
   }
 
+  /**
+   * @param {string} authorEmail
+   * @returns {Promise<string>}
+   */
   const findAuthorNicknameFromAuthorEmail = async authorEmail => {
     const cachedNickname = authorEmailsToNicknames[authorEmail];
     if (cachedNickname !== undefined) return cachedNickname;
@@ -284,8 +299,9 @@ const formatCommitMessage = ({ commit, includeAuthor }) => {
   const ignoreRestRegex = /(Don't|Do not) (show|mention) (details|the rest )in (the )?changelog/i;
   const foundIgnoreRest = commit.message.match(ignoreRestRegex);
   const cleanedMessage =
-    // @ts-ignore - check for nullability is properly done?
-    foundIgnoreRest && foundIgnoreRest.index > 0
+    foundIgnoreRest &&
+    typeof foundIgnoreRest.index === 'number' &&
+    foundIgnoreRest.index > 0
       ? commit.message.substr(0, foundIgnoreRest.index)
       : commit.message;
 
@@ -312,6 +328,10 @@ const formatCommitMessage = ({ commit, includeAuthor }) => {
   return indentedMessage;
 };
 
+/**
+ * @param {GitEnrichedCommitInfo} commit
+ * @returns {string}
+ */
 const formatHiddenCommitMessage = commit => {
   const trimmedMessage = commit.message.replace(/\n/g, ' ').trim();
   return (
@@ -466,6 +486,7 @@ const outputChangelog = ({
     );
   }
 
+  /** @type {GitEnrichedCommitInfo[] | null} */
   let templatesCommits = null;
   if (templatesGitPath) {
     const templatesRepoGitTools = getGitTools(templatesGitPath);

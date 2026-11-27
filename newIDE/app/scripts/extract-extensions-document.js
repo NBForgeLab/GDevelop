@@ -3,6 +3,7 @@
  * Launch this script to generate a list (in markdown format) of all custom extensions.
  */
 
+/** @type {(options?: unknown) => Promise<libGDevelop>} */
 const initializeGDevelopJs = require('../public/libGD.js');
 const fs = require('fs').promises;
 const { default: axios } = require('axios');
@@ -86,13 +87,14 @@ const generateAuthorNamesWithLinks = authors => {
  *
  * (useful as containing author public profiles information).
  *
- * @param {any} gd
+ * @param {libGDevelop} gd
  * @param {Project} project
  *
  * @returns {Promise<Array<EventsFunctionsExtension>>}
  */
 const addAllExtensionsToProject = async (gd, project) => {
   const response = await axios.get(extensionShortHeadersUrl);
+  /** @type {Array<ExtensionShortHeader>} */
   const extensionShortHeaders = response.data;
   if (!extensionShortHeaders.length) {
     throw new Error('Unexpected response from the extension endpoint.');
@@ -135,6 +137,7 @@ const addAllExtensionsToProject = async (gd, project) => {
  * Tool function to restore a serializable object from a JS object.
  * Most gd.* objects are "serializable", meaning they have a serializeTo
  * and unserializeFrom method.
+ * @param {libGDevelop} gd
  * @param {any} serializable A gd.* object to restore (gdSerializable)
  * @param {Object} object The JS object to be used to restore the serializable.
  * @param {string} methodName The name of the unserialization method. "unserializeFrom" by default
@@ -224,8 +227,7 @@ const createExtensionReferencePage = async (
 };
 
 /**
- *
- * @param {{ extension: any }} extension (gdPlatformExtension)
+ * @param {{ extension: PlatformExtension }} options
  * @param {ExtensionShortHeader} extensionShortHeader
  * @param {boolean} isExperimental
  * @returns {RawText}
@@ -272,7 +274,10 @@ const generateExtensionHeaderText = (
   };
 };
 
-/** @returns {RawText} */
+/**
+ * @param {{ extension: PlatformExtension }} options
+ * @returns {RawText}
+ */
 const generateExtensionFooterText = ({ extension }) => {
   return {
     text:
@@ -287,6 +292,7 @@ const generateExtensionFooterText = ({ extension }) => {
 
 /**
  * Generate the metadata for the events based extension
+ * @param {libGDevelop} gd
  * @param {Project} project
  * @param {EventsFunctionsExtension} eventsFunctionsExtension
  * @returns {PlatformExtension}
@@ -350,7 +356,8 @@ const generateEventsFunctionExtensionMetadata = (
 };
 
 /**
- * @param {Array<any>} extensions The extension (gdEventsFunctionsExtension)
+ * @param {Array<EventsFunctionsExtension>} extensions
+ * @param {number} indentationLevel
  */
 const generateExtensionsPageList = (extensions, indentationLevel) => {
   const extensionsByCategory = sortKeys(
@@ -460,7 +467,7 @@ const generateExtensionsList = async (
 };
 
 /**
- * @type {any} gd
+ * @param {libGDevelop} gd
  * @returns {Array<ExtensionReference>}
  */
 const generateAllExtensionReferences = gd => {
@@ -653,6 +660,7 @@ const generateBehaviorsList = extensions => {
   return content;
 };
 
+/** @param {string} subject */
 const getExperimentalWarningMessage = subject =>
   `The following ${subject} are made by a community members and they only got
 though a light review by the GDevelop extension team. As such, we can't
@@ -784,11 +792,14 @@ Read more about this:
   console.info(`✅ Done. File generated: ${extensionsMainFilePath}`);
 };
 
+/**
+ * @param {string} str
+ * @returns {string}
+ */
 const noopTranslationFunction = str => str;
 
 initializeGDevelopJs().then(async gd => {
   try {
-    // @ts-ignore - not passing onFindGDJS - is it still useful?
     const loadingResults = await makeExtensionsLoader({
       gd,
       objectsEditorService: null,
@@ -801,7 +812,7 @@ initializeGDevelopJs().then(async gd => {
     console.info(`ℹ️ Loading all community extensions...`);
 
     /** @type {Project} */
-    const project = new gd.ProjectHelper.createNewGDJSProject();
+    const project = gd.ProjectHelper.createNewGDJSProject();
     await addAllExtensionsToProject(gd, project);
     const extensionShortHeaders = await getAllExtensionShortHeaders();
 

@@ -1,19 +1,35 @@
+// @ts-check
 // Note: this file does not use ES import/export syntax so it can be required directly from Node.js.
 
 const optionalRequire = require('../Utils/OptionalRequire');
+/** @type {any} */
 const remote = optionalRequire('@electron/remote');
 const app = remote ? remote.app : null;
+/** @type {typeof import('fs') | null} */
 const fs = optionalRequire('fs');
+/** @type {typeof import('path') | null} */
 const path = optionalRequire('path');
+/** @type {NodeJS.Process | null} */
 const process = optionalRequire('process');
 var isDarwin = process && /^darwin/.test(process.platform);
 
-const tryPath = (path, onExists, onNoAccess) =>
-  fs.access(path, fs.constants.R_OK, (err) => {
-    if (!err) onExists(path);
+/**
+ * @param {string} targetPath
+ * @param {(gdjsRoot: string) => void} onExists
+ * @param {() => void} onNoAccess
+ */
+const tryPath = (targetPath, onExists, onNoAccess) => {
+  if (!fs) {
+    onNoAccess();
+    return;
+  }
+  fs.access(targetPath, fs.constants.R_OK, (err) => {
+    if (!err) onExists(targetPath);
     else onNoAccess();
   });
+};
 
+/** @returns {Promise<{ gdjsRoot: string }>} */
 const findGDJS = () => {
   if (!path || !process || !fs) return Promise.reject(new Error('Unsupported'));
 
@@ -25,6 +41,7 @@ const findGDJS = () => {
   const rootPath = path.join(appPath, pathToRoot);
 
   return new Promise((resolve, reject) => {
+    /** @param {string} gdjsRoot */
     const onFound = (gdjsRoot) => resolve({ gdjsRoot });
     const onNotFound = () => reject(new Error('Could not find GDJS'));
 
@@ -47,6 +64,9 @@ const findGDJS = () => {
   });
 };
 
-module.exports = {
+/** @type {typeof import('./LocalGDJSFinder')} */
+const LocalGDJSFinder = {
   findGDJS,
 };
+
+module.exports = LocalGDJSFinder;
