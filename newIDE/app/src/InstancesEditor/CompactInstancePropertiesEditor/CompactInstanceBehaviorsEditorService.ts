@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { CompactInstanceBehaviorPropertiesEditor } from './CompactInstanceBehaviorPropertiesEditor';
-import { type CompactInstanceBehaviorPropertiesEditorProps } from './CompactInstanceBehaviorPropertiesEditorProps.flow';
+import { type CompactInstanceBehaviorPropertiesEditorProps } from './CompactInstanceBehaviorPropertiesEditorProps';
 import CompactInstanceAnchorBehaviorEditor from './CompactAnchorInstanceBehaviorEditor';
 
 const components: Record<

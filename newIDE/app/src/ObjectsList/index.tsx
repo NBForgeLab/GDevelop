@@ -18,7 +18,7 @@ import TreeView, {
   type TreeViewInterface,
   type MenuButton,
 } from '../UI/TreeView';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import { type UnsavedChanges } from '../MainFrame/UnsavedChangesContext';
 import { type HotReloadPreviewButtonProps } from '../HotReload/HotReloadPreviewButton';
 import useForceUpdate from '../Utils/UseForceUpdate';
@@ -62,7 +62,7 @@ import {
 } from './ObjectFolderTreeViewItemContent';
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
 import { type HTMLDataset } from '../Utils/HTMLDataset';
-import type { MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import type { MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import type { EventsScope } from '../InstructionOrExpression/EventsScope';
 import { type InstallAssetOutput } from '../AssetStore/InstallAsset';
 import { exceptionallyGuardAgainstDeadObject } from '../Utils/IsNullPtr';

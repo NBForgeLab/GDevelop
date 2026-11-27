@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { type I18n as I18nType } from '@lingui/core';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import { exceptionallyGuardAgainstDeadObject } from '../Utils/IsNullPtr';
 import { I18n } from '@lingui/react';
 import { type RenderEditorContainerPropsWithRef } from '../MainFrame/EditorContainers/BaseEditor';

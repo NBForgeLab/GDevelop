@@ -1,7 +1,7 @@
 import { Trans } from '@lingui/macro';
 import { t } from '@lingui/macro';
 import * as React from 'react';
-import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer';
 import {
   type ParameterFieldProps,
   type ParameterFieldInterface,
@@ -9,7 +9,7 @@ import {
 } from './ParameterFieldCommons';
 import SelectField, { type SelectFieldInterface } from '../../UI/SelectField';
 import SelectOption from '../../UI/SelectOption';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 
 const operatorLabels: { [key: string]: MessageDescriptor } = {
   '=': t`= (equal to)`,

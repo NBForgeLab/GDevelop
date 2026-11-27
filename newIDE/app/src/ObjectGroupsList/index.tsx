@@ -26,7 +26,7 @@ import ErrorBoundary from '../UI/ErrorBoundary';
 import KeyboardShortcuts from '../UI/KeyboardShortcuts';
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
 import { getLabelsForObjectsAndGroupsLists } from '../ObjectsList';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 
 export const groupWithContextReactDndType = 'GD_GROUP_WITH_CONTEXT';
 

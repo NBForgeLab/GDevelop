@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { I18n } from '@lingui/react';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import GDevelopThemeContext from './Theme/GDevelopThemeContext';
 
 // We support a subset of the props supported by Material-UI v0.x MenuItem

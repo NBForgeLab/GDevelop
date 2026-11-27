@@ -14,7 +14,7 @@ import { Column, Line } from '../UI/Grid';
 import RaisedButton from '../UI/RaisedButton';
 import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
 import DismissableTutorialMessage from '../Hints/DismissableTutorialMessage';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import { ColumnStackLayout } from '../UI/Layout';
 import { LineStackLayout } from '../UI/Layout';
 import useForceUpdate from '../Utils/UseForceUpdate';

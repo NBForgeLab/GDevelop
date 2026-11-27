@@ -1,7 +1,7 @@
 import { Trans, t } from '@lingui/macro';
 import * as React from 'react';
 import classNames from 'classnames';
-import { type PreviewDebuggerServer } from '../ExportAndShare/PreviewLauncher.flow';
+import { type PreviewDebuggerServer } from '../ExportAndShare/PreviewLauncher';
 import Text from '../UI/Text';
 import IconButton from '../UI/IconButton';
 import { textEllipsisStyle } from '../UI/TextEllipsis';

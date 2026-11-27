@@ -11,7 +11,7 @@ import SelectOption from '../../UI/SelectOption';
 import { mapFor } from '../../Utils/MapFor';
 import HelpButton from '../../UI/HelpButton';
 import EmptyMessage from '../../UI/EmptyMessage';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import { ColumnStackLayout } from '../../UI/Layout';
 import DismissableAlertMessage from '../../UI/DismissableAlertMessage';
 import CompactValueTypeEditor from './CompactValueTypeEditor';

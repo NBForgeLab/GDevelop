@@ -161,7 +161,7 @@ export default class ViewPosition {
   }
 
   applyTransformationToThree(
-    threeCamera: THREE.Camera,
+    threeCamera: THREE.PerspectiveCamera,
     threePlaneMesh: THREE.Mesh
   ) {
     threeCamera.aspect = this._width / this._height;

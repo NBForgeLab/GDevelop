@@ -10,7 +10,7 @@ import { useSerializableObjectCancelableEditor } from '../Utils/SerializableObje
 import { useMarkObjectAsOpenedInEditor } from './ObjectsOpenedInEditor';
 import SemiControlledTextField from '../UI/SemiControlledTextField';
 import { Column, Line } from '../UI/Grid';
-import { type EditorProps } from './Editors/EditorProps.flow';
+import { type EditorProps } from './Editors/EditorProps';
 import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
 import { type UnsavedChanges } from '../MainFrame/UnsavedChangesContext';
 import useForceUpdate from '../Utils/UseForceUpdate';

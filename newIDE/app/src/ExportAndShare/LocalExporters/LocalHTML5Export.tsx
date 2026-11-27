@@ -11,7 +11,7 @@ import {
   type ExportFlowProps,
   type ExportPipeline,
   type ExportPipelineContext,
-} from '../ExportPipeline.flow';
+} from '../ExportPipeline';
 import optionalRequire from '../../Utils/OptionalRequire';
 import {
   ExplanationHeader,

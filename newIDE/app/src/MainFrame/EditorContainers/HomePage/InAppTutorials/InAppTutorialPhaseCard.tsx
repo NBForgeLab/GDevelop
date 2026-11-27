@@ -4,7 +4,7 @@ import { type SvgIconProps } from '@material-ui/core/SvgIcon';
 import Divider from '@material-ui/core/Divider';
 import { ColumnStackLayout, LineStackLayout } from '../../../../UI/Layout';
 import Text from '../../../../UI/Text';
-import { type MessageDescriptor } from '../../../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../../../Utils/i18n/MessageDescriptor';
 import { CardWidget } from '../CardWidget';
 import { Column, Line, Spacer } from '../../../../UI/Grid';
 import ColoredLinearProgress from '../../../../UI/ColoredLinearProgress';

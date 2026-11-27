@@ -15,7 +15,7 @@ import { getMeasurementUnitShortLabel } from '../../../PropertiesEditor/Properti
 import MeasurementUnitDocumentation from '../../../PropertiesEditor/MeasurementUnitDocumentation';
 import ShapePreview from './ShapePreview';
 import PolygonEditor from './PolygonEditor';
-import { type BehaviorEditorProps } from '../BehaviorEditorProps.flow';
+import { type BehaviorEditorProps } from '../BehaviorEditorProps';
 import DismissableAlertMessage from '../../../UI/DismissableAlertMessage';
 import {
   ColumnStackLayout,

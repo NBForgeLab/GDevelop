@@ -2,7 +2,7 @@ import { t } from '@lingui/macro';
 import * as React from 'react';
 import { I18n } from '@lingui/react';
 import TextField from '@material-ui/core/TextField';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import { computeTextFieldStyleProps } from './TextField';
 import { type FieldFocusFunction } from '../EventsSheet/ParameterFields/ParameterFieldCommons';
 import { MarkdownText } from './MarkdownText';

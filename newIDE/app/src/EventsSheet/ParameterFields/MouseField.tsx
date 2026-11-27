@@ -6,7 +6,7 @@ import {
   type ParameterFieldInterface,
   type FieldFocusFunction,
 } from './ParameterFieldCommons';
-import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer';
 import SelectField, { type SelectFieldInterface } from '../../UI/SelectField';
 import SelectOption from '../../UI/SelectOption';
 

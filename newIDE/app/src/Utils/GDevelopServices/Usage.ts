@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance } from 'axios';
 import { type I18n as I18nType } from '@lingui/core';
 import { GDevelopUsageApi } from './ApiConfigs';
-import { type MessageDescriptor } from '../i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../i18n/MessageDescriptor';
 import {
   selectMessageByLocale,
   type MessageByLocale,

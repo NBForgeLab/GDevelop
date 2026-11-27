@@ -2,7 +2,7 @@ import {
   type PreviewDebuggerServerCallbacks,
   type PreviewDebuggerServer,
   type DebuggerId,
-} from '../../PreviewLauncher.flow';
+} from '../../PreviewLauncher';
 
 let debuggerServerState: 'started' | 'stopped' = 'stopped';
 const callbacksList: Array<PreviewDebuggerServerCallbacks> = [];

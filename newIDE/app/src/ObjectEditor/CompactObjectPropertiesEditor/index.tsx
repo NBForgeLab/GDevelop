@@ -58,7 +58,7 @@ import {
 } from '../Editors/CustomObjectPropertiesEditor';
 import NewVariantDialog from '../Editors/CustomObjectPropertiesEditor/NewVariantDialog';
 import useAlertDialog from '../../UI/Alert/useAlertDialog';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import { CompactEffectsListEditor } from '../../LayersList/CompactLayerPropertiesEditor/CompactEffectsListEditor';
 import { CompactPropertiesEditorByVisibility } from '../../CompactPropertiesEditor/CompactPropertiesEditorByVisibility';
 import propertiesMapToSchema from '../../PropertiesEditor/PropertiesMapToSchema';

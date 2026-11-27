@@ -4,7 +4,7 @@ import {
   shouldCloseOrCancel,
   shouldValidate,
 } from './KeyboardShortcuts/InteractionKeys';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import IconButton from './IconButton';
 import CheckIcon from './CustomSvgIcons/Check';
 import CrossIcon from './CustomSvgIcons/Cross';

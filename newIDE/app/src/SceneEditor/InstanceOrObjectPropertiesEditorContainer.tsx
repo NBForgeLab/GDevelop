@@ -15,7 +15,7 @@ import { CompactLayerPropertiesEditor } from '../LayersList/CompactLayerProperti
 import { CompactEventsBasedObjectVariantPropertiesEditor } from '../SceneEditor/CompactEventsBasedObjectVariantPropertiesEditor';
 import { CompactScenePropertiesEditor } from './CompactScenePropertiesEditor';
 import Rectangle from '../Utils/Rectangle';
-import { type LastSelectionType } from './EditorsDisplay.flow';
+import { type LastSelectionType } from './EditorsDisplay';
 import {
   CompactObjectGroupPropertiesEditor,
   type CompactObjectGroupPropertiesEditorInterface,

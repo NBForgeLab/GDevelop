@@ -14,7 +14,7 @@ import { type ResourceExternalEditor } from '../ResourceExternalEditor';
 import IconButton from '../../UI/IconButton';
 import Edit from '../../UI/CustomSvgIcons/Edit';
 import ElementWithMenu from '../../UI/Menu/ElementWithMenu';
-import { type MenuItemTemplate } from '../../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../../UI/Menu/Menu';
 import { t } from '@lingui/macro';
 import { ExternalEditorOpenedDialog } from '../../UI/ExternalEditorOpenedDialog';
 import { applyResourceDefaults } from '../ResourceUtils';

@@ -11,7 +11,7 @@ import {
   type PreparePreviewWindowsOptions,
   type PreviewLauncherProps,
   type PreviewDebuggerServer,
-} from '../../PreviewLauncher.flow';
+} from '../../PreviewLauncher';
 import {
   browserPreviewDebuggerServer,
   registerNewPreviewWindow,

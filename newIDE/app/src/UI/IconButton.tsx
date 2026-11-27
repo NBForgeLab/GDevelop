@@ -2,7 +2,7 @@ import * as React from 'react';
 import MUIIconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import { I18n } from '@lingui/react';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import { adaptAcceleratorString } from './AcceleratorString';
 import { tooltipEnterDelay } from './Tooltip';
 import GDevelopThemeContext from './Theme/GDevelopThemeContext';

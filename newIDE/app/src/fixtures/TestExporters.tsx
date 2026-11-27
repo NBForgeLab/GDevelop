@@ -5,7 +5,7 @@ import {
   type ExportPipeline,
   type ExportPipelineContext,
   type ExportFlowProps,
-} from '../ExportAndShare/ExportPipeline.flow';
+} from '../ExportAndShare/ExportPipeline';
 import {
   type UrlFileDescriptor,
   type TextFileDescriptor,

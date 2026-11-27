@@ -16,7 +16,7 @@ import { ColumnStackLayout, LineStackLayout } from '../../UI/Layout';
 import Check from '../../UI/CustomSvgIcons/Check';
 import Help from '../../UI/CustomSvgIcons/Help';
 import RaisedButton from '../../UI/RaisedButton';
-import { type ExportFlowProps } from '../ExportPipeline.flow';
+import { type ExportFlowProps } from '../ExportPipeline';
 
 const getIconStyle = ({ isMobile }: { isMobile: boolean }) => {
   return {

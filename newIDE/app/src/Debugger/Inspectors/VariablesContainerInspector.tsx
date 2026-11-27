@@ -132,9 +132,9 @@ const VariablesContainerInspector = (props: Props): React.ReactNode => (
     collapsed={false}
     name={false}
     src={
-      props.variablesContainer
-        ? transformVariablesContainer(props.variablesContainer)
-        : null
+      (props.variablesContainer &&
+        transformVariablesContainer(props.variablesContainer)) ||
+      {}
     }
     enableClipboard={false}
     displayDataTypes={false}

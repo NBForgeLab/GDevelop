@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { type CompactInstanceBehaviorPropertiesEditorProps } from './CompactInstanceBehaviorPropertiesEditorProps.flow';
+import { type CompactInstanceBehaviorPropertiesEditorProps } from './CompactInstanceBehaviorPropertiesEditorProps';
 import {
   CompactInstanceBehaviorPropertiesEditor,
   getPropertyValue,

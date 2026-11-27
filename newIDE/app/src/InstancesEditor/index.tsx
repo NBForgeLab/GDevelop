@@ -296,7 +296,7 @@ export default class InstancesEditor extends Component<Props, State> {
         width: initialWidth,
         height: initialHeight,
         view: gameCanvas,
-        context: threeRenderer.getContext(),
+        context: threeRenderer.getContext() as WebGL2RenderingContext,
         clearBeforeRender: false,
         preserveDrawingBuffer: true,
         antialias: false,

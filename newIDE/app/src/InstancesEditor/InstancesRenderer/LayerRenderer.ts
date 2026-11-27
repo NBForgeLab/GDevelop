@@ -105,7 +105,7 @@ export default class LayerRenderer {
   // and then must be displayed on a plane in the 3D world:
   _threePlaneTexture: THREE.Texture | null = null;
   _threePlaneGeometry: THREE.PlaneGeometry | null = null;
-  _threePlaneMaterial: THREE.MeshBasicMaterial | null = null;
+  _threePlaneMaterial: THREE.ShaderMaterial | null = null;
   _threePlaneMesh: THREE.Mesh | null = null;
 
   _showObjectInstancesIn3D: boolean;
@@ -856,7 +856,9 @@ export default class LayerRenderer {
       // "Hack" into the Three.js renderer by getting the internal WebGL texture for the PixiJS plane,
       // and set it so that it's the same as the WebGL texture for the PixiJS RenderTexture.
       // This works because PixiJS and Three.js are using the same WebGL context.
-      const texture = threeRenderer.properties.get(this._threePlaneTexture);
+      const texture = threeRenderer.properties.get(this._threePlaneTexture) as {
+        __webglTexture?: WebGLTexture;
+      };
       texture.__webglTexture = glTexture.texture;
     }
   }

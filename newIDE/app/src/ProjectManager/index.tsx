@@ -96,7 +96,7 @@ import {
   type GameplayTestTreeViewItemCallbacks,
 } from './GameplayTestTreeViewItemContent';
 import { DEFAULT_GAMEPLAY_TEST_SOURCE } from '../GameplayTests/DefaultGameplayTestSource';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import useAlertDialog from '../UI/Alert/useAlertDialog';
 import { type ShowConfirmDeleteDialogOptions } from '../UI/Alert/AlertContext';
 import GDevelopThemeContext from '../UI/Theme/GDevelopThemeContext';

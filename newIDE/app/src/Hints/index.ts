@@ -1,5 +1,5 @@
 import { t } from '@lingui/macro';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import { type AlertMessageIdentifier } from '../MainFrame/Preferences/PreferencesContext';
 
 export type Hint = {

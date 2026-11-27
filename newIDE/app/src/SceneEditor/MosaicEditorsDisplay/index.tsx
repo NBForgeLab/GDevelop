@@ -26,7 +26,7 @@ import { type EditorId } from '../utils';
 import {
   type SceneEditorsDisplayProps,
   type SceneEditorsDisplayInterface,
-} from '../EditorsDisplay.flow';
+} from '../EditorsDisplay';
 import {
   InstanceOrObjectPropertiesEditorContainer,
   type InstanceOrObjectPropertiesEditorInterface,

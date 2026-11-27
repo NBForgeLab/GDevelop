@@ -6,7 +6,7 @@ import {
 } from '../../../UI/KeyboardShortcuts/InteractionKeys';
 import ListIcon from '../../../UI/ListIcon';
 import SvgIcon from '@material-ui/core/SvgIcon';
-import { type MessageDescriptor } from '../../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../../Utils/i18n/MessageDescriptor';
 
 import type * as React from 'react';
 

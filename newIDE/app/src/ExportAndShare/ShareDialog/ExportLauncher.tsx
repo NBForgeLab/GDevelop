@@ -19,7 +19,7 @@ import {
 } from '../../Utils/GDevelopServices/Usage';
 import BuildsWatcher from '../Builds/BuildsWatcher';
 import { type BuildStep } from '../Builds/BuildStepsProgress';
-import { type ExportPipeline } from '../ExportPipeline.flow';
+import { type ExportPipeline } from '../ExportPipeline';
 import DismissableAlertMessage from '../../UI/DismissableAlertMessage';
 import {
   addCreateBadgePreHookIfNotClaimed,

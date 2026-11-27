@@ -5,7 +5,7 @@ import MUITextField from '@material-ui/core/TextField';
 import { type FieldFocusFunction } from '../EventsSheet/ParameterFields/ParameterFieldCommons';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Visibility from './CustomSvgIcons/Visibility';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import { MarkdownText } from './MarkdownText';
 import { useShouldAutofocusInput } from './Responsive/ScreenTypeMeasurer';
 import { dataObjectToProps, type HTMLDataset } from '../Utils/HTMLDataset';

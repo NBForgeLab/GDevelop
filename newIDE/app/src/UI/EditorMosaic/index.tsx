@@ -8,7 +8,7 @@ import {
   type TileRenderer,
 } from 'react-mosaic-component';
 import CloseButton from './CloseButton';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import { useDebounce } from '../../Utils/UseDebounce';
 import { addNode } from './NodesHandling';
 import { getVisibleLeaves, toggleLeafVisibility } from './Visibility';

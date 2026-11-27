@@ -7,7 +7,7 @@ import {
   rgbColorToRGBString,
   rgbStringAndAlphaToRGBColor,
 } from '../../Utils/ColorTransformer';
-import { type EditorProps } from './EditorProps.flow';
+import { type EditorProps } from './EditorProps';
 import SemiControlledTextField from '../../UI/SemiControlledTextField';
 import { ResponsiveLineStackLayout, ColumnStackLayout } from '../../UI/Layout';
 import SelectField from '../../UI/SelectField';

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { t } from '@lingui/macro';
 import { type I18n as I18nType } from '@lingui/core';
 import { type TreeViewItem } from '.';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import {
   type ProjectItemFoldersKind,
   type ProjectItemFolderOrItem,

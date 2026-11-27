@@ -4,7 +4,7 @@ import {
   type ParameterFieldInterface,
   type FieldFocusFunction,
 } from './ParameterFieldCommons';
-import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer';
 import { renderInlineDefaultField } from './DefaultField';
 import GenericExpressionField from './GenericExpressionField';
 import ColorPicker from '../../UI/ColorField/ColorPicker';

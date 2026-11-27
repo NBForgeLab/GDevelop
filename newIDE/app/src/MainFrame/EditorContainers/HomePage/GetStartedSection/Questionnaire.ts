@@ -1,5 +1,5 @@
 import { t } from '@lingui/macro';
-import { type MessageDescriptor } from '../../../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../../../Utils/i18n/MessageDescriptor';
 
 export const firstQuestion = 'creationGoal';
 

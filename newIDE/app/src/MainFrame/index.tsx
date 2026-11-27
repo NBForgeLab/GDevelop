@@ -129,7 +129,7 @@ import {
   type PreviewLauncherProps,
   type PreviewLauncherComponent,
   type LaunchPreviewOptions,
-} from '../ExportAndShare/PreviewLauncher.flow';
+} from '../ExportAndShare/PreviewLauncher';
 import {
   type ResourceSource,
   type ResourceManagementProps,
@@ -144,7 +144,7 @@ import {
   type ElectronUpdateStatus,
 } from './UpdaterTools';
 import ChangelogDialogContainer from './Changelog/ChangelogDialogContainer';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import { type ShowConfirmDeleteDialogOptions } from '../UI/Alert/AlertContext';
 import { getNotNullTranslationFunction } from '../Utils/i18n/getTranslationFunction';
 import { type I18n } from '@lingui/core';

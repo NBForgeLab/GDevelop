@@ -6,7 +6,7 @@ import ToolbarSeparator from '../../UI/ToolbarSeparator';
 import IconButton from '../../UI/IconButton';
 import ElementWithMenu from '../../UI/Menu/ElementWithMenu';
 import ToolbarCommands from '../ToolbarCommands';
-import { type MenuItemTemplate } from '../../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../../UI/Menu/Menu';
 import UndoIcon from '../../UI/CustomSvgIcons/Undo';
 import RedoIcon from '../../UI/CustomSvgIcons/Redo';
 import TrashIcon from '../../UI/CustomSvgIcons/Trash';

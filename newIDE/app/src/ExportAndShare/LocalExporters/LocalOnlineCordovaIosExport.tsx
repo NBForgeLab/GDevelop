@@ -16,7 +16,7 @@ import {
   type ExportFlowProps,
   type ExportPipeline,
   type ExportPipelineContext,
-} from '../ExportPipeline.flow';
+} from '../ExportPipeline';
 import {
   type ExportState,
   SetupExportHeader,

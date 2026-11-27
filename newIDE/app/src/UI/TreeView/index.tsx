@@ -21,7 +21,7 @@ import { useIsDragging } from '../DragAndDrop/UseIsDragging';
 import DropIndicator from '../SortableVirtualizedItemList/DropIndicator';
 import { type HTMLDataset } from '../../Utils/HTMLDataset';
 import useForceUpdate from '../../Utils/UseForceUpdate';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import {
   type StickyRow,
   STICKY_ROWS_DEFAULT_MAX_COUNT,

@@ -32,7 +32,7 @@ import getObjectByName from '../Utils/GetObjectByName';
 import UseSceneEditorCommands from './UseSceneEditorCommands';
 import { type InstancesEditorSettings } from '../InstancesEditor/InstancesEditorSettings';
 import { type ResourceManagementProps } from '../ResourcesList/ResourceSource';
-import { type PreviewDebuggerServer } from '../ExportAndShare/PreviewLauncher.flow';
+import { type PreviewDebuggerServer } from '../ExportAndShare/PreviewLauncher';
 import EditSceneIcon from '../UI/CustomSvgIcons/EditScene';
 import {
   type HistoryState,
@@ -68,7 +68,7 @@ import debounce from 'lodash/debounce';
 import { mapFor } from '../Utils/MapFor';
 import MosaicEditorsDisplay from './MosaicEditorsDisplay';
 import SwipeableDrawerEditorsDisplay from './SwipeableDrawerEditorsDisplay';
-import { type SceneEditorsDisplayInterface } from './EditorsDisplay.flow';
+import { type SceneEditorsDisplayInterface } from './EditorsDisplay';
 import newNameGenerator from '../Utils/NewNameGenerator';
 import ObjectsRenderingService from '../ObjectsRendering/ObjectsRenderingService';
 import {
@@ -106,7 +106,7 @@ import {
   getImageResourceNamesForEditedObject,
   shouldResetObjectRendererForCustomObjectChildrenEdit,
 } from './CustomObjectResourceReload';
-import { type LastSelectionType } from './EditorsDisplay.flow';
+import { type LastSelectionType } from './EditorsDisplay';
 import { type ObjectGroupEditorTab } from '../ObjectGroupEditor/EditedObjectGroupEditorDialog';
 
 const gd: libGDevelop = (global as any).gd;

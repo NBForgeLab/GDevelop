@@ -16,7 +16,7 @@ import {
   type ExportPipeline,
   type ExportPipelineContext,
   type ExportFlowProps,
-} from '../ExportPipeline.flow';
+} from '../ExportPipeline';
 import { ExplanationHeader } from '../GenericExporters/OnlineWebExport';
 import { downloadUrlsToLocalFiles } from '../../Utils/LocalFileDownloader';
 import OnlineWebExportFlow from '../GenericExporters/OnlineWebExport/OnlineWebExportFlow';

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import RaisedButton, { RaisedButtonPropsWithoutOnClick } from './RaisedButton';
 import ElementWithMenu from './Menu/ElementWithMenu';
-import { MenuItemTemplate } from './Menu/Menu.flow';
+import { MenuItemTemplate } from './Menu/Menu';
 import { I18n as I18nType } from '@lingui/core';
 
 export interface RaisedButtonWithMenuProps

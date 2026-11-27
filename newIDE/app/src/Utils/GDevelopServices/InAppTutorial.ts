@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { GDevelopAssetApi } from './ApiConfigs';
-import { type MessageDescriptor } from '../i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../i18n/MessageDescriptor';
 import { type MessageByLocale } from '../i18n/MessageByLocale';
 import { ensureIsArray, ensureObjectHasProperty } from '../DataValidator';
 

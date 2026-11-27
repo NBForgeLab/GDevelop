@@ -26,7 +26,7 @@ import {
 } from '../../../../UI/Responsive/ResponsiveWindowMeasurer';
 import { ColumnStackLayout } from '../../../../UI/Layout';
 import { isOnlyOneFreeAnswerPossible } from './UserSurvey';
-import { type MessageDescriptor } from '../../../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../../../Utils/i18n/MessageDescriptor';
 
 const getColumnsFromWindowSize = (
   windowSize: WindowSizeType,

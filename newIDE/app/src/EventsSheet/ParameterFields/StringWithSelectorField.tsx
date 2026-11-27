@@ -21,9 +21,9 @@ import Functions from '@material-ui/icons/Functions';
 import FlatButton from '../../UI/FlatButton';
 import TypeCursorSelect from '../../UI/CustomSvgIcons/TypeCursorSelect';
 import { getParameterChoiceValues } from './ParameterMetadataTools';
-import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer';
 import { renderInlineDefaultField } from './DefaultField';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 
 /**
  * Where a choice adornment is displayed: in the field of an instruction editor,

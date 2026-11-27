@@ -4,7 +4,7 @@ import { I18n } from '@lingui/react';
 import { type I18n as I18nType } from '@lingui/core';
 
 import { type ConnectDragSource, type ConnectDropTarget } from 'react-dnd';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import { type HTMLDataset } from '../Utils/HTMLDataset';
 import { IconContainer, iconWithBackgroundStyle } from '../UI/IconContainer';
 import { ListItem } from '../UI/List';

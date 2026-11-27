@@ -7,7 +7,7 @@ import {
   type PreviewOptions,
   type PreviewLauncherProps,
   type PreviewDebuggerServer,
-} from '../../PreviewLauncher.flow';
+} from '../../PreviewLauncher';
 import { getBaseUrl } from '../../../Utils/GDevelopServices/Preview';
 import { makeTimestampedId } from '../../../Utils/TimestampedId';
 import {

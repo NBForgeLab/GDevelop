@@ -1,8 +1,5 @@
 import optionalRequire from '../../Utils/OptionalRequire';
-import {
-  type MenuItemTemplate,
-  type ContextMenuImplementation,
-} from './Menu.flow';
+import { type MenuItemTemplate, type ContextMenuImplementation } from './Menu';
 const electron = optionalRequire('electron');
 const remote = optionalRequire('@electron/remote');
 

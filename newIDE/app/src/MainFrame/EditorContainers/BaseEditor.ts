@@ -6,7 +6,7 @@ import {
 import { type UnsavedChanges } from '../UnsavedChangesContext';
 import { type ResourceManagementProps } from '../../ResourcesList/ResourceSource';
 import type { StorageProvider } from '../../ProjectsStorage';
-import { type PreviewDebuggerServer } from '../../ExportAndShare/PreviewLauncher.flow';
+import { type PreviewDebuggerServer } from '../../ExportAndShare/PreviewLauncher';
 import { type HotReloadPreviewButtonProps } from '../../HotReload/HotReloadPreviewButton';
 import {
   type FileMetadataAndStorageProviderName,

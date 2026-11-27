@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Trans } from '@lingui/macro';
 import { type I18n as I18nType } from '@lingui/core';
-import { type MenuItemTemplate } from './Menu/Menu.flow';
+import { type MenuItemTemplate } from './Menu/Menu';
 import Container from '@material-ui/core/Container';
 import { ColumnStackLayout, ResponsiveLineStackLayout } from './Layout';
 import RaisedButton from '../UI/RaisedButton';

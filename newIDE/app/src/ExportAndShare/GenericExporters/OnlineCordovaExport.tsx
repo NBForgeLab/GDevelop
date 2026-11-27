@@ -9,7 +9,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import Dialog from '../../UI/Dialog';
 import FlatButton from '../../UI/FlatButton';
 import HelpButton from '../../UI/HelpButton';
-import { type HeaderProps, type ExportFlowProps } from '../ExportPipeline.flow';
+import { type HeaderProps, type ExportFlowProps } from '../ExportPipeline';
 import BuildStepsProgress from '../Builds/BuildStepsProgress';
 import RaisedButton from '../../UI/RaisedButton';
 import { ColumnStackLayout } from '../../UI/Layout';

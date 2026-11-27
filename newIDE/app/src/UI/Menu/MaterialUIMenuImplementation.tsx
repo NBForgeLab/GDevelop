@@ -9,10 +9,7 @@ import Divider from '@material-ui/core/Divider';
 import Fade from '@material-ui/core/Fade';
 import makeStyles from '@material-ui/styles/makeStyles';
 import { adaptAcceleratorString } from '../AcceleratorString';
-import {
-  type MenuItemTemplate,
-  type ContextMenuImplementation,
-} from './Menu.flow';
+import { type MenuItemTemplate, type ContextMenuImplementation } from './Menu';
 import ChevronArrowRight from '../CustomSvgIcons/ChevronArrowRight';
 import { useScreenType } from '../Responsive/ScreenTypeMeasurer';
 import optionalRequire from '../../Utils/OptionalRequire';

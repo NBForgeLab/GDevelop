@@ -14,7 +14,7 @@ import {
   type PreviewLauncherProps,
   type CaptureOptions,
   type PreviewDebuggerServer,
-} from '../../PreviewLauncher.flow';
+} from '../../PreviewLauncher';
 import SubscriptionChecker, {
   type SubscriptionCheckerInterface,
 } from '../../../Profile/Subscription/SubscriptionChecker';

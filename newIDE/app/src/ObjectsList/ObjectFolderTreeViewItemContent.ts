@@ -18,7 +18,7 @@ import {
   pasteObjectFolderOrObjectsAndNotify,
 } from './ObjectFolderOrObjectsClipboard';
 import { duplicateObjectFolderOrObjects } from './ObjectFolderOrObjectsDuplicate';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import type { ObjectWithContext } from '../ObjectsList/EnumerateObjects';
 import { type HTMLDataset } from '../Utils/HTMLDataset';
 import { exceptionallyGuardAgainstDeadObject } from '../Utils/IsNullPtr';

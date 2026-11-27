@@ -13,7 +13,7 @@ import {
   type Build,
   type BuildArtifactKeyName,
 } from '../../Utils/GDevelopServices/Build';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import { type Game, updateGame } from '../../Utils/GDevelopServices/Game';
 import Window from '../../Utils/Window';
 import { ColumnStackLayout, ResponsiveLineStackLayout } from '../../UI/Layout';

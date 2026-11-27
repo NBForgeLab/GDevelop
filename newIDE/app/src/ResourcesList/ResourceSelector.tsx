@@ -17,7 +17,7 @@ import { type FieldFocusFunction } from '../EventsSheet/ParameterFields/Paramete
 import { type ResourceExternalEditor } from '../ResourcesList/ResourceExternalEditor';
 import ResourcesLoader from '../ResourcesLoader';
 import { applyResourceDefaults } from './ResourceUtils';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import FlatButtonWithSplitMenu from '../UI/FlatButtonWithSplitMenu';
 import { LineStackLayout, ResponsiveLineStackLayout } from '../UI/Layout';
 import IconButton from '../UI/IconButton';

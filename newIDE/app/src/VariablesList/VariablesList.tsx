@@ -6,7 +6,7 @@ import { t, Trans } from '@lingui/macro';
 import { type I18n as I18nType } from '@lingui/core';
 import { ClickAwayListener } from '@material-ui/core';
 
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import Add from '../UI/CustomSvgIcons/Add';
 import Edit from '../UI/CustomSvgIcons/Edit';
 import Undo from '../UI/CustomSvgIcons/Undo';

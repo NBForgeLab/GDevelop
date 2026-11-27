@@ -1,7 +1,7 @@
 import { Trans } from '@lingui/macro';
 
 import * as React from 'react';
-import { type BehaviorEditorProps } from './BehaviorEditorProps.flow';
+import { type BehaviorEditorProps } from './BehaviorEditorProps';
 import BehaviorPropertiesEditor from './BehaviorPropertiesEditor';
 import SmallCrossIcon from '../../UI/CustomSvgIcons/SmallCross';
 import LeftAlignmentIcon from '../../UI/CustomSvgIcons/LeftAlignment';

@@ -5,7 +5,7 @@ import {
   getOtherUserCloudProject,
   getProjectFileAsZipBlob,
 } from '../../Utils/GDevelopServices/Project';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import { type AuthenticatedUser } from '../../Profile/AuthenticatedUserContext';
 import { type FileMetadata } from '..';
 import { unzipFirstEntryOfBlob } from '../../Utils/Zip.js/Utils';

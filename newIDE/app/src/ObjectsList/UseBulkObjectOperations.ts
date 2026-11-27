@@ -20,7 +20,7 @@ import {
   getUniqueFolderName,
 } from './ObjectFolderOrObjectsClipboard';
 import { duplicateObjectFolderOrObjectsInPlace } from './ObjectFolderOrObjectsDuplicate';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import { type ShowConfirmDeleteDialogOptions } from '../UI/Alert/AlertContext';
 
 const gd: libGDevelop = (global as any).gd;

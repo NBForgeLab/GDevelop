@@ -25,7 +25,10 @@ const vertexColors: Array<number> = [];
 /**
  * Renderer for gd.SpriteObject
  */
-export default class RenderedSprite3DInstance extends Rendered3DInstance<PIXI.Graphics> {
+export default class RenderedSprite3DInstance extends Rendered3DInstance<
+  PIXI.Graphics,
+  THREE.Mesh
+> {
   _renderedAnimation: number;
   _renderedDirection: number;
   _centerX: number;

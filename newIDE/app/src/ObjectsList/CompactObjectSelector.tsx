@@ -2,7 +2,7 @@ import * as React from 'react';
 import { t, Trans } from '@lingui/macro';
 import { I18n } from '@lingui/react';
 import { type I18n as I18nType } from '@lingui/core';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import CompactSelectField from '../UI/CompactSelectField';
 import SelectOption from '../UI/SelectOption';
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';

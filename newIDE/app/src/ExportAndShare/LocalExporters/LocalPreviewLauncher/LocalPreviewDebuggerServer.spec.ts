@@ -1,7 +1,7 @@
 import {
   type PreviewDebuggerServer,
   type PreviewDebuggerServerCallbacks,
-} from '../../PreviewLauncher.flow';
+} from '../../PreviewLauncher';
 
 const mockIpcRendererListeners: Map<
   string,

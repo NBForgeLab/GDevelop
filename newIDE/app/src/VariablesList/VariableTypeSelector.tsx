@@ -4,7 +4,7 @@ import { I18n } from '@lingui/react';
 import Tooltip from '@material-ui/core/Tooltip';
 import { type SvgIconProps } from '@material-ui/core/SvgIcon';
 
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import CompactSelectField from '../UI/CompactSelectField';
 import SelectOption from '../UI/SelectOption';
 import VariableStringIcon from './Icons/VariableStringIcon';

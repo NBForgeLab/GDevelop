@@ -12,7 +12,7 @@ import {
 } from '../../UI/Layout';
 import ResourceSelector from '../../ResourcesList/ResourceSelector';
 import ResourcesLoader from '../../ResourcesLoader';
-import { type EditorProps } from './EditorProps.flow';
+import { type EditorProps } from './EditorProps';
 import SemiControlledTextField from '../../UI/SemiControlledTextField';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Button from '@material-ui/core/Button';

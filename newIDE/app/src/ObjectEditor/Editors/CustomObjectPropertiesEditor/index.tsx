@@ -4,7 +4,7 @@ import { type I18n as I18nType } from '@lingui/core';
 
 import * as React from 'react';
 import PropertiesEditorByVisibility from '../../../PropertiesEditor/PropertiesEditorByVisibility';
-import { type EditorProps } from '../EditorProps.flow';
+import { type EditorProps } from '../EditorProps';
 import { Column, Line } from '../../../UI/Grid';
 import { getExtraObjectsInformation } from '../../../Hints';
 import { getObjectTutorialIds } from '../../../Utils/GDevelopServices/Tutorial';

@@ -3,7 +3,7 @@ import { I18n } from '@lingui/react';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 
 import Text from './Text';
 import CircularProgress from './CircularProgress';

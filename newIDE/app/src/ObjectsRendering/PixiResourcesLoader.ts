@@ -55,15 +55,17 @@ type ResourcePromise<T> = {
  */
 const dispose3DModel = (model: GLTF) => {
   model.scene.traverse((object: THREE.Object3D) => {
-    if (object.geometry) object.geometry.dispose();
-    const materials = Array.isArray(object.material)
-      ? object.material
-      : object.material
-        ? [object.material]
+    const mesh = object as THREE.Mesh;
+    if (mesh.geometry) mesh.geometry.dispose();
+    const materials = Array.isArray(mesh.material)
+      ? mesh.material
+      : mesh.material
+        ? [mesh.material]
         : [];
     for (const material of materials) {
-      for (const key in material) {
-        const texture = material[key];
+      const materialRecord = material as unknown as Record<string, any>;
+      for (const key in materialRecord) {
+        const texture = materialRecord[key];
         if (!texture || !texture.isTexture) continue;
         texture.dispose();
         const image = texture.image;
@@ -192,7 +194,7 @@ const createInvalidModel = (): GLTF => {
     scenes: [],
     asset: {},
     userData: {},
-    parser: null,
+    parser: null as any,
   };
 };
 const invalidModel: GLTF = createInvalidModel();
@@ -280,8 +282,9 @@ const applyThreeTextureSettings = (
 
 // If modifying this function, make sure to update Resource3DPreview.worker.js copy.
 const removeMetalness = (material: THREE.Material): void => {
-  if (material.metalness) {
-    material.metalness = 0;
+  const standardMaterial = material as THREE.MeshStandardMaterial;
+  if (standardMaterial.metalness) {
+    standardMaterial.metalness = 0;
   }
 };
 

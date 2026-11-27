@@ -10,7 +10,7 @@ import Help from '../../UI/CustomSvgIcons/Help';
 import Check from '../../UI/CustomSvgIcons/Check';
 import FlatButton from '../../UI/FlatButton';
 import RaisedButton from '../../UI/RaisedButton';
-import { type ExportFlowProps } from '../ExportPipeline.flow';
+import { type ExportFlowProps } from '../ExportPipeline';
 
 const styles = {
   icon: {

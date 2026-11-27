@@ -2,7 +2,7 @@ import { Trans } from '@lingui/macro';
 
 import * as React from 'react';
 import PropertiesEditorByVisibility from '../../PropertiesEditor/PropertiesEditorByVisibility';
-import { type BehaviorEditorProps } from './BehaviorEditorProps.flow';
+import { type BehaviorEditorProps } from './BehaviorEditorProps';
 import { Column } from '../../UI/Grid';
 import propertiesMapToSchema from '../../PropertiesEditor/PropertiesMapToSchema';
 

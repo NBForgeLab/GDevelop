@@ -4,7 +4,7 @@ import {
   type DebuggerId,
   type HotReloaderLog,
   type DebuggerStatus,
-} from '../ExportAndShare/PreviewLauncher.flow';
+} from '../ExportAndShare/PreviewLauncher';
 import {
   type InGameEditorExtensionError,
   setLatestInGameEditorExtensionErrors,

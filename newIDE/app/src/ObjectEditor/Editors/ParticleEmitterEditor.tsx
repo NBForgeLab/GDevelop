@@ -10,7 +10,7 @@ import {
   rgbStringAndAlphaToRGBColor,
 } from '../../Utils/ColorTransformer';
 import SemiControlledTextField from '../../UI/SemiControlledTextField';
-import { type EditorProps } from './EditorProps.flow';
+import { type EditorProps } from './EditorProps';
 import ResourceSelectorWithThumbnail from '../../ResourcesList/ResourceSelectorWithThumbnail';
 import { ResponsiveLineStackLayout, ColumnStackLayout } from '../../UI/Layout';
 import DismissableTutorialMessage from '../../Hints/DismissableTutorialMessage';

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer';
 import VariableField, {
   getRootVariableName,
   renderVariableWithIcon,

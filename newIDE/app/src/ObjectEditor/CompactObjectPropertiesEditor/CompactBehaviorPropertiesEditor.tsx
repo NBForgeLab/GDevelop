@@ -9,7 +9,7 @@ import ShareExternal from '../../UI/CustomSvgIcons/ShareExternal';
 import { CompactPropertiesEditorByVisibility } from '../../CompactPropertiesEditor/CompactPropertiesEditorByVisibility';
 import propertiesMapToSchema from '../../PropertiesEditor/PropertiesMapToSchema';
 import { useForceRecompute } from '../../Utils/UseForceUpdate';
-import { type CompactBehaviorPropertiesEditorProps } from './CompactBehaviorPropertiesEditorProps.flow';
+import { type CompactBehaviorPropertiesEditorProps } from './CompactBehaviorPropertiesEditorProps';
 
 export const styles: {
   icon: React.CSSProperties;

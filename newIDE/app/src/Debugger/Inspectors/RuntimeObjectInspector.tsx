@@ -88,7 +88,7 @@ const RuntimeObjectInspector = (props: Props): React.ReactNode => (
     <ReactJsonView
       collapsed={false}
       name={false}
-      src={transform(props.runtimeObject)}
+      src={transform(props.runtimeObject) || {}}
       enableClipboard={false}
       displayDataTypes={false}
       displayObjectSize={false}

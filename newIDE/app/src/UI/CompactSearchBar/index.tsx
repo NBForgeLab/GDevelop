@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import classes from './CompactSearchBar.module.css';
 import { makeTimestampedId } from '../../Utils/TimestampedId';
 import Search from '../CustomSvgIcons/Search';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import { t } from '@lingui/macro';
 
 export type CompactSearchBarInterface = {

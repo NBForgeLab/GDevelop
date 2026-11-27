@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Line, Column, Spacer } from '../../../UI/Grid';
 import Checkbox from '../../../UI/Checkbox';
 import SemiControlledTextField from '../../../UI/SemiControlledTextField';
-import { type BehaviorEditorProps } from '../BehaviorEditorProps.flow';
+import { type BehaviorEditorProps } from '../BehaviorEditorProps';
 import Text from '../../../UI/Text';
 import DismissableAlertMessage from '../../../UI/DismissableAlertMessage';
 import {

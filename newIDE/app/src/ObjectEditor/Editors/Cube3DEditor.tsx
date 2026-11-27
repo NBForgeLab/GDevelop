@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Trans, t } from '@lingui/macro';
-import { type EditorProps } from './EditorProps.flow';
+import { type EditorProps } from './EditorProps';
 import { ColumnStackLayout, ResponsiveLineStackLayout } from '../../UI/Layout';
 import Text from '../../UI/Text';
 import SemiControlledTextField from '../../UI/SemiControlledTextField';

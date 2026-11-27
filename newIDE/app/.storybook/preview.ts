@@ -12,7 +12,7 @@ export const globalTypes = {
     defaultValue: 'GDevelop default Dark',
     toolbar: {
       icon: 'circlehollow',
-      // See theme names in ThemeRegistry.js
+      // See theme names in ThemeRegistry.ts
       items: [
         'GDevelop default Dark',
         'GDevelop default Light',
@@ -40,3 +40,11 @@ export const decorators = [
   i18nProviderDecorator,
   BrowserDropDownMenuDisablerDecorator,
 ];
+
+const preview = {
+  globalTypes,
+  parameters,
+  decorators,
+};
+
+export default preview;

@@ -1,5 +1,5 @@
 import { Trans } from '@lingui/macro';
-import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer';
 import * as React from 'react';
 import {
   type ParameterFieldProps,

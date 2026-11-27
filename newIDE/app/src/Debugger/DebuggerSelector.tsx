@@ -6,7 +6,7 @@ import SelectOption from '../UI/SelectOption';
 import {
   type DebuggerId,
   type DebuggerStatus,
-} from '../ExportAndShare/PreviewLauncher.flow';
+} from '../ExportAndShare/PreviewLauncher';
 
 type Props = {
   selectedId: DebuggerId;

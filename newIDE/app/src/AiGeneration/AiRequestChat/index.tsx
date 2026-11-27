@@ -24,7 +24,7 @@ import {
   type Quota,
   type UsagePrice,
 } from '../../Utils/GDevelopServices/Usage';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import Link from '../../UI/Link';
 import { getHelpLink } from '../../Utils/HelpLink';
 import Window from '../../Utils/Window';

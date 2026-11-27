@@ -2,7 +2,7 @@ import * as React from 'react';
 import { type I18n as I18nType } from '@lingui/core';
 import ReactDOM from 'react-dom';
 import ContextMenu, { type ContextMenuInterface } from './ContextMenu';
-import { type MenuItemTemplate } from './Menu.flow';
+import { type MenuItemTemplate } from './Menu';
 
 type Props = {
   element: React.ReactElement<any>;

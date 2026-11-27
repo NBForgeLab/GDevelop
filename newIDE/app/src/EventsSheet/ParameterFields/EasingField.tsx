@@ -6,7 +6,7 @@ import {
   type ParameterFieldProps,
   type ParameterFieldInterface,
 } from './ParameterFieldCommons';
-import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer';
 import StringWithSelectorField, {
   renderInlineStringWithSelector,
   type ChoiceAdornmentContext,

@@ -9,7 +9,7 @@ import Help from '../../UI/CustomSvgIcons/Help';
 import { getHelpLink } from '../../Utils/HelpLink';
 import Window from '../../Utils/Window';
 import RaisedButton from '../../UI/RaisedButton';
-import { type ExportFlowProps } from '../ExportPipeline.flow';
+import { type ExportFlowProps } from '../ExportPipeline';
 
 export const ExplanationHeader = (): React.ReactNode => (
   <Text align="center">

@@ -4,7 +4,7 @@ import { I18n } from '@lingui/react';
 import { type I18n as I18nType } from '@lingui/core';
 import GDevelopThemeContext from '../Theme/GDevelopThemeContext';
 import { type CubicBezierPoints } from '../../Utils/Easings';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 
 export const curveEditorPadding = 16;
 const curveEditorStep = 0.01;

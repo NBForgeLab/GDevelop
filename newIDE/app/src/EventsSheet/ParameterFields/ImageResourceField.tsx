@@ -10,7 +10,7 @@ import {
   type ParameterFieldInterface,
   type FieldFocusFunction,
 } from './ParameterFieldCommons';
-import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer';
 import { highlightSearchText } from '../../Utils/HighlightSearchText';
 
 const ImageResourceField = React.forwardRef<

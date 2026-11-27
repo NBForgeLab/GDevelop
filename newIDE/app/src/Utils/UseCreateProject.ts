@@ -13,7 +13,7 @@ import {
   type ExampleProjectSetup,
 } from '../ProjectCreation/NewProjectSetupDialog';
 import { sendNewGameCreated } from './Analytics/EventSender';
-import { type MessageDescriptor } from './i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from './i18n/MessageDescriptor';
 import { type State } from '../MainFrame/MainFrameState';
 import {
   type StorageProvider,

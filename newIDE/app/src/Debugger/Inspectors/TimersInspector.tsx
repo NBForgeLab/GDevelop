@@ -35,7 +35,7 @@ const TimersInspector = (props: Props): React.ReactNode => (
   <ReactJsonView
     collapsed={false}
     name={false}
-    src={props.timers ? transform(props.timers) : null}
+    src={(props.timers && transform(props.timers)) || {}}
     enableClipboard={false}
     displayDataTypes={false}
     displayObjectSize={false}

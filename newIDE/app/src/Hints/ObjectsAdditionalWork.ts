@@ -1,7 +1,7 @@
 import { t } from '@lingui/macro';
 import { type AlertMessageIdentifier } from '../MainFrame/Preferences/PreferencesContext';
 import newNameGenerator from '../Utils/NewNameGenerator';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import getObjectByName from '../Utils/GetObjectByName';
 
 /*

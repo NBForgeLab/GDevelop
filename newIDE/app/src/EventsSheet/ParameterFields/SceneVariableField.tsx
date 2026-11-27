@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer';
 import VariableField, { renderVariableWithIcon } from './VariableField';
 import SceneVariablesDialog from '../../VariablesList/SceneVariablesDialog';
 import { type VariableDialogOpeningProps } from '../../VariablesList/VariablesEditorDialog';

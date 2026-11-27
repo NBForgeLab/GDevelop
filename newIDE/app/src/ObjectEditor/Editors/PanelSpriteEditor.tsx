@@ -3,7 +3,7 @@ import { Trans } from '@lingui/macro';
 import * as React from 'react';
 import Checkbox from '../../UI/Checkbox';
 import ResourceSelectorWithThumbnail from '../../ResourcesList/ResourceSelectorWithThumbnail';
-import { type EditorProps } from './EditorProps.flow';
+import { type EditorProps } from './EditorProps';
 import SemiControlledTextField from '../../UI/SemiControlledTextField';
 import { ResponsiveLineStackLayout, ColumnStackLayout } from '../../UI/Layout';
 

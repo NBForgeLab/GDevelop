@@ -115,7 +115,7 @@ export default class RuntimeSceneInspector extends React.Component<
         <ReactJsonView
           collapsed={false}
           name={false}
-          src={transform(runtimeScene)}
+          src={transform(runtimeScene) || {}}
           enableClipboard={false}
           displayDataTypes={false}
           displayObjectSize={false}

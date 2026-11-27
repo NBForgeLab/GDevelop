@@ -3,7 +3,7 @@ import Drawer from '@material-ui/core/Drawer';
 import classNames from 'classnames';
 import { Trans, t } from '@lingui/macro';
 import { type I18n as I18nType } from '@lingui/core';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import {
   type AiRequestSummary,
   type AiRequestSummariesFilter,
@@ -18,7 +18,7 @@ import CollapsibleSidePanel from '../UI/CollapsibleSidePanel';
 import Add from '../UI/CustomSvgIcons/Add';
 import Refresh from '../UI/CustomSvgIcons/Refresh';
 import ContextMenu, { type ContextMenuInterface } from '../UI/Menu/ContextMenu';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import ThreeDotsMenu from '../UI/CustomSvgIcons/ThreeDotsMenu';
 import Tune from '../UI/CustomSvgIcons/Tune';
 import ElementWithMenu from '../UI/Menu/ElementWithMenu';

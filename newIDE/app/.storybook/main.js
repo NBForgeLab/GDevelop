@@ -1,18 +1,18 @@
 const path = require('path');
 
-const isBabelLoaderRule = rule =>
+const isBabelLoaderRule = (rule) =>
   rule &&
   ((typeof rule.loader === 'string' && rule.loader.includes('babel-loader')) ||
     (Array.isArray(rule.use) &&
       rule.use.some(
-        useEntry =>
+        (useEntry) =>
           useEntry &&
           typeof useEntry === 'object' &&
           typeof useEntry.loader === 'string' &&
           useEntry.loader.includes('babel-loader')
       )));
 
-const isDefaultStorybookRuleToReplace = rule => {
+const isDefaultStorybookRuleToReplace = (rule) => {
   if (!rule) return false;
   if (
     rule.test instanceof RegExp &&
@@ -31,7 +31,7 @@ const isDefaultStorybookRuleToReplace = rule => {
 };
 
 module.exports = {
-  env: config => ({
+  env: (config) => ({
     PUBLIC_URL: '.',
     REACT_APP_ENV: '',
     ...config,
@@ -67,15 +67,15 @@ module.exports = {
     // extends it), while excluding large compiled locale files and .d.ts files.
     const rules = (config.module && config.module.rules) || [];
     config.module.rules = rules
-      .filter(rule => !isDefaultStorybookRuleToReplace(rule))
-      .map(rule => {
+      .filter((rule) => !isDefaultStorybookRuleToReplace(rule))
+      .map((rule) => {
         if (!isBabelLoaderRule(rule)) return rule;
 
         const existingExclude = Array.isArray(rule.exclude)
           ? rule.exclude
           : rule.exclude
-          ? [rule.exclude]
-          : [];
+            ? [rule.exclude]
+            : [];
 
         return {
           ...rule,
@@ -205,9 +205,14 @@ module.exports = {
       }
     );
 
+    config.performance = {
+      hints: false,
+    };
+
     config.ignoreWarnings = [
       ...(config.ignoreWarnings || []),
       /Failed to parse source map/,
+      /export 'default' \(imported as 'previewAnnotations'\) was not found/,
     ];
 
     return config;

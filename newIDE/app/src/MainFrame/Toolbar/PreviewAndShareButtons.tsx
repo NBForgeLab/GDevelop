@@ -2,7 +2,7 @@ import { type I18n as I18nType } from '@lingui/core';
 import * as React from 'react';
 import { t, Trans } from '@lingui/macro';
 import { LineStackLayout } from '../../UI/Layout';
-import { type MenuItemTemplate } from '../../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../../UI/Menu/Menu';
 import { type PreviewState } from '../PreviewState';
 import PreviewIcon from '../../UI/CustomSvgIcons/Preview';
 import UpdateIcon from '../../UI/CustomSvgIcons/Update';

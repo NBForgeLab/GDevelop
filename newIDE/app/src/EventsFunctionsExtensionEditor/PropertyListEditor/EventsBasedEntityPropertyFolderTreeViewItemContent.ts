@@ -19,11 +19,11 @@ import {
   pasteProperties,
   PROPERTIES_CLIPBOARD_KIND,
 } from './EventsBasedEntityPropertyTreeViewItemContent';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import { type HTMLDataset } from '../../Utils/HTMLDataset';
 import { removeFolderAndSubFolders } from '../../Utils/Folders';
 import { serializeToJSObject } from '../../Utils/Serializer';
-import { type MenuItemTemplate } from '../../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../../UI/Menu/Menu';
 
 export const expandAllSubfolders = (
   propertyFolder: gdPropertyFolderOrProperty,

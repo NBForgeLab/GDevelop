@@ -6,7 +6,7 @@ import IconButton from '../../UI/IconButton';
 import SmallCross from '../../UI/CustomSvgIcons/SmallCross';
 import FileIcon from '../../UI/CustomSvgIcons/File';
 import CircularProgress from '../../UI/CircularProgress';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import classes from './AiAttachments.module.css';
 
 const formatFileSize = (sizeInBytes: number): string =>

@@ -25,7 +25,7 @@ import {
   moveFunctionFolderOrFunction,
   buildMoveToMenu,
 } from './EventsFunctionFolderTreeViewItemContent';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 
 const gd: libGDevelop = (global as any).gd;
 

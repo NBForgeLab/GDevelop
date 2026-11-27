@@ -9,7 +9,7 @@ import MUIListItemSecondaryAction from '@material-ui/core/ListItemSecondaryActio
 import IconButton from '@material-ui/core/IconButton';
 import ElementWithMenu from './Menu/ElementWithMenu';
 import Tooltip from '@material-ui/core/Tooltip';
-import { type MenuItemTemplate } from './Menu/Menu.flow';
+import { type MenuItemTemplate } from './Menu/Menu';
 import { dataObjectToProps, type HTMLDataset } from '../Utils/HTMLDataset';
 import { useLongTouch } from '../Utils/UseLongTouch';
 import Collapse from '@material-ui/core/Collapse';

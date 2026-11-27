@@ -2,8 +2,8 @@ import * as React from 'react';
 import SceneEditor from './index';
 import { hasMixedValues } from '../PropertiesEditor';
 import { prepareInstancesEditorSettings } from '../InstancesEditor/InstancesEditorSettings';
-import { type PreviewDebuggerServer } from '../ExportAndShare/PreviewLauncher.flow';
-import { type SceneEditorsDisplayInterface } from './EditorsDisplay.flow';
+import { type PreviewDebuggerServer } from '../ExportAndShare/PreviewLauncher';
+import { type SceneEditorsDisplayInterface } from './EditorsDisplay';
 import { type PrimitiveValueField } from '../PropertiesEditor/PropertiesEditorSchema';
 
 jest.mock('../ObjectEditor/ObjectsEditorService', () => ({}));

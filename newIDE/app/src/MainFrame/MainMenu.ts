@@ -9,7 +9,7 @@ import { type ShortcutMap } from '../KeyboardShortcuts/DefaultShortcuts';
 import {
   type MenuDeclarativeItemTemplate,
   type MenuItemTemplate,
-} from '../UI/Menu/Menu.flow';
+} from '../UI/Menu/Menu';
 import { getElectronAccelerator } from '../KeyboardShortcuts';
 import { isMacLike } from '../Utils/Platform';
 import Window from '../Utils/Window';

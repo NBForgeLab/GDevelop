@@ -6,7 +6,7 @@ import TextField, {
   type TextFieldInterface,
   type TextFieldStyleProps,
 } from '../TextField';
-import { type MenuItemTemplate } from '../Menu/Menu.flow';
+import { type MenuItemTemplate } from '../Menu/Menu';
 import { type HTMLDataset } from '../../Utils/HTMLDataset';
 import {
   shouldCloseOrCancel,

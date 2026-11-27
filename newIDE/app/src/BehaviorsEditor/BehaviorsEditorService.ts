@@ -1,6 +1,6 @@
 import * as React from 'react';
 import BehaviorPropertiesEditor from './Editors/BehaviorPropertiesEditor';
-import { type BehaviorEditorProps } from './Editors/BehaviorEditorProps.flow';
+import { type BehaviorEditorProps } from './Editors/BehaviorEditorProps';
 import Physics2Editor from './Editors/Physics2Editor';
 import Physics3DEditor from './Editors/Physics3DEditor';
 import AnchorBehaviorEditor from './Editors/AnchorBehaviorEditor';

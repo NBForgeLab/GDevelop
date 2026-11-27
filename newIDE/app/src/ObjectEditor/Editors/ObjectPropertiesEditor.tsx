@@ -5,7 +5,7 @@ import * as React from 'react';
 import PropertiesEditor from '../../PropertiesEditor';
 import propertiesMapToSchema from '../../PropertiesEditor/PropertiesMapToSchema';
 import EmptyMessage from '../../UI/EmptyMessage';
-import { type EditorProps } from './EditorProps.flow';
+import { type EditorProps } from './EditorProps';
 import { Line } from '../../UI/Grid';
 import { getExtraObjectsInformation } from '../../Hints';
 import { getObjectTutorialIds } from '../../Utils/GDevelopServices/Tutorial';

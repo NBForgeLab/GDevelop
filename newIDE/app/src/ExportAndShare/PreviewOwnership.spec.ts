@@ -6,7 +6,7 @@ import { findGDJS } from '../GameEngineFinder/BrowserS3GDJSFinder';
 import { browserPreviewDebuggerServer as debuggerServer } from './BrowserExporters/BrowserPreview/BrowserPreviewDebuggerServer';
 import { setGameplayTestFramePreviewLocation } from '../GameplayTests/GameplayTestFrame';
 import { putFile } from './BrowserExporters/BrowserSWPreviewLauncher/BrowserSWPreviewIndexedDB';
-import { type PreviewOptions } from './PreviewLauncher.flow';
+import { type PreviewOptions } from './PreviewLauncher';
 
 jest.mock('../GameEngineFinder/BrowserS3GDJSFinder', () => ({
   findGDJS: jest.fn(),

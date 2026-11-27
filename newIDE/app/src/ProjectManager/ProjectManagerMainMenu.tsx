@@ -6,7 +6,7 @@ import {
   type MainMenuCallbacks,
   type BuildMainMenuProps,
 } from '../MainFrame/MainMenu';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import classes from './ProjectManagerMainMenu.module.css';
 import classNames from 'classnames';
 import TextButton from '../UI/TextButton';

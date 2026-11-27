@@ -1,8 +1,8 @@
 import { type ResourceManagementProps } from '../../ResourcesList/ResourceSource';
 import { type EventsScope } from '../../InstructionOrExpression/EventsScope';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import { type ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
-import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer';
 import { type VariableDialogOpeningProps } from '../../VariablesList/VariablesEditorDialog';
 
 import type * as React from 'react';

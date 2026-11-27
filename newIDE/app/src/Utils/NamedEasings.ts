@@ -1,5 +1,5 @@
 import { t } from '@lingui/macro';
-import { type MessageDescriptor } from './i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from './i18n/MessageDescriptor';
 import { type ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
 import {
   formatCubicBezier,

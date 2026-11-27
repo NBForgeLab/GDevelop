@@ -1,6 +1,6 @@
 import * as React from 'react';
 import classNames from 'classnames';
-import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer';
 import ObjectSelector, {
   type ObjectSelectorInterface,
 } from '../../ObjectsList/ObjectSelector';

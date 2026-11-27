@@ -10,7 +10,7 @@ import HelpButton from '../../../UI/HelpButton';
 import ResourcesLoader from '../../../ResourcesLoader';
 import PointsEditor from './PointsEditor';
 import CollisionMasksEditor from './CollisionMasksEditor';
-import { type EditorProps } from '../EditorProps.flow';
+import { type EditorProps } from '../EditorProps';
 import { Column } from '../../../UI/Grid';
 import {
   ResponsiveLineStackLayout,
@@ -22,7 +22,7 @@ import useForceUpdate from '../../../Utils/UseForceUpdate';
 import SpacedDismissableTutorialMessage from './SpacedDismissableTutorialMessage';
 import { useResponsiveWindowSize } from '../../../UI/Responsive/ResponsiveWindowMeasurer';
 import FlatButtonWithSplitMenu from '../../../UI/FlatButtonWithSplitMenu';
-import { type MenuItemTemplate } from '../../../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../../../UI/Menu/Menu';
 import Add from '../../../UI/CustomSvgIcons/Add';
 import { getMatchingCollisionMask } from './CollisionMasksEditor/CollisionMaskHelper';
 import {

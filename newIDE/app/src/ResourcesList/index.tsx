@@ -9,7 +9,7 @@ import SearchBar from '../UI/SearchBar';
 import KeyboardShortcuts from '../UI/KeyboardShortcuts';
 import { filterResourcesList } from './EnumerateResources';
 import { getResourceFilePathStatus } from './ResourceUtils';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import {
   type ResourceKind,
   allResourceKindsAndMetadata,

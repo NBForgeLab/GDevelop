@@ -4,7 +4,7 @@ import {
   type ResourceKind,
   type ResourceManagementProps,
 } from './ResourceSource';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import { type StorageProvider } from '../ProjectsStorage';
 import newNameGenerator from '../Utils/NewNameGenerator';
 import {

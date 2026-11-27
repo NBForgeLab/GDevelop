@@ -1,7 +1,7 @@
 import { Trans, t } from '@lingui/macro';
 import * as React from 'react';
 import { type I18n as I18nType } from '@lingui/core';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import { ToolbarGroup } from '../UI/Toolbar';
 import { Spacer } from '../UI/Grid';
 import RaisedButtonWithSplitMenu from '../UI/RaisedButtonWithSplitMenu';

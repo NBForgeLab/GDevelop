@@ -8,7 +8,7 @@ import Text from '../../UI/Text';
 import { MarkdownText } from '../../UI/MarkdownText';
 import { tooltipEnterDelay } from '../../UI/Tooltip';
 import PortalContainerContext from '../PortalContainerContext';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import { shouldSubmit } from '../KeyboardShortcuts/InteractionKeys';
 
 const styles = {

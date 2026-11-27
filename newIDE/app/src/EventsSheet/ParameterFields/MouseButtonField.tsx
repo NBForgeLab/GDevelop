@@ -14,7 +14,7 @@ import RaisedButton from '../../UI/RaisedButton';
 import Functions from '@material-ui/icons/Functions';
 import FlatButton from '../../UI/FlatButton';
 import TypeCursorSelect from '../../UI/CustomSvgIcons/TypeCursorSelect';
-import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer';
 
 const mouseButtons = [
   { value: 'Left', label: t`Left (primary)` },

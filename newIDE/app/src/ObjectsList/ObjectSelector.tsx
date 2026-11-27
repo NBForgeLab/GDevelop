@@ -11,7 +11,7 @@ import ListIcon from '../UI/ListIcon';
 import ObjectsRenderingService from '../ObjectsRendering/ObjectsRenderingService';
 import useForceUpdate from '../Utils/UseForceUpdate';
 import { useOnResource3DPreviewRendered } from '../ResourcesList/ResourcePreview/Resource3DPreviewContext';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import { useShouldAutofocusInput } from '../UI/Responsive/ScreenTypeMeasurer';
 import SelectField from '../UI/SelectField';
 import SelectOption from '../UI/SelectOption';

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import ElementWithMenu from './Menu/ElementWithMenu';
-import { MenuItemTemplate } from './Menu/Menu.flow';
+import { MenuItemTemplate } from './Menu/Menu';
 import { I18n as I18nType } from '@lingui/core';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Button from '@material-ui/core/Button';

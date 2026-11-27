@@ -6,7 +6,7 @@ import {
   type PrivateGameTemplateListingData,
   type BundleListingData,
 } from '../../Utils/GDevelopServices/Shop';
-import type { MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import type { MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import {
   getPrivateAssetPack,
   type PrivateAssetPack,

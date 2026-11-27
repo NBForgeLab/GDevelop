@@ -1,6 +1,6 @@
 import { Trans } from '@lingui/macro';
 import * as React from 'react';
-import { type ExportFlowProps } from '../../ExportPipeline.flow';
+import { type ExportFlowProps } from '../../ExportPipeline';
 import { ColumnStackLayout } from '../../../UI/Layout';
 import RaisedButton from '../../../UI/RaisedButton';
 import { Column, Line } from '../../../UI/Grid';

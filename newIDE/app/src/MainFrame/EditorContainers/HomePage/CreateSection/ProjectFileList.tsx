@@ -20,7 +20,7 @@ import Paper from '../../../../UI/Paper';
 import PlaceholderError from '../../../../UI/PlaceholderError';
 import AlertMessage from '../../../../UI/AlertMessage';
 import ProjectFileListItem from './ProjectFileListItem';
-import { type MenuItemTemplate } from '../../../../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../../../../UI/Menu/Menu';
 import {
   getLastModifiedInfoByProjectId,
   getProjectLineHeight,

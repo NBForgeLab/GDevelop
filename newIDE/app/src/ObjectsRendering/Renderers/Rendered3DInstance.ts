@@ -9,6 +9,7 @@ import PixiResourcesLoader from '../PixiResourcesLoader';
  */
 export default class Rendered3DInstance<
   TPixiObject extends PIXI.DisplayObject = PIXI.DisplayObject,
+  TThreeObject extends THREE.Object3D = THREE.Object3D,
 > {
   _project: gdProject;
   _instance: gdInitialInstance;
@@ -17,7 +18,7 @@ export default class Rendered3DInstance<
   _threeGroup: THREE.Group | null;
   _pixiResourcesLoader: typeof PixiResourcesLoader;
   _pixiObject: TPixiObject | null;
-  _threeObject: THREE.Object3D | null;
+  _threeObject: TThreeObject | null;
   wasUsed: boolean;
   _wasDestroyed: boolean;
   _getPropertyOverridings: (() => Map<string, string>) | null;

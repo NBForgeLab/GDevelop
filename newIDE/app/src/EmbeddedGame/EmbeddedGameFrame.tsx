@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Trans } from '@lingui/macro';
-import { type PreviewDebuggerServer } from '../ExportAndShare/PreviewLauncher.flow';
+import { type PreviewDebuggerServer } from '../ExportAndShare/PreviewLauncher';
 import { objectWithContextReactDndType } from '../ObjectsList';
 import { makeDropTarget } from '../UI/DragAndDrop/DropTarget';
 import Text from '../UI/Text';

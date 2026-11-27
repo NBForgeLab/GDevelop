@@ -15,7 +15,7 @@ import {
   type AppArguments,
   POSITIONAL_ARGUMENTS_KEY,
 } from '../../Utils/Window';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import {
   generateOnOpen,
   generateOnEnsureCanAccessResources,

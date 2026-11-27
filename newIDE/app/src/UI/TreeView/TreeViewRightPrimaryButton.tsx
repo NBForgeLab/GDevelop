@@ -2,7 +2,7 @@ import * as React from 'react';
 import { I18n } from '@lingui/react';
 import Button from '@material-ui/core/Button';
 import { Spacer } from '../../UI/Grid';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 
 export type TreeViewRightPrimaryButtonProps = {
   label?: MessageDescriptor | null;

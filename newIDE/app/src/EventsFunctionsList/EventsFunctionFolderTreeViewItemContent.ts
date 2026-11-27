@@ -21,9 +21,9 @@ import {
   pasteEventsFunction,
   EVENTS_FUNCTION_CLIPBOARD_KIND,
 } from './EventsFunctionTreeViewItemContent';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import { type HTMLDataset } from '../Utils/HTMLDataset';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import newNameGenerator from '../Utils/NewNameGenerator';
 import {
   getOrCreateChildFolder,

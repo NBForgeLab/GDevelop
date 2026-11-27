@@ -3,7 +3,7 @@ import { type I18n as I18nType } from '@lingui/core';
 import * as React from 'react';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import ContextMenu, { type ContextMenuInterface } from './Menu/ContextMenu';
-import { type MenuItemTemplate } from './Menu/Menu.flow';
+import { type MenuItemTemplate } from './Menu/Menu';
 import { useLongTouch } from '../Utils/UseLongTouch';
 import { LONG_PRESS_DELAY_ON_HELD_ITEM } from './DragAndDrop/TouchDragDelay';
 import GDevelopThemeContext from './Theme/GDevelopThemeContext';

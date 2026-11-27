@@ -14,7 +14,7 @@ import {
   type ExportFlowProps,
   type ExportPipeline,
   type ExportPipelineContext,
-} from '../ExportPipeline.flow';
+} from '../ExportPipeline';
 import RaisedButton from '../../UI/RaisedButton';
 import {
   BlobDownloadUrlHolder,

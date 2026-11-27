@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { type I18n as I18nType } from '@lingui/core';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import ListIcon from '../../UI/ListIcon';
 import { useShortcutMap } from '../../KeyboardShortcuts';
 import { makeStyles } from '@material-ui/core/styles';

@@ -6,7 +6,7 @@ import Collapse from '@material-ui/core/Collapse';
 import MuiTextField from '@material-ui/core/TextField';
 import Text from './Text';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import { useShouldAutofocusInput } from './Responsive/ScreenTypeMeasurer';
 import { shouldValidate } from './KeyboardShortcuts/InteractionKeys';
 import TagChips from './TagChips';
@@ -14,7 +14,7 @@ import { I18n } from '@lingui/react';
 import { type I18n as I18nType } from '@lingui/core';
 import { useDebounce } from '../Utils/UseDebounce';
 import SearchBarContainer from './SearchBarContainer';
-import { type MenuItemTemplate } from './Menu/Menu.flow';
+import { type MenuItemTemplate } from './Menu/Menu';
 import { useResponsiveWindowSize } from './Responsive/ResponsiveWindowMeasurer';
 
 type TagsHandler = {

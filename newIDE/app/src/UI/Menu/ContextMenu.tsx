@@ -1,7 +1,7 @@
 import React from 'react';
 import { I18n } from '@lingui/react';
 import { type I18n as I18nType } from '@lingui/core';
-import { type MenuItemTemplate } from './Menu.flow';
+import { type MenuItemTemplate } from './Menu';
 import Menu from '@material-ui/core/Menu';
 import Fade from '@material-ui/core/Fade';
 import ElectronMenuImplementation from './ElectronMenuImplementation';

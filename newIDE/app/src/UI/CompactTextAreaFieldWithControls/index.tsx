@@ -3,7 +3,7 @@ import { I18n } from '@lingui/react';
 import classNames from 'classnames';
 import classes from './CompactTextAreaFieldWithControls.module.css';
 import { makeTimestampedId } from '../../Utils/TimestampedId';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import { shouldSubmit } from '../KeyboardShortcuts/InteractionKeys';
 
 export type CompactTextAreaFieldWithControlsProps = {

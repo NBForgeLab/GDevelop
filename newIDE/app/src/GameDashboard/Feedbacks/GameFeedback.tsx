@@ -33,7 +33,7 @@ import Options from '../../UI/CustomSvgIcons/Options';
 import ContextMenu, {
   type ContextMenuInterface,
 } from '../../UI/Menu/ContextMenu';
-import { type MenuItemTemplate } from '../../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../../UI/Menu/Menu';
 import { showErrorBox } from '../../UI/Messages/MessageBox';
 import CircularProgress from '../../UI/CircularProgress';
 import FlatButton from '../../UI/FlatButton';

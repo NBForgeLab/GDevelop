@@ -4,7 +4,7 @@ import {
   type PreviewDebuggerServer,
   type DebuggerId,
   type ServerAddress,
-} from '../../PreviewLauncher.flow';
+} from '../../PreviewLauncher';
 const electron = optionalRequire('electron');
 const ipcRenderer = electron ? electron.ipcRenderer : null;
 

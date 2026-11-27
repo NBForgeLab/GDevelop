@@ -2,7 +2,7 @@ import * as React from 'react';
 import {
   type LaunchCaptureOptions,
   type CaptureOptions,
-} from '../ExportAndShare/PreviewLauncher.flow';
+} from '../ExportAndShare/PreviewLauncher';
 import {
   createGameResourceSignedUrls,
   updateGame,

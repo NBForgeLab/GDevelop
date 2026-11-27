@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Trans, t } from '@lingui/macro';
 import { I18n } from '@lingui/react';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import Dialog, { DialogPrimaryButton } from '../Dialog';
 import FlatButton from '../FlatButton';
 import Text from '../Text';

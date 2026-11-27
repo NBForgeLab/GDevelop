@@ -26,7 +26,7 @@ type ZOrderedDisplayObject = PIXI.DisplayObject & { zOrder?: number };
  * Renderer for gd.CustomObject (the class is not exposed to newIDE)
  */
 export default class LegacyRenderedCustomObjectInstance
-  extends Rendered3DInstance<PIXI.Container>
+  extends Rendered3DInstance<PIXI.Container, THREE.Group>
   implements LayoutedParent<RenderedInstance | Rendered3DInstance>
 {
   childrenInstances: ChildInstance[];

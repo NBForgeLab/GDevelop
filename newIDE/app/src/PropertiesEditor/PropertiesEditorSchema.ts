@@ -1,6 +1,6 @@
 import { type I18n as I18nType } from '@lingui/core';
 import * as React from 'react';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import { type ResourceKind } from '../ResourcesList/ResourceSource';
 
 // An "instance" here is the objects for which properties are shown

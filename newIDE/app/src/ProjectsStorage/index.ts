@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { type I18n as I18nType } from '@lingui/core';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import { type AppArguments } from '../Utils/Window';
 import { type AuthenticatedUser } from '../Profile/AuthenticatedUserContext';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import {
   type ShowAlertFunction,
   type ShowConfirmFunction,

@@ -13,7 +13,7 @@ import HelpIcon from './HelpIcon';
 import IconButton from './IconButton';
 import Cross from './CustomSvgIcons/Cross';
 import ElementWithMenu from './Menu/ElementWithMenu';
-import { type MenuItemTemplate } from './Menu/Menu.flow';
+import { type MenuItemTemplate } from './Menu/Menu';
 
 // We override the style of paper for the border, as we need access
 // to the hover/focus status of the paper to change the border color.

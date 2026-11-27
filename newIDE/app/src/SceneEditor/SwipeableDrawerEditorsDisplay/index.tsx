@@ -24,7 +24,7 @@ import { type EditorId } from '../utils';
 import {
   type SceneEditorsDisplayInterface,
   type SceneEditorsDisplayProps,
-} from '../EditorsDisplay.flow';
+} from '../EditorsDisplay';
 import ErrorBoundary from '../../UI/ErrorBoundary';
 import {
   InstanceOrObjectPropertiesEditorContainer,

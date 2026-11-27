@@ -2,7 +2,7 @@ import * as React from 'react';
 import { I18n } from '@lingui/react';
 import { Trans } from '@lingui/macro';
 import TextField from '@material-ui/core/TextField';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { makeStyles, Popper } from '@material-ui/core';
 import {

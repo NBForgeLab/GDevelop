@@ -42,7 +42,7 @@ import {
   expandAllSubfolders,
   type EventsBasedEntityPropertyFolderTreeViewItemProps,
 } from './EventsBasedEntityPropertyFolderTreeViewItemContent';
-import { type MenuItemTemplate } from '../../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../../UI/Menu/Menu';
 import useAlertDialog from '../../UI/Alert/useAlertDialog';
 import { type ShowConfirmDeleteDialogOptions } from '../../UI/Alert/AlertContext';
 import GDevelopThemeContext from '../../UI/Theme/GDevelopThemeContext';

@@ -9,7 +9,7 @@ import {
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
-import { type HeaderProps, type ExportFlowProps } from '../ExportPipeline.flow';
+import { type HeaderProps, type ExportFlowProps } from '../ExportPipeline';
 import { ColumnStackLayout } from '../../UI/Layout';
 import { IosSigningCredentialsSelector } from '../SigningCredentials/IosSigningCredentialsSelector';
 import BuildStepsProgress from '../Builds/BuildStepsProgress';

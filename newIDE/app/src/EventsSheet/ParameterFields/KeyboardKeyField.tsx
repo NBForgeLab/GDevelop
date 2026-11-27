@@ -15,7 +15,7 @@ import TypeCursorSelect from '../../UI/CustomSvgIcons/TypeCursorSelect';
 import SemiControlledAutoComplete, {
   type SemiControlledAutoCompleteInterface,
 } from '../../UI/SemiControlledAutoComplete';
-import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer';
 import { keyNames } from '../../Utils/KeyboardKeyNames';
 
 const keyNamesSet = new Set(keyNames);

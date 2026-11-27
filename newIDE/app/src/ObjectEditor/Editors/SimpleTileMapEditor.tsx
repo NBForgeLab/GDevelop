@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { EditorProps } from './EditorProps.flow';
+import type { EditorProps } from './EditorProps';
 import ScrollView, { type ScrollViewInterface } from '../../UI/ScrollView';
 import { ColumnStackLayout } from '../../UI/Layout';
 import SemiControlledTextField from '../../UI/SemiControlledTextField';

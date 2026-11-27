@@ -16,7 +16,7 @@ import {
 import FlatButton from '../UI/FlatButton';
 import Text from '../UI/Text';
 import { GameThumbnail } from './GameThumbnail';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import {
   getGameMainImageUrl,
   getGameUrl,

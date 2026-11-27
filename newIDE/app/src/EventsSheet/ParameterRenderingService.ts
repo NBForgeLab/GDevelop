@@ -3,7 +3,7 @@ import * as React from 'react';
 import {
   type ParameterInlineRenderer,
   type ParameterInlineRendererProps,
-} from './ParameterFields/ParameterInlineRenderer.flow';
+} from './ParameterFields/ParameterInlineRenderer';
 import DefaultField, {
   renderInlineDefaultField,
 } from './ParameterFields/DefaultField';
@@ -79,7 +79,7 @@ import ObjectAnimationNameField from './ParameterFields/ObjectAnimationNameField
 import ObjectSkinNameField from './ParameterFields/ObjectSkinNameField';
 import FunctionParameterNameField from './ParameterFields/FunctionParameterNameField';
 import ExternalLayoutNameField from './ParameterFields/ExternalLayoutNameField';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import LeaderboardIdField, {
   renderInlineLeaderboardIdField,
 } from './ParameterFields/LeaderboardIdField';

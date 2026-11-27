@@ -23,7 +23,7 @@ import UnsavedChangesContext from '../MainFrame/UnsavedChangesContext';
 import AlertMessage from '../UI/AlertMessage';
 import useAlertDialog from '../UI/Alert/useAlertDialog';
 import PlaceholderLoader from '../UI/PlaceholderLoader';
-import type { MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import type { MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import PlaceholderError from '../UI/PlaceholderError';
 import CloudStorageProvider from '../ProjectsStorage/CloudStorageProvider';
 import GetSubscriptionCard from '../Profile/Subscription/GetSubscriptionCard';

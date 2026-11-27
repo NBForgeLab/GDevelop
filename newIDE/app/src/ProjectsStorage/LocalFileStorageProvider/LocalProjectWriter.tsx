@@ -22,7 +22,7 @@ import {
   splitPaths,
   getSlugifiedUniqueNameFromProperty,
 } from '../../Utils/ObjectSplitter';
-import type { MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import type { MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import LocalFolderPicker from '../../UI/LocalFolderPicker';
 import SaveAsOptionsDialog from '../SaveAsOptionsDialog';
 import {

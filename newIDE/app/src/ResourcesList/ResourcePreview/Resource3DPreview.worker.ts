@@ -22,30 +22,33 @@ const removeMetalness = (material: MaterialWithMetalness) => {
 
 // Copied from PixiResourcesLoader.js
 const removeMetalnessFromMesh = (node: THREE.Object3D) => {
-  if (!node.material) {
+  const mesh = node as THREE.Mesh;
+  if (!mesh.material) {
     return;
   }
-  if (Array.isArray(node.material)) {
-    for (let index = 0; index < node.material.length; index++) {
-      removeMetalness(node.material[index]);
+  if (Array.isArray(mesh.material)) {
+    for (let index = 0; index < mesh.material.length; index++) {
+      removeMetalness(mesh.material[index]);
     }
   } else {
-    removeMetalness(node.material);
+    removeMetalness(mesh.material);
   }
 };
 
 const disposeModel = (model: THREE.Object3D) => {
   model.traverse((node: THREE.Object3D) => {
-    if (node.geometry) node.geometry.dispose();
+    const mesh = node as THREE.Mesh & { skeleton?: THREE.Skeleton };
+    if (mesh.geometry) mesh.geometry.dispose();
     // The bones of skinned meshes are stored in a texture.
-    if (node.skeleton) node.skeleton.dispose();
-    if (!node.material) return;
-    const materials = Array.isArray(node.material)
-      ? node.material
-      : [node.material];
+    if (mesh.skeleton) mesh.skeleton.dispose();
+    if (!mesh.material) return;
+    const materials = Array.isArray(mesh.material)
+      ? mesh.material
+      : [mesh.material];
     materials.forEach((material: THREE.Material) => {
-      Object.keys(material).forEach((key) => {
-        const value = material[key];
+      const materialRecord = material as unknown as Record<string, any>;
+      Object.keys(materialRecord).forEach((key) => {
+        const value = materialRecord[key];
         if (!value || !value.isTexture) return;
         // GLTFLoader decodes textures as ImageBitmaps, which are not freed by
         // the garbage collector: close them explicitly.
@@ -224,15 +227,17 @@ const renderModel = async (
         const box = new THREE.Box3();
         const meshes: Array<THREE.Mesh> = [];
         model.traverse((child: THREE.Object3D) => {
-          if (child.isMesh) {
+          if ((child as THREE.Mesh).isMesh) {
             meshes.push(child as THREE.Mesh);
           }
         });
         meshes.forEach((mesh) => {
           mesh.geometry.computeBoundingBox();
-          const geometryBox = mesh.geometry.boundingBox.clone();
-          geometryBox.applyMatrix4(mesh.matrixWorld);
-          box.union(geometryBox);
+          if (mesh.geometry.boundingBox) {
+            const geometryBox = mesh.geometry.boundingBox.clone();
+            geometryBox.applyMatrix4(mesh.matrixWorld);
+            box.union(geometryBox);
+          }
         });
 
         const size = new THREE.Vector3();

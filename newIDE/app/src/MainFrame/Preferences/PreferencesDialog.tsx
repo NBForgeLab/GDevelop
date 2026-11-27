@@ -37,7 +37,7 @@ import {
   getDisplayedCommandAreaNames,
   type CommandArea,
 } from '../../CommandPalette/CommandsList';
-import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
 import { useResponsiveWindowSize } from '../../UI/Responsive/ResponsiveWindowMeasurer';
 import { adaptAcceleratorString } from '../../UI/AcceleratorString';
 import {

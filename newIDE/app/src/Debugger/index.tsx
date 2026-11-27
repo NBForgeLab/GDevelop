@@ -14,7 +14,7 @@ import {
   type PreviewDebuggerServer,
   type DebuggerId,
   type DebuggerStatus,
-} from '../ExportAndShare/PreviewLauncher.flow';
+} from '../ExportAndShare/PreviewLauncher';
 import { type Log, LogsManager } from './DebuggerConsole';
 
 // Mirrors `gdjs.FrameMeasureOutput`: a plain tree (no back-references),

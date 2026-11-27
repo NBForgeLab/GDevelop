@@ -40,7 +40,7 @@ import ContextMenu, {
   type ContextMenuInterface,
 } from '../../../../UI/Menu/ContextMenu';
 import type { ClientCoordinates } from '../../../../Utils/UseLongTouch';
-import { type MenuItemTemplate } from '../../../../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../../../../UI/Menu/Menu';
 import { EducationCard } from '../LearnSection/EducationCard';
 import UserSVG from '../../../../UI/CustomSvgIcons/User';
 import { copyTextToClipboard } from '../../../../Utils/Clipboard';

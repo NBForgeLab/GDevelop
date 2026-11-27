@@ -4,7 +4,7 @@ import Text from '../../UI/Text';
 import Checkbox from '../../UI/Checkbox';
 import { Column, Line } from '../../UI/Grid';
 import { type TargetName } from '../../Utils/GDevelopServices/Build';
-import { type HeaderProps, type ExportFlowProps } from '../ExportPipeline.flow';
+import { type HeaderProps, type ExportFlowProps } from '../ExportPipeline';
 import BuildStepsProgress from '../Builds/BuildStepsProgress';
 import RaisedButton from '../../UI/RaisedButton';
 import { ColumnStackLayout } from '../../UI/Layout';

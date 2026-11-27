@@ -1,7 +1,7 @@
 import { type I18n as I18nType } from '@lingui/core';
 import { t } from '@lingui/macro';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
-import { type MenuItemTemplate } from '../UI/Menu/Menu.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import { mapFor } from '../Utils/MapFor';
 import { removeFolderAndSubFolders } from '../Utils/Folders';
 import { exceptionallyGuardAgainstDeadObject } from '../Utils/IsNullPtr';

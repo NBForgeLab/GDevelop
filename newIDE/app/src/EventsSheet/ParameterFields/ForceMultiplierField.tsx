@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Trans } from '@lingui/macro';
-import { type ParameterInlineRendererProps } from './ParameterInlineRenderer.flow';
+import { type ParameterInlineRendererProps } from './ParameterInlineRenderer';
 import RaisedButton from '../../UI/RaisedButton';
 import { Line, Column } from '../../UI/Grid';
 import {

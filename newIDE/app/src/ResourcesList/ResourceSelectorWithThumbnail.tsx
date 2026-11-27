@@ -8,7 +8,7 @@ import {
 import ResourceThumbnail, {
   resourcesKindsWithThumbnail,
 } from './ResourceThumbnail';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import { LineStackLayout } from '../UI/Layout';
 import { useResponsiveWindowSize } from '../UI/Responsive/ResponsiveWindowMeasurer';
 import { Line } from '../UI/Grid';

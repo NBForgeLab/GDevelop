@@ -2,7 +2,7 @@ import * as React from 'react';
 import {
   type PreviewDebuggerServer,
   type PreviewLauncherInterface,
-} from '../ExportAndShare/PreviewLauncher.flow';
+} from '../ExportAndShare/PreviewLauncher';
 import {
   enumerateGameplayTestStateInspectors,
   type GameplayTestStateInspectors,

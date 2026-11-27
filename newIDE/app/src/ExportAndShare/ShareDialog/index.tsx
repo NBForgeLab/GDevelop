@@ -6,7 +6,7 @@ import FlatButton from '../../UI/FlatButton';
 import BuildsDialog from '../Builds/BuildsDialog';
 import AuthenticatedUserContext from '../../Profile/AuthenticatedUserContext';
 import PublishHome from './PublishHome';
-import { type ExportPipeline } from '../ExportPipeline.flow';
+import { type ExportPipeline } from '../ExportPipeline';
 import { Tabs } from '../../UI/Tabs';
 import InviteHome from './InviteHome';
 import { useResponsiveWindowSize } from '../../UI/Responsive/ResponsiveWindowMeasurer';

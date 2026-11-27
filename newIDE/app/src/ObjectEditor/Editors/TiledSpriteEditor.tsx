@@ -3,7 +3,7 @@ import { Trans } from '@lingui/macro';
 import * as React from 'react';
 import SemiControlledTextField from '../../UI/SemiControlledTextField';
 import ResourceSelectorWithThumbnail from '../../ResourcesList/ResourceSelectorWithThumbnail';
-import { type EditorProps } from './EditorProps.flow';
+import { type EditorProps } from './EditorProps';
 import { ResponsiveLineStackLayout, ColumnStackLayout } from '../../UI/Layout';
 
 const gd: libGDevelop = (global as any).gd;

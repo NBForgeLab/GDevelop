@@ -28,7 +28,7 @@ import ContextMenu, {
   type ContextMenuInterface,
 } from '../../../../UI/Menu/ContextMenu';
 import type { ClientCoordinates } from '../../../../Utils/UseLongTouch';
-import { type MenuItemTemplate } from '../../../../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../../../../UI/Menu/Menu';
 
 const styles = {
   listItem: {

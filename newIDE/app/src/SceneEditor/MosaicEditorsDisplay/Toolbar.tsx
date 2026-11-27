@@ -6,7 +6,7 @@ import ToolbarSeparator from '../../UI/ToolbarSeparator';
 import IconButton from '../../UI/IconButton';
 import ElementWithMenu from '../../UI/Menu/ElementWithMenu';
 import ToolbarCommands from '../ToolbarCommands';
-import { type MenuItemTemplate } from '../../UI/Menu/Menu.flow';
+import { type MenuItemTemplate } from '../../UI/Menu/Menu';
 import ObjectIcon from '../../UI/CustomSvgIcons/Object';
 import ObjectGroupIcon from '../../UI/CustomSvgIcons/ObjectGroup';
 import EditIcon from '../../UI/CustomSvgIcons/Edit';

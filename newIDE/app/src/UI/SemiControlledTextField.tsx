@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor.flow';
+import { type MessageDescriptor } from '../Utils/i18n/MessageDescriptor';
 import TextField, {
   type TextFieldInterface,
   type TextFieldStyleProps,
