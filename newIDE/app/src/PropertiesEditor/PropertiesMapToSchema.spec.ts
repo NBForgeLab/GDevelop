@@ -1,7 +1,7 @@
 import propertiesMapToSchema from './PropertiesMapToSchema';
 import { type Schema } from './PropertiesEditorSchema';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('propertiesMapToSchema (bitmask properties)', () => {
   const makeSchema = (

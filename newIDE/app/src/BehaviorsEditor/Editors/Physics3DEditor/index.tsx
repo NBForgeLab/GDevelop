@@ -32,7 +32,7 @@ import { type GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as THREE from 'three';
 import AlertMessage from '../../../UI/AlertMessage';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type Props = BehaviorEditorProps;
 

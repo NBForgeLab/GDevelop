@@ -31,7 +31,7 @@ import {
   getRequestedNewName,
 } from './NameHelpers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // The settings of a custom behavior, and the ones that only change what is
 // shown in the editor (no generated code depends on them).

@@ -12,7 +12,7 @@ import Visibility from '../UI/CustomSvgIcons/Visibility';
 import VisibilityOff from '../UI/CustomSvgIcons/VisibilityOff';
 import { FunctionListItem } from './ExtensionFunctionSelectorDialog';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const getEventsFunctionType = () =>
   gd.EventsFunction as typeof gd.EventsFunction &

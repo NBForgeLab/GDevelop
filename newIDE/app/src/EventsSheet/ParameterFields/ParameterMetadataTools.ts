@@ -1,7 +1,7 @@
 import { isEasingChoiceList, allEasingNames } from '../../Utils/Easings';
 import { type ExpressionParameters } from './ParameterFieldCommons';
 import { type ExpressionAutocompletion } from '../../ExpressionAutocompletion';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * Given an instruction or an expression and a parameter number,

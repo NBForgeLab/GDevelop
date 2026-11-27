@@ -6,7 +6,7 @@ import {
 import { translateExtensionCategory } from '../Utils/Extension/ExtensionCategories';
 import { shouldHideExtension } from '../Version';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const GROUP_DELIMITER = ' ❯ ';
 

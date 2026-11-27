@@ -8,7 +8,7 @@ const path = optionalRequire('path');
 const os = optionalRequire('os');
 const process = optionalRequire('process');
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * The folder of the temporary files (previews, exports). An editor running a

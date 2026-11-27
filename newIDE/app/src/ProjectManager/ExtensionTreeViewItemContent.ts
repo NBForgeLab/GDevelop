@@ -18,7 +18,7 @@ import { type ProjectItemFolderOrItem } from './ProjectItemFolders';
 import { isExtensionNameTaken } from './EventFunctionExtensionNameVerifier';
 import { type HTMLDataset } from '../Utils/HTMLDataset';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const EVENTS_FUNCTIONS_EXTENSION_CLIPBOARD_KIND = 'Events Functions Extension';
 

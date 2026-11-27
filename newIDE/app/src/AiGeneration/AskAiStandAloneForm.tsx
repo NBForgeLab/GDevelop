@@ -55,7 +55,7 @@ import EventsFunctionsExtensionsContext from '../EventsFunctionsExtensionsLoader
 import Cross from '../UI/CustomSvgIcons/Cross';
 import useAlertDialog from '../UI/Alert/useAlertDialog';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // Stable references for the standalone form, which never gates edits (it only
 // creates a project from scratch, with nothing to apply on an existing one).

@@ -11,7 +11,7 @@ import {
   withoutEventIdAnnotations,
 } from './EventScriptTestHelpers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('EventScriptSourceView', () => {
   const manyEventsSerialized = [

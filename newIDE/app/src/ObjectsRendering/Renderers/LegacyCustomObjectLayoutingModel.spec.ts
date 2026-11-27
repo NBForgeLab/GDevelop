@@ -9,7 +9,7 @@ import {
 } from './LegacyCustomObjectLayoutingModel';
 import { mapFor } from '../../Utils/MapFor';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('getLayouts', () => {
   it('can fill the parent with a child', () => {

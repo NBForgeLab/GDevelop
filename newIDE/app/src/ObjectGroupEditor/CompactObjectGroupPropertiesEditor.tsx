@@ -44,7 +44,7 @@ import NetworkNotSynchronized from '../UI/CustomSvgIcons/NetworkNotSynchronized'
 import { EmptyPlaceholder } from '../UI/EmptyPlaceholder';
 import { useResponsiveWindowSize } from '../UI/Responsive/ResponsiveWindowMeasurer';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const styles = {
   icon: {

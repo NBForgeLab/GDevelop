@@ -7,7 +7,7 @@ import { type EditorProps } from './EditorProps';
 import SemiControlledTextField from '../../UI/SemiControlledTextField';
 import { ResponsiveLineStackLayout, ColumnStackLayout } from '../../UI/Layout';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export default class PanelSpriteEditor extends React.Component<EditorProps> {
   render(): React.ReactNode {

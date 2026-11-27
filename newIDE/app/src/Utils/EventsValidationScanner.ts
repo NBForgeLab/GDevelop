@@ -4,7 +4,7 @@ import { getFunctionNameFromType } from '../EventsFunctionsExtensionsLoader';
 import type { EventPath } from './EventPath';
 import { renderInstructionSentenceAsPlainText } from '../EventsSheet/EventsTree/TextRenderer';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type ValidationErrorType =
   | 'missing-instruction'

@@ -26,7 +26,7 @@ import {
 } from './NameHelpers';
 import { getObjectTypesUsingBehavior } from './CustomBehaviorFunctions';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /** The settings of an extension, all read and written as strings. */
 const EXTENSION_PROPERTY_NAMES = [

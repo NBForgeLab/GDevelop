@@ -1,4 +1,4 @@
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const getGdCustomObjectConfiguration = () =>
   gd.CustomObjectConfiguration as typeof gd.CustomObjectConfiguration &

@@ -21,7 +21,7 @@ import VisibilityOff from '../UI/CustomSvgIcons/VisibilityOff';
 import Add from '../UI/CustomSvgIcons/Add';
 import { expandAllSubfolders } from './EventsFunctionFolderTreeViewItemContent';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const EVENTS_BASED_OBJECT_CLIPBOARD_KIND = 'Events Based Object';
 

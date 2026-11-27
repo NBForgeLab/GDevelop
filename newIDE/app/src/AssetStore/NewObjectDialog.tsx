@@ -53,7 +53,7 @@ import { useInstallExtension } from './ExtensionStore/InstallExtension';
 import { ExtensionStoreContext } from './ExtensionStore/ExtensionStoreContext';
 import { type ObjectShortHeader } from '../Utils/GDevelopServices/Extension';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const isDev = Window.isDev();
 

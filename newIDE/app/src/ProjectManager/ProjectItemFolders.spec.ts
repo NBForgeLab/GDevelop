@@ -10,7 +10,7 @@ import {
 } from './ProjectItemFolders';
 import { removeFolderAndSubFolders } from '../Utils/Folders';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('ProjectItemFolders', () => {
   const makeProjectWithScenes = (sceneNames: Array<string>) => {

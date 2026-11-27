@@ -9,7 +9,7 @@ import {
   type AtlasGrid,
 } from './SimpleTileMapAtlasGrid';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const SIMPLE_TILE_MAP_TYPE = 'TileMap::SimpleTileMap';
 const RAW_JSON_KEYS = [

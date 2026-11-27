@@ -14,7 +14,7 @@ import {
 import PreferencesContext from '../../MainFrame/Preferences/PreferencesContext';
 import { BEHAVIORS_FETCH_TIMEOUT } from '../../Utils/GlobalFetchTimeouts';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const emptySearchText = '';
 

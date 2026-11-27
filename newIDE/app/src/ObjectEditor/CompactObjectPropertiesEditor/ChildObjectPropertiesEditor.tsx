@@ -8,7 +8,7 @@ import { ColumnStackLayout } from '../../UI/Layout';
 import { getSchemaWithOpenFullEditorButton } from './CompactObjectPropertiesSchema';
 import { useForceRecompute } from '../../Utils/UseForceUpdate';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type Props = {
   project: gdProject;

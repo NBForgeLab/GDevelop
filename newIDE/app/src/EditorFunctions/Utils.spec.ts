@@ -2,7 +2,7 @@ import { fakeAssetShortHeader1 } from '../fixtures/GDevelopServicesTestData';
 import { PixiResourcesLoaderMock } from '../fixtures/TestPixiResourcesLoader';
 import { getObjectSizeInfo, getObjectSizeInfoHints } from './Utils';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('getObjectSizeInfo', () => {
   let project: gdProject;

@@ -8,7 +8,7 @@ import flatten from 'lodash/flatten';
 import { getExtensionPrefix } from './EnumerateInstructions';
 import { shouldHideExtension } from '../Version';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const GROUP_DELIMITER = ' ❯ ';
 

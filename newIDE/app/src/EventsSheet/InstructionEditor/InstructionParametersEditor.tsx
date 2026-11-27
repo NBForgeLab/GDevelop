@@ -41,7 +41,7 @@ import Edit from '../../UI/CustomSvgIcons/Edit';
 import { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
 import { type VariableDialogOpeningProps } from '../../VariablesList/VariablesEditorDialog';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const styles = {
   // When displaying the empty message, center the message:

@@ -829,9 +829,15 @@ const PreferencesDialog = ({
                 <div style={styles.fullWidthControl}>
                   <CompactSelectField
                     value={values.backdropClickBehavior}
-                    onChange={(value: string) =>
-                      setBackdropClickBehavior(value)
-                    }
+                    onChange={(value: string) => {
+                      if (
+                        value === 'cancel' ||
+                        value === 'apply' ||
+                        value === 'nothing'
+                      ) {
+                        setBackdropClickBehavior(value);
+                      }
+                    }}
                   >
                     <SelectOption value="cancel" label={t`Cancel changes`} />
                     <SelectOption value="apply" label={t`Apply changes`} />
@@ -851,9 +857,15 @@ const PreferencesDialog = ({
                       <div style={styles.fullWidthControl}>
                         <CompactSelectField
                           value={values.resourcesImporationBehavior}
-                          onChange={(value: string) =>
-                            setResourcesImporationBehavior(value)
-                          }
+                          onChange={(value: string) => {
+                            if (
+                              value === 'import' ||
+                              value === 'relative' ||
+                              value === 'ask'
+                            ) {
+                              setResourcesImporationBehavior(value);
+                            }
+                          }}
                         >
                           <SelectOption
                             value="import"
@@ -961,9 +973,11 @@ const PreferencesDialog = ({
                 <div style={styles.fullWidthControl}>
                   <CompactSelectField
                     value={values.eventsSheetCancelInlineParameter}
-                    onChange={(value: string) =>
-                      setEventsSheetCancelInlineParameter(value)
-                    }
+                    onChange={(value: string) => {
+                      if (value === 'cancel' || value === 'apply') {
+                        setEventsSheetCancelInlineParameter(value);
+                      }
+                    }}
                   >
                     <SelectOption value="cancel" label={t`Cancel changes`} />
                     <SelectOption value="apply" label={t`Apply changes`} />

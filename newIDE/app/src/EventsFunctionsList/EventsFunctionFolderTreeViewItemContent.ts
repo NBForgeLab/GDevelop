@@ -30,7 +30,7 @@ import {
   removeFolderAndSubFolders,
 } from '../Utils/Folders';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const moveFunctionFolderOrFunction = (
   selectedItemContent: TreeViewItemContent,

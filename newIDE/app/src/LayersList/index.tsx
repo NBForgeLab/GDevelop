@@ -45,7 +45,7 @@ import LightbulbIconOff from '../UI/CustomSvgIcons/LightbulbOff';
 import { mapReverseFor } from '../Utils/MapFor';
 import { addDefaultLightToLayer } from '../ProjectCreation/CreateProject';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const layersRootFolderId = 'layers';
 

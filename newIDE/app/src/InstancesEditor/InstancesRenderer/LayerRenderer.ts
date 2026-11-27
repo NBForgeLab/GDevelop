@@ -21,7 +21,7 @@ import {
   makeBasicProfilingCounters,
   resetBasicProfilingCounters,
 } from './BasicProfilingCounters';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type ZOrderedDisplayObject = PIXI.DisplayObject & { zOrder?: number };
 type ZOrderedContainer = PIXI.Container & { zOrder?: number };

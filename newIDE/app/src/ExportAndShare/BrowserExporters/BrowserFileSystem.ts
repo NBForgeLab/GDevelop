@@ -1,6 +1,6 @@
 import path from 'path-browserify';
 import { decodePercentEncodedFileName } from '../../Utils/PercentEncodedFileName';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type BlobFileDescriptor = {
   filePath: string;

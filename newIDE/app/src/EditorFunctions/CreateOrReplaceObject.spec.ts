@@ -1,7 +1,7 @@
 import { editorFunctions, type EditorFunctionGenericOutput } from './index';
 import { makeFakeLaunchFunctionOptionsWithProject } from './TestHelpers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('create_or_replace_object (additional cases)', () => {
   let project: gdProject;

@@ -19,7 +19,7 @@ import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/Even
 import PortalContainerContext from '../UI/PortalContainerContext';
 import { type VariableDialogOpeningProps } from '../VariablesList/VariablesEditorDialog';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type Props = {
   project: gdProject;

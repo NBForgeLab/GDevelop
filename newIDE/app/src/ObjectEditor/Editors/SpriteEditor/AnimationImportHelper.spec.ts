@@ -1,5 +1,5 @@
 import { groupResourcesByAnimations } from './AnimationImportHelper';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('AnimationImportHelper', () => {
   const createResources = (filePaths: Array<string>): Array<gdResource> =>

@@ -20,7 +20,7 @@ import { CompactIconField } from '../OptionsEditorDialog/CompactIconField';
 import { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
 import ChildObjectForwardFunctionGenerationDialog from './ChildObjectForwardFunctionGenerationDialog';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const isDev = Window.isDev();
 

@@ -4,7 +4,7 @@ import { moveUrlResourcesToLocalFiles } from './LocalFileResourceMover';
 import { makeTestProject } from '../../fixtures/TestProject';
 import { fakeSilverAuthenticatedUser } from '../../fixtures/GDevelopServicesTestData';
 import path from 'path';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 jest.mock('../../Utils/OptionalRequire');
 jest.mock('axios');

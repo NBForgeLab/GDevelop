@@ -18,7 +18,7 @@ import TypeCursorSelect from '../../UI/CustomSvgIcons/TypeCursorSelect';
 import RaisedButton from '../../UI/RaisedButton';
 import Functions from '@material-ui/icons/Functions';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export default React.forwardRef<ParameterFieldInterface, ParameterFieldProps>(
   function LayerEffectParameterNameField(props: ParameterFieldProps, ref) {

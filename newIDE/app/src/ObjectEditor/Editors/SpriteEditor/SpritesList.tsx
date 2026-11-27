@@ -46,7 +46,7 @@ import HoldForMenuProgress from '../../../UI/DragAndDrop/HoldForMenuProgress';
 import { ColumnDropIndicator } from '../../../MainFrame/EditorTabs/DropIndicator';
 import { useDragDropManager } from 'react-dnd';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const SPRITE_SIZE = 100;
 

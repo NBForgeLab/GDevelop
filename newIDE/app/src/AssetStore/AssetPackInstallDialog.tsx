@@ -36,7 +36,7 @@ import { type ObjectFolderOrObjectWithContext } from '../ObjectsList/EnumerateOb
 import { ExtensionStoreContext } from './ExtensionStore/ExtensionStoreContext';
 import uniq from 'lodash/uniq';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // We limit the number of assets that can be installed at once to avoid
 // timeouts especially with premium packs.

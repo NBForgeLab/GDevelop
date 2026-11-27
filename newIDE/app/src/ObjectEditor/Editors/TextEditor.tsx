@@ -30,7 +30,7 @@ import {
 } from '../../Utils/ColorTransformer';
 import ColorField from '../../UI/ColorField';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const toolbarItemStyle = {
   marginRight: 10,

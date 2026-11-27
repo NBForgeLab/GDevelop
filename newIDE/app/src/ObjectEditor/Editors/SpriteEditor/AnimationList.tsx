@@ -50,7 +50,7 @@ import ElementWithMenu from '../../../UI/Menu/ElementWithMenu';
 import MountOnFirstVisible from '../../../UI/MountOnFirstVisible';
 import { renameObjectAnimationReferences } from '../../../Utils/ObjectAnimationsRefactoring';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const removeExtensionFromFileName = (fileName: string) => {
   const dotIndex = fileName.lastIndexOf('.');

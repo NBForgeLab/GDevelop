@@ -16,7 +16,7 @@ import getObjectByName from '../../Utils/GetObjectByName';
 import AlertMessage from '../../UI/AlertMessage';
 import { mapVector } from '../../Utils/MapFor';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type Props = {
   project: gdProject;

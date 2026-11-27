@@ -16,7 +16,7 @@ import { ResponsiveLineStackLayout, ColumnStackLayout } from '../../UI/Layout';
 import DismissableTutorialMessage from '../../Hints/DismissableTutorialMessage';
 import { getObjectTutorialIds } from '../../Utils/GDevelopServices/Tutorial';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export default class ParticleEmitterEditor extends React.Component<EditorProps> {
   render(): React.ReactNode {

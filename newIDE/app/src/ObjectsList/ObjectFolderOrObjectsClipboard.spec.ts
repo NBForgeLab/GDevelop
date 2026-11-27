@@ -24,7 +24,7 @@ import {
 } from './ObjectFolderOrObjectsDuplicate';
 import { makeFakeI18n } from '../EditorFunctions/TestHelpers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('ObjectFolderOrObjectsClipboard', () => {
   beforeEach(() => {

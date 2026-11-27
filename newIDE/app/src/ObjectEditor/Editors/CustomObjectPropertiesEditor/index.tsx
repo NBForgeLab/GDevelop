@@ -64,7 +64,7 @@ import ResponsiveFlatButton from '../../../UI/ResponsiveFlatButton';
 import propertiesMapToSchema from '../../../PropertiesEditor/PropertiesMapToSchema';
 import { renameObjectPointReferences } from '../../../Utils/ObjectAnimationsRefactoring';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const styles: {
   icon: React.CSSProperties;

@@ -52,7 +52,7 @@ import Text from '../UI/Text';
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
 import { getAllVisibleBehaviorNames } from '../Utils/Behavior';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const BEHAVIORS_CLIPBOARD_KIND = 'Behaviors';
 

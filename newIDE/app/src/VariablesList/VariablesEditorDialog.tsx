@@ -18,7 +18,7 @@ import { insertInVariablesContainer } from '../Utils/VariablesUtils';
 import { getRootVariableName } from '../EventsSheet/ParameterFields/VariableField';
 import { getNodeIdFromVariableName } from './VariableToTreeNodeHandling';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type VariableDialogOpeningProps = {
   variableName: string;

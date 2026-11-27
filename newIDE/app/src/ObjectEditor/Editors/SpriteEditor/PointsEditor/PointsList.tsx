@@ -16,7 +16,7 @@ import RaisedButton from '../../../../UI/RaisedButton';
 import PointRow from './PointRow';
 import styles from './styles';
 import Add from '../../../../UI/CustomSvgIcons/Add';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type PointsListBodyProps = {
   pointsContainer: gdSprite;

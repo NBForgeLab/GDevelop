@@ -34,7 +34,7 @@ import {
 } from './FitAreaToChildren';
 import { applyPropertyChanges, type PropertyChange } from './PropertyChanges';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const VARIANT_RENAME_REJECTED_MESSAGE =
   'Renaming a variant is not supported yet: create a variant with `duplicated_from_variant_name` set to the old name, then delete the old one (the objects using it fall back to the default variant).';

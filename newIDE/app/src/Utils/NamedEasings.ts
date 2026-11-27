@@ -8,7 +8,7 @@ import {
   type CubicBezierPoints,
 } from './Easings';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * Return the unquoted string if `value` is a quoted literal with no inner

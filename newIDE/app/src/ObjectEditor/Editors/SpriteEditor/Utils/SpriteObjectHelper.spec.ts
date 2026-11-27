@@ -8,7 +8,7 @@ import {
   haveSameCollisionMasks,
   allObjectSpritesHaveSamePointsAs,
 } from './SpriteObjectHelper';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('SpriteObjectHelper', () => {
   describe('Points related methods', () => {

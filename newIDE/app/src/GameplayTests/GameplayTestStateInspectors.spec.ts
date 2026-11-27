@@ -5,7 +5,7 @@ import {
 } from '../EventsFunctionsExtensionsLoader';
 import { makeFakeI18n } from '../EditorFunctions/TestHelpers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const fakeEventsFunctionCodeWriter: EventsFunctionCodeWriter = {
   getIncludeFileFor: (functionName: string) => `fake-${functionName}.js`,

@@ -77,7 +77,7 @@ export const getOrCreateStressTestSpriteObject = (
   object: gdObject;
   configuration: gdSpriteObject;
 } => {
-  const gd = (global as any).gd as libGDevelop;
+  const gd = global.gd as libGDevelop;
   const objectsContainer = testProject.testLayout.getObjects();
   if (!objectsContainer.hasObjectNamed(objectName)) {
     const resourcesManager = testProject.project.getResourcesManager();

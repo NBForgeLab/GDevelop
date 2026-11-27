@@ -15,7 +15,7 @@ import useValueWithInit from '../Utils/UseRefInitHook';
 import Text from '../UI/Text';
 import { makeObjectGroupMergedVariablesContainer } from '../Utils/VariablesUtils';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type ObjectGroupEditorTab = 'objects' | 'variables';
 

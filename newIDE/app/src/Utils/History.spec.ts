@@ -9,7 +9,7 @@ import {
   type HistoryState,
 } from './History';
 import { makeTestProject } from '../fixtures/TestProject';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('History', () => {
   it('retains both undo steps when scene edits are applied in one batch', () => {

@@ -4,7 +4,7 @@ import type {
 } from '../../../ObjectsList/EnumerateObjects';
 import { type EnumeratedInstructionOrExpressionMetadata } from '../../../InstructionOrExpression/EnumeratedInstructionOrExpressionMetadata';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // ListItem created must have consistent keys that include their type
 // (object, group, instruction) to allow them to be living

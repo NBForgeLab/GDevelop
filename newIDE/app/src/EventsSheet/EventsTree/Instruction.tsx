@@ -48,7 +48,7 @@ import { ExtensionStoreContext } from '../../AssetStore/ExtensionStore/Extension
 import Warning from '../../UI/CustomSvgIcons/Warning';
 import { highlightSearchText } from '../../Utils/HighlightSearchText';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const styles = {
   container: {

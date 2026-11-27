@@ -15,7 +15,7 @@ import RaisedButton from '../UI/RaisedButton';
 import AlertMessage from '../UI/AlertMessage';
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const desktopIconSizes = [512];
 export const androidIconSizes = [192, 144, 96, 72, 48, 36];

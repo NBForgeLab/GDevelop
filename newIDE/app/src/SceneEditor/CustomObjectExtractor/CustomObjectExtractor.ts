@@ -4,7 +4,7 @@ import { serializeToJSObject } from '../../Utils/Serializer';
 import getObjectByName from '../../Utils/GetObjectByName';
 import Rectangle from '../../Utils/Rectangle';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const extractAsCustomObject = ({
   project,

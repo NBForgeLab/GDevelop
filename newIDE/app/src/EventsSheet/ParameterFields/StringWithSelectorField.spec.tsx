@@ -7,7 +7,7 @@ import StringWithSelectorField, {
 } from './StringWithSelectorField';
 import { makeTestProject } from '../../fixtures/TestProject';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 jest.mock('./GenericExpressionField', () => ({
   __esModule: true,

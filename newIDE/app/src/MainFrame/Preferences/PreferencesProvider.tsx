@@ -119,172 +119,123 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     | null
     | undefined = null;
 
-  state: any = {
-    values: getPreferences() as PreferencesValues,
-    setMultipleValues: this._setMultipleValues.bind(this) as any,
-    setLanguage: this._setLanguage.bind(this) as any,
-    setThemeName: this._setThemeName.bind(this) as any,
-    setCodeEditorThemeName: this._setCodeEditorThemeName.bind(this) as any,
-    setAutoDownloadUpdates: this._setAutoDownloadUpdates.bind(this) as any,
-    checkUpdates: ((forceDownload?: boolean) =>
-      this._checkUpdates(forceDownload, true)) as any,
-    setAutoDisplayChangelog: this._setAutoDisplayChangelog.bind(this) as any,
-    showAlertMessage: this._showAlertMessage.bind(this) as any,
-    showAllAlertMessages: this._showAllAlertMessages.bind(this) as any,
-    showTutorialHint: this._showTutorialHint.bind(this) as any,
-    showAllTutorialHints: this._showAllTutorialHints.bind(this) as any,
-    showAnnouncement: this._showAnnouncement.bind(this) as any,
-    showAllAnnouncements: this._showAllAnnouncements.bind(this) as any,
-    showAskAiStandAloneForm: this._showAskAiStandAloneForm.bind(this) as any,
-    showAllAskAiStandAloneForms: this._showAllAskAiStandAloneForms.bind(
-      this
-    ) as any,
-    verifyIfIsNewVersion: this._verifyIfIsNewVersion.bind(this) as any,
+  state: State = {
+    values: getPreferences(),
+    setMultipleValues: this._setMultipleValues.bind(this),
+    setLanguage: this._setLanguage.bind(this),
+    setThemeName: this._setThemeName.bind(this),
+    setCodeEditorThemeName: this._setCodeEditorThemeName.bind(this),
+    setAutoDownloadUpdates: this._setAutoDownloadUpdates.bind(this),
+    checkUpdates: (forceDownload?: boolean) =>
+      this._checkUpdates(forceDownload, true),
+    setAutoDisplayChangelog: this._setAutoDisplayChangelog.bind(this),
+    showAlertMessage: this._showAlertMessage.bind(this),
+    showAllAlertMessages: this._showAllAlertMessages.bind(this),
+    showTutorialHint: this._showTutorialHint.bind(this),
+    showAllTutorialHints: this._showAllTutorialHints.bind(this),
+    showAnnouncement: this._showAnnouncement.bind(this),
+    showAllAnnouncements: this._showAllAnnouncements.bind(this),
+    showAskAiStandAloneForm: this._showAskAiStandAloneForm.bind(this),
+    showAllAskAiStandAloneForms: this._showAllAskAiStandAloneForms.bind(this),
+    verifyIfIsNewVersion: this._verifyIfIsNewVersion.bind(this),
     setEventsSheetShowObjectThumbnails:
-      this._setEventsSheetShowObjectThumbnails.bind(this) as any,
-    setAutosaveOnPreview: this._setAutosaveOnPreview.bind(this) as any,
-    setUseGDJSDevelopmentWatcher: this._setUseGDJSDevelopmentWatcher.bind(
-      this
-    ) as any,
+      this._setEventsSheetShowObjectThumbnails.bind(this),
+    setAutosaveOnPreview: this._setAutosaveOnPreview.bind(this),
+    setUseGDJSDevelopmentWatcher: this._setUseGDJSDevelopmentWatcher.bind(this),
     setEventsSheetUseAssignmentOperators:
-      this._setEventsSheetUseAssignmentOperators.bind(this) as any,
-    setEventsSheetIndentScale: this._setEventsSheetIndentScale.bind(
-      this
-    ) as any,
-    setEventsSheetZoomLevel: this._setEventsSheetZoomLevel.bind(this) as any,
-    setShowEffectParameterNames: this._setShowEffectParameterNames.bind(
-      this
-    ) as any,
-    getLastUsedPath: this._getLastUsedPath.bind(this) as any,
-    setLastUsedPath: this._setLastUsedPath.bind(this) as any,
-    getDefaultEditorMosaicNode: this._getDefaultEditorMosaicNode.bind(
-      this
-    ) as any,
-    setDefaultEditorMosaicNode: this._setDefaultEditorMosaicNode.bind(
-      this
-    ) as any,
-    getRecentProjectFiles: this._getRecentProjectFiles.bind(this) as any,
-    insertRecentProjectFile: this._insertRecentProjectFile.bind(this) as any,
-    removeRecentProjectFile: this._removeRecentProjectFile.bind(this) as any,
-    getAutoOpenMostRecentProject: this._getAutoOpenMostRecentProject.bind(
-      this
-    ) as any,
-    setAutoOpenMostRecentProject: this._setAutoOpenMostRecentProject.bind(
-      this
-    ) as any,
+      this._setEventsSheetUseAssignmentOperators.bind(this),
+    setEventsSheetIndentScale: this._setEventsSheetIndentScale.bind(this),
+    setEventsSheetZoomLevel: this._setEventsSheetZoomLevel.bind(this),
+    setShowEffectParameterNames: this._setShowEffectParameterNames.bind(this),
+    getLastUsedPath: this._getLastUsedPath.bind(this),
+    setLastUsedPath: this._setLastUsedPath.bind(this),
+    getDefaultEditorMosaicNode: this._getDefaultEditorMosaicNode.bind(this),
+    setDefaultEditorMosaicNode: this._setDefaultEditorMosaicNode.bind(this),
+    getRecentProjectFiles: this._getRecentProjectFiles.bind(this),
+    insertRecentProjectFile: this._insertRecentProjectFile.bind(this),
+    removeRecentProjectFile: this._removeRecentProjectFile.bind(this),
+    getAutoOpenMostRecentProject: this._getAutoOpenMostRecentProject.bind(this),
+    setAutoOpenMostRecentProject: this._setAutoOpenMostRecentProject.bind(this),
     hadProjectOpenedDuringLastSession:
-      this._hadProjectOpenedDuringLastSession.bind(this) as any,
-    setHasProjectOpened: this._setHasProjectOpened.bind(this) as any,
-    setShortcutForCommand: this._setShortcutForCommand.bind(this) as any,
-    resetShortcutsToDefault: this._resetShortcutsToDefault.bind(this) as any,
-    getNewObjectDialogDefaultTab: this._getNewObjectDialogDefaultTab.bind(
-      this
-    ) as any,
-    setNewObjectDialogDefaultTab: this._setNewObjectDialogDefaultTab.bind(
-      this
-    ) as any,
-    getNewEffectDialogDefaultTab: this._getNewEffectDialogDefaultTab.bind(
-      this
-    ) as any,
-    setNewEffectDialogDefaultTab: this._setNewEffectDialogDefaultTab.bind(
-      this
-    ) as any,
-    getShareDialogDefaultTab: this._getShareDialogDefaultTab.bind(this) as any,
-    setShareDialogDefaultTab: this._setShareDialogDefaultTab.bind(this) as any,
-    getIsMenuBarHiddenInPreview: this._getIsMenuBarHiddenInPreview.bind(
-      this
-    ) as any,
-    setIsMenuBarHiddenInPreview: this._setIsMenuBarHiddenInPreview.bind(
-      this
-    ) as any,
-    setBackdropClickBehavior: this._setBackdropClickBehavior.bind(this) as any,
-    setResourcesImporationBehavior: this._setResourcesImporationBehavior.bind(
-      this
-    ) as any,
-    getIsAlwaysOnTopInPreview: this._getIsAlwaysOnTopInPreview.bind(
-      this
-    ) as any,
-    setIsAlwaysOnTopInPreview: this._setIsAlwaysOnTopInPreview.bind(
-      this
-    ) as any,
+      this._hadProjectOpenedDuringLastSession.bind(this),
+    setHasProjectOpened: this._setHasProjectOpened.bind(this),
+    setShortcutForCommand: this._setShortcutForCommand.bind(this),
+    resetShortcutsToDefault: this._resetShortcutsToDefault.bind(this),
+    getNewObjectDialogDefaultTab: this._getNewObjectDialogDefaultTab.bind(this),
+    setNewObjectDialogDefaultTab: this._setNewObjectDialogDefaultTab.bind(this),
+    getNewEffectDialogDefaultTab: this._getNewEffectDialogDefaultTab.bind(this),
+    setNewEffectDialogDefaultTab: this._setNewEffectDialogDefaultTab.bind(this),
+    getShareDialogDefaultTab: this._getShareDialogDefaultTab.bind(this),
+    setShareDialogDefaultTab: this._setShareDialogDefaultTab.bind(this),
+    getIsMenuBarHiddenInPreview: this._getIsMenuBarHiddenInPreview.bind(this),
+    setIsMenuBarHiddenInPreview: this._setIsMenuBarHiddenInPreview.bind(this),
+    setBackdropClickBehavior: this._setBackdropClickBehavior.bind(this),
+    setResourcesImporationBehavior:
+      this._setResourcesImporationBehavior.bind(this),
+    getIsAlwaysOnTopInPreview: this._getIsAlwaysOnTopInPreview.bind(this),
+    setIsAlwaysOnTopInPreview: this._setIsAlwaysOnTopInPreview.bind(this),
     setEventsSheetCancelInlineParameter:
-      this._setEventsSheetCancelInlineParameter.bind(this) as any,
-    setShowExperimentalExtensions: this._setShowCommunityExtensions.bind(
-      this
-    ) as any,
-    setShowCreateSectionByDefault: this._setShowCreateSectionByDefault.bind(
-      this
-    ) as any,
+      this._setEventsSheetCancelInlineParameter.bind(this),
+    setShowExperimentalExtensions: this._setShowCommunityExtensions.bind(this),
+    setShowCreateSectionByDefault:
+      this._setShowCreateSectionByDefault.bind(this),
     setShowInAppTutorialDeveloperMode:
-      this._setShowInAppTutorialDeveloperMode.bind(this) as any,
+      this._setShowInAppTutorialDeveloperMode.bind(this),
     setOpenDiagnosticReportAutomatically:
-      this._setOpenDiagnosticReportAutomatically.bind(this) as any,
+      this._setOpenDiagnosticReportAutomatically.bind(this),
     getOpenDiagnosticReportAutomatically:
-      this._getOpenDiagnosticReportAutomatically.bind(this) as any,
+      this._getOpenDiagnosticReportAutomatically.bind(this),
     setBlockPreviewAndExportOnDiagnosticErrors:
-      this._setBlockPreviewAndExportOnDiagnosticErrors.bind(this) as any,
+      this._setBlockPreviewAndExportOnDiagnosticErrors.bind(this),
     getBlockPreviewAndExportOnDiagnosticErrors:
-      this._getBlockPreviewAndExportOnDiagnosticErrors.bind(this) as any,
+      this._getBlockPreviewAndExportOnDiagnosticErrors.bind(this),
     setShowDeprecatedInstructionWarning:
-      this._setShowDeprecatedInstructionWarning.bind(this) as any,
+      this._setShowDeprecatedInstructionWarning.bind(this),
     getShowDeprecatedInstructionWarning:
-      this._getShowDeprecatedInstructionWarning.bind(this) as any,
-    setUse3DEditor: this._setUse3DEditor.bind(this) as any,
-    getUse3DEditor: this._getUse3DEditor.bind(this) as any,
-    setShowBasicProfilingCounters: this._setShowBasicProfilingCounters.bind(
-      this
-    ) as any,
-    setDisableNpmScriptConfirmation: this._setDisableNpmScriptConfirmation.bind(
-      this
-    ) as any,
-    saveTutorialProgress: this._saveTutorialProgress.bind(this) as any,
-    getTutorialProgress: this._getTutorialProgress.bind(this) as any,
-    setNewProjectsDefaultFolder: this._setNewProjectsDefaultFolder.bind(
-      this
-    ) as any,
+      this._getShowDeprecatedInstructionWarning.bind(this),
+    setUse3DEditor: this._setUse3DEditor.bind(this),
+    getUse3DEditor: this._getUse3DEditor.bind(this),
+    setShowBasicProfilingCounters:
+      this._setShowBasicProfilingCounters.bind(this),
+    setDisableNpmScriptConfirmation:
+      this._setDisableNpmScriptConfirmation.bind(this),
+    saveTutorialProgress: this._saveTutorialProgress.bind(this),
+    getTutorialProgress: this._getTutorialProgress.bind(this),
+    setNewProjectsDefaultFolder: this._setNewProjectsDefaultFolder.bind(this),
     setNewProjectsDefaultStorageProviderName:
-      this._setNewProjectsDefaultStorageProviderName.bind(this) as any,
+      this._setNewProjectsDefaultStorageProviderName.bind(this),
     setUseShortcutToClosePreviewWindow:
-      this._setUseShortcutToClosePreviewWindow.bind(this) as any,
+      this._setUseShortcutToClosePreviewWindow.bind(this),
     setWatchProjectFolderFilesForLocalProjects:
-      this._setWatchProjectFolderFilesForLocalProjects.bind(this) as any,
+      this._setWatchProjectFolderFilesForLocalProjects.bind(this),
     setLastClaimableProductsDialogMonth:
-      this._setLastClaimableProductsDialogMonth.bind(this) as any,
+      this._setLastClaimableProductsDialogMonth.bind(this),
     setAutoDisplayClaimableProductsDialog:
-      this._setAutoDisplayClaimableProductsDialog.bind(this) as any,
-    setNewFeaturesAcknowledgements: this._setNewFeaturesAcknowledgements.bind(
-      this
-    ) as any,
-    setDisplaySaveReminder: this._setDisplaySaveReminder.bind(this) as any,
-    getEditorStateForProject: this._getEditorStateForProject.bind(this) as any,
-    setEditorStateForProject: this._setEditorStateForProject.bind(this) as any,
+      this._setAutoDisplayClaimableProductsDialog.bind(this),
+    setNewFeaturesAcknowledgements:
+      this._setNewFeaturesAcknowledgements.bind(this),
+    setDisplaySaveReminder: this._setDisplaySaveReminder.bind(this),
+    getEditorStateForProject: this._getEditorStateForProject.bind(this),
+    setEditorStateForProject: this._setEditorStateForProject.bind(this),
     setFetchPlayerTokenForPreviewAutomatically:
-      this._setFetchPlayerTokenForPreviewAutomatically.bind(this) as any,
+      this._setFetchPlayerTokenForPreviewAutomatically.bind(this),
     setPreviewCrashReportUploadLevel:
-      this._setPreviewCrashReportUploadLevel.bind(this) as any,
-    setGamesDashboardOrderBy: this._setGamesDashboardOrderBy.bind(this) as any,
-    setTakeScreenshotOnPreview: this._setTakeScreenshotOnPreview.bind(
-      this
-    ) as any,
-    setGameplayTestFramePosition: this._setGameplayTestFramePosition.bind(
-      this
-    ) as any,
-    setGameplayTestFrameZoomFactor: this._setGameplayTestFrameZoomFactor.bind(
-      this
-    ) as any,
-    setShowAiAskButtonInTitleBar: this._setShowAiAskButtonInTitleBar.bind(
-      this
-    ) as any,
+      this._setPreviewCrashReportUploadLevel.bind(this),
+    setGamesDashboardOrderBy: this._setGamesDashboardOrderBy.bind(this),
+    setTakeScreenshotOnPreview: this._setTakeScreenshotOnPreview.bind(this),
+    setGameplayTestFramePosition: this._setGameplayTestFramePosition.bind(this),
+    setGameplayTestFrameZoomFactor:
+      this._setGameplayTestFrameZoomFactor.bind(this),
+    setShowAiAskButtonInTitleBar: this._setShowAiAskButtonInTitleBar.bind(this),
     setAutomaticallyUseCreditsForAiRequests:
-      this._setAutomaticallyUseCreditsForAiRequests.bind(this) as any,
+      this._setAutomaticallyUseCreditsForAiRequests.bind(this),
     setAutomaticallyApplyAiRequestEditsForProjectId:
-      this._setAutomaticallyApplyAiRequestEditsForProjectId.bind(this) as any,
+      this._setAutomaticallyApplyAiRequestEditsForProjectId.bind(this),
     setUseBackgroundSerializerForSaving:
-      this._setUseBackgroundSerializerForSaving.bind(this) as any,
-    setShowJsTypeError: this._setShowJsTypeError.bind(this) as any,
-    setCanonicalEventSerialization: this._setCanonicalEventSerialization.bind(
-      this
-    ) as any,
+      this._setUseBackgroundSerializerForSaving.bind(this),
+    setShowJsTypeError: this._setShowJsTypeError.bind(this),
+    setCanonicalEventSerialization:
+      this._setCanonicalEventSerialization.bind(this),
   };
 
   componentDidMount() {
@@ -1165,7 +1116,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
 
   _setNewFeaturesAcknowledgements(newFeaturesAcknowledgements: {
     [featureId: string]: {
-      dates: [number];
+      dates: Array<number>;
     };
   }) {
     this.setState(

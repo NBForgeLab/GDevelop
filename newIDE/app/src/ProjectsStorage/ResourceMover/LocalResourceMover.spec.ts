@@ -9,7 +9,7 @@ import {
 import { type MoveAllProjectResourcesOptions } from './index';
 import { emptyStorageProvider } from '../ProjectStorageProviders';
 import { fakeSilverAuthenticatedUser } from '../../fixtures/GDevelopServicesTestData';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 jest.mock('../../Utils/LocalFileUploader');
 jest.mock('../../Utils/GDevelopServices/Project');

@@ -3,7 +3,7 @@ import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
 import ResourcesLoader from '../../ResourcesLoader';
 import * as PIXI from 'pixi.js-legacy';
 import { rgbOrHexToHexNumber } from '../../Utils/ColorTransformer';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * Renderer for an ParticleEmitter object.

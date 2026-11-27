@@ -21,7 +21,7 @@ jest.mock('../EmbeddedGame/InGameEditorQueries', () => ({
     mockRaycastInGameEditor(request),
 }));
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const testSceneLocation: InGameEditorEditedLocation = {
   sceneName: 'TestScene',

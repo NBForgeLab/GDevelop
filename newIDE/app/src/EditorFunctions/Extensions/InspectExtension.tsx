@@ -40,7 +40,7 @@ import {
   type SimplifiedProperty,
 } from '../SimplifiedProject/SimplifiedExtensions';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type InspectedFunction = SimplifiedFunction & {
   // Only set at the function level (the drill-down on `function_name`).

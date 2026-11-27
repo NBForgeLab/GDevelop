@@ -2,7 +2,7 @@ import { t } from '@lingui/macro';
 import { type I18n as I18nType } from '@lingui/core';
 import { showErrorBox } from '../UI/Messages/MessageBox';
 import values from 'lodash/values';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type ProjectError = {
   type: 'error' | 'warning';

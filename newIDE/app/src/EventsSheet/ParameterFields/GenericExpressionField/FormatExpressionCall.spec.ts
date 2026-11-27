@@ -10,7 +10,7 @@ import {
   enumerateObjectExpressions,
 } from '../../../InstructionOrExpression/EnumerateExpressions';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const makeFakeI18n = (fakeI18n?: any): I18nType => ({
   ...fakeI18n,

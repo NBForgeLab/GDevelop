@@ -728,7 +728,7 @@ export const isPixelArt = (
 export const getEffectAssetMetadata = (
   assetOrAssetShortHeader: AssetShortHeader | Asset
 ): gdEffectMetadata | null => {
-  const gd: libGDevelop = (global as any).gd;
+  const gd: libGDevelop = global.gd;
   if (!gd) return null;
   const effectMetadata = gd.MetadataProvider.getEffectMetadata(
     gd.JsPlatform.get(),

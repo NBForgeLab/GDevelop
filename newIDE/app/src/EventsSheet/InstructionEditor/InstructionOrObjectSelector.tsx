@@ -66,7 +66,7 @@ import InAppTutorialContext from '../../InAppTutorial/InAppTutorialContext';
 import { exceptionallyGuardAgainstDeadObject } from '../../Utils/IsNullPtr';
 import OpenIcon from '../../UI/CustomSvgIcons/ShareExternal';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const singleLineTreeViewItemHeight = 32;
 const twoLinesTreeViewItemHeight = 44;

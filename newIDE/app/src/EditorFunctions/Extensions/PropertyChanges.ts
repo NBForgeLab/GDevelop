@@ -7,7 +7,7 @@ import {
   listQuoted,
 } from './NameHelpers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * Where the properties live: the properties of a custom object, the properties

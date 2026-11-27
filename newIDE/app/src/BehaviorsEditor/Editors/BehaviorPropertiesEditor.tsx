@@ -6,7 +6,7 @@ import { type BehaviorEditorProps } from './BehaviorEditorProps';
 import { Column } from '../../UI/Grid';
 import propertiesMapToSchema from '../../PropertiesEditor/PropertiesMapToSchema';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type Props = BehaviorEditorProps;
 

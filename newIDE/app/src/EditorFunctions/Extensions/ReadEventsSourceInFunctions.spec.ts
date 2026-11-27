@@ -11,7 +11,7 @@ import {
 import healthExtensionJson from '../../fixtures/HealthExtension.json';
 import tankConfigurationExtensionJson from '../../fixtures/TankConfigurationExtension.json';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const createFakeEventsFunctionCodeWriter = (): EventsFunctionCodeWriter => ({
   getIncludeFileFor: (functionName: string) => `${functionName}.js`,

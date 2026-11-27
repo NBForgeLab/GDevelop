@@ -6,7 +6,7 @@ import {
   convertBlobToDataURL,
 } from '../Utils/BlobDownloader';
 import { downloadAndPrepareExternalEditorBase64Resources } from './LocalResourceExternalEditors';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 jest.mock('../Utils/BlobDownloader');
 jest.mock('../Utils/OptionalRequire');

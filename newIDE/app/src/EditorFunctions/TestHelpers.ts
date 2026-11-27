@@ -16,7 +16,7 @@ const { fakeAssetShortHeader1, fakeSkyboxAssetShortHeader } =
     fakeSkyboxAssetShortHeader: AssetShortHeader;
   };
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // The editor writes the generated code to files: the tests only need the
 // metadata, so nothing is actually written.

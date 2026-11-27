@@ -33,7 +33,7 @@ import { complyVariantsToEventsBasedObjectOf } from '../AssetStore/InstallAsset'
 import { isURL, isBlobURL } from '../ResourcesList/ResourceUtils';
 import useAlertDialog from '../UI/Alert/useAlertDialog';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const useOpenAssetFile = (): (() => Promise<{
   assetPackBlob: Blob | null;

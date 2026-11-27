@@ -17,7 +17,7 @@ import { makeSimplifiedProjectBuilder } from '../EditorFunctions/SimplifiedProje
 import { type FunctionAuthoringScope } from '../InstructionOrExpression/EnumeratedInstructionOrExpressionMetadata';
 import { prepareAiUserContent } from './PrepareAiUserContent';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const notLoggedInErrorMessage =
   'Not logged in to GDevelop: this uses the GDevelop online services, ask the user to log in to their GDevelop account in the editor.';

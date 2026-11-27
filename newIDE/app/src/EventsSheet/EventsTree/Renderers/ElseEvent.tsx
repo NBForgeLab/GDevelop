@@ -15,7 +15,7 @@ import ConditionsActionsColumns from '../ConditionsActionsColumns';
 import Tooltip from '@material-ui/core/Tooltip';
 import { Trans } from '@lingui/macro';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 

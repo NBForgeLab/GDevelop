@@ -1,5 +1,5 @@
 import { makeSchema } from './CompactInstancePropertiesSchema';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // Avoid importing the whole properties panel (and its renderers).
 jest.mock('./index', () => ({ styles: { icon: {} } }));

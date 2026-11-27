@@ -18,7 +18,7 @@ import CompactSemiControlledTextField from '../../UI/CompactSemiControlledTextFi
 import { CompactToggleField } from '../../UI/CompactToggleField';
 import { CompactIconField } from '../OptionsEditorDialog/CompactIconField';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type Props = {
   project: gdProject;

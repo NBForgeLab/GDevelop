@@ -2,7 +2,7 @@ import {
   cleanNonExistingObjectFolderOrObjectWithContexts,
   getObjectFolderOrObjectWithContextFromObjectName,
 } from './ObjectFolderOrObjectsSelection';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('SceneEditor', () => {
   test('cleanNonExistingObjectFolderOrObjectWithContexts', () => {

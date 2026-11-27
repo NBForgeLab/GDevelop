@@ -23,7 +23,7 @@ import {
 } from '../../Utils/ZoomUtils';
 import KeyboardShortcuts from '../../UI/KeyboardShortcuts';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const imagePreviewMaxZoom = 4;
 const imagePreviewMinZoom = 1 / 4;

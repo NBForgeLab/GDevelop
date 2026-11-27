@@ -11,7 +11,7 @@ import {
 import { makeFakeLaunchFunctionOptionsWithProject } from '../TestHelpers';
 import { EXTENSION_STORE_ORIGIN_NAME } from '../SimplifiedProject/SimplifiedExtensions';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 

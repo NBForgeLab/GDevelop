@@ -28,7 +28,7 @@ import { type HTMLDataset } from '../Utils/HTMLDataset';
 import { isVariantEditable } from '../ObjectEditor/Editors/CustomObjectPropertiesEditor';
 import { exceptionallyGuardAgainstDeadObject } from '../Utils/IsNullPtr';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const getObjectTreeViewItemId = (object: gdObject): string => {
   // Use the ptr to avoid display bugs in the rare case a user set an object

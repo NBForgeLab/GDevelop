@@ -12,7 +12,7 @@ import {
   TableHeaderColumn,
 } from '../UI/Table';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // If adding new classes, also add them to `patchClassesForUseAfterFreeDetection`
 // in postjs.js and to the MemoryTracked member in the C++ class header.

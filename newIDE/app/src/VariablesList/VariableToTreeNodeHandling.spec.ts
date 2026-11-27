@@ -6,7 +6,7 @@ import {
   updateListOfNodesFollowingChangeName,
 } from './VariableToTreeNodeHandling';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // Resolve `gd.VariablesContainer` lazily at call time because `global.gd` is populated asynchronously.
 const getGdVariablesContainer = () =>

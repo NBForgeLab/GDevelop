@@ -7,7 +7,7 @@ import {
 } from '../../Utils/GDevelopServices/Generation';
 import { renderEventSourceById } from '../../EventsSheet/EventsTree/TextRenderer/EventScriptSourceView';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 

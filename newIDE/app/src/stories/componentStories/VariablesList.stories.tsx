@@ -12,7 +12,7 @@ import { Column, Line } from '../../UI/Grid';
 import Text from '../../UI/Text';
 import { useRefWithInit } from '../../Utils/UseRefInitHook';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * A variables container with a lot of variables, including nested ones, to

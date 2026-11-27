@@ -1,7 +1,7 @@
 import { editorFunctions, type EditorFunctionGenericOutput } from './index';
 import { makeFakeLaunchFunctionOptionsWithProject } from './TestHelpers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('read_game_project_json', () => {
   let project: gdProject;

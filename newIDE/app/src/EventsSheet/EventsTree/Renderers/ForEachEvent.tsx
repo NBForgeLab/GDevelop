@@ -24,7 +24,7 @@ import { type ParameterFieldInterface } from '../../ParameterFields/ParameterFie
 import ParameterRenderingService from '../../ParameterRenderingService';
 import { Trans, t } from '@lingui/macro';
 import { I18n } from '@lingui/react';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 

@@ -26,7 +26,7 @@ import { type AutocompletionAction } from './ExpressionAutocompletionsHandler';
 import useForceUpdate from '../../../Utils/UseForceUpdate';
 import { useOnResource3DPreviewRendered } from '../../../ResourcesList/ResourcePreview/Resource3DPreviewContext';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const defaultTextStyle: React.CSSProperties = {
   // Break words if they are too long to fit on a single line.

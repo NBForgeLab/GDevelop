@@ -2,7 +2,7 @@ import { testProject } from './GDevelopJsInitializerDecorator';
 import { loadExtension } from '../JsExtensionsLoader';
 
 const loadMultiplayerExtension = () => {
-  const gd: libGDevelop = (global as any).gd;
+  const gd: libGDevelop = global.gd;
   const platform = gd.JsPlatform.get();
   if (platform.isExtensionLoaded('Multiplayer')) return;
 

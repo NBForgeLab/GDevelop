@@ -492,12 +492,31 @@ export function createOwnedBinarySnapshot(element: SerializerElement): OwnedBina
 export function _malloc(size: number): number;
 export function _free(ptr: number): void;
 export const HEAPU8: Uint8Array;
+`;
 
-export as namespace gd;
+const exportedTypeNames = Array.from(
+  new Set(
+    Array.from(dts.matchAll(/^export (?:class|enum|type) (\w+)/gm)).map(
+      m => m[1]
+    )
+  )
+);
+
+const finalDts =
+  dts +
+  `
+import type * as _GdModule from './types';
 
 declare global {
-  const gd: typeof gd;
+  // \`var\` (not \`const\`) so that \`gd\` is also a property of \`globalThis\`: code can then
+  // access it as \`global.gd\` / \`globalThis.gd\` without any cast.
+  var gd: typeof _GdModule;
+
+  // Companion type namespace so type positions like \`gd.Project\` keep resolving globally.
+  namespace gd {
+${exportedTypeNames.map(name => `    export type ${name} = _GdModule.${name};`).join('\n')}
+  }
 }
 `;
 
-writeFileSync(__dirname + '/../types.d.ts', dts);
+writeFileSync(__dirname + '/../types.d.ts', finalDts);

@@ -13,7 +13,7 @@ import VisibilityOff from '../UI/CustomSvgIcons/VisibilityOff';
 import ListIcon from '../UI/ListIcon';
 import { getFunctionIconUrl } from '../EventsFunctionsList/EventsFunctionTreeViewItemContent';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const getEventsFunctionType = () =>
   gd.EventsFunction as typeof gd.EventsFunction &

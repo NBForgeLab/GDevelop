@@ -22,7 +22,7 @@ import { cloudStorageProviderInternalName } from '../CloudStorageProvider/CloudS
 import { localFileStorageProviderInternalName } from '../LocalFileStorageProvider/LocalFileStorageProviderInternalName';
 const path = optionalRequire('path');
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type ResourceAndFile = {
   resource: gdResource;

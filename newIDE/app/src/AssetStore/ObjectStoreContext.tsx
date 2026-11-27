@@ -16,7 +16,7 @@ import PreferencesContext from '../MainFrame/Preferences/PreferencesContext';
 import { OBJECTS_FETCH_TIMEOUT } from '../Utils/GlobalFetchTimeouts';
 import { translateExtensionCategory } from '../Utils/Extension/ExtensionCategories';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const emptySearchText = '';
 

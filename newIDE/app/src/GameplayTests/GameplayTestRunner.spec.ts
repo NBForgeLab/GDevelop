@@ -3,7 +3,7 @@ import {
   runGameplayTests,
 } from './GameplayTestRunner';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const setSystemTimeMs = (timeMs: number) => {
   // Missing in Flow types of Jest.

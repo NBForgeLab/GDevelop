@@ -4,7 +4,7 @@ import ResourcesLoader from '../../ResourcesLoader';
 import * as PIXI from 'pixi.js-legacy';
 import * as THREE from 'three';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 let transparentMaterial: THREE.MeshBasicMaterial | null = null;
 const getTransparentMaterial = () => {

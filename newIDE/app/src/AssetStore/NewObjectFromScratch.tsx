@@ -32,7 +32,7 @@ import IconButton from '../UI/IconButton';
 import ThreeDotsMenu from '../UI/CustomSvgIcons/ThreeDotsMenu';
 import ExtensionInstallDialog from './ExtensionStore/ExtensionInstallDialog';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type CustomObjectPackResultsProps = {
   packTag: string;

@@ -13,7 +13,7 @@ import { getAllPointNames } from '../../ObjectEditor/Editors/SpriteEditor/Utils/
 import getObjectGroupByName from '../../Utils/GetObjectGroupByName';
 import { mapVector } from '../../Utils/MapFor';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export default React.forwardRef<ParameterFieldInterface, ParameterFieldProps>(
   function ObjectPointNameField(props: ParameterFieldProps, ref) {

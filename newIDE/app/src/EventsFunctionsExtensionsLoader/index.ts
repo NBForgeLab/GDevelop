@@ -1,7 +1,7 @@
 import { type I18n as I18nType } from '@lingui/core';
 import { mapVector, mapFor } from '../Utils/MapFor';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type EventsFunctionCodeWriter = {
   getIncludeFileFor: (functionName: string) => string;

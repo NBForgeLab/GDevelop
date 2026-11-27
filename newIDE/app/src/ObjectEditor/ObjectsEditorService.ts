@@ -12,7 +12,7 @@ import Model3DEditor from './Editors/Model3DEditor';
 import SpineEditor from './Editors/SpineEditor';
 import SimpleTileMapEditor from './Editors/SimpleTileMapEditor';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const editorConfigurations: Record<string, any> = {
   Sprite: {

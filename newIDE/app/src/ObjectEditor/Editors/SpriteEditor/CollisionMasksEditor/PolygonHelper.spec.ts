@@ -4,7 +4,7 @@ import {
   getMagnetizedVertexForDeletion,
 } from './PolygonHelper';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('PolygonHelper', () => {
   const addVertex = (vertices: gdVectorVector2f, x: number, y: number) => {

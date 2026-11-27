@@ -1,5 +1,5 @@
 import InstancesSelection from './InstancesSelection';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('InstancesSelection', () => {
   it('does not select a sealed instance', () => {

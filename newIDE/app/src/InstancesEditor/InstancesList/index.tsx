@@ -21,7 +21,7 @@ import { toFixedWithoutTrailingZeros } from '../../Utils/Mathematics';
 import ErrorBoundary from '../../UI/ErrorBoundary';
 import useForceUpdate from '../../Utils/UseForceUpdate';
 import { Column, Line } from '../../UI/Grid';
-const gd = (global as any).gd as libGDevelop;
+const gd = global.gd as libGDevelop;
 
 const SortDirection = {
   ASC: 'ASC' as const,

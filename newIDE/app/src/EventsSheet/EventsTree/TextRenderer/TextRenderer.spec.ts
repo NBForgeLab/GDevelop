@@ -6,7 +6,7 @@ import {
   eventsTextRenderingErrorText,
 } from '.';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('EventsTree/TextRenderer', () => {
   it('renders events as text', () => {

@@ -284,7 +284,7 @@ export const popOutTab = (
   // Append to external pane
   const externalPane = state.panes['external'];
 
-  // Build new panes in two steps to avoid Flow's invalid-computed-prop error.
+  // Build new panes in two steps so TypeScript keeps the explicit 'external' key distinct.
   const newPanes: EditorTabsState['panes'] = {
     ...state.panes,
     external: {
@@ -341,8 +341,8 @@ export const popInTab = (
   // Append to target pane and focus it
   const targetPane = state.panes[targetPaneIdentifier];
 
-  // Build new panes in two steps to avoid Flow's invalid-computed-prop error
-  // (computed key could theoretically overwrite the explicit 'external' key).
+  // Build new panes in two steps so the computed key cannot obscure the explicit
+  // 'external' pane key in the object literal type.
   const newPanes: EditorTabsState['panes'] = {
     ...state.panes,
     external: {
@@ -553,7 +553,7 @@ export const closeLayoutTabs = (
 };
 
 // The name-derived subset of EditorTab a rename may replace; id/editorRef and the
-// rest are preserved. Kept explicit (not $Shape<EditorTab>) so callers can't touch
+// rest are preserved. Kept explicit (not Partial<EditorTab>) so callers can't touch
 // id/editorRef.
 type RenamedEditorTabFields = {
   key: string;

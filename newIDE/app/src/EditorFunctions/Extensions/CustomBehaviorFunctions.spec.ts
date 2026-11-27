@@ -11,7 +11,7 @@ import {
 } from './CustomBehaviorFunctions';
 import { createCustomFunction } from './CustomFunctionFunctions';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const createFakeProject = () => {
   const project = gd.ProjectHelper.createNewGDJSProject();

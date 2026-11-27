@@ -4,7 +4,7 @@ import { duplicateLobbyConfiguration } from '../Utils/GDevelopServices/Play';
 import { registerGame } from '../Utils/GDevelopServices/Game';
 import { getDefaultRegisterGameProperties } from '../Utils/UseGameAndBuildsManager';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type UseMultiplayerLobbyConfiguratorOutput = {
   configureMultiplayerLobbiesIfNeeded: (

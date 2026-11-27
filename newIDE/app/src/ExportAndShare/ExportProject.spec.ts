@@ -1,7 +1,7 @@
 import BrowserFileSystem from './BrowserExporters/BrowserFileSystem';
 import exportProject from './ExportProject';
 
-const gd = (global as any).gd as libGDevelop;
+const gd = global.gd as libGDevelop;
 
 describe('native export ownership', () => {
   let project: gdProject;

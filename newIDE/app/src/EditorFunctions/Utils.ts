@@ -8,7 +8,7 @@ import {
   getModel3DObjectSizeInfo,
 } from './Model3DSizeInfo';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type ObjectSizeInfo = {
   // `width`/`height`/`centerX`/`centerY` are `null` when size is not known.

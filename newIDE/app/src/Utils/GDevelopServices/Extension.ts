@@ -7,7 +7,7 @@ import { ensureIsArray } from '../DataValidator';
 // This file is mocked by tests.
 // Don't put any function that is not calling services.
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type ExtensionTier = 'experimental' | 'reviewed' | 'installed';
 

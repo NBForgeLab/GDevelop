@@ -1,6 +1,6 @@
 import { makeObjectGroupMergedVariablesContainer } from './VariablesUtils';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('makeObjectGroupMergedVariablesContainer', () => {
   const setUpProjectWithObjectGroup = () => {

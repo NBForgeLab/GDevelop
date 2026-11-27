@@ -214,7 +214,7 @@ export type HintEntry = {
   objectNames: Array<string>;
 };
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type EditorFunctionCall = {
   name: string;

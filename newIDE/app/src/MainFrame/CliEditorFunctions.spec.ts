@@ -19,7 +19,7 @@ jest.mock('../ObjectsRendering/PixiResourcesLoader', () => {
   return { __esModule: true, default: PixiResourcesLoaderMock };
 });
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const makeFakeCliEditorFunctionsCollaborators = (
   project: gdProject

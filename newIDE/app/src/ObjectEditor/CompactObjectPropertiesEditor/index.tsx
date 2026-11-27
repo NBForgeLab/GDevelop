@@ -70,7 +70,7 @@ import {
 import useVariablesContainerRefactoring from '../../VariablesList/useVariablesContainerRefactoring';
 import { TopLevelCollapsibleSection } from '../../CompactPropertiesEditor/TopLevelCollapsibleSection';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const styles: {
   icon: React.CSSProperties;

@@ -22,7 +22,7 @@ import {
 
 import { unserializeFromJSObject } from '../../Utils/Serializer';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 

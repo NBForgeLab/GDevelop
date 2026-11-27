@@ -55,7 +55,7 @@ export const makeFakeExactExpressionAutocompletion = (): Array<{
   kind: string;
   shouldConvertToString: boolean;
 }> => {
-  const gd: libGDevelop = (global as any).gd;
+  const gd: libGDevelop = global.gd;
   const expressionMetadata = new gd.ExpressionMetadata(
     'number',
     'SomeExtension',
@@ -90,7 +90,7 @@ export const makeFakeExactExpressionAutocompletion = (): Array<{
 
 export const makeFakeExpressionAutocompletions =
   (): Array<ExpressionAutocompletion> => {
-    const gd: libGDevelop = (global as any).gd;
+    const gd: libGDevelop = global.gd;
 
     const expressionMetadata = new gd.ExpressionMetadata(
       'number',

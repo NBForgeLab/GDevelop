@@ -67,7 +67,7 @@ import type { EventsScope } from '../InstructionOrExpression/EventsScope';
 import { type InstallAssetOutput } from '../AssetStore/InstallAsset';
 import { exceptionallyGuardAgainstDeadObject } from '../Utils/IsNullPtr';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const sceneObjectsRootFolderId = 'scene-objects';
 const globalObjectsRootFolderId = 'global-objects';

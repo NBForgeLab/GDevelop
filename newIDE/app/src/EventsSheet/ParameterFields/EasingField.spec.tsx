@@ -16,7 +16,7 @@ import { type ParameterFieldProps } from './ParameterFieldCommons';
 import { type EventsScope } from '../../InstructionOrExpression/EventsScope';
 import { makeTestProject } from '../../fixtures/TestProject';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const mockCaptures: {
   selectorProps: any;

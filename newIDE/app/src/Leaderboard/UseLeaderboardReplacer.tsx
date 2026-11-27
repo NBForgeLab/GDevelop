@@ -22,7 +22,7 @@ import { registerGame } from '../Utils/GDevelopServices/Game';
 import { toNewGdMapStringString } from '../Utils/MapStringString';
 import { getDefaultRegisterGameProperties } from '../Utils/UseGameAndBuildsManager';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type ReplacePromptDialogProps = {
   leaderboardsToReplace: Array<string> | null | undefined;

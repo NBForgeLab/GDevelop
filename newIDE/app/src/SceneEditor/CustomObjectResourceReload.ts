@@ -1,4 +1,4 @@
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * Options describing a change made to the children of a custom

@@ -21,7 +21,7 @@ import {
 } from '../../AiGeneration/AskAiAutomation';
 import { type OpenAskAiOptions } from '../../AiGeneration/Utils';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * The tools of the MCP server needing the editor (the user, the project

@@ -28,7 +28,7 @@ import { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/E
 import CompactPropertiesEditorRowField from '../../CompactPropertiesEditor/CompactPropertiesEditorRowField';
 import useForceUpdate from '../../Utils/UseForceUpdate';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type Props = {
   project: gdProject;

@@ -4,7 +4,7 @@ import {
   type FunctionOwner,
 } from '../SimplifiedProject/SimplifiedExtensions';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type { FunctionOwner };
 

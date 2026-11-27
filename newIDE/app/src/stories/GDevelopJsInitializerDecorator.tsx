@@ -10,12 +10,12 @@ const GD_STARTUP_TIMES = (global as any).GD_STARTUP_TIMES || [];
 // We create the global "gd" object **synchronously** here. This is done as
 // the source files are using `global.gd` as a "top level" object (after imports).
 // This is a side effect, so this file must be imported before any component.
-// See also setupTests.js for Jest tests.
+// See also setupTests.ts for Jest tests.
 (global as any).gd = {
   I_AM_NOT_YET_INITIALIZED_YOU_MUST_USE_GD_INSIDE_A_STORY_ONLY: true,
 };
 
-const gdGlobal = (global as any).gd as Record<string, any>;
+const gdGlobal = global.gd as unknown as Record<string, any>;
 
 // Will contain the result of makeTestProject
 export let testProject: TestProject =

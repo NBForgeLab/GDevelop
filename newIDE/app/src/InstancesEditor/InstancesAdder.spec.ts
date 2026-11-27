@@ -1,6 +1,6 @@
 import { addSerializedInstances } from './InstancesAdder';
 import { serializeToJSObject } from '../Utils/Serializer';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('addSerializedInstances', () => {
   it('keeps the layer of pasted instances if it exists, otherwise uses the base layer', () => {

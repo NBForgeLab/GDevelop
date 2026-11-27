@@ -3,7 +3,7 @@ import newNameGenerator from './NewNameGenerator';
 import { normalizeString } from './Search';
 import { unserializeFromJSObject } from './Serializer';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // Resolve `gd.Variable` lazily at call time because `global.gd` is populated asynchronously.
 const getGdVariable = () =>

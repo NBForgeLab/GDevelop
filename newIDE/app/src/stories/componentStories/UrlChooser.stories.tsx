@@ -5,7 +5,7 @@ import paperDecorator from '../PaperDecorator';
 
 import { UrlChooser } from '../../ResourcesList/BrowserResourceSources';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export default {
   title: 'BrowserResourceSources/UrlChooser',

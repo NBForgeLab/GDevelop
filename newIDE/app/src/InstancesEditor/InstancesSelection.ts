@@ -1,4 +1,4 @@
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * Represents a list of selected instances.

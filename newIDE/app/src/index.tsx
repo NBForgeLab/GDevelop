@@ -88,7 +88,7 @@ class Bootstrapper extends Component<Record<string, never>, State> {
           return path + `?cache-buster=${VersionMetadata.versionWithHash}`;
         },
       }).then((gd: any) => {
-        (global as any).gd = gd;
+        global.gd = gd;
         GD_STARTUP_TIMES.push([
           'libGD.js initialization done',
           performance.now(),

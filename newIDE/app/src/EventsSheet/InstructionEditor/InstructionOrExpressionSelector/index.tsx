@@ -28,7 +28,7 @@ import {
   getFuseSearchQueryForMultipleKeys,
 } from '../../../UI/Search/UseSearchStructuredItem';
 import Add from '../../../UI/CustomSvgIcons/Add';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const getGroupIconSrc = (key: string) => {
   return gd.JsPlatform.get()

@@ -4,7 +4,7 @@ import withTemporaryResource from '../Utils/WithTemporaryResource';
 import { toNewGdMapStringString } from '../Utils/MapStringString';
 const fs = optionalRequire('fs');
 const path = optionalRequire('path');
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const createOrUpdateResource = (
   project: gdProject,

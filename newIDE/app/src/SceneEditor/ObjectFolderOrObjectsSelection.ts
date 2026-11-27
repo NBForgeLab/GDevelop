@@ -1,7 +1,7 @@
 import { mapVector } from '../Utils/MapFor';
 import { type ObjectFolderOrObjectWithContext } from '../ObjectsList/EnumerateObjectFolderOrObject';
 import { exceptionallyGuardAgainstDeadObject } from '../Utils/IsNullPtr';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const cleanNonExistingObjectFolderOrObjectWithContexts = (
   globalObjectsContainer: gdObjectsContainer | null | undefined,

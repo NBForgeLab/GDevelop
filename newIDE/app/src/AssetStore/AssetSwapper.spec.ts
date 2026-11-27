@@ -1,7 +1,7 @@
 import { swapAsset } from './AssetSwapper';
 import { PixiResourcesLoaderMock } from '../fixtures/TestPixiResourcesLoader';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('swapAsset (Sprite)', () => {
   const makeNewTestProject = (): {

@@ -44,7 +44,7 @@ const styles: {
   },
 };
 
-type ErrorBoundaryScope =
+export type ErrorBoundaryScope =
   | 'app'
   | 'editor'
   | 'start-page'
@@ -167,7 +167,6 @@ const errorHandler = (
   );
   sendErrorMessage(
     'Error caught by error boundary',
-    // @ts-expect-error - EventSender restricts type to a subset of error-boundary scopes.
     `error-boundary_${scope}`,
     {
       error,

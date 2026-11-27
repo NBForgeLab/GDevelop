@@ -3,7 +3,7 @@ const reportedDeadWrappers = new WeakSet<object>();
 const getGdInstance = (): libGDevelop | undefined =>
   (typeof gd !== 'undefined' ? gd : undefined) ||
   (typeof globalThis !== 'undefined' ? (globalThis as any).gd : undefined) ||
-  (typeof global !== 'undefined' ? (global as any).gd : undefined);
+  (typeof global !== 'undefined' ? global.gd : undefined);
 
 /**
  * Check if the Emscripten object is actually a null pointer.

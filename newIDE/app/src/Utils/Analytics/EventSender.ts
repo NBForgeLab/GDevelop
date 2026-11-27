@@ -20,6 +20,7 @@ import {
   isNativeAndroid,
 } from '../Platform';
 import { retryIfFailed } from '../RetryIfFailed';
+import { type ErrorBoundaryScope } from '../../UI/ErrorBoundary';
 import { type NewProjectCreationSource } from '../../ProjectCreation/NewProjectSetupDialog';
 import { isServiceWorkerSupported } from '../../ServiceWorkerSetup';
 const electron = optionalRequire('electron');
@@ -627,10 +628,8 @@ export const sendErrorMessage = (
   type:
     | 'error'
     | 'error-boundary_mainframe'
-    | 'error-boundary_list-search-result'
-    | 'error-boundary_box-search-result'
-    | 'error-boundary_app'
-    | 'error-boundary_extension-loader',
+    | 'error-boundary_extension-loader'
+    | `error-boundary_${ErrorBoundaryScope}`,
   rawError: any,
   errorId: string
 ) => {

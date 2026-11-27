@@ -33,7 +33,7 @@ import {
 import SemiControlledTextField from '../../../UI/SemiControlledTextField';
 import { renameObjectPointReferences } from '../../../Utils/ObjectAnimationsRefactoring';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const styles: { scrollView: React.CSSProperties } = {
   scrollView: { display: 'flex', flexDirection: 'column' },

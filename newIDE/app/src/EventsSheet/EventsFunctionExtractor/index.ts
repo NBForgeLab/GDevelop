@@ -7,7 +7,7 @@ import {
 } from '../../InstructionOrExpression/EventsScope';
 import newNameGenerator from '../../Utils/NewNameGenerator';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const getGdEventsFunction = () =>
   gd.EventsFunction as unknown as typeof gd.EventsFunction &

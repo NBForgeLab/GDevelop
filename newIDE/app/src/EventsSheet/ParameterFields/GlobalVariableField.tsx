@@ -9,7 +9,7 @@ import {
   type FieldFocusFunction,
 } from './ParameterFieldCommons';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const getGdVariablesContainer = () =>
   gd.VariablesContainer as typeof gd.VariablesContainer &

@@ -2,7 +2,7 @@ import { editorFunctions, type EditorFunctionGenericOutput } from './index';
 import { makeFakeLaunchFunctionOptionsWithProject } from './TestHelpers';
 import { type ResourceFilesStorage } from './AttachmentResources';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('change_project_properties_resources', () => {
   let project: gdProject;

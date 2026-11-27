@@ -40,7 +40,7 @@ import { fillBehaviorProperty } from '../../EventsFunctionsExtensionEditor/Event
 import { type VariableDialogOpeningProps } from '../../VariablesList/VariablesEditorDialog';
 import { ExtensionStoreContext } from '../../AssetStore/ExtensionStore/ExtensionStoreContext';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const getGdObjectsContainer = () =>
   gd.ObjectsContainer as unknown as typeof gd.ObjectsContainer &

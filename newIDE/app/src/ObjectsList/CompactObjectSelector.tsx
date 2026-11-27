@@ -14,7 +14,7 @@ import {
 import classes from '../UI/CompactTextAreaField/CompactTextAreaField.module.css';
 import CompactPropertiesEditorRowField from '../CompactPropertiesEditor/CompactPropertiesEditorRowField';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type Props = {
   project: gdProject;

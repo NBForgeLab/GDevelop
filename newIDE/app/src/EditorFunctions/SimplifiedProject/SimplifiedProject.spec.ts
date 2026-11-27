@@ -11,7 +11,7 @@ import {
 import tankConfigurationExtensionJson from '../../fixtures/TankConfigurationExtension.json';
 import { type FunctionAuthoringScope } from '../../InstructionOrExpression/EnumeratedInstructionOrExpressionMetadata';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const getGdEventsFunction = () =>
   gd.EventsFunction as typeof gd.EventsFunction &

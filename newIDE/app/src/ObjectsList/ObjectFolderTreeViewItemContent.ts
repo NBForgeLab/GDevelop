@@ -24,7 +24,7 @@ import { type HTMLDataset } from '../Utils/HTMLDataset';
 import { exceptionallyGuardAgainstDeadObject } from '../Utils/IsNullPtr';
 import { removeFolderAndSubFolders } from '../Utils/Folders';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const expandAllSubfolders = (
   objectFolder: gdObjectFolderOrObject,

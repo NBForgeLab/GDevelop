@@ -1,7 +1,7 @@
 import { editorFunctions } from './index';
 import { makeFakeLaunchFunctionOptionsWithProject } from './TestHelpers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // These tools are handled server-side (or are no-ops in the editor): the
 // editor implementations only return a constant output. These tests lock in

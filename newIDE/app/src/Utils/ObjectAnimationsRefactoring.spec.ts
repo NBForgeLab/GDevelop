@@ -4,7 +4,7 @@ import {
 } from './ObjectAnimationsRefactoring';
 import { unserializeFromJSObject } from './Serializer';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('ObjectAnimationsRefactoring', () => {
   let project: gdProject;

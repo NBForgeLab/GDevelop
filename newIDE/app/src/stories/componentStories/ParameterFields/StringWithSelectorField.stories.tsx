@@ -24,7 +24,7 @@ const useParameterMetadata = (
   choices: Array<string> | null
 ): gdParameterMetadata =>
   React.useMemo(() => {
-    const gd: libGDevelop = (global as any).gd;
+    const gd: libGDevelop = global.gd;
     const parameterMetadata = new gd.ParameterMetadata();
     parameterMetadata.setType(type);
     parameterMetadata.setDescription(description);

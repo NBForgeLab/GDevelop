@@ -2,7 +2,7 @@ import RenderedInstance from './RenderedInstance';
 import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
 import ResourcesLoader from '../../ResourcesLoader';
 import * as PIXI from 'pixi.js-legacy';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * Renderer for gd.SpriteObject

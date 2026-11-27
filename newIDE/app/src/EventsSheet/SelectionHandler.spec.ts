@@ -19,7 +19,7 @@ import {
 import { makeTestProject } from '../fixtures/TestProject';
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 

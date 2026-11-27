@@ -4,7 +4,7 @@ import {
   shouldResetObjectRendererForCustomObjectChildrenEdit,
 } from './CustomObjectResourceReload';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const addSpriteFrame = (object: gdObject, imageName: string) => {
   const spriteConfig = gd.asSpriteConfiguration(object.getConfiguration());

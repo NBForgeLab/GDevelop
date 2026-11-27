@@ -16,7 +16,7 @@ import {
   listQuoted,
 } from './NameHelpers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /** The parameter types offered by the function editor. */
 export const PARAMETER_TYPES: Array<string> = [

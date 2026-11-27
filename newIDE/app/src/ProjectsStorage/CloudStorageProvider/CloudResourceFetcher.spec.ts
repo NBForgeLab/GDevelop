@@ -9,7 +9,7 @@ import {
 import { makeTestProject } from '../../fixtures/TestProject';
 import { moveUrlResourcesToCloudFilesIfPrivate } from './CloudResourceFetcher';
 import { fakeSilverAuthenticatedUser } from '../../fixtures/GDevelopServicesTestData';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 jest.mock('../../Utils/GDevelopServices/Project');
 jest.mock('../../Utils/BlobDownloader');

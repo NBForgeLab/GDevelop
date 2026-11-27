@@ -2,7 +2,7 @@ import { roundPositionsToGrid } from '../Utils/GridHelpers';
 import { unserializeFromJSObject } from '../Utils/Serializer';
 import { type InstancesEditorSettings } from './InstancesEditorSettings';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const addSerializedInstances = ({
   project,

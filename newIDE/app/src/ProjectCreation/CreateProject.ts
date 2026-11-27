@@ -8,7 +8,7 @@ import {
   type NewProjectCreationSource,
 } from './NewProjectSetupDialog';
 import { retryIfFailed } from '../Utils/RetryIfFailed';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // Metadata for the `new_game_creation` analytics event. The event itself is sent
 // later (from `useCreateProject`), once the project has its final UUID assigned.

@@ -18,7 +18,7 @@ import PortalContainerContext from '../../UI/PortalContainerContext';
 import { MarkdownText } from '../../UI/MarkdownText';
 import Text from '../../UI/Text';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type ConceptKind =
   | 'Action'

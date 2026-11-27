@@ -8,7 +8,7 @@ import {
   getResourceCustomPropertyValue,
   setResourceCustomPropertyValue,
 } from './ResourceUtils';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const addNewAnimationWithImageToSpriteObject = (
   object: gdObject,

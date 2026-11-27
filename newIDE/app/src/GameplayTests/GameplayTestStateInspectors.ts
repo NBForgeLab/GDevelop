@@ -1,6 +1,6 @@
 import { mapFor } from '../Utils/MapFor';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // Keep snapshots bounded for expression-heavy behaviors/objects.
 const MAX_ENTRIES_PER_TYPE = 40;

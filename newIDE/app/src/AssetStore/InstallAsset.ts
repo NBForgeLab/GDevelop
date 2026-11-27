@@ -21,7 +21,7 @@ import {
 } from './ExtensionStore/InstallExtension';
 import { mapVector } from '../Utils/MapFor';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * Adds the specified resource to the resources manager, avoiding to duplicate

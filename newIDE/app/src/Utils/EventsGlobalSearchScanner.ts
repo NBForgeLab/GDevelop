@@ -4,7 +4,7 @@ import type { EventPath } from './EventPath';
 import { mapFor } from './MapFor';
 import type { SearchFilterParams } from './Search';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 

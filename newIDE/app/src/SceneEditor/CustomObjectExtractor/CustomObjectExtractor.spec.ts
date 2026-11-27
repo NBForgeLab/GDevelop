@@ -3,7 +3,7 @@ import { makeTestProject } from '../../fixtures/TestProject';
 import Rectangle from '../../Utils/Rectangle';
 import { getInstancesInLayoutForObject } from '../../Utils/Layout';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('CustomObjectExtractor', () => {
   it('can extract 2 instances as a custom object', () => {

@@ -60,7 +60,7 @@ import MoveEventsBasedObjectDialog from './MoveEventsBasedObjectDialog';
 import MoveEventsBasedBehaviorDialog from './MoveEventsBasedBehaviorDialog';
 import MoveEventsFunctionDialog from './MoveEventsFunctionDialog';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const getObjectsContainerSourceType = () =>
   gd.ObjectsContainer as typeof gd.ObjectsContainer &

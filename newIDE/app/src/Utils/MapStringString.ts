@@ -1,4 +1,4 @@
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const toNewGdMapStringString = (object: {
   [key: string]: string;

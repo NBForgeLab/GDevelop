@@ -33,7 +33,7 @@ import {
   parseLocalFilePathOrExtensionFromMetadata,
 } from '../../ResourcesList/ResourceUtils';
 import { sanitizeFilename } from '../../Utils/Filename';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const PROJECT_JSON_FILENAME = 'game.json';
 

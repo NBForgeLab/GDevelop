@@ -68,7 +68,7 @@ import {
   isTileSetBadlyConfigured,
 } from '../Utils/TileMap';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const instancesEditorId = 'instances-editor-canvas';
 const styles: {

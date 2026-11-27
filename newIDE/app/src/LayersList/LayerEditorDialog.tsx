@@ -27,7 +27,7 @@ import SelectOption from '../UI/SelectOption';
 import Paper from '../UI/Paper';
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type Props = {
   project: gdProject;

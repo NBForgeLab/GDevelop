@@ -109,7 +109,7 @@ import {
 import { type LastSelectionType } from './EditorsDisplay';
 import { type ObjectGroupEditorTab } from '../ObjectGroupEditor/EditedObjectGroupEditorDialog';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const BASE_LAYER_NAME = '';
 const INSTANCES_CLIPBOARD_KIND = 'Instances';

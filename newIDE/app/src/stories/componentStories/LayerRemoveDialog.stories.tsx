@@ -5,7 +5,7 @@ import paperDecorator from '../PaperDecorator';
 
 import LayerRemoveDialog from '../../LayersList/LayerRemoveDialog';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export default {
   title: 'LayerRemoveDialog',

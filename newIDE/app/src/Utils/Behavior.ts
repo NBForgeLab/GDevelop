@@ -1,7 +1,7 @@
 import newNameGenerator from './NewNameGenerator';
 import Window from './Window';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const multiplayerObjectBehaviorType =
   'Multiplayer::MultiplayerObjectBehavior';

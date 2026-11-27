@@ -72,7 +72,7 @@ import {
   enumerateFoldersInContainer,
 } from './EnumerateFunctionFolderOrFunction';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const extensionConfigurationRootFolderId = 'extension-configuration';
 export const extensionObjectsRootFolderId = 'extension-objects';

@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js-legacy';
 import Rectangle from '../Utils/Rectangle';
 import { type InstanceMeasurer } from './InstancesRenderer';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export default class SelectionRectangle {
   instances: gdInitialInstancesContainer;

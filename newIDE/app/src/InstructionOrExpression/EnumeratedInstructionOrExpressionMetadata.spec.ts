@@ -2,7 +2,7 @@ import { type I18n as I18nType } from '@lingui/core';
 import { filterEnumeratedInstructionOrExpressionMetadataByScope } from './EnumeratedInstructionOrExpressionMetadata';
 import { enumerateAllInstructions } from './EnumerateInstructions';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const makeFakeI18n = (fakeI18n?: any): I18nType => ({
   ...fakeI18n,

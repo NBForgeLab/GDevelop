@@ -149,7 +149,7 @@ let playgroundContainers: {
 } | null = null;
 const getOrCreatePlaygroundContainers = () => {
   if (playgroundContainers) return playgroundContainers;
-  const gd = (global as any).gd as libGDevelop;
+  const gd = global.gd as libGDevelop;
   const objectsContainerSourceType =
     gd.ObjectsContainer as unknown as typeof gd.ObjectsContainer_SourceType;
   const project = testProject.project;

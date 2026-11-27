@@ -10,7 +10,7 @@ import { loadFontFace } from '../Utils/FontFaceLoader';
 import { checkIfCredentialsRequired } from '../Utils/CrossOrigin';
 import { dracoDecoderPath } from '../Utils/DracoDecoder';
 import { type ResourceKind } from '../ResourcesList/ResourceSource';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type SpineTextureAtlasOrLoadingError = {
   textureAtlas: TextureAtlas | null | undefined;

@@ -34,7 +34,7 @@ import EmptyMessage from '../../UI/EmptyMessage';
 import useVariablesContainerRefactoring from '../../VariablesList/useVariablesContainerRefactoring';
 import propertiesMapToSchema from '../../PropertiesEditor/PropertiesMapToSchema';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const noop = () => {};
 

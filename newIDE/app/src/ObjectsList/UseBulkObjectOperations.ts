@@ -23,7 +23,7 @@ import { duplicateObjectFolderOrObjectsInPlace } from './ObjectFolderOrObjectsDu
 import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import { type ShowConfirmDeleteDialogOptions } from '../UI/Alert/AlertContext';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type ObjectWithContext = {
   object: gdObject;

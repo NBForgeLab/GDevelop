@@ -1,6 +1,6 @@
 import path from 'path-browserify';
 import { uploadObjects } from '../../Utils/GDevelopServices/Preview';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type TextFileDescriptor = {
   filePath: string;

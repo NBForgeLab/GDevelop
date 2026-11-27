@@ -28,6 +28,7 @@
   },
   "include": [
     "src/**/*",
+    ".storybook/preview.ts",
     "../../GDevelop.js/types.d.ts"
   ],
   "exclude": [

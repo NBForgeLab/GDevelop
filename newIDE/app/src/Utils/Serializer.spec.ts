@@ -33,7 +33,7 @@ describe('temporary serializer elements', () => {
   });
 
   it('releases both temporary resources when object asset serialization throws', () => {
-    const gd: libGDevelop = (global as any).gd;
+    const gd: libGDevelop = global.gd;
     const project = gd.ProjectHelper.createNewGDJSProject();
     const object = project
       .getObjects()
@@ -48,10 +48,7 @@ describe('temporary serializer elements', () => {
     };
     const error = new Error('Asset serialization interrupted');
     const serializeTo = jest
-      .spyOn(
-        ((global as any).gd as libGDevelop).ObjectAssetSerializer,
-        'serializeTo'
-      )
+      .spyOn((global.gd as libGDevelop).ObjectAssetSerializer, 'serializeTo')
       .mockImplementation((project, object, name, output, names) => {
         captured.element = output;
         captured.resourceNames = names;

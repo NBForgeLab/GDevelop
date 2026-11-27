@@ -4,7 +4,7 @@ import {
   containsNameUsedAsIdentifier,
 } from './EventScriptIdentifiers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // A corpus of tricky names checked against the REAL C++ implementation
 // (`gd.Project.isNameSafe`, compiled to wasm): a change to

@@ -2,7 +2,7 @@ import {
   getLastObjectParameterValue,
   getSpecializedParameterFieldType,
 } from './ParameterMetadataTools';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('getLastObjectParameterValue', () => {
   it('returns null if no parameter index passed', () => {

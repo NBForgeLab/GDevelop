@@ -28,7 +28,7 @@ import { mapVector } from '../Utils/MapFor';
 import Add from '../UI/CustomSvgIcons/Add';
 import { useResponsiveWindowSize } from '../UI/Responsive/ResponsiveWindowMeasurer';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type Props = {
   project: gdProject;

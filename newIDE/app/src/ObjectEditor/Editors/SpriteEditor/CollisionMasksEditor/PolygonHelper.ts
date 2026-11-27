@@ -1,6 +1,6 @@
 import { mapFor, mapVector } from '../../../../Utils/MapFor';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const roundVertexToHalfPixel = (vertex: gdVector2f) => {
   vertex.x = Math.round(vertex.x * 2) / 2;

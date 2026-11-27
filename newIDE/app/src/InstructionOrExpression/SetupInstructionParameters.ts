@@ -3,7 +3,7 @@ import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/Even
 import { mapTypeToOperators } from '../EventsSheet/ParameterFields/OperatorField';
 import { mapTypeToRelationalOperators } from '../EventsSheet/ParameterFields/RelationalOperatorField';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * After selecting an instruction, this function allows to set up the proper

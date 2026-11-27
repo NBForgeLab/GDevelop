@@ -10,7 +10,7 @@ import {
   type EventsFunctionCodeWriter,
 } from '../../EventsFunctionsExtensionsLoader';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const createFakeEventsFunctionCodeWriter = (): EventsFunctionCodeWriter => ({
   getIncludeFileFor: (functionName: string) => `${functionName}.js`,

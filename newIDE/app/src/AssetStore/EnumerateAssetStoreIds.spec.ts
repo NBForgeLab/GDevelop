@@ -1,6 +1,6 @@
 import { enumerateAssetStoreIds } from './EnumerateAssetStoreIds';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('enumerateAssetStoreIds', () => {
   const makeNewTestProject = (): {

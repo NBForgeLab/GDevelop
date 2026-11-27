@@ -6,7 +6,7 @@ import { testProject } from '../../GDevelopJsInitializerDecorator';
 import ObjectField from '../../../EventsSheet/ParameterFields/ObjectField';
 import ValueStateHolder from '../../ValueStateHolder';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export default {
   title: 'ParameterFields/ObjectField',

@@ -26,7 +26,7 @@ import { shouldActivate } from '../../../UI/KeyboardShortcuts/InteractionKeys';
 import { ProjectScopedContainersAccessor } from '../../../InstructionOrExpression/EventsScope';
 import ParameterRenderingService from '../../ParameterRenderingService';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 

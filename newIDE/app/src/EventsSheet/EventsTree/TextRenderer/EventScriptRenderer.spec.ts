@@ -7,7 +7,7 @@ import {
   withoutEventIdAnnotations,
 } from './EventScriptTestHelpers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // Conformance fixtures shared with the backend serializer
 // (events-script-serializer.js in the GDevelop-services repository): both

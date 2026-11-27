@@ -57,7 +57,7 @@ import {
   type ParsedValue,
 } from './NameHelpers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const FUNCTION_SCOPE_TYPES: Array<ToolScopeType> = [
   'extension',

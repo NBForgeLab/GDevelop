@@ -12,7 +12,7 @@ import { isBehaviorDefaultCapability } from '../BehaviorsEditor/EnumerateBehavio
 import { updateBehaviorsSharedDataInScope, type ResolvedScope } from './Scope';
 import type { EventPath } from '../Utils/EventPath';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 

@@ -13,7 +13,7 @@ import {
 import { EXTENSION_STORE_ORIGIN_NAME } from './SimplifiedProject/SimplifiedExtensions';
 import { mapFor } from '../Utils/MapFor';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const defaultVariantScope = {
   type: 'custom_object_variant',

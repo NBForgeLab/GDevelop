@@ -1,5 +1,5 @@
 import { containsSubInstructions } from './ContainsSubInstruction';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('ContainsSubInstructions', () => {
   const insertInstruction = (list: gdInstructionsList, type: string) => {

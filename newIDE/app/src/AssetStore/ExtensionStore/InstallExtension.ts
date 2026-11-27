@@ -31,7 +31,7 @@ import InAppTutorialContext from '../../InAppTutorial/InAppTutorialContext';
 import PromisePool from '@supercharge/promise-pool';
 import { retryIfFailed } from '../../Utils/RetryIfFailed';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type RequiredExtensionInstallation = {
   requiredExtensionShortHeaders: Array<ExtensionShortHeader>;

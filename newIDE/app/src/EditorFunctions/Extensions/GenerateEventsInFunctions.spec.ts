@@ -8,7 +8,7 @@ import {
 } from '../../Utils/GDevelopServices/Generation';
 import { serializeToJSON } from '../../Utils/Serializer';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const fakeAiGeneratedEventId = 'fake-ai-generated-event-id';
 

@@ -4,7 +4,7 @@ import {
 } from './index';
 import { makeFakeLaunchFunctionOptionsWithoutProject } from './TestHelpers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('initialize_project (without project)', () => {
   let createdProject: gdProject;

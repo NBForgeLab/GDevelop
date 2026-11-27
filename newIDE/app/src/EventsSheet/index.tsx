@@ -135,7 +135,7 @@ import type { InitialSearchFilterParams } from './SearchPanel';
 import { isNullPtr } from '../Utils/IsNullPtr';
 import { type VariableDialogOpeningProps } from '../VariablesList/VariablesEditorDialog';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 

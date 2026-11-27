@@ -9,7 +9,7 @@ import CompactAnchorBehaviorEditor from '../../../ObjectEditor/CompactObjectProp
 import SerializedObjectDisplay from '../../SerializedObjectDisplay';
 import fakeResourceManagementProps from '../../FakeResourceManagement';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export default {
   title: 'ObjectEditor/CompactAnchorBehaviorEditor',

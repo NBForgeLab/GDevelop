@@ -11,7 +11,7 @@ import { unserializeFromJSObject } from '../../Utils/Serializer';
 import tankConfigurationExtensionJson from '../../fixtures/TankConfigurationExtension.json';
 import schemasFixture from './TypedOutputsSchemas.fixture.json';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * Conformance test for the "typed reads" whose output shapes the generation-api

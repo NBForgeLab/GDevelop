@@ -6,7 +6,7 @@ import { loadExtension } from '../JsExtensionsLoader';
  * extensions), to display its actual properties.
  */
 export const getRealCube3dObject = (): gdObject => {
-  const gd: libGDevelop = (global as any).gd;
+  const gd: libGDevelop = global.gd;
   const platform = gd.JsPlatform.get();
   if (!platform.isExtensionLoaded('Scene3D')) {
     const result = loadExtension(

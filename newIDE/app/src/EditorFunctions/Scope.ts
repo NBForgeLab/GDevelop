@@ -3,7 +3,7 @@ import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/Even
 import { isExtensionFromStore } from './SimplifiedProject/SimplifiedExtensions';
 import { type OutsideEditorChangesTarget } from './OutsideEditorChanges';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * The `scope` argument shared by the editor functions: which container of the

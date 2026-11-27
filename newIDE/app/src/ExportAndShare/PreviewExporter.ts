@@ -4,7 +4,7 @@ import type BrowserSWFileSystem from './BrowserExporters/BrowserSWFileSystem';
 import type BrowserS3FileSystem from './BrowserExporters/BrowserS3FileSystem';
 import withTemporaryResource from '../Utils/WithTemporaryResource';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export async function withPreviewExporter(
   {

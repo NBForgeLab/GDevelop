@@ -3,7 +3,7 @@ import withTemporaryResource from '../Utils/WithTemporaryResource';
 import type BrowserFileSystem from './BrowserExporters/BrowserFileSystem';
 import type LocalFileSystem from './LocalExporters/LocalFileSystem';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // Exporter borrows its filesystem. Keep both alive throughout the native call.
 export default function exportProject({

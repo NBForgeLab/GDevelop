@@ -26,7 +26,7 @@ import CompactPropertiesEditorRowField from '../../CompactPropertiesEditor/Compa
 import { CompactCollapsibleAdvancedSection } from '../../CompactPropertiesEditor/CompactPropertiesEditorByVisibility';
 import { getSentenceErrorText } from './SentenceErrorMessage';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const getEventsFunctionType = () =>
   gd.EventsFunction as typeof gd.EventsFunction &

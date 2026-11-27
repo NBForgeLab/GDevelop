@@ -6,7 +6,7 @@ import {
 } from './index';
 import { makeFakeLaunchFunctionOptionsWithProject } from './TestHelpers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('add_behavior', () => {
   let project: gdProject;

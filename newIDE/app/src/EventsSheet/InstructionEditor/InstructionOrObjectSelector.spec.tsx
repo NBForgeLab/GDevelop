@@ -48,7 +48,7 @@ type MockTreeItem = {
 
 it('enumerates once while typing and rebuilds once on an explicit refresh', () => {
   const project = (
-    (global as any).gd as libGDevelop
+    global.gd as libGDevelop
   ).ProjectHelper.createNewGDJSProject();
   const layout = project.insertNewLayout('Scene', 0);
   layout.getObjects().insertNewObject(project, 'Sprite', 'Player', 0);

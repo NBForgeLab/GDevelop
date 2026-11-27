@@ -7,7 +7,7 @@ import SelectOption from '../UI/SelectOption';
 import Text from '../UI/Text';
 import enumerateLayers from './EnumerateLayers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type Props = {
   open: boolean;

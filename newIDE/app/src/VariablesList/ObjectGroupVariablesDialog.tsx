@@ -20,7 +20,7 @@ import { getRootVariableName } from '../EventsSheet/ParameterFields/VariableFiel
 import { getNodeIdFromVariableName } from './VariableToTreeNodeHandling';
 import useValueWithInit from '../Utils/UseRefInitHook';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type Props = {
   project: gdProject;

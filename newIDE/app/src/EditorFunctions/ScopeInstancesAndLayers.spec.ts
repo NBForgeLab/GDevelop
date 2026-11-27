@@ -7,7 +7,7 @@ import {
 } from './Scope';
 import { EXTENSION_STORE_ORIGIN_NAME } from './SimplifiedProject/SimplifiedExtensions';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const DIALOG_DEFAULT_VARIANT_SCOPE = {
   type: 'custom_object_variant',

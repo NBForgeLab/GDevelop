@@ -3,7 +3,7 @@ import * as React from 'react';
 import PreferencesContext from '../MainFrame/Preferences/PreferencesContext';
 import useAlertDialog from '../UI/Alert/useAlertDialog';
 import { exceptionallyGuardAgainstDeadObject } from './IsNullPtr';
-const gd = (global as any).gd as libGDevelop;
+const gd = global.gd as libGDevelop;
 
 type Props = {
   serializableObject: gdSerializable;

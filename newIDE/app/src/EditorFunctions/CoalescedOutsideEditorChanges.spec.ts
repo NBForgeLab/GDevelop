@@ -1,7 +1,7 @@
 import { makeCoalescedOutsideEditorChanges } from './CoalescedOutsideEditorChanges';
 import { type EventsFunctionsExtensionsState } from '../EventsFunctionsExtensionsLoader/EventsFunctionsExtensionsContext';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const makeNotifications = () => ({
   onSceneEventsModifiedOutsideEditor: jest.fn<void, Array<any>>(),

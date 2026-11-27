@@ -11,7 +11,7 @@ import {
 } from '../../../fixtures/GDevelopServicesTestData';
 import AuthenticatedUserContext from '../../../Profile/AuthenticatedUserContext';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export default {
   title: 'ResourcesList/FileToCloudProjectResourceUploader',

@@ -13,7 +13,7 @@ import {
 import { type EventRendererProps } from './EventRenderer';
 import ConditionsActionsColumns from '../ConditionsActionsColumns';
 import { Trans } from '@lingui/macro';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 

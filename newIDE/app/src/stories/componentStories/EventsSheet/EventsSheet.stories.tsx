@@ -8,7 +8,7 @@ import { testProject } from '../../GDevelopJsInitializerDecorator';
 import fakeResourceManagementProps from '../../FakeResourceManagement';
 import fakeHotReloadPreviewButtonProps from '../../FakeHotReloadPreviewButtonProps';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 const pushBackInstruction = (
   list: gdInstructionsList,

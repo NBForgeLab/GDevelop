@@ -1,6 +1,6 @@
 import { checkIfCredentialsRequired } from '../../../../Utils/CrossOrigin';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // 25% of 255 to accept pixels that are not fully transparent (like effects)
 const PIXEL_TRANSPARENCY_THRESHOLD = 64;

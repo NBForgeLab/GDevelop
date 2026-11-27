@@ -9,7 +9,7 @@ import optionalLazyRequire from '../../Utils/OptionalLazyRequire';
 import optionalRequire from '../../Utils/OptionalRequire';
 import { copyTextToClipboard } from '../../Utils/Clipboard';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const lazyRequireGlob = optionalLazyRequire('glob');
 const path = optionalRequire('path');

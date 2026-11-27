@@ -29,7 +29,7 @@ import Add from '../../../../UI/CustomSvgIcons/Add';
 import Trash from '../../../../UI/CustomSvgIcons/Trash';
 import Warning from '../../../../UI/CustomSvgIcons/Warning';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type VerticesTableProps = {
   vertices: gdVectorVector2f;

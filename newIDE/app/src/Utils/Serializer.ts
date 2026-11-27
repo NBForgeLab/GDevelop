@@ -1,5 +1,5 @@
 import withTemporaryResource from './WithTemporaryResource';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * Options that affect how a project (or any serializable) is converted to JSON.

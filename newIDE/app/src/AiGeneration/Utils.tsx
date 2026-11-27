@@ -58,7 +58,7 @@ import {
 import CloudStorageProvider from '../ProjectsStorage/CloudStorageProvider';
 import { checkIfHasTooManyCloudProjects } from '../MainFrame/EditorContainers/HomePage/CreateSection/MaxProjectCountAlertMessage';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // How long to keep the "Calculating..." indicator visible after a refresh
 // completes, to prevent it from flashing on fast calls.

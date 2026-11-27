@@ -53,7 +53,7 @@ describe.each([
       .mockResolvedValueOnce(false)
       .mockResolvedValueOnce(true);
     mockUseAlertDialog.mockReturnValue({ showConfirmation });
-    const variable = new ((global as any).gd as libGDevelop).Variable();
+    const variable = new (global.gd as libGDevelop).Variable();
     variable.setString('original');
     const objects = new Map([['first', variable]]);
     const onCancel = jest.fn();
@@ -81,7 +81,7 @@ describe.each([
           confirm = resolve;
         }),
     });
-    const variable = new ((global as any).gd as libGDevelop).Variable();
+    const variable = new (global.gd as libGDevelop).Variable();
     const objects = new Map([['first', variable]]);
     const onCancel = jest.fn();
     const restore = jest
@@ -106,8 +106,8 @@ describe.each([
 
   it('releases partially built snapshots when serialization fails', () => {
     mockUseAlertDialog.mockReturnValue({});
-    const first = new ((global as any).gd as libGDevelop).Variable();
-    const second = new ((global as any).gd as libGDevelop).Variable();
+    const first = new (global.gd as libGDevelop).Variable();
+    const second = new (global.gd as libGDevelop).Variable();
     const elements: Array<gdSerializerElement> = [];
     jest.spyOn(first, 'serializeTo').mockImplementation((element) => {
       elements.push(element);

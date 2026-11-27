@@ -3,7 +3,7 @@ import transformRect from '../Utils/TransformRect';
 import { type InstanceMeasurer } from './InstancesRenderer';
 import Rectangle from '../Utils/Rectangle';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * Displays a crossed-eye icon on every instance that is hidden when the

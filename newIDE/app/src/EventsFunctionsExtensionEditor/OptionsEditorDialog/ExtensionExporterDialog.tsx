@@ -13,7 +13,7 @@ import Upload from '../../UI/CustomSvgIcons/Upload';
 import { serializeToJSObject } from '../../Utils/Serializer';
 import { type ExtensionDependency } from '../../Utils/GDevelopServices/Extension';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const findRequiredExtensions = (
   project: gdProject,

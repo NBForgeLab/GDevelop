@@ -3,7 +3,7 @@ import { mapVector } from '../Utils/MapFor';
 import classNames from 'classnames';
 import { instructionParameter } from '../EventsSheet/EventsTree/ClassNames';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const GLOBAL_SEARCH_MATCH_CLASS_NAME = 'global-search-text-match';
 

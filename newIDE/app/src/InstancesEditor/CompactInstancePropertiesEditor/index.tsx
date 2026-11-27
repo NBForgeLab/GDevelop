@@ -48,7 +48,7 @@ import CompactInstanceBehaviorsEditorService from './CompactInstanceBehaviorsEdi
 import { exceptionallyGuardAgainstDeadObject } from '../../Utils/IsNullPtr';
 import { getAllVisibleBehaviorNames } from '../../Utils/Behavior';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const notOverridableBehaviorTypes = [
   'Physics2::Physics2Behavior',

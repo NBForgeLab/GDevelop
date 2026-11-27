@@ -17,7 +17,7 @@ import TypeCursorSelect from '../../UI/CustomSvgIcons/TypeCursorSelect';
 import getObjectByName from '../../Utils/GetObjectByName';
 import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export default React.forwardRef<ParameterFieldInterface, ParameterFieldProps>(
   function ObjectSkinNameField(props: ParameterFieldProps, ref) {

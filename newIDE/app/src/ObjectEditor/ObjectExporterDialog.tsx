@@ -35,7 +35,7 @@ import ResourcesLoader from '../ResourcesLoader';
 import { type ExtensionDependency } from '../Utils/GDevelopServices/Extension';
 import { getIDEVersion } from '../Version';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const excludedObjectType = [
   'BBText::BBText',

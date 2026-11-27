@@ -1,6 +1,6 @@
 import { downloadResourcesAsBlobs } from './DownloadFileSaveAsDialog';
 import { downloadUrlsToBlobs } from '../../Utils/BlobDownloader';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 jest.mock('../../Utils/BlobDownloader');
 jest.mock('../../Utils/OptionalRequire');

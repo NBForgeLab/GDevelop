@@ -1,4 +1,4 @@
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /** Naive way to check if a variable expression is not using a structure/array. */
 const isRootVariableName = (fullName: string) =>

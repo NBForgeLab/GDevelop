@@ -78,7 +78,7 @@ jest.mock('../Utils/LocalUserInfo', () => ({
   getUID: () => 'preview-ownership-test',
 }));
 
-const gd = (global as any).gd as libGDevelop;
+const gd = global.gd as libGDevelop;
 
 const makePreviewOptions = (
   overrides: Partial<PreviewOptions> & { project: gdProject; sceneName: string }

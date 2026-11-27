@@ -44,7 +44,7 @@ import NewBehaviorDialog from '../../BehaviorsEditor/NewBehaviorDialog';
 import { type CompactTextFieldInterface } from '../../UI/CompactTextField';
 import { getChoiceDisplayLabel } from '../../Utils/ChoiceLabel';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const styles: {
   rowContainer: React.CSSProperties;

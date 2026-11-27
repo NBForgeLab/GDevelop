@@ -2,7 +2,7 @@ import { editorFunctions, type EditorFunctionGenericOutput } from './index';
 import { makeFakeLaunchFunctionOptionsWithProject } from './TestHelpers';
 import { PixiResourcesLoaderMock } from '../fixtures/TestPixiResourcesLoader';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('put_2d_instances (modifications of existing instances)', () => {
   let project: gdProject;

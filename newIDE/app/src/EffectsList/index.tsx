@@ -56,7 +56,7 @@ import VisibilityOffIcon from '../UI/CustomSvgIcons/VisibilityOff';
 import PropertiesEditorByVisibility from '../PropertiesEditor/PropertiesEditorByVisibility';
 import NewEffectDialog from './NewEffectDialog';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const EFFECTS_CLIPBOARD_KIND = 'Effects';
 

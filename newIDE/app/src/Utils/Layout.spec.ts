@@ -1,6 +1,6 @@
 import { renameLayoutInProject } from './Layout';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('renameLayoutInProject', () => {
   const makeProject = () => {

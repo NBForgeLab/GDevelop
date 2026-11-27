@@ -1,7 +1,7 @@
 import { unserializeFromJSObject } from '../../../Utils/Serializer';
 import serializerFixtures from './EventScriptRenderer.fixtures.json';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * Build a gd.EventsList from serialized events, for tests (the caller is

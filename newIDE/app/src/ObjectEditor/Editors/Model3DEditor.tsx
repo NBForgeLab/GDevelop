@@ -33,7 +33,7 @@ import ResourceSelectorWithThumbnail from '../../ResourcesList/ResourceSelectorW
 import { ChoiceProperty } from '../../BehaviorsEditor/Editors/Physics2Editor';
 import { renameObjectAnimationReferences } from '../../Utils/ObjectAnimationsRefactoring';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const DragSourceAndDropTarget = makeDragSourceAndDropTarget<
   Record<string, never>

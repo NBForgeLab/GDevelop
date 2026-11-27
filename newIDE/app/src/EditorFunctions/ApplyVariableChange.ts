@@ -1,4 +1,4 @@
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const getGdVariable = () =>
   gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;

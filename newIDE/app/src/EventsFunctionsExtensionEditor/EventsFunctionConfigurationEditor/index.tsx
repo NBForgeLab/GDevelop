@@ -17,7 +17,7 @@ import { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/E
 import { type VariableDialogOpeningProps } from '../../VariablesList/VariablesEditorDialog';
 import useForceUpdate from '../../Utils/UseForceUpdate';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type EventsFunctionConfigurationEditorInterface = {
   editEventsFunctionParameter: (

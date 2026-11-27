@@ -13,7 +13,7 @@ import { ResponsiveLineStackLayout, ColumnStackLayout } from '../../UI/Layout';
 import SelectField from '../../UI/SelectField';
 import SelectOption from '../../UI/SelectOption';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export default class ShapePainterEditor extends React.Component<EditorProps> {
   render(): React.ReactNode {

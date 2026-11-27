@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { AutoSizer } from 'react-virtualized';
 import type { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // -- Types --
 

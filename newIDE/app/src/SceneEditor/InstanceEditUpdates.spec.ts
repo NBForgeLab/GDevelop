@@ -17,7 +17,7 @@ jest.mock('./SwipeableDrawerEditorsDisplay', () => () => null);
 
 it('refreshes instance panels and serializes each edit once across previews', () => {
   const project = (
-    (global as any).gd as libGDevelop
+    global.gd as libGDevelop
   ).ProjectHelper.createNewGDJSProject();
   const layout = project.insertNewLayout('Scene', 0);
   const instances = layout.getInitialInstances();

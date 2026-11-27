@@ -29,7 +29,7 @@ import {
 } from '../MainFrame/ResourcesWatcher';
 import { showWarningBox } from '../UI/Messages/MessageBox';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // It's important to use remote and not electron for folder actions,
 // otherwise they will be opened in the background.

@@ -54,7 +54,7 @@ import PreferencesContext, {
   type Preferences,
 } from '../../../MainFrame/Preferences/PreferencesContext';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const styles: {
   container: React.CSSProperties;

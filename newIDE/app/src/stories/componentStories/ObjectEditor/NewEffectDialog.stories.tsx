@@ -33,7 +33,7 @@ export default {
  * other stories.
  */
 const loadRealEffectExtensions = () => {
-  const gd: libGDevelop = (global as any).gd;
+  const gd: libGDevelop = global.gd;
   const platform = gd.JsPlatform.get();
   const extensions = [
     {

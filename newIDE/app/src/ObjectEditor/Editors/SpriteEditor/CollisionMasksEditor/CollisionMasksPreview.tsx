@@ -9,7 +9,7 @@ import {
   type NewVertexHintPoint,
 } from './PolygonHelper';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type SelectedVertex = {
   vertex: gdVector2f;

@@ -3,7 +3,7 @@ import { type I18n as I18nType } from '@lingui/core';
 import { mapFor } from '../../Utils/MapFor';
 import { ParametersIndexOffsets } from '../../EventsFunctionsExtensionsLoader';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const getSentenceErrorText = (
   i18n: I18nType,

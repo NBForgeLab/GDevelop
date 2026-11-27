@@ -5,7 +5,7 @@ import {
 } from './index';
 import { makeFakeLaunchFunctionOptionsWithProject } from './TestHelpers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('read_scene_events', () => {
   let project: gdProject;

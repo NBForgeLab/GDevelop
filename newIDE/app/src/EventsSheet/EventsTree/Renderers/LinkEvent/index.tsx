@@ -26,7 +26,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { Column } from '../../../../UI/Grid';
 import Text from '../../../../UI/Text';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 

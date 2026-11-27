@@ -185,7 +185,7 @@
             },
             {
               "name": "prop-types",
-              "message": "Don't import anything from prop-types - use Flow/TypeScript types instead."
+              "message": "Don't import anything from prop-types - use TypeScript types instead."
             }
           ]
         }

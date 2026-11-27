@@ -3,7 +3,7 @@ import {
   deleteFilesWithPrefix,
   putFile,
 } from './BrowserSWPreviewLauncher/BrowserSWPreviewIndexedDB';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type TextFileDescriptor = {
   filePath: string;

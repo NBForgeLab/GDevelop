@@ -22,7 +22,7 @@ import VisibilityOffIcon from '../../UI/CustomSvgIcons/VisibilityOff';
 import { ProjectScopedContainersAccessor } from '../../InstructionOrExpression/EventsScope';
 import { buildMoveToMenu } from './EventsBasedEntityPropertyFolderTreeViewItemContent';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const PROPERTIES_CLIPBOARD_KIND = 'Properties';
 

@@ -5,7 +5,7 @@ import {
   type PropertyChangesResult,
 } from './PropertyChanges';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * A project with an extension holding a behavior (a property and a shared

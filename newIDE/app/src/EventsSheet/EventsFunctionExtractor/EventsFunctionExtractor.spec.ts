@@ -1,6 +1,6 @@
 import { setupFunctionFromEvents } from '.';
 import { makeTestProject } from '../../fixtures/TestProject';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const serializedEvents = [
   {

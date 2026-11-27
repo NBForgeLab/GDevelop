@@ -3,7 +3,7 @@ import { type SelectionState, getSelectedEvents } from './SelectionHandler';
 import { mapFor } from '../Utils/MapFor';
 import uniqBy from 'lodash/uniqBy';
 import type { SearchFilterParams } from '../Utils/Search';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type SearchInEventsInputs = {
   searchInSelection: boolean;

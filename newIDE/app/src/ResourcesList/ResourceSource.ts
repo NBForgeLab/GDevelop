@@ -15,7 +15,7 @@ import { type ResourceExternalEditor } from './ResourceExternalEditor';
 import { type OnFetchNewlyAddedResourcesFunction } from '../ProjectsStorage/ResourceFetcher';
 import { type ResourceCustomPropertyConfig } from '../Utils/ProjectSettingsReader';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // These are all the kind of resources that can be found in
 // Core/GDCore/Project/ResourcesContainer.h

@@ -1,5 +1,5 @@
 import ResourcesLoader from '.';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 jest.mock('../Utils/OptionalRequire');
 

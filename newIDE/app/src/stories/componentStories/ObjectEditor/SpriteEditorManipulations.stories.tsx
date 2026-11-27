@@ -55,7 +55,7 @@ const getResourceName = (index: number) =>
   'manipulations-' + IMAGE_FILE_NAMES[index % IMAGE_FILE_NAMES.length];
 
 const addImageResourceIfMissing = (resourceName: string, fileName: string) => {
-  const gd = (global as any).gd as libGDevelop;
+  const gd = global.gd as libGDevelop;
   const resourcesManager = testProject.project.getResourcesManager();
   if (resourcesManager.hasResource(resourceName)) return;
 
@@ -81,7 +81,7 @@ const getOrCreateSpriteObject = ({
   animationsCount: number;
   framesPerAnimation: number;
 }): gdObject => {
-  const gd = (global as any).gd as libGDevelop;
+  const gd = global.gd as libGDevelop;
   const objectsContainer = testProject.testLayout.getObjects();
   if (!objectsContainer.hasObjectNamed(objectName)) {
     IMAGE_FILE_NAMES.forEach((fileName) =>
@@ -127,7 +127,7 @@ const getOrCreateSpriteObject = ({
  * what the editor displays.
  */
 const readAnimations = (object: gdObject) => {
-  const gd = (global as any).gd as libGDevelop;
+  const gd = global.gd as libGDevelop;
   const animations = gd
     .asSpriteConfiguration(object.getConfiguration())
     .getAnimations();
@@ -213,7 +213,7 @@ const fakeImageResourceSources: Array<ResourceSource> = [
 let chosenResourcesCount = 0;
 
 const makeImageResource = (resourceName: string, fileName: string) => {
-  const gd = (global as any).gd as libGDevelop;
+  const gd = global.gd as libGDevelop;
   const resource = new gd.ImageResource();
   resource.setName(resourceName);
   resource.setFile('res/' + fileName);
@@ -373,7 +373,7 @@ const SpriteEditorPlayground = ({
                 // all the following ones, and adding enough of them
                 // reallocates the vector holding them - so anything resolved
                 // before the session is now dangling.
-                const gd = (global as any).gd as libGDevelop;
+                const gd = global.gd as libGDevelop;
                 const animations = gd
                   .asSpriteConfiguration(object.getConfiguration())
                   .getAnimations();

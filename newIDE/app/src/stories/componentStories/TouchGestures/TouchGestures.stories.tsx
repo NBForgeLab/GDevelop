@@ -40,7 +40,7 @@ import { DraggableClosableTab } from '../../../MainFrame/EditorTabs/DraggableEdi
 import { useRefWithInit } from '../../../Utils/UseRefInitHook';
 import useForceUpdate from '../../../Utils/UseForceUpdate';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export default {
   title: 'Touch gestures',

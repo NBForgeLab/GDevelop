@@ -3,7 +3,7 @@ import { editorFunctions, type EditorFunctionGenericOutput } from './index';
 import { makeFakeLaunchFunctionOptionsWithProject } from './TestHelpers';
 import { type ObjectsOutsideEditorChanges } from './OutsideEditorChanges';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('change_object_properties_effects (effect rename, move and warnings)', () => {
   let project: gdProject;

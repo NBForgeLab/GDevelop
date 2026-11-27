@@ -1,7 +1,7 @@
 import { markLegacySkyboxes } from './LegacySkyboxOrientation';
 import { makeTestProject } from '../fixtures/TestProject';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('markLegacySkyboxes', () => {
   it('marks the skyboxes without a top as legacy and keeps the others', () => {

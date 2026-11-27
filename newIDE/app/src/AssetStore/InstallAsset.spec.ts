@@ -36,7 +36,7 @@ import {
 } from '../Utils/GDevelopServices/Extension';
 import * as Asset from '../Utils/GDevelopServices/Asset';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 jest.mock('../Utils/GDevelopServices/Extension');
 

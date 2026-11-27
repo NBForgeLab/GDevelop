@@ -33,7 +33,7 @@ import LocalResourceMover from './ProjectsStorage/ResourceMover/LocalResourceMov
 import LocalResourceFetcher from './ProjectsStorage/ResourceFetcher/LocalResourceFetcher';
 import LocalLoginProvider from './LoginProvider/LocalLoginProvider';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const create = (authentication: Authentication): React.ReactNode => {
   Window.setUpContextMenu();

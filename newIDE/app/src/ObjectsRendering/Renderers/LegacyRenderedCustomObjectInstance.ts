@@ -18,7 +18,7 @@ import {
 import * as PIXI from 'pixi.js-legacy';
 import * as THREE from 'three';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 type ZOrderedDisplayObject = PIXI.DisplayObject & { zOrder?: number };
 

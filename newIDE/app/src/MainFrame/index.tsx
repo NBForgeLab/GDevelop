@@ -320,7 +320,7 @@ const ipcRendererForUpdates = electron ? electron.ipcRenderer : null;
 
 const GD_STARTUP_TIMES = (global as any).GD_STARTUP_TIMES || [];
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const editorKindToRenderer: {
   [key in EditorKind]: (

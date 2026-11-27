@@ -20,7 +20,7 @@ import ConditionsActionsColumns from '../ConditionsActionsColumns';
 import { shouldActivate } from '../../../UI/KeyboardShortcuts/InteractionKeys';
 import ParameterRenderingService from '../../ParameterRenderingService';
 import { Trans } from '@lingui/macro';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 

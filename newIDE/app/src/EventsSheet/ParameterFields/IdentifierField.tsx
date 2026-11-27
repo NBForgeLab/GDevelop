@@ -8,7 +8,7 @@ import GenericExpressionField from './GenericExpressionField';
 import { type ExpressionAutocompletion } from '../../ExpressionAutocompletion';
 import { getLastObjectParameterValue } from './ParameterMetadataTools';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export default React.forwardRef<ParameterFieldInterface, ParameterFieldProps>(
   function IdentifierField(props, ref) {

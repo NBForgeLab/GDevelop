@@ -55,7 +55,7 @@ export class ProjectScopedContainersAccessor {
       eventsBasedObject,
       eventsFunction,
     } = this._scope;
-    const gd: libGDevelop = (global as any).gd;
+    const gd: libGDevelop = global.gd;
 
     if (layout) {
       projectScopedContainers =

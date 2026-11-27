@@ -2,7 +2,7 @@ import { makeTestExtensions } from '../fixtures/TestExtensions';
 import { editorFunctions, type EditorFunctionGenericOutput } from './index';
 import { makeFakeLaunchFunctionOptionsWithProject } from './TestHelpers';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('change_behavior_property (property warnings and shared properties)', () => {
   let project: gdProject;

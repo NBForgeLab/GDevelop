@@ -28,7 +28,7 @@ import ChevronArrowRight from '../UI/CustomSvgIcons/ChevronArrowRight';
 import ChevronArrowBottom from '../UI/CustomSvgIcons/ChevronArrowBottom';
 import type { EventPath } from '../Utils/EventPath';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const styles: {
   table: React.CSSProperties;

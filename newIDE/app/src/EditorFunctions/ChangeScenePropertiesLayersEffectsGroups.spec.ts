@@ -2,7 +2,7 @@ import { editorFunctions, type EditorFunctionGenericOutput } from './index';
 import { makeFakeLaunchFunctionOptionsWithProject } from './TestHelpers';
 import { makeTestExtensions } from '../fixtures/TestExtensions';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('change_scene_properties_layers_effects_groups', () => {
   let project: gdProject;

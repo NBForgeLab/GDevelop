@@ -2,7 +2,7 @@ import { mapFor } from '../Utils/MapFor';
 import { normalizeString } from '../Utils/Search';
 import { exceptionallyGuardAgainstDeadObject } from '../Utils/IsNullPtr';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 // Resolve `gd.Variable` lazily at call time because `global.gd` is populated asynchronously.
 const getGdVariable = () =>

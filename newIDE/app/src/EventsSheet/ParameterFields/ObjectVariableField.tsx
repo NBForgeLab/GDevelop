@@ -14,7 +14,7 @@ import getObjectByName from '../../Utils/GetObjectByName';
 import getObjectGroupByName from '../../Utils/GetObjectGroupByName';
 import EventsRootVariablesFinder from '../../Utils/EventsRootVariablesFinder';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const getGdVariablesContainer = () =>
   gd.VariablesContainer as typeof gd.VariablesContainer &

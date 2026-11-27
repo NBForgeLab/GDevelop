@@ -7,7 +7,7 @@ import {
   unserializeFromJSObject,
 } from '../Utils/Serializer';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 describe('instances raw JSON', () => {
   let project: gdProject;

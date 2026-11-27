@@ -25,7 +25,7 @@ import useAlertDialog from '../UI/Alert/useAlertDialog';
 import ErrorBoundary from '../UI/ErrorBoundary';
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type ObjectEditorTab =
   | 'properties'

@@ -14,7 +14,7 @@ import { nameAndIconContainer } from '../EventsTree/ClassNames';
 import InAppTutorialContext from '../../InAppTutorial/InAppTutorialContext';
 import { highlightSearchText } from '../../Utils/HighlightSearchText';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const getRequiredBehaviorTypes = (
   platform: gdPlatform,

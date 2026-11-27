@@ -6,7 +6,7 @@ import {
   isModel3DObjectMeasured,
 } from '../Model3DSizeInfo';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * How the area of a variant is fitted to its child instances:

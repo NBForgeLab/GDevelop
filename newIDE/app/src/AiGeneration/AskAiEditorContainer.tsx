@@ -106,7 +106,7 @@ import { t } from '@lingui/macro';
 import { extractGDevelopApiErrorStatusAndCode } from '../Utils/GDevelopServices/Errors';
 import { SubscriptionContext } from '../Profile/Subscription/SubscriptionContext';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const styles = {
   container: {

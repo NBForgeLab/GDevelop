@@ -1,7 +1,7 @@
 import { mapVector, mapFor } from '../../../../Utils/MapFor';
 import every from 'lodash/every';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * Return the specified animation, direction and sprite for a SpriteObject.

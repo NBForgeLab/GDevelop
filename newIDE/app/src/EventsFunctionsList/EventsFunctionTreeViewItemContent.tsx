@@ -27,7 +27,7 @@ import {
 } from './EventsFunctionFolderTreeViewItemContent';
 import { type MenuItemTemplate } from '../UI/Menu/Menu';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const EVENTS_FUNCTION_CLIPBOARD_KIND = 'Events Function';
 

@@ -31,7 +31,7 @@ import SelectField from '../UI/SelectField';
 import Text from '../UI/Text';
 import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/EventsScope';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const noop = () => {};
 

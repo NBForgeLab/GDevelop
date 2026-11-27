@@ -17,7 +17,7 @@ import { getIDEVersion } from '../../Version';
 import ListIcon from '../../UI/ListIcon';
 import GDevelopThemeContext from '../../UI/Theme/GDevelopThemeContext';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const styles: {
   button: React.CSSProperties;

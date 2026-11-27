@@ -45,7 +45,7 @@ import { CompactTextAreaField } from '../../UI/CompactTextAreaField';
 import { type VariableDialogOpeningProps } from '../../VariablesList/VariablesEditorDialog';
 import NewBehaviorDialog from '../../BehaviorsEditor/NewBehaviorDialog';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const getEventsFunctionType = () =>
   gd.EventsFunction as typeof gd.EventsFunction &

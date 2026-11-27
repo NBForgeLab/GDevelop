@@ -10,7 +10,7 @@ import { markObjectAsOpenedInEditor } from '../ObjectEditor/ObjectsOpenedInEdito
 import { mapFor } from '../Utils/MapFor';
 import { PixiResourcesLoaderMock } from '../fixtures/TestPixiResourcesLoader';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 

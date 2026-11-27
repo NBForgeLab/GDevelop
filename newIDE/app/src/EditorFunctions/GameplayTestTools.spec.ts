@@ -10,7 +10,7 @@ jest.mock('../GameplayTests/GameplayTestRunner', () => ({
     mockRunProjectGameplayTests(...args),
 }));
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const STORED_SOURCE = 'await harness.goToScene("Scene");';
 

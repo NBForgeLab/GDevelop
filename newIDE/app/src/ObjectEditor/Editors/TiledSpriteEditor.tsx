@@ -6,7 +6,7 @@ import ResourceSelectorWithThumbnail from '../../ResourcesList/ResourceSelectorW
 import { type EditorProps } from './EditorProps';
 import { ResponsiveLineStackLayout, ColumnStackLayout } from '../../UI/Layout';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export default class TiledSpriteEditor extends React.Component<EditorProps> {
   render(): React.ReactNode {

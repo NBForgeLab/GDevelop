@@ -6,7 +6,7 @@ import {
 import { EXTENSION_STORE_ORIGIN_NAME } from '../EditorFunctions/SimplifiedProject/SimplifiedExtensions';
 import { type AiRequestFunctionCallOutput } from '../Utils/GDevelopServices/Generation';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const createFakeError = (
   overrides: Partial<InGameEditorExtensionError>

@@ -19,7 +19,7 @@ import { makeTestExtensions } from '../../fixtures/TestExtensions';
 import tankConfigurationExtensionJson from '../../fixtures/TankConfigurationExtension.json';
 import leaderboardDialogExtensionJson from '../../fixtures/LeaderboardDialogExtension.json';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const createFakeEventsFunctionCodeWriter = (): EventsFunctionCodeWriter => ({
   getIncludeFileFor: (functionName: string) => `${functionName}.js`,

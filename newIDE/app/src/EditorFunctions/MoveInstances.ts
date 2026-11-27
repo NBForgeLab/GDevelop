@@ -10,7 +10,7 @@ import {
   type ToolScopeType,
 } from './Scope';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * `change_scene_properties_layers_effects_groups.move_instances`: move the

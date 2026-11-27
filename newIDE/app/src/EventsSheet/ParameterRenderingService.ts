@@ -93,7 +93,7 @@ import {
   type ParameterFieldInterface,
 } from './ParameterFields/ParameterFieldCommons';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export type ParameterField =
   | React.ForwardRefExoticComponent<

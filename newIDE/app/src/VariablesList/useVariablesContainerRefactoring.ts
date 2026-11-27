@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { exceptionallyGuardAgainstDeadObject } from '../Utils/IsNullPtr';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 const REFACTORING_DEBOUNCE_MS = 200;
 

@@ -1,6 +1,6 @@
 import { mapFor } from './MapFor';
 import { getInstancesInLayoutForObject } from './Layout';
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 /**
  * Where an object lives, as known by its editors: its scene (or the scene a

@@ -13,7 +13,7 @@ import {
 import { t } from '@lingui/macro';
 import { type I18n as I18nType } from '@lingui/core';
 
-const gd: libGDevelop = (global as any).gd;
+const gd: libGDevelop = global.gd;
 
 export const OBJECT_FOLDER_OR_OBJECTS_CLIPBOARD_KIND = 'ObjectFolderOrObjects';
 
