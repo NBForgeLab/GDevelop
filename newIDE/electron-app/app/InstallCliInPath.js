@@ -5,9 +5,14 @@ const child_process = require('child_process');
 const CLI_SYMLINK_NAME = 'gdevelop';
 const UNIX_BIN_DIR = '/usr/local/bin';
 
-const shellQuote = value => `'${value.replace(/'/g, `'\\''`)}'`;
+/** @param {string} value */
+const shellQuote = (value) => `'${value.replace(/'/g, `'\\''`)}'`;
 
-const installCliInPathOnWindows = appExecPath => {
+/**
+ * @param {string} appExecPath
+ * @returns {Promise<{status: 'success' | 'error', message: string}>}
+ */
+const installCliInPathOnWindows = (appExecPath) => {
   const installDir = path.dirname(appExecPath);
   const escapedDir = installDir.replace(/'/g, `''`);
   // [Environment]::SetEnvironmentVariable rewrites Path as REG_SZ, corrupting REG_EXPAND_SZ
@@ -30,11 +35,11 @@ const installCliInPathOnWindows = appExecPath => {
     `[GDevelopCli.NativeMethods]::SendMessageTimeout($HWND_BROADCAST, $WM_SETTINGCHANGE, [UIntPtr]::Zero, 'Environment', $SMTO_ABORTIFHUNG, $broadcastTimeoutMs, [ref]$broadcastResult) | Out-Null`,
   ].join('; ');
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     child_process.execFile(
       'powershell.exe',
       ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', psCommand],
-      error => {
+      (error) => {
         if (error) {
           resolve({
             status: 'error',
@@ -53,19 +58,26 @@ const installCliInPathOnWindows = appExecPath => {
 
 // osascript reports a dismissed admin prompt as error -128 ("User canceled").
 // pkexec exits 126 (dialog dismissed) or 127 (not authorized) when the user declines.
-const isElevationCancelled = error =>
+/** @param {import('child_process').ExecFileException} error */
+const isElevationCancelled = (error) =>
   process.platform === 'darwin'
     ? /-128|user canceled/i.test(error.message)
     : error.code === 126 || error.code === 127;
 
+/**
+ * @param {string} appExecPath
+ * @param {string} symlinkPath
+ * @returns {Promise<{status: 'success' | 'error', message: string}>}
+ */
 const elevateUnixSymlink = (appExecPath, symlinkPath) => {
   const shellCommand = `mkdir -p ${shellQuote(
     UNIX_BIN_DIR
   )} && ln -sf ${shellQuote(appExecPath)} ${shellQuote(symlinkPath)}`;
   const manualCommand = `sudo mkdir -p "${UNIX_BIN_DIR}" && sudo ln -sf "${appExecPath}" "${symlinkPath}"`;
 
-  return new Promise(resolve => {
-    const onDone = error => {
+  return new Promise((resolve) => {
+    /** @param {import('child_process').ExecFileException | null} error */
+    const onDone = (error) => {
       if (error) {
         if (isElevationCancelled(error)) {
           resolve({
@@ -97,10 +109,14 @@ const elevateUnixSymlink = (appExecPath, symlinkPath) => {
   });
 };
 
-const installCliInPathOnUnix = appExecPath => {
+/**
+ * @param {string} appExecPath
+ * @returns {Promise<{status: 'success' | 'error', message: string}>}
+ */
+const installCliInPathOnUnix = (appExecPath) => {
   const symlinkPath = path.join(UNIX_BIN_DIR, CLI_SYMLINK_NAME);
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     try {
       fs.mkdirSync(UNIX_BIN_DIR, { recursive: true });
       fs.rmSync(symlinkPath, { force: true });
@@ -110,14 +126,20 @@ const installCliInPathOnUnix = appExecPath => {
         message: `GDevelop CLI available as "${CLI_SYMLINK_NAME}".`,
       });
     } catch (error) {
-      if (error.code === 'EACCES' || error.code === 'EPERM') {
+      const errorCode =
+        error && typeof error === 'object' && 'code' in error
+          ? error.code
+          : undefined;
+      if (errorCode === 'EACCES' || errorCode === 'EPERM') {
         // /usr/local/bin is not writable: retry with elevation.
         elevateUnixSymlink(appExecPath, symlinkPath).then(resolve);
         return;
       }
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       resolve({
         status: 'error',
-        message: `Could not create "${symlinkPath}": ${error.message}`,
+        message: `Could not create "${symlinkPath}": ${errorMessage}`,
       });
     }
   });
@@ -125,9 +147,10 @@ const installCliInPathOnUnix = appExecPath => {
 
 /**
  * Register the GDevelop binary in the system PATH so the CLI works anywhere.
+ * @param {string} appExecPath
  * @returns {Promise<{status: 'success' | 'error', message: string}>}
  */
-const installCliInPath = appExecPath => {
+const installCliInPath = (appExecPath) => {
   if (process.platform === 'win32') {
     return installCliInPathOnWindows(appExecPath);
   }

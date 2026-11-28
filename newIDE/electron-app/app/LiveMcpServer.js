@@ -19,13 +19,19 @@ const PORT_ATTEMPTS = 10;
 const MAX_BODY_BYTES = 10 * 1024 * 1024;
 const MCP_PATH = '/mcp';
 
+/**
+ * @param {any} id
+ * @param {number} code
+ * @param {string} message
+ */
 const makeJsonRpcError = (id, code, message) => ({
   jsonrpc: '2.0',
   id: id === undefined ? null : id,
   error: { code, message },
 });
 
-const isLoopbackHost = hostHeader => {
+/** @param {string | undefined} hostHeader */
+const isLoopbackHost = (hostHeader) => {
   if (!hostHeader) return false;
   const hostname = hostHeader.replace(/:\d+$/, '');
   return (
@@ -35,7 +41,8 @@ const isLoopbackHost = hostHeader => {
 
 // A browser page can reach a local server: only requests without an origin
 // (agents are not browsers) or from a local page are accepted.
-const isAllowedOrigin = origin => {
+/** @param {string | undefined} origin */
+const isAllowedOrigin = (origin) => {
   if (!origin) return true;
   try {
     return isLoopbackHost(new URL(origin).host);
@@ -44,6 +51,10 @@ const isAllowedOrigin = origin => {
   }
 };
 
+/**
+ * @param {string | undefined} authorizationHeader
+ * @param {string} token
+ */
 const isTokenValid = (authorizationHeader, token) => {
   const match = /^Bearer\s+(.+)$/i.exec(authorizationHeader || '');
   if (!match) return false;
@@ -56,22 +67,47 @@ const isTokenValid = (authorizationHeader, token) => {
 };
 
 /**
+ * @typedef {{
+ *   id: number,
+ *   isDestroyed: () => boolean,
+ *   webContents: { send: (channel: string, payload: any) => void },
+ * }} TargetWindow
+ * @typedef {{
+ *   info: (...args: any[]) => void,
+ *   warn: (...args: any[]) => void,
+ *   error: (...args: any[]) => void,
+ * }} Logger
+ */
+
+/**
  * @param {{
- *   getTargetWindow: () => ?{ id: number, isDestroyed: () => boolean, webContents: { send: (channel: string, payload: any) => void } },
- *   log: { info: Function, warn: Function, error: Function },
+ *   getTargetWindow: () => TargetWindow | null,
+ *   log: Logger,
  * }} options
  */
 const createLiveMcpServer = ({ getTargetWindow, log }) => {
+  /** @type {import('http').Server | null} */
   let server = null;
+  /** @type {number | null} */
   let listeningPort = null;
+  /** @type {string | null} */
   let token = null;
-  // sessionId -> { window }
+  /** @type {Map<string, { window: TargetWindow }>} */
   const sessions = new Map();
-  // `${sessionId} ${JSON id}` -> { resolve, windowId }
+  /** @type {Map<string, { resolve: (value: any) => void, windowId: number }>} */
   const pendingResponses = new Map();
 
+  /**
+   * @param {string} sessionId
+   * @param {any} id
+   */
   const getPendingKey = (sessionId, id) => `${sessionId} ${JSON.stringify(id)}`;
 
+  /**
+   * @param {{ window: TargetWindow }} session
+   * @param {string} sessionId
+   * @param {any} message
+   */
   const sendToWindow = (session, sessionId, message) => {
     if (session.window.isDestroyed()) return false;
     session.window.webContents.send('mcp-live-message', {
@@ -81,8 +117,14 @@ const createLiveMcpServer = ({ getTargetWindow, log }) => {
     return true;
   };
 
+  /**
+   * @param {{ window: TargetWindow }} session
+   * @param {string} sessionId
+   * @param {any} message
+   * @returns {Promise<any>}
+   */
   const forwardRequest = (session, sessionId, message) =>
-    new Promise(resolve => {
+    new Promise((resolve) => {
       const pendingKey = getPendingKey(sessionId, message.id);
       pendingResponses.set(pendingKey, {
         resolve,
@@ -100,7 +142,10 @@ const createLiveMcpServer = ({ getTargetWindow, log }) => {
       }
     });
 
-  /** Called with what a window sent on `mcp-live-send`. */
+  /**
+   * Called with what a window sent on `mcp-live-send`.
+   * @param {{ sessionId: string, text: string }} payload
+   */
   const onWindowResponse = ({ sessionId, text }) => {
     let response;
     try {
@@ -116,8 +161,11 @@ const createLiveMcpServer = ({ getTargetWindow, log }) => {
     pending.resolve(response);
   };
 
-  /** Fails the calls waiting for a closed window, and forgets its sessions. */
-  const onWindowClosed = windowId => {
+  /**
+   * Fails the calls waiting for a closed window, and forgets its sessions.
+   * @param {number} windowId
+   */
+  const onWindowClosed = (windowId) => {
     pendingResponses.forEach((pending, pendingKey) => {
       if (pending.windowId !== windowId) return;
       pendingResponses.delete(pendingKey);
@@ -135,6 +183,12 @@ const createLiveMcpServer = ({ getTargetWindow, log }) => {
     });
   };
 
+  /**
+   * @param {import('http').ServerResponse} res
+   * @param {number} statusCode
+   * @param {any} body
+   * @param {import('http').OutgoingHttpHeaders} [headers]
+   */
   const sendJson = (res, statusCode, body, headers = {}) => {
     res.writeHead(statusCode, {
       'Content-Type': 'application/json',
@@ -143,11 +197,16 @@ const createLiveMcpServer = ({ getTargetWindow, log }) => {
     res.end(JSON.stringify(body));
   };
 
-  const readBody = req =>
+  /**
+   * @param {import('http').IncomingMessage} req
+   * @returns {Promise<string>}
+   */
+  const readBody = (req) =>
     new Promise((resolve, reject) => {
+      /** @type {Buffer[]} */
       const chunks = [];
       let size = 0;
-      req.on('data', chunk => {
+      req.on('data', (chunk) => {
         size += chunk.length;
         if (size > MAX_BODY_BYTES) {
           reject(new Error('Request too large.'));
@@ -160,6 +219,10 @@ const createLiveMcpServer = ({ getTargetWindow, log }) => {
       req.on('error', reject);
     });
 
+  /**
+   * @param {import('http').IncomingMessage} req
+   * @param {import('http').ServerResponse} res
+   */
   const handlePost = async (req, res) => {
     let body;
     try {
@@ -171,17 +234,19 @@ const createLiveMcpServer = ({ getTargetWindow, log }) => {
     const messages = Array.isArray(body) ? body : [body];
     if (
       !messages.length ||
-      messages.some(message => !message || typeof message !== 'object')
+      messages.some((message) => !message || typeof message !== 'object')
     ) {
       sendJson(res, 400, makeJsonRpcError(null, -32600, 'Invalid request.'));
       return;
     }
 
     const isInitialization = messages.some(
-      message => message.method === 'initialize'
+      (message) => message.method === 'initialize'
     );
-    let sessionId = req.headers['mcp-session-id'];
+    const rawSessionId = req.headers['mcp-session-id'];
+    let sessionId = typeof rawSessionId === 'string' ? rawSessionId : undefined;
     let session = sessionId ? sessions.get(sessionId) : null;
+    /** @type {import('http').OutgoingHttpHeaders} */
     const responseHeaders = {};
     if (isInitialization) {
       const window = getTargetWindow();
@@ -212,16 +277,20 @@ const createLiveMcpServer = ({ getTargetWindow, log }) => {
       return;
     }
 
+    const activeSession = session;
+    const activeSessionId = sessionId;
     const requests = messages.filter(
-      message =>
+      (message) =>
         typeof message.method === 'string' &&
         message.id !== undefined &&
         message.id !== null
     );
     // Notifications (and responses) are delivered without waiting.
     messages
-      .filter(message => !requests.includes(message))
-      .forEach(message => sendToWindow(session, sessionId, message));
+      .filter((message) => !requests.includes(message))
+      .forEach((message) =>
+        sendToWindow(activeSession, activeSessionId, message)
+      );
     if (!requests.length) {
       res.writeHead(202, responseHeaders);
       res.end();
@@ -229,7 +298,9 @@ const createLiveMcpServer = ({ getTargetWindow, log }) => {
     }
 
     const responses = await Promise.all(
-      requests.map(message => forwardRequest(session, sessionId, message))
+      requests.map((message) =>
+        forwardRequest(activeSession, activeSessionId, message)
+      )
     );
     if (res.destroyed) return;
     sendJson(
@@ -240,6 +311,10 @@ const createLiveMcpServer = ({ getTargetWindow, log }) => {
     );
   };
 
+  /**
+   * @param {import('http').IncomingMessage} req
+   * @param {import('http').ServerResponse} res
+   */
   const handleRequest = (req, res) => {
     const url = new URL(req.url || '/', 'http://127.0.0.1');
     if (url.pathname !== MCP_PATH) {
@@ -264,7 +339,7 @@ const createLiveMcpServer = ({ getTargetWindow, log }) => {
     }
 
     if (req.method === 'POST') {
-      handlePost(req, res).catch(error => {
+      handlePost(req, res).catch((error) => {
         log.error('[MCP] Error while handling a request:', error);
         if (!res.headersSent)
           sendJson(res, 500, makeJsonRpcError(null, -32603, 'Internal error.'));
@@ -272,7 +347,8 @@ const createLiveMcpServer = ({ getTargetWindow, log }) => {
       return;
     }
     if (req.method === 'DELETE') {
-      const sessionId = req.headers['mcp-session-id'];
+      const rawSessionId = req.headers['mcp-session-id'];
+      const sessionId = typeof rawSessionId === 'string' ? rawSessionId : '';
       const session = sessionId ? sessions.get(sessionId) : null;
       if (!session) {
         sendJson(
@@ -296,7 +372,11 @@ const createLiveMcpServer = ({ getTargetWindow, log }) => {
     res.end();
   };
 
-  const listen = port =>
+  /**
+   * @param {number} port
+   * @returns {Promise<import('http').Server>}
+   */
+  const listen = (port) =>
     new Promise((resolve, reject) => {
       const newServer = http.createServer(handleRequest);
       // A tool call (like a gameplay test) can take minutes.
@@ -308,50 +388,69 @@ const createLiveMcpServer = ({ getTargetWindow, log }) => {
       });
     });
 
+  /**
+   * @param {{ port: number, token: string }} options
+   * @returns {Promise<number | null>}
+   */
   const start = async ({ port, token: newToken }) => {
     await stop();
     token = newToken;
+    /** @type {unknown} */
     let lastError = null;
     for (let attempt = 0; attempt < PORT_ATTEMPTS; attempt++) {
       try {
         server = await listen(port + attempt);
-        listeningPort = server.address().port;
+        const serverAddress = server.address();
+        listeningPort =
+          serverAddress && typeof serverAddress === 'object'
+            ? serverAddress.port
+            : null;
         log.info(
           `[MCP] Live editor server listening on port ${listeningPort}.`
         );
         return listeningPort;
       } catch (error) {
         lastError = error;
-        if (error.code !== 'EADDRINUSE') break;
+        const errorCode =
+          error && typeof error === 'object' && 'code' in error
+            ? error.code
+            : undefined;
+        if (errorCode !== 'EADDRINUSE') break;
       }
     }
     throw lastError || new Error('Could not start the server.');
   };
 
+  /** @returns {Promise<void>} */
   const stop = () =>
-    new Promise(resolve => {
-      sessions.forEach((session, sessionId) => {
-        if (!session.window.isDestroyed())
-          session.window.webContents.send('mcp-live-session-closed', {
-            sessionId,
-          });
-      });
-      sessions.clear();
-      pendingResponses.forEach((pending, pendingKey) => {
-        const id = JSON.parse(pendingKey.slice(pendingKey.indexOf(' ') + 1));
-        pending.resolve(
-          makeJsonRpcError(id, -32000, 'The GDevelop MCP server was stopped.')
-        );
-      });
-      pendingResponses.clear();
-      listeningPort = null;
-      if (!server) return resolve();
-      const stoppedServer = server;
-      server = null;
-      stoppedServer.close(() => resolve());
-      if (stoppedServer.closeAllConnections)
-        stoppedServer.closeAllConnections();
-    });
+    /** @type {Promise<void>} */ (
+      new Promise((resolve) => {
+        sessions.forEach((session, sessionId) => {
+          if (!session.window.isDestroyed())
+            session.window.webContents.send('mcp-live-session-closed', {
+              sessionId,
+            });
+        });
+        sessions.clear();
+        pendingResponses.forEach((pending, pendingKey) => {
+          const id = JSON.parse(pendingKey.slice(pendingKey.indexOf(' ') + 1));
+          pending.resolve(
+            makeJsonRpcError(id, -32000, 'The GDevelop MCP server was stopped.')
+          );
+        });
+        pendingResponses.clear();
+        listeningPort = null;
+        if (!server) {
+          resolve();
+          return;
+        }
+        const stoppedServer = server;
+        server = null;
+        stoppedServer.close(() => resolve());
+        if (stoppedServer.closeAllConnections)
+          stoppedServer.closeAllConnections();
+      })
+    );
 
   return {
     start,
@@ -363,10 +462,16 @@ const createLiveMcpServer = ({ getTargetWindow, log }) => {
   };
 };
 
-/** The settings (enabled, port, token), kept in the user data folder. */
-const makeLiveMcpServerSettingsStore = userDataPath => {
+/**
+ * The settings (enabled, port, token), kept in the user data folder.
+ * @typedef {{ enabled: boolean, port: number, token: string | null }} LiveMcpServerSettings
+ * @param {string} userDataPath
+ */
+const makeLiveMcpServerSettingsStore = (userDataPath) => {
   const settingsPath = path.join(userDataPath, 'mcp-live-server.json');
+  /** @returns {LiveMcpServerSettings} */
   const read = () => {
+    /** @type {{ enabled?: unknown, port?: unknown, token?: unknown }} */
     let settings = {};
     try {
       settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8')) || {};
@@ -374,7 +479,9 @@ const makeLiveMcpServerSettingsStore = userDataPath => {
     return {
       enabled: !!settings.enabled,
       port:
-        Number.isInteger(settings.port) && settings.port > 0
+        typeof settings.port === 'number' &&
+        Number.isInteger(settings.port) &&
+        settings.port > 0
           ? settings.port
           : DEFAULT_PORT,
       token:
@@ -383,14 +490,16 @@ const makeLiveMcpServerSettingsStore = userDataPath => {
           : null,
     };
   };
-  const write = settings => {
+  /** @param {LiveMcpServerSettings} settings */
+  const write = (settings) => {
     fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), {
       mode: 0o600,
     });
   };
+  /** @returns {LiveMcpServerSettings & { token: string }} */
   const readOrCreate = () => {
     const settings = read();
-    if (settings.token) return settings;
+    if (settings.token) return { ...settings, token: settings.token };
     const newSettings = {
       ...settings,
       token: crypto.randomBytes(32).toString('hex'),

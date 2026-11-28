@@ -7,7 +7,7 @@ const os = require('os');
  * @param {string} ip
  * @returns {boolean}
  */
-const isPrivateIp = ip => {
+const isPrivateIp = (ip) => {
   const [first, second] = ip.split('.').map(Number);
   return (
     first === 10 ||
@@ -20,7 +20,7 @@ const isPrivateIp = ip => {
 const getLocalNetworkIps = () => {
   return Object.entries(os.networkInterfaces())
     .flatMap(([name, interfaces]) =>
-      name.match(/^(VirtualBox|VMware)/) ? [] : interfaces
+      name.match(/^(VirtualBox|VMware)/) || !interfaces ? [] : interfaces
     )
     .filter(
       ({ family, internal, address }) =>

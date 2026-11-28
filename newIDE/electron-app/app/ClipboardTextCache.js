@@ -8,10 +8,10 @@ let cachedText = '';
 const refreshCachedText = () => {
   clipboard
     .readText()
-    .then(text => {
+    .then((text) => {
       cachedText = text;
     })
-    .catch(error => {
+    .catch((error) => {
       log.warn('Failed to read the clipboard:', error);
     });
 };
@@ -21,13 +21,13 @@ const setupClipboardTextCache = () => {
   // The clipboard can only have been changed by another app while no window was focused.
   app.on('browser-window-focus', refreshCachedText);
 
-  ipcMain.on('clipboard-read-text', event => {
+  ipcMain.on('clipboard-read-text', (event) => {
     event.returnValue = cachedText;
   });
 
   ipcMain.on('clipboard-write-text', (event, text) => {
     cachedText = typeof text === 'string' ? text : '';
-    clipboard.writeText(cachedText).catch(error => {
+    clipboard.writeText(cachedText).catch((error) => {
       log.error('Failed to write the clipboard:', error);
     });
     event.returnValue = null;

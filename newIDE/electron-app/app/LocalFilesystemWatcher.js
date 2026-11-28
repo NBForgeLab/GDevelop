@@ -1,6 +1,7 @@
 const fileWatcher = require('chokidar');
 const path = require('path');
 
+/** @type {Record<string, () => void>} */
 let subscriptionCancelers = {};
 let newSubscriptionId = 1;
 
@@ -9,25 +10,32 @@ const getNewSubscriptionId = () => {
   return id.toString();
 };
 
-const normalizePath = path => {
-  if (!path) return ''; // Safety check
+/** @param {string} filePath */
+const normalizePath = (filePath) => {
+  if (!filePath) return ''; // Safety check
 
-  return path.replace(/\\/g, '/');
+  return filePath.replace(/\\/g, '/');
 };
 
+/**
+ * @param {string} folderPath
+ * @param {(filePath: string) => void} fileWiseCallback
+ * @param {string} serializedOptions
+ * @returns {string}
+ */
 const setupWatcher = (folderPath, fileWiseCallback, serializedOptions) => {
   const options = JSON.parse(serializedOptions);
   const newSubscriptionId = getNewSubscriptionId();
   const watcher = fileWatcher
     .watch(folderPath, {
-      ignored: candidatePath => {
+      ignored: (candidatePath) => {
         // Normalize the path to avoid issues with different path separators (\ on Windows, / on other OSes).
         // Even on Windows, "candidatePath" returned by chokidar is always using "/".
         // So we normalize all paths (candidatePath and ignore paths) to avoid missing ignored files on Windows.
         const normalizedCandidatePath = normalizePath(candidatePath);
 
         if (
-          (options.ignore || []).some(ignore =>
+          /** @type {string[]} */ (options.ignore || []).some((ignore) =>
             normalizedCandidatePath.includes(normalizePath(ignore))
           ) ||
           // Force ignore, for safety, any node_modules folder as they are too big and would crash the watcher on macOS.
@@ -65,7 +73,8 @@ const setupWatcher = (folderPath, fileWiseCallback, serializedOptions) => {
   return newSubscriptionId;
 };
 
-const disableWatcher = id => {
+/** @param {string} id */
+const disableWatcher = (id) => {
   const subscriptionCanceler = subscriptionCancelers[id];
   if (!subscriptionCanceler) {
     console.log('No watcher subscription to disable.');

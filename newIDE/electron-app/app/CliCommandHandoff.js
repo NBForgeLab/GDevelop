@@ -42,13 +42,17 @@ const forwardedCommandOptionNames = [
 // so they can't steal the value of our own -- flags during parsing.
 const knownCliFlagNames = new Set(
   [...argsParserOptions.boolean, ...argsParserOptions.string].filter(
-    name => name !== '_'
+    (name) => name !== '_'
   )
 );
 const booleanFlagNames = new Set(argsParserOptions.boolean);
-const parseGDevelopArgs = argv =>
+/**
+ * @param {string[]} argv
+ * @returns {import('minimist').ParsedArgs}
+ */
+const parseGDevelopArgs = (argv) =>
   parseArgs(
-    argv.filter(arg => {
+    argv.filter((arg) => {
       if (!arg.startsWith('--')) return true;
       const argName = arg.slice(2).split('=')[0];
       if (knownCliFlagNames.has(argName)) return true;
@@ -63,17 +67,37 @@ const parseGDevelopArgs = argv =>
 // Electron reorders commandLine (switches first, values last) before forwarding
 // to 'second-instance', breaking flag-to-value pairing on reparse. Prefer
 // additionalData.args (parsed by the second instance itself) instead.
-const parseSecondInstanceArgs = ({ commandLine, additionalData, isDev }) =>
-  additionalData && additionalData.args
-    ? additionalData.args
-    : // In dev, electron is launched with an extra argument, so skip one more.
-      parseGDevelopArgs(commandLine.slice(isDev ? 2 : 1));
+/**
+ * @param {{
+ *   commandLine: string[],
+ *   additionalData: unknown,
+ *   isDev: boolean,
+ * }} options
+ * @returns {import('minimist').ParsedArgs}
+ */
+const parseSecondInstanceArgs = ({ commandLine, additionalData, isDev }) => {
+  const additionalArgs =
+    additionalData &&
+    typeof additionalData === 'object' &&
+    'args' in additionalData
+      ? additionalData.args
+      : null;
+  if (additionalArgs && typeof additionalArgs === 'object') {
+    return /** @type {import('minimist').ParsedArgs} */ (additionalArgs);
+  }
+  // In dev, electron is launched with an extra argument, so skip one more.
+  return parseGDevelopArgs(commandLine.slice(isDev ? 2 : 1));
+};
 
 // Inline JSON and "-" (stdin) are kept as is, anything else is a path.
-const resolveCommandArgsPaths = commandArgs => {
-  if (!commandArgs) return commandArgs;
+/**
+ * @param {string | string[] | undefined} commandArgs
+ * @returns {string[] | undefined}
+ */
+const resolveCommandArgsPaths = (commandArgs) => {
+  if (!commandArgs) return undefined;
   const values = Array.isArray(commandArgs) ? commandArgs : [commandArgs];
-  return values.map(value => {
+  return values.map((value) => {
     const trimmedValue = value.trim();
     if (!trimmedValue || trimmedValue === '-' || /^[[{]/.test(trimmedValue))
       return value;
@@ -81,7 +105,11 @@ const resolveCommandArgsPaths = commandArgs => {
   });
 };
 
-const isCliProjectAlreadyOpenElsewhere = parsedArgs => {
+/**
+ * @param {import('minimist').ParsedArgs} parsedArgs
+ * @returns {boolean}
+ */
+const isCliProjectAlreadyOpenElsewhere = (parsedArgs) => {
   const fileIdentifier = normalizeFileIdentifier(parsedArgs._[0]);
   return (
     !!fileIdentifier &&
@@ -90,23 +118,33 @@ const isCliProjectAlreadyOpenElsewhere = parsedArgs => {
 };
 
 // Redirects the command to an already open editor instead of spawning a new window.
+/**
+ * @param {{
+ *   parsedArgs: import('minimist').ParsedArgs,
+ *   mainWindows: Set<import('electron').BrowserWindow>,
+ * }} options
+ * @returns {boolean}
+ */
 const routeCliCommandToLiveEditor = ({ parsedArgs, mainWindows }) => {
   const commandName = parsedArgs['run-command'];
   if (!commandName) return false;
 
   const fileIdentifier = normalizeFileIdentifier(parsedArgs._[0]);
   const targetWindow = Array.from(mainWindows).find(
-    window => getWindowFileIdentifier(window.id) === fileIdentifier
+    (window) => getWindowFileIdentifier(window.id) === fileIdentifier
   );
   if (!targetWindow) return false;
 
+  /** @type {Record<string, any>} */
   const commandOptions = {};
-  forwardedCommandOptionNames.forEach(name => {
+  forwardedCommandOptionNames.forEach((name) => {
     if (parsedArgs[name] !== undefined) commandOptions[name] = parsedArgs[name];
   });
   // Paths are resolved by the editor, which can run in another directory.
   if (commandOptions['results-path'])
-    commandOptions['results-path'] = path.resolve(commandOptions['results-path']);
+    commandOptions['results-path'] = path.resolve(
+      commandOptions['results-path']
+    );
 
   targetWindow.webContents.send('run-cli-command', {
     commandName,

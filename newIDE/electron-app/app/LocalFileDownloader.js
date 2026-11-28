@@ -1,5 +1,7 @@
 const fs = require('fs');
-const axios = require('axios');
+const axios = /** @type {import('axios').AxiosStatic} */ (
+  /** @type {unknown} */ (require('axios'))
+);
 const log = require('electron-log');
 const { session } = require('electron');
 
@@ -25,7 +27,8 @@ const findGDevelopCloudCookieValue = async () => {
 // request is actually going to a gdevelop.io host; otherwise a project
 // resource pointing at an attacker-controlled URL would exfiltrate the
 // visitor's cloud session cookie to that host.
-const isGDevelopCloudHost = url => {
+/** @param {string} url */
+const isGDevelopCloudHost = (url) => {
   try {
     const { hostname, protocol } = new URL(url);
     return (
@@ -63,7 +66,8 @@ module.exports = {
     return new Promise((resolve, reject) => {
       let isRejectedOrResolvedAlready = false;
 
-      const cleanUpAndReject = err => {
+      /** @param {unknown} err */
+      const cleanUpAndReject = (err) => {
         if (isRejectedOrResolvedAlready) return;
         isRejectedOrResolvedAlready = true;
 

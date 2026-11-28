@@ -3,6 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const { notarize } = require('@electron/notarize');
 
+/**
+ * @param {import('electron-builder').AfterPackContext} context
+ */
 exports.default = async function notarizing(context) {
   const { electronPlatformName, appOutDir } = context;
   if (electronPlatformName !== 'darwin') {
@@ -42,7 +45,6 @@ exports.default = async function notarizing(context) {
 
   try {
     await notarize({
-      appBundleId,
       appPath,
       appleId,
       appleIdPassword,

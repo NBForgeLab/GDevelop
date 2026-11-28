@@ -10,22 +10,29 @@ const appPublicFolderBaseUrl = path.join(__dirname + '/../www');
 
 /**
  * Load the given path, relative to the app public folder.
+ * @param {{
+ *   isDev: boolean,
+ *   devTools: boolean,
+ *   path: string,
+ *   window: import('electron').BrowserWindow,
+ * }} options
  */
 const load = ({ isDev, devTools, path, window }) => {
   if (isDev) {
     // Development (server hosted by npm run start)
     window.loadURL(developmentServerBaseUrl + path);
-    window.openDevTools();
+    window.webContents.openDevTools();
   } else {
     // Production (with npm run build)
     window.loadURL('file://' + appPublicFolderBaseUrl + path);
-    if (devTools) window.openDevTools();
+    if (devTools) window.webContents.openDevTools();
   }
 };
 
 /**
  * Register gdide:// scheme to load JavaScript files in Electron.
  * Useful in particular for HTML modules support (where file:// protocol is not supported).
+ * @param {{ isDev: boolean }} options
  */
 const registerGdideProtocol = ({ isDev }) => {
   if (isDev) {

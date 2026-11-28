@@ -81,13 +81,20 @@ if (args['mcp']) args['run-command'] = 'SERVE_MCP';
 // With `--mcp` or `--json`, stdout only holds the output of the command: the
 // logs of the main process (including electron-log's) go to stderr.
 if (args['mcp'] || args['json']) {
+  /** @param {...any} values */
   const writeToStderr = (...values) =>
     process.stderr.write(require('util').format(...values) + '\n');
   console.log = writeToStderr;
   console.info = writeToStderr;
   console.debug = writeToStderr;
-  const stderrLogTransport = message => writeToStderr(...message.data);
-  stderrLogTransport.level = 'info';
+  /** @type {import('electron-log').Transport} */
+  const stderrLogTransport = Object.assign(
+    /** @param {import('electron-log').LogMessage} message */
+    (message) => {
+      writeToStderr(...message.data);
+    },
+    { level: /** @type {const} */ ('info') }
+  );
   log.transports.console.level = false;
   log.transports.stderr = stderrLogTransport;
 }
@@ -99,16 +106,20 @@ log.info('GDevelop Electron app starting...');
 // on OS X: ~/Library/Logs/<app name>/log.log
 // on Windows: %USERPROFILE%\AppData\Roaming\<app name>\log.log
 autoUpdater.logger = log;
-autoUpdater.logger.transports.file.level = 'info';
+log.transports.file.level = 'info';
 autoUpdater.autoDownload = false;
 
 // Keep a global reference of the window objects, if you don't, the windows will
 // be closed automatically when the JavaScript object is garbage collected.
+/** @type {Set<import('electron').BrowserWindow>} */
 let mainWindows = new Set();
+/** @type {import('electron').BrowserWindow | null} */
 let mainWindow = null; // Primary window reference for backwards compatibility
 let windowCounter = 0; // Counter for creating unique session partitions
 // The window an agent connecting to the live MCP server is bound to.
+/** @type {import('electron').BrowserWindow | null} */
 let lastFocusedMainWindow = null;
+/** @type {ReturnType<typeof createLiveMcpServer> | null} */
 let liveMcpServer = null;
 
 const devTools = !!args['dev-tools'];
@@ -139,8 +150,7 @@ if (process.platform === 'win32') {
 // a stale registry entry falls back to running headless in this process.
 const isCliRunCommand = !!args['run-command'];
 const gotTheLock =
-  isCliRunCommand &&
-  (args['mcp'] || !isCliProjectAlreadyOpenElsewhere(args))
+  isCliRunCommand && (args['mcp'] || !isCliProjectAlreadyOpenElsewhere(args))
     ? true
     : app.requestSingleInstanceLock({ args });
 
@@ -148,28 +158,36 @@ if (!gotTheLock) {
   // Second instance attempted - quit immediately
   app.quit();
 } else {
-  app.on('second-instance', (event, commandLine, workingDirectory, additionalData) => {
-    const secondInstanceArgs = parseSecondInstanceArgs({
-      commandLine,
-      additionalData,
-      isDev,
-    });
+  app.on(
+    'second-instance',
+    (event, commandLine, workingDirectory, additionalData) => {
+      const secondInstanceArgs = parseSecondInstanceArgs({
+        commandLine,
+        additionalData,
+        isDev,
+      });
 
-    if (routeCliCommandToLiveEditor({ parsedArgs: secondInstanceArgs, mainWindows })) {
-      return;
+      if (
+        routeCliCommandToLiveEditor({
+          parsedArgs: secondInstanceArgs,
+          mainWindows,
+        })
+      ) {
+        return;
+      }
+
+      // Update the global args so the new window's renderer (which reads them
+      // via remote.getGlobal('args')) picks up the second-instance CLI flags
+      // (e.g. --run-command, positional project file).
+      global['args'] = secondInstanceArgs;
+
+      createNewWindow(secondInstanceArgs);
     }
-
-    // Update the global args so the new window's renderer (which reads them
-    // via remote.getGlobal('args')) picks up the second-instance CLI flags
-    // (e.g. --run-command, positional project file).
-    global['args'] = secondInstanceArgs;
-
-    createNewWindow(secondInstanceArgs);
-  });
+  );
 }
 
 // Quit when all windows are closed.
-app.on('window-all-closed', function() {
+app.on('window-all-closed', function () {
   // Best-effort cleanup - ignore any errors to prevent crashes during shutdown
   try {
     stopAllServers();
@@ -192,9 +210,11 @@ app.on('window-all-closed', function() {
 
 // Maps target (from window.open) to BrowserWindow ID for child windows.
 // This is used to target the correct BrowserWindow for IPC messages.
+/** @type {Map<string, number>} */
 const windowTargetIdToBrowserWindowIds = new Map();
 
 // Function to create a new GDevelop window
+/** @param {import('minimist').ParsedArgs} [windowArgs] */
 function createNewWindow(windowArgs = args) {
   const isIntegrated = windowArgs.mode === 'integrated';
   // windowArgs: a GUI primary process can still open a CLI window (second-instance fallback).
@@ -204,7 +224,25 @@ function createNewWindow(windowArgs = args) {
     app.dock.hide();
   }
 
+  /** @type {import('electron').WebPreferences} */
+  const webPreferences = {
+    webSecurity: false, // Allow to access to local files,
+    // Allow Node.js API access in renderer process, as long
+    // as we've not removed dependency on it and on "@electron/remote".
+    nodeIntegration: true,
+    sandbox: false,
+    contextIsolation: false,
+    // Keep timers and `requestAnimationFrame` running at full speed when
+    // the window is minimized or covered by another window (Chromium
+    // otherwise throttles timers to once a minute and stops animation
+    // frames entirely). The editor keeps working in the background: the
+    // AI agent keeps running its turns, and gameplay tests - which need
+    // animation frames to step the game - keep progressing.
+    backgroundThrottling: false,
+  };
+
   // Create the browser window.
+  /** @type {import('electron').BrowserWindowConstructorOptions} */
   const options = {
     width: windowArgs.width || 800,
     height: windowArgs.height || 600,
@@ -216,21 +254,7 @@ function createNewWindow(windowArgs = args) {
       symbolColor: '#ffffff',
     },
     trafficLightPosition: { x: 12, y: 12 },
-    webPreferences: {
-      webSecurity: false, // Allow to access to local files,
-      // Allow Node.js API access in renderer process, as long
-      // as we've not removed dependency on it and on "@electron/remote".
-      nodeIntegration: true,
-      sandbox: false,
-      contextIsolation: false,
-      // Keep timers and `requestAnimationFrame` running at full speed when
-      // the window is minimized or covered by another window (Chromium
-      // otherwise throttles timers to once a minute and stops animation
-      // frames entirely). The editor keeps working in the background: the
-      // AI agent keeps running its turns, and gameplay tests - which need
-      // animation frames to step the game - keep progressing.
-      backgroundThrottling: false,
-    },
+    webPreferences,
     enableLargerThanScreen: true,
     backgroundColor: '#000',
   };
@@ -241,7 +265,7 @@ function createNewWindow(windowArgs = args) {
   if (windowCounter > 0) {
     // Create a unique partition for this window so it has independent auth state
     // Each partition gets its own storage (IndexedDB, localStorage, cookies, etc.)
-    options.webPreferences.partition = `persist:gdevelop-window-${windowCounter}`;
+    webPreferences.partition = `persist:gdevelop-window-${windowCounter}`;
     log.info(
       `Creating window #${windowCounter} with partition: persist:gdevelop-window-${windowCounter}`
     );
@@ -327,12 +351,12 @@ function createNewWindow(windowArgs = args) {
   newWindow.webContents.once('did-finish-load', () => {
     newWindow.webContents
       .executeJavaScript('process.pid')
-      .then(pid => {
+      .then((pid) => {
         log.info(
           `Window ${windowId} (window number ${windowNumber}) is running in renderer process PID: ${pid}`
         );
       })
-      .catch(err => {
+      .catch((err) => {
         log.warn('Could not get renderer process PID:', err);
       });
   });
@@ -350,7 +374,7 @@ function createNewWindow(windowArgs = args) {
     devTools,
   });
 
-  newWindow.on('closed', function() {
+  newWindow.on('closed', function () {
     // Remove from tracked windows
     mainWindows.delete(newWindow);
     clearWindowFileIdentifier(windowId);
@@ -381,14 +405,12 @@ function createNewWindow(windowArgs = args) {
 
   // Allow blank-URL pop-out windows (used by WindowPortal for editor pop-outs),
   // but open all other URLs in the external browser.
-  newWindow.webContents.setWindowOpenHandler(details => {
+  newWindow.webContents.setWindowOpenHandler((details) => {
     if (details.frameName.startsWith('GDevelopWindowPortal')) {
       // Extract the theme background color passed via the features string
       // by WindowPortal (e.g. "...,themeBackgroundColor=%23282828").
       let backgroundColor = '#000';
-      const match = details.features.match(
-        /themeBackgroundColor=([^,]*)/
-      );
+      const match = details.features.match(/themeBackgroundColor=([^,]*)/);
       if (match) {
         try {
           backgroundColor = decodeURIComponent(match[1]);
@@ -430,8 +452,13 @@ function createNewWindow(windowArgs = args) {
   newWindow.webContents.on('did-create-window', (childWindow, details) => {
     require('@electron/remote/main').enable(childWindow.webContents);
 
-    if (!details.frameName || !details.frameName.startsWith('GDevelopWindowPortal')) {
-      console.warn(`Unexpected frameName for child window: ${details.frameName} - verify handling on Electron side.`);
+    if (
+      !details.frameName ||
+      !details.frameName.startsWith('GDevelopWindowPortal')
+    ) {
+      console.warn(
+        `Unexpected frameName for child window: ${details.frameName} - verify handling on Electron side.`
+      );
     }
 
     // Track child window by frameName so the renderer can look up its
@@ -455,7 +482,7 @@ function createNewWindow(windowArgs = args) {
     });
 
     // Block further nesting of new windows from pop-outs.
-    childWindow.webContents.setWindowOpenHandler(childDetails => {
+    childWindow.webContents.setWindowOpenHandler((childDetails) => {
       electron.shell.openExternal(childDetails.url);
       return { action: 'deny' };
     });
@@ -466,14 +493,16 @@ function createNewWindow(windowArgs = args) {
 
 const setupLiveMcpServer = () => {
   const settingsStore = makeLiveMcpServerSettingsStore(app.getPath('userData'));
+  /** @type {string | null} */
   let lastError = null;
-  liveMcpServer = createLiveMcpServer({
+  const server = createLiveMcpServer({
     getTargetWindow: () =>
       lastFocusedMainWindow && !lastFocusedMainWindow.isDestroyed()
         ? lastFocusedMainWindow
         : mainWindow,
     log,
   });
+  liveMcpServer = server;
 
   app.on('browser-window-focus', (_event, window) => {
     if (mainWindows.has(window)) lastFocusedMainWindow = window;
@@ -481,7 +510,7 @@ const setupLiveMcpServer = () => {
 
   const getStatus = () => {
     const settings = settingsStore.read();
-    const port = liveMcpServer.getPort();
+    const port = server.getPort();
     return {
       enabled: settings.enabled,
       port,
@@ -495,19 +524,19 @@ const setupLiveMcpServer = () => {
     const settings = settingsStore.read();
     lastError = null;
     if (!settings.enabled) {
-      await liveMcpServer.stop();
+      await server.stop();
       return;
     }
     try {
-      await liveMcpServer.start({ port: settings.port, token: settings.token });
+      await server.start({ port: settings.port, token: settings.token });
     } catch (error) {
-      lastError = error.message;
+      lastError = error instanceof Error ? error.message : String(error);
       log.error('[MCP] Could not start the live editor server:', error);
     }
   };
 
   ipcMain.on('mcp-live-send', (_event, payload) =>
-    liveMcpServer.onWindowResponse(payload)
+    server.onWindowResponse(payload)
   );
   ipcMain.handle('mcp-live-server-get-status', () => getStatus());
   ipcMain.handle('mcp-live-server-set-enabled', async (_event, enabled) => {
@@ -526,7 +555,7 @@ const setupLiveMcpServer = () => {
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
-app.on('ready', async function() {
+app.on('ready', async function () {
   // Handoff calls app.quit() but 'ready' still runs; without the lock, do not create a window.
   if (!gotTheLock) {
     return;
@@ -588,16 +617,22 @@ app.on('ready', async function() {
   ipcMain.handle(
     'cli-write-stdout',
     (_event, text) =>
-      new Promise(resolve => process.stdout.write(String(text), () => resolve()))
+      /** @type {Promise<void>} */ (
+        new Promise((resolve) =>
+          process.stdout.write(String(text), () => resolve())
+        )
+      )
   );
 
   // The input of a CLI command given as "-" (e.g. calls piped to GDevelop).
+  /** @type {Promise<string> | null} */
   let cliStdinPromise = null;
   ipcMain.handle('cli-read-stdin', () => {
     if (!cliStdinPromise) {
       cliStdinPromise = new Promise((resolve, reject) => {
+        /** @type {Buffer[]} */
         const chunks = [];
-        process.stdin.on('data', chunk => chunks.push(chunk));
+        process.stdin.on('data', (chunk) => chunks.push(chunk));
         process.stdin.on('end', () =>
           resolve(Buffer.concat(chunks).toString('utf8'))
         );
@@ -655,6 +690,7 @@ app.on('ready', async function() {
   // Piskel image editor
   ipcMain.handle('piskel-load', (event, externalEditorInput) => {
     const parentWindow = BrowserWindow.fromWebContents(event.sender);
+    if (!parentWindow) return null;
     return loadExternalEditorWindow({
       parentWindow: parentWindow,
       devTools,
@@ -666,6 +702,7 @@ app.on('ready', async function() {
   // JFXR sound effect generator
   ipcMain.handle('jfxr-load', (event, externalEditorInput) => {
     const parentWindow = BrowserWindow.fromWebContents(event.sender);
+    if (!parentWindow) return null;
     return loadExternalEditorWindow({
       parentWindow: parentWindow,
       devTools,
@@ -677,6 +714,7 @@ app.on('ready', async function() {
   // Yarn Dialogue Tree Editor
   ipcMain.handle('yarn-load', (event, externalEditorInput) => {
     const parentWindow = BrowserWindow.fromWebContents(event.sender);
+    if (!parentWindow) return null;
     return loadExternalEditorWindow({
       parentWindow: parentWindow,
       devTools,
@@ -703,7 +741,7 @@ app.on('ready', async function() {
         log.info('Local file upload successfully done');
         event.sender.send('local-file-upload-done', null);
       },
-      uploadError => {
+      (uploadError) => {
         log.error('Local file upload errored', uploadError);
         event.sender.send('local-file-upload-done', uploadError);
       }
@@ -734,7 +772,7 @@ app.on('ready', async function() {
   );
 
   // Window maximize toggle (for double-click on titlebar):
-  ipcMain.handle('window-maximize-toggle', async event => {
+  ipcMain.handle('window-maximize-toggle', async (event) => {
     const window = BrowserWindow.fromWebContents(event.sender);
     if (!window) return;
 
@@ -767,7 +805,7 @@ app.on('ready', async function() {
     (event, folderPath, options) => {
       const subscriptionId = setupWatcher(
         folderPath,
-        changedFilePath => {
+        (changedFilePath) => {
           if (!event.sender.isDestroyed()) {
             event.sender.send('project-file-changed', changedFilePath);
           }
@@ -803,26 +841,26 @@ app.on('ready', async function() {
     });
   });
 
-  ipcMain.on('stop-server', event => {
+  ipcMain.on('stop-server', (event) => {
     const window = BrowserWindow.fromWebContents(event.sender);
     const windowId = window ? window.id : 'unknown';
     log.info('Received event to stop server for window', windowId);
 
-    stopServer(windowId, err => {
+    stopServer(windowId, (err) => {
       event.sender.send('stop-server-done', err);
     });
   });
 
-  ipcMain.on('get-local-network-ip', event => {
+  ipcMain.on('get-local-network-ip', (event) => {
     event.sender.send('local-network-ip', findLocalIp());
   });
 
   // LocalGDJSDevelopmentWatcher events:
-  ipcMain.on('setup-local-gdjs-development-watcher', event => {
+  ipcMain.on('setup-local-gdjs-development-watcher', (event) => {
     setupLocalGDJSDevelopmentWatcher();
   });
 
-  ipcMain.on('close-local-gdjs-development-watcher', event => {
+  ipcMain.on('close-local-gdjs-development-watcher', (event) => {
     closeLocalGDJSDevelopmentWatcher();
   });
 
@@ -830,7 +868,7 @@ app.on('ready', async function() {
     log.info(
       'Notifying all editor windows that the GDJS runtime has been updated.'
     );
-    mainWindows.forEach(window => {
+    mainWindows.forEach((window) => {
       window.webContents.send(
         'local-gdjs-development-watcher-runtime-updated',
         null
@@ -855,7 +893,7 @@ app.on('ready', async function() {
           event.sender.send('debugger-message-received', { id, message });
         }
       },
-      onError: error => {
+      onError: (error) => {
         if (!event.sender.isDestroyed()) {
           event.sender.send('debugger-error-received', error);
         }
@@ -889,14 +927,14 @@ app.on('ready', async function() {
   ipcMain.on('debugger-send-message', (event, message) => {
     const window = BrowserWindow.fromWebContents(event.sender);
     const windowId = window ? window.id : 'unknown';
-    sendMessage(windowId, message, err => {
+    sendMessage(windowId, message, (err) => {
       if (!event.sender.isDestroyed()) {
         event.sender.send('debugger-send-message-done', err);
       }
     });
   });
 
-  ipcMain.on('debugger-close-all-connections', event => {
+  ipcMain.on('debugger-close-all-connections', (event) => {
     const window = BrowserWindow.fromWebContents(event.sender);
     const windowId = window ? window.id : 'unknown';
     closeAllConnections(windowId);
@@ -912,7 +950,7 @@ app.on('ready', async function() {
     isExplicitUpdateCheck = !!explicit;
     log.info('Starting check for updates (with auto-download if any)');
     autoUpdater.autoDownload = true;
-    autoUpdater.checkForUpdatesAndNotify().catch(err => {
+    autoUpdater.checkForUpdatesAndNotify().catch((err) => {
       log.error('Error checking for updates:', err);
     });
   });
@@ -921,7 +959,7 @@ app.on('ready', async function() {
     isExplicitUpdateCheck = !!explicit;
     log.info('Starting check for updates (without auto-download)');
     autoUpdater.autoDownload = false;
-    autoUpdater.checkForUpdates().catch(err => {
+    autoUpdater.checkForUpdates().catch((err) => {
       log.error('Error checking for updates:', err);
     });
   });
@@ -930,9 +968,10 @@ app.on('ready', async function() {
     autoUpdater.quitAndInstall();
   });
 
+  /** @param {any} status */
   function sendUpdateStatus(status) {
     log.info(status);
-    mainWindows.forEach(window => {
+    mainWindows.forEach((window) => {
       if (!window.isDestroyed()) {
         window.webContents.send('update-status', status);
       }
@@ -944,20 +983,20 @@ app.on('ready', async function() {
       status: 'checking-for-update',
     });
   });
-  autoUpdater.on('update-available', info => {
+  autoUpdater.on('update-available', (info) => {
     sendUpdateStatus({
       message: 'Update available.',
       status: 'update-available',
       info,
     });
   });
-  autoUpdater.on('update-not-available', info => {
+  autoUpdater.on('update-not-available', (info) => {
     sendUpdateStatus({
       message: 'Update not available.',
       status: 'update-not-available',
     });
   });
-  autoUpdater.on('error', err => {
+  autoUpdater.on('error', (err) => {
     if (isExplicitUpdateCheck) {
       sendUpdateStatus({
         message: 'Error in auto-updater. ' + err,
@@ -968,7 +1007,7 @@ app.on('ready', async function() {
       log.error('Background update check failed:', err);
     }
   });
-  autoUpdater.on('download-progress', progressObj => {
+  autoUpdater.on('download-progress', (progressObj) => {
     let logMessage = 'Download speed: ' + progressObj.bytesPerSecond;
     logMessage = logMessage + ' - Downloaded ' + progressObj.percent + '%';
     logMessage =
@@ -987,7 +1026,7 @@ app.on('ready', async function() {
       total: progressObj.total,
     });
   });
-  autoUpdater.on('update-downloaded', info => {
+  autoUpdater.on('update-downloaded', (info) => {
     sendUpdateStatus({
       message: 'Update downloaded',
       status: 'update-downloaded',
@@ -1052,7 +1091,8 @@ app.on('ready', async function() {
             { cmd: 'xterm', args: ['-e', 'bash', '-c', bashCommand] },
           ];
 
-          const tryTerminal = index => {
+          /** @param {number} index */
+          const tryTerminal = (index) => {
             if (index >= terminals.length) {
               log.error('No terminal emulator found');
               return;

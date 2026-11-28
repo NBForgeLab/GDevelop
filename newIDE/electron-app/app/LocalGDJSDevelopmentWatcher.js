@@ -30,6 +30,7 @@ const onWatchEvent = debounce(
   100 /* Avoid running the script too much in case multiple changes are fired at the same time. */
 );
 
+/** @type {import('chokidar').FSWatcher | null} */
 let watcher = null;
 
 /**
@@ -48,7 +49,9 @@ const setupLocalGDJSDevelopmentWatcher = () => {
       ignoreInitial: true,
     })
     .on('all', onWatchEvent)
-    .on('error', e => log.error("Can't set up a watcher for GDJS changes:", e))
+    .on('error', (e) =>
+      log.error("Can't set up a watcher for GDJS changes:", e)
+    )
     .on('ready', () => {
       const totalTimeStr = (performance.now() - startTime).toFixed(2);
       log.info(`Watchers for GDJS changes installed in ${totalTimeStr}ms.`);
@@ -63,7 +66,8 @@ const closeLocalGDJSDevelopmentWatcher = () => {
   watcher = null;
 };
 
-const onLocalGDJSDevelopmentWatcherRuntimeUpdated = cb => {
+/** @param {() => void} cb */
+const onLocalGDJSDevelopmentWatcherRuntimeUpdated = (cb) => {
   onRuntimeUpdatedCallback = cb;
 };
 

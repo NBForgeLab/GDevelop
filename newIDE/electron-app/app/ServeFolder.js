@@ -3,12 +3,19 @@ const httpsConfiguration = require('./Utils/DevServerHttpsConfiguration.js');
 const { getAvailablePort } = require('./Utils/AvailablePortFinder');
 
 // Track servers per window ID
-// Map<windowId, { serverParams, serverInstance }>
+/**
+ * @type {Map<
+ *   number | string,
+ *   { serverParams: any, serverInstance: import('five-server').default }
+ * >}
+ */
 const serversByWindow = new Map();
 
 module.exports = {
   /**
    * Start a server to serve a folder for a specific window
+   * @param {{ root: string, useHttps: boolean, windowId: number | string }} options
+   * @param {(error: unknown, serverParams?: any) => void} onDone
    */
   serveFolder: ({ root, useHttps, windowId }, onDone) => {
     // Check if this window already has a server for the same root
@@ -26,7 +33,7 @@ module.exports = {
     }
 
     getAvailablePort(2929, 4000).then(
-      port => {
+      (port) => {
         const serverParams = {
           port,
           root,
@@ -40,9 +47,17 @@ module.exports = {
           middleware: [
             // Handle requests with query parameters by serving index.html
             // This ensures URLs like http://localhost:2929/?i=123 work correctly
+            /**
+             * @param {import('http').IncomingMessage} req
+             * @param {import('http').ServerResponse} res
+             * @param {() => void} next
+             */
             function handleQueryParams(req, res, next) {
               try {
-                const url = new URL(req.url, `http://${req.headers.host}`);
+                const url = new URL(
+                  req.url || '/',
+                  `http://${req.headers.host || 'localhost'}`
+                );
                 // If the request is for the root path with query parameters,
                 // rewrite to serve index.html while preserving the query string
                 if (url.pathname === '/' && url.search) {
@@ -56,6 +71,11 @@ module.exports = {
             // Disable caching, as it can lead to older generated code being served
             // in case preview files are proxied through a CDN (see
             // https://github.com/4ian/GDevelop/pull/6553 for example)
+            /**
+             * @param {import('http').IncomingMessage} _
+             * @param {import('http').ServerResponse} res
+             * @param {() => void} next
+             */
             function noCache(_, res, next) {
               res.setHeader('Surrogate-Control', 'no-store');
               res.setHeader(
@@ -76,16 +96,18 @@ module.exports = {
             serversByWindow.set(windowId, { serverParams, serverInstance });
             onDone(null, serverParams);
           })
-          .catch(err => {
+          .catch((err) => {
             onDone(err);
           });
       },
-      err => onDone(err)
+      (err) => onDone(err)
     );
   },
 
   /**
    * Stop the server for a specific window
+   * @param {number | string} windowId
+   * @param {(error?: unknown) => void} onDone
    */
   stopServer: (windowId, onDone) => {
     const server = serversByWindow.get(windowId);
@@ -96,7 +118,7 @@ module.exports = {
           serversByWindow.delete(windowId);
           onDone();
         })
-        .catch(err => {
+        .catch((err) => {
           serversByWindow.delete(windowId);
           onDone(err);
         });

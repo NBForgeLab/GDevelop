@@ -18,14 +18,14 @@ if (!args['skip-app-build']) {
 const electronBuilder = path.join('node_modules', '.bin', 'electron-builder');
 let electronBuilderArguments = process.argv
   .slice(2)
-  .filter(arg => arg !== '--skip-app-build');
+  .filter((arg) => arg !== '--skip-app-build');
 shell.exec(
   [
     electronBuilder,
     '--config=electron-builder-config.js',
     electronBuilderArguments.join(' '),
   ].join(' '),
-  code => {
+  (code) => {
     if (code !== 0) {
       shell.echo(`❌ Electron build failed with code ${code}.`);
     }

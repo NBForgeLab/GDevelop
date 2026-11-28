@@ -11,9 +11,14 @@ const registryFilePath = path.join(
   'open-projects.json'
 );
 
+/** @type {Map<number, string>} */
 const windowFileIdentifiers = new Map();
 
-const normalizeFileIdentifier = fileIdentifier => {
+/**
+ * @param {string | null | undefined} fileIdentifier
+ * @returns {string | null}
+ */
+const normalizeFileIdentifier = (fileIdentifier) => {
   if (!fileIdentifier) return null;
   try {
     const resolved = path.resolve(fileIdentifier);
@@ -25,13 +30,12 @@ const normalizeFileIdentifier = fileIdentifier => {
 
 const writeOpenProjectsRegistry = () => {
   try {
-    const fileIdentifiers = Array.from(
-      new Set(windowFileIdentifiers.values())
-    );
+    const fileIdentifiers = Array.from(new Set(windowFileIdentifiers.values()));
     fs.writeFileSync(registryFilePath, JSON.stringify(fileIdentifiers));
   } catch (e) {}
 };
 
+/** @returns {string[]} */
 const readOpenProjectFileIdentifiers = () => {
   try {
     const fileIdentifiers = JSON.parse(
@@ -43,9 +47,17 @@ const readOpenProjectFileIdentifiers = () => {
   }
 };
 
-const getWindowFileIdentifier = windowId =>
+/**
+ * @param {number} windowId
+ * @returns {string | null}
+ */
+const getWindowFileIdentifier = (windowId) =>
   windowFileIdentifiers.get(windowId) || null;
 
+/**
+ * @param {number} windowId
+ * @param {string | null | undefined} fileIdentifier
+ */
 const setWindowFileIdentifier = (windowId, fileIdentifier) => {
   const normalized = normalizeFileIdentifier(fileIdentifier);
   if (normalized) windowFileIdentifiers.set(windowId, normalized);
@@ -53,7 +65,8 @@ const setWindowFileIdentifier = (windowId, fileIdentifier) => {
   writeOpenProjectsRegistry();
 };
 
-const clearWindowFileIdentifier = windowId => {
+/** @param {number} windowId */
+const clearWindowFileIdentifier = (windowId) => {
   if (windowFileIdentifiers.delete(windowId)) writeOpenProjectsRegistry();
 };
 

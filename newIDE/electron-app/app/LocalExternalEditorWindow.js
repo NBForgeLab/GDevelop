@@ -7,7 +7,7 @@ const { load } = require('./Utils/UrlLoader');
 // Generic function to load external editors in a modal window.
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-/** @type {BrowserWindow | null} */
+/** @type {import('electron').BrowserWindow | null} */
 let modalWindow = null;
 
 const relativeWidth = 0.7;
@@ -16,6 +16,13 @@ const backgroundColor = '#000000';
 
 /**
  * Open a modal window containing an external HTML5 editor
+ * @param {{
+ *   devTools: boolean,
+ *   parentWindow: import('electron').BrowserWindow,
+ *   indexSubPath: string,
+ *   externalEditorInput: any,
+ * }} options
+ * @returns {Promise<any>}
  */
 const loadExternalEditorWindow = ({
   devTools,
@@ -23,7 +30,8 @@ const loadExternalEditorWindow = ({
   indexSubPath,
   externalEditorInput,
 }) => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
+    /** @type {any} */
     let externalEditorOutput = null;
 
     const windowOptions = {
@@ -43,21 +51,22 @@ const loadExternalEditorWindow = ({
       },
     };
 
-    modalWindow = new BrowserWindow(windowOptions);
-    modalWindow.setMenu(null);
+    const createdModalWindow = new BrowserWindow(windowOptions);
+    modalWindow = createdModalWindow;
+    createdModalWindow.setMenu(null);
 
     // Enable `@electron/remote` module for renderer process
-    require('@electron/remote/main').enable(modalWindow.webContents);
+    require('@electron/remote/main').enable(createdModalWindow.webContents);
 
     /** @param {import('electron').IpcMainEvent} event */
-    const onReady = event => {
-      if (!modalWindow || event.sender !== modalWindow.webContents) return;
+    const onReady = (event) => {
+      if (event.sender !== createdModalWindow.webContents) return;
 
-      modalWindow.webContents.send(
+      createdModalWindow.webContents.send(
         'open-external-editor-input',
         externalEditorInput
       );
-      modalWindow.show();
+      createdModalWindow.show();
     };
 
     /**
@@ -65,7 +74,7 @@ const loadExternalEditorWindow = ({
      * @param {any} newExternalEditorOutput
      */
     const saveExternalEditorOutput = (event, newExternalEditorOutput) => {
-      if (!modalWindow || event.sender !== modalWindow.webContents) return;
+      if (event.sender !== createdModalWindow.webContents) return;
 
       externalEditorOutput = newExternalEditorOutput;
     };
@@ -75,15 +84,15 @@ const loadExternalEditorWindow = ({
 
     // Load the index.html of the app.
     load({
-      window: modalWindow,
+      window: createdModalWindow,
       isDev,
       path: '/external/' + indexSubPath,
       devTools,
     });
 
     //Prevent any navigation inside the modal window.
-    modalWindow.webContents.on('will-navigate', (e, url) => {
-      if (url !== modalWindow.webContents.getURL()) {
+    createdModalWindow.webContents.on('will-navigate', (e, url) => {
+      if (url !== createdModalWindow.webContents.getURL()) {
         console.info('Opening in browser (because of will-navigate):', url);
         e.preventDefault();
         electron.shell.openExternal(url);
@@ -91,13 +100,13 @@ const loadExternalEditorWindow = ({
     });
 
     // Prevent opening any website or url inside Electron
-    modalWindow.webContents.setWindowOpenHandler(details => {
+    createdModalWindow.webContents.setWindowOpenHandler((details) => {
       console.info('Opening in browser (because of new window): ', details.url);
       electron.shell.openExternal(details.url);
       return { action: 'deny' };
     });
 
-    modalWindow.on('closed', event => {
+    createdModalWindow.on('closed', () => {
       modalWindow = null;
 
       ipcMain.removeListener('external-editor-ready', onReady);
@@ -108,10 +117,10 @@ const loadExternalEditorWindow = ({
       resolve(externalEditorOutput);
     });
 
-    modalWindow.on('close', event => {
+    createdModalWindow.on('close', () => {
       if (!modalWindow) return;
       // use destroy as a workaround to force window closing, which is not done properly otherwise on Windows
-      modalWindow.destroy();
+      createdModalWindow.destroy();
       modalWindow = null;
     });
   });

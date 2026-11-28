@@ -3,15 +3,42 @@ const { getAvailablePort } = require('./Utils/AvailablePortFinder');
 const log = require('electron-log');
 const { findLocalIp } = require('./Utils/LocalNetworkIpFinder');
 
+/**
+ * @typedef {{
+ *   onMessage: (payload: { id: string, message: import('ws').Data }) => void,
+ *   onError: (error: unknown) => void,
+ *   onConnectionClose: (payload: { id: string }) => void,
+ *   onConnectionOpen: (payload: { id: string }) => void,
+ *   onConnectionError: (payload: { id: string, errorMessage: string }) => void,
+ *   onListening: (payload: { address: { address: string, port: number } }) => void,
+ * }} DebuggerServerOptions
+ */
+
 // Track servers per window ID
-// Map<windowId, { wsServer, webSockets, nextDebuggerId, callbackHandlers }>
+/**
+ * @type {Map<
+ *   number | string,
+ *   {
+ *     wsServer: import('ws').Server,
+ *     webSockets: Record<string, import('ws') | null>,
+ *     nextDebuggerId: number,
+ *     callbackHandlers: DebuggerServerOptions,
+ *   }
+ * >}
+ */
 const serversByWindow = new Map();
 
-/** @param {WebSocket.Server} wsServer */
-const getServerAddress = wsServer => ({
-  address: findLocalIp() || '127.0.0.1',
-  port: wsServer.address().port,
-});
+/** @param {import('ws').Server} wsServer */
+const getServerAddress = (wsServer) => {
+  const serverAddress = wsServer.address();
+  return {
+    address: findLocalIp() || '127.0.0.1',
+    port:
+      serverAddress && typeof serverAddress === 'object'
+        ? serverAddress.port
+        : 0,
+  };
+};
 
 /**
  * This module creates a WebSocket server listening for a connection
@@ -20,6 +47,10 @@ const getServerAddress = wsServer => ({
  * (in GDJS).
  */
 module.exports = {
+  /**
+   * @param {number | string} windowId
+   * @param {DebuggerServerOptions} options
+   */
   startDebuggerServer: (windowId, options) => {
     const existingServer = serversByWindow.get(windowId);
 
@@ -31,8 +62,9 @@ module.exports = {
     }
 
     getAvailablePort(3030, 4000).then(
-      port => {
+      (port) => {
         const wsServer = new WebSocket.Server({ port });
+        /** @type {Record<string, import('ws') | null>} */
         const webSockets = {};
         let nextDebuggerId = 0;
 
@@ -50,7 +82,7 @@ module.exports = {
             `Debugger connection with id "${id}" opened for window ${windowId}.`
           );
 
-          newWebSocket.on('message', message => {
+          newWebSocket.on('message', (message) => {
             // log.info(`Debugger connection with id "${id}" received message.`);
             options.onMessage({ id, message });
           });
@@ -63,7 +95,7 @@ module.exports = {
             options.onConnectionClose({ id });
           });
 
-          newWebSocket.on('error', error => {
+          newWebSocket.on('error', (error) => {
             const errorMessage = error.message || 'Unknown error';
             log.error(
               `Error in debugger connection with id "${id}" for window ${windowId}: ${errorMessage}.`
@@ -81,13 +113,13 @@ module.exports = {
           options.onListening({ address: getServerAddress(wsServer) });
         });
 
-        wsServer.on('error', error => {
+        wsServer.on('error', (error) => {
           log.error(`Debugger server errored for window ${windowId}.`);
           options.onError(error);
           module.exports.closeServer(windowId);
         });
       },
-      err => {
+      (err) => {
         log.error(
           `Could not find a port for the Debugger server for window ${windowId}.`
         );
@@ -96,7 +128,8 @@ module.exports = {
     );
   },
 
-  closeServer: windowId => {
+  /** @param {number | string} windowId */
+  closeServer: (windowId) => {
     const serverData = serversByWindow.get(windowId);
     if (serverData && serverData.wsServer) {
       try {
@@ -108,13 +141,14 @@ module.exports = {
     serversByWindow.delete(windowId);
   },
 
-  closeAllConnections: windowId => {
+  /** @param {number | string} windowId */
+  closeAllConnections: (windowId) => {
     const serverData = serversByWindow.get(windowId);
     if (!serverData) return;
 
     // The object is emptied rather than replaced: the connection handler of
     // the server keeps adding the next connections to this same object.
-    Object.keys(serverData.webSockets).forEach(id => {
+    Object.keys(serverData.webSockets).forEach((id) => {
       const webSocket = serverData.webSockets[id];
       delete serverData.webSockets[id];
       if (!webSocket) return;
@@ -122,27 +156,34 @@ module.exports = {
       try {
         webSocket.close();
       } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         log.warn(
-          `Unable to close debugger connection with id "${id}" for window ${windowId}: ${error.message ||
-            error}`
+          `Unable to close debugger connection with id "${id}" for window ${windowId}: ${errorMessage}`
         );
       }
     });
   },
 
+  /**
+   * @param {number | string} windowId
+   * @param {{ id: string, message: any }} payload
+   * @param {(error?: unknown) => void} cb
+   */
   sendMessage: (windowId, { id, message }, cb) => {
     const serverData = serversByWindow.get(windowId);
     if (!serverData) {
       return cb(`No debugger server for window ${windowId}`);
     }
 
-    if (!serverData.webSockets[id]) {
+    const webSocket = serverData.webSockets[id];
+    if (!webSocket) {
       return cb(
         `Debugger connection with id "${id}" does not exist for window ${windowId}`
       );
     }
 
-    serverData.webSockets[id].send(message, err => {
+    webSocket.send(message, (err) => {
       cb(err);
     });
   },
@@ -156,7 +197,7 @@ module.exports = {
         try {
           // Close all websocket connections first
           if (serverData.webSockets) {
-            Object.keys(serverData.webSockets).forEach(id => {
+            Object.keys(serverData.webSockets).forEach((id) => {
               const ws = serverData.webSockets[id];
               if (ws) {
                 try {

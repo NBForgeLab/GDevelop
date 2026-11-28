@@ -1,8 +1,16 @@
 const fs = require('fs');
-const axios = require('axios');
+const axios = /** @type {import('axios').AxiosStatic} */ (
+  /** @type {unknown} */ (require('axios'))
+);
 const { Transform } = require('stream');
 
 module.exports = {
+  /**
+   * @param {string} localFilePath
+   * @param {{ signedUrl: string, contentType: string }} uploadOptions
+   * @param {(loadedBytes: number, fileSize: number) => void} onProgress
+   * @returns {Promise<void>}
+   */
   uploadLocalFile: (localFilePath, uploadOptions, onProgress) => {
     return new Promise((resolve, reject) => {
       fs.stat(localFilePath, (err, stats) => {

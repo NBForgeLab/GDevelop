@@ -25,6 +25,6 @@ try {
 } catch (e) {
   shell.echo(
     '❌ Error while extracting ' + zipFilePath + ' to ' + basePath + ' folder:',
-    e.message
+    e instanceof Error ? e.message : String(e)
   );
 }
