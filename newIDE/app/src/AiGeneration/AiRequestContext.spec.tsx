@@ -26,7 +26,9 @@ import { type EditApprovalRequest } from './Utils';
 import { act } from 'react-dom/test-utils';
 
 jest.mock('../Utils/GDevelopServices/Generation', () => ({
-  ...(jest.genMockFromModule('../Utils/GDevelopServices/Generation') as any),
+  ...jest.createMockFromModule<
+    typeof import('../Utils/GDevelopServices/Generation')
+  >('../Utils/GDevelopServices/Generation'),
   // A pure helper: the summary of a request is built for real.
   getAiRequestSummary: jest.requireActual<any>(
     '../Utils/GDevelopServices/Generation'
