@@ -94,7 +94,7 @@ describe('AskAiAutomation', () => {
   let run: AutomatedAiRequestRun | null = null;
 
   beforeEach(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.spyOn(console, 'info').mockImplementation(() => {});
   });
   afterEach(async () => {
