@@ -135,8 +135,9 @@ export const makeStoreExtensionReadOnlyMessage = (
   `(c) functions → call "${extensionName}::<Fn>" from a function of your own extension. ` +
   `Last resort: \`create_extension({ duplicated_extension_name: "${extensionName}" })\` gives you an editable copy (it will no longer receive store updates).`;
 
-const isToolScopeType = (value: unknown): boolean =>
-  typeof value === 'string' && ALL_SCOPE_TYPES.includes(value as any);
+const isToolScopeType = (value: unknown): value is ToolScopeType =>
+  typeof value === 'string' &&
+  (ALL_SCOPE_TYPES as ReadonlyArray<string>).includes(value);
 
 const listAllowedTypes = (allowedTypes: Array<ToolScopeType>): string =>
   allowedTypes.map((type) => `"${type}"`).join(', ');
@@ -173,12 +174,13 @@ export const parseScopeArgument = (
       '`scope` must be an object like { type: "scene", scene_name: "MyScene" }.'
     );
   }
-  if (!isToolScopeType(rawScope.type)) {
+  const rawScopeType: unknown = rawScope.type;
+  if (!isToolScopeType(rawScopeType)) {
     throw new Error(
       `\`scope.type\` must be one of: ${listAllowedTypes(allowedTypes)}.`
     );
   }
-  const type: ToolScopeType = rawScope.type as any;
+  const type: ToolScopeType = rawScopeType;
   if (!allowedTypes.includes(type)) {
     throw new Error(
       `\`scope.type\` "${type}" is not accepted here: use one of ${listAllowedTypes(

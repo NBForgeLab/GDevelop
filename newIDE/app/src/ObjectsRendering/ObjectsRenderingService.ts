@@ -38,7 +38,7 @@ const gd: libGDevelop = global.gd;
 // and merging it would shadow PixiJS's `Texture`/`Color` (spine's `Texture` has
 // no `.from`, which breaks `PIXI.Texture.from(...)` calls made by extensions like
 // Lighting).
-(global as any).PIXI = PIXI;
+global.PIXI = PIXI;
 
 const requirableModules: Record<string, any> = {};
 

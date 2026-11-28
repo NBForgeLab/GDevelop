@@ -99,3 +99,5 @@ if (typeof window !== 'undefined' && typeof window.matchMedia !== 'function') {
     dispatchEvent: () => false,
   });
 }
+
+export {};

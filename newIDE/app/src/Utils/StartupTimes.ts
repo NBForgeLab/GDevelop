@@ -11,14 +11,14 @@ type Summary = {
   steps: Array<SummarizedStep>;
 };
 
-export const GD_STARTUP_TIMES: Array<RawStepMeasure> = (global as any)
-  .GD_STARTUP_TIMES;
-
-if (!GD_STARTUP_TIMES) {
+if (!global.GD_STARTUP_TIMES) {
   console.error(
     'Could not find GD_STARTUP_TIMES array. Have you declared it in index.html, in a synchronous script?'
   );
 }
+
+export const GD_STARTUP_TIMES: Array<RawStepMeasure> =
+  global.GD_STARTUP_TIMES || [];
 
 export const getStartupTimesSummary = (): Summary => {
   let previousStep: RawStepMeasure = ['<init>', 0];

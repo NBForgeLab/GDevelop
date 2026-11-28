@@ -544,10 +544,10 @@ const PreferencesDialog = ({
    * Find the entry (section or shortcut area) displayed at the top of the
    * content, or the last one if the content is scrolled to the bottom.
    */
-  const getEntryKeyAtTop = (
-    entryKeys: Array<string>,
-    getElementId: (arg0: string) => string
-  ): string | null | undefined => {
+  const getEntryKeyAtTop = <T extends string>(
+    entryKeys: Array<T>,
+    getElementId: (arg0: T) => string
+  ): T | null | undefined => {
     const container = sectionContentRef.current;
     if (!container || entryKeys.length === 0) return null;
 
@@ -583,7 +583,7 @@ const PreferencesDialog = ({
         getSectionElementId
       );
       if (sectionNameAtTop && sectionNameAtTop !== currentSection) {
-        setCurrentSection(sectionNameAtTop as any);
+        setCurrentSection(sectionNameAtTop);
       }
     } else {
       const areaNameAtTop = getEntryKeyAtTop(
@@ -591,7 +591,7 @@ const PreferencesDialog = ({
         getShortcutAreaElementId
       );
       if (areaNameAtTop && areaNameAtTop !== currentShortcutArea) {
-        setCurrentShortcutArea(areaNameAtTop as any);
+        setCurrentShortcutArea(areaNameAtTop);
       }
     }
   };

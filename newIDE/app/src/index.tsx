@@ -15,7 +15,7 @@ import { showErrorBox } from './UI/Messages/MessageBox';
 import VersionMetadata from './Version/VersionMetadata';
 import { getThemeWindowBackgroundColor } from './UI/Theme';
 
-const GD_STARTUP_TIMES = (global as any).GD_STARTUP_TIMES || [];
+const GD_STARTUP_TIMES = global.GD_STARTUP_TIMES || [];
 
 // No i18n in this file
 
@@ -68,7 +68,7 @@ class Bootstrapper extends Component<Record<string, never>, State> {
       `./libGD.js?cache-buster=${VersionMetadata.versionWithHash}`
     ).then(() => {
       GD_STARTUP_TIMES.push(['libGDLoadedTime', performance.now()]);
-      const initializeGDevelopJs = (global as any).initializeGDevelopJs;
+      const initializeGDevelopJs = global.initializeGDevelopJs;
       if (!initializeGDevelopJs) {
         this.handleEditorLoadError(
           new Error('Missing initializeGDevelopJs in libGD.js')

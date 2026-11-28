@@ -80,7 +80,12 @@ const getTooltipTitle = (
   } else if (typeof tooltip === 'string') {
     text = tooltip;
   } else if (typeof tooltip === 'object' && tooltip !== null) {
-    text = (tooltip as any).default || (tooltip as any).id || '';
+    text =
+      ('default' in tooltip && typeof tooltip.default === 'string'
+        ? tooltip.default
+        : '') ||
+      tooltip.id ||
+      '';
   }
   if (acceleratorString) {
     text += ' (' + adaptAcceleratorString(acceleratorString) + ')';

@@ -595,8 +595,8 @@ const EditorTabsPane = React.forwardRef<unknown, Props>((props, ref) => {
       const askAiTab = tabsBeingClosed.find((tab) => tab.key === 'ask-ai');
       if (askAiTab && askAiTab.editorRef) {
         // the key ensures an AskAiEditorInterface.
-        const ref = askAiTab.editorRef as any;
-        if (ref.requestClose) {
+        const ref = askAiTab.editorRef;
+        if ('requestClose' in ref && typeof ref.requestClose === 'function') {
           return ref.requestClose();
         }
       }

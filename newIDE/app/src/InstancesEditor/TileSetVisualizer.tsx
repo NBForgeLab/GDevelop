@@ -222,25 +222,12 @@ const Tile = ({
   );
 };
 
-export type TileMapPaintingSelection =
-  | {
-      kind: 'rectangle';
-      coordinates: TileMapCoordinates[];
-      flipHorizontally: boolean;
-      flipVertically: boolean;
-    }
-  | {
-      kind: 'freehand';
-      coordinates: TileMapCoordinates[];
-      flipHorizontally: boolean;
-      flipVertically: boolean;
-    }
-  | {
-      kind: 'floodfill';
-      coordinates: TileMapCoordinates[];
-      flipHorizontally: boolean;
-      flipVertically: boolean;
-    };
+export type TileMapPaintingSelection = {
+  kind: 'rectangle' | 'freehand' | 'floodfill';
+  coordinates: TileMapCoordinates[];
+  flipHorizontally: boolean;
+  flipVertically: boolean;
+};
 
 export type TileMapTileSelection =
   | {
@@ -296,7 +283,7 @@ export const createSelectionWithPreviousTool = (
     : defaultFlips.vertical;
 
   return {
-    kind: kind as any,
+    kind,
     coordinates,
     flipHorizontally,
     flipVertically,
@@ -675,14 +662,11 @@ const TileSetVisualizer = ({
               tileMapTileSelection.kind === 'floodfill')
           ) {
             newSelection = {
-              kind: tileMapTileSelection.kind as any,
-              coordinates: [
-                topLeftCorner,
-                bottomRightCorner,
-              ] as TileMapCoordinates[],
+              kind: tileMapTileSelection.kind,
+              coordinates: [topLeftCorner, bottomRightCorner],
               flipHorizontally: shouldFlipHorizontally,
               flipVertically: shouldFlipVertically,
-            } as TileMapTileSelection;
+            };
           } else {
             newSelection = {
               kind: 'rectangle',
@@ -827,7 +811,7 @@ const TileSetVisualizer = ({
       return;
     }
     onSelectTileMapTile({
-      kind: kind as any,
+      kind,
       coordinates: lastPaintingSelection
         ? lastPaintingSelection.coordinates
         : [
@@ -865,9 +849,8 @@ const TileSetVisualizer = ({
     else setShouldFlipVertically(newShouldFlip);
     if (tileMapPaintingSelection) {
       onSelectTileMapTile({
-        kind: tileMapPaintingSelection.kind as any,
-        coordinates:
-          tileMapPaintingSelection.coordinates as TileMapCoordinates[],
+        kind: tileMapPaintingSelection.kind,
+        coordinates: tileMapPaintingSelection.coordinates,
         flipHorizontally: isHorizontal
           ? newShouldFlip
           : tileMapPaintingSelection.flipHorizontally,

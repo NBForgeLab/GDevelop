@@ -50,10 +50,10 @@ const Chip = React.forwardRef<ChipInterface, ChipProps>((props, ref) => {
   return (
     <MuiChip
       label={props.label}
-      icon={props.icon as any}
+      icon={React.isValidElement(props.icon) ? props.icon : undefined}
       size={props.size}
       variant={props.variant}
-      avatar={props.avatar as any}
+      avatar={React.isValidElement(props.avatar) ? props.avatar : undefined}
       style={{
         ...props.style,
         ...textColorStyle,
@@ -64,7 +64,7 @@ const Chip = React.forwardRef<ChipInterface, ChipProps>((props, ref) => {
       onDelete={props.onDelete ?? undefined}
       classes={useStyles()}
       className={props.disableAutoTranslate ? 'notranslate' : undefined}
-      ref={chipRef as any}
+      ref={chipRef}
       color={props.color}
     />
   );

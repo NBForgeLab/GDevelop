@@ -318,7 +318,7 @@ import isUserTyping from '../KeyboardShortcuts/IsUserTyping';
 const electron = optionalRequire('electron');
 const ipcRendererForUpdates = electron ? electron.ipcRenderer : null;
 
-const GD_STARTUP_TIMES = (global as any).GD_STARTUP_TIMES || [];
+const GD_STARTUP_TIMES = global.GD_STARTUP_TIMES || [];
 
 const gd: libGDevelop = global.gd;
 

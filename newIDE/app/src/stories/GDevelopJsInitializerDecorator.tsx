@@ -4,8 +4,8 @@ import { makeTestExtensions } from '../fixtures/TestExtensions';
 import { loadExtension } from '../JsExtensionsLoader';
 import { makeTestProject, type TestProject } from '../fixtures/TestProject';
 import { getStartupTimesSummary } from '../Utils/StartupTimes';
-const initializeGDevelopJs = (global as any).initializeGDevelopJs;
-const GD_STARTUP_TIMES = (global as any).GD_STARTUP_TIMES || [];
+const initializeGDevelopJs = global.initializeGDevelopJs;
+const GD_STARTUP_TIMES = global.GD_STARTUP_TIMES || [];
 
 // We create the global "gd" object **synchronously** here. This is done as
 // the source files are using `global.gd` as a "top level" object (after imports).
@@ -40,6 +40,7 @@ const GDevelopJsInitializer = ({ children }: GDevelopJsInitializerProps) => {
     console.info(
       'Loading GDevelop.js and creating test extensions/test project...'
     );
+    if (!initializeGDevelopJs) return;
     GD_STARTUP_TIMES.push(['initializeGDevelopJsCall', performance.now()]);
     initializeGDevelopJs().then((gd: any) => {
       GD_STARTUP_TIMES.push(['initializeGDevelopJsDone', performance.now()]);
