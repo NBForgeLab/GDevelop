@@ -45,10 +45,7 @@ type Props = {
       openEventsEditor: boolean;
       openSceneEditor: boolean;
       focusWhenOpened:
-        | 'scene-or-events-otherwise'
-        | 'scene'
-        | 'events'
-        | 'none';
+        'scene-or-events-otherwise' | 'scene' | 'events' | 'none';
     }
   ) => void;
   onWillInstallExtension: (extensionNames: Array<string>) => void;
@@ -67,17 +64,13 @@ type _UseNewProjectDialogReturnType = {
   onSelectPrivateGameTemplateListingData: (arg0: {
     preventBackHome?: boolean;
     privateGameTemplateListingData:
-      | PrivateGameTemplateListingData
-      | null
-      | undefined;
+      PrivateGameTemplateListingData | null | undefined;
   }) => void;
   openNewProjectDialog: () => void;
   renderNewProjectDialog: () => React.ReactNode;
   selectedExampleShortHeader: ExampleShortHeader | null | undefined;
   selectedPrivateGameTemplateListingData:
-    | PrivateGameTemplateListingData
-    | null
-    | undefined;
+    PrivateGameTemplateListingData | null | undefined;
 };
 
 const useNewProjectDialog = ({
@@ -128,35 +121,34 @@ const useNewProjectDialog = ({
   }, [setNewProjectSetupDialogOpen]);
 
   const privateGameTemplateListingDatasFromSameCreator:
-    | Array<PrivateGameTemplateListingData>
-    | null
-    | undefined = React.useMemo(() => {
-    if (
-      !selectedPrivateGameTemplateListingData ||
-      !privateGameTemplateListingDatas ||
-      !receivedGameTemplates
-    )
-      return null;
-
-    const receivedGameTemplateIds = receivedGameTemplates.map(
-      (template) => template.id
-    );
-
-    return privateGameTemplateListingDatas
-      .filter(
-        (template) =>
-          template.sellerId ===
-            selectedPrivateGameTemplateListingData.sellerId &&
-          !receivedGameTemplateIds.includes(template.sellerId)
+    Array<PrivateGameTemplateListingData> | null | undefined =
+    React.useMemo(() => {
+      if (
+        !selectedPrivateGameTemplateListingData ||
+        !privateGameTemplateListingDatas ||
+        !receivedGameTemplates
       )
-      .sort((template1, template2) =>
-        template1.name.localeCompare(template2.name)
+        return null;
+
+      const receivedGameTemplateIds = receivedGameTemplates.map(
+        (template) => template.id
       );
-  }, [
-    selectedPrivateGameTemplateListingData,
-    privateGameTemplateListingDatas,
-    receivedGameTemplates,
-  ]);
+
+      return privateGameTemplateListingDatas
+        .filter(
+          (template) =>
+            template.sellerId ===
+              selectedPrivateGameTemplateListingData.sellerId &&
+            !receivedGameTemplateIds.includes(template.sellerId)
+        )
+        .sort((template1, template2) =>
+          template1.name.localeCompare(template2.name)
+        );
+    }, [
+      selectedPrivateGameTemplateListingData,
+      privateGameTemplateListingDatas,
+      receivedGameTemplates,
+    ]);
 
   const onSelectPrivateGameTemplateListingData = React.useCallback(
     ({
@@ -164,9 +156,7 @@ const useNewProjectDialog = ({
       preventBackHome,
     }: {
       privateGameTemplateListingData:
-        | PrivateGameTemplateListingData
-        | null
-        | undefined;
+        PrivateGameTemplateListingData | null | undefined;
       preventBackHome?: boolean;
     }) => {
       setSelectedPrivateGameTemplateListingData(privateGameTemplateListingData);

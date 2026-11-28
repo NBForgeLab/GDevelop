@@ -44,8 +44,8 @@ export const isMuiCheckbox = (element: HTMLElement): boolean => {
   const typeAttribute = element.attributes.getNamedItem('type');
   return Boolean(
     typeAttribute &&
-      typeAttribute.value === 'checkbox' &&
-      'indeterminate' in element.dataset
+    typeAttribute.value === 'checkbox' &&
+    'indeterminate' in element.dataset
   );
 };
 

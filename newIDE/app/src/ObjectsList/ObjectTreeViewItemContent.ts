@@ -92,9 +92,7 @@ export type ObjectTreeViewItemProps = ObjectTreeViewItemCallbacks & {
   showDeleteConfirmation: (options: any) => Promise<boolean>;
   selectObjectFolderOrObjectWithContext: (
     objectFolderOrObjectWithContext:
-      | ObjectFolderOrObjectWithContext
-      | null
-      | undefined
+      ObjectFolderOrObjectWithContext | null | undefined
   ) => void;
   selectObjectFolderOrObjectsWithContext: (
     items: Array<ObjectFolderOrObjectWithContext>

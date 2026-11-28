@@ -29,9 +29,7 @@ const styles = {
 
 type Props = InstancesEditorPropsWithoutSizeAndScroll & {
   wrappedEditorRef:
-    | ((arg0: InstancesEditor | null | undefined) => void)
-    | null
-    | undefined;
+    ((arg0: InstancesEditor | null | undefined) => void) | null | undefined;
 };
 
 const noop = () => {};

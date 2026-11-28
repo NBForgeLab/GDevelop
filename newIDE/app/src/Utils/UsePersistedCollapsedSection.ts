@@ -11,11 +11,7 @@ type EditorStateForPropertyPanel = {
 type Props = {
   project: gdProject;
   persistedPanelStateType:
-    | 'instances-of-object'
-    | 'object'
-    | 'scene'
-    | 'objectGroup'
-    | 'layer';
+    'instances-of-object' | 'object' | 'scene' | 'objectGroup' | 'layer';
   persistedPanelStateId: string | null;
   foldedByDefault?: boolean;
 };

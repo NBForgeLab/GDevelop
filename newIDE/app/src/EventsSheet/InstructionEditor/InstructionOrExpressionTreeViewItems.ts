@@ -128,9 +128,7 @@ export class InstructionGroupTreeViewItem implements TreeViewItem {
   }
 }
 
-export class InstructionGroupTreeViewItemContent
-  implements TreeViewItemContent
-{
+export class InstructionGroupTreeViewItemContent implements TreeViewItemContent {
   name: string;
   props: FreeInstructionProps;
   applySearch = false;

@@ -3,8 +3,7 @@ import optionalRequire from '../Utils/OptionalRequire';
 const remote = optionalRequire('@electron/remote');
 
 export type SlowGraphicsRenderingReason =
-  | 'software-rendering'
-  | 'integrated-graphics-card';
+  'software-rendering' | 'integrated-graphics-card';
 
 // Renderers drawing with the processor instead of the graphics card:
 // "Microsoft Basic Render Driver" (WARP) and SwiftShader with Chromium,

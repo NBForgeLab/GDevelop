@@ -375,8 +375,7 @@ export const useManageObjectBehaviors = ({
   onExtensionInstalled: (extensionNames: Array<string>) => void;
   allVisibleBehaviorNames: Array<string>;
   onCreateNewExtensionWithBehavior:
-    | ((project: gdProject, object: gdObject) => void)
-    | null;
+    ((project: gdProject, object: gdObject) => void) | null;
 }): UseManageBehaviorsState => {
   const [justAddedBehaviorName, setJustAddedBehaviorName] = React.useState<
     string | null | undefined
@@ -729,8 +728,7 @@ type Props = {
   onWillInstallExtension: (extensionNames: Array<string>) => void;
   onExtensionInstalled: (extensionNames: Array<string>) => void;
   onCreateNewExtensionWithBehavior:
-    | ((project: gdProject, object: gdObject) => void)
-    | null;
+    ((project: gdProject, object: gdObject) => void) | null;
   isListLocked: boolean;
 };
 

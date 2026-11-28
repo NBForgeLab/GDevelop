@@ -18,9 +18,7 @@ const firstExampleIds: Array<string> = [];
 type ExampleStoreState = {
   exampleFilters: Filters | null | undefined;
   exampleShortHeadersSearchResults:
-    | Array<SearchResult<ExampleShortHeader>>
-    | null
-    | undefined;
+    Array<SearchResult<ExampleShortHeader>> | null | undefined;
   fetchExamplesAndFilters: () => void;
   exampleShortHeaders: Array<ExampleShortHeader> | null | undefined;
   error: Error | null | undefined;
@@ -132,16 +130,15 @@ export const ExampleStoreStateProvider = ({
 
   const { chosenCategory, chosenFilters } = filtersState;
   const exampleShortHeadersSearchResults:
-    | Array<SearchResult<ExampleShortHeader>>
-    | null
-    | undefined = useSearchStructuredItem(exampleShortHeadersById, {
-    searchText,
-    chosenCategory,
-    chosenFilters,
-    excludedTiers,
-    defaultFirstSearchItemIds: firstExampleIds,
-    shuffleResults: false,
-  });
+    Array<SearchResult<ExampleShortHeader>> | null | undefined =
+    useSearchStructuredItem(exampleShortHeadersById, {
+      searchText,
+      chosenCategory,
+      chosenFilters,
+      excludedTiers,
+      defaultFirstSearchItemIds: firstExampleIds,
+      shuffleResults: false,
+    });
 
   const exampleStoreState = React.useMemo(
     () => ({

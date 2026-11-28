@@ -421,14 +421,12 @@ const ResourcesList = React.memo(
               {
                 label: i18n._(t`Remove unused...`),
                 submenu: allResourceKindsAndMetadata
-                  .map(
-                    ({ displayName, kind }): MenuItemTemplate => ({
-                      label: i18n._(displayName),
-                      click: () => {
-                        onRemoveUnusedResources(kind);
-                      },
-                    })
-                  )
+                  .map(({ displayName, kind }): MenuItemTemplate => ({
+                    label: i18n._(displayName),
+                    click: () => {
+                      onRemoveUnusedResources(kind);
+                    },
+                  }))
                   .concat([
                     {
                       label: i18n._(t`Resources (any kind)`),

@@ -141,10 +141,7 @@ const gd: libGDevelop = global.gd;
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 
 type LoopEvent =
-  | gdWhileEvent
-  | gdRepeatEvent
-  | gdForEachEvent
-  | gdForEachChildVariableEvent;
+  gdWhileEvent | gdRepeatEvent | gdForEachEvent | gdForEachChildVariableEvent;
 
 // Derives the stable list label stored in history for a given live instruction
 // list reference. 'whileConditions' identifies the loop-guard list of a WhileEvent,
@@ -199,14 +196,11 @@ type Props = {
   onWillInstallExtension: (extensionNames: Array<string>) => void;
   onExtensionInstalled: (extensionNames: Array<string>) => void;
   onCreateNewExtensionWithBehavior:
-    | ((project: gdProject, object: gdObject) => void)
-    | null;
+    ((project: gdProject, object: gdObject) => void) | null;
   editEventsFunctionParameter:
-    | ((variableDialogOpeningProps: VariableDialogOpeningProps) => void)
-    | null;
+    ((variableDialogOpeningProps: VariableDialogOpeningProps) => void) | null;
   openEventsBasedEntityPropertyEditorDialog:
-    | ((variableDialogOpeningProps: VariableDialogOpeningProps) => void)
-    | null;
+    ((variableDialogOpeningProps: VariableDialogOpeningProps) => void) | null;
 };
 
 type ComponentProps = Props & {

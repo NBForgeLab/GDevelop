@@ -184,8 +184,7 @@ export type SubscriptionState = {
    * Calling this function will trigger a fetch in the background if not already loaded.
    */
   getSubscriptionPlansWithPricingSystems: () =>
-    | SubscriptionPlanWithPricingSystems[]
-    | null;
+    SubscriptionPlanWithPricingSystems[] | null;
   /**
    * Returns subscription plan of the user, even if it's a legacy plan, or null if not found or no subscription.
    */

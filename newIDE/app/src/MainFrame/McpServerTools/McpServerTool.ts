@@ -41,9 +41,7 @@ export type McpServerTool = {
     context: {
       // Absent when the project can't change during the session.
       getOpenedProject:
-        | (() => McpOpenedProject | null | undefined)
-        | null
-        | undefined;
+        (() => McpOpenedProject | null | undefined) | null | undefined;
     }
   ) => Promise<McpServerToolOutput>;
   // A successful call opens another project, which the next calls act on.

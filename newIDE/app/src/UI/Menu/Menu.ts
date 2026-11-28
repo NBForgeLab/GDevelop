@@ -4,7 +4,8 @@ import { type ReactNode } from 'react';
  * The type describing a menu item supported both as in an Electron
  * menu and as a material-ui menu (for the web-app).
  */
-export type MenuItemTemplate = // "Classic" menu item
+export type MenuItemTemplate =
+  // "Classic" menu item
   // Sub menu
   | {
       id?: string;
@@ -54,7 +55,8 @@ export interface ContextMenuImplementation {
  * This allows to send a template of a menu to the Electron main process
  * to generate the application main menu.
  */
-export type MenuDeclarativeItemTemplate = // "Classic" menu item
+export type MenuDeclarativeItemTemplate =
+  // "Classic" menu item
   // Sub menu
   | {
       label: string;

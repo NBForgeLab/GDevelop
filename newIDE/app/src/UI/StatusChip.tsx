@@ -5,12 +5,7 @@ import classes from './StatusChip.module.css';
 
 /** The meaning of a status, which gives the color of a chip. */
 export type StatusChipTone =
-  | 'neutral'
-  | 'success'
-  | 'error'
-  | 'warning'
-  | 'info'
-  | 'progress';
+  'neutral' | 'success' | 'error' | 'warning' | 'info' | 'progress';
 
 const toneClasses = {
   neutral: classes.neutral,

@@ -64,9 +64,7 @@ const getTool = (tools: Array<McpServerTool>, name: string): McpServerTool => {
 
 const context = {
   getOpenedProject: (() => null) as
-    | (() => McpOpenedProject | null | undefined)
-    | null
-    | undefined,
+    (() => McpOpenedProject | null | undefined) | null | undefined,
 };
 
 describe('AiRequestTools', () => {

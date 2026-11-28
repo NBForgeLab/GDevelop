@@ -58,10 +58,7 @@ const groupVersionsByDay = (
 };
 
 export type VersionRestoringStatus =
-  | 'opened'
-  | 'unsavedChanges'
-  | 'saving'
-  | 'latest';
+  'opened' | 'unsavedChanges' | 'saving' | 'latest';
 export type OpenedVersionStatus = {
   version: ExpandedCloudProjectVersion;
   status: VersionRestoringStatus;

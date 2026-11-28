@@ -7,9 +7,7 @@ import { renderInstructionSentenceAsPlainText } from '../EventsSheet/EventsTree/
 const gd: libGDevelop = global.gd;
 
 export type ValidationErrorType =
-  | 'missing-instruction'
-  | 'invalid-parameter'
-  | 'missing-parameter';
+  'missing-instruction' | 'invalid-parameter' | 'missing-parameter';
 
 export type ValidationError = {
   type: ValidationErrorType;

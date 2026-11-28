@@ -28,9 +28,7 @@ type BundleStoreState = {
   error: Error | null | undefined;
   shop: {
     bundleListingDatasSearchResults:
-      | Array<BundleListingData>
-      | null
-      | undefined;
+      Array<BundleListingData> | null | undefined;
     filtersState: FiltersState;
     setInitialBundleUserFriendlySlug: (arg0: string) => void;
     setInitialBundleCategory: (arg0: string) => void;
@@ -238,9 +236,7 @@ export const BundleStoreStateProvider = ({
   const currentPage = shopNavigationState.getCurrentPage();
 
   const bundleListingDatasSearchResultsForShop:
-    | Array<BundleListingData>
-    | null
-    | undefined = useSearchItem(
+    Array<BundleListingData> | null | undefined = useSearchItem(
     bundleListingDatasById,
     getBundleListingDataSearchTerms,
     shopSearchText,

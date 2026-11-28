@@ -90,7 +90,7 @@ export default class InstancesSelection {
   }
 
   unselectInstancesOfObject(objectName: string) {
-    for (let i = 0; i < this.selection.length; ) {
+    for (let i = 0; i < this.selection.length;) {
       if (this.selection[i].getObjectName() === objectName) {
         this.selection.splice(i, 1);
       } else {
@@ -100,7 +100,7 @@ export default class InstancesSelection {
   }
 
   unselectInstancesOnLayer(layerName: string) {
-    for (let i = 0; i < this.selection.length; ) {
+    for (let i = 0; i < this.selection.length;) {
       if (this.selection[i].getLayer() === layerName) {
         this.selection.splice(i, 1);
       } else {
@@ -119,7 +119,7 @@ export default class InstancesSelection {
     instancesContainer.iterateOverInstances(functor);
     functor.delete();
 
-    for (let i = 0; i < this.selection.length; ) {
+    for (let i = 0; i < this.selection.length;) {
       const instance = this.selection[i];
       if (!allExistingInstancePointers.has(instance.ptr)) {
         this.selection.splice(i, 1);

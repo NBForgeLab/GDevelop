@@ -157,7 +157,8 @@ const hasBadge = (
 export const hasMissingBadges = (
   badges: Array<Badge> | null | undefined,
   achievements: Array<Achievement> | null | undefined
-): boolean => // Not connected
+): boolean =>
+  // Not connected
   !badges ||
   !achievements ||
   // Connected but some achievements are not yet claimed

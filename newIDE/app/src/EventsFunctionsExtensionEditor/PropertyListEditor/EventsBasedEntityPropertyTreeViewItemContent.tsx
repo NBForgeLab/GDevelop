@@ -195,9 +195,7 @@ export const getEventsBasedEntityPropertyTreeViewItemId = (
   }`;
 };
 
-export class EventsBasedEntityPropertyTreeViewItemContent
-  implements TreeViewItemContent
-{
+export class EventsBasedEntityPropertyTreeViewItemContent implements TreeViewItemContent {
   property: gdPropertyFolderOrProperty;
   props: EventsBasedEntityPropertyTreeViewItemProps;
 

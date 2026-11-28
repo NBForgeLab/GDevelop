@@ -41,9 +41,7 @@ const styles = {
 export const getPlanSpecificRequirements = (
   i18n: I18nType,
   subscriptionPlansWithPricingSystems:
-    | Array<SubscriptionPlanWithPricingSystems>
-    | null
-    | undefined
+    Array<SubscriptionPlanWithPricingSystems> | null | undefined
 ): Array<string> => {
   const planSpecificRequirements = subscriptionPlansWithPricingSystems
     ? uniq(
@@ -66,13 +64,9 @@ export const getPlanSpecificRequirements = (
 type Props = {
   onClose: (...args: Array<any>) => any;
   availableSubscriptionPlansWithPrices:
-    | SubscriptionPlanWithPricingSystems[]
-    | null
-    | undefined;
+    SubscriptionPlanWithPricingSystems[] | null | undefined;
   userSubscriptionPlanEvenIfLegacy:
-    | SubscriptionPlanWithPricingSystems
-    | null
-    | undefined;
+    SubscriptionPlanWithPricingSystems | null | undefined;
   recommendedPlanId: string | null | undefined;
   onOpenPendingDialog: (open: boolean) => void;
   couponCode?: string | null;
@@ -362,7 +356,8 @@ export default function SubscriptionDialog({
                           <Trans>
                             Redeemed code valid until{' '}
                             {new Date(
-                              authenticatedUser.subscription.redemptionCodeValidUntil
+                              authenticatedUser.subscription
+                                .redemptionCodeValidUntil
                             ).toLocaleDateString()}
                             .
                           </Trans>

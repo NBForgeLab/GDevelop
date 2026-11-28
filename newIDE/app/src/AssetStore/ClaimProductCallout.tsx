@@ -26,8 +26,7 @@ const styles = {
 
 type Props = {
   productListingData:
-    | PrivateAssetPackListingData
-    | PrivateGameTemplateListingData;
+    PrivateAssetPackListingData | PrivateGameTemplateListingData;
   isAlreadyReceived: boolean;
 };
 

@@ -263,8 +263,7 @@ describe('inspect_extension', () => {
 
       expect(result.success).toBe(true);
       const inspectedExtension = result.extension as
-        | InspectedExtension
-        | undefined;
+        InspectedExtension | undefined;
       if (!inspectedExtension)
         throw new Error('Expected an extension in the output.');
       expect(inspectedExtension.isReadOnly).toBe(true);
@@ -290,8 +289,7 @@ describe('inspect_extension', () => {
       expect(result.success).toBe(true);
       expect(result.message).toContain('no generated metadata');
       const inspectedFunction = result.functionDeclaration as
-        | InspectedFunction
-        | undefined;
+        InspectedFunction | undefined;
       if (!inspectedFunction) throw new Error('Expected a function.');
       expect(inspectedFunction.callForm).toBeUndefined();
       expect(inspectedFunction.callFormUnavailableReason).toContain(
@@ -340,8 +338,7 @@ describe('inspect_extension', () => {
 
       expect(result.success).toBe(true);
       const customObject = result.customObject as
-        | InspectedCustomObject
-        | undefined;
+        InspectedCustomObject | undefined;
       if (!customObject) throw new Error('Expected a custom object.');
       expect(customObject.objectName).toBe('CombinedTank');
       expect(customObject.objectType).toBe('TankConfiguration::CombinedTank');
@@ -395,8 +392,7 @@ describe('inspect_extension', () => {
 
       expect(result.success).toBe(true);
       const inspectedFunction = result.functionDeclaration as
-        | InspectedFunction
-        | undefined;
+        InspectedFunction | undefined;
       if (!inspectedFunction) throw new Error('Expected a function.');
       // An `ActionWithOperator` declares no parameter of its own: its events
       // read the `Value` GDevelop generates from the getter.
@@ -418,8 +414,7 @@ describe('inspect_extension', () => {
         function_name: 'TopRotation',
       });
       const inspectedGetter = getterResult.functionDeclaration as
-        | InspectedFunction
-        | undefined;
+        InspectedFunction | undefined;
       if (!inspectedGetter) throw new Error('Expected a function.');
       expect(inspectedGetter).not.toHaveProperty('parametersForEvents');
     });
@@ -441,8 +436,7 @@ describe('inspect_extension', () => {
 
       expect(result.success).toBe(true);
       const inspectedFunction = result.functionDeclaration as
-        | InspectedFunction
-        | undefined;
+        InspectedFunction | undefined;
       if (!inspectedFunction) throw new Error('Expected a function.');
       expect(inspectedFunction.owner).toBe('object');
       expect(inspectedFunction.callForm).toBe(
@@ -452,8 +446,7 @@ describe('inspect_extension', () => {
         'LeaderboardDialog::LeaderboardDialog::SetScore'
       );
       const inspectedExtension = result.extension as
-        | InspectedExtension
-        | undefined;
+        InspectedExtension | undefined;
       if (!inspectedExtension) throw new Error('Expected an extension.');
       expect(inspectedExtension.isReadOnly).toBe(true);
     });
@@ -470,8 +463,7 @@ describe('inspect_extension', () => {
 
       expect(result.success).toBe(true);
       const customObject = result.customObject as
-        | InspectedCustomObject
-        | undefined;
+        InspectedCustomObject | undefined;
       if (!customObject) throw new Error('Expected a custom object.');
       expect(customObject.variantNames).toEqual(['Pressed']);
       expect(customObject).not.toHaveProperty('variants');
@@ -501,8 +493,7 @@ describe('inspect_extension', () => {
 
       expect(result.success).toBe(true);
       const customBehavior = result.customBehavior as
-        | InspectedCustomBehavior
-        | undefined;
+        InspectedCustomBehavior | undefined;
       if (!customBehavior) throw new Error('Expected a custom behavior.');
       expect(customBehavior.behaviorType).toBe('MyExt::MyBehavior');
       expect(
@@ -539,8 +530,7 @@ describe('inspect_extension', () => {
 
       expect(result.success).toBe(true);
       const customBehavior = result.customBehavior as
-        | InspectedCustomBehavior
-        | undefined;
+        InspectedCustomBehavior | undefined;
       if (!customBehavior) throw new Error('Expected a custom behavior.');
       expect(customBehavior.sharedProperties).toEqual([]);
     });
@@ -558,8 +548,7 @@ describe('inspect_extension', () => {
 
       expect(result.success).toBe(true);
       const inspectedFunction = result.functionDeclaration as
-        | InspectedFunction
-        | undefined;
+        InspectedFunction | undefined;
       if (!inspectedFunction) throw new Error('Expected a function.');
       expect(inspectedFunction.owner).toBe('behavior');
       expect(inspectedFunction.isLifecycle).toBe(true);
@@ -585,8 +574,7 @@ describe('inspect_extension', () => {
 
       expect(result.success).toBe(true);
       const inspectedFunction = result.functionDeclaration as
-        | InspectedFunction
-        | undefined;
+        InspectedFunction | undefined;
       if (!inspectedFunction) throw new Error('Expected a function.');
       expect(inspectedFunction.owner).toBe('extension');
       // The generated metadata has a code-only `currentScene` first: the

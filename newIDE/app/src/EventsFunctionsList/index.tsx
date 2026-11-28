@@ -1998,10 +1998,8 @@ const EventsFunctionsList = React.forwardRef<
   }
 );
 
-const arePropsEqual = (
-  prevProps: Props,
-  nextProps: Props
-): boolean => // The component is costly to render, so avoid any re-rendering as much
+const arePropsEqual = (prevProps: Props, nextProps: Props): boolean =>
+  // The component is costly to render, so avoid any re-rendering as much
   // as possible.
   // We make the assumption that no changes to the tree is made outside
   // from the component.

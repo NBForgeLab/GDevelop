@@ -58,8 +58,7 @@ export type EnumeratedExpressionMetadata = {
 // InstructionMetadata/ExpressionMetadata methods. In theory,
 // this type and objects are redundant with InstructionMetadata and ExpressionMetadata.
 export type EnumeratedInstructionOrExpressionMetadata =
-  | EnumeratedInstructionMetadata
-  | EnumeratedExpressionMetadata;
+  EnumeratedInstructionMetadata | EnumeratedExpressionMetadata;
 
 /**
  * Given a list of expression or instructions that were previously enumerated,

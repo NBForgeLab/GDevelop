@@ -80,10 +80,7 @@ export const DEFAULT_AI_REQUEST_TIMEOUT_MS = 45 * 60 * 1000;
 //   a plan to confirm or to finish), and was not answered (anymore).
 // - "timeout": the request was not finished in time, and was suspended.
 export type AutomatedAiRequestStatus =
-  | 'finished'
-  | 'waiting_for_user'
-  | 'error'
-  | 'timeout';
+  'finished' | 'waiting_for_user' | 'error' | 'timeout';
 
 export type AutomatedAiRequestResult = {
   status: AutomatedAiRequestStatus;

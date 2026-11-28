@@ -31,11 +31,7 @@ type BasicAnchor =
   | 'Center'
   | 'Advanced';
 type AdvancedAnchor =
-  | 'MinEdge'
-  | 'MaxEdge'
-  | 'Proportional'
-  | 'Center'
-  | 'None';
+  'MinEdge' | 'MaxEdge' | 'Proportional' | 'Center' | 'None';
 
 const getAnchorProperty = (
   getPropertyValue: (propertyName: string) => string | null,

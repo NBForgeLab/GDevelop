@@ -24,10 +24,7 @@ type Props = {
       openEventsEditor: boolean;
       openSceneEditor: boolean;
       focusWhenOpened:
-        | 'scene-or-events-otherwise'
-        | 'scene'
-        | 'events'
-        | 'none';
+        'scene-or-events-otherwise' | 'scene' | 'events' | 'none';
     }
   ) => void;
   openExternalEvents: (name: string) => void;

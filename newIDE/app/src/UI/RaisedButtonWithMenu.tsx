@@ -4,8 +4,7 @@ import ElementWithMenu from './Menu/ElementWithMenu';
 import { MenuItemTemplate } from './Menu/Menu';
 import { I18n as I18nType } from '@lingui/core';
 
-export interface RaisedButtonWithMenuProps
-  extends RaisedButtonPropsWithoutOnClick {
+export interface RaisedButtonWithMenuProps extends RaisedButtonPropsWithoutOnClick {
   buildMenuTemplate: (i18n: I18nType) => MenuItemTemplate[];
 }
 

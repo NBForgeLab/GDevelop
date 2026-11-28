@@ -63,10 +63,7 @@ import MoveEventsFunctionDialog from './MoveEventsFunctionDialog';
 const gd: libGDevelop = global.gd;
 
 export type ExtensionItemConfigurationAttribute =
-  | 'type'
-  | 'isPrivate'
-  | 'isAsync'
-  | 'isDeprecated';
+  'type' | 'isPrivate' | 'isAsync' | 'isDeprecated';
 
 type Props = {
   project: gdProject;
@@ -158,14 +155,11 @@ type State = {
     | null
     | undefined;
   doMoveEventsBasedObjectToCb:
-    | null
-    | ((destinationExtensionName: string) => void);
+    null | ((destinationExtensionName: string) => void);
   doMoveEventsBasedBehaviorToCb:
-    | null
-    | ((destinationExtensionName: string) => void);
+    null | ((destinationExtensionName: string) => void);
   doMoveEventsFunctionToCb:
-    | null
-    | ((destinationExtensionName: string) => Promise<void>);
+    null | ((destinationExtensionName: string) => Promise<void>);
 };
 
 const extensionEditIconReactNode = <ExtensionEditIcon />;
@@ -215,18 +209,12 @@ export default class EventsFunctionsExtensionEditor extends React.Component<
   editor: EventsSheetInterface | null | undefined;
   eventsFunctionList: EventsFunctionsListInterface | null | undefined;
   eventsBasedBehaviorEditor:
-    | EventsBasedBehaviorOrObjectEditorInterface
-    | null
-    | undefined;
+    EventsBasedBehaviorOrObjectEditorInterface | null | undefined;
   eventsBasedObjectEditor:
-    | EventsBasedBehaviorOrObjectEditorInterface
-    | null
-    | undefined;
+    EventsBasedBehaviorOrObjectEditorInterface | null | undefined;
   propertyListEditor: PropertyListEditorInterface | null | undefined;
   eventsFunctionConfigurationEditor:
-    | EventsFunctionConfigurationEditorInterface
-    | null
-    | undefined;
+    EventsFunctionConfigurationEditorInterface | null | undefined;
   _editorMosaic: EditorMosaicInterface | null | undefined;
   _editorNavigator: EditorNavigatorInterface | null | undefined;
   // Create an empty "context" of objects.

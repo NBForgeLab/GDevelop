@@ -25,9 +25,8 @@ import Popper from '@material-ui/core/Popper';
 import Paper from './Paper';
 import PortalContainerContext from './PortalContainerContext';
 
-export const AutocompletePaperComponent = (
-  props: any
-): React.ReactNode => ( // Use light background so that it's in contrast with background that
+export const AutocompletePaperComponent = (props: any): React.ReactNode => (
+  // Use light background so that it's in contrast with background that
   // is either dark or medium (in dialogs).
   <Paper {...props} background="light" />
 );

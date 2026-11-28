@@ -14,11 +14,7 @@ type Props = {
   };
   scrollKey: string;
   persistedPanelStateType:
-    | 'instances-of-object'
-    | 'object'
-    | 'scene'
-    | 'objectGroup'
-    | 'layer';
+    'instances-of-object' | 'object' | 'scene' | 'objectGroup' | 'layer';
   persistedPanelStateId: string | null;
   saveDebounceTimeInMs?: number;
 };

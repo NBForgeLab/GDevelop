@@ -121,9 +121,7 @@ const getCategories = (
 type ObjectStoreState = {
   filters: Filters | null | undefined;
   searchResults:
-    | Array<SearchResult<ObjectShortHeader | ObjectCategory>>
-    | null
-    | undefined;
+    Array<SearchResult<ObjectShortHeader | ObjectCategory>> | null | undefined;
   fetchObjects: () => void;
   error: Error | null | undefined;
   searchText: string;
@@ -498,18 +496,17 @@ export const ObjectStoreStateProvider = ({
   ]);
 
   const searchResults:
-    | Array<SearchResult<ObjectShortHeader | ObjectCategory>>
-    | null
-    | undefined = useSearchStructuredItem(allTranslatedObjectsAndCategories, {
-    searchText,
-    chosenItemCategory: chosenCategory,
-    chosenCategory: filtersState.chosenCategory,
-    chosenFilters: filtersState.chosenFilters,
-    excludedTiers: showExperimentalExtensions
-      ? noExcludedTiers
-      : excludedExperimentalTiers,
-    defaultFirstSearchItemIds: defaultFirstSearchItemIds,
-  });
+    Array<SearchResult<ObjectShortHeader | ObjectCategory>> | null | undefined =
+    useSearchStructuredItem(allTranslatedObjectsAndCategories, {
+      searchText,
+      chosenItemCategory: chosenCategory,
+      chosenCategory: filtersState.chosenCategory,
+      chosenFilters: filtersState.chosenFilters,
+      excludedTiers: showExperimentalExtensions
+        ? noExcludedTiers
+        : excludedExperimentalTiers,
+      defaultFirstSearchItemIds: defaultFirstSearchItemIds,
+    });
 
   const objectStoreState = React.useMemo(
     () => ({

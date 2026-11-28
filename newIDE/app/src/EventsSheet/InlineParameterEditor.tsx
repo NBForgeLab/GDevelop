@@ -37,11 +37,9 @@ type Props = {
   anchorEl: HTMLElement | null | undefined;
   resourceManagementProps: ResourceManagementProps;
   editEventsFunctionParameter:
-    | ((variableDialogOpeningProps: VariableDialogOpeningProps) => void)
-    | null;
+    ((variableDialogOpeningProps: VariableDialogOpeningProps) => void) | null;
   openEventsBasedEntityPropertyEditorDialog:
-    | ((variableDialogOpeningProps: VariableDialogOpeningProps) => void)
-    | null;
+    ((variableDialogOpeningProps: VariableDialogOpeningProps) => void) | null;
 };
 
 const InlineParameterEditor = ({

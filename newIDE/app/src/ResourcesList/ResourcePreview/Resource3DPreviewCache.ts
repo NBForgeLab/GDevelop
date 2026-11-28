@@ -10,9 +10,8 @@ let previewCache: {
   };
 } = {};
 let requestPreview:
-  | ((url: string) => Promise<string | null | undefined>)
-  | null
-  | undefined = null;
+  ((url: string) => Promise<string | null | undefined>) | null | undefined =
+  null;
 const requestedPreviewUrls: Set<string> = new Set();
 const previewRenderedListeners: Set<() => void> = new Set();
 let isListenersNotificationScheduled = false;
@@ -49,9 +48,7 @@ export const burstResource3DPreviewCache = () => {
 
 export const setResource3DPreviewRequester = (
   requester:
-    | ((url: string) => Promise<string | null | undefined>)
-    | null
-    | undefined
+    ((url: string) => Promise<string | null | undefined>) | null | undefined
 ) => {
   requestPreview = requester;
   if (!requester) burstResource3DPreviewCache();

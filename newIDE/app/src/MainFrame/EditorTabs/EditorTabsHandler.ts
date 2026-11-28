@@ -61,9 +61,7 @@ export type EditorTab = {
   label?: string;
   icon?: React.ReactNode;
   renderCustomIcon:
-    | ((brightness: number) => React.ReactNode)
-    | null
-    | undefined;
+    ((brightness: number) => React.ReactNode) | null | undefined;
   /** the html dataset object to set on the tab button. */
   tabOptions?: TabOptions;
   /** The name of the layout/external layout/external events/extension. */
@@ -562,9 +560,7 @@ type RenamedEditorTabFields = {
   tabOptions?: TabOptions;
   icon?: React.ReactNode;
   renderCustomIcon:
-    | ((brightness: number) => React.ReactNode)
-    | null
-    | undefined;
+    ((brightness: number) => React.ReactNode) | null | undefined;
 };
 
 /**
@@ -910,9 +906,7 @@ export const getOpenedAskAiEditor = (
 
   return {
     askAiEditor: editorTabOpened.editorTab.editorRef as
-      | AskAiEditorInterface
-      | null
-      | undefined,
+      AskAiEditorInterface | null | undefined,
     editorTab: editorTabOpened.editorTab,
     paneIdentifier: editorTabOpened.paneIdentifier,
     tabIndex: editorTabOpened.tabIndex,

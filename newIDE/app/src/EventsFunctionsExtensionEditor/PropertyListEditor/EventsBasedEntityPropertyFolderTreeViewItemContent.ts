@@ -142,9 +142,7 @@ export const getEventsBasedEntityPropertyFolderTreeViewItemId = (
   return `property-folder-${propertyFolder.ptr}`;
 };
 
-export class EventsBasedEntityPropertyFolderTreeViewItemContent
-  implements TreeViewItemContent
-{
+export class EventsBasedEntityPropertyFolderTreeViewItemContent implements TreeViewItemContent {
   propertyFolder: gdPropertyFolderOrProperty;
   props: EventsBasedEntityPropertyFolderTreeViewItemProps;
 

@@ -94,8 +94,7 @@ type ListItemRightButtonProps =
 // They should be self descriptive - refer to Material UI docs otherwise.
 type ListItemProps = ListItemRightButtonProps & {
   onClick?:
-    | ((event: React.MouseEvent<HTMLElement>) => void | Promise<void>)
-    | null;
+    ((event: React.MouseEvent<HTMLElement>) => void | Promise<void>) | null;
   onDoubleClick?: (event: React.MouseEvent<HTMLElement>) => void;
   primaryText: React.ReactNode | null | undefined;
   secondaryText?: React.ReactNode;

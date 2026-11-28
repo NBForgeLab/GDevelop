@@ -62,9 +62,7 @@ function useObjectsSelection({
   const selectObjectFolderOrObjectWithContext = React.useCallback(
     (
       objectFolderOrObjectWithContext:
-        | ObjectFolderOrObjectWithContext
-        | null
-        | undefined
+        ObjectFolderOrObjectWithContext | null | undefined
     ) => {
       selectObjectFolderOrObjectsWithContext(
         objectFolderOrObjectWithContext ? [objectFolderOrObjectWithContext] : []

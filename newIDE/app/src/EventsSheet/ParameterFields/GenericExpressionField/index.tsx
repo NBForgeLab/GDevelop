@@ -167,9 +167,7 @@ export const extractErrors = (
   expressionNode: gdExpressionNode,
   objectName: string,
   showDeprecatedInstructionWarning:
-    | 'no'
-    | 'icon'
-    | 'icon-and-deprecated-warning-text'
+    'no' | 'icon' | 'icon-and-deprecated-warning-text'
 ): {
   errorText: string | null | undefined;
   errorHighlights: Array<Highlight>;

@@ -64,9 +64,7 @@ const styles = {
 };
 
 export type GamesDashboardOrderBy =
-  | 'totalSessions'
-  | 'weeklySessions'
-  | 'lastModifiedAt';
+  'totalSessions' | 'weeklySessions' | 'lastModifiedAt';
 
 const totalSessionsSort = (
   itemA: DashboardItem,

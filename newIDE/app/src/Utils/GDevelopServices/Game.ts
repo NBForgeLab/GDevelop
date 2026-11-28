@@ -9,9 +9,7 @@ import { t } from '@lingui/macro';
 import { ensureIsArray, ensureObjectHasProperty } from '../DataValidator';
 
 export type GameUploadType =
-  | 'game-thumbnail'
-  | 'game-screenshot'
-  | 'game-preview-video';
+  'game-thumbnail' | 'game-screenshot' | 'game-preview-video';
 
 export type SavedStatus = 'draft' | 'saved';
 
@@ -165,9 +163,7 @@ export type GameFeaturing = {
 };
 
 export type GameUsageType =
-  | 'featuring-basic'
-  | 'featuring-pro'
-  | 'featuring-premium';
+  'featuring-basic' | 'featuring-pro' | 'featuring-premium';
 
 export type MarketingPlan = {
   id: GameUsageType;

@@ -31,9 +31,7 @@ export const getSubscriptionPlanToUpsell = ({
 }: {
   subscription: Subscription | null | undefined;
   subscriptionPlansWithPricingSystems:
-    | Array<SubscriptionPlanWithPricingSystems>
-    | null
-    | undefined;
+    Array<SubscriptionPlanWithPricingSystems> | null | undefined;
 }): SubscriptionPlanWithPricingSystems | null | undefined => {
   if (
     !subscriptionPlansWithPricingSystems ||

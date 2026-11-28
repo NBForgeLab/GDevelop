@@ -58,11 +58,9 @@ export type ParameterFieldProps = CommonProps & {
   parameterIndex?: number;
   onInstructionTypeChanged?: () => void;
   editEventsFunctionParameter?:
-    | ((variableDialogOpeningProps: VariableDialogOpeningProps) => void)
-    | null;
+    ((variableDialogOpeningProps: VariableDialogOpeningProps) => void) | null;
   openEventsBasedEntityPropertyEditorDialog?:
-    | ((variableDialogOpeningProps: VariableDialogOpeningProps) => void)
-    | null;
+    ((variableDialogOpeningProps: VariableDialogOpeningProps) => void) | null;
   expressionTypeExtraInfo?: string;
 };
 

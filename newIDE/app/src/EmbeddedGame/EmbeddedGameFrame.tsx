@@ -100,25 +100,21 @@ export type EditorCameraState = {
 };
 
 let onSetEmbededGameFramePreviewLocation:
-  | null
-  | ((attachToPreviewOptions: AttachToPreviewOptions) => void) = null;
+  null | ((attachToPreviewOptions: AttachToPreviewOptions) => void) = null;
 let onSwitchToSceneEdition:
-  | null
-  | ((switchToSceneEditionOptions: SwitchToSceneEditionOptions) => void) = null;
+  null | ((switchToSceneEditionOptions: SwitchToSceneEditionOptions) => void) =
+  null;
 let onSetEditorHotReloadNeeded:
-  | null
-  | ((hotReloadSteps: HotReloadSteps) => void) = null;
+  null | ((hotReloadSteps: HotReloadSteps) => void) = null;
 let onIsEditorHotReloadNeeded: null | (() => boolean) = null;
 let onSwitchInGameEditorIfNoHotReloadIsNeeded:
-  | null
-  | ((previewInGameEditorTarget: PreviewInGameEditorTarget) => void) = null;
+  null | ((previewInGameEditorTarget: PreviewInGameEditorTarget) => void) =
+  null;
 let onPreventGameFramePointerEvents: null | ((enabled: boolean) => void) = null;
 let onSetCameraState:
-  | null
-  | ((editorId: string, cameraState: EditorCameraState) => void) = null;
+  null | ((editorId: string, cameraState: EditorCameraState) => void) = null;
 let onChangeViewPosition:
-  | null
-  | ((command: ChangeViewPositionCommand) => void) = null;
+  null | ((command: ChangeViewPositionCommand) => void) = null;
 
 export const setEmbeddedGameFramePreviewLocation = ({
   previewIndexHtmlLocation,

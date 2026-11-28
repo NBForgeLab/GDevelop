@@ -36,23 +36,17 @@ type PrivateGameTemplateStoreState = {
   gameTemplateFilters: Filters | null | undefined;
   fetchGameTemplates: () => void;
   privateGameTemplateListingDatas:
-    | Array<PrivateGameTemplateListingData>
-    | null
-    | undefined;
+    Array<PrivateGameTemplateListingData> | null | undefined;
   error: Error | null | undefined;
   shop: {
     privateGameTemplateListingDatasSearchResults:
-      | Array<PrivateGameTemplateListingData>
-      | null
-      | undefined;
+      Array<PrivateGameTemplateListingData> | null | undefined;
     filtersState: FiltersState;
     setInitialGameTemplateUserFriendlySlug: (arg0: string) => void;
   };
   exampleStore: {
     privateGameTemplateListingDatasSearchResults:
-      | Array<SearchResult<PrivateGameTemplateListingData>>
-      | null
-      | undefined;
+      Array<SearchResult<PrivateGameTemplateListingData>> | null | undefined;
     searchText: string;
     setSearchText: (arg0: string) => void;
     filtersState: FiltersState;
@@ -282,21 +276,18 @@ export const PrivateGameTemplateStoreStateProvider = ({
   const currentPage = shopNavigationState.getCurrentPage();
 
   const privateGameTemplateListingDatasSearchResultsForExampleStore:
-    | Array<SearchResult<PrivateGameTemplateListingData>>
-    | null
-    | undefined = useSearchStructuredItem(privateGameTemplateListingDatasById, {
-    searchText: exampleStoreSearchText,
-    chosenCategory: filtersStateForExampleStore.chosenCategory,
-    chosenFilters: filtersStateForExampleStore.chosenFilters,
-    excludedTiers,
-    defaultFirstSearchItemIds: firstGameTemplateIds,
-    shuffleResults: false,
-  });
+    Array<SearchResult<PrivateGameTemplateListingData>> | null | undefined =
+    useSearchStructuredItem(privateGameTemplateListingDatasById, {
+      searchText: exampleStoreSearchText,
+      chosenCategory: filtersStateForExampleStore.chosenCategory,
+      chosenFilters: filtersStateForExampleStore.chosenFilters,
+      excludedTiers,
+      defaultFirstSearchItemIds: firstGameTemplateIds,
+      shuffleResults: false,
+    });
 
   const privateGameTemplateListingDatasSearchResultsForShop:
-    | Array<PrivateGameTemplateListingData>
-    | null
-    | undefined = useSearchItem(
+    Array<PrivateGameTemplateListingData> | null | undefined = useSearchItem(
     privateGameTemplateListingDatasById,
     getPrivateGameTemplateListingDataSearchTerms,
     shopSearchText,

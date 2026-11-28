@@ -108,12 +108,10 @@ export const enumerateObjects = (
     }
   )
     .filter((object): object is gdObject => Boolean(object))
-    .map(
-      (object: gdObject): ObjectWithContext => ({
-        object,
-        global: false,
-      })
-    );
+    .map((object: gdObject): ObjectWithContext => ({
+      object,
+      global: false,
+    }));
 
   const projectObjectsList: ObjectWithContextList =
     globalObjectsContainer === objectsContainer || !globalObjectsContainer
@@ -129,12 +127,10 @@ export const enumerateObjects = (
           return object;
         })
           .filter((object): object is gdObject => Boolean(object))
-          .map(
-            (object: gdObject): ObjectWithContext => ({
-              object,
-              global: true,
-            })
-          );
+          .map((object: gdObject): ObjectWithContext => ({
+            object,
+            global: true,
+          }));
 
   const allObjectsList: ObjectWithContextList =
     containerObjectsList.concat(projectObjectsList);

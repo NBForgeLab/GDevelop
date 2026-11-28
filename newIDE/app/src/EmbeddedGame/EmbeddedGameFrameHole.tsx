@@ -49,9 +49,7 @@ const notifyEmbeddedGameFrameHoleResizeCallbacks = () => {
 };
 
 export const getActiveEmbeddedGameFrameHoleRect = ():
-  | ClientRect
-  | null
-  | undefined => {
+  ClientRect | null | undefined => {
   // There is only one embedded game frame hole active at a time,
   // so we don't need to check if the parent scene editor is active.
   const activeEmbeddedGameFrameHole = document.querySelector(

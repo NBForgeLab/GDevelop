@@ -9,11 +9,12 @@ import {
 import { triggerOnResourceExternallyChanged } from '../MainFrame/ResourcesWatcher';
 import newNameGenerator from '../Utils/NewNameGenerator';
 
-export type ResourceFilesStorage = // Kept in memory, and stored when the project is saved.
+export type ResourceFilesStorage =
+  // Kept in memory, and stored when the project is saved.
 
-    | 'stored' // The project was not saved, and the files can't be kept in memory.
-    | 'stored-when-project-is-saved'
-    | 'project-not-saved';
+  | 'stored' // The project was not saved, and the files can't be kept in memory.
+  | 'stored-when-project-is-saved'
+  | 'project-not-saved';
 
 export type AttachmentsForResources = {
   // The files attached by the user to the AI (null for an unknown or expired one).

@@ -82,9 +82,7 @@ export const useExtensionDetail = ({
   project,
 }: {
   extensionShortHeader:
-    | ExtensionShortHeader
-    | BehaviorShortHeader
-    | ObjectShortHeader;
+    ExtensionShortHeader | BehaviorShortHeader | ObjectShortHeader;
   isInstalling: boolean;
   onInstall?: () => Promise<void>;
   project: gdProject;
@@ -224,9 +222,7 @@ export const useExtensionDetail = ({
 
 type Props = {
   extensionShortHeader:
-    | ExtensionShortHeader
-    | BehaviorShortHeader
-    | ObjectShortHeader;
+    ExtensionShortHeader | BehaviorShortHeader | ObjectShortHeader;
   isInstalling: boolean;
   onInstall?: () => Promise<void>;
   extensionDetail: ExtensionDetail;

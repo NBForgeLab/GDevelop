@@ -91,12 +91,7 @@ export const renderInlineRelationalOperator = ({
   InvalidParameterValue,
   parameterMetadata,
 }: ParameterInlineRendererProps):
-  | '<'
-  | '='
-  | '>'
-  | string
-  | React.ReactElement<any>
-  | React.ReactNode => {
+  '<' | '=' | '>' | string | React.ReactElement<any> | React.ReactNode => {
   const comparedValueType = parameterMetadata
     ? parameterMetadata.getExtraInfo()
     : 'unknown';

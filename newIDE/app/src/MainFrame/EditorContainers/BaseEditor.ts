@@ -89,10 +89,7 @@ export type RenderEditorContainerProps = {
       openEventsEditor: boolean;
       openSceneEditor: boolean;
       focusWhenOpened:
-        | 'scene-or-events-otherwise'
-        | 'scene'
-        | 'events'
-        | 'none';
+        'scene-or-events-otherwise' | 'scene' | 'events' | 'none';
     }
   ) => void;
   onOpenEvents: (sceneName: string) => void;
@@ -290,8 +287,7 @@ export type RenderEditorContainerProps = {
   onWillInstallExtension: (extensionNames: Array<string>) => void;
   onExtensionInstalled: (extensionNames: Array<string>) => void;
   onCreateNewExtensionWithBehavior:
-    | ((project: gdProject, object: gdObject) => void)
-    | null;
+    ((project: gdProject, object: gdObject) => void) | null;
   onDeleteEventsBasedObjectVariant: (
     eventsFunctionsExtension: gdEventsFunctionsExtension,
     eventBasedObject: gdEventsBasedObject,

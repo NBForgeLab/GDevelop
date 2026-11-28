@@ -21,11 +21,7 @@ const styles = {
 };
 
 export type FunctionCallRowStatus =
-  | 'pending'
-  | 'working'
-  | 'finished'
-  | 'errored'
-  | 'aborted';
+  'pending' | 'working' | 'finished' | 'errored' | 'aborted';
 
 export const FunctionCallStatusIcon = ({
   status,

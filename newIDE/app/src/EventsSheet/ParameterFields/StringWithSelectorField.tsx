@@ -31,10 +31,7 @@ import { type MessageDescriptor } from '../../Utils/i18n/MessageDescriptor';
  * or in the events sheet.
  */
 export type ChoiceAdornmentContext =
-  | 'field'
-  | 'inlineField'
-  | 'menu'
-  | 'eventsSheet';
+  'field' | 'inlineField' | 'menu' | 'eventsSheet';
 
 export type RenderChoiceAdornment = (
   choice: string,

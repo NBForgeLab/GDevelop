@@ -128,9 +128,7 @@ export class ObjectGroupTreeViewItemContent implements TreeViewItemContent {
   }
 }
 
-export class ObjectGroupObjectTreeViewItemContent
-  implements TreeViewItemContent
-{
+export class ObjectGroupObjectTreeViewItemContent implements TreeViewItemContent {
   applySearch = true;
   object: gdObject;
   props: ObjectTreeViewItemProps;

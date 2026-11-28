@@ -434,8 +434,7 @@ export default class Window {
   static getOrientation(): 'portrait' | 'landscape' {
     try {
       return window.screen.orientation.type.split('-')[0] as
-        | 'portrait'
-        | 'landscape';
+        'portrait' | 'landscape';
     } catch (error) {
       console.warn('An error occurred when reading screen orientation', error);
       return 'landscape';

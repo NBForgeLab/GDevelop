@@ -171,9 +171,7 @@ export const getBundleTiles = ({
   allBundleListingDatas: Array<BundleListingData> | null | undefined;
   displayedBundleListingDatas: Array<BundleListingData> | null | undefined;
   onBundleSelection:
-    | ((bundleListingData: BundleListingData) => void)
-    | null
-    | undefined;
+    ((bundleListingData: BundleListingData) => void) | null | undefined;
   receivedBundles: Array<any> | null | undefined;
   openedShopCategory?: string | null;
   hasAssetFiltersApplied?: boolean;
@@ -258,13 +256,9 @@ export const getGameTemplateTiles = ({
   onlyShowAssets,
 }: {
   allPrivateGameTemplateListingDatas:
-    | Array<PrivateGameTemplateListingData>
-    | null
-    | undefined;
+    Array<PrivateGameTemplateListingData> | null | undefined;
   displayedPrivateGameTemplateListingDatas:
-    | Array<PrivateGameTemplateListingData>
-    | null
-    | undefined;
+    Array<PrivateGameTemplateListingData> | null | undefined;
   onPrivateGameTemplateSelection:
     | ((privateGameTemplateListingData: PrivateGameTemplateListingData) => void)
     | null
@@ -360,9 +354,7 @@ export const getPublicAssetPackTiles = ({
 }: {
   publicAssetPacks: PublicAssetPack[] | null | undefined;
   onPublicAssetPackSelection:
-    | ((publicAssetPack: PublicAssetPack) => void)
-    | null
-    | undefined;
+    ((publicAssetPack: PublicAssetPack) => void) | null | undefined;
   openedShopCategory?: string | null;
   hasAssetFiltersApplied?: boolean;
 }): Array<React.ReactNode> => {
@@ -397,13 +389,9 @@ export const getAssetPackTiles = ({
   hasAssetFiltersApplied,
 }: {
   allPrivateAssetPackListingDatas:
-    | Array<PrivateAssetPackListingData>
-    | null
-    | undefined;
+    Array<PrivateAssetPackListingData> | null | undefined;
   displayedPrivateAssetPackListingDatas:
-    | Array<PrivateAssetPackListingData>
-    | null
-    | undefined;
+    Array<PrivateAssetPackListingData> | null | undefined;
   onPrivateAssetPackSelection:
     | ((privateAssetPackListingData: PrivateAssetPackListingData) => void)
     | null

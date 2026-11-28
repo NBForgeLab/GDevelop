@@ -59,8 +59,7 @@ type Props = {
   onWillInstallExtension: (extensionNames: Array<string>) => void;
   onExtensionInstalled: (extensionNames: Array<string>) => void;
   onCreateNewExtensionWithBehavior:
-    | ((project: gdProject, object: gdObject) => void)
-    | null;
+    ((project: gdProject, object: gdObject) => void) | null;
   onOpenEventBasedObjectVariantEditor: (
     extensionName: string,
     eventsBasedObjectName: string,

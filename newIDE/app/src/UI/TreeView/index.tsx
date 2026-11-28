@@ -116,8 +116,7 @@ export type ItemData<Item> = {
   }) => void;
   renamedItemId: string | null | undefined;
   canDrop?:
-    | ((item: Item, where: 'before' | 'inside' | 'after') => boolean)
-    | null;
+    ((item: Item, where: 'before' | 'inside' | 'after') => boolean) | null;
   onDrop: (
     item: Item,
     where: 'before' | 'inside' | 'after'
@@ -158,8 +157,7 @@ const getItemProps = memoizeOne(
     isMobile: boolean,
     DragSourceAndDropTarget: TreeViewDragSourceAndDropTargetComponent,
     getItemHtmlId:
-      | ((item: Item, index: number) => string | null | undefined)
-      | undefined,
+      ((item: Item, index: number) => string | null | undefined) | undefined,
     forceDefaultDraggingPreview: boolean | undefined,
     shouldSelectUponContextMenuOpening: boolean | undefined,
     multiSelect: boolean

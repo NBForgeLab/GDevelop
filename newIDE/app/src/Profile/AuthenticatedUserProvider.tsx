@@ -141,9 +141,7 @@ export default class AuthenticatedUserProvider extends React.Component<
   _hasNotifiedUserAboutEmailVerification = false;
   _abortController: AbortController | null | undefined = null;
   _notificationPollingIntervalId:
-    | ReturnType<typeof setInterval>
-    | null
-    | undefined = null;
+    ReturnType<typeof setInterval> | null | undefined = null;
 
   // Cloud projects are requested in 2 different places at app opening.
   // - First one comes from user authenticating and automatically fetching

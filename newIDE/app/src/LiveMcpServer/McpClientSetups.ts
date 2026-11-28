@@ -1,10 +1,5 @@
 export type McpClientId =
-  | 'claude-code'
-  | 'cursor'
-  | 'vscode'
-  | 'gemini-cli'
-  | 'codex'
-  | 'other';
+  'claude-code' | 'cursor' | 'vscode' | 'gemini-cli' | 'codex' | 'other';
 
 export type McpClientSetup = {
   clientId: McpClientId;

@@ -66,9 +66,7 @@ const renderResetSentence = (
 type Props = {
   /** The plan to upsell. When absent, only the credits options are offered. */
   suggestedSubscriptionPlan:
-    | SubscriptionPlanWithPricingSystems
-    | null
-    | undefined;
+    SubscriptionPlanWithPricingSystems | null | undefined;
   /** True when the user already pays for a plan (and can upgrade it). */
   hasSubscription: boolean;
   availableCredits: number;

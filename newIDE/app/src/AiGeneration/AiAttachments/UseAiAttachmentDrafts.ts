@@ -7,11 +7,7 @@ import { uploadAiAttachment } from './AiAttachmentsUpload';
 export const MAX_ATTACHMENTS_PER_MESSAGE = 10;
 
 export type AiAttachmentDraftError =
-  | 'too-large'
-  | 'empty'
-  | 'too-many'
-  | 'not-authenticated'
-  | 'upload-failed';
+  'too-large' | 'empty' | 'too-many' | 'not-authenticated' | 'upload-failed';
 
 export type AiAttachmentDraft = {
   localId: string;

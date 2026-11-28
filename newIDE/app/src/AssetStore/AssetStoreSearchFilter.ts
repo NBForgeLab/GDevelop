@@ -22,9 +22,7 @@ export class TagAssetStoreSearchFilter extends TagSearchFilter<AssetShortHeader>
 // the effects of the store are found by what the engine knows, not by a list.
 export const EFFECT_ASSETS_OBJECT_TYPE = 'effect';
 
-export class ObjectTypeAssetStoreSearchFilter
-  implements SearchFilter<AssetShortHeader>
-{
+export class ObjectTypeAssetStoreSearchFilter implements SearchFilter<AssetShortHeader> {
   objectTypes: Set<string>;
 
   constructor(objectTypes: Set<string> = new Set()) {
@@ -45,9 +43,7 @@ export class ObjectTypeAssetStoreSearchFilter
   }
 }
 
-export class LicenseAssetStoreSearchFilter
-  implements SearchFilter<AssetShortHeader>
-{
+export class LicenseAssetStoreSearchFilter implements SearchFilter<AssetShortHeader> {
   attributionFreeOnly: boolean;
 
   static noAttributionLicenses: Array<string> = [
@@ -75,9 +71,9 @@ export class LicenseAssetStoreSearchFilter
   }
 }
 
-export class AssetPackTypeStoreSearchFilter
-  implements SearchFilter<PublicAssetPack | PrivateAssetPackListingData>
-{
+export class AssetPackTypeStoreSearchFilter implements SearchFilter<
+  PublicAssetPack | PrivateAssetPackListingData
+> {
   isFree: boolean;
   isPremium: boolean;
   isOwned: boolean;
@@ -125,9 +121,7 @@ export class AssetPackTypeStoreSearchFilter
   }
 }
 
-export class AnimatedAssetStoreSearchFilter
-  implements SearchFilter<AssetShortHeader>
-{
+export class AnimatedAssetStoreSearchFilter implements SearchFilter<AssetShortHeader> {
   mustBeAnimated: boolean;
   mustHaveSeveralState: boolean;
 
@@ -153,9 +147,7 @@ export class AnimatedAssetStoreSearchFilter
   }
 }
 
-export class DimensionAssetStoreSearchFilter
-  implements SearchFilter<AssetShortHeader>
-{
+export class DimensionAssetStoreSearchFilter implements SearchFilter<AssetShortHeader> {
   dimensionMin: number;
   dimensionMax: number;
 
@@ -246,9 +238,7 @@ const getColorSimilitude = function (
   );
 };
 
-export class ColorAssetStoreSearchFilter
-  implements SearchFilter<AssetShortHeader>
-{
+export class ColorAssetStoreSearchFilter implements SearchFilter<AssetShortHeader> {
   color: RGBColor | null;
 
   constructor(color: RGBColor | null = null) {
@@ -305,9 +295,7 @@ const ignoredThematicTags = new Set([
   'forest',
 ]);
 
-export class AssetSwappingAssetStoreSearchFilter
-  implements SearchFilter<AssetShortHeader>
-{
+export class AssetSwappingAssetStoreSearchFilter implements SearchFilter<AssetShortHeader> {
   isEnabled: boolean;
   objectType: string;
   hasSeveralStates: boolean;
@@ -435,9 +423,7 @@ export class AssetSwappingAssetStoreSearchFilter
   }
 }
 
-export class SimilarAssetStoreSearchFilter
-  implements SearchFilter<AssetShortHeader>
-{
+export class SimilarAssetStoreSearchFilter implements SearchFilter<AssetShortHeader> {
   other: AssetShortHeader;
 
   constructor(other: AssetShortHeader) {

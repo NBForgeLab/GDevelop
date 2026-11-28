@@ -29,9 +29,7 @@ export const useOutOfDateAlertDialog = (): (() => Promise<boolean>) => {
 
 type Props = {
   extensionShortHeader:
-    | ExtensionShortHeader
-    | BehaviorShortHeader
-    | ObjectShortHeader;
+    ExtensionShortHeader | BehaviorShortHeader | ObjectShortHeader;
   isInstalling: boolean;
   onClose: () => void;
   onInstall?: () => Promise<void>;

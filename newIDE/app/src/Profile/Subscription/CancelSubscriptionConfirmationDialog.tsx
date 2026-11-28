@@ -26,8 +26,7 @@ import RouterContext from '../../MainFrame/RouterContext';
 import SubscriptionPlanTableSummary from './SubscriptionDialog/SubscriptionPlanTableSummary';
 
 type ProductListingData =
-  | PrivateAssetPackListingData
-  | PrivateGameTemplateListingData;
+  PrivateAssetPackListingData | PrivateGameTemplateListingData;
 
 const styles = {
   thumbnail: {
@@ -54,9 +53,7 @@ const getMonth = (date: Date): string =>
 
 type Props = {
   userSubscriptionPlanEvenIfLegacy:
-    | SubscriptionPlanWithPricingSystems
-    | null
-    | undefined;
+    SubscriptionPlanWithPricingSystems | null | undefined;
   freeSubscriptionPlan: SubscriptionPlanWithPricingSystems | null | undefined;
   onConfirm: () => void;
   onClose: () => void;

@@ -65,9 +65,7 @@ const isColumnDefinition = (
 ): column is ColumnDefinition => Boolean(column);
 
 type StepName =
-  | 'object-or-free-instructions'
-  | 'object-instructions'
-  | 'parameters';
+  'object-or-free-instructions' | 'object-instructions' | 'parameters';
 
 type Props = {
   project: gdProject;
@@ -94,14 +92,11 @@ type Props = {
   onWillInstallExtension: (extensionNames: Array<string>) => void;
   onExtensionInstalled: (extensionNames: Array<string>) => void;
   onCreateNewExtensionWithBehavior:
-    | ((project: gdProject, object: gdObject) => void)
-    | null;
+    ((project: gdProject, object: gdObject) => void) | null;
   editEventsFunctionParameter:
-    | ((variableDialogOpeningProps: VariableDialogOpeningProps) => void)
-    | null;
+    ((variableDialogOpeningProps: VariableDialogOpeningProps) => void) | null;
   openEventsBasedEntityPropertyEditorDialog:
-    | ((variableDialogOpeningProps: VariableDialogOpeningProps) => void)
-    | null;
+    ((variableDialogOpeningProps: VariableDialogOpeningProps) => void) | null;
 };
 
 const getInitialStepName = (isNewInstruction: boolean): StepName => {

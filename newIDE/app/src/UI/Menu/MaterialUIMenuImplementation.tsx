@@ -228,9 +228,7 @@ const SubMenuItem = ({
  *  - checked (when `type` is 'checkbox')
  *  - submenu
  */
-export default class MaterialUIMenuImplementation
-  implements ContextMenuImplementation
-{
+export default class MaterialUIMenuImplementation implements ContextMenuImplementation {
   _onClose: () => void;
   _portalContainer: HTMLElement | null | undefined;
   constructor({

@@ -194,11 +194,7 @@ const SearchBar = React.forwardRef<SearchBarInterface, Props>(
       event: any,
       newValue: string | null | undefined,
       reason:
-        | 'create-option'
-        | 'select-option'
-        | 'remove-option'
-        | 'blur'
-        | 'clear'
+        'create-option' | 'select-option' | 'remove-option' | 'blur' | 'clear'
     ) => {
       // Called when the value of the autocomplete changes.
       if (reason === 'select-option') {

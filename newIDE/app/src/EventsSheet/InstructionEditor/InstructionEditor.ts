@@ -52,9 +52,7 @@ type Parameters = {
 type InstructionEditorState = {
   chosenObjectName: string | null | undefined;
   chosenObjectInstructionsInfo:
-    | Array<EnumeratedInstructionMetadata>
-    | null
-    | undefined;
+    Array<EnumeratedInstructionMetadata> | null | undefined;
   chosenObjectInstructionsInfoTree: InstructionTreeNode | null | undefined;
 };
 

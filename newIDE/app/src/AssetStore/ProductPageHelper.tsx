@@ -373,12 +373,7 @@ export const getProductsIncludedInBundleTiles = ({
   disabled,
 }: {
   product:
-    | PrivateAssetPack
-    | null
-    | undefined
-    | PrivateGameTemplate
-    | Bundle
-    | Course;
+    PrivateAssetPack | null | undefined | PrivateGameTemplate | Bundle | Course;
   productListingDatas:
     | Array<
         | PrivateAssetPackListingData

@@ -243,8 +243,7 @@ type Props = {
   onWillInstallExtension: (extensionNames: Array<string>) => void;
   onExtensionInstalled: (extensionNames: Array<string>) => void;
   onCreateNewExtensionWithBehavior:
-    | ((project: gdProject, object: gdObject) => void)
-    | null;
+    ((project: gdProject, object: gdObject) => void) | null;
   onDeleteEventsBasedObjectVariant: (
     eventsFunctionsExtension: gdEventsFunctionsExtension,
     eventBasedObject: gdEventsBasedObject,
@@ -264,9 +263,7 @@ type State = {
   scenePropertiesDialogOpen: boolean;
   layersListOpen: boolean;
   onCloseLayerRemoveDialog:
-    | ((doRemove: boolean, newLayer: string | null) => void)
-    | null
-    | undefined;
+    ((doRemove: boolean, newLayer: string | null) => void) | null | undefined;
   layerRemoved: string | null | undefined;
   editedLayer: gdLayer | null | undefined;
   editedLayerInitialTab: 'properties' | 'effects';
@@ -312,9 +309,7 @@ export default class SceneEditor extends React.Component<Props, State> {
   editorViewPosition2D: EditorViewPosition2D = { viewX: null, viewY: null };
   _reloadResourcesCounter: number = 0;
   _lastEmbeddedGameContextMenuScenePosition:
-    | [number, number, number]
-    | null
-    | undefined = null;
+    [number, number, number] | null | undefined = null;
 
   constructor(props: Props) {
     super(props);

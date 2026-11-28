@@ -98,8 +98,8 @@ const DragSourceAndDropTarget = makeDragSourceAndDropTarget('variable-editor', {
 const stopEventPropagation = (event: React.SyntheticEvent<any>) =>
   event.stopPropagation();
 
-const memoized = memoizeOne(
-  <T,>(initialValue: number, callback: () => T): T => callback()
+const memoized = memoizeOne(<T,>(initialValue: number, callback: () => T): T =>
+  callback()
 );
 
 /**

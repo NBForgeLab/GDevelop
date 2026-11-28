@@ -37,9 +37,7 @@ export const canUseNamedEasings = (
 
 export const getNamedEasingsContainerFromAccessor = (
   projectScopedContainersAccessor:
-    | ProjectScopedContainersAccessor
-    | null
-    | undefined
+    ProjectScopedContainersAccessor | null | undefined
 ): gdNamedEasingsContainer | null | undefined =>
   projectScopedContainersAccessor
     ? projectScopedContainersAccessor.get().getNamedEasings()

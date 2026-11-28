@@ -762,8 +762,7 @@ export const getCalloutToGetSubscriptionOrClaimProduct = ({
 }: {
   subscription: Subscription | null | undefined;
   productListingData:
-    | PrivateAssetPackListingData
-    | PrivateGameTemplateListingData;
+    PrivateAssetPackListingData | PrivateGameTemplateListingData;
   isAlreadyReceived: boolean;
 }):
   | {
@@ -877,13 +876,9 @@ export const getClaimableProductListingDatas = ({
 }: {
   subscription: Subscription | null | undefined;
   privateAssetPackListingDatas:
-    | Array<PrivateAssetPackListingData>
-    | null
-    | undefined;
+    Array<PrivateAssetPackListingData> | null | undefined;
   privateGameTemplateListingDatas:
-    | Array<PrivateGameTemplateListingData>
-    | null
-    | undefined;
+    Array<PrivateGameTemplateListingData> | null | undefined;
   receivedAssetPacks:
     | ReadonlyArray<{
         readonly id: string;
@@ -940,8 +935,7 @@ export const redeemProduct = async ({
   password,
 }: {
   productListingData:
-    | PrivateAssetPackListingData
-    | PrivateGameTemplateListingData;
+    PrivateAssetPackListingData | PrivateGameTemplateListingData;
   getAuthorizationHeader: () => Promise<string>;
   userId: string;
   password: string;

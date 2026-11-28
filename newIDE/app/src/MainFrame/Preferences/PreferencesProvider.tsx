@@ -46,9 +46,7 @@ type State = Preferences;
 const localStorageItem = 'gd-preferences';
 
 export const loadPreferencesFromLocalStorage = ():
-  | PreferencesValues
-  | null
-  | undefined => {
+  PreferencesValues | null | undefined => {
   try {
     const persistedState = localStorage.getItem(localStorageItem);
     if (!persistedState) return null;
@@ -111,13 +109,9 @@ const getPreferences = (): PreferencesValues => {
 
 export default class PreferencesProvider extends React.Component<Props, State> {
   _periodicUpdateCheckTimeout:
-    | ReturnType<typeof setTimeout>
-    | null
-    | undefined = null;
+    ReturnType<typeof setTimeout> | null | undefined = null;
   _periodicUpdateCheckInterval:
-    | ReturnType<typeof setInterval>
-    | null
-    | undefined = null;
+    ReturnType<typeof setInterval> | null | undefined = null;
 
   state: State = {
     values: getPreferences(),
@@ -569,9 +563,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
 
   _setShowDeprecatedInstructionWarning(
     showDeprecatedInstructionWarning:
-      | 'no'
-      | 'icon'
-      | 'icon-and-deprecated-warning-text'
+      'no' | 'icon' | 'icon-and-deprecated-warning-text'
   ) {
     this.setState(
       (state) => ({
@@ -585,9 +577,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
   }
 
   _getShowDeprecatedInstructionWarning():
-    | 'no'
-    | 'icon'
-    | 'icon-and-deprecated-warning-text' {
+    'no' | 'icon' | 'icon-and-deprecated-warning-text' {
     return this.state.values.showDeprecatedInstructionWarning;
   }
 

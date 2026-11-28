@@ -52,11 +52,7 @@ type Props = {
 };
 
 type ChatStatus =
-  | 'working'
-  | 'waiting-for-user'
-  | 'error'
-  | 'suspended'
-  | 'ready';
+  'working' | 'waiting-for-user' | 'error' | 'suspended' | 'ready';
 
 const getChatStatus = (
   aiRequestSummary: AiRequestSummary,

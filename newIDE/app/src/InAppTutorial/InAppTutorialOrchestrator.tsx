@@ -1167,8 +1167,7 @@ const InAppTutorialOrchestrator = React.forwardRef<
       }
 
       let formattedStepTrigger:
-        | InAppTutorialFlowStepFormattedTrigger
-        | undefined;
+        InAppTutorialFlowStepFormattedTrigger | undefined;
       const stepTrigger = currentStep.nextStepTrigger;
       if (
         stepTrigger &&
@@ -1188,8 +1187,7 @@ const InAppTutorialOrchestrator = React.forwardRef<
           : undefined;
       } else {
         formattedStepTrigger = stepTrigger as
-          | InAppTutorialFlowStepFormattedTrigger
-          | undefined;
+          InAppTutorialFlowStepFormattedTrigger | undefined;
       }
       const formattedStep: InAppTutorialFlowFormattedStep = {
         ...currentStep,

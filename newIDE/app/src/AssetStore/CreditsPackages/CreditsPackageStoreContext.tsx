@@ -32,9 +32,7 @@ type CreditsUsageDialogOptions = {
 type CreditsPackageStoreState = {
   fetchCreditsPackages: () => void;
   creditsPackageListingDatas:
-    | Array<CreditsPackageListingData>
-    | null
-    | undefined;
+    Array<CreditsPackageListingData> | null | undefined;
   error: Error | null | undefined;
   openCreditsPackageDialog: (
     arg0: CreditsPackageDialogOpeningOptions | null | undefined

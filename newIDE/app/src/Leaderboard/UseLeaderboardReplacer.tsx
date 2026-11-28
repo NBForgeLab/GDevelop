@@ -381,30 +381,26 @@ export const useLeaderboardReplacer = (): UseLeaderboardReplacerOutput => {
     // An error happened. Store the errors and offer a way to
     // retry.
     return new Promise((resolve) => {
-      setOnRetry(
-        (): RetryOrAbandonCallback => () => {
-          // Keep only the errored leaderboards.
-          setLeaderboardsToReplace(
-            leaderboardsToReplace.filter((id) =>
-              leaderboardsWithErrors.some(
-                (erroredLeaderboard) => erroredLeaderboard.leaderboardId === id
-              )
+      setOnRetry((): RetryOrAbandonCallback => () => {
+        // Keep only the errored leaderboards.
+        setLeaderboardsToReplace(
+          leaderboardsToReplace.filter((id) =>
+            leaderboardsWithErrors.some(
+              (erroredLeaderboard) => erroredLeaderboard.leaderboardId === id
             )
-          );
-          // Launch the fetch again, and solve the promise once
-          // this new fetch resolve itself.
-          resolve(ensureLeaderboardsAreReplaced());
-        }
-      );
-      setOnAbandon(
-        (): RetryOrAbandonCallback => () => {
-          // Abandon: resolve immediately, closing the dialog
-          setErroredLeaderboards([]);
-          setShouldReplace(false);
-          setLeaderboardsToReplace(null);
-          resolve({ someLeaderboardsWereDuplicated: true });
-        }
-      );
+          )
+        );
+        // Launch the fetch again, and solve the promise once
+        // this new fetch resolve itself.
+        resolve(ensureLeaderboardsAreReplaced());
+      });
+      setOnAbandon((): RetryOrAbandonCallback => () => {
+        // Abandon: resolve immediately, closing the dialog
+        setErroredLeaderboards([]);
+        setShouldReplace(false);
+        setLeaderboardsToReplace(null);
+        resolve({ someLeaderboardsWereDuplicated: true });
+      });
     });
   }, [
     authenticatedUser,

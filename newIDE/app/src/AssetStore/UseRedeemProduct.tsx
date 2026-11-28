@@ -12,8 +12,7 @@ import PasswordPromptDialog from './PasswordPromptDialog';
 import Window from '../Utils/Window';
 
 type RedeemableProductListingData =
-  | PrivateAssetPackListingData
-  | PrivateGameTemplateListingData;
+  PrivateAssetPackListingData | PrivateGameTemplateListingData;
 
 /**
  * Claims a product given away to subscribers.

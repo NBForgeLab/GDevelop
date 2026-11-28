@@ -1,17 +1,8 @@
 export type Sha512Variant = 'SHA-384' | 'SHA-512';
 export type Sha512InputFormat =
-  | 'HEX'
-  | 'TEXT'
-  | 'B64'
-  | 'BYTES'
-  | 'ARRAYBUFFER'
-  | 'UINT8ARRAY';
+  'HEX' | 'TEXT' | 'B64' | 'BYTES' | 'ARRAYBUFFER' | 'UINT8ARRAY';
 export type Sha512OutputFormat =
-  | 'HEX'
-  | 'B64'
-  | 'BYTES'
-  | 'ARRAYBUFFER'
-  | 'UINT8ARRAY';
+  'HEX' | 'B64' | 'BYTES' | 'ARRAYBUFFER' | 'UINT8ARRAY';
 export type Sha512Encoding = 'UTF8' | 'UTF16BE' | 'UTF16LE';
 
 export interface Sha512Options {

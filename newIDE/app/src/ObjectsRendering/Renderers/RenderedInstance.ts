@@ -7,8 +7,8 @@ import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
  */
 export default class RenderedInstance<
   TPixiObject extends PIXI.DisplayObject = PIXI.DisplayObject,
-  TObjectConfiguration extends
-    gdObjectConfiguration | null = gdObjectConfiguration | null,
+  TObjectConfiguration extends gdObjectConfiguration | null =
+    gdObjectConfiguration | null,
 > {
   _project: gdProject;
   _instance: gdInitialInstance;

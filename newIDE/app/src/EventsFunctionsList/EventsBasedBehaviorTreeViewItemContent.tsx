@@ -89,9 +89,7 @@ export type EventsBasedBehaviorProps = TreeItemProps &
     eventsBasedBehaviorsList: gdEventsBasedBehaviorsList;
   };
 
-export class EventsBasedBehaviorTreeViewItemContent
-  implements TreeViewItemContent
-{
+export class EventsBasedBehaviorTreeViewItemContent implements TreeViewItemContent {
   eventsBasedBehavior: gdEventsBasedBehavior;
   props: EventsBasedBehaviorProps;
 

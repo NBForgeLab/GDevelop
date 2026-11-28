@@ -341,9 +341,7 @@ const adaptObjectHeader = (header: ObjectShortHeader): ObjectShortHeader => {
 
 export const getExtensionHeader = (
   extensionShortHeader:
-    | ExtensionShortHeader
-    | BehaviorShortHeader
-    | ObjectShortHeader
+    ExtensionShortHeader | BehaviorShortHeader | ObjectShortHeader
 ): Promise<ExtensionHeader> => {
   return cdnClient.get(extensionShortHeader.headerUrl).then((response) => {
     const data: ExtensionHeaderWithTagsAsString = response.data;

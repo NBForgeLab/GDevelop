@@ -27,13 +27,9 @@ type Props = {
     eventsFunctionCodeWriterCallbacks: EventsFunctionCodeWriterCallbacks
   ) => EventsFunctionCodeWriter | null | undefined;
   eventsFunctionsExtensionWriter:
-    | EventsFunctionsExtensionWriter
-    | null
-    | undefined;
+    EventsFunctionsExtensionWriter | null | undefined;
   eventsFunctionsExtensionOpener:
-    | EventsFunctionsExtensionOpener
-    | null
-    | undefined;
+    EventsFunctionsExtensionOpener | null | undefined;
 };
 
 /**

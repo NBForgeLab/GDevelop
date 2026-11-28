@@ -46,9 +46,7 @@ export type ExtensionSearchGroup = BaseGroup & {
 };
 
 export type GlobalSearchGroup =
-  | LayoutSearchGroup
-  | ExternalEventsSearchGroup
-  | ExtensionSearchGroup;
+  LayoutSearchGroup | ExternalEventsSearchGroup | ExtensionSearchGroup;
 
 export type GlobalSearchInputs = {
   searchText: string;

@@ -4,9 +4,7 @@ import {
   type FontResourceV2,
 } from '../../Utils/GDevelopServices/Asset';
 
-export class DurationResourceStoreSearchFilter
-  implements SearchFilter<AudioResourceV2>
-{
+export class DurationResourceStoreSearchFilter implements SearchFilter<AudioResourceV2> {
   durationMin: number;
   durationMax: number;
   static durationMarks: Array<number> = [0, 2, 5, 20, 60, 300, 1800];
@@ -42,9 +40,7 @@ export class DurationResourceStoreSearchFilter
   }
 }
 
-export class AudioTypeResourceStoreSearchFilter
-  implements SearchFilter<AudioResourceV2>
-{
+export class AudioTypeResourceStoreSearchFilter implements SearchFilter<AudioResourceV2> {
   type: 'sound' | 'music' | null;
 
   constructor(type: 'sound' | 'music' | null = null) {
@@ -61,9 +57,7 @@ export class AudioTypeResourceStoreSearchFilter
   }
 }
 
-export class AlphabetSupportResourceStoreSearchFilter
-  implements SearchFilter<FontResourceV2>
-{
+export class AlphabetSupportResourceStoreSearchFilter implements SearchFilter<FontResourceV2> {
   alphabets: string[];
 
   constructor(alphabets?: string[]) {

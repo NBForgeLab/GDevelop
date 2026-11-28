@@ -31,9 +31,7 @@ const getInlineParameterDisplayValue = (
 };
 
 export const useFetchLeaderboards = ():
-  | Array<Leaderboard>
-  | null
-  | undefined => {
+  Array<Leaderboard> | null | undefined => {
   const { leaderboards, listLeaderboards } =
     React.useContext(LeaderboardContext);
   const fetchLeaderboards = React.useCallback(async () => {

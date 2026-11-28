@@ -26,9 +26,7 @@ type Props = {
   children: (arg0: {
     storageProviders: Array<StorageProvider>;
     getStorageProviderResourceOperations: () =>
-      | ResourcesActionsMenuBuilder
-      | null
-      | undefined;
+      ResourcesActionsMenuBuilder | null | undefined;
     getStorageProviderOperations: (
       newStorageProvider?: StorageProvider | null
     ) => StorageProviderOperations;

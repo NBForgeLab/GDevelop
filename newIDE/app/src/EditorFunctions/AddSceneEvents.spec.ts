@@ -210,30 +210,28 @@ describe('add_scene_events', () => {
     changes: (Array.isArray(changeOrChanges)
       ? changeOrChanges
       : [changeOrChanges]
-    ).map(
-      (change): Record<string, any> => ({
-        operationName: 'insert_at_end',
-        operationTargetEvent: null,
-        isEventsJsonValid: true,
+    ).map((change): Record<string, any> => ({
+      operationName: 'insert_at_end',
+      operationTargetEvent: null,
+      isEventsJsonValid: true,
 
-        generatedEvents: JSON.stringify([
-          {
-            type: 'BuiltinCommonInstructions::Standard',
-            conditions: [],
-            actions: [],
-          },
-        ]),
+      generatedEvents: JSON.stringify([
+        {
+          type: 'BuiltinCommonInstructions::Standard',
+          conditions: [],
+          actions: [],
+        },
+      ]),
 
-        areEventsValid: true,
-        extensionNames: [],
-        diagnosticLines: [],
-        undeclaredVariables: [],
-        undeclaredObjectVariables: {},
-        missingObjectBehaviors: {},
-        missingResources: [],
-        ...change,
-      })
-    ),
+      areEventsValid: true,
+      extensionNames: [],
+      diagnosticLines: [],
+      undeclaredVariables: [],
+      undeclaredObjectVariables: {},
+      missingObjectBehaviors: {},
+      missingResources: [],
+      ...change,
+    })),
     error: null,
     stats: null,
   });

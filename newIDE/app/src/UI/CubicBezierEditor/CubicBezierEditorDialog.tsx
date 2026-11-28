@@ -222,8 +222,7 @@ const CubicBezierEditorDialog = ({
   };
 
   const secondaryActions:
-    | Array<React.ReactNode | null | undefined>
-    | undefined = namedEasing
+    Array<React.ReactNode | null | undefined> | undefined = namedEasing
     ? [
         <FlatButton
           key="delete-named-easing"

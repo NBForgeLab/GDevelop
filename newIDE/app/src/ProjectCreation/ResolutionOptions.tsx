@@ -49,10 +49,7 @@ const styles = {
 };
 
 export type ResolutionOption =
-  | 'mobilePortrait'
-  | 'desktopMobileLandscape'
-  | 'desktopHD'
-  | 'custom';
+  'mobilePortrait' | 'desktopMobileLandscape' | 'desktopHD' | 'custom';
 
 export const resolutionOptions: {
   [key in ResolutionOption]: {

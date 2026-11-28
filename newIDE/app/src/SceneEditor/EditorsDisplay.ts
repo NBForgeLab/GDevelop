@@ -142,8 +142,7 @@ export type SceneEditorsDisplayProps = {
   onWillInstallExtension: (extensionNames: Array<string>) => void;
   onExtensionInstalled: (extensionNames: Array<string>) => void;
   onCreateNewExtensionWithBehavior:
-    | ((project: gdProject, object: gdObject) => void)
-    | null;
+    ((project: gdProject, object: gdObject) => void) | null;
   updateBehaviorsSharedData: () => void;
   onInstancesAdded: (arg0: Array<gdInitialInstance>) => void;
   onInstancesSelected: (arg0: Array<gdInitialInstance>) => void;

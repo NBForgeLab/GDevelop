@@ -55,10 +55,7 @@ const styles = {
 
 const formatBuildText = (
   buildType:
-    | 'cordova-build'
-    | 'cordova-ios-build'
-    | 'electron-build'
-    | 'web-build'
+    'cordova-build' | 'cordova-ios-build' | 'electron-build' | 'web-build'
 ) => {
   switch (buildType) {
     case 'cordova-build':
@@ -76,10 +73,7 @@ const formatBuildText = (
 
 const getIcon = (
   buildType:
-    | 'cordova-build'
-    | 'cordova-ios-build'
-    | 'electron-build'
-    | 'web-build'
+    'cordova-build' | 'cordova-ios-build' | 'electron-build' | 'web-build'
 ) => {
   switch (buildType) {
     case 'cordova-build':

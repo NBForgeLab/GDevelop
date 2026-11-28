@@ -54,9 +54,7 @@ const getPositiveNumber = (
 const describeRun = (
   run: AutomatedAiRequestRun,
   getOpenedProject:
-    | (() => McpOpenedProject | null | undefined)
-    | null
-    | undefined
+    (() => McpOpenedProject | null | undefined) | null | undefined
 ): McpServerToolOutput => {
   const result = run.getResult();
   const openedProject = getOpenedProject ? getOpenedProject() : null;

@@ -10,11 +10,7 @@ export type EducationForm = {
 };
 
 export type EducationFormStatus =
-  | 'login'
-  | 'fill'
-  | 'sending'
-  | 'success'
-  | 'error';
+  'login' | 'fill' | 'sending' | 'success' | 'error';
 
 const emptyForm = {
   firstName: '',

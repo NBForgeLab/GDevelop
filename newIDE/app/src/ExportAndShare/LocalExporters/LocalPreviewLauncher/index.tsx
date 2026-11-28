@@ -118,13 +118,9 @@ export default class LocalPreviewLauncher extends React.Component<
     captureOptions: null,
   };
   _networkPreviewSubscriptionChecker:
-    | SubscriptionCheckerInterface
-    | null
-    | undefined = null;
+    SubscriptionCheckerInterface | null | undefined = null;
   _hotReloadSubscriptionChecker:
-    | SubscriptionCheckerInterface
-    | null
-    | undefined = null;
+    SubscriptionCheckerInterface | null | undefined = null;
 
   _openPreviewBrowserWindow = () => {
     const {

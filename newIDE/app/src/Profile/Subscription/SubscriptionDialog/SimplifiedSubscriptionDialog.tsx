@@ -324,9 +324,7 @@ const ContinueForFreeButton = ({
 type Props = {
   onClose: (...args: Array<any>) => any;
   availableSubscriptionPlansWithPrices:
-    | SubscriptionPlanWithPricingSystems[]
-    | null
-    | undefined;
+    SubscriptionPlanWithPricingSystems[] | null | undefined;
   featuredPlanId?: string | null;
   onOpenPendingDialog: (open: boolean) => void;
   couponCode?: string | null;

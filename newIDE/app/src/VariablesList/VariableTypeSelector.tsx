@@ -37,8 +37,7 @@ type Props = {
 
 let options: Array<React.ReactElement> | undefined;
 let variableTypeToIcon:
-  | Record<number, React.ComponentType<SvgIconProps>>
-  | undefined;
+  Record<number, React.ComponentType<SvgIconProps>> | undefined;
 let variableTypeToString: Record<string, string> | undefined;
 let variableTypeToLabel: Record<number, MessageDescriptor> | undefined;
 

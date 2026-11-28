@@ -20,7 +20,8 @@ export type TextFieldStyleProps = {
   padding?: number;
 };
 
-type ValueProps = // Support "text", "password" and "email" type:
+type ValueProps =
+  // Support "text", "password" and "email" type:
   // "email" type is used to display appropriate keyboard on mobile.
   // Support "number" type (note that onChange returns a string):
   | {

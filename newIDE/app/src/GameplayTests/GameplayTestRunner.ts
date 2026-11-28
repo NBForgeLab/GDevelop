@@ -521,9 +521,7 @@ const runSingleTest = async ({
   speedFactor: number | null;
   stateInspectors: GameplayTestStateInspectors;
   onProgress:
-    | ((test: GameplayTestToRun, frame: number) => void)
-    | null
-    | undefined;
+    ((test: GameplayTestToRun, frame: number) => void) | null | undefined;
 }): Promise<GameplayTestResult> => {
   const messageId = 'gameplay-test-' + nextRunMessageId++;
 

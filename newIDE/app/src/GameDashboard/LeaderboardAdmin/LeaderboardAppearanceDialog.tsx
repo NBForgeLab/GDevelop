@@ -91,9 +91,7 @@ const unitSelectOptions = typedOrderedTimeUnits.reduce<
 type Props = {
   open: boolean;
   leaderboardCustomizationSettings:
-    | LeaderboardCustomizationSettings
-    | null
-    | undefined;
+    LeaderboardCustomizationSettings | null | undefined;
   onSave: (
     leaderboardCustomizationSettings: LeaderboardCustomizationSettings
   ) => Promise<void>;

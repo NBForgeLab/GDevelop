@@ -4,9 +4,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { tooltipEnterDelay } from '../UI/Tooltip';
 
 export type ToolbarButtonHooksNames =
-  | 'onEditorReady'
-  | 'onPreviewStart'
-  | 'onPreviewEnd';
+  'onEditorReady' | 'onPreviewStart' | 'onPreviewEnd';
 
 export type ToolbarButtonConfig = {
   name: string;

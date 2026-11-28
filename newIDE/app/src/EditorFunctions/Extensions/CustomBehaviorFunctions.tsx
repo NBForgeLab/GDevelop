@@ -242,7 +242,8 @@ export const getObjectTypesUsingBehavior = (
   project: gdProject,
   eventsFunctionsExtension: gdEventsFunctionsExtension,
   eventsBasedBehavior: gdEventsBasedBehavior
-): Array<string> => // `toNewVectorString` returns a static temporary: never delete it.
+): Array<string> =>
+  // `toNewVectorString` returns a static temporary: never delete it.
   gd.WholeProjectRefactorer.getAllObjectTypesUsingEventsBasedBehavior(
     project,
     eventsFunctionsExtension,

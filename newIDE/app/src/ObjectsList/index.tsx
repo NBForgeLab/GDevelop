@@ -1281,20 +1281,18 @@ const ObjectsList = React.forwardRef<ObjectsListInterface, Props>(
               ),
               placeholder: new PlaceHolderTreeViewItem(
                 globalObjectsEmptyPlaceholderId,
-                (
-                  <Trans>
-                    There is no{' '}
-                    <Link
-                      href={globalObjectsWikiLink}
-                      onClick={() =>
-                        Window.openExternalURL(globalObjectsWikiLink)
-                      }
-                    >
-                      global object
-                    </Link>{' '}
-                    yet.
-                  </Trans>
-                ),
+                <Trans>
+                  There is no{' '}
+                  <Link
+                    href={globalObjectsWikiLink}
+                    onClick={() =>
+                      Window.openExternalURL(globalObjectsWikiLink)
+                    }
+                  >
+                    global object
+                  </Link>{' '}
+                  yet.
+                </Trans>,
                 () => [buildPasteMenuItem(i18n, globalObjectsRootFolder, true)]
               ),
               objectTreeViewItemProps,
@@ -2056,10 +2054,8 @@ const ObjectsList = React.forwardRef<ObjectsListInterface, Props>(
   }
 );
 
-const arePropsEqual = (
-  prevProps: Props,
-  nextProps: Props
-): boolean => // The component is costly to render, so avoid any re-rendering as much
+const arePropsEqual = (prevProps: Props, nextProps: Props): boolean =>
+  // The component is costly to render, so avoid any re-rendering as much
   // as possible.
   // We make the assumption that no changes to objects list is made outside
   // from the component.

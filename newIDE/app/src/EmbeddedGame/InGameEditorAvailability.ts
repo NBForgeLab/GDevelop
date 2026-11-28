@@ -2,8 +2,7 @@ import * as React from 'react';
 import { isWebGL2Supported } from '../Utils/WebGL';
 
 export type InGameEditorUnavailabilityReason =
-  | 'webgl2-not-supported'
-  | 'renderer-creation-failed';
+  'webgl2-not-supported' | 'renderer-creation-failed';
 
 // Reported by the in-game editor (the runtime) when it starts: the 3D
 // renderer can fail to be created even if WebGL2 is supported (for example,

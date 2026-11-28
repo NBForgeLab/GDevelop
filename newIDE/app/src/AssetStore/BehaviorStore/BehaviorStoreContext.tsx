@@ -326,18 +326,17 @@ export const BehaviorStoreStateProvider = ({
   }, [allTranslatedBehaviors, firstBehaviorIds, installedBehaviorMetadataList]);
 
   const searchResults:
-    | Array<SearchResult<BehaviorShortHeader>>
-    | null
-    | undefined = useSearchStructuredItem(allTranslatedBehaviors, {
-    searchText,
-    chosenItemCategory: chosenCategory,
-    chosenCategory: filtersState.chosenCategory,
-    chosenFilters: filtersState.chosenFilters,
-    excludedTiers: showExperimentalExtensions
-      ? noExcludedTiers
-      : excludedExperimentalTiers,
-    defaultFirstSearchItemIds: defaultFirstSearchItemIds,
-  });
+    Array<SearchResult<BehaviorShortHeader>> | null | undefined =
+    useSearchStructuredItem(allTranslatedBehaviors, {
+      searchText,
+      chosenItemCategory: chosenCategory,
+      chosenCategory: filtersState.chosenCategory,
+      chosenFilters: filtersState.chosenFilters,
+      excludedTiers: showExperimentalExtensions
+        ? noExcludedTiers
+        : excludedExperimentalTiers,
+      defaultFirstSearchItemIds: defaultFirstSearchItemIds,
+    });
 
   const behaviorStoreState = React.useMemo(
     () => ({

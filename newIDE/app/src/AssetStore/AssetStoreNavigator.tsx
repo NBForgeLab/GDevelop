@@ -16,13 +16,9 @@ export type AssetStorePageState = {
   openedShopCategory: string | null;
   openedAssetShortHeader: AssetShortHeader | null | undefined;
   openedPrivateAssetPackListingData:
-    | PrivateAssetPackListingData
-    | null
-    | undefined;
+    PrivateAssetPackListingData | null | undefined;
   openedPrivateGameTemplateListingData:
-    | PrivateGameTemplateListingData
-    | null
-    | undefined;
+    PrivateGameTemplateListingData | null | undefined;
   openedBundleListingData: BundleListingData | null | undefined;
   selectedFolders: Array<string>;
   filtersState: FiltersState;

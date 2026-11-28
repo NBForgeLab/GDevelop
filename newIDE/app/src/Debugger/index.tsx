@@ -95,9 +95,7 @@ type State = {
 export default class Debugger extends React.Component<Props, State> {
   state: any = {
     debuggerServerState: this.props.previewDebuggerServer.getServerState() as
-      | 'started'
-      | 'starting'
-      | 'stopped',
+      'started' | 'starting' | 'stopped',
     debuggerServerError: null,
     debuggerIds: getInspectableDebuggerIds(
       this.props.previewDebuggerServer.getExistingDebuggerIds()

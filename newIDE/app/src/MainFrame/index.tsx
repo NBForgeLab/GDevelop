@@ -476,9 +476,7 @@ export type Props = {
     storageProvider?: StorageProvider | null
   ) => StorageProviderOperations;
   getStorageProviderResourceOperations: () =>
-    | ResourcesActionsMenuBuilder
-    | null
-    | undefined;
+    ResourcesActionsMenuBuilder | null | undefined;
   getStorageProvider: () => StorageProvider;
   resourceSources: Array<ResourceSource>;
   resourceExternalEditors: Array<ResourceExternalEditor>;
@@ -3339,10 +3337,7 @@ const MainFrame = (props: Props): React.ReactElement<any> => {
         openEventsEditor: boolean;
         openSceneEditor: boolean;
         focusWhenOpened:
-          | 'scene-or-events-otherwise'
-          | 'scene'
-          | 'events'
-          | 'none';
+          'scene-or-events-otherwise' | 'scene' | 'events' | 'none';
       }
     ): EditorTabsState => {
       const sceneEditorOptions = getEditorOpeningOptions({
@@ -3379,10 +3374,7 @@ const MainFrame = (props: Props): React.ReactElement<any> => {
         openEventsEditor: boolean;
         openSceneEditor: boolean;
         focusWhenOpened:
-          | 'scene-or-events-otherwise'
-          | 'scene'
-          | 'events'
-          | 'none';
+          'scene-or-events-otherwise' | 'scene' | 'events' | 'none';
       } = {
         openEventsEditor: true,
         openSceneEditor: true,
@@ -6073,10 +6065,7 @@ const MainFrame = (props: Props): React.ReactElement<any> => {
         openEventsEditor: boolean;
         openSceneEditor: boolean;
         focusWhenOpened:
-          | 'scene-or-events-otherwise'
-          | 'scene'
-          | 'events'
-          | 'none';
+          'scene-or-events-otherwise' | 'scene' | 'events' | 'none';
       }
     ) => openLayout(name, options),
     onWillInstallExtension,

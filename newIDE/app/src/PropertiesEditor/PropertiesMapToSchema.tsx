@@ -535,9 +535,7 @@ const isPropertyVisible = ({
 
 type CommonProps = {
   defaultValueProperties:
-    | gdPropertiesContainer
-    | gdMapStringPropertyDescriptor
-    | null;
+    gdPropertiesContainer | gdMapStringPropertyDescriptor | null;
   object?: gdObject | null;
   visibility?: 'All' | 'Basic' | 'Advanced' | 'Deprecated';
   showcaseNonDefaultValues?: boolean;

@@ -52,8 +52,7 @@ const ClaimableProductsDialog = ({
 
   const openInStore = (
     productListingData:
-      | PrivateAssetPackListingData
-      | PrivateGameTemplateListingData
+      PrivateAssetPackListingData | PrivateGameTemplateListingData
   ) => {
     addRouteArguments(
       productListingData.productType === 'GAME_TEMPLATE'

@@ -2290,7 +2290,7 @@ class NumberGenerator {
    */
   getNextRandomNumber(): number {
     // Masks would more efficient but less readable.
-    this.x = (1103515245 * this.x + 12345) % 2 ** 31 >> 16;
+    this.x = ((1103515245 * this.x + 12345) % 2 ** 31) >> 16;
     return this.x / 2 ** 15;
   }
 }

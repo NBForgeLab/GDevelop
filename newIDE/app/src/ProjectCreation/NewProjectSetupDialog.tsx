@@ -139,21 +139,15 @@ type Props = {
     exampleShortHeader: ExampleShortHeader | null | undefined
   ) => void;
   selectedPrivateGameTemplateListingData:
-    | PrivateGameTemplateListingData
-    | null
-    | undefined;
+    PrivateGameTemplateListingData | null | undefined;
   onSelectPrivateGameTemplateListingData: (
     privateGameTemplateListingData:
-      | PrivateGameTemplateListingData
-      | null
-      | undefined
+      PrivateGameTemplateListingData | null | undefined
   ) => void;
   storageProviders: Array<StorageProvider>;
   storageProvider: StorageProvider | null | undefined;
   privateGameTemplateListingDatasFromSameCreator:
-    | Array<PrivateGameTemplateListingData>
-    | null
-    | undefined;
+    Array<PrivateGameTemplateListingData> | null | undefined;
   preventBackHome?: boolean;
   onOpenLayout: (
     sceneName: string,
@@ -161,10 +155,7 @@ type Props = {
       openEventsEditor: boolean;
       openSceneEditor: boolean;
       focusWhenOpened:
-        | 'scene-or-events-otherwise'
-        | 'scene'
-        | 'events'
-        | 'none';
+        'scene-or-events-otherwise' | 'scene' | 'events' | 'none';
     }
   ) => void;
   onWillInstallExtension: (extensionNames: Array<string>) => void;

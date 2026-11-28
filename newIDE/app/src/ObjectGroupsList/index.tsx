@@ -750,10 +750,8 @@ const ObjectGroupsList = React.forwardRef<ObjectGroupsListInterface, Props>(
   }
 );
 
-const arePropsEqual = (
-  prevProps: Props,
-  nextProps: Props
-): boolean => // The component is costly to render, so avoid any re-rendering as much
+const arePropsEqual = (prevProps: Props, nextProps: Props): boolean =>
+  // The component is costly to render, so avoid any re-rendering as much
   // as possible.
   // We make the assumption that no changes to groups list is made outside
   // from the component.

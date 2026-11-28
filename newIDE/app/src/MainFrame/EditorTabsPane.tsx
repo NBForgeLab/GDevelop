@@ -174,10 +174,7 @@ export type EditorTabsPaneCommonProps = {
       openEventsEditor: boolean;
       openSceneEditor: boolean;
       focusWhenOpened:
-        | 'scene-or-events-otherwise'
-        | 'scene'
-        | 'events'
-        | 'none';
+        'scene-or-events-otherwise' | 'scene' | 'events' | 'none';
     }
   ) => void;
   openExternalLayout: (name: string) => void;
@@ -256,9 +253,7 @@ export type EditorTabsPaneCommonProps = {
   }) => void;
   onSelectPrivateGameTemplateListingData: (arg0: {
     privateGameTemplateListingData:
-      | PrivateGameTemplateListingData
-      | null
-      | undefined;
+      PrivateGameTemplateListingData | null | undefined;
     preventBackHome?: boolean;
   }) => void;
   createEmptyProject: (
@@ -343,8 +338,7 @@ export type EditorTabsPaneCommonProps = {
   onWillInstallExtension: (extensionNames: Array<string>) => void;
   onExtensionInstalled: (extensionNames: Array<string>) => void;
   onCreateNewExtensionWithBehavior:
-    | ((project: gdProject, object: gdObject) => void)
-    | null;
+    ((project: gdProject, object: gdObject) => void) | null;
   onLoadEventsFunctionsExtensions: (arg0: {
     shouldHotReloadEditor: boolean;
   }) => Promise<void>;

@@ -36,8 +36,7 @@ export type TreeNode<T> =
 export type InstructionTreeNode = TreeNode<EnumeratedInstructionMetadata>;
 export type ExpressionTreeNode = TreeNode<EnumeratedExpressionMetadata>;
 export type InstructionOrExpressionTreeNode =
-  | InstructionTreeNode
-  | EnumeratedExpressionMetadata;
+  InstructionTreeNode | EnumeratedExpressionMetadata;
 
 export const createTree = <T extends EnumeratedInstructionOrExpressionMetadata>(
   allExpressions: Array<T>,

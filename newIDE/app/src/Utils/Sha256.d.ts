@@ -2,12 +2,7 @@ declare class jsSHA {
   constructor(
     variant: 'SHA-224' | 'SHA-256',
     inputFormat:
-      | 'HEX'
-      | 'TEXT'
-      | 'B64'
-      | 'BYTES'
-      | 'ARRAYBUFFER'
-      | 'UINT8ARRAY',
+      'HEX' | 'TEXT' | 'B64' | 'BYTES' | 'ARRAYBUFFER' | 'UINT8ARRAY',
     options?: {
       encoding?: string;
       numRounds?: number;

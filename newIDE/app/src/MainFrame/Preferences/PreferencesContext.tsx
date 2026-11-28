@@ -246,9 +246,7 @@ export type PreferencesValues = {
   showCreateSectionByDefault: boolean;
   showInAppTutorialDeveloperMode: boolean;
   showDeprecatedInstructionWarning:
-    | 'no'
-    | 'icon'
-    | 'icon-and-deprecated-warning-text';
+    'no' | 'icon' | 'icon-and-deprecated-warning-text';
   openDiagnosticReportAutomatically: boolean;
   blockPreviewAndExportOnDiagnosticErrors: boolean;
   use3DEditor: boolean;
@@ -383,9 +381,7 @@ export type Preferences = {
     value: 'no' | 'icon' | 'icon-and-deprecated-warning-text'
   ) => void;
   getShowDeprecatedInstructionWarning: () =>
-    | 'no'
-    | 'icon'
-    | 'icon-and-deprecated-warning-text';
+    'no' | 'icon' | 'icon-and-deprecated-warning-text';
   setUse3DEditor: (enabled: boolean) => void;
   getUse3DEditor: () => boolean;
   setShowBasicProfilingCounters: (enabled: boolean) => void;
@@ -470,8 +466,7 @@ export const initialPreferences = {
     hasProjectOpened: false,
     userShortcutMap: {},
     newObjectDialogDefaultTab: (electron ? 'new-object' : 'asset-store') as
-      | 'asset-store'
-      | 'new-object',
+      'asset-store' | 'new-object',
     // Show the effects of the store first, as they are not otherwise visible.
     newEffectDialogDefaultTab: 'asset-store' as 'asset-store' | 'from-scratch',
     shareDialogDefaultTab: 'publish' as 'invite' | 'publish',
@@ -486,9 +481,7 @@ export const initialPreferences = {
     openDiagnosticReportAutomatically: true,
     blockPreviewAndExportOnDiagnosticErrors: false,
     showDeprecatedInstructionWarning: 'no' as
-      | 'no'
-      | 'icon'
-      | 'icon-and-deprecated-warning-text',
+      'no' | 'icon' | 'icon-and-deprecated-warning-text',
     use3DEditor: isWebGL2Supported() as boolean,
     showBasicProfilingCounters: false,
     inAppTutorialsProgress: {},
@@ -504,9 +497,7 @@ export const initialPreferences = {
     fetchPlayerTokenForPreviewAutomatically: true,
     previewCrashReportUploadLevel: 'exclude-javascript-code-events',
     gamesDashboardOrderBy: 'lastModifiedAt' as
-      | 'lastModifiedAt'
-      | 'totalSessions'
-      | 'weeklySessions',
+      'lastModifiedAt' | 'totalSessions' | 'weeklySessions',
     takeScreenshotOnPreview: true,
     gameplayTestFramePosition: null,
     gameplayTestFrameZoomFactor: null,
@@ -583,9 +574,7 @@ export const initialPreferences = {
   getBlockPreviewAndExportOnDiagnosticErrors: (): boolean => false,
   setBlockPreviewAndExportOnDiagnosticErrors: (enabled: boolean) => {},
   getShowDeprecatedInstructionWarning: ():
-    | 'no'
-    | 'icon'
-    | 'icon-and-deprecated-warning-text' => 'no',
+    'no' | 'icon' | 'icon-and-deprecated-warning-text' => 'no',
   setUse3DEditor: (enabled: boolean) => {},
   getUse3DEditor: (): boolean => false,
   setShowBasicProfilingCounters: (enabled: boolean) => {},

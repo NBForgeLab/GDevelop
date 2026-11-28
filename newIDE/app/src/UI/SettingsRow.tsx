@@ -65,9 +65,8 @@ const SettingsRowContext = React.createContext<
  * easy to do by mistake with a mouse or on a touchscreen.
  */
 export const useSettingsRowControlIds = ():
-  | SettingsRowControlIds
-  | null
-  | undefined => React.useContext(SettingsRowContext);
+  SettingsRowControlIds | null | undefined =>
+  React.useContext(SettingsRowContext);
 
 let generatedRowIdsCount = 0;
 

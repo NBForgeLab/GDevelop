@@ -243,9 +243,7 @@ export const getEventsFunctionFolderTreeViewItemId = (
   return `function-folder-${functionFolder.ptr}`;
 };
 
-export class EventsFunctionFolderTreeViewItemContent
-  implements TreeViewItemContent
-{
+export class EventsFunctionFolderTreeViewItemContent implements TreeViewItemContent {
   functionFolder: gdFunctionFolderOrFunction;
   props: EventsFunctionFolderProps;
 

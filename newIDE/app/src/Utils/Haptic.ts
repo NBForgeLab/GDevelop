@@ -14,8 +14,7 @@ export const hapticPatterns = {
 };
 
 export const hapticFeedback:
-  | ((arg0: { pattern: Array<number> }) => void)
-  | null = !isNativeMobileApp()
+  ((arg0: { pattern: Array<number> }) => void) | null = !isNativeMobileApp()
   ? ({ pattern }) => {
       try {
         if (window.navigator && window.navigator.vibrate) {

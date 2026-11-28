@@ -123,8 +123,7 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance<
    */
   _keepCachedBitmapScaleMode() {
     const pixiObject = this._pixiObject as
-      | (PIXI.Container & Record<string, any>)
-      | null;
+      (PIXI.Container & Record<string, any>) | null;
     if (!pixiObject) return;
     // The canvas method is used when the renderer falls back to canvas.
     for (const methodName of [

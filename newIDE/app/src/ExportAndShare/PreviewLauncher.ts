@@ -193,9 +193,7 @@ export type PreviewLauncherInterface = {
   readonly closePreview?: (windowId: number) => void;
   readonly closeAllPreviews?: () => void;
   readonly getPreviewDebuggerServer: () =>
-    | PreviewDebuggerServer
-    | null
-    | undefined;
+    PreviewDebuggerServer | null | undefined;
 };
 
 /**

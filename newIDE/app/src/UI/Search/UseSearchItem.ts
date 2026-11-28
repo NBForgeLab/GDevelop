@@ -28,9 +28,9 @@ export interface SearchFilter<SearchItem> {
   hasFilters(): boolean;
 }
 
-export class TagSearchFilter<SearchItem extends AssetShortHeader | ResourceV2>
-  implements SearchFilter<SearchItem>
-{
+export class TagSearchFilter<
+  SearchItem extends AssetShortHeader | ResourceV2,
+> implements SearchFilter<SearchItem> {
   tags: Set<string>;
 
   constructor(tags: Set<string> = new Set()) {

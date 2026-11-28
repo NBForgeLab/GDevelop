@@ -371,12 +371,10 @@ export type LockedTextBasedCourseChapter = {
 };
 
 export type VideoBasedCourseChapter =
-  | LockedVideoBasedCourseChapter
-  | UnlockedVideoBasedCourseChapter;
+  LockedVideoBasedCourseChapter | UnlockedVideoBasedCourseChapter;
 
 export type TextBasedCourseChapter =
-  | LockedTextBasedCourseChapter
-  | UnlockedTextBasedCourseChapter;
+  LockedTextBasedCourseChapter | UnlockedTextBasedCourseChapter;
 
 export type CourseChapter =
   | LockedVideoBasedCourseChapter

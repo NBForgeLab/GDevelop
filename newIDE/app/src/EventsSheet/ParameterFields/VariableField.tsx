@@ -68,14 +68,11 @@ type Props = ParameterFieldProps & {
     projectScopedContainers: gdProjectScopedContainers
   ) => VariablesContainer_SourceType;
   openVariableEditorDialog:
-    | ((variableDialogOpeningProps: VariableDialogOpeningProps) => void)
-    | null;
+    ((variableDialogOpeningProps: VariableDialogOpeningProps) => void) | null;
   editEventsFunctionParameter:
-    | ((variableDialogOpeningProps: VariableDialogOpeningProps) => void)
-    | null;
+    ((variableDialogOpeningProps: VariableDialogOpeningProps) => void) | null;
   openEventsBasedEntityPropertyEditorDialog:
-    | ((variableDialogOpeningProps: VariableDialogOpeningProps) => void)
-    | null;
+    ((variableDialogOpeningProps: VariableDialogOpeningProps) => void) | null;
   expressionType: ExpressionType;
   expressionTypeExtraInfo?: string;
 };

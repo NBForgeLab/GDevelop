@@ -726,11 +726,9 @@ let onSetGameplayTestFramePreviewLocation:
   | ((previewIndexHtmlLocation: string, gameResolution: Size | null) => void) =
   null;
 let onSetGameplayTestFrameRunStatus:
-  | null
-  | ((runStatus: GameplayTestFrameRunStatus | null) => void) = null;
+  null | ((runStatus: GameplayTestFrameRunStatus | null) => void) = null;
 let onSetGameplayTestFrameHiddenPause:
-  | null
-  | ((hiddenPause: GameplayTestFrameHiddenPause | null) => void) = null;
+  null | ((hiddenPause: GameplayTestFrameHiddenPause | null) => void) = null;
 
 /**
  * Point the gameplay test frame to a preview (and show it).

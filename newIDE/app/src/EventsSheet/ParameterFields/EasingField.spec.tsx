@@ -352,8 +352,7 @@ describe('EasingField named easings', () => {
     0.34, 1.56, 0.64, 1,
   ];
   let originalRenameNamedEasing:
-    | typeof gd.WholeProjectRefactorer.renameNamedEasing
-    | null = null;
+    typeof gd.WholeProjectRefactorer.renameNamedEasing | null = null;
   let originalRenameNamedEasingInEventsFunctionsExtension:
     | typeof gd.WholeProjectRefactorer.renameNamedEasingInEventsFunctionsExtension
     | null = null;

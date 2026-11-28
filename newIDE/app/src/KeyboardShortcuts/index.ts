@@ -15,14 +15,15 @@ import { SafeExtractor } from '../Utils/SafeExtractor';
 const electron = optionalRequire('electron');
 
 // Valid action keys
-type KeyType = // A-Z
+type KeyType =
+  // A-Z
 
-    | 'alphabet' // Numrow 0-9
-    | 'number' // F1-F12
-    | 'fn-row' // Numpad+, Numpad-
-    | 'numpad-arith' // Numrow-, Numrow=
-    | 'numrow-arith'
-    | 'other'; // Tab, Space
+  | 'alphabet' // Numrow 0-9
+  | 'number' // F1-F12
+  | 'fn-row' // Numpad+, Numpad-
+  | 'numpad-arith' // Numrow-, Numrow=
+  | 'numrow-arith'
+  | 'other'; // Tab, Space
 
 /**
  * Map deprecated (but still used in the runtime) key codes to their new "code"

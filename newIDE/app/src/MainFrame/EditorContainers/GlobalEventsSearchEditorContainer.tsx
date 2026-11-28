@@ -20,9 +20,7 @@ import {
 
 export class GlobalEventsSearchEditorContainer extends React.Component<RenderEditorContainerProps> {
   _globalEventsSearchEditorRef:
-    | GlobalEventsSearchEditorInterface
-    | null
-    | undefined = null;
+    GlobalEventsSearchEditorInterface | null | undefined = null;
 
   componentDidMount() {
     if (this.props.setToolbar) {

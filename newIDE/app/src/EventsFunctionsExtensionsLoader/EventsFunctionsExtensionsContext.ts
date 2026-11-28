@@ -22,13 +22,9 @@ export type EventsFunctionsExtensionsState = {
     extension: gdEventsFunctionsExtension
   ) => void;
   getEventsFunctionsExtensionWriter: () =>
-    | EventsFunctionsExtensionWriter
-    | null
-    | undefined;
+    EventsFunctionsExtensionWriter | null | undefined;
   getEventsFunctionsExtensionOpener: () =>
-    | EventsFunctionsExtensionOpener
-    | null
-    | undefined;
+    EventsFunctionsExtensionOpener | null | undefined;
   ensureLoadFinished: () => Promise<void>;
   getIncludeFileHashs: () => {
     [key: string]: number;

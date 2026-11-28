@@ -208,11 +208,8 @@ export const ExtensionStoreStateProvider = ({
   }, [translatedExtensionShortHeadersByName]);
 
   const searchResults:
-    | Array<SearchResult<ExtensionShortHeader>>
-    | null
-    | undefined = useSearchStructuredItem(
-    translatedExtensionShortHeadersByName,
-    {
+    Array<SearchResult<ExtensionShortHeader>> | null | undefined =
+    useSearchStructuredItem(translatedExtensionShortHeadersByName, {
       searchText,
       chosenItemCategory: chosenCategory,
       chosenCategory: filtersState.chosenCategory,
@@ -221,8 +218,7 @@ export const ExtensionStoreStateProvider = ({
         ? noExcludedTiers
         : excludedExperimentalTiers,
       defaultFirstSearchItemIds: firstExtensionIds,
-    }
-  );
+    });
 
   const hasExtensionNamed = React.useCallback(
     (extensionName: string) => {

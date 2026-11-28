@@ -1,24 +1,25 @@
 import * as React from 'react';
 import Window from '../Utils/Window';
 
-export type Route = // For compatibility when there was only one tutorial.
+export type Route =
+  // For compatibility when there was only one tutorial.
 
-    | 'onboarding' // New way of opening a tutorial.
-    | 'guided-lesson'
-    | 'signup'
-    | 'profile'
-    | 'subscription'
-    | 'games-dashboard' // For compatibility when there was only asset packs.
-    | 'asset-store' // New way of opening the store.
-    | 'store' // Old way of opening the build section
-    | 'build' // New way of opening the build section
-    | 'create'
-    | 'education'
-    | 'learn'
-    | 'play'
-    | 'standalone'
-    | 'ask-ai'
-    | 'credits-purchase';
+  | 'onboarding' // New way of opening a tutorial.
+  | 'guided-lesson'
+  | 'signup'
+  | 'profile'
+  | 'subscription'
+  | 'games-dashboard' // For compatibility when there was only asset packs.
+  | 'asset-store' // New way of opening the store.
+  | 'store' // Old way of opening the build section
+  | 'build' // New way of opening the build section
+  | 'create'
+  | 'education'
+  | 'learn'
+  | 'play'
+  | 'standalone'
+  | 'ask-ai'
+  | 'credits-purchase';
 export type RouteKey =
   | 'initial-dialog'
   | 'game-id'

@@ -89,10 +89,7 @@ const styles: Record<string, React.CSSProperties> = {
 };
 
 type OverlayTextPosition =
-  | 'topLeft'
-  | 'topRight'
-  | 'bottomLeft'
-  | 'bottomRight';
+  'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
 
 const ImageOverlay = ({
   content,

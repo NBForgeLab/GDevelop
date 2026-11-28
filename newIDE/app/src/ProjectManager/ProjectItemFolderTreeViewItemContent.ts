@@ -44,9 +44,7 @@ export type ProjectItemFolderTreeViewItemProps = TreeItemProps & {
  * A folder used to organize the scenes, the external layouts, the external
  * events or the gameplay tests.
  */
-export class ProjectItemFolderTreeViewItemContent
-  implements TreeViewItemContent
-{
+export class ProjectItemFolderTreeViewItemContent implements TreeViewItemContent {
   folder: ProjectItemFolderOrItem;
   props: ProjectItemFolderTreeViewItemProps;
   inFolder: ProjectItemInFolder;

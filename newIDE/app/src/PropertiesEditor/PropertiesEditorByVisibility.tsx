@@ -59,13 +59,7 @@ const PropertiesEditorByVisibility = ({
   placeholder,
   isAdvancedSectionInitiallyUncollapsed,
 }: Props):
-  | false
-  | 0
-  | ''
-  | React.ReactPortal
-  | React.ReactNode
-  | null
-  | undefined => {
+  false | 0 | '' | React.ReactPortal | React.ReactNode | null | undefined => {
   const [shouldShowDeprecatedProperties, setShouldShowDeprecatedProperties] =
     React.useState<boolean>(false);
 

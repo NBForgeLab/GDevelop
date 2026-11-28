@@ -10,10 +10,7 @@ import { type ObjectSizeInfo } from './Utils';
  *   3D object on a surface (3D only: in 2D, Y is the axis pointing down).
  */
 export type InstanceAnchor =
-  | 'origin'
-  | 'min_corner'
-  | 'center'
-  | 'bottom_center';
+  'origin' | 'min_corner' | 'center' | 'bottom_center';
 
 export const INSTANCE_ANCHORS_2D: Array<InstanceAnchor> = [
   'origin',

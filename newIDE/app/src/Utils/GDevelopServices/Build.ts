@@ -21,10 +21,7 @@ export type TargetName =
   | 's3';
 
 export type BuildType =
-  | 'cordova-build'
-  | 'cordova-ios-build'
-  | 'electron-build'
-  | 'web-build';
+  'cordova-build' | 'cordova-ios-build' | 'electron-build' | 'web-build';
 
 export type BuildDetectedError = {
   // A machine-readable code identifying the error. The human-readable message
@@ -103,8 +100,7 @@ export type AppleAuthKeySigningCredential = {
 };
 
 export type SigningCredential =
-  | AppleCertificateSigningCredential
-  | AppleAuthKeySigningCredential;
+  AppleCertificateSigningCredential | AppleAuthKeySigningCredential;
 
 export const client: AxiosInstance = axios.create({
   baseURL: GDevelopBuildApi.baseUrl,

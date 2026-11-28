@@ -110,9 +110,7 @@ const getEstimatedTotalPriceAndCurrencyCode = ({
     | null
     | undefined;
   redemptionCodesIncludedInBundle:
-    | Array<IncludedRedemptionCode>
-    | null
-    | undefined;
+    Array<IncludedRedemptionCode> | null | undefined;
   filter?:
     | 'ASSET_PACK'
     | 'GAME_TEMPLATE'
@@ -251,9 +249,7 @@ export const renderEstimatedTotalPriceFormatted = ({
     | null
     | undefined;
   redemptionCodesIncludedInBundle:
-    | Array<IncludedRedemptionCode>
-    | null
-    | undefined;
+    Array<IncludedRedemptionCode> | null | undefined;
   filter?:
     | 'ASSET_PACK'
     | 'GAME_TEMPLATE'
@@ -296,9 +292,7 @@ export const getEstimatedSavingsFormatted = ({
     | null
     | undefined;
   redemptionCodesIncludedInBundle:
-    | Array<IncludedRedemptionCode>
-    | null
-    | undefined;
+    Array<IncludedRedemptionCode> | null | undefined;
 }):
   | {
       savingsPriceFormatted: string;

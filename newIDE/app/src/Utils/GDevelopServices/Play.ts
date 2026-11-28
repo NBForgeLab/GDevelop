@@ -15,9 +15,7 @@ import {
 export type LeaderboardSortOption = 'ASC' | 'DESC';
 export type LeaderboardVisibilityOption = 'HIDDEN' | 'PUBLIC';
 export type LeaderboardPlayerUnicityDisplayOption =
-  | 'FREE'
-  | 'PREFER_UNIQUE'
-  | 'PREFER_NON_UNIQUE';
+  'FREE' | 'PREFER_UNIQUE' | 'PREFER_NON_UNIQUE';
 
 export type LeaderboardScoreFormattingCustom = {
   type: 'custom';
@@ -27,10 +25,7 @@ export type LeaderboardScoreFormattingCustom = {
 };
 
 export type LeaderboardScoreFormattingTimeUnit =
-  | 'hour'
-  | 'minute'
-  | 'second'
-  | 'millisecond';
+  'hour' | 'minute' | 'second' | 'millisecond';
 
 export type LeaderboardScoreFormattingTime = {
   type: 'time';
@@ -39,8 +34,7 @@ export type LeaderboardScoreFormattingTime = {
 };
 
 export type LeaderboardScoreFormatting =
-  | LeaderboardScoreFormattingCustom
-  | LeaderboardScoreFormattingTime;
+  LeaderboardScoreFormattingCustom | LeaderboardScoreFormattingTime;
 
 export interface LeaderboardTheme {
   backgroundColor: string;
@@ -471,9 +465,7 @@ export const canUserCustomizeLeaderboardTheme = (
 
 export const getRGBLeaderboardTheme = (
   leaderboardCustomizationSettings:
-    | LeaderboardCustomizationSettings
-    | null
-    | undefined
+    LeaderboardCustomizationSettings | null | undefined
 ): LeaderboardTheme => {
   const defaultBackgroundColor = '#d0d1ff';
   const defaultTextColor = '#000000';

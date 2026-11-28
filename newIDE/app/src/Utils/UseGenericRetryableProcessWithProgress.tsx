@@ -223,22 +223,18 @@ export const useGenericRetryableProcessWithProgress = <DoProcessOptions,>({
       // An error happened. Store the errors and offer a way to
       // retry.
       return new Promise<void>((resolve) => {
-        setOnRetry(
-          (): RetryOrAbandonCallback => () => {
-            // Launch the fetch again, and solve the promise once
-            // this new fetch resolve itself.
-            resolve(ensureProcessIsDone(options));
-          }
-        );
-        setOnAbandon(
-          (): RetryOrAbandonCallback => () => {
-            // Abandon: resolve immediately, closing the dialog
-            setIsFetching(false);
-            setGenericError(null);
-            setResult(null);
-            resolve();
-          }
-        );
+        setOnRetry((): RetryOrAbandonCallback => () => {
+          // Launch the fetch again, and solve the promise once
+          // this new fetch resolve itself.
+          resolve(ensureProcessIsDone(options));
+        });
+        setOnAbandon((): RetryOrAbandonCallback => () => {
+          // Abandon: resolve immediately, closing the dialog
+          setIsFetching(false);
+          setGenericError(null);
+          setResult(null);
+          resolve();
+        });
 
         // Display the errors to the user:
         setResult(newResult);

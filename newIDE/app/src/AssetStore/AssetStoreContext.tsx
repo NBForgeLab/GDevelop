@@ -82,9 +82,7 @@ type AssetStoreState = {
   filters: Filters | null | undefined;
   publicAssetPacks: PublicAssetPacks | null | undefined;
   privateAssetPackListingDatas:
-    | Array<PrivateAssetPackListingData>
-    | null
-    | undefined;
+    Array<PrivateAssetPackListingData> | null | undefined;
   authors: Array<Author> | null | undefined;
   licenses: Array<License> | null | undefined;
   environment: Environment;
@@ -92,9 +90,7 @@ type AssetStoreState = {
   assetShortHeadersSearchResults: Array<AssetShortHeader> | null | undefined;
   publicAssetPacksSearchResults: Array<PublicAssetPack> | null | undefined;
   privateAssetPackListingDatasSearchResults:
-    | Array<PrivateAssetPackListingData>
-    | null
-    | undefined;
+    Array<PrivateAssetPackListingData> | null | undefined;
   fetchAssetsAndFilters: () => void;
   error: Error | null | undefined;
   assetFiltersState: AssetFiltersState;
@@ -505,9 +501,7 @@ export const AssetStoreStateProvider = ({
   );
 
   const assetShortHeadersSearchResults:
-    | Array<AssetShortHeader>
-    | null
-    | undefined = useSearchItem(
+    Array<AssetShortHeader> | null | undefined = useSearchItem(
     assetShortHeadersById,
     getAssetShortHeaderSearchTermsWithAuthors,
     searchText,
@@ -518,9 +512,7 @@ export const AssetStoreStateProvider = ({
 
   // this filter works for both public and private packs
   const publicAssetPacksSearchResults:
-    | Array<PublicAssetPack>
-    | null
-    | undefined = useSearchItem(
+    Array<PublicAssetPack> | null | undefined = useSearchItem(
     publicAssetPacksByTag,
     // this filter works for both public and private packs
     getPublicAssetPackSearchTerms,
@@ -533,9 +525,7 @@ export const AssetStoreStateProvider = ({
 
   // this filter works for both public and private packs
   const privateAssetPackListingDatasSearchResults:
-    | Array<PrivateAssetPackListingData>
-    | null
-    | undefined = useSearchItem(
+    Array<PrivateAssetPackListingData> | null | undefined = useSearchItem(
     privateAssetPackListingDatasById,
     // this filter works for both public and private packs
     getPrivateAssetPackListingDataSearchTerms,

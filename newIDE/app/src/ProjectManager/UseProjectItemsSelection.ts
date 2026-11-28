@@ -32,9 +32,7 @@ function useProjectItemsSelection(): {
    * selection is not organized in folders (extensions...).
    */
   const getSelectedFolderOrItems = React.useCallback(():
-    | SelectedFolderOrItems
-    | null
-    | undefined => {
+    SelectedFolderOrItems | null | undefined => {
     if (selectedItems.length === 0) return null;
     const kind = getProjectItemFoldersKind(
       selectedItems[0].content.getRootId()

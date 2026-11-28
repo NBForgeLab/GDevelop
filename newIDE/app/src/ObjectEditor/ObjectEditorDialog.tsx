@@ -28,10 +28,7 @@ import { ProjectScopedContainersAccessor } from '../InstructionOrExpression/Even
 const gd: libGDevelop = global.gd;
 
 export type ObjectEditorTab =
-  | 'properties'
-  | 'behaviors'
-  | 'variables'
-  | 'effects';
+  'properties' | 'behaviors' | 'variables' | 'effects';
 
 type Props = {
   open: boolean;
@@ -66,8 +63,7 @@ type Props = {
   onWillInstallExtension: (extensionNames: Array<string>) => void;
   onExtensionInstalled: (extensionNames: Array<string>) => void;
   onCreateNewExtensionWithBehavior:
-    | ((project: gdProject, object: gdObject) => void)
-    | null;
+    ((project: gdProject, object: gdObject) => void) | null;
   onOpenEventBasedObjectEditor: (
     extensionName: string,
     eventsBasedObjectName: string

@@ -98,9 +98,7 @@ export const getObjectTreeViewItemId = (
   return 'object-' + eventsBasedObject.ptr;
 };
 
-export class EventsBasedObjectTreeViewItemContent
-  implements TreeViewItemContent
-{
+export class EventsBasedObjectTreeViewItemContent implements TreeViewItemContent {
   eventsBasedObject: gdEventsBasedObject;
   props: EventsBasedObjectProps;
 

@@ -38,11 +38,7 @@ export type Subscription = {
    * null when subscription is empty.
    */
   pricingSystemId:
-    | 'REDEMPTION_CODE'
-    | 'MANUALLY_ADDED'
-    | 'TEAM_MEMBER'
-    | string
-    | null;
+    'REDEMPTION_CODE' | 'MANUALLY_ADDED' | 'TEAM_MEMBER' | string | null;
   stripeSubscriptionId?: string;
   stripeCustomerId?: string;
   paypalSubscriptionId?: string;

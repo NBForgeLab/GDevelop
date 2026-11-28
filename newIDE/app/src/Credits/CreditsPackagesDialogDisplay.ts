@@ -9,11 +9,7 @@ import {
  * buying credits to publish a game) and to follow conversion per placement.
  */
 export type CreditsPackagePlacementId =
-  | 'ai-requests'
-  | 'asset-store'
-  | 'game-featuring'
-  | 'profile'
-  | 'unknown';
+  'ai-requests' | 'asset-store' | 'game-featuring' | 'profile' | 'unknown';
 
 /**
  * The variants of the credits packages dialog:

@@ -101,9 +101,7 @@ const identifyAssetPackKind = ({
   assetPack,
 }: {
   privateAssetPackListingDatas:
-    | Array<PrivateAssetPackListingData>
-    | null
-    | undefined;
+    Array<PrivateAssetPackListingData> | null | undefined;
   publicAssetPacks: PublicAssetPacks | null | undefined;
   assetPack: PrivateAssetPack | PublicAssetPack | null;
 }) => {
@@ -679,61 +677,59 @@ export const AssetStore = React.forwardRef<AssetStoreInterface, Props>(
     ]);
 
     const privateAssetPackListingDatasFromSameCreator:
-      | Array<PrivateAssetPackListingData>
-      | null
-      | undefined = React.useMemo(() => {
-      if (
-        !openedPrivateAssetPackListingData ||
-        !privateAssetPackListingDatas ||
-        !receivedAssetPacks
-      )
-        return null;
-
-      const receivedAssetPackIds = receivedAssetPacks.map((pack) => pack.id);
-
-      return privateAssetPackListingDatas
-        .filter(
-          (pack) =>
-            pack.sellerId === openedPrivateAssetPackListingData.sellerId &&
-            !receivedAssetPackIds.includes(pack.sellerId)
+      Array<PrivateAssetPackListingData> | null | undefined =
+      React.useMemo(() => {
+        if (
+          !openedPrivateAssetPackListingData ||
+          !privateAssetPackListingDatas ||
+          !receivedAssetPacks
         )
-        .sort((pack1, pack2) => pack1.name.localeCompare(pack2.name));
-    }, [
-      openedPrivateAssetPackListingData,
-      privateAssetPackListingDatas,
-      receivedAssetPacks,
-    ]);
+          return null;
+
+        const receivedAssetPackIds = receivedAssetPacks.map((pack) => pack.id);
+
+        return privateAssetPackListingDatas
+          .filter(
+            (pack) =>
+              pack.sellerId === openedPrivateAssetPackListingData.sellerId &&
+              !receivedAssetPackIds.includes(pack.sellerId)
+          )
+          .sort((pack1, pack2) => pack1.name.localeCompare(pack2.name));
+      }, [
+        openedPrivateAssetPackListingData,
+        privateAssetPackListingDatas,
+        receivedAssetPacks,
+      ]);
 
     const privateGameTemplateListingDatasFromSameCreator:
-      | Array<PrivateGameTemplateListingData>
-      | null
-      | undefined = React.useMemo(() => {
-      if (
-        !openedPrivateGameTemplateListingData ||
-        !privateGameTemplateListingDatas ||
-        !receivedGameTemplates
-      )
-        return null;
-
-      const receivedGameTemplateIds = receivedGameTemplates.map(
-        (template) => template.id
-      );
-
-      return privateGameTemplateListingDatas
-        .filter(
-          (template) =>
-            template.sellerId ===
-              openedPrivateGameTemplateListingData.sellerId &&
-            !receivedGameTemplateIds.includes(template.sellerId)
+      Array<PrivateGameTemplateListingData> | null | undefined =
+      React.useMemo(() => {
+        if (
+          !openedPrivateGameTemplateListingData ||
+          !privateGameTemplateListingDatas ||
+          !receivedGameTemplates
         )
-        .sort((template1, template2) =>
-          template1.name.localeCompare(template2.name)
+          return null;
+
+        const receivedGameTemplateIds = receivedGameTemplates.map(
+          (template) => template.id
         );
-    }, [
-      openedPrivateGameTemplateListingData,
-      privateGameTemplateListingDatas,
-      receivedGameTemplates,
-    ]);
+
+        return privateGameTemplateListingDatas
+          .filter(
+            (template) =>
+              template.sellerId ===
+                openedPrivateGameTemplateListingData.sellerId &&
+              !receivedGameTemplateIds.includes(template.sellerId)
+          )
+          .sort((template1, template2) =>
+            template1.name.localeCompare(template2.name)
+          );
+      }, [
+        openedPrivateGameTemplateListingData,
+        privateGameTemplateListingDatas,
+        receivedGameTemplates,
+      ]);
 
     const onBack = React.useCallback(async () => {
       const page = shopNavigationState.backToPreviousPage();
