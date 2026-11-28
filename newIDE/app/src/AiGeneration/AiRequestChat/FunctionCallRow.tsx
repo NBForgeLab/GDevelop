@@ -88,7 +88,7 @@ const EditorFunctionCallRow = ({
       // is memoized, so this won't impact rendering of large chats.
       existingParsedOutput = JSON.parse(existingFunctionCallOutput.output);
     }
-  } catch (error) {
+  } catch {
     existingParsedOutput = null;
   }
 
@@ -267,7 +267,7 @@ const SubAgentFunctionCallRow = ({
     if (existingFunctionCallOutput) {
       existingParsedOutput = JSON.parse(existingFunctionCallOutput.output);
     }
-  } catch (error) {
+  } catch {
     existingParsedOutput = null;
   }
 
@@ -333,7 +333,7 @@ const SubAgentFunctionCallRow = ({
         editorFunctionCallResultOutput: null,
       });
       text = result.text;
-    } catch (error) {
+    } catch {
       text = functionCall.name;
     }
   }
@@ -351,7 +351,7 @@ const SubAgentFunctionCallRow = ({
         return trimmed || null;
       }
       return null;
-    } catch (error) {
+    } catch {
       return null;
     }
   }, [functionCall.arguments]);

@@ -90,7 +90,6 @@ export default React.forwardRef<ParameterFieldInterface, ParameterFieldProps>(
       // Recompute on each props change: the object (not in the props) may
       // have been changed in the instruction, or a behavior may have been
       // added to it (from the instruction editor dialog).
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       [props, objectName, allowedBehaviorType]
     );
 

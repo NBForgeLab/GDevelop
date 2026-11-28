@@ -7202,7 +7202,7 @@ const getLinkedEventsNotes = (
   for (const match of eventScriptText.matchAll(linkLineRegex)) {
     try {
       targets.add(JSON.parse(`"${match[1]}"`));
-    } catch (error) {
+    } catch {
       // Not a valid string literal: nothing to say about it.
     }
   }
@@ -11355,7 +11355,7 @@ const isVariableMissingInSomeContainer = (
   variablesContainers.some((variablesContainer) => {
     try {
       return !getVariableAtPath({ variablePath, variablesContainer });
-    } catch (error) {
+    } catch {
       // A malformed path is reported when the change is applied.
       return false;
     }
@@ -11865,7 +11865,7 @@ const inspectVariables: EditorFunction = {
           variablePath: path,
           variablesContainer,
         });
-      } catch (error) {
+      } catch {
         notFound.push(path);
         continue;
       }
@@ -12087,7 +12087,7 @@ const initializeProject: EditorFunctionWithoutProject = {
       };
 
       return output;
-    } catch (error) {
+    } catch {
       return makeGenericFailure(
         'Unable to initialize project (possibly a network error). Try again.'
       );

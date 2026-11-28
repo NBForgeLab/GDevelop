@@ -84,7 +84,7 @@ export const useRefreshLimits = (
           { times: options && options.withRetry ? 2 : 1 },
           onRefreshLimits
         );
-      } catch (error) {
+      } catch {
         // Ignore limits refresh error.
       }
       await delay(REFRESH_LIMITS_SETTLE_DELAY_MS);
@@ -134,7 +134,7 @@ const doesFunctionCallModifyProject = (
       return editorFunctionDef.getModifiesProject(
         JSON.parse(functionCall.arguments)
       );
-    } catch (error) {
+    } catch {
       return !!editorFunctionDef.modifiesProject;
     }
   }
@@ -171,7 +171,7 @@ const renderFunctionCallLabel = ({
       editorFunctionCallResultOutput: null,
     });
     return result.text || functionCall.name;
-  } catch (error) {
+  } catch {
     return functionCall.name;
   }
 };

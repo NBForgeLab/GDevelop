@@ -7,7 +7,7 @@ export const getPublicUrl = (): string => {
     // webpack DefinePlugin or Vite define) apply without needing `global.process`.
     const publicUrl = process.env.PUBLIC_URL;
     return typeof publicUrl === 'string' ? publicUrl : '';
-  } catch (error) {
+  } catch {
     return '';
   }
 };
@@ -18,7 +18,7 @@ export const getPublicUrl = (): string => {
 export const isReactAppEnvDevelopment = (): boolean => {
   try {
     return process.env.REACT_APP_ENV === 'development';
-  } catch (error) {
+  } catch {
     return false;
   }
 };

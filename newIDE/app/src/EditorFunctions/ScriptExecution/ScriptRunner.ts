@@ -197,7 +197,7 @@ const formatLoggedValue = (value: any): string => {
   if (typeof value === 'string') return value;
   try {
     return JSON.stringify(value);
-  } catch (error) {
+  } catch {
     return String(value);
   }
 };

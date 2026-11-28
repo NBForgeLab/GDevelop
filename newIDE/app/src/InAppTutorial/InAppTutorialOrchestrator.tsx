@@ -80,7 +80,7 @@ const isInAppTutorialTestModeEnabled = (): boolean => {
     return new URLSearchParams(window.location.search).has(
       'in-app-tutorial-test-mode'
     );
-  } catch (error) {
+  } catch {
     return false;
   }
 };

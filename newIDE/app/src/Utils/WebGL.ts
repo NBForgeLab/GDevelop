@@ -8,7 +8,7 @@ export const isWebGL2Supported = (): boolean => {
       !!window.WebGLRenderingContext && !!canvas.getContext('webgl2');
 
     return isWebGLAvailable;
-  } catch (e) {
+  } catch {
     isWebGLAvailable = false;
     return false;
   }

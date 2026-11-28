@@ -62,7 +62,7 @@ const useResourcesChangedWatcher = ({
     Object.keys(projectCallbacks).forEach((callbackId) => {
       try {
         projectCallbacks[callbackId]();
-      } catch (error) {}
+      } catch {}
     });
   }, [project]);
 

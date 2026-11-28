@@ -207,7 +207,7 @@ const getParameterExtraInfo = (
     let parsedValue = null;
     try {
       parsedValue = JSON.parse(value);
-    } catch (error) {
+    } catch {
       parsedValue = null;
     }
     if (!Array.isArray(parsedValue)) {

@@ -118,7 +118,7 @@ const useClickDragAsControl = ({
           if (maybePromise && typeof maybePromise.catch === 'function') {
             maybePromise.catch(() => {});
           }
-        } catch (error) {
+        } catch {
           // Ignore: the control will still work using mouse movements, just
           // without the cursor being hidden.
         }

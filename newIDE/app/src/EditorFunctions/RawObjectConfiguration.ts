@@ -1511,7 +1511,7 @@ export const getFrameImageSizes = async (
   if (imageNames.length === 0) return null;
   try {
     await PixiResourcesLoader.loadTextures(project, imageNames);
-  } catch (error) {
+  } catch {
     return null;
   }
   const frameImageSizes: {
@@ -1569,7 +1569,7 @@ export const getModelAnimationSources = async (
       spine.destroy();
       return animationNames;
     }
-  } catch (error) {
+  } catch {
     return null;
   }
   return null;

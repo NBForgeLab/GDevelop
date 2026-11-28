@@ -59,7 +59,7 @@ const sanitizeReturnValue = (returnValue: any): any => {
     }
     // Return the parsed value (plain JSON) so it stays structured for the UI.
     return JSON.parse(serialized);
-  } catch (error) {
+  } catch {
     return '[unserializable value]';
   }
 };
@@ -109,7 +109,7 @@ export const capScriptExecutionResult = (
             totalArgChars += serialized.length;
           }
         }
-      } catch (error) {
+      } catch {
         cappedArgs = '[unserializable args]';
       }
 

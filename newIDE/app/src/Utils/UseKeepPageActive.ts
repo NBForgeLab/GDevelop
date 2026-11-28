@@ -44,7 +44,7 @@ const getAudioContext = (): AudioContext | null | undefined => {
   try {
     audioContext = new AudioContextConstructor();
     return audioContext;
-  } catch (error) {
+  } catch {
     console.warn('Could not create an audio context to keep the page active.');
     return null;
   }
@@ -95,7 +95,7 @@ const stopKeepingPageActive = () => {
   try {
     startedOscillator.stop();
     startedOscillator.disconnect();
-  } catch (error) {
+  } catch {
     // The oscillator was already stopped: nothing to do.
   }
 };

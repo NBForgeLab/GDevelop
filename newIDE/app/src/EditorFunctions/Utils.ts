@@ -415,7 +415,7 @@ const getShortMeasurementUnit = (
       shortLabel +=
         (shortLabel ? '·' : '') + symbol + (power === 1 ? '' : `^${power}`);
     }
-  } catch (_) {
+  } catch {
     // Defensive: if anything goes wrong, fall back to the name.
     return name;
   }

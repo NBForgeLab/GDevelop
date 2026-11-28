@@ -22,7 +22,7 @@ export const decodePercentEncodedFileName = (fileName: string): string => {
   let decodedFileName: string;
   try {
     decodedFileName = decodeURIComponent(fileName);
-  } catch (error) {
+  } catch {
     // Not a valid percent-encoded name (like a lone "%") - keep it as is.
     return fileName;
   }

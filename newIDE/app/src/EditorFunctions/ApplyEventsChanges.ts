@@ -218,7 +218,7 @@ const keepReplacedJsCodeEventSettings = ({
   let replacedEvent = null;
   try {
     replacedEvent = getEventByPath(rootEventsList, replacedEventPath);
-  } catch (error) {
+  } catch {
     // An invalid path is reported when the operation is applied.
     return;
   }
@@ -409,7 +409,7 @@ export const applyEventsChanges = (
           } else {
             try {
               targetPath = parseEventPath(target);
-            } catch (pathParseError) {
+            } catch {
               errors.push(
                 `Could not find event with aiGeneratedEventId "${target}" and could not parse as path. Skipping deletion of "${target}".`
               );
@@ -443,7 +443,7 @@ export const applyEventsChanges = (
           // Then try to parse as a path string (e.g., "event-0.1.2" or "0.1.2")
           try {
             parsedPath = parseEventPath(operationTargetEvent);
-          } catch (pathParseError) {
+          } catch {
             errors.push(
               `Could not find event with aiGeneratedEventId "${operationTargetEvent}" and could not parse as path. Skipping operation "${operationName}".`
             );

@@ -67,7 +67,7 @@ export default class Clipboard {
     try {
       const parsedText = JSON.parse(text);
       return parsedText.content;
-    } catch (e) {
+    } catch {
       console.warn('The clipboard content is not valid JSON');
       return null;
     }

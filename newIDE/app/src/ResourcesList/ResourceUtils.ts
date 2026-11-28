@@ -207,7 +207,7 @@ export const parseLocalFilePathOrExtensionFromMetadata = (
               : null,
         };
       }
-    } catch (error) {
+    } catch {
       console.warn(
         'Malformed metadata for resource with name ' +
           resource.getName() +
@@ -240,7 +240,7 @@ export const updateResourceJsonMetadata = (
       })
     );
     return;
-  } catch (error) {
+  } catch {
     // Ignore the error, the metadata is not valid JSON
     // so we'll just overwrite it entirely instead of merging it.
   }
@@ -278,7 +278,7 @@ export const getResourceCustomProperties = (
     ) {
       return metadata[RESOURCE_CUSTOM_PROPERTIES_METADATA_KEY];
     }
-  } catch (error) {
+  } catch {
     // Malformed metadata: treat as if no custom properties were set.
   }
   return {};

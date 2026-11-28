@@ -94,7 +94,7 @@ export const moveAllLocalResourcesToCloudResources = async ({
           resource,
           file,
         };
-      } catch (error) {
+      } catch {
         result.erroredResources.push({
           resourceName: resource.getName(),
           error: new Error(

@@ -287,7 +287,7 @@ export const getScopeLabelFromArgs = (args: any): string => {
   try {
     const scope = parseScopeArgument(args, { allowedTypes: ALL_SCOPE_TYPES });
     if (scope) return getScopeLabel(scope);
-  } catch (error) {
+  } catch {
     // Malformed: fall through to the legacy field.
   }
   const sceneName =
@@ -300,7 +300,7 @@ export const getSceneNameFromArgs = (args: any): string => {
   try {
     const scope = parseScopeArgument(args, { allowedTypes: ALL_SCOPE_TYPES });
     if (scope && scope.type === 'scene') return scope.scene_name || '';
-  } catch (error) {
+  } catch {
     // Malformed: nothing to show.
   }
   return '';
@@ -331,7 +331,7 @@ export const getFunctionTargetFromArgs = (args: any): FunctionTarget | null => {
   let scope = null;
   try {
     scope = parseScopeArgument(args, { allowedTypes: ALL_SCOPE_TYPES });
-  } catch (error) {
+  } catch {
     // Malformed: nothing to open.
     return null;
   }

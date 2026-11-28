@@ -531,7 +531,7 @@ const countEventsAndInstructions = (
       if (parts && parts.actionsList) {
         instructionsCount += parts.actionsList.size();
       }
-    } catch (error) {
+    } catch {
       // Counting is best-effort only.
     }
     if (event.canHaveSubEvents()) {

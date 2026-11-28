@@ -214,7 +214,7 @@ export const ensureModel3DMeasurementLoaded = (
         return;
       }
       measured.set(key, { gltfScene: gltf.scene, measurement });
-    } catch (error) {
+    } catch {
       // The model became unreadable (missing resource, unreadable file...):
       // what was measured on the previous one no longer describes it.
       measured.delete(key);

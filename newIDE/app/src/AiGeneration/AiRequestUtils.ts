@@ -280,7 +280,7 @@ export const getLatestActivePlan = (
           latestPlan = output.plan;
           break;
         }
-      } catch (e) {
+      } catch {
         // Ignore parse errors
       }
     }

@@ -9,7 +9,7 @@ const findEmptyPath = (basePath: string) => {
   const folderName = generateName('My project', (name) => {
     try {
       fs.accessSync(path.join(basePath, name));
-    } catch (ex) {
+    } catch {
       return false;
     }
     return true;
@@ -25,7 +25,7 @@ export const findDefaultFolder = (electronApp: any): string => {
   let documentsPath = '';
   try {
     documentsPath = electronApp.getPath('documents');
-  } catch (ex) {
+  } catch {
     // A user may not have the Documents folder defined on Windows.
     documentsPath = electronApp.getPath('home');
   }

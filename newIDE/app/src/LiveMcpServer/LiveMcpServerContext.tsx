@@ -58,7 +58,7 @@ const getClientName = (line: string): string | null => {
     return clientInfo && typeof clientInfo.name === 'string'
       ? clientInfo.name
       : null;
-  } catch (error) {
+  } catch {
     return null;
   }
 };

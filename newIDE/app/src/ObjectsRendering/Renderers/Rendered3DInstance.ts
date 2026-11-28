@@ -108,7 +108,6 @@ export default class Rendered3DInstance<
    * its resources were reloaded). The default is a no-op; composite renderers
    * (e.g. for custom objects) override this to recurse into their children.
    */
-  // eslint-disable-next-line no-unused-vars
   resetInstanceRenderersFor(objectName: string): void {}
 
   getOriginX(): number {

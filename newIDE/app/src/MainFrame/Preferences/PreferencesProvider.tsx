@@ -83,7 +83,7 @@ export const loadPreferencesFromLocalStorage = ():
     }
 
     return values;
-  } catch (e) {
+  } catch {
     return null;
   }
 };

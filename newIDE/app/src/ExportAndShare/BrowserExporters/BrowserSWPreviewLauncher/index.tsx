@@ -376,7 +376,7 @@ export default class BrowserSWPreviewLauncher extends React.Component<
               if (previewWindow && !previewWindow.closed) {
                 try {
                   previewWindow.focus();
-                } catch (e) {}
+                } catch {}
               }
             });
           } else if (previewWindows) {
@@ -395,7 +395,7 @@ export default class BrowserSWPreviewLauncher extends React.Component<
               previewWindow.location = outputDir + '/index.html';
               try {
                 previewWindow.focus();
-              } catch (e) {}
+              } catch {}
 
               // Register the window so that it can be accessed
               // by the debugger and for the captures to be detected when it closes.

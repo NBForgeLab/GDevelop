@@ -67,7 +67,7 @@ export const CorsAwareImage = ({
     src ? addSearchParameterToUrl(src, 'gdUsage', 'img') : undefined;
 
   return (
-    <img // eslint-disable-line jsx-a11y/alt-text
+    <img
       {...props}
       alt={alt ?? undefined}
       title={title ?? undefined}

@@ -92,7 +92,7 @@ const CloudProjectRecoveryDialog = ({
           getVersions(),
           setDelay(DELAY_TO_READ_DIALOG_IN_MS),
         ]);
-      } catch (error) {
+      } catch {
         setIsErrored(true);
       } finally {
         setIsLoading(false);

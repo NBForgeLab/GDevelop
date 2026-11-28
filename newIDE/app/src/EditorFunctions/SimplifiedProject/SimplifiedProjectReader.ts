@@ -49,7 +49,7 @@ export const estimateTokens = (value: unknown): number => {
   if (typeof value !== 'object') return Math.ceil(String(value).length / 4);
   try {
     return Math.ceil(JSON.stringify(value).length / 4);
-  } catch (error) {
+  } catch {
     return Infinity;
   }
 };

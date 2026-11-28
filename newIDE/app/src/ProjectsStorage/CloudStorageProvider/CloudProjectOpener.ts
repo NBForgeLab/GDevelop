@@ -106,7 +106,7 @@ export const generateOnOpen =
       return {
         content: JSON.parse(serializedProject),
       };
-    } catch (error) {
+    } catch {
       throw new CloudProjectReadingError();
     }
   };

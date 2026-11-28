@@ -46,7 +46,7 @@ const stringifyValue = (value: any): string | null => {
   if (typeof value === 'string') return value || null;
   try {
     return JSON.stringify(value, null, 2);
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -59,7 +59,7 @@ const summarizeValue = (value: any): string | null => {
   if (!object) {
     try {
       return JSON.stringify(value);
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -68,7 +68,7 @@ const summarizeValue = (value: any): string | null => {
     .map((key) => {
       try {
         return `${key}: ${JSON.stringify(object[key])}`;
-      } catch (error) {
+      } catch {
         return key;
       }
     })
@@ -109,7 +109,7 @@ export const parseRunScriptArguments = (
       title: SafeExtractor.extractStringProperty(parsed, 'title'),
       jsCode: SafeExtractor.extractStringProperty(parsed, 'js_code') || '',
     };
-  } catch (error) {
+  } catch {
     return { title: null, jsCode: '' };
   }
 };

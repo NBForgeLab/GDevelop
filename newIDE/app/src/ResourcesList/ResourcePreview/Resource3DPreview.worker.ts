@@ -1,4 +1,3 @@
-/* eslint-env worker */
 // IMPORTANT: this file is compiled as a worker entry point (by Vite / worker-loader).
 import * as THREE from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader';

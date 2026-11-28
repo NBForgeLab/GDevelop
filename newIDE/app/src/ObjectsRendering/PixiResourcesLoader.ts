@@ -323,7 +323,7 @@ export const readEmbeddedResourcesMapping = (
     }
 
     return metadata.embeddedResourcesMapping;
-  } catch (err) {
+  } catch {
     return null;
   }
 };

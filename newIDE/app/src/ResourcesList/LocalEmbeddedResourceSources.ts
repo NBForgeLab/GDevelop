@@ -216,7 +216,7 @@ export async function listTileMapEmbeddedResources(
         embeddedResources,
       };
     }
-  } catch (error) {
+  } catch {
     console.error(
       `Unable to read properly the data from file ${filePath} for use as a tilemap - ignoring any potentially embedded resources.`
     );

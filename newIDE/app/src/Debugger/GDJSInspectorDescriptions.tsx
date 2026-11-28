@@ -9,7 +9,7 @@ export type CallFunction = (path: Array<string>, args: Array<any>) => boolean;
 
 export type InspectorDescriptionsGetter = (
   gameData: GameData
-) => Array<InspectorDescription>; //eslint-disable-line
+) => Array<InspectorDescription>;
 
 export type InspectorDescription = {
   label: string;

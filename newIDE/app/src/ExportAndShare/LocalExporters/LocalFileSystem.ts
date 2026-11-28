@@ -274,7 +274,7 @@ class LocalFileSystem {
     try {
       const stat = fs.statSync(filePath);
       return stat.isFile();
-    } catch (e) {
+    } catch {
       return false;
     }
   };

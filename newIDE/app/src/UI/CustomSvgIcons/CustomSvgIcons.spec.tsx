@@ -29,7 +29,6 @@ describe('CustomSvgIcons', () => {
   test('all 278 SVG icons can be rendered without throwing errors', () => {
     for (const iconFile of iconFiles) {
       const modulePath = './' + iconFile.replace(/\.tsx$/, '');
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const IconComponent = require(modulePath).default;
       expect(IconComponent).toBeDefined();
 

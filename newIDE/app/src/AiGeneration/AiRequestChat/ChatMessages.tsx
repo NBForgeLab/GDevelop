@@ -512,7 +512,7 @@ export const ChatMessages: React.ComponentType<Props> = React.memo<Props>(
                 messageId: message.messageId || '',
               });
             }
-          } catch (e) {
+          } catch {
             // Ignore parse errors.
           }
         }
@@ -573,7 +573,7 @@ export const ChatMessages: React.ComponentType<Props> = React.memo<Props>(
                 editorFunctionCallResultOutput: null,
               });
               if (result.text) texts.push(result.text);
-            } catch (e) {
+            } catch {
               // Ignore rendering errors for the status bar.
             }
           }

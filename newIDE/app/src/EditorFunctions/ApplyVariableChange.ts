@@ -116,7 +116,7 @@ const parseValueAsObjectOrArray = (
 
     // Value is a primitive, not an object or array.
     return null;
-  } catch (error) {
+  } catch {
     // Not even a JSON string (probably a primitive or a string).
     return null;
   }

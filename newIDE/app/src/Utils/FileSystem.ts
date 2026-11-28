@@ -14,7 +14,7 @@ const lastUsedDialogDirectoryKey = 'gd-last-used-file-dialog-directory';
 export const getLastUsedDialogDirectory = (): string | undefined => {
   try {
     return localStorage.getItem(lastUsedDialogDirectoryKey) || undefined;
-  } catch (error) {
+  } catch {
     return undefined;
   }
 };
@@ -37,7 +37,7 @@ export const readJSONFile = async (
     const data = await fsPromises.readFile(filepath, { encoding: 'utf8' });
     const dataObject = JSON.parse(data);
     return dataObject;
-  } catch (ex) {
+  } catch {
     throw new Error(filepath + ' is a corrupted/malformed file.');
   }
 };

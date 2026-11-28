@@ -40,7 +40,7 @@ export const resizeImage = (
           }
           resolve(URL.createObjectURL(blob));
         }, 'image/png');
-      } catch (error) {
+      } catch {
         reject('An error occurred while generating an icon');
       }
     });

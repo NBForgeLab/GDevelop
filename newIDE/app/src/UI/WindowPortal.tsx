@@ -341,7 +341,7 @@ function copyStyleElementToDocument(
         cssText += rules[i].cssText + '\n';
       }
       if (cssText) newStyle.textContent = cssText;
-    } catch (e) {
+    } catch {
       // Cross-origin stylesheets can't be read – skip silently.
     }
   }

@@ -356,7 +356,7 @@ export const RunScriptFunctionCallRow = ({
     if (existingFunctionCallOutput) {
       try {
         return JSON.parse(existingFunctionCallOutput.output);
-      } catch (error) {
+      } catch {
         return null;
       }
     }

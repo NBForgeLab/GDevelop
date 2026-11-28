@@ -5568,7 +5568,7 @@ const MainFrame = (props: Props): React.ReactElement<any> => {
           creationSource: 'in-app-tutorial',
           // Remaining will be set by the template.
         });
-      } catch (error) {
+      } catch {
         showErrorBox({
           message: i18n._(
             t`Unable to create a new project for the tutorial. Try again later.`
@@ -5602,7 +5602,7 @@ const MainFrame = (props: Props): React.ReactElement<any> => {
           templateId,
           newProjectSetup,
         });
-      } catch (error) {
+      } catch {
         showErrorBox({
           message: i18n._(
             t`Unable to create a new project for the course chapter. Try again later.`
@@ -5684,7 +5684,7 @@ const MainFrame = (props: Props): React.ReactElement<any> => {
               // Remaining will be set by the template.
             }
           );
-        } catch (error) {
+        } catch {
           showErrorBox({
             message: i18n._(
               t`Unable to create a new project for the tutorial. Try again later.`

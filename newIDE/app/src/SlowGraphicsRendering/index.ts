@@ -33,7 +33,7 @@ const getWebGLRendererName = (): string | null => {
     if (loseContext) loseContext.loseContext();
 
     return typeof rendererName === 'string' ? rendererName : null;
-  } catch (error) {
+  } catch {
     return null;
   }
 };

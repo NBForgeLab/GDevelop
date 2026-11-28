@@ -775,7 +775,7 @@ export const changeCustomBehavior: EditorFunction = {
       await ensureExtensionsUpToDate();
       try {
         gd.WholeProjectRefactorer.fixInvalidRequiredBehaviorProperties(project);
-      } catch (error) {
+      } catch {
         // The extension has no generated metadata yet: nothing to fix.
       }
     }

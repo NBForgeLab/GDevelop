@@ -1157,7 +1157,6 @@ export const AskAiEditor = React.memo(
             // upToDateConfirmStopping is declared below this callback, but it is
             // only ever called at event-handler time (post-render), so it is
             // always initialised by the time this runs.
-            // eslint-disable-next-line no-use-before-define
             upToDateConfirmStopping
               .current({
                 title: t`Open another chat?`,

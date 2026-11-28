@@ -50,7 +50,7 @@ export const registerThemes = (monaco: MonacoApi) => {
           codeEditorTheme.themeName,
           codeEditorTheme.themeData
         );
-      } catch (e) {
+      } catch {
         // Theme might already be defined — ignore.
       }
     }
@@ -231,7 +231,7 @@ export const applyElectronClipboardPatch = (
                 ]);
               }
             }
-          } catch (e) {
+          } catch {
             // Clipboard read failed — ignore.
           }
         }

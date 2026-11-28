@@ -1393,7 +1393,7 @@ export default class AuthenticatedUserProvider extends React.Component<
           form,
           preferences.language
         );
-      } catch (error) {
+      } catch {
         // Ignore this error - this is a best effort call
         // and the user profile will be created on demand later
         // by the API when fetched.
@@ -1474,7 +1474,7 @@ export default class AuthenticatedUserProvider extends React.Component<
 
     try {
       await authentication.forgotPassword(form);
-    } catch (apiCallError) {
+    } catch {
       // Do not throw error if the email is not found, as we don't want to
       // give information to the user about which email is registered.
     }
@@ -1823,7 +1823,7 @@ export default class AuthenticatedUserProvider extends React.Component<
                 try {
                   await this._doEdit(changes, this.props.preferencesValues);
                   this.openEditProfileDialog(false);
-                } catch (error) {
+                } catch {
                   // Ignore errors, we will let the user retry in their profile.
                 }
               }}

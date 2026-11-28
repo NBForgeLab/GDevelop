@@ -176,7 +176,7 @@ export const addInGameEditorExtensionErrorsToFunctionCallOutputs = ({
   let parsedOutput;
   try {
     parsedOutput = JSON.parse(lastOutput.output);
-  } catch (error) {
+  } catch {
     return { functionCallOutputs, newlyGivenErrorIds: [] };
   }
 

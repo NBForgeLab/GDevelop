@@ -270,7 +270,7 @@ export default class BrowserS3PreviewLauncher extends React.Component<
         previewWindow.location = outputDir + '/index.html';
         try {
           previewWindow.focus();
-        } catch (e) {}
+        } catch {}
       });
 
       // If the preview windows are new, register them so that they can be accessed

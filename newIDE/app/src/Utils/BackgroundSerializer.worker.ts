@@ -1,5 +1,3 @@
-/* eslint-env worker */
-
 declare function importScripts(...urls: string[]): void;
 declare function initializeGDevelopJs(options?: {
   locateFile?: (path: string, prefix: string) => string;
@@ -40,7 +38,6 @@ const getLibGDevelop = (versionWithHash?: string): Promise<libGDevelop> => {
     try {
       const url = `/libGD.js?cache-buster=${versionWithHash}`;
       // Load libGD.js in the worker context.
-      // eslint-disable-next-line no-undef
       importScripts(url);
 
       if (typeof initializeGDevelopJs !== 'function') {

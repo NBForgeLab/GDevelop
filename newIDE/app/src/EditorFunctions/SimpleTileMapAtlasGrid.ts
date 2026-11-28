@@ -30,7 +30,7 @@ export const loadSimpleTileMapAtlasGrid = async ({
 > => {
   try {
     await PixiResourcesLoader.loadTextures(project, [atlasImage]);
-  } catch (error) {
+  } catch {
     return {
       success: false,
       error: `The atlas image "${atlasImage}" could not be loaded.`,

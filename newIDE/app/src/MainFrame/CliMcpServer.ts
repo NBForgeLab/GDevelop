@@ -627,7 +627,7 @@ export const makeMcpMessagesQueue = ({
       let message: JsonRpcMessage;
       try {
         message = JSON.parse(line);
-      } catch (error) {
+      } catch {
         send(
           JSON.stringify({
             jsonrpc: '2.0',

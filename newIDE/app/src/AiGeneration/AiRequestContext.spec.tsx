@@ -105,7 +105,6 @@ const flushPromises = async () => {
   // Allow chained promises inside the polling tick to resolve.
   // The tick performs several `await`s sequentially, so we flush a few times.
   for (let i = 0; i < 10; i++) {
-    // eslint-disable-next-line no-await-in-loop
     await Promise.resolve();
   }
 };
@@ -188,7 +187,6 @@ describe('AiRequestProvider sub-agent polling', () => {
       POLLING_INTERVAL_AFTER_BACKOFF_IN_MS,
       POLLING_INTERVAL_AFTER_2X_BACKOFF_IN_MS,
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       await act(async () => {
         jest.advanceTimersByTime(intervalMs);
         await flushPromises();

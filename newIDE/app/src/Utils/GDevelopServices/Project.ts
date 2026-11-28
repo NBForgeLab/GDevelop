@@ -162,7 +162,7 @@ export const isCloudProjectVersionSane = async (
     const projectFile = await unzipFirstEntryOfBlob(response.data);
     JSON.parse(projectFile);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 };

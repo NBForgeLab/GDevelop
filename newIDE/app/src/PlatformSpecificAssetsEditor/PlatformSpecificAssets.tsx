@@ -160,7 +160,7 @@ const PlatformSpecificAssets = ({
         );
         setIsLoading(false);
       }, 200 /* Let a bit of time so that image files can be found */);
-    } catch (e) {
+    } catch {
       showAlert({
         title: t`Some icons could not be generated.`,
         message: t`An error occurred while generating some icons. Verify that the image is valid and try again.`,

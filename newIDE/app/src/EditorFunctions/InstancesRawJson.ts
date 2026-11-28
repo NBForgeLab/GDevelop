@@ -182,7 +182,7 @@ const getTileMapDimensions = (
       isPositiveInteger(tileMap.dimY)
       ? { dimX: tileMap.dimX, dimY: tileMap.dimY }
       : null;
-  } catch (error) {
+  } catch {
     return null;
   }
 };

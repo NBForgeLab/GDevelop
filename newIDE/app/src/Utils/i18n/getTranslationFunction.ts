@@ -12,7 +12,7 @@ type NotNullTranslationFunction = (arg0: string) => string;
 const safeTranslate = (i18nModule: I18n, str: string): string => {
   try {
     return i18nModule._(str);
-  } catch (error) {
+  } catch {
     return str;
   }
 };

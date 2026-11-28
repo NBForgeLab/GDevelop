@@ -371,7 +371,7 @@ const PrivateGameTemplateInformationPage = ({
         setVerifiedShowcasedGameUrl(
           publicGame.publicWebBuildId ? getPublicGameUrl(publicGame) : null
         );
-      } catch (error) {
+      } catch {
         // The game does not exist (anymore) or could not be fetched:
         // don't display a button leading nowhere.
         if (!isCancelled) setVerifiedShowcasedGameUrl(null);
