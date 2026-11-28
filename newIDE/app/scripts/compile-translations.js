@@ -19,7 +19,9 @@ const newIdeAppPath = path.join(__dirname, '..');
 // that translations are valid ICU messages before running "lingui compile"
 // (which crashes at the first invalid translation, leaving all the
 // remaining locales - notably "en" - without a compiled catalog).
+/** @type {typeof import('pofile') | null} */
 let PO = null;
+/** @type {((input: string) => unknown[]) | null} */
 let parseIcuMessage = null;
 try {
   PO = require('pofile');
@@ -30,9 +32,13 @@ try {
   );
 }
 
-const readUtf8File = path =>
+/**
+ * @param {string} filePath
+ * @returns {Promise<string>}
+ */
+const readUtf8File = filePath =>
   new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', function(err, content) {
+    fs.readFile(filePath, 'utf8', function(err, content) {
       if (err) {
         reject(err);
         return;
@@ -42,9 +48,14 @@ const readUtf8File = path =>
     });
   });
 
-const writeUtf8File = (path, content) =>
+/**
+ * @param {string} filePath
+ * @param {string} content
+ * @returns {Promise<void>}
+ */
+const writeUtf8File = (filePath, content) =>
   new Promise((resolve, reject) => {
-    fs.writeFile(path, content, 'utf8', function(err) {
+    fs.writeFile(filePath, content, 'utf8', function(err) {
       if (err) {
         return reject(err);
       }
@@ -83,6 +94,10 @@ if (!msgcat) {
   shell.exit(process.env.CI ? 1 : 0);
 }
 
+/**
+ * @param {{ messages: Record<string, string> }} compiledCatalog
+ * @returns {number}
+ */
 const computeTranslationRatio = compiledCatalog => {
   const allMessages = Object.keys(compiledCatalog.messages);
   const sameAsKeyCount = allMessages.filter(
@@ -92,6 +107,15 @@ const computeTranslationRatio = compiledCatalog => {
   return 1 - sameAsKeyCount / allMessages.length;
 };
 
+/**
+ * @param {Array<{
+ *   languageCode: string,
+ *   languageName: string,
+ *   languageNativeName: string,
+ *   translationRatio: number,
+ * }>} object
+ * @returns {Promise<void>}
+ */
 const writeLocaleMetadata = object => {
   return new Promise((resolve, reject) => {
     const content = [
@@ -108,8 +132,13 @@ const writeLocaleMetadata = object => {
   });
 };
 
-const sanitizeMessagePo = path => {
-  return readUtf8File(path).then(content => {
+/**
+ * @param {string} filePath
+ * @returns {Promise<{ forbiddenStringsFound: Array<{ str: string, regex: RegExp }> }>}
+ */
+const sanitizeMessagePo = filePath => {
+  return readUtf8File(filePath).then(content => {
+    /** @type {Array<{ str: string, regex: RegExp }>} */
     let forbiddenStringsFound = [];
     let forbiddenStrings = [
       {
@@ -141,7 +170,7 @@ const sanitizeMessagePo = path => {
       }
     });
 
-    return writeUtf8File(path, sanitizedContent).then(() => {
+    return writeUtf8File(filePath, sanitizedContent).then(() => {
       return {
         forbiddenStringsFound,
       };
@@ -156,19 +185,25 @@ const sanitizeMessagePo = path => {
 // included - without an up-to-date "messages.js". A missing "en/messages.js"
 // makes English strings with parameters displayed with raw placeholders (like
 // "{numberOfAssetPacks}") in production builds.
-const validateMessagePo = path => {
+/**
+ * @param {string} filePath
+ * @returns {Promise<{ invalidMessages: Array<{ msgid: string }> }>}
+ */
+const validateMessagePo = filePath => {
   if (!PO || !parseIcuMessage) {
     return Promise.resolve({ invalidMessages: [] });
   }
 
-  return readUtf8File(path).then(content => {
+  const parseIcu = parseIcuMessage;
+  return readUtf8File(filePath).then(content => {
     const catalog = PO.parse(content);
+    /** @type {Array<{ msgid: string }>} */
     const invalidMessages = [];
     catalog.items.forEach(item => {
       const hasInvalidTranslation = item.msgstr.some(translation => {
         if (!translation) return false;
         try {
-          parseIcuMessage(translation);
+          parseIcu(translation);
           return false;
         } catch (error) {
           return true;
@@ -185,14 +220,20 @@ const validateMessagePo = path => {
       return { invalidMessages };
     }
 
-    return writeUtf8File(path, catalog.toString()).then(() => ({
+    return writeUtf8File(filePath, catalog.toString()).then(() => ({
       invalidMessages,
     }));
   });
 };
 
-const lintMessagePo = (locale, path) => {
-  return readUtf8File(path).then(content => {
+/**
+ * @param {string} locale
+ * @param {string} filePath
+ * @returns {Promise<{ errors: Array<{ str: string }> }>}
+ */
+const lintMessagePo = (locale, filePath) => {
+  return readUtf8File(filePath).then(content => {
+    /** @type {Array<{ str: string }>} */
     const errors = [];
     if (locale === 'pseudo_LOCALE' || locale === 'en') {
       return { errors };
@@ -292,10 +333,10 @@ getLocales()
         `❌ Error(s) occurred while listing locales folders: ` + error
       );
       shell.exit(1);
-      return;
     }
   )
   .then(results => {
+    if (!results) return [];
     //Display success and errors while concatenating translation catalogs for each locale.
     const successes = results.filter(
       ({ shellOutput }) => shellOutput.code === 0
@@ -381,7 +422,6 @@ getLocales()
         `❌ "lingui compile" failed - some locales are missing an up-to-date "messages.js". Verify the translations reported in the error above (and fix them on Crowdin).`
       );
       shell.exit(1);
-      return;
     }
 
     // The English catalog is removed by extract-all-translations and must be
@@ -396,16 +436,17 @@ getLocales()
         )}" was not created by "lingui compile".`
       );
       shell.exit(1);
-      return;
     }
 
     return locales;
   })
   .then(locales => {
+    if (!locales) return [];
     // Compute some stats about the languages...
     return locales
       .map(locale => {
         try {
+          /** @type {{ messages: Record<string, string> }} */
           const compiledCatalog = require(getLocaleCompiledCatalogPath(locale));
 
           return {
@@ -433,7 +474,6 @@ getLocales()
           error
       );
       shell.exit(1);
-      return;
     }
   )
   .then(
@@ -442,7 +482,6 @@ getLocales()
         `✅ Translations compiled and metadata written in ${getLocaleMetadataPath()}`
       );
       shell.exit(0);
-      return;
     },
     error => {
       shell.echo(
@@ -450,6 +489,5 @@ getLocales()
           error
       );
       shell.exit(1);
-      return;
     }
   );

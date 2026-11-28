@@ -5,6 +5,17 @@ const recursive = require('recursive-readdir');
 
 const newIdeAppSrcPath = path.join(__dirname, '../src');
 
+/**
+ * @param {string} filePath
+ * @returns {Promise<{
+ *   filePath: string,
+ *   supportsTrans: boolean,
+ *   requiresTrans: boolean,
+ *   supportsI18n: boolean,
+ *   requiresI18n: boolean,
+ *   reason: string,
+ * }>}
+ */
 const analyzeFile = filePath =>
   new Promise((resolve, reject) =>
     fs.readFile(filePath, { encoding: 'utf8' }, (err, content) => {
@@ -84,7 +95,7 @@ const analyzeFile = filePath =>
 
 recursive(newIdeAppSrcPath, function(err, files) {
   if (err) {
-    shell.echo(`❌ Error(s) occurred while reading files `, err);
+    shell.echo(`❌ Error(s) occurred while reading files `, String(err));
     shell.exit(1);
   }
 

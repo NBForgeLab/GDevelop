@@ -12,10 +12,6 @@ import GlobalAndSceneVariablesDialog from '../../VariablesList/GlobalAndSceneVar
 
 const gd: libGDevelop = global.gd;
 
-const getGdVariablesContainer = () =>
-  gd.VariablesContainer as typeof gd.VariablesContainer &
-    typeof gd.VariablesContainer_SourceType;
-
 export default React.forwardRef<ParameterFieldInterface, ParameterFieldProps>(
   function SceneVariableField(props: ParameterFieldProps, ref) {
     const field = React.useRef<ParameterFieldInterface | null>(null);
@@ -115,7 +111,7 @@ export default React.forwardRef<ParameterFieldInterface, ParameterFieldProps>(
 const getVariableSourceFromIdentifier = (
   identifier: string,
   projectScopedContainers: gdProjectScopedContainers
-): VariablesContainer_SourceType => getGdVariablesContainer().Scene;
+): VariablesContainer_SourceType => gd.VariablesContainer.Scene;
 
 export const renderInlineSceneVariable = (
   props: ParameterInlineRendererProps

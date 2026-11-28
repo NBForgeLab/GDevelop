@@ -192,25 +192,20 @@ const setExpressionType = (
   gd.PropertyFunctionGenerator.updateReturnActionType(project, eventsFunction);
 };
 
-const getEventsFunctionType = () =>
-  gd.EventsFunction as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
-
 const setFunctionTypeName = (
   eventsFunction: gdEventsFunction,
   name: string
 ) => {
-  const eventsFunctionType = getEventsFunctionType();
   eventsFunction.setFunctionType(
     name === 'Condition'
-      ? eventsFunctionType.Condition
+      ? gd.EventsFunction.Condition
       : name === 'Expression' || name === 'StringExpression'
-        ? eventsFunctionType.Expression
+        ? gd.EventsFunction.Expression
         : name === 'ExpressionAndCondition'
-          ? eventsFunctionType.ExpressionAndCondition
+          ? gd.EventsFunction.ExpressionAndCondition
           : name === 'ActionWithOperator'
-            ? eventsFunctionType.ActionWithOperator
-            : eventsFunctionType.Action
+            ? gd.EventsFunction.ActionWithOperator
+            : gd.EventsFunction.Action
   );
   // Only the legacy `StringExpression` says what the function returns: the
   // other types returning a value keep it. A function returning nothing has
@@ -320,7 +315,7 @@ const getDefaultSentence = (
   const isFirstParameterImplicitInSentence =
     owner !== 'extension' &&
     eventsFunction.getFunctionType() ===
-      getEventsFunctionType().ExpressionAndCondition;
+      gd.EventsFunction.ExpressionAndCondition;
   const parameters = eventsFunction.getParameters();
   const sentenceParts = [
     eventsFunction.getFullName() || eventsFunction.getName(),

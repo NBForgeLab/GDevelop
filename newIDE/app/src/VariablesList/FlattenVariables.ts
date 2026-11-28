@@ -3,10 +3,6 @@ import { inheritedPrefix, separator } from './VariableToTreeNodeHandling';
 
 const gd: libGDevelop = global.gd;
 
-// Resolve `gd.Variable` lazily at call time because `global.gd` is populated asynchronously.
-const getGdVariable = () =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
-
 /**
  * A variable to be displayed as a row of the variables list. The tree of
  * variables is flattened into a list of these, so that only the rows that
@@ -89,10 +85,9 @@ const flattenVariable = ({
     return;
   }
 
-  const gdVariable = getGdVariable();
   const type = variable.getType();
   const isCollection =
-    type === gdVariable.Structure || type === gdVariable.Array;
+    type === gd.Variable.Structure || type === gd.Variable.Array;
   const isExpanded = isCollection && !variable.isFolded();
 
   flattenedVariables.push({
@@ -118,7 +113,7 @@ const flattenVariable = ({
       name: childName,
       index: childIndex,
       variable:
-        type === gdVariable.Structure
+        type === gd.Variable.Structure
           ? variable.getChild(childName)
           : variable.getAtIndex(childIndex),
       parentVariable: variable,
@@ -130,7 +125,7 @@ const flattenVariable = ({
       flattenedVariables,
     });
 
-  if (type === gdVariable.Structure) {
+  if (type === gd.Variable.Structure) {
     variable.getAllChildrenNames().toJSArray().forEach(flattenChild);
   } else {
     mapFor(0, variable.getChildrenCount(), (childIndex) =>

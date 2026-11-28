@@ -393,7 +393,7 @@ export default class RenderedCustomObjectInstance
     project: gdProject,
     resourcesLoader: typeof ResourcesLoader,
     objectConfiguration: gdObjectConfiguration
-  ): any {
+  ): string {
     const customObjectConfiguration =
       gd.asCustomObjectConfiguration(objectConfiguration);
     const eventBasedObject = getEventBasedObject(
@@ -613,17 +613,17 @@ export default class RenderedCustomObjectInstance
     }
   }
 
-  getDefaultWidth(): any {
+  getDefaultWidth(): number {
     const variant = this.getVariant();
     return variant ? variant.getAreaMaxX() - variant.getAreaMinX() : 48;
   }
 
-  getDefaultHeight(): any {
+  getDefaultHeight(): number {
     const variant = this.getVariant();
     return variant ? variant.getAreaMaxY() - variant.getAreaMinY() : 48;
   }
 
-  getDefaultDepth(): any {
+  getDefaultDepth(): number {
     const variant = this.getVariant();
     return variant ? variant.getAreaMaxZ() - variant.getAreaMinZ() : 48;
   }
@@ -654,15 +654,15 @@ export default class RenderedCustomObjectInstance
     return (-variant.getAreaMinZ() / this.getDefaultDepth()) * this.getDepth();
   }
 
-  getCenterX(): any {
+  getCenterX(): number {
     return this.getWidth() / 2;
   }
 
-  getCenterY(): any {
+  getCenterY(): number {
     return this.getHeight() / 2;
   }
 
-  getCenterZ(): any {
+  getCenterZ(): number {
     return this.getDepth() / 2;
   }
 }

@@ -2,7 +2,9 @@ const reportedDeadWrappers = new WeakSet<object>();
 
 const getGdInstance = (): libGDevelop | undefined =>
   (typeof gd !== 'undefined' ? gd : undefined) ||
-  (typeof globalThis !== 'undefined' ? (globalThis as any).gd : undefined) ||
+  (typeof globalThis !== 'undefined'
+    ? (globalThis as { gd?: libGDevelop }).gd
+    : undefined) ||
   (typeof global !== 'undefined' ? global.gd : undefined);
 
 /**
@@ -15,7 +17,7 @@ const getGdInstance = (): libGDevelop | undefined =>
 export const isNullPtr = (
   gd: libGDevelop,
   object: gdEmscriptenObject
-): boolean => gd.getPointer(object as any) === 0;
+): boolean => gd.getPointer(object) === 0;
 
 /**
  * Guard against dead (destroyed) C++/WebIDL wrapper objects.
@@ -37,11 +39,21 @@ export const exceptionallyGuardAgainstDeadObject = <T>(
 
   try {
     const gdInstance = getGdInstance();
-    if (gdInstance && typeof gdInstance.assertObjectAlive === 'function') {
-      gdInstance.assertObjectAlive(obj as any);
+    if (
+      gdInstance &&
+      typeof gdInstance.assertObjectAlive === 'function' &&
+      typeof obj === 'object' &&
+      'ptr' in obj
+    ) {
+      gdInstance.assertObjectAlive(obj as unknown as gdEmscriptenObject);
     }
   } catch (exception) {
-    if ((exception as any)?.name === 'UseAfterFreeError') {
+    if (
+      typeof exception === 'object' &&
+      exception !== null &&
+      'name' in exception &&
+      exception.name === 'UseAfterFreeError'
+    ) {
       if (typeof obj === 'object' && !reportedDeadWrappers.has(obj)) {
         reportedDeadWrappers.add(obj);
         // Do not retain native wrappers or send their contents with the event.

@@ -7,10 +7,6 @@ import {
 
 const gd: libGDevelop = global.gd;
 
-const getGdCustomObjectConfiguration = () =>
-  gd.CustomObjectConfiguration as typeof gd.CustomObjectConfiguration &
-    typeof gd.CustomObjectConfiguration_EdgeAnchor;
-
 describe('getLayoutedRenderedInstance', () => {
   it('can fill the parent with a child (with custom size)', () => {
     const project = gd.ProjectHelper.createNewGDJSProject();
@@ -26,10 +22,10 @@ describe('getLayoutedRenderedInstance', () => {
       child: { defaultWidth: 64, defaultHeight: 64 },
       instance: { x: 0, y: 0, customSize: { width: 100, height: 100 } },
       anchor: {
-        left: getGdCustomObjectConfiguration().MinEdge,
-        top: getGdCustomObjectConfiguration().MinEdge,
-        right: getGdCustomObjectConfiguration().MaxEdge,
-        bottom: getGdCustomObjectConfiguration().MaxEdge,
+        left: gd.CustomObjectConfiguration.MinEdge,
+        top: gd.CustomObjectConfiguration.MinEdge,
+        right: gd.CustomObjectConfiguration.MaxEdge,
+        bottom: gd.CustomObjectConfiguration.MaxEdge,
       },
     });
     const instance = layoutedRenderedInstance._instance;
@@ -56,10 +52,10 @@ describe('getLayoutedRenderedInstance', () => {
       child: { defaultWidth: 100, defaultHeight: 100 },
       instance: { x: 0, y: 0, customSize: null },
       anchor: {
-        left: getGdCustomObjectConfiguration().MinEdge,
-        top: getGdCustomObjectConfiguration().MinEdge,
-        right: getGdCustomObjectConfiguration().MaxEdge,
-        bottom: getGdCustomObjectConfiguration().MaxEdge,
+        left: gd.CustomObjectConfiguration.MinEdge,
+        top: gd.CustomObjectConfiguration.MinEdge,
+        right: gd.CustomObjectConfiguration.MaxEdge,
+        bottom: gd.CustomObjectConfiguration.MaxEdge,
       },
     });
     const instance = layoutedRenderedInstance._instance;
@@ -86,10 +82,10 @@ describe('getLayoutedRenderedInstance', () => {
       child: { defaultWidth: 64, defaultHeight: 64 },
       instance: { x: -50, y: -50, customSize: { width: 100, height: 100 } },
       anchor: {
-        left: getGdCustomObjectConfiguration().MinEdge,
-        top: getGdCustomObjectConfiguration().MinEdge,
-        right: getGdCustomObjectConfiguration().MaxEdge,
-        bottom: getGdCustomObjectConfiguration().MaxEdge,
+        left: gd.CustomObjectConfiguration.MinEdge,
+        top: gd.CustomObjectConfiguration.MinEdge,
+        right: gd.CustomObjectConfiguration.MaxEdge,
+        bottom: gd.CustomObjectConfiguration.MaxEdge,
       },
     });
     const instance = layoutedRenderedInstance._instance;
@@ -116,10 +112,10 @@ describe('getLayoutedRenderedInstance', () => {
       child: { defaultWidth: 64, defaultHeight: 64, originX: 32, originY: 32 },
       instance: { x: 50, y: 50, customSize: { width: 100, height: 100 } },
       anchor: {
-        left: getGdCustomObjectConfiguration().MinEdge,
-        top: getGdCustomObjectConfiguration().MinEdge,
-        right: getGdCustomObjectConfiguration().MaxEdge,
-        bottom: getGdCustomObjectConfiguration().MaxEdge,
+        left: gd.CustomObjectConfiguration.MinEdge,
+        top: gd.CustomObjectConfiguration.MinEdge,
+        right: gd.CustomObjectConfiguration.MaxEdge,
+        bottom: gd.CustomObjectConfiguration.MaxEdge,
       },
     });
     const instance = layoutedRenderedInstance._instance;
@@ -146,10 +142,10 @@ describe('getLayoutedRenderedInstance', () => {
       child: { defaultWidth: 64, defaultHeight: 64 },
       instance: { x: 0, y: 0, customSize: { width: 100, height: 100 } },
       anchor: {
-        left: getGdCustomObjectConfiguration().Proportional,
-        top: getGdCustomObjectConfiguration().Proportional,
-        right: getGdCustomObjectConfiguration().Proportional,
-        bottom: getGdCustomObjectConfiguration().Proportional,
+        left: gd.CustomObjectConfiguration.Proportional,
+        top: gd.CustomObjectConfiguration.Proportional,
+        right: gd.CustomObjectConfiguration.Proportional,
+        bottom: gd.CustomObjectConfiguration.Proportional,
       },
     });
     const instance = layoutedRenderedInstance._instance;
@@ -177,7 +173,7 @@ describe('getLayoutedRenderedInstance', () => {
           parent: { width: 2000, height: 2000 },
           child: { defaultWidth: 10, defaultHeight: 10 },
           instance: { x: 500, y: 500, customSize: null },
-          anchor: { [objectEdge]: getGdCustomObjectConfiguration().MinEdge },
+          anchor: { [objectEdge]: gd.CustomObjectConfiguration.MinEdge },
         });
         const instance = layoutedRenderedInstance._instance;
         expect(instance.getX()).toBe(500);
@@ -203,7 +199,7 @@ describe('getLayoutedRenderedInstance', () => {
           parent: { width: 2000, height: 2000 },
           child: { defaultWidth: 10, defaultHeight: 10 },
           instance: { x: 500, y: 500, customSize: null },
-          anchor: { [objectEdge]: getGdCustomObjectConfiguration().MaxEdge },
+          anchor: { [objectEdge]: gd.CustomObjectConfiguration.MaxEdge },
         });
         const instance = layoutedRenderedInstance._instance;
         expect(instance.getX()).toBe(1500);
@@ -229,7 +225,7 @@ describe('getLayoutedRenderedInstance', () => {
           parent: { width: 2000, height: 2000 },
           child: { defaultWidth: 10, defaultHeight: 10 },
           instance: { x: 500, y: 500, customSize: null },
-          anchor: { [objectEdge]: getGdCustomObjectConfiguration().Center },
+          anchor: { [objectEdge]: gd.CustomObjectConfiguration.Center },
         });
         const instance = layoutedRenderedInstance._instance;
         expect(instance.getX()).toBe(1000);
@@ -256,8 +252,8 @@ describe('getLayoutedRenderedInstance', () => {
         child: { defaultWidth: 10, defaultHeight: 10 },
         instance: { x: 500, y: 500, customSize: null },
         anchor: {
-          left: getGdCustomObjectConfiguration().MinEdge,
-          right: getGdCustomObjectConfiguration().MaxEdge,
+          left: gd.CustomObjectConfiguration.MinEdge,
+          right: gd.CustomObjectConfiguration.MaxEdge,
         },
       });
       const instance = layoutedRenderedInstance._instance;
@@ -283,7 +279,7 @@ describe('getLayoutedRenderedInstance', () => {
         parent: { width: 2000, height: 2000 },
         child: { defaultWidth: 10, defaultHeight: 10 },
         instance: { x: 500, y: 500, customSize: null },
-        anchor: { left: getGdCustomObjectConfiguration().Proportional },
+        anchor: { left: gd.CustomObjectConfiguration.Proportional },
       });
       const instance = layoutedRenderedInstance._instance;
       expect(instance.getX()).toBe(1000);
@@ -311,7 +307,7 @@ describe('getLayoutedRenderedInstance', () => {
           parent: { width: 2000, height: 2000 },
           child: { defaultWidth: 10, defaultHeight: 10 },
           instance: { x: 500, y: 500, customSize: null },
-          anchor: { [objectEdge]: getGdCustomObjectConfiguration().MinEdge },
+          anchor: { [objectEdge]: gd.CustomObjectConfiguration.MinEdge },
         });
         const instance = layoutedRenderedInstance._instance;
         expect(instance.getX()).toBe(500);
@@ -337,7 +333,7 @@ describe('getLayoutedRenderedInstance', () => {
           parent: { width: 2000, height: 2000 },
           child: { defaultWidth: 10, defaultHeight: 10 },
           instance: { x: 500, y: 500, customSize: null },
-          anchor: { [objectEdge]: getGdCustomObjectConfiguration().MaxEdge },
+          anchor: { [objectEdge]: gd.CustomObjectConfiguration.MaxEdge },
         });
         const instance = layoutedRenderedInstance._instance;
         expect(instance.getX()).toBe(500);
@@ -363,7 +359,7 @@ describe('getLayoutedRenderedInstance', () => {
           parent: { width: 2000, height: 2000 },
           child: { defaultWidth: 10, defaultHeight: 10 },
           instance: { x: 500, y: 500, customSize: null },
-          anchor: { [objectEdge]: getGdCustomObjectConfiguration().Center },
+          anchor: { [objectEdge]: gd.CustomObjectConfiguration.Center },
         });
         const instance = layoutedRenderedInstance._instance;
         expect(instance.getX()).toBe(500);
@@ -390,8 +386,8 @@ describe('getLayoutedRenderedInstance', () => {
         child: { defaultWidth: 10, defaultHeight: 10 },
         instance: { x: 500, y: 500, customSize: null },
         anchor: {
-          top: getGdCustomObjectConfiguration().MinEdge,
-          bottom: getGdCustomObjectConfiguration().MaxEdge,
+          top: gd.CustomObjectConfiguration.MinEdge,
+          bottom: gd.CustomObjectConfiguration.MaxEdge,
         },
       });
       const instance = layoutedRenderedInstance._instance;
@@ -418,7 +414,7 @@ describe('getLayoutedRenderedInstance', () => {
         child: { defaultWidth: 10, defaultHeight: 10 },
         instance: { x: 500, y: 500, customSize: null },
         anchor: {
-          top: getGdCustomObjectConfiguration().Proportional,
+          top: gd.CustomObjectConfiguration.Proportional,
         },
       });
       const instance = layoutedRenderedInstance._instance;
@@ -534,26 +530,26 @@ const getLayoutedRenderedInstanceFor = (props: {
 const getHorizontalAnchorFor = (
   anchor: CustomObjectConfiguration_EdgeAnchor | null | undefined
 ) =>
-  anchor === getGdCustomObjectConfiguration().MinEdge
+  anchor === gd.CustomObjectConfiguration.MinEdge
     ? 'WindowLeft'
-    : anchor === getGdCustomObjectConfiguration().MaxEdge
+    : anchor === gd.CustomObjectConfiguration.MaxEdge
       ? 'WindowRight'
-      : anchor === getGdCustomObjectConfiguration().Center
+      : anchor === gd.CustomObjectConfiguration.Center
         ? 'WindowCenter'
-        : anchor === getGdCustomObjectConfiguration().Proportional
+        : anchor === gd.CustomObjectConfiguration.Proportional
           ? 'Proportional'
           : 'None';
 
 const getVerticalAnchorFor = (
   anchor: CustomObjectConfiguration_EdgeAnchor | null | undefined
 ) =>
-  anchor === getGdCustomObjectConfiguration().MinEdge
+  anchor === gd.CustomObjectConfiguration.MinEdge
     ? 'WindowTop'
-    : anchor === getGdCustomObjectConfiguration().MaxEdge
+    : anchor === gd.CustomObjectConfiguration.MaxEdge
       ? 'WindowBottom'
-      : anchor === getGdCustomObjectConfiguration().Center
+      : anchor === gd.CustomObjectConfiguration.Center
         ? 'WindowCenter'
-        : anchor === getGdCustomObjectConfiguration().Proportional
+        : anchor === gd.CustomObjectConfiguration.Proportional
           ? 'Proportional'
           : 'None';
 

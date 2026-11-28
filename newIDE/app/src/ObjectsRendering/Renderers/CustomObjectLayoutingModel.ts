@@ -1,9 +1,5 @@
 const gd: libGDevelop = global.gd;
 
-const getGdCustomObjectConfiguration = () =>
-  gd.CustomObjectConfiguration as typeof gd.CustomObjectConfiguration &
-    typeof gd.CustomObjectConfiguration_EdgeAnchor;
-
 // - The term "object" is used in comments about the layout declaration because
 //   the layout is done with one instance per object-child and the object name
 //   is used to reference these instances.
@@ -46,16 +42,15 @@ const getPropertyValue = (
   properties: gdMapStringPropertyDescriptor,
   behaviorOverriding: gdBehavior | null
 ): CustomObjectConfiguration_EdgeAnchor => {
-  const CustomObjectConfiguration = getGdCustomObjectConfiguration();
   return behaviorOverriding && behaviorOverriding.hasPropertyValue(name)
-    ? CustomObjectConfiguration.getEdgeAnchorFromString(
+    ? gd.CustomObjectConfiguration.getEdgeAnchorFromString(
         behaviorOverriding.getProperties().get(name).getValue()
       )
     : properties.has(name)
-      ? CustomObjectConfiguration.getEdgeAnchorFromString(
+      ? gd.CustomObjectConfiguration.getEdgeAnchorFromString(
           properties.get(name).getValue()
         )
-      : CustomObjectConfiguration.NoAnchor;
+      : gd.CustomObjectConfiguration.NoAnchor;
 };
 
 export interface PropertiesContainer {
@@ -63,12 +58,11 @@ export interface PropertiesContainer {
 }
 
 const getDefaultAnchor = () => {
-  const CustomObjectConfiguration = getGdCustomObjectConfiguration();
   return {
-    leftEdgeAnchor: CustomObjectConfiguration.NoAnchor,
-    topEdgeAnchor: CustomObjectConfiguration.NoAnchor,
-    rightEdgeAnchor: CustomObjectConfiguration.NoAnchor,
-    bottomEdgeAnchor: CustomObjectConfiguration.NoAnchor,
+    leftEdgeAnchor: gd.CustomObjectConfiguration.NoAnchor,
+    topEdgeAnchor: gd.CustomObjectConfiguration.NoAnchor,
+    rightEdgeAnchor: gd.CustomObjectConfiguration.NoAnchor,
+    bottomEdgeAnchor: gd.CustomObjectConfiguration.NoAnchor,
   };
 };
 
@@ -377,7 +371,6 @@ export const getLayoutedRenderedInstance = <T extends ChildRenderedInstance>(
     layoutedInstance as any as gdInitialInstance
   );
 
-  const CustomObjectConfiguration = getGdCustomObjectConfiguration();
   const objectAnchor = getObjectAnchor(
     eventBasedObjectVariant,
     layoutedInstance.getObjectName(),
@@ -385,16 +378,16 @@ export const getLayoutedRenderedInstance = <T extends ChildRenderedInstance>(
   );
   const leftEdgeAnchor = objectAnchor
     ? objectAnchor.leftEdgeAnchor
-    : CustomObjectConfiguration.NoAnchor;
+    : gd.CustomObjectConfiguration.NoAnchor;
   const topEdgeAnchor = objectAnchor
     ? objectAnchor.topEdgeAnchor
-    : CustomObjectConfiguration.NoAnchor;
+    : gd.CustomObjectConfiguration.NoAnchor;
   const rightEdgeAnchor = objectAnchor
     ? objectAnchor.rightEdgeAnchor
-    : CustomObjectConfiguration.NoAnchor;
+    : gd.CustomObjectConfiguration.NoAnchor;
   const bottomEdgeAnchor = objectAnchor
     ? objectAnchor.bottomEdgeAnchor
-    : CustomObjectConfiguration.NoAnchor;
+    : gd.CustomObjectConfiguration.NoAnchor;
 
   const parentInitialMinX = eventBasedObjectVariant.getAreaMinX();
   const parentInitialMinY = eventBasedObjectVariant.getAreaMinY();
@@ -449,37 +442,37 @@ export const getLayoutedRenderedInstance = <T extends ChildRenderedInstance>(
     const initialInstanceMaxX = initialInstanceMinX + initialInstanceWidth;
 
     let left = initialInstanceMinX;
-    if (leftEdgeAnchor === CustomObjectConfiguration.MinEdge) {
+    if (leftEdgeAnchor === gd.CustomObjectConfiguration.MinEdge) {
       left = parentMinX + initialInstanceMinX - parentInitialMinX;
-    } else if (leftEdgeAnchor === CustomObjectConfiguration.MaxEdge) {
+    } else if (leftEdgeAnchor === gd.CustomObjectConfiguration.MaxEdge) {
       left = parentMaxX + initialInstanceMinX - parentInitialMaxX;
-    } else if (leftEdgeAnchor === CustomObjectConfiguration.Proportional) {
+    } else if (leftEdgeAnchor === gd.CustomObjectConfiguration.Proportional) {
       left =
         parentMinX +
         ((initialInstanceMinX - parentInitialMinX) / parentInitialWidth) *
           parentWidth;
-    } else if (leftEdgeAnchor === CustomObjectConfiguration.Center) {
+    } else if (leftEdgeAnchor === gd.CustomObjectConfiguration.Center) {
       left = parentCenterX + initialInstanceMinX - parentInitialCenterX;
     }
 
     let right = initialInstanceMaxX;
-    if (rightEdgeAnchor === CustomObjectConfiguration.MinEdge) {
+    if (rightEdgeAnchor === gd.CustomObjectConfiguration.MinEdge) {
       right = parentMinX + initialInstanceMaxX - parentInitialMinX;
-    } else if (rightEdgeAnchor === CustomObjectConfiguration.MaxEdge) {
+    } else if (rightEdgeAnchor === gd.CustomObjectConfiguration.MaxEdge) {
       right = parentMaxX + initialInstanceMaxX - parentInitialMaxX;
-    } else if (rightEdgeAnchor === CustomObjectConfiguration.Proportional) {
+    } else if (rightEdgeAnchor === gd.CustomObjectConfiguration.Proportional) {
       right =
         parentMinX +
         ((initialInstanceMaxX - parentInitialMinX) / parentInitialWidth) *
           parentWidth;
-    } else if (rightEdgeAnchor === CustomObjectConfiguration.Center) {
+    } else if (rightEdgeAnchor === gd.CustomObjectConfiguration.Center) {
       right = parentCenterX + initialInstanceMaxX - parentInitialCenterX;
     }
 
     const width =
-      rightEdgeAnchor === CustomObjectConfiguration.NoAnchor
+      rightEdgeAnchor === gd.CustomObjectConfiguration.NoAnchor
         ? initialInstanceWidth
-        : leftEdgeAnchor === CustomObjectConfiguration.NoAnchor
+        : leftEdgeAnchor === gd.CustomObjectConfiguration.NoAnchor
           ? initialInstanceWidth
           : right - left;
     layoutedInstance.setCustomWidth(width);
@@ -487,9 +480,9 @@ export const getLayoutedRenderedInstance = <T extends ChildRenderedInstance>(
     // The originX according to the new width.
     const originX = renderedInstance.getOriginX();
     const x =
-      rightEdgeAnchor === CustomObjectConfiguration.NoAnchor
+      rightEdgeAnchor === gd.CustomObjectConfiguration.NoAnchor
         ? left + originX
-        : leftEdgeAnchor === CustomObjectConfiguration.NoAnchor
+        : leftEdgeAnchor === gd.CustomObjectConfiguration.NoAnchor
           ? right - width + originX
           : left + originX;
     layoutedInstance.x = x;
@@ -517,37 +510,37 @@ export const getLayoutedRenderedInstance = <T extends ChildRenderedInstance>(
     const initialInstanceMaxY = initialInstanceMinY + initialInstanceHeight;
 
     let bottom = initialInstanceMaxY;
-    if (bottomEdgeAnchor === CustomObjectConfiguration.MinEdge) {
+    if (bottomEdgeAnchor === gd.CustomObjectConfiguration.MinEdge) {
       bottom = parentMinY + initialInstanceMaxY - parentInitialMinY;
-    } else if (bottomEdgeAnchor === CustomObjectConfiguration.MaxEdge) {
+    } else if (bottomEdgeAnchor === gd.CustomObjectConfiguration.MaxEdge) {
       bottom = parentMaxY + initialInstanceMaxY - parentInitialMaxY;
-    } else if (bottomEdgeAnchor === CustomObjectConfiguration.Proportional) {
+    } else if (bottomEdgeAnchor === gd.CustomObjectConfiguration.Proportional) {
       bottom =
         parentMinY +
         ((initialInstanceMaxY - parentInitialMinY) / parentInitialHeight) *
           parentHeight;
-    } else if (bottomEdgeAnchor === CustomObjectConfiguration.Center) {
+    } else if (bottomEdgeAnchor === gd.CustomObjectConfiguration.Center) {
       bottom = parentCenterY + initialInstanceMaxY - parentInitialCenterY;
     }
 
     let top = initialInstanceMinY;
-    if (topEdgeAnchor === CustomObjectConfiguration.MinEdge) {
+    if (topEdgeAnchor === gd.CustomObjectConfiguration.MinEdge) {
       top = parentMinY + initialInstanceMinY - parentInitialMinY;
-    } else if (topEdgeAnchor === CustomObjectConfiguration.MaxEdge) {
+    } else if (topEdgeAnchor === gd.CustomObjectConfiguration.MaxEdge) {
       top = parentMaxY + initialInstanceMinY - parentInitialMaxY;
-    } else if (topEdgeAnchor === CustomObjectConfiguration.Proportional) {
+    } else if (topEdgeAnchor === gd.CustomObjectConfiguration.Proportional) {
       top =
         parentMinY +
         ((initialInstanceMinY - parentInitialMinY) / parentInitialHeight) *
           parentHeight;
-    } else if (topEdgeAnchor === CustomObjectConfiguration.Center) {
+    } else if (topEdgeAnchor === gd.CustomObjectConfiguration.Center) {
       top = parentCenterY + initialInstanceMinY - parentInitialCenterY;
     }
 
     const height =
-      bottomEdgeAnchor === CustomObjectConfiguration.NoAnchor
+      bottomEdgeAnchor === gd.CustomObjectConfiguration.NoAnchor
         ? initialInstanceHeight
-        : topEdgeAnchor === CustomObjectConfiguration.NoAnchor
+        : topEdgeAnchor === gd.CustomObjectConfiguration.NoAnchor
           ? initialInstanceHeight
           : bottom - top;
     layoutedInstance.setCustomHeight(height);
@@ -555,9 +548,9 @@ export const getLayoutedRenderedInstance = <T extends ChildRenderedInstance>(
     // The originY according to the new height.
     const originY = renderedInstance.getOriginY();
     const y =
-      bottomEdgeAnchor === CustomObjectConfiguration.NoAnchor
+      bottomEdgeAnchor === gd.CustomObjectConfiguration.NoAnchor
         ? top + originY
-        : topEdgeAnchor === CustomObjectConfiguration.NoAnchor
+        : topEdgeAnchor === gd.CustomObjectConfiguration.NoAnchor
           ? bottom - height + originY
           : top + originY;
     layoutedInstance.y = y;

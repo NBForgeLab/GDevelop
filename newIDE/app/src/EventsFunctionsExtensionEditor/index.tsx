@@ -62,18 +62,6 @@ import MoveEventsFunctionDialog from './MoveEventsFunctionDialog';
 
 const gd: libGDevelop = global.gd;
 
-const getObjectsContainerSourceType = () =>
-  gd.ObjectsContainer as typeof gd.ObjectsContainer &
-    typeof gd.ObjectsContainer_SourceType;
-
-const getVariablesContainerSourceType = () =>
-  gd.VariablesContainer as typeof gd.VariablesContainer &
-    typeof gd.VariablesContainer_SourceType;
-
-const getResourcesContainerSourceType = () =>
-  gd.ResourcesContainer as typeof gd.ResourcesContainer &
-    typeof gd.ResourcesContainer_SourceType;
-
 export type ExtensionItemConfigurationAttribute =
   | 'type'
   | 'isPrivate'
@@ -247,21 +235,21 @@ export default class EventsFunctionsExtensionEditor extends React.Component<
   // (like ObjectGroupsList) because objects "ptr" changed.
   /** An empty list for when one is asked */
   _globalObjectsContainer: gdObjectsContainer = new gd.ObjectsContainer(
-    getObjectsContainerSourceType().Unknown
+    gd.ObjectsContainer.Unknown
   );
   /** The objects from function parameters. */
   _objectsContainer: gdObjectsContainer = new gd.ObjectsContainer(
-    getObjectsContainerSourceType().Function
+    gd.ObjectsContainer.Function
   );
   _parameterVariablesContainer: gdVariablesContainer =
-    new gd.VariablesContainer(getVariablesContainerSourceType().Parameters);
+    new gd.VariablesContainer(gd.VariablesContainer.Parameters);
   _propertyVariablesContainer: gdVariablesContainer = new gd.VariablesContainer(
-    getVariablesContainerSourceType().Properties
+    gd.VariablesContainer.Properties
   );
   _parameterResourcesContainer: gdResourcesContainer =
-    new gd.ResourcesContainer(getResourcesContainerSourceType().Parameters);
+    new gd.ResourcesContainer(gd.ResourcesContainer.Parameters);
   _propertyResourcesContainer: gdResourcesContainer = new gd.ResourcesContainer(
-    getResourcesContainerSourceType().Properties
+    gd.ResourcesContainer.Properties
   );
   _projectScopedContainersAccessor: ProjectScopedContainersAccessor | null =
     null;

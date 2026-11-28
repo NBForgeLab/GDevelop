@@ -47,23 +47,15 @@ import { type AutocompletionAction } from './GenericExpressionField/ExpressionAu
 
 const gd: libGDevelop = global.gd;
 
-const getGdVariable = () =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
-
-const getGdVariablesContainer = () =>
-  gd.VariablesContainer as typeof gd.VariablesContainer &
-    typeof gd.VariablesContainer_SourceType;
-
 const getVariableTypeName = (
   variableType: Variable_Type | null
 ): 'number' | 'string' | 'boolean' => {
-  const gdVariable = getGdVariable();
   switch (variableType) {
-    case gdVariable.Number:
+    case gd.Variable.Number:
       return 'number';
-    case gdVariable.Boolean:
+    case gd.Variable.Boolean:
       return 'boolean';
-    case gdVariable.String:
+    case gd.Variable.String:
     default:
       return 'string';
   }
@@ -117,21 +109,20 @@ const isRootVariableDeclared = (
 export const getVariableSourceIcon = (
   variableSourceType: VariablesContainer_SourceType
 ): any => {
-  const gdVariablesContainer = getGdVariablesContainer();
   switch (variableSourceType) {
-    case gdVariablesContainer.Global:
-    case gdVariablesContainer.ExtensionGlobal:
+    case gd.VariablesContainer.Global:
+    case gd.VariablesContainer.ExtensionGlobal:
       return GlobalVariableIcon;
-    case gdVariablesContainer.Scene:
-    case gdVariablesContainer.ExtensionScene:
+    case gd.VariablesContainer.Scene:
+    case gd.VariablesContainer.ExtensionScene:
       return SceneVariableIcon;
-    case gdVariablesContainer.Object:
+    case gd.VariablesContainer.Object:
       return ObjectVariableIcon;
-    case gdVariablesContainer.Local:
+    case gd.VariablesContainer.Local:
       return LocalVariableIcon;
-    case gdVariablesContainer.Parameters:
+    case gd.VariablesContainer.Parameters:
       return ParameterIcon;
-    case gdVariablesContainer.Properties:
+    case gd.VariablesContainer.Properties:
       return PropertyIcon;
     default:
       return UnknownTypeIcon;
@@ -139,17 +130,16 @@ export const getVariableSourceIcon = (
 };
 
 export const getVariableTypeIcon = (variableType: Variable_Type): any => {
-  const gdVariable = getGdVariable();
   switch (variableType) {
-    case gdVariable.Number:
+    case gd.Variable.Number:
       return VariableNumberIcon;
-    case gdVariable.String:
+    case gd.Variable.String:
       return VariableStringIcon;
-    case gdVariable.Boolean:
+    case gd.Variable.Boolean:
       return VariableBooleanIcon;
-    case gdVariable.Array:
+    case gd.Variable.Array:
       return VariableArrayIcon;
-    case gdVariable.Structure:
+    case gd.Variable.Structure:
       return VariableStructureIcon;
     default:
       return UnknownTypeIcon;
@@ -300,12 +290,11 @@ export default React.forwardRef<ParameterFieldInterface, Props>(
           )
         : null;
 
-    const gdVariable = getGdVariable();
     const needManualTypeSwitcher =
       isSwitchableInstruction &&
-      variableType !== gdVariable.Number &&
-      variableType !== gdVariable.String &&
-      variableType !== gdVariable.Boolean &&
+      variableType !== gd.Variable.Number &&
+      variableType !== gd.Variable.String &&
+      variableType !== gd.Variable.Boolean &&
       field.current &&
       !field.current.hasAnyError() &&
       value;
@@ -313,17 +302,16 @@ export default React.forwardRef<ParameterFieldInterface, Props>(
     const onGetAdditionalActions = React.useCallback(
       (fieldCurrentValue: string): Array<AutocompletionAction> => {
         const actions = [];
-        const gdVariablesContainer = getGdVariablesContainer();
 
         const variableSourceType = getVariableSourceFromIdentifier(
           fieldCurrentValue,
           projectScopedContainersAccessor.get()
         );
         const isVariableDeclared =
-          variableSourceType !== gdVariablesContainer.Unknown;
+          variableSourceType !== gd.VariablesContainer.Unknown;
 
         if (isVariableDeclared) {
-          if (variableSourceType === gdVariablesContainer.Parameters) {
+          if (variableSourceType === gd.VariablesContainer.Parameters) {
             if (editEventsFunctionParameter) {
               actions.push({
                 id: 'edit-parameters',
@@ -332,7 +320,7 @@ export default React.forwardRef<ParameterFieldInterface, Props>(
                 onClick: openParameterEditor,
               });
             }
-          } else if (variableSourceType === gdVariablesContainer.Properties) {
+          } else if (variableSourceType === gd.VariablesContainer.Properties) {
             if (openEventsBasedEntityPropertyEditorDialog) {
               actions.push({
                 id: 'edit-properties',
@@ -484,8 +472,8 @@ export default React.forwardRef<ParameterFieldInterface, Props>(
                       gd.VariableInstructionSwitcher.getSwitchableInstructionVariableType(
                         instruction.getType()
                       );
-                    return type === gdVariable.Unknown
-                      ? gdVariable.Number
+                    return type === gd.Variable.Unknown
+                      ? gd.Variable.Number
                       : type;
                   })()}
                   onChange={(e, i, value: any) => {
@@ -496,9 +484,12 @@ export default React.forwardRef<ParameterFieldInterface, Props>(
                     onInstructionTypeChanged();
                   }}
                 >
-                  <SelectOption value={gdVariable.Number} label={t`Number`} />
-                  <SelectOption value={gdVariable.String} label={t`Text`} />
-                  <SelectOption value={gdVariable.Boolean} label={t`Boolean`} />
+                  <SelectOption value={gd.Variable.Number} label={t`Number`} />
+                  <SelectOption value={gd.Variable.String} label={t`Text`} />
+                  <SelectOption
+                    value={gd.Variable.Boolean}
+                    label={t`Boolean`}
+                  />
                 </SelectField>
               )}
           </ColumnStackLayout>

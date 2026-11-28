@@ -150,14 +150,10 @@ let playgroundContainers: {
 const getOrCreatePlaygroundContainers = () => {
   if (playgroundContainers) return playgroundContainers;
   const gd = global.gd as libGDevelop;
-  const objectsContainerSourceType =
-    gd.ObjectsContainer as unknown as typeof gd.ObjectsContainer_SourceType;
   const project = testProject.project;
-  const objectsContainer = new gd.ObjectsContainer(
-    objectsContainerSourceType.Unknown
-  );
+  const objectsContainer = new gd.ObjectsContainer(gd.ObjectsContainer.Unknown);
   const globalObjectsContainer = new gd.ObjectsContainer(
-    objectsContainerSourceType.Unknown
+    gd.ObjectsContainer.Unknown
   );
   const rootFolder = objectsContainer.getRootFolder();
   objectsContainer.insertNewObjectInFolder(

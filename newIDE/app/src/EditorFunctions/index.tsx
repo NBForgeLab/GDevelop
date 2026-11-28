@@ -10977,7 +10977,6 @@ const changeProjectPropertiesResources: EditorFunction = {
           );
           gd.ProjectBrowserHelper.exposeProjectObjects(
             project,
-            // Flow does not know ObjectsUsingResourceCollector inherits from ArbitraryObjectsWorker.
             objectsCollector
           );
           const objectNamesUsingResource = objectsCollector
@@ -12315,8 +12314,7 @@ const runScript: EditorFunction = {
   modifiesProject: true,
 };
 
-// A helper (not an inline conditional spread) keeps Flow from reasoning about
-// the product of two union spreads in the `meta` of `run_script`.
+// A helper (not an inline conditional spread) avoids computing complex union spreads in `run_script` metadata.
 const getNewExternalLayoutNamesMeta = (
   newExternalLayoutNames: Array<string>
 ): {

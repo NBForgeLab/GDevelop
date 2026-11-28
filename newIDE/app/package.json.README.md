@@ -32,5 +32,5 @@ The codebase uses the legacy **Decorators/HOC API** (`DragSource`, `DropTarget`,
 ## Various fixes
 
 - `react-mosaic-component` is the official npm package (v5.3.0). Earlier versions used a custom fork to pin `react-dnd` 7.x; this is no longer needed.
-- `@lingui/react` is a version where Flow definitions have been fixed.
+- `@lingui/react` is GDevelop's fork of Lingui React v2.
 - `pixi-simple-gesture` is a version where an extra check for `undefined` has been added to `touchStart` in `pan.js`, following traces of errors that have been inspected (though the bug could not be reproduced - but better be safe).

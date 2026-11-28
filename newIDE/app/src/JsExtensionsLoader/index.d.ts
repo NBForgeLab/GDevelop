@@ -1,3 +1,11 @@
+import * as PIXI from 'pixi.js-legacy';
+import * as THREE from 'three';
+import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils';
+import type ResourcesLoader from '../ResourcesLoader';
+import type PixiResourcesLoader from '../ObjectsRendering/PixiResourcesLoader';
+import type RenderedInstance from '../ObjectsRendering/Renderers/RenderedInstance';
+import type Rendered3DInstance from '../ObjectsRendering/Renderers/Rendered3DInstance';
+
 export type TranslationFunction = (text: string) => string;
 
 export type ObjectEditorConfiguration<
@@ -25,11 +33,42 @@ export interface JsExtensionObjectsEditorService {
   editorConfigurations: Record<string, ObjectEditorConfiguration<any, any>>;
 }
 
+export type InstanceRendererConstructor = (new (
+  project: gdProject,
+  instance: gdInitialInstance,
+  associatedObjectConfiguration: gdObjectConfiguration,
+  pixiContainer: PIXI.Container,
+  pixiResourcesLoader: typeof PixiResourcesLoader,
+  getPropertyOverridings?: (() => Map<string, string>) | null
+) => RenderedInstance<any>) & {
+  getThumbnail: (
+    project: gdProject,
+    resourcesLoader: typeof ResourcesLoader,
+    objectConfiguration: gdObjectConfiguration
+  ) => string;
+};
+
+export type Instance3DRendererConstructor = new (
+  project: gdProject,
+  instance: gdInitialInstance,
+  associatedObjectConfiguration: gdObjectConfiguration,
+  pixiContainer: PIXI.Container,
+  threeGroup: THREE.Group | null,
+  pixiResourcesLoader: typeof PixiResourcesLoader,
+  getPropertyOverridings?: (() => Map<string, string>) | null
+) => Rendered3DInstance<any, any>;
+
 export interface JsExtensionObjectsRenderingService {
-  renderers: Record<string, any>;
-  renderers3D: Record<string, any>;
-  registerInstanceRenderer: (objectType: string, renderer: any) => void;
-  registerInstance3DRenderer: (objectType: string, renderer: any) => void;
+  renderers: Record<string, InstanceRendererConstructor>;
+  renderers3D: Record<string, Instance3DRendererConstructor>;
+  registerInstanceRenderer: (
+    objectType: string,
+    renderer: InstanceRendererConstructor
+  ) => void;
+  registerInstance3DRenderer: (
+    objectType: string,
+    renderer: Instance3DRendererConstructor
+  ) => void;
   registerClearCache: (clearCache: (project: gdProject) => void) => void;
   registerModule: (requirePath: string, module: any) => void;
   requireModule: (
@@ -39,17 +78,17 @@ export interface JsExtensionObjectsRenderingService {
   getThumbnail: (
     project: gdProject,
     objectConfiguration: gdObjectConfiguration
-  ) => any;
+  ) => string;
   rgbOrHexToHexNumber: (value: string) => number;
   hexNumberToRGBArray: (value: number) => [number, number, number];
   gd: libGDevelop;
-  PIXI: any;
-  THREE: any;
+  PIXI: typeof PIXI;
+  THREE: typeof THREE;
   THREE_ADDONS: {
-    SkeletonUtils: any;
+    SkeletonUtils: typeof SkeletonUtils;
   };
-  RenderedInstance: any;
-  Rendered3DInstance: any;
+  RenderedInstance: typeof RenderedInstance;
+  Rendered3DInstance: typeof Rendered3DInstance;
 }
 
 export type JsExtensionModule = {

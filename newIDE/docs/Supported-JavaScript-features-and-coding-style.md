@@ -1,6 +1,6 @@
 # Supported JavaScript features and coding styles
 
-> _tl;dr:_ the game engine/extensions are written in TypeScript and can uses "modern" JavaScript but cautiously. The editor is a modern, shiny codebase with bundling and latest JavaScript features.
+> _tl;dr:_ both the game engine/extensions and the editor (`newIDE/app`) are written in TypeScript. The game engine/extensions target cautious, garbage-free JavaScript, while the editor uses modern TypeScript and React features bundled with Vite.
 
 ## For the game engine (GDJS) and extensions
 
@@ -34,18 +34,16 @@ Learn how to [manually launch the type checking in GDJS README](../../GDJS/READM
 
 ## For the editor (`newIDE/app`)
 
-The editor sources are processed by Babel, which _transpiles_ the JavaScript latest features so that they run on older browsers. Thus, it's fine to use **all the latest and greatest** syntax and features 🎉
+The editor sources are written in TypeScript and compiled by Vite (Sucrase/esbuild and Babel), so it's fine to use **modern TypeScript and React** syntax and features 🎉
 
-All source files should use the arrow function (`=>`), `class`, `let`/`const` and anything that makes the codebase more readable, concise and less error prone.
+All new source files should use TypeScript (`.ts` / `.tsx`), arrow functions (`=>`), `class`, `let`/`const`, and anything that makes the codebase more readable, concise, and less error-prone.
 
 ### What about typing?
 
-The codebase is typed using **[Flow](https://flow.org/)**. It's a powerful type checker that does not require any recompilation. It's very similar to TypeScript
+The codebase is typed using **[TypeScript](https://www.typescriptlang.org/)** (`npm run check-types` and `npm run check-script-types` in `newIDE/app`).
 
-> The IDE is using Flow and not TypeScript for historical reasons. Apart from a few differences, it should not be difficult to get used to the Flow syntax.
-
-While proper typing can be seen as cumbersome, it's something that is rather quick to learn and forces developers to think about what they are using. It's also an invaluable tool for refactoring, and ensures that any addition/removal is not breaking anything. It also provides autocompletion (like in VSCode, with the Flow Language Support plugin).
+Proper typing forces developers to think clearly about data contracts, enables reliable refactoring, catches bugs before runtime, and provides rich IDE autocompletion.
 
 ## What about code formatting?
 
-All the code of the game engine and the IDE is auto formatted with Prettier (run `npm run format` in `newID/app` and in `GDJS` folder). Install it in your IDE/text editor and never think about formatting again in your life. The joy! 🎉
+All the code of the game engine and the IDE is auto formatted with Prettier (run `npm run format` in `newIDE/app` and in `GDJS` folder). Install it in your IDE/text editor and never think about formatting again in your life. The joy! 🎉

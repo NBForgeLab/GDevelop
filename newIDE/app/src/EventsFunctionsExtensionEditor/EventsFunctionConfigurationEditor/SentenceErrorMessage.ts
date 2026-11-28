@@ -24,11 +24,9 @@ export const getSentenceErrorText = (
       : ParametersIndexOffsets.FreeFunction;
 
   const type = eventsFunction.getFunctionType();
-  const eventsFunctionType = gd.EventsFunction as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
   const param0isImplicit =
     (eventsBasedBehavior || eventsBasedObject) &&
-    type === eventsFunctionType.ExpressionAndCondition;
+    type === gd.EventsFunction.ExpressionAndCondition;
   const missingParameters = mapFor(
     0,
     eventsFunction.getParameters().getParametersCount(),

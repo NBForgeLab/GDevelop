@@ -16,10 +16,6 @@ import { mapFor } from '../../Utils/MapFor';
 
 const gd: libGDevelop = global.gd;
 
-const getGdVariablesContainer = () =>
-  gd.VariablesContainer as typeof gd.VariablesContainer &
-    typeof gd.VariablesContainer_SourceType;
-
 export default React.forwardRef<ParameterFieldInterface, ParameterFieldProps>(
   function AnyVariableField(props: ParameterFieldProps, ref) {
     const field = React.useRef<ParameterFieldInterface | null>(null);
@@ -55,8 +51,7 @@ export default React.forwardRef<ParameterFieldInterface, ParameterFieldProps>(
         }
       ).filter(
         (variableContainer) =>
-          variableContainer.getSourceType() !==
-          getGdVariablesContainer().Parameters
+          variableContainer.getSourceType() !== gd.VariablesContainer.Parameters
       );
     }, [projectScopedContainersAccessor]);
 
@@ -121,7 +116,7 @@ export default React.forwardRef<ParameterFieldInterface, ParameterFieldProps>(
           parameterRenderingService={props.parameterRenderingService}
         />
         {variableEditorOpen &&
-          (variableSourceType === getGdVariablesContainer().Local ? (
+          (variableSourceType === gd.VariablesContainer.Local ? (
             project && (
               <LocalVariablesDialog
                 project={project}
@@ -143,8 +138,8 @@ export default React.forwardRef<ParameterFieldInterface, ParameterFieldProps>(
               onCancel={() => setVariableEditorOpen(null)}
               onApply={onVariableEditorApply}
               isGlobalTabInitiallyOpen={
-                variableSourceType === getGdVariablesContainer().Global ||
-                variableSourceType === getGdVariablesContainer().ExtensionGlobal
+                variableSourceType === gd.VariablesContainer.Global ||
+                variableSourceType === gd.VariablesContainer.ExtensionGlobal
               }
               initiallySelectedVariable={variableEditorOpen}
               hotReloadPreviewButtonProps={null}
@@ -167,7 +162,7 @@ export const getVariableSourceFromIdentifier = (
     ? variablesContainersList
         .getVariablesContainerFromVariableOrPropertyName(rootVariableName)
         .getSourceType()
-    : getGdVariablesContainer().Unknown;
+    : gd.VariablesContainer.Unknown;
 };
 
 export const renderInlineAnyVariableOrProperty = (

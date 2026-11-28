@@ -74,9 +74,7 @@ const createFakeProject = () => {
   const openFunction = dialog
     .getEventsFunctions()
     .insertNewEventsFunction('Open', 0);
-  const eventsFunctionType = gd.EventsFunction as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
-  openFunction.setFunctionType(eventsFunctionType.Action);
+  openFunction.setFunctionType(gd.EventsFunction.Action);
   const darkVariant = dialog.getVariants().insertNewVariant('Dark', 0);
   darkVariant.getLayers().insertNewLayer('', 0);
   darkVariant.setAreaMaxX(120);

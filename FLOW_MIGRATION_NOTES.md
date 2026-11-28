@@ -1,7 +1,7 @@
 # GDevelop Flow-to-TypeScript Migration — Deferred Engineering Notes & Follow-Up Checklist
 
-**Document Version**: 1.0.0  
-**Scope**: Actionable caveats, deferred cleanup items, and edge-case reminders to observe during Phases 1–6 of the `newIDE/app` TypeScript migration.  
+**Document Version**: 1.1.0  
+**Scope**: Actionable caveats, deferred cleanup items, and edge-case reminders observed during Phases 1–6 of the `newIDE/app` TypeScript migration (**All items below have now been executed and completed in Phases 1–6 and post-Phase-6 hardening commits.**).  
 **Related Documents**:
 - [Executive Overview (`FLOW_AUDIT_AND_MIGRATION_STRATEGY.md`)](./FLOW_AUDIT_AND_MIGRATION_STRATEGY.md)
 - [Flow Diagnostic Audit Report (`FLOW_AUDIT_REPORT.md`)](./FLOW_AUDIT_REPORT.md)

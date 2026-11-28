@@ -39,22 +39,14 @@ const autocompletionIconSizeStyle: React.CSSProperties = {
   maxHeight: 16,
 };
 
-const getGdVariable = () =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
-
-const getGdVariablesContainer = () =>
-  gd.VariablesContainer as typeof gd.VariablesContainer &
-    typeof gd.VariablesContainer_SourceType;
-
 const getTypeToIcon = (type: string) => {
-  const gdVariable = getGdVariable();
   // Reuse variable icons for property types.
   if (type === 'number') {
-    return getVariableTypeToIcon()[gdVariable.Number];
+    return getVariableTypeToIcon()[gd.Variable.Number];
   } else if (type === 'boolean') {
-    return getVariableTypeToIcon()[gdVariable.Boolean];
+    return getVariableTypeToIcon()[gd.Variable.Boolean];
   } else {
-    return getVariableTypeToIcon()[gdVariable.String];
+    return getVariableTypeToIcon()[gd.Variable.String];
   }
 };
 
@@ -353,7 +345,7 @@ export default function ExpressionAutocompletionsDisplayer({
                   const IconComponent =
                     expressionAutocompletion.kind === 'Variable'
                       ? expressionAutocompletion.variableScope ===
-                        getGdVariablesContainer().Unknown
+                        gd.VariablesContainer.Unknown
                         ? // No icon is displayed for child-variables
                           null
                         : getVariableSourceIcon(

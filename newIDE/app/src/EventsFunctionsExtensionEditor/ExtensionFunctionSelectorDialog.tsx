@@ -15,10 +15,6 @@ import { getFunctionIconUrl } from '../EventsFunctionsList/EventsFunctionTreeVie
 
 const gd: libGDevelop = global.gd;
 
-const getEventsFunctionType = () =>
-  gd.EventsFunction as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
-
 type Props = {
   eventsFunctionsContainer: gdEventsFunctionsContainer;
   onCancel: () => void;
@@ -77,7 +73,6 @@ export default function ExtensionFunctionSelectorDialog({
   onChoose,
   onCancel,
 }: Props): React.ReactNode {
-  const eventsFunctionType = getEventsFunctionType();
   const [showAdvanced, setShowAdvanced] = React.useState(false);
 
   return (
@@ -100,7 +95,7 @@ export default function ExtensionFunctionSelectorDialog({
     >
       <List>
         <FunctionListItem
-          functionType={eventsFunctionType.Action}
+          functionType={gd.EventsFunction.Action}
           functionName={null}
           name={<Trans>Action</Trans>}
           description={
@@ -112,7 +107,7 @@ export default function ExtensionFunctionSelectorDialog({
           onChoose={onChoose}
         />
         <FunctionListItem
-          functionType={eventsFunctionType.Condition}
+          functionType={gd.EventsFunction.Condition}
           functionName={null}
           name={<Trans>Condition</Trans>}
           description={
@@ -124,7 +119,7 @@ export default function ExtensionFunctionSelectorDialog({
           onChoose={onChoose}
         />
         <FunctionListItem
-          functionType={eventsFunctionType.Expression}
+          functionType={gd.EventsFunction.Expression}
           functionName={null}
           name={<Trans>Expression</Trans>}
           description={
@@ -141,7 +136,7 @@ export default function ExtensionFunctionSelectorDialog({
               <Trans>Lifecycle functions (advanced)</Trans>
             </Subheader>
             <FunctionListItem
-              functionType={eventsFunctionType.Action}
+              functionType={gd.EventsFunction.Action}
               functionName="onFirstSceneLoaded"
               disabled={eventsFunctionsContainer.hasEventsFunctionNamed(
                 'onFirstSceneLoaded'
@@ -155,7 +150,7 @@ export default function ExtensionFunctionSelectorDialog({
               onChoose={onChoose}
             />
             <FunctionListItem
-              functionType={eventsFunctionType.Action}
+              functionType={gd.EventsFunction.Action}
               functionName="onSceneLoaded"
               disabled={eventsFunctionsContainer.hasEventsFunctionNamed(
                 'onSceneLoaded'
@@ -169,7 +164,7 @@ export default function ExtensionFunctionSelectorDialog({
               onChoose={onChoose}
             />
             <FunctionListItem
-              functionType={eventsFunctionType.Action}
+              functionType={gd.EventsFunction.Action}
               functionName="onScenePreEvents"
               disabled={eventsFunctionsContainer.hasEventsFunctionNamed(
                 'onScenePreEvents'
@@ -183,7 +178,7 @@ export default function ExtensionFunctionSelectorDialog({
               onChoose={onChoose}
             />
             <FunctionListItem
-              functionType={eventsFunctionType.Action}
+              functionType={gd.EventsFunction.Action}
               functionName="onScenePostEvents"
               disabled={eventsFunctionsContainer.hasEventsFunctionNamed(
                 'onScenePostEvents'
@@ -197,7 +192,7 @@ export default function ExtensionFunctionSelectorDialog({
               onChoose={onChoose}
             />
             <FunctionListItem
-              functionType={eventsFunctionType.Action}
+              functionType={gd.EventsFunction.Action}
               functionName="onScenePaused"
               disabled={eventsFunctionsContainer.hasEventsFunctionNamed(
                 'onScenePaused'
@@ -211,7 +206,7 @@ export default function ExtensionFunctionSelectorDialog({
               onChoose={onChoose}
             />
             <FunctionListItem
-              functionType={eventsFunctionType.Action}
+              functionType={gd.EventsFunction.Action}
               functionName="onSceneResumed"
               disabled={eventsFunctionsContainer.hasEventsFunctionNamed(
                 'onSceneResumed'
@@ -225,7 +220,7 @@ export default function ExtensionFunctionSelectorDialog({
               onChoose={onChoose}
             />
             <FunctionListItem
-              functionType={eventsFunctionType.Action}
+              functionType={gd.EventsFunction.Action}
               functionName="onSceneUnloading"
               disabled={eventsFunctionsContainer.hasEventsFunctionNamed(
                 'onSceneUnloading'

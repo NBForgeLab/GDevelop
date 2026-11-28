@@ -36,10 +36,6 @@ import {
 
 const gd: libGDevelop = global.gd;
 
-const getGdObjectsContainer = () =>
-  gd.ObjectsContainer as unknown as typeof gd.ObjectsContainer &
-    typeof gd.ObjectsContainer_SourceType;
-
 const styles = {
   container: {
     display: 'flex',
@@ -54,7 +50,7 @@ export class CustomObjectEditorContainer extends React.Component<RenderEditorCon
   _projectScopedContainersAccessor: ProjectScopedContainersAccessor | null =
     null;
   _objectsContainer: gdObjectsContainer = new gd.ObjectsContainer(
-    getGdObjectsContainer().Function
+    gd.ObjectsContainer.Function
   );
 
   constructor(props: RenderEditorContainerProps) {

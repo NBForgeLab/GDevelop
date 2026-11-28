@@ -1,4 +1,8 @@
-import { type JsExtensionObjectsRenderingService } from '../JsExtensionsLoader';
+import {
+  type Instance3DRendererConstructor,
+  type InstanceRendererConstructor,
+  type JsExtensionObjectsRenderingService,
+} from '../JsExtensionsLoader';
 import RenderedUnknownInstance from './Renderers/RenderedUnknownInstance';
 import RenderedSpriteInstance from './Renderers/RenderedSpriteInstance';
 import RenderedTiledSpriteInstance from './Renderers/RenderedTiledSpriteInstance';
@@ -52,12 +56,12 @@ const ObjectsRenderingService = {
     'PrimitiveDrawing::Drawer': RenderedShapePainterInstance,
     'TextEntryObject::TextEntry': RenderedTextEntryInstance,
     'ParticleSystem::ParticleEmitter': RenderedParticleEmitterInstance,
-  } as Record<string, any>,
-  renderers3D: {} as Record<string, any>,
+  } as Record<string, InstanceRendererConstructor>,
+  renderers3D: {} as Record<string, Instance3DRendererConstructor>,
   getThumbnail: function (
     project: gdProject,
     objectConfiguration: gdObjectConfiguration
-  ): any {
+  ): string {
     const objectType = objectConfiguration.getType();
     if (this.renderers.hasOwnProperty(objectType))
       return this.renderers[objectType].getThumbnail(
@@ -84,7 +88,7 @@ const ObjectsRenderingService = {
     instance: gdInitialInstance,
     pixiContainer: PIXI.Container
   ): RenderedInstance | Rendered3DInstance {
-    return new this.renderers['unknownObjectType'](
+    return new RenderedUnknownInstance(
       project,
       instance,
       null,
@@ -169,7 +173,10 @@ const ObjectsRenderingService = {
       );
     }
   },
-  registerInstanceRenderer: function (objectType: string, renderer: any) {
+  registerInstanceRenderer: function (
+    objectType: string,
+    renderer: InstanceRendererConstructor
+  ) {
     if (!renderer.getThumbnail) {
       console.warn(
         `Tried to register renderer for object "${objectType}", but getThumbnail is not defined.`
@@ -190,7 +197,10 @@ const ObjectsRenderingService = {
 
     this.renderers[objectType] = renderer;
   },
-  registerInstance3DRenderer: function (objectType: string, renderer: any) {
+  registerInstance3DRenderer: function (
+    objectType: string,
+    renderer: Instance3DRendererConstructor
+  ) {
     if (this.renderers3D.hasOwnProperty(objectType)) {
       console.warn(
         `Tried to register 3D renderer for object "${objectType}", but a renderer already exists.`

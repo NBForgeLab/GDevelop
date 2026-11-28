@@ -167,7 +167,7 @@ class TileMapPaintingPreview {
     );
 
     try {
-      const texture = new PIXI.Texture(atlasTexture, rect);
+      const texture = new PIXI.Texture(atlasTexture.baseTexture, rect);
       this.cache.set(cacheKey, texture);
       return texture;
     } catch (error) {
@@ -290,7 +290,7 @@ class TileMapPaintingPreview {
     tilesCoordinatesInTileMapGrid.forEach((tilesCoordinates) => {
       const { bottomRightCorner, topLeftCorner, tileCoordinates } =
         tilesCoordinates;
-      let texture;
+      let texture: PIXI.Texture | null | undefined;
       if (isBadlyConfigured) {
         texture = PixiResourcesLoader.getInvalidPIXITexture();
       } else {
@@ -299,7 +299,6 @@ class TileMapPaintingPreview {
             tileSet,
             ...tileCoordinates,
           });
-          if (!texture) return;
         } else if (tileMapTileSelection.kind === 'erase') {
           texture = PIXI.Texture.from(
             'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAARSURBVHgBY7h58+Z/BhgAcQA/VAcVLiw46wAAAABJRU5ErkJggg=='
@@ -307,6 +306,7 @@ class TileMapPaintingPreview {
           texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
         }
       }
+      if (!texture) return;
       const sprite = this._getTilingSpriteForRectangle({
         bottomRightCorner,
         topLeftCorner,

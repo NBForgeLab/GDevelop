@@ -124,8 +124,7 @@ const editorConfigurations: Record<string, EditorConfiguration<any>> = {
     createNewObject: (): gdTextEntryObject => new gd.TextEntryObject(),
     castToObjectType: (
       objectConfiguration: gdObjectConfiguration
-    ): gdTextEntryObject =>
-      (gd as any).asTextEntryConfiguration(objectConfiguration),
+    ): gdTextEntryObject => gd.asTextEntryObject(objectConfiguration),
     helpPagePath: '/objects/text_entry',
   },
   'ParticleSystem::ParticleEmitter': {

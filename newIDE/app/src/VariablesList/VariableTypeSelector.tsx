@@ -20,10 +20,6 @@ import classes from './VariablesList.module.css';
 
 const gd: libGDevelop = global.gd;
 
-// Resolve `gd.Variable` lazily at call time because `global.gd` is populated asynchronously.
-const getGdVariable = () =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
-
 type Props = {
   variableType: Variable_Type;
   onChange: (newVariableType: string, nodeId: string) => void;
@@ -47,32 +43,35 @@ let variableTypeToString: Record<string, string> | undefined;
 let variableTypeToLabel: Record<number, MessageDescriptor> | undefined;
 
 const getOptions = (variableType: Variable_Type) => {
-  const gdVariable = getGdVariable();
   if (!options) {
     options = [
-      <SelectOption key="string" label={t`Text`} value={gdVariable.String} />,
-      <SelectOption key="number" label={t`Number`} value={gdVariable.Number} />,
+      <SelectOption key="string" label={t`Text`} value={gd.Variable.String} />,
+      <SelectOption
+        key="number"
+        label={t`Number`}
+        value={gd.Variable.Number}
+      />,
       <SelectOption
         key="boolean"
         label={t`Boolean`}
-        value={gdVariable.Boolean}
+        value={gd.Variable.Boolean}
       />,
-      <SelectOption key="array" label={t`Array`} value={gdVariable.Array} />,
+      <SelectOption key="array" label={t`Array`} value={gd.Variable.Array} />,
       <SelectOption
         key="structure"
         label={t`Structure`}
-        value={gdVariable.Structure}
+        value={gd.Variable.Structure}
       />,
     ];
   }
   // A variable with mixed types must be displayed as such, but this can't be
   // chosen: it's only the result of multiple variables being edited at once.
-  return variableType === gdVariable.MixedTypes
+  return variableType === gd.Variable.MixedTypes
     ? [
         <SelectOption
           key="mixed-types"
           label={t`Mixed types`}
-          value={gdVariable.MixedTypes}
+          value={gd.Variable.MixedTypes}
           disabled
         />,
         ...options,
@@ -85,14 +84,13 @@ export const getVariableTypeToIcon = (): Record<
   React.ComponentType<SvgIconProps>
 > => {
   if (!variableTypeToIcon) {
-    const gdVariable = getGdVariable();
     variableTypeToIcon = {
-      [gdVariable.MixedTypes]: VariableMixedTypesIcon,
-      [gdVariable.String]: VariableStringIcon,
-      [gdVariable.Number]: VariableNumberIcon,
-      [gdVariable.Boolean]: VariableBooleanIcon,
-      [gdVariable.Array]: VariableArrayIcon,
-      [gdVariable.Structure]: VariableStructureIcon,
+      [gd.Variable.MixedTypes]: VariableMixedTypesIcon,
+      [gd.Variable.String]: VariableStringIcon,
+      [gd.Variable.Number]: VariableNumberIcon,
+      [gd.Variable.Boolean]: VariableBooleanIcon,
+      [gd.Variable.Array]: VariableArrayIcon,
+      [gd.Variable.Structure]: VariableStructureIcon,
     };
   }
   return variableTypeToIcon;
@@ -100,13 +98,12 @@ export const getVariableTypeToIcon = (): Record<
 
 const getVariableTypeToString = (): Record<string, string> => {
   if (!variableTypeToString) {
-    const gdVariable = getGdVariable();
     variableTypeToString = {
-      [gdVariable.String]: 'string',
-      [gdVariable.Number]: 'number',
-      [gdVariable.Boolean]: 'boolean',
-      [gdVariable.Array]: 'array',
-      [gdVariable.Structure]: 'structure',
+      [gd.Variable.String]: 'string',
+      [gd.Variable.Number]: 'number',
+      [gd.Variable.Boolean]: 'boolean',
+      [gd.Variable.Array]: 'array',
+      [gd.Variable.Structure]: 'structure',
     };
   }
   return variableTypeToString;
@@ -114,14 +111,13 @@ const getVariableTypeToString = (): Record<string, string> => {
 
 const getVariableTypeToLabel = (): Record<number, MessageDescriptor> => {
   if (!variableTypeToLabel) {
-    const gdVariable = getGdVariable();
     variableTypeToLabel = {
-      [gdVariable.MixedTypes]: t`Mixed types`,
-      [gdVariable.String]: t`Text`,
-      [gdVariable.Number]: t`Number`,
-      [gdVariable.Boolean]: t`Boolean`,
-      [gdVariable.Array]: t`Array`,
-      [gdVariable.Structure]: t`Structure`,
+      [gd.Variable.MixedTypes]: t`Mixed types`,
+      [gd.Variable.String]: t`Text`,
+      [gd.Variable.Number]: t`Number`,
+      [gd.Variable.Boolean]: t`Boolean`,
+      [gd.Variable.Array]: t`Array`,
+      [gd.Variable.Structure]: t`Structure`,
     };
   }
   return variableTypeToLabel;
@@ -153,7 +149,7 @@ const VariableTypeSelector: React.ComponentType<Props> = React.memo<Props>(
           className={className}
           fontSize="small"
           htmlColor={
-            variableType === getGdVariable().MixedTypes
+            variableType === gd.Variable.MixedTypes
               ? gdevelopTheme.message.error
               : undefined
           }

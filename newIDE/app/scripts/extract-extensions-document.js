@@ -3,11 +3,12 @@
  * Launch this script to generate a list (in markdown format) of all custom extensions.
  */
 
+const path = require('path');
+const libGDPath = path.join(__dirname, '..', 'public', 'libGD.js');
 /** @type {(options?: unknown) => Promise<libGDevelop>} */
-const initializeGDevelopJs = require('../public/libGD.js');
+const initializeGDevelopJs = require(libGDPath);
 const fs = require('fs').promises;
 const { default: axios } = require('axios');
-const path = require('path');
 const {
   gdevelopWikiUrlRoot,
   getHelpLink,

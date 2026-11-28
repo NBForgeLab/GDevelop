@@ -34,13 +34,11 @@ describe('ObjectFolderOrObjectsClipboard', () => {
 
   const makeProjectWithObjects = () => {
     const project = gd.ProjectHelper.createNewGDJSProject();
-    const objectsContainerSourceType =
-      gd.ObjectsContainer as unknown as typeof gd.ObjectsContainer_SourceType;
     const globalObjectsContainer = new gd.ObjectsContainer(
-      objectsContainerSourceType.Unknown
+      gd.ObjectsContainer.Unknown
     );
     const objectsContainer = new gd.ObjectsContainer(
-      objectsContainerSourceType.Unknown
+      gd.ObjectsContainer.Unknown
     );
     const rootFolder = objectsContainer.getRootFolder();
 
@@ -310,13 +308,11 @@ describe('ObjectFolderOrObjectsClipboard', () => {
 
   test('duplicateObjectFolderOrObjectsInPlace inserts each copy after its original sibling', () => {
     const project = gd.ProjectHelper.createNewGDJSProject();
-    const objectsContainerSourceType =
-      gd.ObjectsContainer as unknown as typeof gd.ObjectsContainer_SourceType;
     const globalObjectsContainer = new gd.ObjectsContainer(
-      objectsContainerSourceType.Unknown
+      gd.ObjectsContainer.Unknown
     );
     const objectsContainer = new gd.ObjectsContainer(
-      objectsContainerSourceType.Unknown
+      gd.ObjectsContainer.Unknown
     );
     const rootFolder = objectsContainer.getRootFolder();
     ['A', 'B', 'C'].forEach((name, index) => {

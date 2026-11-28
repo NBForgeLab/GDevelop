@@ -12,9 +12,6 @@ import { makeFakeLaunchFunctionOptionsWithProject } from './TestHelpers';
 
 const gd: libGDevelop = global.gd;
 
-const getGdVariable = () =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
-
 const fake9PatchAssetShortHeader = {
   ...fakeAssetShortHeader1,
   name: 'Yellow Button',
@@ -2041,7 +2038,7 @@ describe('editorFunctions', () => {
 
       // The variable is actually persisted as a structure with each child set.
       const variable = project.getVariables().get('stats');
-      expect(variable.getType()).toBe(getGdVariable().Structure);
+      expect(variable.getType()).toBe(gd.Variable.Structure);
       expect(variable.getChild('hp').getValue()).toBe(10);
       expect(variable.getChild('name').getString()).toBe('Hero');
       expect(variable.getChild('alive').getBool()).toBe(true);
@@ -2085,7 +2082,7 @@ describe('editorFunctions', () => {
         `"Added global variable \\"config.audio.volume\\" (Number) = 0.8"`
       );
       const config = project.getVariables().get('config');
-      expect(config.getType()).toBe(getGdVariable().Structure);
+      expect(config.getType()).toBe(gd.Variable.Structure);
       expect(
         config.getChild('audio').getChild('volume').getValue()
       ).toBeCloseTo(0.8);
@@ -2106,7 +2103,7 @@ describe('editorFunctions', () => {
         `"Added global variable \\"inventory[2]\\" (String) = Magic Sword"`
       );
       const inventory = project.getVariables().get('inventory');
-      expect(inventory.getType()).toBe(getGdVariable().Array);
+      expect(inventory.getType()).toBe(gd.Variable.Array);
       expect(inventory.getChildrenCount()).toBe(3);
       expect(inventory.getAtIndex(2).getString()).toBe('Magic Sword');
     });
@@ -2133,7 +2130,7 @@ describe('editorFunctions', () => {
       expect(result.message).toMatchInlineSnapshot(
         `"Edited global variable \\"player.hp\\" = 42"`
       );
-      expect(struct.getType()).toBe(getGdVariable().Structure);
+      expect(struct.getType()).toBe(gd.Variable.Structure);
       expect(struct.getChild('hp').getValue()).toBe(42);
       // Siblings must still be intact (no data loss from cast).
       expect(struct.hasChild('name')).toBe(true);
@@ -2164,7 +2161,7 @@ describe('editorFunctions', () => {
       expect(result.message).toMatchInlineSnapshot(
         `"Edited global variable \\"inventory[1]\\" = Magic Shield"`
       );
-      expect(array.getType()).toBe(getGdVariable().Array);
+      expect(array.getType()).toBe(gd.Variable.Array);
       // Other elements must still be intact (no data loss from cast).
       expect(array.getChildrenCount()).toBe(3);
       expect(array.getAtIndex(0).getString()).toBe('Sword');
@@ -2188,9 +2185,9 @@ describe('editorFunctions', () => {
         `"Added scene \\"TestScene\\" variable \\"players[0].name\\" (String) = Alice"`
       );
       const players = testScene.getVariables().get('players');
-      expect(players.getType()).toBe(getGdVariable().Array);
+      expect(players.getType()).toBe(gd.Variable.Array);
       const player0 = players.getAtIndex(0);
-      expect(player0.getType()).toBe(getGdVariable().Structure);
+      expect(player0.getType()).toBe(gd.Variable.Structure);
       expect(player0.getChild('name').getString()).toBe('Alice');
     });
 
@@ -2310,7 +2307,7 @@ describe('editorFunctions', () => {
         .getObject('Player')
         .getVariables()
         .get('Variable');
-      expect(updated.getType()).toBe(getGdVariable().Array);
+      expect(updated.getType()).toBe(gd.Variable.Array);
       expect(updated.getChildrenCount()).toBe(2);
       expect(updated.getAtIndex(0).getValue()).toBe(10);
       expect(updated.getAtIndex(1).getValue()).toBe(11);

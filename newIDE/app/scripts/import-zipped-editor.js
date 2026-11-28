@@ -118,7 +118,7 @@ const editorHasCorrectHash = () =>
           '-editor.zip to public/external/' +
           editor +
           ' folder:',
-        e.message
+        e instanceof Error ? e.message : String(e)
       );
     }
   } catch (e) {

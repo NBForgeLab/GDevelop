@@ -463,16 +463,14 @@ export const getAutocompletionsFromDescriptions = (
   i18n: I18nType | null | undefined
 ): Array<ExpressionAutocompletion> => {
   const { gd } = expressionAutocompletionContext;
-  const expressionCompletionDescription =
-    gd.ExpressionCompletionDescription as typeof gd.ExpressionCompletionDescription &
-      typeof gd.ExpressionCompletionDescription_CompletionKind;
 
   return flatten(
     mapVector(expressionCompletionDescriptions, (completionDescription) => {
       const completionKind = completionDescription.getCompletionKind();
 
       if (
-        completionKind === expressionCompletionDescription.ExpressionWithPrefix
+        completionKind ===
+        gd.ExpressionCompletionDescription.ExpressionWithPrefix
       ) {
         const objectName: string = completionDescription.getObjectName();
         const behaviorName: string = completionDescription.getBehaviorName();
@@ -495,7 +493,7 @@ export const getAutocompletionsFromDescriptions = (
             i18n
           );
         }
-      } else if (completionKind === expressionCompletionDescription.Object) {
+      } else if (completionKind === gd.ExpressionCompletionDescription.Object) {
         return [
           {
             kind: 'Object',
@@ -513,20 +511,22 @@ export const getAutocompletionsFromDescriptions = (
           },
         ];
       } else if (
-        completionKind === expressionCompletionDescription.BehaviorWithPrefix
+        completionKind === gd.ExpressionCompletionDescription.BehaviorWithPrefix
       ) {
         return getAutocompletionsForBehavior(
           expressionAutocompletionContext,
           completionDescription
         );
       } else if (
-        completionKind === expressionCompletionDescription.TextWithPrefix
+        completionKind === gd.ExpressionCompletionDescription.TextWithPrefix
       ) {
         return getAutocompletionsForText(
           expressionAutocompletionContext,
           completionDescription
         );
-      } else if (completionKind === expressionCompletionDescription.Variable) {
+      } else if (
+        completionKind === gd.ExpressionCompletionDescription.Variable
+      ) {
         return [
           {
             kind: 'Variable',
@@ -539,7 +539,9 @@ export const getAutocompletionsFromDescriptions = (
             variableScope: completionDescription.getVariableScope(),
           },
         ];
-      } else if (completionKind === expressionCompletionDescription.Property) {
+      } else if (
+        completionKind === gd.ExpressionCompletionDescription.Property
+      ) {
         return [
           {
             kind: 'Property',
@@ -551,7 +553,9 @@ export const getAutocompletionsFromDescriptions = (
             propertyType: completionDescription.getType(),
           },
         ];
-      } else if (completionKind === expressionCompletionDescription.Parameter) {
+      } else if (
+        completionKind === gd.ExpressionCompletionDescription.Parameter
+      ) {
         return [
           {
             kind: 'Parameter',

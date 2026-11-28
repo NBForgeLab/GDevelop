@@ -85,22 +85,20 @@ const createFakeAuthoredExtension = (
     .setType('Number')
     .setValue('9.8');
 
-  const eventsFunctionType = gd.EventsFunction as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
   behavior.getEventsFunctions().insertNewEventsFunction('doStepPreEvents', 0);
   const hitFunction = behavior
     .getEventsFunctions()
     .insertNewEventsFunction('Hit', 1);
-  hitFunction.setFunctionType(eventsFunctionType.Action);
+  hitFunction.setFunctionType(gd.EventsFunction.Action);
   hitFunction.setSentence('Hit _PARAM0_ for _PARAM2_ damage');
   const isDeadFunction = behavior
     .getEventsFunctions()
     .insertNewEventsFunction('IsDead', 2);
-  isDeadFunction.setFunctionType(eventsFunctionType.Condition);
+  isDeadFunction.setFunctionType(gd.EventsFunction.Condition);
   const privateFunction = behavior
     .getEventsFunctions()
     .insertNewEventsFunction('ResetInternalState', 3);
-  privateFunction.setFunctionType(eventsFunctionType.Action);
+  privateFunction.setFunctionType(gd.EventsFunction.Action);
   privateFunction.setPrivate(true);
   gd.WholeProjectRefactorer.ensureBehaviorEventsFunctionsProperParameters(
     extension,

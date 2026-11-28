@@ -206,9 +206,6 @@ export default class RenderedSprite3DInstance extends Rendered3DInstance<
       this._project,
       imageName
     );
-    if (this._pixiObject) {
-      (this._pixiObject as any).texture = texture;
-    }
 
     if (!texture.baseTexture.valid) {
       // Post pone texture update if texture is not loaded.

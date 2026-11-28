@@ -14,8 +14,10 @@ const VersionMetadata = require('../src/Version/VersionMetadata.json');
 
 /**
  * Remove files created by create-react-app default service worker.
+ * @returns {Promise<void>}
  */
 const cleanBuildFiles = () => {
+  /** @returns {Promise<string[]>} */
   const listBuildFiles = () =>
     new Promise((resolve, reject) => {
       fs.readdir(buildPath, (err, files) => {
@@ -37,6 +39,12 @@ const cleanBuildFiles = () => {
   });
 };
 
+/**
+ * @param {string} file
+ * @param {string} searchText
+ * @param {string} replacedText
+ * @returns {boolean}
+ */
 const replaceInFile = (file, searchText, replacedText) => {
   if (shell.sed('-i', searchText, replacedText, file).code !== 0) {
     return false;

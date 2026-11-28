@@ -32,12 +32,9 @@ export default class ParticleEmitterEditor extends React.Component<EditorProps> 
       gd.asParticleEmitterConfiguration(objectConfiguration);
     const tutorialIds = getObjectTutorialIds(objectConfiguration.getType());
 
-    const rendererTypePoint = (gd.ParticleEmitterObject as any)
-      .Point as ParticleEmitterObject_RendererType;
-    const rendererTypeLine = (gd.ParticleEmitterObject as any)
-      .Line as ParticleEmitterObject_RendererType;
-    const rendererTypeQuad = (gd.ParticleEmitterObject as any)
-      .Quad as ParticleEmitterObject_RendererType;
+    const rendererTypePoint = gd.ParticleEmitterObject.Point;
+    const rendererTypeLine = gd.ParticleEmitterObject.Line;
+    const rendererTypeQuad = gd.ParticleEmitterObject.Quad;
 
     return (
       <ColumnStackLayout noMargin>

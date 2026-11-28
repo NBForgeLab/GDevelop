@@ -21,6 +21,11 @@ declare module 'libGD.js-for-tests-only' {
   export = initializeGDevelopJs;
 }
 
+declare module 'GDJS-for-web-app-only/Runtime/Extensions/*/JsExtension.js' {
+  const extensionModule: import('../JsExtensionsLoader').JsExtensionModule;
+  export = extensionModule;
+}
+
 declare module 'GDJS-for-web-app-only/*' {
   const extensionModule: any;
   export = extensionModule;

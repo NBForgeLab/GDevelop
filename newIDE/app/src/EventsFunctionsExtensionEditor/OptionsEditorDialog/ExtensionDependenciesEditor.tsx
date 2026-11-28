@@ -104,88 +104,83 @@ export const ExtensionDependenciesEditor = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {
-              // unsure why Flow complains about TableRow.
-              mapVector<gdDependencyMetadata, React.ReactNode>(
-                eventsFunctionsExtension.getAllDependencies(),
-                (dependency, index) => (
-                  // unsure why Flow complains about TableRow.
-                  <TableRow key={dependency.getName()}>
-                    <TableRowColumn>
-                      <CompactSemiControlledTextField
-                        commitOnBlur
-                        value={dependency.getName()}
-                        onChange={(newName) => {
-                          if (newName === dependency.getName()) return;
+            {mapVector<gdDependencyMetadata, React.ReactNode>(
+              eventsFunctionsExtension.getAllDependencies(),
+              (dependency, index) => (
+                <TableRow key={dependency.getName()}>
+                  <TableRowColumn>
+                    <CompactSemiControlledTextField
+                      commitOnBlur
+                      value={dependency.getName()}
+                      onChange={(newName) => {
+                        if (newName === dependency.getName()) return;
 
-                          if (checkNameExists(newName, deps)) {
-                            showWarningBox(
-                              `This name is already in use! Please use a unique name.`,
-                              { delayToNextTick: true }
-                            );
-                          } else {
-                            dependency.setName(newName);
-                            forceUpdate();
-                          }
-                        }}
-                      />
-                    </TableRowColumn>
-                    <TableRowColumn>
-                      <CompactSemiControlledTextField
-                        commitOnBlur
-                        value={dependency.getExportName()}
-                        onChange={(newExportName) => {
-                          if (newExportName === dependency.getExportName())
-                            return;
+                        if (checkNameExists(newName, deps)) {
+                          showWarningBox(
+                            `This name is already in use! Please use a unique name.`,
+                            { delayToNextTick: true }
+                          );
+                        } else {
+                          dependency.setName(newName);
+                          forceUpdate();
+                        }
+                      }}
+                    />
+                  </TableRowColumn>
+                  <TableRowColumn>
+                    <CompactSemiControlledTextField
+                      commitOnBlur
+                      value={dependency.getExportName()}
+                      onChange={(newExportName) => {
+                        if (newExportName === dependency.getExportName())
+                          return;
 
-                          dependency.setExportName(newExportName);
-                          forceUpdate();
-                        }}
-                      />
-                    </TableRowColumn>
-                    <TableRowColumn>
-                      <CompactSemiControlledTextField
-                        commitOnBlur
-                        value={dependency.getVersion()}
-                        onChange={(newVersion) => {
-                          if (newVersion === dependency.getVersion()) return;
+                        dependency.setExportName(newExportName);
+                        forceUpdate();
+                      }}
+                    />
+                  </TableRowColumn>
+                  <TableRowColumn>
+                    <CompactSemiControlledTextField
+                      commitOnBlur
+                      value={dependency.getVersion()}
+                      onChange={(newVersion) => {
+                        if (newVersion === dependency.getVersion()) return;
 
-                          dependency.setVersion(newVersion);
-                          forceUpdate();
-                        }}
-                      />
-                    </TableRowColumn>
-                    <TableRowColumn>
-                      <CompactSelectField
-                        value={dependency.getDependencyType()}
-                        onChange={(newType) => {
-                          if (newType === dependency.getDependencyType())
-                            return;
+                        dependency.setVersion(newVersion);
+                        forceUpdate();
+                      }}
+                    />
+                  </TableRowColumn>
+                  <TableRowColumn>
+                    <CompactSelectField
+                      value={dependency.getDependencyType()}
+                      onChange={(newType) => {
+                        if (newType === dependency.getDependencyType()) return;
 
-                          dependency.setDependencyType(newType);
-                          forceUpdate();
-                        }}
-                      >
-                        <SelectOption value="npm" label={t`NPM`} />
-                        <SelectOption value="cordova" label={t`Cordova`} />
-                      </CompactSelectField>
-                    </TableRowColumn>
-                    <TableRowColumn>
-                      <IconButton
-                        tooltip={t`Delete`}
-                        onClick={() => {
-                          eventsFunctionsExtension.removeDependencyAt(index);
-                          forceUpdate();
-                        }}
-                        size="small"
-                      >
-                        <Trash />
-                      </IconButton>
-                    </TableRowColumn>
-                  </TableRow>
-                )
+                        dependency.setDependencyType(newType);
+                        forceUpdate();
+                      }}
+                    >
+                      <SelectOption value="npm" label={t`NPM`} />
+                      <SelectOption value="cordova" label={t`Cordova`} />
+                    </CompactSelectField>
+                  </TableRowColumn>
+                  <TableRowColumn>
+                    <IconButton
+                      tooltip={t`Delete`}
+                      onClick={() => {
+                        eventsFunctionsExtension.removeDependencyAt(index);
+                        forceUpdate();
+                      }}
+                      size="small"
+                    >
+                      <Trash />
+                    </IconButton>
+                  </TableRowColumn>
+                </TableRow>
               )
-            }
+            )}
           </TableBody>
         </Table>
         <Column expand>
@@ -234,62 +229,57 @@ export const ExtensionDependenciesEditor = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {
-              // unsure why Flow complains about TableRow.
-              mapVector<gdSourceFileMetadata, React.ReactNode>(
-                eventsFunctionsExtension.getAllSourceFiles(),
-                (sourceFile, index) => (
-                  // unsure why Flow complains about TableRow.
-                  <TableRow key={sourceFile.getResourceName()}>
-                    <TableRowColumn>
-                      <CompactResourceSelectorWithThumbnail
-                        project={project}
-                        resourceManagementProps={resourceManagementProps}
-                        resourceKind="javascript"
-                        resourceName={sourceFile.getResourceName()}
-                        onChange={(newResourceName) => {
-                          sourceFile.setResourceName(newResourceName);
-                          forceUpdate();
-                        }}
-                      />
-                    </TableRowColumn>
-                    <TableRowColumn>
-                      <CompactSelectField
-                        value={sourceFile.getIncludePosition()}
-                        onChange={(newType) => {
-                          if (newType === sourceFile.getIncludePosition())
-                            return;
+            {mapVector<gdSourceFileMetadata, React.ReactNode>(
+              eventsFunctionsExtension.getAllSourceFiles(),
+              (sourceFile, index) => (
+                <TableRow key={sourceFile.getResourceName()}>
+                  <TableRowColumn>
+                    <CompactResourceSelectorWithThumbnail
+                      project={project}
+                      resourceManagementProps={resourceManagementProps}
+                      resourceKind="javascript"
+                      resourceName={sourceFile.getResourceName()}
+                      onChange={(newResourceName) => {
+                        sourceFile.setResourceName(newResourceName);
+                        forceUpdate();
+                      }}
+                    />
+                  </TableRowColumn>
+                  <TableRowColumn>
+                    <CompactSelectField
+                      value={sourceFile.getIncludePosition()}
+                      onChange={(newType) => {
+                        if (newType === sourceFile.getIncludePosition()) return;
 
-                          sourceFile.setIncludePosition(newType);
-                          forceUpdate();
-                        }}
-                      >
-                        <SelectOption
-                          value="first"
-                          label={t`First (before other files)`}
-                        />
-                        <SelectOption
-                          value="last"
-                          label={t`Last (after other files)`}
-                        />
-                      </CompactSelectField>
-                    </TableRowColumn>
-                    <TableRowColumn>
-                      <IconButton
-                        tooltip={t`Delete`}
-                        onClick={() => {
-                          eventsFunctionsExtension.removeSourceFileAt(index);
-                          forceUpdate();
-                        }}
-                        size="small"
-                      >
-                        <Trash />
-                      </IconButton>
-                    </TableRowColumn>
-                  </TableRow>
-                )
+                        sourceFile.setIncludePosition(newType);
+                        forceUpdate();
+                      }}
+                    >
+                      <SelectOption
+                        value="first"
+                        label={t`First (before other files)`}
+                      />
+                      <SelectOption
+                        value="last"
+                        label={t`Last (after other files)`}
+                      />
+                    </CompactSelectField>
+                  </TableRowColumn>
+                  <TableRowColumn>
+                    <IconButton
+                      tooltip={t`Delete`}
+                      onClick={() => {
+                        eventsFunctionsExtension.removeSourceFileAt(index);
+                        forceUpdate();
+                      }}
+                      size="small"
+                    >
+                      <Trash />
+                    </IconButton>
+                  </TableRowColumn>
+                </TableRow>
               )
-            }
+            )}
           </TableBody>
         </Table>
         <Column expand>

@@ -3,22 +3,33 @@
 
 const { findGDJS } = require('../GameEngineFinder/LocalGDJSFinder');
 const optionalRequire = require('../Utils/OptionalRequire');
-/** @type {typeof import('path')} */
+/** @type {typeof import('path') | null} */
 const path = optionalRequire('path');
-/** @type {typeof import('fs')} */
+/** @type {typeof import('fs') | null} */
 const fs = optionalRequire('fs');
+
+/**
+ * @param {string | null} modulePath
+ * @returns {modulePath is string}
+ */
+const isNonNullString = (modulePath) => !!modulePath;
 
 /**
  * @param {string} extensionFolderPath
  * @returns {Promise<string | null>}
  */
 const checkIfPathHasJsExtensionModule = (extensionFolderPath) => {
+  if (!path || !fs) {
+    return Promise.resolve(null);
+  }
+  const pathModule = path;
+  const fsModule = fs;
   return new Promise((resolve) => {
-    const jsExtensionModulePath = path.join(
+    const jsExtensionModulePath = pathModule.join(
       extensionFolderPath,
       'JsExtension.js'
     );
-    fs.stat(jsExtensionModulePath, (err, stats) => {
+    fsModule.stat(jsExtensionModulePath, (err, stats) => {
       if (err) {
         return resolve(null);
       }
@@ -36,13 +47,18 @@ const checkIfPathHasJsExtensionModule = (extensionFolderPath) => {
  * @returns {Promise<Array<string>>}
  */
 const findJsExtensionModules = ({ filterExamples, onFindGDJS }) => {
+  if (!path || !fs) {
+    return Promise.reject(new Error('Unsupported'));
+  }
+  const pathModule = path;
+  const fsModule = fs;
   return (onFindGDJS ? onFindGDJS() : findGDJS()).then(({ gdjsRoot }) => {
-    const extensionsRoot = path.join(gdjsRoot, 'Runtime', 'Extensions');
+    const extensionsRoot = pathModule.join(gdjsRoot, 'Runtime', 'Extensions');
     console.info(
       `Searching for JS extensions (file called JsExtension.js) in ${extensionsRoot}...`
     );
     return new Promise((resolve, reject) => {
-      fs.readdir(extensionsRoot, (error, extensionFolders) => {
+      fsModule.readdir(extensionsRoot, (error, extensionFolders) => {
         if (error) {
           return reject(error);
         }
@@ -56,17 +72,11 @@ const findJsExtensionModules = ({ filterExamples, onFindGDJS }) => {
         Promise.all(
           filteredExtensionFolders.map((extensionFolder) =>
             checkIfPathHasJsExtensionModule(
-              path.join(extensionsRoot, extensionFolder)
+              pathModule.join(extensionsRoot, extensionFolder)
             )
           )
         ).then((modulePaths) => {
-          resolve(
-            modulePaths.filter(
-              /** @type {(modulePath: string | null) => modulePath is string} */ (
-                (modulePath) => !!modulePath
-              )
-            )
-          );
+          resolve(modulePaths.filter(isNonNullString));
         }, reject);
       });
     });

@@ -47,10 +47,6 @@ import NewBehaviorDialog from '../../BehaviorsEditor/NewBehaviorDialog';
 
 const gd: libGDevelop = global.gd;
 
-const getEventsFunctionType = () =>
-  gd.EventsFunction as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
-
 const PARAMETERS_CLIPBOARD_KIND = 'Parameters';
 
 const DragSourceAndDropTarget = makeDragSourceAndDropTarget(
@@ -280,7 +276,7 @@ const CompactEventsFunctionParametersEditor = React.forwardRef<
       (index: any) => {
         return (
           eventsFunction.getFunctionType() ===
-            getEventsFunctionType().ActionWithOperator ||
+            gd.EventsFunction.ActionWithOperator ||
           freezeParameters ||
           index < firstParameterIndex
         );
@@ -613,10 +609,9 @@ const CompactEventsFunctionParametersEditor = React.forwardRef<
       [eventsFunction, longDescriptionShownIndexes]
     );
 
-    const eventsFunctionType = getEventsFunctionType();
     const parameters =
       eventsFunctionsContainer &&
-      eventsFunction.getFunctionType() === eventsFunctionType.ActionWithOperator
+      eventsFunction.getFunctionType() === gd.EventsFunction.ActionWithOperator
         ? eventsFunction.getParametersForEvents(eventsFunctionsContainer)
         : eventsFunction.getParameters();
 
@@ -632,8 +627,7 @@ const CompactEventsFunctionParametersEditor = React.forwardRef<
     // Same thing for an object which has mandatory Object parameter.
     const labelShownFirstIndex =
       firstParameterIndex +
-      (eventsFunction.getFunctionType() ===
-      eventsFunctionType.ActionWithOperator
+      (eventsFunction.getFunctionType() === gd.EventsFunction.ActionWithOperator
         ? 1
         : 0);
 
@@ -997,7 +991,7 @@ const CompactEventsFunctionParametersEditor = React.forwardRef<
                           disabled={
                             !isClipboardContainingParameters ||
                             eventsFunction.getFunctionType() ===
-                              eventsFunctionType.ActionWithOperator
+                              gd.EventsFunction.ActionWithOperator
                           }
                         />
                       </LineStackLayout>
@@ -1011,7 +1005,7 @@ const CompactEventsFunctionParametersEditor = React.forwardRef<
                           // from their associated getter.
                           disabled={
                             eventsFunction.getFunctionType() ===
-                            eventsFunctionType.ActionWithOperator
+                            gd.EventsFunction.ActionWithOperator
                           }
                         />
                       </LineStackLayout>

@@ -28,10 +28,6 @@ import { getSentenceErrorText } from './SentenceErrorMessage';
 
 const gd: libGDevelop = global.gd;
 
-const getEventsFunctionType = () =>
-  gd.EventsFunction as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
-
 type Props = {
   project: gdProject;
   eventsFunction: gdEventsFunction;
@@ -50,10 +46,9 @@ const getFullNameHintText = (
   type: EventsFunction_FunctionType,
   expressionType: gdValueTypeMetadata
 ): MessageDescriptor => {
-  const eventsFunctionType = getEventsFunctionType();
-  if (type === eventsFunctionType.Condition) {
+  if (type === gd.EventsFunction.Condition) {
     return t`Example: Is flashing`;
-  } else if (type === eventsFunctionType.Expression) {
+  } else if (type === gd.EventsFunction.Expression) {
     return expressionType.isNumber()
       ? t`Example: Remaining life`
       : t`Example: Equipped shield name`;
@@ -66,10 +61,9 @@ const getDescriptionHintText = (
   type: EventsFunction_FunctionType,
   expressionType: gdValueTypeMetadata
 ): MessageDescriptor => {
-  const eventsFunctionType = getEventsFunctionType();
-  if (type === eventsFunctionType.Condition) {
+  if (type === gd.EventsFunction.Condition) {
     return t`Example: Check if the object is flashing.`;
-  } else if (type === eventsFunctionType.Expression) {
+  } else if (type === gd.EventsFunction.Expression) {
     return expressionType.isNumber()
       ? t`Example: Return the number of remaining lives for the player.`
       : t`Example: Return the name of the shield equipped by the player.`;
@@ -158,10 +152,9 @@ export const CompactEventsFunctionPropertiesEditor = ({
     );
   }
 
-  const eventsFunctionType = getEventsFunctionType();
   const getterFunction =
     eventsFunctionsContainer &&
-    type === eventsFunctionType.ActionWithOperator &&
+    type === gd.EventsFunction.ActionWithOperator &&
     eventsFunctionsContainer.hasEventsFunctionNamed(
       eventsFunction.getGetterName()
     )
@@ -189,29 +182,29 @@ export const CompactEventsFunctionPropertiesEditor = ({
                 }}
               >
                 <SelectOption
-                  value={eventsFunctionType.Action}
+                  value={gd.EventsFunction.Action}
                   label={t`Action`}
                 />
                 <SelectOption
-                  value={eventsFunctionType.Condition}
+                  value={gd.EventsFunction.Condition}
                   label={t`Condition`}
                 />
                 <SelectOption
-                  value={eventsFunctionType.Expression}
+                  value={gd.EventsFunction.Expression}
                   label={t`Expression`}
                 />
                 <SelectOption
-                  value={eventsFunctionType.ExpressionAndCondition}
+                  value={gd.EventsFunction.ExpressionAndCondition}
                   label={t`Expression and condition`}
                 />
                 <SelectOption
-                  value={eventsFunctionType.ActionWithOperator}
+                  value={gd.EventsFunction.ActionWithOperator}
                   label={t`Action with operator`}
                 />
               </CompactSelectField>
             }
           />
-          {type === eventsFunctionType.ActionWithOperator ? (
+          {type === gd.EventsFunction.ActionWithOperator ? (
             <CompactPropertiesEditorRowField
               label={i18n._(t`Related expression and condition`)}
               field={
@@ -242,7 +235,7 @@ export const CompactEventsFunctionPropertiesEditor = ({
 
                           return (
                             eventsFunction.getFunctionType() ===
-                              eventsFunctionType.ExpressionAndCondition && (
+                              gd.EventsFunction.ExpressionAndCondition && (
                               <SelectOption
                                 key={eventsFunction.getName()}
                                 value={eventsFunction.getName()}
@@ -282,7 +275,7 @@ export const CompactEventsFunctionPropertiesEditor = ({
               }
             />
           )}
-          {type === eventsFunctionType.ActionWithOperator ? (
+          {type === gd.EventsFunction.ActionWithOperator ? (
             <CompactTextAreaField
               disabled
               label={i18n._(t`Description`)}
@@ -296,7 +289,7 @@ export const CompactEventsFunctionPropertiesEditor = ({
           ) : (
             <CompactTextAreaField
               label={
-                type === eventsFunctionType.ExpressionAndCondition
+                type === gd.EventsFunction.ExpressionAndCondition
                   ? i18n._(
                       t`Description (will be prefixed by "Compare" or "Return")`
                     )
@@ -313,7 +306,7 @@ export const CompactEventsFunctionPropertiesEditor = ({
               }}
             />
           )}
-          {type === eventsFunctionType.ActionWithOperator ? (
+          {type === gd.EventsFunction.ActionWithOperator ? (
             <CompactTextAreaField
               disabled
               label={i18n._(t`Sentence in Events Sheet`)}
@@ -330,13 +323,13 @@ export const CompactEventsFunctionPropertiesEditor = ({
               onChange={(text) => {}}
             />
           ) : (
-            (type === eventsFunctionType.Action ||
-              type === eventsFunctionType.Condition ||
-              type === eventsFunctionType.ExpressionAndCondition) && (
+            (type === gd.EventsFunction.Action ||
+              type === gd.EventsFunction.Condition ||
+              type === gd.EventsFunction.ExpressionAndCondition) && (
               <CompactTextAreaField
                 label={
                   eventsBasedBehavior &&
-                  type === eventsFunctionType.ExpressionAndCondition
+                  type === gd.EventsFunction.ExpressionAndCondition
                     ? i18n._(
                         t`Sentence in Events Sheet (automatically suffixed by "of _PARAM0_")`
                       )

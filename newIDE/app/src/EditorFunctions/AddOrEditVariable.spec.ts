@@ -3,9 +3,6 @@ import { makeFakeLaunchFunctionOptionsWithProject } from './TestHelpers';
 
 const gd: libGDevelop = global.gd;
 
-const getGdVariable = () =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
-
 describe('add_or_edit_variable', () => {
   let project: gdProject;
 
@@ -33,7 +30,7 @@ describe('add_or_edit_variable', () => {
     expect(result.success).toBe(true);
     expect(result.message).toBe('Added global variable "code" (String) = 123');
     const variable = project.getVariables().get('code');
-    expect(variable.getType()).toBe(getGdVariable().String);
+    expect(variable.getType()).toBe(gd.Variable.String);
     expect(variable.getString()).toBe('123');
   });
 
@@ -53,7 +50,7 @@ describe('add_or_edit_variable', () => {
       'Added global variable "isPaused" (Boolean) = true'
     );
     const variable = project.getVariables().get('isPaused');
-    expect(variable.getType()).toBe(getGdVariable().Boolean);
+    expect(variable.getType()).toBe(gd.Variable.Boolean);
     expect(variable.getBool()).toBe(true);
   });
 
@@ -355,9 +352,7 @@ describe('add_or_edit_variable (instance scope)', () => {
       .getObject('Door')
       .getVariables();
     expect(doorVariables.has('LevelNumber')).toBe(true);
-    expect(doorVariables.get('LevelNumber').getType()).toBe(
-      getGdVariable().Number
-    );
+    expect(doorVariables.get('LevelNumber').getType()).toBe(gd.Variable.Number);
     expect(doorVariables.get('LevelNumber').getValue()).toBe(0);
     // The other instances (and other objects) are untouched.
     expect(doorInstance2.getVariables().has('LevelNumber')).toBe(false);
@@ -412,13 +407,9 @@ describe('add_or_edit_variable (instance scope)', () => {
       .getObjects()
       .getObject('Door')
       .getVariables();
-    expect(doorVariables.get('Stats').getType()).toBe(
-      getGdVariable().Structure
-    );
+    expect(doorVariables.get('Stats').getType()).toBe(gd.Variable.Structure);
     expect(doorVariables.get('Stats').getChildrenCount()).toBe(0);
-    expect(doorVariables.get('Greeting').getType()).toBe(
-      getGdVariable().String
-    );
+    expect(doorVariables.get('Greeting').getType()).toBe(gd.Variable.String);
     expect(doorVariables.get('Greeting').getString()).toBe('');
     expect(
       doorInstance1.getVariables().get('Stats').getChild('Health').getValue()

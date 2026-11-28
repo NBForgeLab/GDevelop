@@ -15,7 +15,7 @@ export default class WindowBorder {
   layout: gdLayout | null;
   eventsBasedObjectVariant: gdEventsBasedObjectVariant | null;
   toCanvasCoordinates: (x: number, y: number) => [number, number];
-  pixiRectangle: any = new PIXI.Graphics() as any;
+  pixiRectangle: PIXI.Graphics = new PIXI.Graphics();
   windowRectangle: Rectangle = new Rectangle();
 
   constructor({
@@ -32,7 +32,7 @@ export default class WindowBorder {
     this.pixiRectangle.hitArea = new PIXI.Rectangle(0, 0, 0, 0);
   }
 
-  getPixiObject(): any {
+  getPixiObject(): PIXI.Graphics {
     return this.pixiRectangle;
   }
 

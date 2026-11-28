@@ -14,10 +14,6 @@ import { FunctionListItem } from './ExtensionFunctionSelectorDialog';
 
 const gd: libGDevelop = global.gd;
 
-const getEventsFunctionType = () =>
-  gd.EventsFunction as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
-
 type Props = {
   eventsBasedObject: gdEventsBasedObject;
   onCancel: () => void;
@@ -29,7 +25,6 @@ export default function ObjectMethodSelectorDialog({
   onChoose,
   onCancel,
 }: Props): React.ReactNode {
-  const eventsFunctionType = getEventsFunctionType();
   const eventsFunctions = eventsBasedObject.getEventsFunctions();
   const [showAdvanced, setShowAdvanced] = React.useState(false);
 
@@ -57,7 +52,7 @@ export default function ObjectMethodSelectorDialog({
     >
       <List>
         <FunctionListItem
-          functionType={eventsFunctionType.Action}
+          functionType={gd.EventsFunction.Action}
           functionName={null}
           name={<Trans>Action</Trans>}
           description={
@@ -69,7 +64,7 @@ export default function ObjectMethodSelectorDialog({
           onChoose={onChoose}
         />
         <FunctionListItem
-          functionType={eventsFunctionType.Condition}
+          functionType={gd.EventsFunction.Condition}
           functionName={null}
           name={<Trans>Condition</Trans>}
           description={
@@ -81,7 +76,7 @@ export default function ObjectMethodSelectorDialog({
           onChoose={onChoose}
         />
         <FunctionListItem
-          functionType={eventsFunctionType.Expression}
+          functionType={gd.EventsFunction.Expression}
           functionName={null}
           name={<Trans>Expression</Trans>}
           description={
@@ -96,7 +91,7 @@ export default function ObjectMethodSelectorDialog({
           <Trans>Lifecycle methods</Trans>
         </Subheader>
         <FunctionListItem
-          functionType={eventsFunctionType.Action}
+          functionType={gd.EventsFunction.Action}
           functionName="onCreated"
           disabled={eventsFunctions.hasEventsFunctionNamed('onCreated')}
           onChoose={onChoose}
@@ -107,7 +102,7 @@ export default function ObjectMethodSelectorDialog({
           }
         />
         <FunctionListItem
-          functionType={eventsFunctionType.Action}
+          functionType={gd.EventsFunction.Action}
           functionName="doStepPostEvents"
           disabled={eventsFunctions.hasEventsFunctionNamed('doStepPostEvents')}
           onChoose={onChoose}
@@ -119,7 +114,7 @@ export default function ObjectMethodSelectorDialog({
           }
         />
         <FunctionListItem
-          functionType={eventsFunctionType.Action}
+          functionType={gd.EventsFunction.Action}
           functionName="onDestroy"
           disabled={
             eventsFunctions.hasEventsFunctionNamed('onOwnerRemovedFromScene') ||
@@ -139,7 +134,7 @@ export default function ObjectMethodSelectorDialog({
               <Trans>Other lifecycle methods</Trans>
             </Subheader>
             <FunctionListItem
-              functionType={eventsFunctionType.Action}
+              functionType={gd.EventsFunction.Action}
               functionName="onHotReloading"
               disabled={eventsFunctions.hasEventsFunctionNamed(
                 'onHotReloading'

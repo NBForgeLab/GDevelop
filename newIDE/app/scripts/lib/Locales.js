@@ -5,6 +5,7 @@ const ISO6391 = require('iso-639-1');
 const newIdeAppPath = path.join(__dirname, '../..');
 const localesBasePath = path.join(newIdeAppPath, 'src/locales');
 
+/** @param {string} langLongCode @returns {string} */
 const getShortestCode = langLongCode => {
   if (langLongCode === 'pt_BR') return langLongCode;
 
@@ -12,6 +13,7 @@ const getShortestCode = langLongCode => {
   return langParts[0];
 };
 
+/** @returns {Promise<string[]>} */
 const getLocales = () => {
   return new Promise((resolve, reject) => {
     fs.readdir(localesBasePath, (error, locales) => {
@@ -30,6 +32,7 @@ const getLocales = () => {
   });
 };
 
+/** @param {string} localeName @returns {string[]} */
 const getLocaleSourceCatalogFiles = localeName => {
   if (localeName === 'en') return ['ide-messages.pot'];
   if (localeName === 'pseudo_LOCALE') return ['ide-messages.pot'];
@@ -37,22 +40,27 @@ const getLocaleSourceCatalogFiles = localeName => {
   return ['ide-messages.po', 'gdcore-gdcpp-gdjs-extensions-messages.po'];
 };
 
+/** @param {string} localeName @returns {string} */
 const getLocalePath = localeName => {
   return path.join(localesBasePath, localeName);
 };
 
+/** @param {string} localeName @returns {string} */
 const getLocaleCatalogPath = localeName => {
   return path.join(getLocalePath(localeName), 'messages.po');
 };
 
+/** @param {string} localeName @returns {string} */
 const getLocaleCompiledCatalogPath = localeName => {
   return path.join(getLocalePath(localeName), 'messages.js');
 };
 
+/** @returns {string} */
 const getLocaleMetadataPath = () => {
   return path.join(localesBasePath, 'LocalesMetadata.js');
 };
 
+/** @param {string} langCode @returns {string} */
 const getLocaleName = langCode => {
   if (langCode === 'pt_BR') {
     return 'Brazilian Portuguese';
@@ -70,6 +78,7 @@ const getLocaleName = langCode => {
 
   return ISO6391.getName(getShortestCode(langCode));
 };
+/** @param {string} langCode @returns {string} */
 const getLocaleNativeName = langCode => {
   if (langCode === 'pt_BR') {
     return 'Português brasileiro';

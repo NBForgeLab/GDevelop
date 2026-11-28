@@ -26,10 +26,6 @@ const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 
-const getEventsFunctionType = () =>
-  gd.EventsFunction as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
-
 const extensionScope = { type: 'extension', extension_name: 'MyExt' };
 const behaviorScope = {
   type: 'custom_behavior',
@@ -488,7 +484,7 @@ describe('CustomFunctionFunctions', () => {
       expect(output.success).toBe(true);
       const eventsFunction = getFreeFunction('Score');
       expect(eventsFunction.getFunctionType()).toBe(
-        getEventsFunctionType().ExpressionAndCondition
+        gd.EventsFunction.ExpressionAndCondition
       );
       expect(eventsFunction.getExpressionType().getName()).toBe('string');
       expect(getFirstActionType(eventsFunction)).toBe('SetReturnString');
@@ -1120,7 +1116,7 @@ describe('CustomFunctionFunctions', () => {
         getter_name: 'Score',
       });
       // The extension editor lets a getter become an action.
-      getFreeFunction('Score').setFunctionType(getEventsFunctionType().Action);
+      getFreeFunction('Score').setFunctionType(gd.EventsFunction.Action);
 
       const { output } = await launchFunction(changeCustomFunction, project, {
         scope: extensionScope,
@@ -1287,20 +1283,19 @@ describe('CustomFunctionFunctions', () => {
       expect(output.success).toBe(false);
       expect(output.message).toContain('"SetScore"');
       expect(getFreeFunction('Score').getFunctionType()).toBe(
-        getEventsFunctionType().Expression
+        gd.EventsFunction.Expression
       );
     });
 
     // The Core function type a case of the table expects (the table only
     // names stored types: a `StringExpression` is an `Expression`).
     const getExpectedFunctionType = (functionTypeName: string): number => {
-      const eventsFunctionType = getEventsFunctionType();
       const functionTypes: {
         [key: string]: number;
       } = {
-        Action: eventsFunctionType.Action,
-        Expression: eventsFunctionType.Expression,
-        ExpressionAndCondition: eventsFunctionType.ExpressionAndCondition,
+        Action: gd.EventsFunction.Action,
+        Expression: gd.EventsFunction.Expression,
+        ExpressionAndCondition: gd.EventsFunction.ExpressionAndCondition,
       };
       const functionType = functionTypes[functionTypeName];
       if (functionType === undefined)

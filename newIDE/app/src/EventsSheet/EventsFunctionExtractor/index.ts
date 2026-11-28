@@ -9,10 +9,6 @@ import newNameGenerator from '../../Utils/NewNameGenerator';
 
 const gd: libGDevelop = global.gd;
 
-const getGdEventsFunction = () =>
-  gd.EventsFunction as unknown as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
-
 /**
  * Set up an events function with the given serialized events,
  * so that the function contains these events, expecting the objects
@@ -35,7 +31,7 @@ export const setupFunctionFromEvents = ({
 }) => {
   // Set up the function
   eventsFunction.setName('MyFunction');
-  eventsFunction.setFunctionType(getGdEventsFunction().Action);
+  eventsFunction.setFunctionType(gd.EventsFunction.Action);
   unserializeFromJSObject(
     eventsFunction.getEvents(),
     serializedEvents,

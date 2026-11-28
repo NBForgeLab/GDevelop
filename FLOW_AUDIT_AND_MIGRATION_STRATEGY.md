@@ -1,6 +1,9 @@
 # GDevelop Flow Diagnostic Audit & Phased TypeScript Migration Strategy
 
-This document provides a top-level executive overview and navigation index for the comprehensive Flow Audit and TypeScript Migration Strategy prepared for the GDevelop repository (baseline commit `aeb2561323`, updated with verified findings from Phase 0–2 execution).
+This document provides a top-level executive overview and navigation index for the comprehensive Flow Audit and TypeScript Migration Strategy prepared for the GDevelop repository (baseline commit `aeb2561323`).
+
+> **Migration Status: Complete (Phases 0–6 + Post-Phase-6 Hardening & Final Cleanup)**
+> All 6 phases have been executed (`0` remaining `@flow` files in `newIDE/app` and `newIDE/electron-app`, `0` `.js.flow` stubs, Flow tooling and `flow-libs`/`flow-typed`/`GDevelop.js/types` decommissioned, and residual Flow traces in `Extensions/JsExtensionTypes.d.ts`, editor/CI configs, scripts, and docs cleaned up). In `newIDE/app/src` (excluding `locales/`), `2,366` files are TypeScript (`.ts`/`.tsx`), while `10` intentionally non-Flow `.js` files remain (6 `@ts-check` Node/CommonJS modules with `.d.ts` companions, 2 vendored SHA libraries with `.d.ts` declarations, 1 package placeholder, and 1 Jest mock).
 
 The full, publication-grade documentation deliverables are tracked in the repository root (with synchronized local mirrors in `docs/FlowMigration/`, which is gitignored by root `.gitignore`'s `/docs` rule):
 1. [**Flow Diagnostic Audit Report (`FLOW_AUDIT_REPORT.md`)**](./FLOW_AUDIT_REPORT.md)

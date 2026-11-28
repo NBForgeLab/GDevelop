@@ -2,9 +2,9 @@
 // Note: this file does not use ES import/export syntax so it can be required directly from Node.js.
 
 const optionalRequire = require('../Utils/OptionalRequire');
-/** @type {any} */
+/** @type {{ app?: { getAppPath: () => string } } | null} */
 const remote = optionalRequire('@electron/remote');
-const app = remote ? remote.app : null;
+const app = remote && remote.app ? remote.app : null;
 /** @type {typeof import('fs') | null} */
 const fs = optionalRequire('fs');
 /** @type {typeof import('path') | null} */

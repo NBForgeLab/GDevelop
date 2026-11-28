@@ -832,11 +832,8 @@ export const withScopeObjectsContainersList = <T>(
   }
   // Children of a custom object (or the global objects) only see each other:
   // no global objects on top.
-  const objectsContainerSourceType =
-    gd.ObjectsContainer as typeof gd.ObjectsContainer &
-      typeof gd.ObjectsContainer_SourceType;
   const emptyGlobalObjectsContainer = new gd.ObjectsContainer(
-    objectsContainerSourceType.Unknown
+    gd.ObjectsContainer.Unknown
   );
   try {
     return fn(
@@ -877,29 +874,20 @@ export const makeScopeProjectScopedContainersAccessor = (
       dispose: () => {},
     };
   }
-  const objectsContainerSourceType =
-    gd.ObjectsContainer as typeof gd.ObjectsContainer &
-      typeof gd.ObjectsContainer_SourceType;
-  const variablesContainerSourceType =
-    gd.VariablesContainer as typeof gd.VariablesContainer &
-      typeof gd.VariablesContainer_SourceType;
-  const resourcesContainerSourceType =
-    gd.ResourcesContainer as typeof gd.ResourcesContainer &
-      typeof gd.ResourcesContainer_SourceType;
   const objectsContainer = new gd.ObjectsContainer(
-    objectsContainerSourceType.Function
+    gd.ObjectsContainer.Function
   );
   const parameterVariablesContainer = new gd.VariablesContainer(
-    variablesContainerSourceType.Parameters
+    gd.VariablesContainer.Parameters
   );
   const propertyVariablesContainer = new gd.VariablesContainer(
-    variablesContainerSourceType.Properties
+    gd.VariablesContainer.Properties
   );
   const parameterResourcesContainer = new gd.ResourcesContainer(
-    resourcesContainerSourceType.Parameters
+    gd.ResourcesContainer.Parameters
   );
   const propertyResourcesContainer = new gd.ResourcesContainer(
-    resourcesContainerSourceType.Properties
+    gd.ResourcesContainer.Properties
   );
   const accessor = new ProjectScopedContainersAccessor(
     {

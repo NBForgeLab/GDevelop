@@ -3,12 +3,14 @@
   "compilerOptions": {
     "noEmit": true,
     "allowJs": true,
+    "checkJs": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "strictPropertyInitialization": true,
     "lib": ["DOM", "DOM.Iterable", "ES2020", "ES2021", "ES2022", "ESNext.Disposable"],
+    "types": ["node"],
     "target": "ES2020",
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -17,11 +19,17 @@
     "forceConsistentCasingInFileNames": true,
     "module": "esnext",
     "moduleResolution": "node",
+    "paths": {
+      "iso-639-1": ["./types/iso-639-1.d.ts"],
+      "recursive-copy": ["./types/recursive-copy.d.ts"]
+    },
     "resolveJsonModule": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "jsx": "react"
   },
   "include": [
     "**/*.js",
+    "**/*.mjs",
     "../src/GameEngineFinder/LocalGDJSFinder.js",
     "../src/JsExtensionsLoader/index.js",
     "../src/JsExtensionsLoader/LocalJsExtensionsFinder.js",
@@ -29,7 +37,13 @@
     "../src/Utils/MapFor.js",
     "../src/Utils/OptionalRequire.js",
     "lib.es5.d.ts",
-    "../src/types/gd-globals.d.ts",
+    "types.d.ts",
+    "../src/types/*.d.ts",
     "../../../GDevelop.js/types.d.ts"
+  ],
+  "exclude": [
+    "../public/libGD.js",
+    "service-worker-template/**",
+    "theme-templates/**"
   ]
 }

@@ -126,24 +126,20 @@ export type SimplifiedProjectOptions = {
   scopeToScene?: string;
 };
 
-const getGdVariable = (gd: libGDevelop) =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
-
 export const getVariableTypeAsString = (
   gd: libGDevelop,
   variable: gdVariable
 ): string => {
-  const gdVariable = getGdVariable(gd);
   const type = variable.getType();
-  return type === gdVariable.String
+  return type === gd.Variable.String
     ? 'String'
-    : type === gdVariable.Number
+    : type === gd.Variable.Number
       ? 'Number'
-      : type === gdVariable.Boolean
+      : type === gd.Variable.Boolean
         ? 'Boolean'
-        : type === gdVariable.Structure
+        : type === gd.Variable.Structure
           ? 'Structure'
-          : type === gdVariable.Array
+          : type === gd.Variable.Array
             ? 'Array'
             : 'unknown';
 };
@@ -152,19 +148,18 @@ const getVariableValueAsString = (
   gd: libGDevelop,
   variable: gdVariable
 ): string => {
-  const gdVariable = getGdVariable(gd);
   const type = variable.getType();
-  return type === gdVariable.Structure || type === gdVariable.Array
+  return type === gd.Variable.Structure || type === gd.Variable.Array
     ? variable.getChildrenCount() === 0
       ? `No children`
       : variable.getChildrenCount() === 1
         ? `1 child`
         : `${variable.getChildrenCount()} children`
-    : type === gdVariable.String
+    : type === gd.Variable.String
       ? variable.getString()
-      : type === gdVariable.Number
+      : type === gd.Variable.Number
         ? variable.getValue().toString()
-        : type === gdVariable.Boolean
+        : type === gd.Variable.Boolean
           ? variable.getBool()
             ? `True`
             : `False`
@@ -180,9 +175,8 @@ export const getSimplifiedVariable = (
   name: string,
   variable: gdVariable
 ): SimplifiedVariable => {
-  const gdVariable = getGdVariable(gd);
   if (isCollectionVariable(variable)) {
-    if (variable.getType() === gdVariable.Structure) {
+    if (variable.getType() === gd.Variable.Structure) {
       return {
         variableName: name,
         type: getVariableTypeAsString(gd, variable),
@@ -193,7 +187,7 @@ export const getSimplifiedVariable = (
             getSimplifiedVariable(gd, childName, variable.getChild(childName))
           ),
       };
-    } else if (variable.getType() === gdVariable.Array) {
+    } else if (variable.getType() === gd.Variable.Array) {
       return {
         variableName: name,
         type: getVariableTypeAsString(gd, variable),

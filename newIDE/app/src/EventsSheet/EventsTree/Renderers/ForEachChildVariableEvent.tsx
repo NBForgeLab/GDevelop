@@ -30,10 +30,6 @@ const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 
-const getGdVariablesContainer = () =>
-  gd.VariablesContainer as typeof gd.VariablesContainer &
-    typeof gd.VariablesContainer_SourceType;
-
 export const getVariableSourceOrSceneIcon = (
   projectScopedContainersAccessor: ProjectScopedContainersAccessor,
   variableName: string
@@ -42,10 +38,9 @@ export const getVariableSourceOrSceneIcon = (
     variableName,
     projectScopedContainersAccessor.get()
   );
-  const gdVariablesContainer = getGdVariablesContainer();
   return getVariableSourceIcon(
-    variablesContainerSourceType === gdVariablesContainer.Unknown
-      ? gdVariablesContainer.Scene
+    variablesContainerSourceType === gd.VariablesContainer.Unknown
+      ? gd.VariablesContainer.Scene
       : variablesContainerSourceType
   );
 };

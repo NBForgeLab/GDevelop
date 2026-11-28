@@ -597,7 +597,7 @@ SpritesAndAnimationsStory.storyName = 'Sprites (row) and animations (handle)';
 const useManyVariablesContainer = (count: number): gdVariablesContainer => {
   const variablesContainerRef = useRefWithInit(() => {
     const variablesContainer = new gd.VariablesContainer(
-      (gd.VariablesContainer as any).Scene
+      gd.VariablesContainer.Scene
     );
     for (let index = 0; index < count; index++) {
       const variable = new gd.Variable();

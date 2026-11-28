@@ -87,9 +87,7 @@ describe('enumerateGameplayTestStateInspectors', () => {
     const isDeadFunction = eventsBasedBehavior
       .getEventsFunctions()
       .insertNewEventsFunction('IsDead', 0);
-    const eventsFunctionType = gd.EventsFunction as typeof gd.EventsFunction &
-      typeof gd.EventsFunction_FunctionType;
-    isDeadFunction.setFunctionType(eventsFunctionType.Condition);
+    isDeadFunction.setFunctionType(gd.EventsFunction.Condition);
 
     // An events-based (custom) object with a property.
     const eventsBasedObject = extension

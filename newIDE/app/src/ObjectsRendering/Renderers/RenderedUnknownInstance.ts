@@ -39,7 +39,7 @@ export default class RenderedUnknownInstance extends RenderedInstance<PIXI.Sprit
     project: gdProject,
     resourcesLoader: typeof ResourcesLoader,
     objectConfiguration: gdObjectConfiguration
-  ): any {
+  ): string {
     return 'res/unknown32.png';
   }
 

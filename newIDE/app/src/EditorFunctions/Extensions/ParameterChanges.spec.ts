@@ -28,14 +28,12 @@ const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
  */
 const createFakeProjectWithFunctions = () => {
   const project = gd.ProjectHelper.createNewGDJSProject();
-  const eventsFunctionType = gd.EventsFunction as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
   const extension = project.insertNewEventsFunctionsExtension('MyExt', 0);
 
   const freeFunction = extension
     .getEventsFunctions()
     .insertNewEventsFunction('Explode', 0);
-  freeFunction.setFunctionType(eventsFunctionType.Action);
+  freeFunction.setFunctionType(gd.EventsFunction.Action);
   freeFunction
     .getParameters()
     .addNewParameter('Target')
@@ -58,7 +56,7 @@ const createFakeProjectWithFunctions = () => {
   const hitFunction = eventsBasedBehavior
     .getEventsFunctions()
     .insertNewEventsFunction('Hit', 0);
-  hitFunction.setFunctionType(eventsFunctionType.Action);
+  hitFunction.setFunctionType(gd.EventsFunction.Action);
   gd.WholeProjectRefactorer.ensureBehaviorEventsFunctionsProperParameters(
     extension,
     eventsBasedBehavior
@@ -75,7 +73,7 @@ const createFakeProjectWithFunctions = () => {
   const pressFunction = eventsBasedObject
     .getEventsFunctions()
     .insertNewEventsFunction('Press', 0);
-  pressFunction.setFunctionType(eventsFunctionType.Action);
+  pressFunction.setFunctionType(gd.EventsFunction.Action);
   gd.WholeProjectRefactorer.ensureObjectEventsFunctionsProperParameters(
     extension,
     eventsBasedObject

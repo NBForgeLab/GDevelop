@@ -37,6 +37,10 @@ if (shell.test('-f', path.join(sourceDirectory, 'libGD.js'))) {
     '🌐 Downloading pre-built libGD.js from https://s3.amazonaws.com/gdevelop-gdevelop.js (be patient)...'
   );
 
+  /**
+   * @param {string} gitRef
+   * @returns {string | null}
+   */
   const getBranchFromGitRef = gitRef => {
     const branchShellString = shell.exec(
       `git rev-parse --abbrev-ref "${gitRef}"`,
@@ -71,6 +75,11 @@ if (shell.test('-f', path.join(sourceDirectory, 'libGD.js'))) {
   };
 
   // Try to download libGD.js from a specific commit on the current branch
+  /**
+   * @param {string | null} branch
+   * @param {string} gitRef
+   * @returns {Promise<void>}
+   */
   const downloadCommitLibGdJs = (branch, gitRef) =>
     new Promise((resolve, reject) => {
       shell.echo(`ℹ️ Trying to download libGD.js for ${gitRef}.`);
@@ -95,6 +104,10 @@ if (shell.test('-f', path.join(sourceDirectory, 'libGD.js'))) {
     });
 
   // Try to download libGD.js from the latest version built for master branch.
+  /**
+   * @param {string | null} branchName
+   * @returns {Promise<void>}
+   */
   const downloadBranchLatestLibGdJs = branchName => {
     shell.echo(
       `ℹ️ Trying to download libGD.js from ${branchName}, latest build.`
@@ -109,6 +122,10 @@ if (shell.test('-f', path.join(sourceDirectory, 'libGD.js'))) {
   // them fails while the other is still being written, the fallback URL would
   // otherwise be tried while a download to the same destination file is still
   // running in background.
+  /**
+   * @param {string} baseUrl
+   * @returns {Promise<void>}
+   */
   const downloadLibGdJs = baseUrl =>
     downloadLocalFile(baseUrl + '/libGD.wasm', '../public/libGD.wasm')
       .then(() =>
@@ -138,7 +155,7 @@ if (shell.test('-f', path.join(sourceDirectory, 'libGD.js'))) {
         throw error;
       });
 
-  const onLibGdJsDownloaded = response => {
+  const onLibGdJsDownloaded = () => {
     shell.echo('✅ libGD.js downloaded and stored in public/libGD.js');
 
     if (

@@ -15,9 +15,6 @@ import { getVariableTypeIcon } from '../ParameterFields/VariableField';
 
 const gd: libGDevelop = global.gd;
 
-const getGdVariable = () =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
-
 const styles = {
   container: {
     whiteSpace: 'normal',
@@ -43,25 +40,23 @@ type Props = {
 };
 
 const getVariableTypeLabel = (variable: gdVariable, i18n: I18nType) => {
-  const Variable = getGdVariable();
   const type = variable.getType();
-  return type === Variable.String
+  return type === gd.Variable.String
     ? i18n._('Text')
-    : type === Variable.Number
+    : type === gd.Variable.Number
       ? i18n._('Number')
-      : type === Variable.Boolean
+      : type === gd.Variable.Boolean
         ? i18n._('Boolean')
-        : type === Variable.Structure
+        : type === gd.Variable.Structure
           ? i18n._('Structure')
-          : type === Variable.Array
+          : type === gd.Variable.Array
             ? i18n._('Array')
             : 'unknown';
 };
 
 const getVariableValueAsString = (variable: gdVariable, i18n: I18nType) => {
-  const Variable = getGdVariable();
   const type = variable.getType();
-  return type === Variable.Structure || type === Variable.Array
+  return type === gd.Variable.Structure || type === gd.Variable.Array
     ? i18n._(
         variable.getChildrenCount() === 0
           ? t`No children`
@@ -69,11 +64,11 @@ const getVariableValueAsString = (variable: gdVariable, i18n: I18nType) => {
             ? t`1 child`
             : t`${variable.getChildrenCount()} children`
       )
-    : type === Variable.String
+    : type === gd.Variable.String
       ? variable.getString()
-      : type === Variable.Number
+      : type === gd.Variable.Number
         ? variable.getValue().toString()
-        : type === Variable.Boolean
+        : type === gd.Variable.Boolean
           ? variable.getBool()
             ? i18n._(t`True`)
             : i18n._(t`False`)

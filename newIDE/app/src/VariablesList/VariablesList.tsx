@@ -91,10 +91,6 @@ import classes from './VariablesList.module.css';
 
 const gd: libGDevelop = global.gd;
 
-// Resolve `gd.Variable` lazily at call time because `global.gd` is populated asynchronously.
-const getGdVariable = () =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
-
 const DragSourceAndDropTarget = makeDragSourceAndDropTarget('variable-editor', {
   touchDragStart: 'immediate',
 });
@@ -302,8 +298,6 @@ const VariableRow = React.memo<VariableRowProps>(
       return null;
     }, []);
 
-    const gdVariable = getGdVariable();
-
     return (
       <div
         ref={containerRef}
@@ -403,7 +397,7 @@ const VariableRow = React.memo<VariableRowProps>(
                     disabled={
                       isNameLocked ||
                       isInherited ||
-                      parentType === gdVariable.Array
+                      parentType === gd.Variable.Array
                     }
                     onChange={onChangeName}
                     additionalContext={JSON.stringify({ nodeId, depth })}
@@ -421,7 +415,7 @@ const VariableRow = React.memo<VariableRowProps>(
                   >
                     <VariableTypeSelector
                       variableType={
-                        isLoopIndexVariable ? gdVariable.Number : type
+                        isLoopIndexVariable ? gd.Variable.Number : type
                       }
                       onChange={onChangeType}
                       nodeId={nodeId}
@@ -438,7 +432,7 @@ const VariableRow = React.memo<VariableRowProps>(
                     <span className={classes.valueLabel}>
                       <Trans>Counter of the loop</Trans>
                     </span>
-                  ) : type === gdVariable.Boolean ? (
+                  ) : type === gd.Variable.Boolean ? (
                     <>
                       <span className={classes.valueLabel}>
                         {hasMixedValues ? (
@@ -483,13 +477,13 @@ const VariableRow = React.memo<VariableRowProps>(
                               nodeId
                             ];
                         }}
-                        type={type === gdVariable.Number ? 'number' : 'text'}
+                        type={type === gd.Variable.Number ? 'number' : 'text'}
                         directlyStoreValueChangesWhileEditing={
                           directlyStoreValueChangesWhileEditing
                         }
                         key="value"
                         disabled={
-                          type === gdVariable.MixedTypes ||
+                          type === gd.Variable.MixedTypes ||
                           isCollection ||
                           (isInherited && !isTopLevel) ||
                           hasLineBreaks
@@ -513,7 +507,7 @@ const VariableRow = React.memo<VariableRowProps>(
                   {
                     // Only show the large edit button for string variables,
                     // and not for those who are in an inherited structure or array.
-                    type === gdVariable.String &&
+                    type === gd.Variable.String &&
                     !(isInherited && !isTopLevel) ? (
                       <IconButton
                         size="small"
@@ -873,7 +867,7 @@ const VariablesList = React.forwardRef<VariablesListInterface, Props>(
             const parentVariable = getDirectParentVariable(lineage);
             if (
               !parentVariable ||
-              parentVariable.getType() === getGdVariable().Structure
+              parentVariable.getType() === gd.Variable.Structure
             ) {
               hasName = true;
             }
@@ -964,17 +958,16 @@ const VariablesList = React.forwardRef<VariablesListInterface, Props>(
             );
             newSelectedNodes.push(newName);
           } else {
-            const gdVariable = getGdVariable();
             const targetParentType = targetParentVariable.getType();
 
             if (
-              (targetParentType === gdVariable.Structure && !name) ||
-              (targetParentType === gdVariable.Array && !!name)
+              (targetParentType === gd.Variable.Structure && !name) ||
+              (targetParentType === gd.Variable.Array && !!name)
             ) {
               // Early return if trying to paste array element in structure or vice versa
               return;
             }
-            if (targetParentType === gdVariable.Array) {
+            if (targetParentType === gd.Variable.Array) {
               const index = parseInt(targetVariableName, 10) + 1;
               insertInVariableChildrenArray(
                 targetParentVariable,
@@ -1033,7 +1026,7 @@ const VariablesList = React.forwardRef<VariablesListInterface, Props>(
             setCurrentIndexVariableName('');
           }
         } else {
-          if (parentVariable.getType() === getGdVariable().Array) {
+          if (parentVariable.getType() === gd.Variable.Array) {
             parentVariable.removeAtIndex(parseInt(name, 10));
           } else {
             parentVariable.removeChild(name);
@@ -1439,15 +1432,14 @@ const VariablesList = React.forwardRef<VariablesListInterface, Props>(
           props.variablesContainer
         );
         if (!variable || !isCollectionVariable(variable)) return;
-        const gdVariable = getGdVariable();
         const type = variable.getType();
 
-        if (type === gdVariable.Structure) {
+        if (type === gd.Variable.Structure) {
           const name = newNameGenerator('ChildVariable', (name) =>
             variable.hasChild(name)
           );
           variable.getChild(name);
-        } else if (type === gdVariable.Array) {
+        } else if (type === gd.Variable.Array) {
           variable.pushNew();
         }
         if (variable.isFolded()) variable.setFolded(false);
@@ -1673,15 +1665,14 @@ const VariablesList = React.forwardRef<VariablesListInterface, Props>(
           props.variablesContainer
         );
         if (!variable) return;
-        const gdVariable = getGdVariable();
         const oldType = variable.getType();
         variable.castTo(newType);
         // When changing type to String, reset to an empty string.
-        if (newType === 'string' && oldType === gdVariable.Number) {
+        if (newType === 'string' && oldType === gd.Variable.Number) {
           variable.setString('');
         }
         // When changing type to Number, reset to 0.
-        if (newType === 'number' && oldType === gdVariable.String) {
+        if (newType === 'number' && oldType === gd.Variable.String) {
           variable.setValue(0);
         }
         _onChange();
@@ -1709,7 +1700,6 @@ const VariablesList = React.forwardRef<VariablesListInterface, Props>(
 
     const onChangeValue = React.useCallback(
       (newValue: string, nodeId: string) => {
-        const gdVariable = getGdVariable();
         const isInherited = nodeId.startsWith(inheritedPrefix);
         let variable;
         if (isInherited && props.inheritedVariablesContainer) {
@@ -1725,15 +1715,15 @@ const VariablesList = React.forwardRef<VariablesListInterface, Props>(
           );
           if (!name || !changedInheritedVariable || depth > 0) return;
           switch (changedInheritedVariable.getType()) {
-            case gdVariable.String:
+            case gd.Variable.String:
               if (changedInheritedVariable.getString() === newValue) return;
               break;
-            case gdVariable.Number:
+            case gd.Variable.Number:
               const newValueAsFloat = parseFloat(newValue);
               if (newValueAsFloat === changedInheritedVariable.getValue())
                 return;
               break;
-            case gdVariable.Boolean:
+            case gd.Variable.Boolean:
               const newBool = newValue === 'true';
               if (newBool === changedInheritedVariable.getBool()) return;
               break;
@@ -1789,16 +1779,16 @@ const VariablesList = React.forwardRef<VariablesListInterface, Props>(
           return;
         }
         switch (variable.getType()) {
-          case gdVariable.String:
+          case gd.Variable.String:
             if (variable.getString() === newValue) return;
             variable.setString(newValue);
             break;
-          case gdVariable.Number:
+          case gd.Variable.Number:
             const newValueAsFloat = parseFloat(newValue);
             if (newValueAsFloat === variable.getValue()) return;
             variable.setValue(newValueAsFloat);
             break;
-          case gdVariable.Boolean:
+          case gd.Variable.Boolean:
             const newBool = newValue === 'true';
             if (newBool === variable.getBool()) return;
             variable.setBool(newBool);
@@ -1928,9 +1918,8 @@ const VariablesList = React.forwardRef<VariablesListInterface, Props>(
         !!aliveInheritedVariablesContainer &&
         aliveInheritedVariablesContainer.has(name);
 
-      const gdVariable = getGdVariable();
       const typeErrorMessage =
-        parentType === gdVariable.Array &&
+        parentType === gd.Variable.Array &&
         parentVariable &&
         parentVariable.getChildrenCount() > 1 &&
         parentVariable.getAtIndex(0).getType() !== type
@@ -1946,13 +1935,13 @@ const VariablesList = React.forwardRef<VariablesListInterface, Props>(
                 ? t`1 child`
                 : t`${variable.getChildrenCount()} children`
           )
-        : type === gdVariable.String
+        : type === gd.Variable.String
           ? variable.getString()
-          : type === gdVariable.Number
+          : type === gd.Variable.Number
             ? variable.getValue().toString()
             : null;
       const valueAsBool =
-        type === gdVariable.Boolean ? variable.getBool() : null;
+        type === gd.Variable.Boolean ? variable.getBool() : null;
 
       return (
         <VariableRow

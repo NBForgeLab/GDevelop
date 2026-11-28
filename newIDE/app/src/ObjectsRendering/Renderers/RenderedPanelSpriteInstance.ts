@@ -146,7 +146,7 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance<PIXI.C
     const panelSprite = gd.asPanelSpriteConfiguration(
       this._associatedObjectConfiguration
     );
-    const texture = PixiResourcesLoader.getLoadingPIXITexture();
+    const texture = PixiResourcesLoader.getLoadingPIXITexture().baseTexture;
 
     this._tiled = panelSprite.isTiled();
     var StretchedSprite = !this._tiled ? PIXI.Sprite : PIXI.TilingSprite;
@@ -334,18 +334,19 @@ export default class RenderedPanelSpriteInstance extends RenderedInstance<PIXI.C
     this._rightMargin = panelSprite.getRightMargin();
     this._bottomMargin = panelSprite.getBottomMargin();
 
-    const texture = PixiResourcesLoader.getPIXITexture(
+    const loadedTexture = PixiResourcesLoader.getPIXITexture(
       this._project,
       this._textureName
     );
-    if (!texture.baseTexture.valid) {
+    if (!loadedTexture.baseTexture.valid) {
       // Post pone texture update if texture is not loaded.
-      texture.once('update', () => {
+      loadedTexture.once('update', () => {
         if (this._wasDestroyed) return;
         this.updateTextures();
       });
       return;
     }
+    const texture = loadedTexture.baseTexture;
 
     function makeInsideTexture(rect: any) {
       if (rect.width < 0) rect.width = 0;

@@ -9,6 +9,7 @@ var path = require('path');
 
 const externalLibsFolder = path.join(__dirname, 'external-libs');
 
+/** @returns {Promise<string[]>} */
 const getAllExternalLibFiles = () =>
   new Promise((resolve, reject) => {
     fs.readdir(externalLibsFolder, (error, externalLibs) => {
@@ -39,7 +40,7 @@ getAllExternalLibFiles().then(externalLibFiles => {
         '❌ Error while extracting ' +
           externalLibFile +
           ' to public/external/ folder',
-        e.message
+        e instanceof Error ? e.message : String(e)
       );
     }
   });

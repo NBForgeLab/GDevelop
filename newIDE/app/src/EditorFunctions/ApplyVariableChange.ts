@@ -1,8 +1,5 @@
 const gd: libGDevelop = global.gd;
 
-const getGdVariable = () =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
-
 const readOrInferVariableType = (
   specifiedType: string | null,
   value: string
@@ -224,7 +221,7 @@ export const applyVariableChange = ({
     if (segment.type === 'property') {
       // Navigate to structure property. Only cast if not already a Structure:
       // castTo always clears children, even when the type already matches.
-      if (variable.getType() !== getGdVariable().Structure) {
+      if (variable.getType() !== gd.Variable.Structure) {
         variable.castTo('structure');
       }
       if (!variable.hasChild(segment.value)) {
@@ -235,7 +232,7 @@ export const applyVariableChange = ({
       // Navigate to array element. Only cast if not already an Array:
       // castTo always clears children, even when the type already matches.
       const index = parseInt(segment.value, 10);
-      if (variable.getType() !== getGdVariable().Array) {
+      if (variable.getType() !== gd.Variable.Array) {
         variable.castTo('array');
       }
 
@@ -256,7 +253,7 @@ export const applyVariableChange = ({
     return {
       variable,
       variableType:
-        variable.getType() === getGdVariable().Array ? 'Array' : 'Structure',
+        variable.getType() === gd.Variable.Array ? 'Array' : 'Structure',
       addedNewVariable,
     };
   } else {
@@ -321,7 +318,7 @@ export const applyVariableDeletion = ({
     const segment = pathSegments[i];
     if (segment.type === 'property') {
       if (
-        parentVariable.getType() !== getGdVariable().Structure ||
+        parentVariable.getType() !== gd.Variable.Structure ||
         !parentVariable.hasChild(segment.value)
       ) {
         return { removed: false };
@@ -330,7 +327,7 @@ export const applyVariableDeletion = ({
     } else {
       const index = parseInt(segment.value, 10);
       if (
-        parentVariable.getType() !== getGdVariable().Array ||
+        parentVariable.getType() !== gd.Variable.Array ||
         index >= parentVariable.getChildrenCount()
       ) {
         return { removed: false };
@@ -343,7 +340,7 @@ export const applyVariableDeletion = ({
   if (lastSegment.type === 'index') {
     const index = parseInt(lastSegment.value, 10);
     if (
-      parentVariable.getType() !== getGdVariable().Array ||
+      parentVariable.getType() !== gd.Variable.Array ||
       index >= parentVariable.getChildrenCount()
     ) {
       return { removed: false };
@@ -353,7 +350,7 @@ export const applyVariableDeletion = ({
   }
 
   if (
-    parentVariable.getType() !== getGdVariable().Structure ||
+    parentVariable.getType() !== gd.Variable.Structure ||
     !parentVariable.hasChild(lastSegment.value)
   ) {
     return { removed: false };
@@ -389,7 +386,7 @@ export const getVariableAtPath = ({
     const segment = pathSegments[i];
     if (segment.type === 'property') {
       if (
-        variable.getType() !== getGdVariable().Structure ||
+        variable.getType() !== gd.Variable.Structure ||
         !variable.hasChild(segment.value)
       ) {
         return null;
@@ -398,7 +395,7 @@ export const getVariableAtPath = ({
     } else {
       const index = parseInt(segment.value, 10);
       if (
-        variable.getType() !== getGdVariable().Array ||
+        variable.getType() !== gd.Variable.Array ||
         index >= variable.getChildrenCount()
       ) {
         return null;

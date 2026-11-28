@@ -1,7 +1,5 @@
 import * as THREE from 'three';
 
-// `three` has no Flow types in this project: the three.js objects are `any`.
-
 /**
  * The bounding box of a 3D model, as the editor and the game engine measure it:
  * the model rotated as its object configures it, and the origin of the model

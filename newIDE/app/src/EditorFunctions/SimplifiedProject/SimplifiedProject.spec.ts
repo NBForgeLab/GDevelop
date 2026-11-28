@@ -13,10 +13,6 @@ import { type FunctionAuthoringScope } from '../../InstructionOrExpression/Enume
 
 const gd: libGDevelop = global.gd;
 
-const getGdEventsFunction = () =>
-  gd.EventsFunction as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
-
 const createFakeEventsFunctionCodeWriter = (): EventsFunctionCodeWriter => ({
   getIncludeFileFor: (functionName: string) => `${functionName}.js`,
   writeFunctionCode: () => Promise.resolve(),
@@ -41,13 +37,13 @@ const createFakeExtensionWithAPrivateFunction = (
   const publicFunction = extension
     .getEventsFunctions()
     .insertNewEventsFunction('ShowToast', 0);
-  publicFunction.setFunctionType(getGdEventsFunction().Action);
+  publicFunction.setFunctionType(gd.EventsFunction.Action);
   publicFunction.setFullName('Show a toast');
   publicFunction.setSentence('Show a toast');
   const privateFunction = extension
     .getEventsFunctions()
     .insertNewEventsFunction(privateFunctionName, 1);
-  privateFunction.setFunctionType(getGdEventsFunction().Action);
+  privateFunction.setFunctionType(gd.EventsFunction.Action);
   privateFunction.setFullName('Reset the internal state');
   privateFunction.setSentence('Reset the internal state');
   privateFunction.setPrivate(true);
@@ -1635,7 +1631,7 @@ describe('SimplifiedProject', () => {
             name,
             eventsFunctions.getEventsFunctionsCount()
           );
-          eventsFunction.setFunctionType(getGdEventsFunction().Action);
+          eventsFunction.setFunctionType(gd.EventsFunction.Action);
           eventsFunction.setFullName(name);
           eventsFunction.setSentence(name);
           eventsFunction.setPrivate(isPrivate);
@@ -1920,7 +1916,7 @@ describe('SimplifiedProject', () => {
       const patrolAction = behavior
         .getEventsFunctions()
         .insertNewEventsFunction('GoTo', 1);
-      patrolAction.setFunctionType(getGdEventsFunction().Action);
+      patrolAction.setFunctionType(gd.EventsFunction.Action);
       patrolAction.setFullName('Go to a point');
       patrolAction.setSentence('Move _PARAM0_ to _PARAM2_;_PARAM3_');
       gd.WholeProjectRefactorer.ensureBehaviorEventsFunctionsProperParameters(
@@ -1971,7 +1967,7 @@ describe('SimplifiedProject', () => {
       const getValue = healthBar
         .getEventsFunctions()
         .insertNewEventsFunction('Value', 1);
-      getValue.setFunctionType(getGdEventsFunction().ExpressionAndCondition);
+      getValue.setFunctionType(gd.EventsFunction.ExpressionAndCondition);
       getValue.getExpressionType().setName('number');
       gd.WholeProjectRefactorer.ensureObjectEventsFunctionsProperParameters(
         extension,
@@ -1993,7 +1989,7 @@ describe('SimplifiedProject', () => {
       const computeDamage = extension
         .getEventsFunctions()
         .insertNewEventsFunction('ComputeDamage', 0);
-      computeDamage.setFunctionType(getGdEventsFunction().Expression);
+      computeDamage.setFunctionType(gd.EventsFunction.Expression);
       computeDamage.getExpressionType().setName('number');
       computeDamage.setPrivate(true);
       computeDamage

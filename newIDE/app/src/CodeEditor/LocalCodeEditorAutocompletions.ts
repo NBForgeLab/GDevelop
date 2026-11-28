@@ -159,7 +159,6 @@ export const setupAutocompletions = (monaco: any): Promise<void> => {
             (folderName) =>
               !folderName.endsWith('.txt') &&
               !folderName.endsWith('.md') &&
-              !folderName.endsWith('.flow.js') &&
               !folderName.endsWith('.d.ts') &&
               !folderName.endsWith('.gitignore')
           )

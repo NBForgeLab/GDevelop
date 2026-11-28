@@ -69,8 +69,6 @@ export type TestProject = {
  * @param gd The GD instance to use to create the project.
  */
 export const makeTestProject = (gd: libGDevelop): TestProject => {
-  const objectsContainerSourceType =
-    gd.ObjectsContainer as unknown as typeof gd.ObjectsContainer_SourceType;
   const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
   const pushBackInstruction = (
     list: gdInstructionsList,
@@ -210,7 +208,7 @@ export const makeTestProject = (gd: libGDevelop): TestProject => {
         eventsFunctionsExtension: buttonExtension,
         eventsBasedObject: buttonEventBasedObject,
       },
-      new gd.ObjectsContainer(objectsContainerSourceType.Function)
+      new gd.ObjectsContainer(gd.ObjectsContainer.Function)
     );
   const composedEventBasedObjectProjectScopedContainersAccessor =
     new ProjectScopedContainersAccessor(
@@ -219,7 +217,7 @@ export const makeTestProject = (gd: libGDevelop): TestProject => {
         eventsFunctionsExtension: buttonExtension,
         eventsBasedObject: composedEventBasedObject,
       },
-      new gd.ObjectsContainer(objectsContainerSourceType.Function)
+      new gd.ObjectsContainer(gd.ObjectsContainer.Function)
     );
 
   // Create and expose some objects
@@ -1084,8 +1082,6 @@ export const makeTestProject = (gd: libGDevelop): TestProject => {
     numberRelationalOperatorParameterMetadata,
     colorRelationalOperatorParameterMetadata,
     unknownRelationalOperatorParameterMetadata,
-    emptyObjectsContainer: new gd.ObjectsContainer(
-      objectsContainerSourceType.Unknown
-    ),
+    emptyObjectsContainer: new gd.ObjectsContainer(gd.ObjectsContainer.Unknown),
   };
 };

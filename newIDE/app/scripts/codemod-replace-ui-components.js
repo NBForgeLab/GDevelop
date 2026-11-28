@@ -66,6 +66,9 @@ const importsToReplace = [
 
 /**
  * Replace an import by another.
+ * @param {string} oldImport
+ * @param {string} newImport
+ * @returns {(source: string) => string}
  */
 const replaceImport = (oldImport, newImport) => source => {
   const regex = new RegExp(` from '${oldImport}';`, '');
@@ -78,6 +81,10 @@ const replaceImport = (oldImport, newImport) => source => {
   });
 };
 
+/**
+ * @param {string} filePath
+ * @returns {Promise<{ filePath: string, changed: boolean }>}
+ */
 const replaceImportsInFile = filePath =>
   new Promise((resolve, reject) =>
     fs.readFile(filePath, { encoding: 'utf8' }, (err, source) => {
@@ -103,7 +110,10 @@ const replaceImportsInFile = filePath =>
       if (!dryRun) {
         fs.writeFile(filePath, newSource, { encoding: 'utf8' }, err => {
           if (err) {
-            shell.echo(`❌ Error while writing file ${filePath}: `, err);
+            shell.echo(
+              `❌ Error while writing file ${filePath}: `,
+              String(err)
+            );
             return reject(err);
           }
 
@@ -124,7 +134,7 @@ const replaceImportsInFile = filePath =>
 
 recursive(newIdeAppSrcPath, function(err, files) {
   if (err) {
-    shell.echo(`❌ Error(s) occurred while reading files `, err);
+    shell.echo(`❌ Error(s) occurred while reading files `, String(err));
     shell.exit(1);
   }
 

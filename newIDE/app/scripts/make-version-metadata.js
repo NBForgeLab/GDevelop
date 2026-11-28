@@ -15,7 +15,6 @@ const version = electronAppPackageJson.version;
 const versionDir = path.resolve(__dirname, '../src/Version');
 const legacyJsOutputFile = path.join(versionDir, 'VersionMetadata.js');
 const tsOutputFile = path.join(versionDir, 'VersionMetadata.ts');
-const flowStubOutputFile = path.join(versionDir, 'VersionMetadata.js.flow');
 const jsonOutputFile = path.join(versionDir, 'VersionMetadata.json');
 const gitHashShellString = shell.exec(`git rev-parse "HEAD"`, {
   silent: true,
@@ -27,6 +26,11 @@ if (gitHashShellString.stderr || gitHashShellString.code) {
   gitHash = 'unknown-hash';
 }
 
+/**
+ * @param {string} filePath
+ * @param {string} content
+ * @returns {Promise<void>}
+ */
 const writeTextFile = (filePath, content) => {
   return new Promise((resolve, reject) => {
     fs.writeFile(filePath, content, err => {
@@ -37,6 +41,10 @@ const writeTextFile = (filePath, content) => {
   });
 };
 
+/**
+ * @param {string} filePath
+ * @returns {Promise<void>}
+ */
 const removeFileIfExists = filePath => {
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(filePath)) return resolve();
@@ -47,6 +55,9 @@ const removeFileIfExists = filePath => {
   });
 };
 
+/**
+ * @param {{ version: string, gitHash: string, versionWithHash: string }} versionMetadata
+ */
 const writeVersionMetadataFiles = versionMetadata => {
   const formattedJson = JSON.stringify(versionMetadata, null, 2);
   const tsContent = [
@@ -66,7 +77,6 @@ const writeVersionMetadataFiles = versionMetadata => {
 
   return Promise.all([
     removeFileIfExists(legacyJsOutputFile),
-    removeFileIfExists(flowStubOutputFile),
     writeTextFile(tsOutputFile, tsContent),
     writeTextFile(jsonOutputFile, jsonContent),
   ]);

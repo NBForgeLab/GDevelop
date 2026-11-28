@@ -29,6 +29,8 @@ const propsWhereToInsertTranslation = [
 //TODO support for style={styles.addAnimationText}
 /**
  * Replace <tagName>Something</tagName> by <tagName><Trans>Something</Trans></tagName>
+ * @param {string} tagName
+ * @returns {(source: string) => string}
  */
 const addTranslationTagInTag = tagName => source => {
   const tagOpeningRegex = `<${tagName}>`;
@@ -50,9 +52,12 @@ const addTranslationTagInTag = tagName => source => {
 
 /**
  * Replace propName="Something" by propName={<Trans>Something</Trans>}
+ * @param {string} propName
+ * @returns {(source: string) => string}
  */
 const addTranslationTagInProp = propName => source => {
   let newSource = source;
+  /** @param {string} str */
   const sanitize = str =>
     str
       .replace(/&/g, '&amp;')
@@ -82,17 +87,18 @@ const addTranslationTagInProp = propName => source => {
 
 /**
  * Add the "import { Trans } from ..." at the top of the file, if needed.
+ * @param {string} source
+ * @returns {string}
  */
 const addTranslationImport = source => {
   if (source.includes(importExistenceCheckStr)) return source;
 
   let newSource = source;
-  const flowDeclarationRegex = /\/\/[\s]*@flow/;
-  if (flowDeclarationRegex.test(newSource)) {
-    // Add after flow declaration
-    newSource = newSource.replace(flowDeclarationRegex, match => {
-      if (verbose) console.log('Add import (after flow) for', match);
-      return '// @flow\n' + importStr + '\n';
+  const tsCheckDirectiveRegex = /^(\/\/[\s]*@ts-check[^\n]*\n)/;
+  if (tsCheckDirectiveRegex.test(newSource)) {
+    newSource = newSource.replace(tsCheckDirectiveRegex, match => {
+      if (verbose) console.log('Add import (after @ts-check) for', match.trim());
+      return match + importStr + '\n';
     });
   } else {
     if (verbose) console.log('Add import (beginning of the file)');
@@ -102,6 +108,10 @@ const addTranslationImport = source => {
   return newSource;
 };
 
+/**
+ * @param {string} filePath
+ * @returns {Promise<{ filePath: string, changed: boolean }>}
+ */
 const internationalizeFile = filePath =>
   new Promise((resolve, reject) =>
     fs.readFile(filePath, { encoding: 'utf8' }, (err, source) => {
@@ -127,7 +137,10 @@ const internationalizeFile = filePath =>
       if (!dryRun) {
         fs.writeFile(filePath, newSource, { encoding: 'utf8' }, err => {
           if (err) {
-            shell.echo(`❌ Error while writing file ${filePath}: `, err);
+            shell.echo(
+              `❌ Error while writing file ${filePath}: `,
+              String(err)
+            );
             return reject(err);
           }
 
@@ -148,7 +161,7 @@ const internationalizeFile = filePath =>
 
 recursive(newIdeAppSrcPath, function(err, files) {
   if (err) {
-    shell.echo(`❌ Error(s) occurred while reading files `, err);
+    shell.echo(`❌ Error(s) occurred while reading files `, String(err));
     shell.exit(1);
   }
 

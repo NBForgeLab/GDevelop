@@ -16,9 +16,6 @@ const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 
-const getGdVariable = () =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
-
 // A failure to render an event/instruction as EventScript, with `path`
 // locating the node (same paths as the events text renderer: `event-1.2`).
 export type EventScriptRenderingError = {
@@ -219,14 +216,13 @@ type VariableJsValue =
   | { [key: string]: VariableJsValue };
 
 const convertVariableToJsObject = (variable: gdVariable): VariableJsValue => {
-  const gdVariable = getGdVariable();
-  if (variable.getType() === gdVariable.String) {
+  if (variable.getType() === gd.Variable.String) {
     return variable.getString();
-  } else if (variable.getType() === gdVariable.Number) {
+  } else if (variable.getType() === gd.Variable.Number) {
     return variable.getValue();
-  } else if (variable.getType() === gdVariable.Boolean) {
+  } else if (variable.getType() === gd.Variable.Boolean) {
     return variable.getBool();
-  } else if (variable.getType() === gdVariable.Structure) {
+  } else if (variable.getType() === gd.Variable.Structure) {
     const childrenNames = variable.getAllChildrenNames().toJSArray();
     const object: { [key: string]: VariableJsValue } = {};
     childrenNames.forEach((childName) => {
@@ -235,7 +231,7 @@ const convertVariableToJsObject = (variable: gdVariable): VariableJsValue => {
       );
     });
     return object;
-  } else if (variable.getType() === gdVariable.Array) {
+  } else if (variable.getType() === gd.Variable.Array) {
     const children = variable.getAllChildrenArray();
     return mapVector(children, (child) => convertVariableToJsObject(child));
   }

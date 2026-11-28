@@ -2,7 +2,6 @@
   "recommendations": [
     "esbenp.prettier-vscode",
     "xaver.clang-format",
-    "ms-vscode.cpptools",
-    "flowtype.flow-for-vscode"
+    "ms-vscode.cpptools"
   ]
 }

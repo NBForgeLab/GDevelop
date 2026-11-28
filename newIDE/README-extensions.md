@@ -218,7 +218,7 @@ extension
 To add an editor to your object, implement the function `registerEditorConfigurations` in your extension module. For now, only a default editor, displaying the object properties, is supported:
 
 ```js
-registerEditorConfigurations: function(objectsEditorService /*: ObjectsEditorService */) {
+registerEditorConfigurations: function(objectsEditorService) {
   objectsEditorService.registerEditorConfiguration(
     "MyDummyExtension::DummyObject", // Replace by your extension and object type names.
     objectsEditorService.getDefaultObjectJsImplementationPropertiesEditor({
@@ -232,7 +232,7 @@ registerEditorConfigurations: function(objectsEditorService /*: ObjectsEditorSer
 
 #### Declare the PixiJS renderer for the instance of your object in the scene editor
 
-Finally, to have the instances of your object displayed properly on the scene editor, implement the function `registerInstanceRenderers` in your extension module. The function is passed an object called `objectsRenderingService`, containing [RenderedInstance](./app/src/ObjectsRendering/Renderers/RenderedInstance.js), the "base class" for instance renderers, and PixiJS, which give you access to [PixiJS rendering engine](https://github.com/pixijs/pixi.js), used in the editor to render the scene.
+Finally, to have the instances of your object displayed properly on the scene editor, implement the function `registerInstanceRenderers` in your extension module. The function is passed an object called `objectsRenderingService`, containing [RenderedInstance](./app/src/ObjectsRendering/Renderers/RenderedInstance.ts), the "base class" for instance renderers, and PixiJS, which give you access to [PixiJS rendering engine](https://github.com/pixijs/pixi.js), used in the editor to render the scene.
 
 > 👉 See an example in the [example extension _JsExtension.js_ file](../Extensions/ExampleJsExtension/JsExtension.js).
 

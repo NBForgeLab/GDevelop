@@ -91,13 +91,11 @@ export const getFunctionIconUrl = (
   functionType: EventsFunction_FunctionType,
   functionName?: string | null
 ): string => {
-  const eventsFunctionType = gd.EventsFunction as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
   switch (functionType) {
     default:
       return 'res/functions/function.svg';
-    case eventsFunctionType.Action:
-    case eventsFunctionType.ActionWithOperator:
+    case gd.EventsFunction.Action:
+    case gd.EventsFunction.ActionWithOperator:
       switch (functionName) {
         default:
           return 'res/functions/action_black.svg';
@@ -128,10 +126,10 @@ export const getFunctionIconUrl = (
         case 'onHotReloading':
           return 'res/functions/reload_black.svg';
       }
-    case eventsFunctionType.Condition:
+    case gd.EventsFunction.Condition:
       return 'res/functions/condition_black.svg';
-    case eventsFunctionType.Expression:
-    case eventsFunctionType.ExpressionAndCondition:
+    case gd.EventsFunction.Expression:
+    case gd.EventsFunction.ExpressionAndCondition:
       return 'res/functions/expression_black.svg';
   }
 };

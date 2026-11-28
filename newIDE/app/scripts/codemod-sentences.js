@@ -15,25 +15,30 @@ let totalSentenceReplacementCount = 0;
 let totalParameterReplacementCount = 0;
 let totalSimplificationCount = 0;
 
+/** @param {string} extract @returns {string} */
 const sanitizeExtracts = extract => {
   return extract.replace(/"\s+"/g, '').trim();
 };
 
+/** @param {string} subject */
 const isSubjectTheObject = subject => {
   return subject.match(/^_PARAM0_/);
 };
 
+/** @param {string} str @returns {string} */
 const uncapitalize = str => {
   if (!str) return str;
   return str[0].toLowerCase() + str.substr(1);
-}
+};
 
+/** @param {string} subject @returns {string} */
 const normalizeSubject = subject => {
   if (subject.indexOf('the ') !== 0 &&
   subject.indexOf('The ') !== 0) return 'the ' + uncapitalize(subject);
   return uncapitalize(subject);
 };
 
+/** @param {string} extraDetails @returns {string | undefined} */
 const normalizeExtraDetails = extraDetails => {
   if (!extraDetails) return;
   if (extraDetails === 'seconds') {
@@ -48,8 +53,14 @@ const normalizeExtraDetails = extraDetails => {
   }
 
   return extraDetails;
-}
+};
 
+/**
+ * @type {Array<{
+ *   regexp: RegExp,
+ *   replacer: (match: string, ...args: string[]) => string,
+ * }>}
+ */
 const patternsToReplace = [
   {
     regexp: /_\(\s*(["'])Do\s*_PARAM.__PARAM._\s+to\s+(.*)\s*of\s(([\S\s](?!["']\s*\)))*.)["']\s*\)/g,
@@ -237,10 +248,22 @@ const patternsToReplace = [
   }
 ];
 
+/**
+ * @param {string} source
+ * @param {{
+ *   regexp: RegExp,
+ *   replacer: (match: string, ...args: string[]) => string,
+ * }} pattern
+ * @returns {string}
+ */
 const replacePattern = (source, pattern) => {
   return source.replace(pattern.regexp, pattern.replacer);
 };
 
+/**
+ * @param {string} filePath
+ * @returns {Promise<{ filePath: string, changed: boolean }>}
+ */
 const replaceSentencesInFile = filePath =>
   new Promise((resolve, reject) =>
     fs.readFile(filePath, { encoding: 'utf8' }, (err, source) => {
@@ -261,7 +284,10 @@ const replaceSentencesInFile = filePath =>
       if (!dryRun) {
         fs.writeFile(filePath, newSource, { encoding: 'utf8' }, err => {
           if (err) {
-            shell.echo(`❌ Error while writing file ${filePath}: `, err);
+            shell.echo(
+              `❌ Error while writing file ${filePath}: `,
+              String(err)
+            );
             return reject(err);
           }
 
@@ -280,9 +306,13 @@ const replaceSentencesInFile = filePath =>
     })
   );
 
-const readRecursiveFiles = path =>
+/**
+ * @param {string} targetPath
+ * @returns {Promise<string[]>}
+ */
+const readRecursiveFiles = targetPath =>
   new Promise((resolve, reject) => {
-    recursive(path, (err, files) => {
+    recursive(targetPath, (err, files) => {
       if (err) {
         reject(err);
         return;
@@ -292,7 +322,12 @@ const readRecursiveFiles = path =>
     });
   });
 
-const flatten = arr => [].concat(...arr);
+/**
+ * @template T
+ * @param {T[][]} arr
+ * @returns {T[]}
+ */
+const flatten = arr => /** @type {T[]} */ ([]).concat(...arr);
 
 Promise.all([
   readRecursiveFiles(corePath),
@@ -322,7 +357,7 @@ Promise.all([
     });
   },
   err => {
-    shell.echo(`❌ Error(s) occurred while reading files `, err);
+    shell.echo(`❌ Error(s) occurred while reading files `, String(err));
     shell.exit(1);
   }
 );

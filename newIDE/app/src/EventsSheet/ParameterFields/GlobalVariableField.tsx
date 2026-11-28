@@ -11,10 +11,6 @@ import {
 
 const gd: libGDevelop = global.gd;
 
-const getGdVariablesContainer = () =>
-  gd.VariablesContainer as typeof gd.VariablesContainer &
-    typeof gd.VariablesContainer_SourceType;
-
 export default React.forwardRef<ParameterFieldInterface, ParameterFieldProps>(
   function GlobalVariableField(props: ParameterFieldProps, ref) {
     const field = React.useRef<ParameterFieldInterface | null>(null);
@@ -88,7 +84,7 @@ export default React.forwardRef<ParameterFieldInterface, ParameterFieldProps>(
 const getVariableSourceFromIdentifier = (
   variableName: string,
   projectScopedContainers: gdProjectScopedContainers
-): VariablesContainer_SourceType => getGdVariablesContainer().Global;
+): VariablesContainer_SourceType => gd.VariablesContainer.Global;
 
 export const renderInlineGlobalVariable = (
   props: ParameterInlineRendererProps

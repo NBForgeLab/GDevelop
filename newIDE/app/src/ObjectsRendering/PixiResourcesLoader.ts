@@ -81,7 +81,7 @@ let loadedBitmapFonts: Record<string, { data: any }> = {};
 let loadedFontFamilies: Record<string, string> = {};
 
 type LoadedTexture = {
-  pixiTexture: any;
+  pixiTexture: PIXI.Texture;
   // The URL the texture was loaded from. Left undefined when it's not meaningful
   // for change detection (the invalid placeholder texture, video textures…).
   // When set, it's used to detect whether a resource actually changed and skip
@@ -106,7 +106,7 @@ const loadedOrLoadingPixiTextures = (() => {
     get(resourceName: string): LoadedTexture | undefined {
       return entriesByResourceName[resourceName];
     },
-    getPixiTexture(resourceName: string): any {
+    getPixiTexture(resourceName: string): PIXI.Texture | undefined {
       const entry = entriesByResourceName[resourceName];
       return entry ? entry.pixiTexture : undefined;
     },
@@ -119,7 +119,7 @@ const loadedOrLoadingPixiTextures = (() => {
       loadedFromUrl,
     }: {
       resourceName: string;
-      pixiTexture: any;
+      pixiTexture: PIXI.Texture;
       loadedFromUrl?: string;
     }) {
       entriesByResourceName[resourceName] = { pixiTexture, loadedFromUrl };
@@ -131,7 +131,7 @@ const loadedOrLoadingPixiTextures = (() => {
     // very same object, i.e. that point to the same loaded file/URL.
     getResourceNamesSharingPixiTexture(
       resourceName: string,
-      pixiTexture: any
+      pixiTexture: PIXI.Texture
     ): Array<string> {
       return Object.keys(entriesByResourceName).filter(
         (otherName) =>
@@ -880,7 +880,10 @@ export default class PixiResourcesLoader {
    * should listen to PIXI.Texture `update` event, and refresh your object
    * if this event is triggered.
    */
-  static getPIXITexture(project: gdProject, resourceName: string): any {
+  static getPIXITexture(
+    project: gdProject,
+    resourceName: string
+  ): PIXI.Texture {
     const existingPixiTexture =
       loadedOrLoadingPixiTextures.getPixiTexture(resourceName);
     if (existingPixiTexture) {
@@ -1326,7 +1329,10 @@ export default class PixiResourcesLoader {
    * should listen to PIXI.Texture `update` event, and refresh your object
    * if this event is triggered.
    */
-  static getPIXIVideoTexture(project: gdProject, resourceName: string): any {
+  static getPIXIVideoTexture(
+    project: gdProject,
+    resourceName: string
+  ): PIXI.Texture {
     const existingPixiTexture =
       loadedOrLoadingPixiTextures.getPixiTexture(resourceName);
     if (existingPixiTexture) {
@@ -1509,11 +1515,11 @@ export default class PixiResourcesLoader {
       });
   }
 
-  static getInvalidPIXITexture(): any {
+  static getInvalidPIXITexture(): PIXI.Texture {
     return invalidTexture;
   }
 
-  static getLoadingPIXITexture(): any {
+  static getLoadingPIXITexture(): PIXI.Texture {
     return loadingTexture;
   }
 

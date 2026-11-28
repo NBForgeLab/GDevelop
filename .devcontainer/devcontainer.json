@@ -6,8 +6,7 @@
     "vscode": {
       "extensions": [
         "esbenp.prettier-vscode",
-        "ms-vscode.cpptools",
-        "flowtype.flow-for-vscode"
+        "ms-vscode.cpptools"
       ]
     }
   }

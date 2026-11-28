@@ -45,8 +45,6 @@ const getFirstActionType = (eventsFunction: gdEventsFunction): string => {
  */
 const createFakeProject = () => {
   const project = gd.ProjectHelper.createNewGDJSProject();
-  const eventsFunctionType = gd.EventsFunction as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
 
   const uiExtension = project.insertNewEventsFunctionsExtension('UI', 0);
   uiExtension.setFullName('User interface');
@@ -74,11 +72,11 @@ const createFakeProject = () => {
   const healFunction = storeExtension
     .getEventsFunctions()
     .insertNewEventsFunction('Heal', 0);
-  healFunction.setFunctionType(eventsFunctionType.Action);
+  healFunction.setFunctionType(gd.EventsFunction.Action);
   const castFunction = storeExtension
     .getEventsFunctions()
     .insertNewEventsFunction('Cast', 1);
-  castFunction.setFunctionType(eventsFunctionType.Action);
+  castFunction.setFunctionType(gd.EventsFunction.Action);
   addActionCallingFunction(project, castFunction, 'Health::Heal');
 
   return { project, uiExtension, menusExtension, storeExtension };

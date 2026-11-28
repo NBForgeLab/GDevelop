@@ -14,10 +14,6 @@ import { FunctionListItem } from './ExtensionFunctionSelectorDialog';
 
 const gd: libGDevelop = global.gd;
 
-const getEventsFunctionType = () =>
-  gd.EventsFunction as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
-
 type Props = {
   eventsBasedBehavior: gdEventsBasedBehavior;
   onCancel: () => void;
@@ -29,7 +25,6 @@ export default function BehaviorMethodSelectorDialog({
   onChoose,
   onCancel,
 }: Props): React.ReactNode {
-  const eventsFunctionType = getEventsFunctionType();
   const eventsFunctions = eventsBasedBehavior.getEventsFunctions();
   const [showAdvanced, setShowAdvanced] = React.useState(false);
 
@@ -56,7 +51,7 @@ export default function BehaviorMethodSelectorDialog({
     >
       <List>
         <FunctionListItem
-          functionType={eventsFunctionType.Action}
+          functionType={gd.EventsFunction.Action}
           functionName={null}
           name={<Trans>Action</Trans>}
           description={
@@ -69,7 +64,7 @@ export default function BehaviorMethodSelectorDialog({
           onChoose={onChoose}
         />
         <FunctionListItem
-          functionType={eventsFunctionType.Condition}
+          functionType={gd.EventsFunction.Condition}
           functionName={null}
           name={<Trans>Condition</Trans>}
           description={
@@ -82,7 +77,7 @@ export default function BehaviorMethodSelectorDialog({
           onChoose={onChoose}
         />
         <FunctionListItem
-          functionType={eventsFunctionType.Expression}
+          functionType={gd.EventsFunction.Expression}
           functionName={null}
           name={<Trans>Expression</Trans>}
           description={
@@ -97,7 +92,7 @@ export default function BehaviorMethodSelectorDialog({
           <Trans>Lifecycle methods</Trans>
         </Subheader>
         <FunctionListItem
-          functionType={eventsFunctionType.Action}
+          functionType={gd.EventsFunction.Action}
           functionName="onCreated"
           disabled={eventsFunctions.hasEventsFunctionNamed('onCreated')}
           onChoose={onChoose}
@@ -109,7 +104,7 @@ export default function BehaviorMethodSelectorDialog({
           }
         />
         <FunctionListItem
-          functionType={eventsFunctionType.Action}
+          functionType={gd.EventsFunction.Action}
           functionName="doStepPreEvents"
           disabled={eventsFunctions.hasEventsFunctionNamed('doStepPreEvents')}
           onChoose={onChoose}
@@ -122,7 +117,7 @@ export default function BehaviorMethodSelectorDialog({
           }
         />
         <FunctionListItem
-          functionType={eventsFunctionType.Action}
+          functionType={gd.EventsFunction.Action}
           functionName="onDestroy"
           disabled={
             eventsFunctions.hasEventsFunctionNamed('onOwnerRemovedFromScene') ||
@@ -142,7 +137,7 @@ export default function BehaviorMethodSelectorDialog({
               <Trans>Other lifecycle methods</Trans>
             </Subheader>
             <FunctionListItem
-              functionType={eventsFunctionType.Action}
+              functionType={gd.EventsFunction.Action}
               functionName="onDeActivate"
               disabled={eventsFunctions.hasEventsFunctionNamed('onDeActivate')}
               onChoose={onChoose}
@@ -155,7 +150,7 @@ export default function BehaviorMethodSelectorDialog({
               }
             />
             <FunctionListItem
-              functionType={eventsFunctionType.Action}
+              functionType={gd.EventsFunction.Action}
               functionName="onActivate"
               disabled={eventsFunctions.hasEventsFunctionNamed('onActivate')}
               onChoose={onChoose}
@@ -167,7 +162,7 @@ export default function BehaviorMethodSelectorDialog({
               }
             />
             <FunctionListItem
-              functionType={eventsFunctionType.Action}
+              functionType={gd.EventsFunction.Action}
               functionName="doStepPostEvents"
               disabled={eventsFunctions.hasEventsFunctionNamed(
                 'doStepPostEvents'

@@ -2,12 +2,13 @@
 /**
  * Launch this script to generate a reference of all expressions supported by GDevelop.
  */
+const path = require('path');
+const libGDPath = path.join(__dirname, '..', 'public', 'libGD.js');
 /** @type {(options?: unknown) => Promise<libGDevelop>} */
-const initializeGDevelopJs = require('../public/libGD.js');
+const initializeGDevelopJs = require(libGDPath);
 const { mapVector } = require('./lib/MapFor');
 const makeExtensionsLoader = require('./lib/LocalJsExtensionsLoader');
 const fs = require('fs').promises;
-const path = require('path');
 const shell = require('shelljs');
 const {
   generateReadMoreLink,

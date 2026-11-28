@@ -16,14 +16,6 @@ import EventsRootVariablesFinder from '../../Utils/EventsRootVariablesFinder';
 
 const gd: libGDevelop = global.gd;
 
-const getGdVariablesContainer = () =>
-  gd.VariablesContainer as typeof gd.VariablesContainer &
-    typeof gd.VariablesContainer_SourceType;
-
-const getGdObjectsContainer = () =>
-  gd.ObjectsContainer as unknown as typeof gd.ObjectsContainer &
-    typeof gd.ObjectsContainer_SourceType;
-
 // TODO Move this function to the ObjectsContainersList class.
 export const getObjectOrGroupVariablesContainers = (
   globalObjectsContainer: gdObjectsContainer,
@@ -110,11 +102,11 @@ export default React.forwardRef<ParameterFieldInterface, ParameterFieldProps>(
               .get()
               .getObjectsContainersList()
               .getObjectsContainerSourceType(objectName)
-          : getGdObjectsContainer().Unknown,
+          : gd.ObjectsContainer.Unknown,
       [objectName, projectScopedContainersAccessor]
     );
     const canObjectDeclareVariable =
-      objectSourceType !== getGdObjectsContainer().Function;
+      objectSourceType !== gd.ObjectsContainer.Function;
 
     const { layout, eventsBasedObject } = scope;
     const initialInstances =
@@ -246,7 +238,7 @@ export default React.forwardRef<ParameterFieldInterface, ParameterFieldProps>(
 const getVariableSourceFromIdentifier = (
   identifier: string,
   projectScopedContainers: gdProjectScopedContainers
-): VariablesContainer_SourceType => getGdVariablesContainer().Object;
+): VariablesContainer_SourceType => gd.VariablesContainer.Object;
 
 export const renderInlineObjectVariable = (
   props: ParameterInlineRendererProps

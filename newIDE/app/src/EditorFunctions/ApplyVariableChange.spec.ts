@@ -6,18 +6,12 @@ import {
 
 const gd: libGDevelop = global.gd;
 
-const getGdVariable = () =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
-const getGdVariablesContainer = () =>
-  gd.VariablesContainer as typeof gd.VariablesContainer &
-    typeof gd.VariablesContainer_SourceType;
-
 describe('applyVariableChange', () => {
   let variablesContainer: gdVariablesContainer;
 
   beforeEach(() => {
     variablesContainer = new gd.VariablesContainer(
-      getGdVariablesContainer().Unknown
+      gd.VariablesContainer.Unknown
     );
   });
 
@@ -38,7 +32,7 @@ describe('applyVariableChange', () => {
       expect(variablesContainer.has('myVariable')).toBe(true);
 
       const variable = variablesContainer.get('myVariable');
-      expect(variable.getType()).toBe(getGdVariable().String);
+      expect(variable.getType()).toBe(gd.Variable.String);
       expect(variable.getString()).toBe('hello world');
     });
 
@@ -54,7 +48,7 @@ describe('applyVariableChange', () => {
       expect(variablesContainer.has('myNum')).toBe(true);
 
       const variable = variablesContainer.get('myNum');
-      expect(variable.getType()).toBe(getGdVariable().Number);
+      expect(variable.getType()).toBe(gd.Variable.Number);
       expect(variable.getValue()).toBe(42.5);
     });
 
@@ -70,7 +64,7 @@ describe('applyVariableChange', () => {
       expect(variablesContainer.has('myBool')).toBe(true);
 
       const variable = variablesContainer.get('myBool');
-      expect(variable.getType()).toBe(getGdVariable().Boolean);
+      expect(variable.getType()).toBe(gd.Variable.Boolean);
       expect(variable.getBool()).toBe(true);
     });
 
@@ -100,7 +94,7 @@ describe('applyVariableChange', () => {
 
       expect(result.addedNewVariable).toBe(true);
       const variable = variablesContainer.get('forcedString');
-      expect(variable.getType()).toBe(getGdVariable().String);
+      expect(variable.getType()).toBe(gd.Variable.String);
       expect(variable.getString()).toBe('123');
     });
 
@@ -115,7 +109,7 @@ describe('applyVariableChange', () => {
       });
 
       const variable = variablesContainer.get('emptyValue');
-      expect(variable.getType()).toBe(getGdVariable().String);
+      expect(variable.getType()).toBe(gd.Variable.String);
       expect(variable.getString()).toBe('');
     });
 
@@ -130,7 +124,7 @@ describe('applyVariableChange', () => {
       });
 
       const variable = variablesContainer.get('hexValue');
-      expect(variable.getType()).toBe(getGdVariable().Number);
+      expect(variable.getType()).toBe(gd.Variable.Number);
       expect(variable.getValue()).toBe(16);
     });
 
@@ -156,7 +150,7 @@ describe('applyVariableChange', () => {
       });
 
       const variable = variablesContainer.get('jsonAsString');
-      expect(variable.getType()).toBe(getGdVariable().String);
+      expect(variable.getType()).toBe(gd.Variable.String);
       expect(variable.getString()).toBe('{"a": 1}');
     });
   });
@@ -174,11 +168,11 @@ describe('applyVariableChange', () => {
       expect(variablesContainer.has('myStruct')).toBe(true);
 
       const structVar = variablesContainer.get('myStruct');
-      expect(structVar.getType()).toBe(getGdVariable().Structure);
+      expect(structVar.getType()).toBe(gd.Variable.Structure);
       expect(structVar.hasChild('childProperty')).toBe(true);
 
       const childVar = structVar.getChild('childProperty');
-      expect(childVar.getType()).toBe(getGdVariable().String);
+      expect(childVar.getType()).toBe(gd.Variable.String);
       expect(childVar.getString()).toBe('child value');
     });
 
@@ -214,10 +208,10 @@ describe('applyVariableChange', () => {
       expect(result.addedNewVariable).toBe(true);
 
       const level1 = variablesContainer.get('level1');
-      expect(level1.getType()).toBe(getGdVariable().Structure);
+      expect(level1.getType()).toBe(gd.Variable.Structure);
 
       const level2 = level1.getChild('level2');
-      expect(level2.getType()).toBe(getGdVariable().Structure);
+      expect(level2.getType()).toBe(gd.Variable.Structure);
 
       const level3 = level2.getChild('level3');
       expect(level3.getString()).toBe('deep value');
@@ -237,7 +231,7 @@ describe('applyVariableChange', () => {
       expect(variablesContainer.has('myArray')).toBe(true);
 
       const arrayVar = variablesContainer.get('myArray');
-      expect(arrayVar.getType()).toBe(getGdVariable().Array);
+      expect(arrayVar.getType()).toBe(gd.Variable.Array);
       expect(arrayVar.getChildrenCount()).toBe(3); // indices 0, 1, 2
 
       const itemVar = arrayVar.getAtIndex(2);
@@ -307,11 +301,11 @@ describe('applyVariableChange', () => {
       expect(result.addedNewVariable).toBe(true);
 
       const arrayVar = variablesContainer.get('myArray');
-      expect(arrayVar.getType()).toBe(getGdVariable().Array);
+      expect(arrayVar.getType()).toBe(gd.Variable.Array);
       expect(arrayVar.getChildrenCount()).toBe(2); // indices 0, 1
 
       const itemVar = arrayVar.getAtIndex(1);
-      expect(itemVar.getType()).toBe(getGdVariable().Structure);
+      expect(itemVar.getType()).toBe(gd.Variable.Structure);
       expect(itemVar.hasChild('itemProperty')).toBe(true);
       expect(itemVar.getChild('itemProperty').getString()).toBe('nested value');
     });
@@ -327,10 +321,10 @@ describe('applyVariableChange', () => {
       expect(result.addedNewVariable).toBe(true);
 
       const structVar = variablesContainer.get('myStruct');
-      expect(structVar.getType()).toBe(getGdVariable().Structure);
+      expect(structVar.getType()).toBe(gd.Variable.Structure);
 
       const arrayProp = structVar.getChild('arrayProp');
-      expect(arrayProp.getType()).toBe(getGdVariable().Array);
+      expect(arrayProp.getType()).toBe(gd.Variable.Array);
       expect(arrayProp.getChildrenCount()).toBe(3);
       expect(arrayProp.getAtIndex(2).getString()).toBe('array in struct');
     });
@@ -418,7 +412,7 @@ describe('applyVariableChange', () => {
       });
 
       const variable = variablesContainer.get('testBool');
-      expect(variable.getType()).toBe(getGdVariable().Boolean);
+      expect(variable.getType()).toBe(gd.Variable.Boolean);
       expect(variable.getBool()).toBe(true);
     });
 
@@ -431,7 +425,7 @@ describe('applyVariableChange', () => {
       });
 
       const variable = variablesContainer.get('testBool');
-      expect(variable.getType()).toBe(getGdVariable().Boolean);
+      expect(variable.getType()).toBe(gd.Variable.Boolean);
       expect(variable.getBool()).toBe(false);
     });
 
@@ -444,7 +438,7 @@ describe('applyVariableChange', () => {
       });
 
       const variable = variablesContainer.get('testNum');
-      expect(variable.getType()).toBe(getGdVariable().Number);
+      expect(variable.getType()).toBe(gd.Variable.Number);
       expect(variable.getValue()).toBe(3.14159);
     });
 
@@ -457,7 +451,7 @@ describe('applyVariableChange', () => {
       });
 
       const variable = variablesContainer.get('testString');
-      expect(variable.getType()).toBe(getGdVariable().String);
+      expect(variable.getType()).toBe(gd.Variable.String);
       expect(variable.getString()).toBe('123abc');
     });
 
@@ -472,7 +466,7 @@ describe('applyVariableChange', () => {
       expect(result.variableType).toBe('Structure');
 
       const variable = variablesContainer.get('testString');
-      expect(variable.getType()).toBe(getGdVariable().Structure);
+      expect(variable.getType()).toBe(gd.Variable.Structure);
       expect(serializeToJSObject(variable)).toMatchInlineSnapshot(`
         Object {
           "children": Array [
@@ -542,7 +536,7 @@ describe('applyVariableChange', () => {
       expect(result.variableType).toBe('Array');
 
       const variable = variablesContainer.get('testString');
-      expect(variable.getType()).toBe(getGdVariable().Array);
+      expect(variable.getType()).toBe(gd.Variable.Array);
       expect(serializeToJSObject(variable)).toMatchInlineSnapshot(`
         Object {
           "children": Array [
@@ -620,7 +614,7 @@ describe('applyVariableChange', () => {
       });
 
       const replacedRoot = variablesContainer.get('player');
-      expect(replacedRoot.getType()).toBe(getGdVariable().Structure);
+      expect(replacedRoot.getType()).toBe(gd.Variable.Structure);
       expect(replacedRoot.getAllChildrenNames().size()).toBe(1);
       expect(replacedRoot.hasChild('newContent')).toBe(true);
       expect(replacedRoot.getChild('newContent').getValue()).toBe(123);
@@ -649,7 +643,7 @@ describe('applyVariableChange', () => {
       expect(replacedRoot.hasChild('newContent')).toBe(true);
       // The replaced nested structure only has the new field.
       const replacedStats = replacedRoot.getChild('stats');
-      expect(replacedStats.getType()).toBe(getGdVariable().Structure);
+      expect(replacedStats.getType()).toBe(gd.Variable.Structure);
       expect(replacedStats.getAllChildrenNames().size()).toBe(1);
       expect(replacedStats.hasChild('luck')).toBe(true);
       expect(replacedStats.getChild('luck').getValue()).toBe(99);
@@ -681,7 +675,7 @@ describe('applyVariableChange', () => {
       });
 
       const replacedRoot = variablesContainer.get('inventory');
-      expect(replacedRoot.getType()).toBe(getGdVariable().Array);
+      expect(replacedRoot.getType()).toBe(gd.Variable.Array);
       expect(replacedRoot.getChildrenCount()).toBe(1);
       expect(replacedRoot.getAtIndex(0).getString()).toBe('NewItem');
 
@@ -699,7 +693,7 @@ describe('applyVariableChange', () => {
       expect(nested.getChild('label').getString()).toBe('mainMatrix');
       // The replaced nested array only has the new element.
       const replacedRow = nested.getChild('row');
-      expect(replacedRow.getType()).toBe(getGdVariable().Array);
+      expect(replacedRow.getType()).toBe(gd.Variable.Array);
       expect(replacedRow.getChildrenCount()).toBe(1);
       expect(replacedRow.getAtIndex(0).getValue()).toBe(42);
     });
@@ -716,7 +710,7 @@ describe('applyVariableChange', () => {
 
       expect(result.variableType).toBe('Array');
       const variable = variablesContainer.get('emptyArray');
-      expect(variable.getType()).toBe(getGdVariable().Array);
+      expect(variable.getType()).toBe(gd.Variable.Array);
       expect(variable.getChildrenCount()).toBe(0);
     });
 
@@ -730,7 +724,7 @@ describe('applyVariableChange', () => {
 
       expect(result.variableType).toBe('Structure');
       const variable = variablesContainer.get('emptyStructure');
-      expect(variable.getType()).toBe(getGdVariable().Structure);
+      expect(variable.getType()).toBe(gd.Variable.Structure);
       expect(variable.getChildrenCount()).toBe(0);
     });
 
@@ -743,14 +737,10 @@ describe('applyVariableChange', () => {
       });
 
       const variable = variablesContainer.get('inventory');
-      expect(variable.getType()).toBe(getGdVariable().Structure);
-      expect(variable.getChild('weapons').getType()).toBe(
-        getGdVariable().Array
-      );
+      expect(variable.getType()).toBe(gd.Variable.Structure);
+      expect(variable.getChild('weapons').getType()).toBe(gd.Variable.Array);
       expect(variable.getChild('weapons').getChildrenCount()).toBe(0);
-      expect(variable.getChild('stats').getType()).toBe(
-        getGdVariable().Structure
-      );
+      expect(variable.getChild('stats').getType()).toBe(gd.Variable.Structure);
       expect(variable.getChild('stats').getChildrenCount()).toBe(0);
     });
 
@@ -766,7 +756,7 @@ describe('applyVariableChange', () => {
       });
 
       const herbs = variablesContainer.get('storage').getChild('herbs');
-      expect(herbs.getType()).toBe(getGdVariable().Array);
+      expect(herbs.getType()).toBe(gd.Variable.Array);
       expect(herbs.getChildrenCount()).toBe(0);
     });
   });
@@ -777,7 +767,7 @@ describe('applyVariableDeletion', () => {
 
   beforeEach(() => {
     variablesContainer = new gd.VariablesContainer(
-      getGdVariablesContainer().Unknown
+      gd.VariablesContainer.Unknown
     );
   });
 

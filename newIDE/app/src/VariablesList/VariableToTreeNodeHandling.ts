@@ -4,10 +4,6 @@ import { exceptionallyGuardAgainstDeadObject } from '../Utils/IsNullPtr';
 
 const gd: libGDevelop = global.gd;
 
-// Resolve `gd.Variable` lazily at call time because `global.gd` is populated asynchronously.
-const getGdVariable = () =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
-
 type MovementType =
   | 'ArrayToTopLevel'
   | 'FromArrayToAnotherArray'
@@ -119,7 +115,7 @@ export const getVariableContextFromNodeId = (
         ? variablesContainer.get(currentVariableName)
         : null;
     } else {
-      if (parentVariable.getType() === getGdVariable().Array) {
+      if (parentVariable.getType() === gd.Variable.Array) {
         const index = parseInt(currentVariableName, 10);
         if (index >= parentVariable.getChildrenCount()) {
           return { variable: null, lineage, depth, name };
@@ -215,7 +211,6 @@ export const getMovementTypeWithinVariablesContainer = (
   draggedVariableContext: VariableContext,
   targetVariableContext: VariableContext
 ): MovementType | null => {
-  const gdVariable = getGdVariable();
   const { lineage: targetVariableLineage } = targetVariableContext;
   const targetVariableParentVariable = getDirectParentVariable(
     targetVariableLineage
@@ -228,35 +223,35 @@ export const getMovementTypeWithinVariablesContainer = (
 
   if (!!draggedVariableParentVariable && !!targetVariableParentVariable) {
     if (
-      targetVariableParentVariable.getType() === gdVariable.Structure &&
-      draggedVariableParentVariable.getType() === gdVariable.Structure &&
+      targetVariableParentVariable.getType() === gd.Variable.Structure &&
+      draggedVariableParentVariable.getType() === gd.Variable.Structure &&
       draggedVariableParentVariable !== targetVariableParentVariable
     )
       return 'FromStructureToAnotherStructure';
     if (
-      targetVariableParentVariable.getType() === gdVariable.Structure &&
+      targetVariableParentVariable.getType() === gd.Variable.Structure &&
       draggedVariableParentVariable === targetVariableParentVariable
     )
       return 'InsideSameStructure';
     if (
-      targetVariableParentVariable.getType() === gdVariable.Array &&
-      draggedVariableParentVariable.getType() === gdVariable.Array &&
+      targetVariableParentVariable.getType() === gd.Variable.Array &&
+      draggedVariableParentVariable.getType() === gd.Variable.Array &&
       draggedVariableParentVariable !== targetVariableParentVariable
     )
       return 'FromArrayToAnotherArray';
     if (
-      targetVariableParentVariable.getType() === gdVariable.Array &&
+      targetVariableParentVariable.getType() === gd.Variable.Array &&
       draggedVariableParentVariable === targetVariableParentVariable
     )
       return 'InsideSameArray';
     if (
-      targetVariableParentVariable.getType() === gdVariable.Array &&
-      draggedVariableParentVariable.getType() === gdVariable.Structure
+      targetVariableParentVariable.getType() === gd.Variable.Array &&
+      draggedVariableParentVariable.getType() === gd.Variable.Structure
     )
       return 'FromStructureToArray';
     if (
-      targetVariableParentVariable.getType() === gdVariable.Structure &&
-      draggedVariableParentVariable.getType() === gdVariable.Array
+      targetVariableParentVariable.getType() === gd.Variable.Structure &&
+      draggedVariableParentVariable.getType() === gd.Variable.Array
     )
       return 'FromArrayToStructure';
   }
@@ -266,25 +261,25 @@ export const getMovementTypeWithinVariablesContainer = (
   if (
     !draggedVariableParentVariable &&
     !!targetVariableParentVariable &&
-    targetVariableParentVariable.getType() === gdVariable.Structure
+    targetVariableParentVariable.getType() === gd.Variable.Structure
   )
     return 'TopLevelToStructure';
   if (
     !draggedVariableParentVariable &&
     !!targetVariableParentVariable &&
-    targetVariableParentVariable.getType() === gdVariable.Array
+    targetVariableParentVariable.getType() === gd.Variable.Array
   )
     return 'TopLevelToArray';
   if (
     !!draggedVariableParentVariable &&
     !targetVariableParentVariable &&
-    draggedVariableParentVariable.getType() === gdVariable.Structure
+    draggedVariableParentVariable.getType() === gd.Variable.Structure
   )
     return 'StructureToTopLevel';
   if (
     !!draggedVariableParentVariable &&
     !targetVariableParentVariable &&
-    draggedVariableParentVariable.getType() === gdVariable.Array
+    draggedVariableParentVariable.getType() === gd.Variable.Array
   )
     return 'ArrayToTopLevel';
 
@@ -304,16 +299,15 @@ export const generateListOfNodesMatchingSearchInVariable = ({
   searchText: string;
   acc: Array<string>;
 }): Array<string> => {
-  const gdVariable = getGdVariable();
   let newAcc: Array<string>;
   let childrenNodes: Array<string>;
   switch (variable.getType()) {
-    case gdVariable.Boolean:
+    case gd.Variable.Boolean:
       if (normalizeString(variableName).includes(searchText)) {
         return [nodeId];
       }
       return [];
-    case gdVariable.String:
+    case gd.Variable.String:
       if (
         normalizeString(variableName).includes(searchText) ||
         normalizeString(variable.getString()).includes(searchText)
@@ -321,7 +315,7 @@ export const generateListOfNodesMatchingSearchInVariable = ({
         return [nodeId];
       }
       return [];
-    case gdVariable.Number:
+    case gd.Variable.Number:
       if (
         normalizeString(variableName).includes(searchText) ||
         variable.getValue().toString().includes(searchText)
@@ -329,7 +323,7 @@ export const generateListOfNodesMatchingSearchInVariable = ({
         return [nodeId];
       }
       return [];
-    case gdVariable.Array:
+    case gd.Variable.Array:
       newAcc = [...acc];
       if (normalizeString(variableName).includes(searchText)) {
         newAcc.push(nodeId);
@@ -345,7 +339,7 @@ export const generateListOfNodesMatchingSearchInVariable = ({
         });
       }).flat();
       return [...newAcc, ...childrenNodes];
-    case gdVariable.Structure:
+    case gd.Variable.Structure:
       newAcc = [...acc];
       if (normalizeString(variableName).includes(searchText)) {
         newAcc.push(nodeId);

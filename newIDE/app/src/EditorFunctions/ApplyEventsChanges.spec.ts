@@ -14,8 +14,6 @@ import {
 const gd: libGDevelop = global.gd;
 
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
-const getGdVariable = () =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
 
 /** The resolved scope of a scene, as the editor functions build it. */
 const makeSceneScope = (project: gdProject, scene: gdLayout): ResolvedScope => {
@@ -3276,20 +3274,20 @@ describe('addUndeclaredVariables', () => {
     });
 
     expect(testScene.getVariables().get('score').getType()).toBe(
-      getGdVariable().Number
+      gd.Variable.Number
     );
     // 'none' scope defaults to the scene.
     expect(testScene.getVariables().get('playerName').getType()).toBe(
-      getGdVariable().String
+      gd.Variable.String
     );
     expect(testScene.getVariables().get('isPaused').getType()).toBe(
-      getGdVariable().Boolean
+      gd.Variable.Boolean
     );
     expect(project.getVariables().get('settings').getType()).toBe(
-      getGdVariable().Structure
+      gd.Variable.Structure
     );
     expect(project.getVariables().get('inventory').getType()).toBe(
-      getGdVariable().Array
+      gd.Variable.Array
     );
   });
 
@@ -3306,7 +3304,7 @@ describe('addUndeclaredVariables', () => {
 
     // Neither re-created nor re-typed.
     expect(testScene.getVariables().get('score').getType()).toBe(
-      getGdVariable().Number
+      gd.Variable.Number
     );
     expect(testScene.getVariables().get('score').getValue()).toBe(42);
   });
@@ -3354,7 +3352,7 @@ describe('addObjectUndeclaredVariables', () => {
 
     expect(object.getVariables().has('health')).toBe(true);
     expect(object.getVariables().get('health').getType()).toBe(
-      getGdVariable().Number
+      gd.Variable.Number
     );
   });
 
@@ -3374,7 +3372,7 @@ describe('addObjectUndeclaredVariables', () => {
 
     expect(object.getVariables().has('visible')).toBe(true);
     expect(object.getVariables().get('visible').getType()).toBe(
-      getGdVariable().Boolean
+      gd.Variable.Boolean
     );
   });
 
@@ -3424,7 +3422,7 @@ describe('addObjectUndeclaredVariables', () => {
     });
 
     expect(object.getVariables().get('health').getType()).toBe(
-      getGdVariable().Number
+      gd.Variable.Number
     );
     expect(object.getVariables().get('health').getValue()).toBe(100);
   });

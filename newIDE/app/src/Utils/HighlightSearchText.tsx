@@ -173,22 +173,20 @@ export const highlightSearchText = (
 const getColorationName = (
   colorationKind: ExpressionColorationDescription_ColorationKind
 ) => {
-  const colorationKindEnum =
-    gd.ExpressionColorationDescription as unknown as typeof gd.ExpressionColorationDescription_ColorationKind;
   switch (colorationKind) {
-    case colorationKindEnum.Number:
+    case gd.ExpressionColorationDescription.Number:
       return 'number';
 
-    case colorationKindEnum.Object:
+    case gd.ExpressionColorationDescription.Object:
       return 'objectInExpression';
 
-    case colorationKindEnum.Variable:
+    case gd.ExpressionColorationDescription.Variable:
       return 'variable';
 
-    case colorationKindEnum.Operator:
+    case gd.ExpressionColorationDescription.Operator:
       return 'operator';
 
-    case colorationKindEnum.String:
+    case gd.ExpressionColorationDescription.String:
     default:
       return 'string';
   }

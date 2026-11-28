@@ -14,7 +14,7 @@ export default class WindowMask {
   project: gdProject;
   instancesEditorSettings: InstancesEditorSettings;
   viewPosition: ViewPosition;
-  pixiRectangle: any = new PIXI.Graphics() as any;
+  pixiRectangle: PIXI.Graphics = new PIXI.Graphics();
   windowRectangle: Rectangle = new Rectangle();
 
   constructor({ project, viewPosition, instancesEditorSettings }: Props) {
@@ -29,7 +29,7 @@ export default class WindowMask {
     this.instancesEditorSettings = instancesEditorSettings;
   }
 
-  getPixiObject(): any {
+  getPixiObject(): PIXI.Graphics {
     return this.pixiRectangle;
   }
 

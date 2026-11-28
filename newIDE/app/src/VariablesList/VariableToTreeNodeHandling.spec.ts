@@ -8,11 +8,6 @@ import {
 
 const gd: libGDevelop = global.gd;
 
-// Resolve `gd.VariablesContainer` lazily at call time because `global.gd` is populated asynchronously.
-const getGdVariablesContainer = () =>
-  gd.VariablesContainer as typeof gd.VariablesContainer &
-    typeof gd.VariablesContainer_SourceType;
-
 describe('VariableToTreeNodeHandling', () => {
   let variablesContainer: gdVariablesContainer;
   let parent: gdVariable;
@@ -78,7 +73,7 @@ describe('VariableToTreeNodeHandling', () => {
     parent2.insertChild('structureChild', structureChild);
 
     variablesContainer = new gd.VariablesContainer(
-      getGdVariablesContainer().Unknown
+      gd.VariablesContainer.Unknown
     );
     variablesContainer.insert('parent', parent, 0);
     variablesContainer.insert('parent2', parent2, 1);

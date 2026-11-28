@@ -7,14 +7,11 @@ const gd: libGDevelop = global.gd;
 describe('SceneEditor', () => {
   test('cleanNonExistingObjectFolderOrObjectWithContexts', () => {
     const project = gd.ProjectHelper.createNewGDJSProject();
-    const objectsContainerSourceType =
-      gd.ObjectsContainer as typeof gd.ObjectsContainer &
-        typeof gd.ObjectsContainer_SourceType;
     const globalObjectsContainer = new gd.ObjectsContainer(
-      objectsContainerSourceType.Unknown
+      gd.ObjectsContainer.Unknown
     );
     const objectsContainer = new gd.ObjectsContainer(
-      objectsContainerSourceType.Unknown
+      gd.ObjectsContainer.Unknown
     );
 
     const globalRootFolder = globalObjectsContainer.getRootFolder();
@@ -107,14 +104,11 @@ describe('SceneEditor', () => {
 
   test('getObjectFolderOrObjectWithContextFromObjectName finds objects in the right container', () => {
     const project = gd.ProjectHelper.createNewGDJSProject();
-    const objectsContainerSourceType =
-      gd.ObjectsContainer as typeof gd.ObjectsContainer &
-        typeof gd.ObjectsContainer_SourceType;
     const globalObjectsContainer = new gd.ObjectsContainer(
-      objectsContainerSourceType.Unknown
+      gd.ObjectsContainer.Unknown
     );
     const objectsContainer = new gd.ObjectsContainer(
-      objectsContainerSourceType.Unknown
+      gd.ObjectsContainer.Unknown
     );
 
     globalObjectsContainer.insertNewObjectInFolder(
@@ -167,11 +161,8 @@ describe('SceneEditor', () => {
 
   test('cleanNonExistingObjectFolderOrObjectWithContexts keeps a multi-selection spanning several objects and folders intact', () => {
     const project = gd.ProjectHelper.createNewGDJSProject();
-    const objectsContainerSourceType =
-      gd.ObjectsContainer as typeof gd.ObjectsContainer &
-        typeof gd.ObjectsContainer_SourceType;
     const objectsContainer = new gd.ObjectsContainer(
-      objectsContainerSourceType.Unknown
+      gd.ObjectsContainer.Unknown
     );
     const rootFolder = objectsContainer.getRootFolder();
 

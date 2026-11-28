@@ -180,18 +180,16 @@ export const getFunctionTypeAsString = (
   gd: libGDevelop,
   eventsFunction: gdEventsFunction
 ): string => {
-  const eventsFunctionType = gd.EventsFunction as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
   const functionType = eventsFunction.getFunctionType();
-  return functionType === eventsFunctionType.Action
+  return functionType === gd.EventsFunction.Action
     ? 'Action'
-    : functionType === eventsFunctionType.Condition
+    : functionType === gd.EventsFunction.Condition
       ? 'Condition'
-      : functionType === eventsFunctionType.Expression
+      : functionType === gd.EventsFunction.Expression
         ? 'Expression'
-        : functionType === eventsFunctionType.ExpressionAndCondition
+        : functionType === gd.EventsFunction.ExpressionAndCondition
           ? 'ExpressionAndCondition'
-          : functionType === eventsFunctionType.ActionWithOperator
+          : functionType === gd.EventsFunction.ActionWithOperator
             ? 'ActionWithOperator'
             : 'unknown';
 };
@@ -537,11 +535,8 @@ export const makeSimplifiedExtensionsBuilder = (
     const objectGroups = eventsBasedObject.getObjects().getObjectGroups();
     if (objectGroups.count() > 0) {
       // Child objects only see each other: no global objects inside a custom object.
-      const objectsContainerSourceType =
-        gd.ObjectsContainer as typeof gd.ObjectsContainer &
-          typeof gd.ObjectsContainer_SourceType;
       const emptyGlobalObjectsContainer = new gd.ObjectsContainer(
-        objectsContainerSourceType.Unknown
+        gd.ObjectsContainer.Unknown
       );
       const objectsContainersList =
         gd.ObjectsContainersList.makeNewObjectsContainersListForContainers(

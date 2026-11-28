@@ -111,27 +111,27 @@ export default class Rendered3DInstance<
   // eslint-disable-next-line no-unused-vars
   resetInstanceRenderersFor(objectName: string): void {}
 
-  getOriginX(): any {
+  getOriginX(): number {
     return 0;
   }
 
-  getOriginY(): any {
+  getOriginY(): number {
     return 0;
   }
 
-  getOriginZ(): any {
+  getOriginZ(): number {
     return 0;
   }
 
-  getCenterX(): any {
+  getCenterX(): number {
     return this.getWidth() / 2;
   }
 
-  getCenterY(): any {
+  getCenterY(): number {
     return this.getHeight() / 2;
   }
 
-  getCenterZ(): any {
+  getCenterZ(): number {
     return this.getDepth() / 2;
   }
 
@@ -169,21 +169,21 @@ export default class Rendered3DInstance<
   /**
    * Return the width of the instance when the instance doesn't have a custom size.
    */
-  getDefaultWidth(): any {
+  getDefaultWidth(): number {
     return 32;
   }
 
   /**
    * Return the height of the instance when the instance doesn't have a custom size.
    */
-  getDefaultHeight(): any {
+  getDefaultHeight(): number {
     return 32;
   }
 
   /**
    * Return the depth of the instance when the instance doesn't have a custom size.
    */
-  getDefaultDepth(): any {
+  getDefaultDepth(): number {
     return 32;
   }
 

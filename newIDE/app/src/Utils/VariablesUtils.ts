@@ -5,21 +5,16 @@ import { unserializeFromJSObject } from './Serializer';
 
 const gd: libGDevelop = global.gd;
 
-// Resolve `gd.Variable` lazily at call time because `global.gd` is populated asynchronously.
-const getGdVariable = () =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
-
 export const hasChildThatContainsStringInNameOrValue = (
   variable: gdVariable,
   searchText: string
 ): boolean => {
-  const gdVariable = getGdVariable();
   switch (variable.getType()) {
-    case gdVariable.String:
+    case gd.Variable.String:
       return normalizeString(variable.getString()).includes(searchText);
-    case gdVariable.Number:
+    case gd.Variable.Number:
       return variable.getValue().toString().includes(searchText);
-    case gdVariable.Array:
+    case gd.Variable.Array:
       return mapFor(0, variable.getChildrenCount(), (index) => {
         const childVariable = variable.getAtIndex(index);
         return hasChildThatContainsStringInNameOrValue(
@@ -27,7 +22,7 @@ export const hasChildThatContainsStringInNameOrValue = (
           searchText
         );
       }).some(Boolean);
-    case gdVariable.Structure:
+    case gd.Variable.Structure:
       return variable
         .getAllChildrenNames()
         .toJSArray()
@@ -158,7 +153,7 @@ export const hasVariablesContainerSubChildren = (
   }).some(Boolean);
 
 export const isCollectionVariable = (variable: gdVariable): boolean => {
-  const gdVariable = getGdVariable();
+  const gdVariable = gd.Variable;
   const type = variable.getType();
   return type !== gdVariable.MixedTypes && !gdVariable.isPrimitive(type);
 };

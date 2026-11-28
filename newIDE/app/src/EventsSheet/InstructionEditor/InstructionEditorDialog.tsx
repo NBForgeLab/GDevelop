@@ -42,10 +42,6 @@ import { ExtensionStoreContext } from '../../AssetStore/ExtensionStore/Extension
 
 const gd: libGDevelop = global.gd;
 
-const getGdObjectsContainer = () =>
-  gd.ObjectsContainer as unknown as typeof gd.ObjectsContainer &
-    typeof gd.ObjectsContainer_SourceType;
-
 const styles: { fullHeightSelector: React.CSSProperties } = {
   fullHeightSelector: {
     flex: 1,
@@ -219,7 +215,7 @@ const InstructionEditorDialog = ({
         projectScopedContainers.getObjectsContainersList();
       const objectsContainerSourceType =
         objectsContainersList.getObjectsContainerSourceType(object.getName());
-      return objectsContainerSourceType === getGdObjectsContainer().Object;
+      return objectsContainerSourceType === gd.ObjectsContainer.Object;
     },
     [projectScopedContainersAccessor, scope.layout]
   );
@@ -257,7 +253,7 @@ const InstructionEditorDialog = ({
             chosenObject.getName()
           );
 
-        if (objectsContainerSourceType === getGdObjectsContainer().Object) {
+        if (objectsContainerSourceType === gd.ObjectsContainer.Object) {
           // This is a child object in a custom object.
           const wasBehaviorAdded = addBehaviorToObject(
             project,
@@ -275,7 +271,7 @@ const InstructionEditorDialog = ({
             });
           }
         } else if (
-          objectsContainerSourceType === getGdObjectsContainer().Function
+          objectsContainerSourceType === gd.ObjectsContainer.Function
         ) {
           // This is an object coming from the parameter of a function.
           const { eventsFunction, eventsBasedBehavior } = scope;

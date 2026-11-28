@@ -706,7 +706,6 @@ export default class SceneEditor extends React.Component<Props, State> {
           project.getResourcesManager(),
           resourceName
         );
-        // Flow does not know ObjectsUsingResourceCollector inherits from ArbitraryObjectsWorker
         gd.ProjectBrowserHelper.exposeProjectObjects(project, objectsCollector);
         objectsCollector
           .getObjectNames()

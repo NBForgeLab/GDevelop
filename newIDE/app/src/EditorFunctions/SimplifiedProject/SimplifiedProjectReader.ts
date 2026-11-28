@@ -286,8 +286,7 @@ export const parsePath = (path: string): Array<PathStep> => {
   const steps: Array<PathStep> = [];
   let i = 0;
 
-  // `charAt` (and not `path[i]`) so Flow does not keep stale character
-  // refinements across the `i++` mutations.
+  // Use `charAt` (rather than indexing `path[i]`) to keep explicit string bounds across `i++`.
   while (i < path.length) {
     if (path.charAt(i) === '.') {
       i++;

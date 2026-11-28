@@ -9,8 +9,6 @@ import { unserializeFromJSObject } from '../Utils/Serializer';
 
 const gd: libGDevelop = global.gd;
 
-const getGdVariable = () =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
 const asEvent = (event: gdBaseEvent): Event => event as unknown as Event;
 
 describe('add_scene_events', () => {
@@ -901,11 +899,11 @@ describe('add_scene_events', () => {
     expect(result.success).toBe(true);
     expect(scene.getVariables().has('score')).toBe(true);
     expect(scene.getVariables().get('score').getType()).toBe(
-      getGdVariable().Number
+      gd.Variable.Number
     );
     expect(project.getVariables().has('settings')).toBe(true);
     expect(project.getVariables().get('settings').getType()).toBe(
-      getGdVariable().Structure
+      gd.Variable.Structure
     );
     expect(
       scene.getObjects().getObject('Player').getVariables().has('health')

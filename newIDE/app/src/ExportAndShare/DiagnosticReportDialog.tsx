@@ -324,16 +324,13 @@ export default function DiagnosticReportDialog({
       const mismatchedTypeObjects = new Set<string>();
       const missingObjectVariablesByObject = new Map<string, Set<string>>();
       const missingBehaviorsByObjects = new Map<string, Set<string>>();
-      const ProjectDiagnostic =
-        gd.ProjectDiagnostic as typeof gd.ProjectDiagnostic &
-          typeof gd.ProjectDiagnostic_ErrorType;
       mapFor(0, diagnosticReport.count(), (index) => {
         const projectDiagnostic = diagnosticReport.get(index);
 
         const objectName = projectDiagnostic.getObjectName();
         const type = projectDiagnostic.getType();
         switch (type) {
-          case ProjectDiagnostic.UndeclaredVariable:
+          case gd.ProjectDiagnostic.UndeclaredVariable:
             if (objectName.length === 0) {
               missingSceneVariables.add(projectDiagnostic.getActualValue());
             } else {
@@ -345,7 +342,7 @@ export default function DiagnosticReportDialog({
             }
             break;
 
-          case ProjectDiagnostic.MissingBehavior:
+          case gd.ProjectDiagnostic.MissingBehavior:
             const behaviorType = projectDiagnostic.getExpectedValue();
             const isCapability = gd.MetadataProvider.getBehaviorMetadata(
               gd.JsPlatform.get(),
@@ -358,11 +355,11 @@ export default function DiagnosticReportDialog({
             }
             break;
 
-          case ProjectDiagnostic.UnknownObject:
+          case gd.ProjectDiagnostic.UnknownObject:
             unknownObjects.add(projectDiagnostic.getActualValue());
             break;
 
-          case ProjectDiagnostic.MismatchedObjectType:
+          case gd.ProjectDiagnostic.MismatchedObjectType:
             mismatchedTypeObjects.add(objectName);
             break;
 

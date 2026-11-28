@@ -7,13 +7,6 @@ import {
 
 const gd: libGDevelop = global.gd;
 
-// Resolve `gd.Variable` / `gd.VariablesContainer` lazily at call time because `global.gd` is populated asynchronously.
-const getGdVariable = () =>
-  gd.Variable as typeof gd.Variable & typeof gd.Variable_Type;
-const getGdVariablesContainer = () =>
-  gd.VariablesContainer as typeof gd.VariablesContainer &
-    typeof gd.VariablesContainer_SourceType;
-
 const makeStructure = (
   children: {
     [key: string]: string;
@@ -56,7 +49,7 @@ describe('flattenVariablesContainers', () => {
         └── 1 'one'
     */
     variablesContainer = new gd.VariablesContainer(
-      getGdVariablesContainer().Unknown
+      gd.VariablesContainer.Unknown
     );
     const text = new gd.Variable();
     text.setString('Hello');
@@ -109,7 +102,7 @@ describe('flattenVariablesContainers', () => {
     expect(rows[0]).toMatchObject({
       name: 'Text',
       index: 0,
-      type: getGdVariable().String,
+      type: gd.Variable.String,
       isCollection: false,
       isExpanded: false,
       parentVariable: null,
@@ -117,7 +110,7 @@ describe('flattenVariablesContainers', () => {
     expect(rows[1]).toMatchObject({
       name: 'Structure',
       index: 1,
-      type: getGdVariable().Structure,
+      type: gd.Variable.Structure,
       isCollection: true,
       isExpanded: true,
     });
@@ -135,7 +128,7 @@ describe('flattenVariablesContainers', () => {
 
   test('the inherited variables are displayed first, without the ones being overridden', () => {
     const inheritedVariablesContainer = new gd.VariablesContainer(
-      getGdVariablesContainer().Unknown
+      gd.VariablesContainer.Unknown
     );
     const inheritedOnly = new gd.Variable();
     inheritedOnly.setString('inherited');

@@ -776,14 +776,12 @@ export const getLinkedSetterNames = (
   functionsContainer: gdEventsFunctionsContainer,
   getterName: string
 ): Array<string> => {
-  const eventsFunctionType = gd.EventsFunction as typeof gd.EventsFunction &
-    typeof gd.EventsFunction_FunctionType;
   return mapFor(0, functionsContainer.getEventsFunctionsCount(), (index) =>
     functionsContainer.getEventsFunctionAt(index)
   )
     .filter(
       (candidate) =>
-        candidate.getFunctionType() === eventsFunctionType.ActionWithOperator &&
+        candidate.getFunctionType() === gd.EventsFunction.ActionWithOperator &&
         candidate.getGetterName() === getterName
     )
     .map((setter) => setter.getName());
