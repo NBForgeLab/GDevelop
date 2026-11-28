@@ -17,6 +17,7 @@
     "build:raw": "node scripts/build.js --raw",
     "build-with-MinGW": "node scripts/build.js --use-MinGW",
     "clean": "node scripts/clean.js",
+    "check-types": "node ../GDJS/node_modules/typescript/bin/tsc --noEmit --strict --skipLibCheck false --target es2020 --lib es2020,dom --types node --moduleResolution node types.d.ts && node ../GDJS/node_modules/typescript/bin/tsc --noEmit --allowJs --checkJs --strict --skipLibCheck false --target es2022 --module es2022 --moduleResolution node --types node scripts/generate-dts.mjs",
     "lint": "node scripts/lint-with-clang-tidy.js",
     "test": "jest"
   },

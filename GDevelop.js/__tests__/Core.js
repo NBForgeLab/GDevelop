@@ -5,11 +5,7 @@ const {
 } = require('../TestUtils/FakeAbstractFileSystem');
 const extend = require('extend');
 
-const mapFor = /*:: <T> */ (
-  start /*: number */,
-  end /*: number */,
-  func /*: (number) => T */
-) /*: Array<T> */ => {
+const mapFor = (start, end, func) => {
   const result = [];
   for (let i = start; i < end; i++) {
     result.push(func(i));

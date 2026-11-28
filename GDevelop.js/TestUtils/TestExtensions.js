@@ -251,7 +251,7 @@ module.exports = {
       // Create a new gd.BehaviorSharedDataJsImplementation object and implement the methods
       // that are called to get and set the properties of the shared data.
       const dummyBehaviorWithSharedData = new gd.BehaviorJsImplementation();
-      // $FlowExpectedError - ignore Flow warning as we're creating a behavior
+      // Implement BehaviorJsImplementation method expected by tests at runtime.
       dummyBehaviorWithSharedData.updateProperty = function (
         behaviorContent,
         propertyName,

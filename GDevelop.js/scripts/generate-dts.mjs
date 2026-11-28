@@ -73,12 +73,13 @@ const castFunctions = {
   ImageResource: { inputType: 'Resource', returnType: 'ImageResource' },
 };
 
+/** @type {Record<string, string[]>} */
 const extraClassAttributes = {
   ObjectJsImplementation: ['content: Record<string, any>;'],
   VectorString: ['toJSArray(): Array<string>;'],
   Serializer: [
-    'static fromJSObject(object: Object): gdSerializerElement;',
-    'static toJSObject(element: gdSerializerElement): any;',
+    'static fromJSObject(object: unknown): SerializerElement;',
+    'static toJSObject(element: SerializerElement): any;',
   ],
 };
 
@@ -221,14 +222,28 @@ class Parser {
 }
 
 const enums = [];
-for (const [_, enumName, enumCode] of bindingsFile.matchAll(
-  /enum\s+([a-zA-Z_]+)\s+{\r?\n?([^}]*)\r?\n}/gm
+/** @type {Map<string, Array<{ memberName: string, enumName: string }>>} */
+const scopedEnumMembersByClass = new Map();
+for (const [, enumName, enumCode] of bindingsFile.matchAll(
+  /enum\s+([a-zA-Z0-9_]+)\s+\{\r?\n?([^}]*)\r?\n\}/gm
 )) {
   const members = [];
   let i = 0;
-  for (const enumMemberString of enumCode.split('\n')) {
-    const [_, memberName] = enumMemberString.match(/"[a-zA-Z]*::([a-zA-Z]*)"/);
+  for (const enumMemberString of enumCode.split(/\r?\n/)) {
+    const match = enumMemberString
+      .replace(/\/\/.*$/, '')
+      .match(/"(?:([a-zA-Z0-9_]+)::)?([a-zA-Z0-9_]+)"/);
+    if (!match) continue;
+    const [, owningClassName, memberName] = match;
     members.push(`  ${memberName} = ${i++},`);
+    if (owningClassName) {
+      let classMembers = scopedEnumMembersByClass.get(owningClassName);
+      if (!classMembers) {
+        classMembers = [];
+        scopedEnumMembersByClass.set(owningClassName, classMembers);
+      }
+      classMembers.push({ memberName, enumName });
+    }
   }
   enums.push(
     `export enum ${enumName} {
@@ -237,113 +252,150 @@ ${members.join('\n')}
   );
 }
 
-const interfaces = [];
-const freeFunctions = [];
+/** @param {string} type */
+const mapTsType = (type) => PrimitiveTypes.get(type) ?? type;
+
+/**
+ * @typedef {{
+ *   name: string,
+ *   type: string,
+ *   optional: boolean,
+ *   defaultValue: number | typeof none,
+ * }} ParsedParameter
+ *
+ * @typedef {{
+ *   methodName: string,
+ *   isStatic: boolean,
+ *   isFree: boolean,
+ *   isConstructor: boolean,
+ *   returnType: string,
+ *   parameters: ParsedParameter[],
+ *   overrideSignature?: string,
+ * }} ParsedMethod
+ *
+ * @typedef {{
+ *   name: string,
+ *   type: string,
+ *   optional: boolean,
+ * }} ParsedAttribute
+ *
+ * @typedef {{
+ *   interfaceName: string,
+ *   implementationName?: string,
+ *   inheritedClass?: string,
+ *   methods: ParsedMethod[],
+ *   attributes: ParsedAttribute[],
+ * }} ParsedInterface
+ */
+
+/**
+ * @param {ParsedMethod} method
+ * @returns {string}
+ */
+const getNormalizedMethodSignature = (method) => {
+  if (method.overrideSignature) {
+    return method.overrideSignature;
+  }
+  const paramTypes = method.parameters
+    .map(({ type, optional }) => `${optional ? '?' : ''}:${mapTsType(type)}`)
+    .join(',');
+  return `(${paramTypes})=>${mapTsType(method.returnType)}`;
+};
+
+/** @type {ParsedInterface[]} */
+const parsedInterfaces = [];
 for (const [
-  _,
+  ,
   implementationName,
   interfaceName,
   interfaceCode,
 ] of bindingsFile.matchAll(
-  /(?:\[JSImplementation=([a-zA-Z0-9]+)\]\r?\n?)?interface\s+([a-zA-Z0-9]+)\s+{(?:}|(?:\r?\n?([^}]*)\r?\n}))/gm
+  /(?:\[JSImplementation=([a-zA-Z0-9]+)\]\r?\n?)?interface\s+([a-zA-Z0-9]+)\s+\{(?:}|(?:\r?\n?([^}]*)\r?\n\}))/gm
 )) {
-  if (!interfaceCode) {
-    interfaces.push(
-      `export class ${interfaceName} extends EmscriptenObject {}`
-    );
-    continue;
-  }
-
+  /** @type {ParsedMethod[]} */
   const methods = [];
+  /** @type {ParsedAttribute[]} */
   const attributes = [];
 
-  Parser.setSource(interfaceCode);
-  Parser.skipWhitespaces();
-  while (!Parser.isDone) {
-    const {
-      type: returnType,
-      optional: optionalReturn,
-      attribute: isAttribute,
-    } = Parser.readType();
+  if (interfaceCode) {
+    Parser.setSource(interfaceCode);
+    Parser.skipWhitespaces();
+    while (!Parser.isDone) {
+      const {
+        type: returnType,
+        optional: optionalReturn,
+        attribute: isAttribute,
+      } = Parser.readType();
 
-    if (isAttribute) {
-      const attributeName = Parser.readUntil(';');
-      attributes.push(
-        `${attributeName}${optionalReturn ? '?' : ''}: ${returnType};`
-      );
+      if (isAttribute) {
+        const attributeName = Parser.readUntil(';');
+        attributes.push({
+          name: attributeName,
+          type: returnType,
+          optional: optionalReturn,
+        });
+        Parser.skipWhitespaces();
+        continue;
+      }
+
+      let methodName = Parser.readUntil('(');
+      const isStatic = methodName.includes('STATIC_');
+      const isFree = methodName.includes('FREE_');
+      const isConstructor =
+        returnType === 'void' && methodName === interfaceName;
+      // Remove prefixes which are not part of the actual function name
+      methodName = methodName
+        .replace('WRAPPED_', '')
+        .replace('MAP_', '')
+        .replace('FREE_', '')
+        .replace('CLONE_', '')
+        .replace('STATIC_', '');
+      // Convert PascalCase to camelCase
+      methodName = methodName[0].toLowerCase() + methodName.slice(1);
+
+      /** @type {ParsedParameter[]} */
+      const parameters = [];
       Parser.skipWhitespaces();
-      continue;
+      if (Parser.currentCharacter !== ')')
+        do {
+          if (Parser.currentCharacter === ',') Parser.parserPosition++;
+          const { type, optional } = Parser.readType();
+          Parser.skipWhitespaces();
+          const name = Parser.readIdentifier();
+          Parser.skipWhitespaces();
+
+          /** @type {number | typeof none} */
+          let defaultValue = none;
+          if (Parser.currentCharacter === '=') {
+            Parser.parserPosition++;
+            Parser.skipWhitespaces();
+            defaultValue = Parser.readNumber();
+            Parser.skipWhitespaces();
+          }
+
+          parameters.push({ name, type, optional, defaultValue });
+        } while (Parser.currentCharacter === ',');
+
+      // Health checks
+      if (Parser.currentCharacter !== ')')
+        console.warn('Expected closing parenthesis.');
+      Parser.parserPosition++;
+      Parser.skipWhitespaces();
+      if (Parser.currentCharacter !== ';') console.warn('Expected semicolon.');
+      Parser.parserPosition++;
+      Parser.skipWhitespaces();
+
+      methods.push({
+        methodName,
+        isStatic,
+        isFree,
+        isConstructor,
+        returnType,
+        parameters,
+        overrideSignature:
+          methodSignatureOverrides[interfaceName]?.[methodName],
+      });
     }
-
-    let methodName = Parser.readUntil('(');
-    const isStatic = methodName.includes('STATIC_');
-    const isFree = methodName.includes('FREE_');
-    const isConstructor = returnType === 'void' && methodName === interfaceName;
-    // Remove prefixes which are not part of the actual function name
-    methodName = methodName
-      .replace('WRAPPED_', '')
-      .replace('MAP_', '')
-      .replace('FREE_', '')
-      .replace('CLONE_', '')
-      .replace('STATIC_', '');
-    // Convert PascalCase to camelCase
-    methodName = methodName[0].toLowerCase() + methodName.slice(1);
-
-    /** @type {Array<{name:string, type:string, optional:boolean, defaultValue:(number | typeof none)}>} */
-    const parameters = [];
-    Parser.skipWhitespaces();
-    if (Parser.currentCharacter !== ')')
-      do {
-        if (Parser.currentCharacter === ',') Parser.parserPosition++;
-        const { type, optional } = Parser.readType();
-        Parser.skipWhitespaces();
-        const name = Parser.readIdentifier();
-        Parser.skipWhitespaces();
-
-        let defaultValue = none;
-        if (Parser.currentCharacter === '=') {
-          Parser.parserPosition++;
-          Parser.skipWhitespaces();
-          defaultValue = Parser.readNumber();
-          Parser.skipWhitespaces();
-        }
-
-        parameters.push({ name, type, optional, defaultValue });
-      } while (Parser.currentCharacter === ',');
-
-    // Health checks
-    if (Parser.currentCharacter !== ')')
-      console.warn('Expected closing parenthesis.');
-    Parser.parserPosition++;
-    Parser.skipWhitespaces();
-    if (Parser.currentCharacter !== ';') console.warn('Expected semicolon.');
-    Parser.parserPosition++;
-    Parser.skipWhitespaces();
-
-    const method = `${isStatic ? 'static ' : ''}${
-      isConstructor ? `constructor` : methodName
-    }(${parameters
-      .map(
-        ({ name, type, optional, defaultValue }) =>
-          `${name}${optional ? '?' : ''}: ${
-            PrimitiveTypes.has(type) ? PrimitiveTypes.get(type) : type
-          }`
-      )
-      .join(', ')})${
-      isConstructor
-        ? ''
-        : `: ${
-            PrimitiveTypes.has(returnType)
-              ? PrimitiveTypes.get(returnType)
-              : returnType
-          }`
-    };`;
-
-    const finalMethod =
-      methodSignatureOverrides[interfaceName]?.[methodName] ?? method;
-
-    if (isFree) freeFunctions.push(`export function ${finalMethod}`);
-    methods.push(finalMethod);
   }
 
   const explicitlyInheritedClass = bindingsFile.match(
@@ -351,23 +403,206 @@ for (const [
   );
   const inheritedClass =
     implementationName ||
-    (!!explicitlyInheritedClass && explicitlyInheritedClass[1]);
+    (explicitlyInheritedClass ? explicitlyInheritedClass[1] : undefined);
+
+  parsedInterfaces.push({
+    interfaceName,
+    implementationName: implementationName || undefined,
+    inheritedClass,
+    methods,
+    attributes,
+  });
+}
+
+/** @type {Map<string, ParsedInterface>} */
+const interfaceByName = new Map(
+  parsedInterfaces.map((iface) => [iface.interfaceName, iface])
+);
+
+/**
+ * Collect instance member signatures from `baseClassName` and its ancestors so
+ * `[JSImplementation=...]` wrappers with incompatible callback signatures do not
+ * emit invalid TypeScript subclass overrides (TS2416).
+ * @param {string} baseClassName
+ * @returns {Map<string, string>}
+ */
+const collectInheritedMemberSignatures = (baseClassName) => {
+  /** @type {Map<string, string>} */
+  const memberSignatures = new Map([
+    ['ptr', 'attribute::number'],
+    ['delete', 'method:()=>void'],
+  ]);
+  /** @type {Set<string>} */
+  const visited = new Set();
+  /** @type {string | undefined} */
+  let currentName = baseClassName;
+  while (currentName && !visited.has(currentName)) {
+    visited.add(currentName);
+    const current = interfaceByName.get(currentName);
+    if (!current) break;
+    for (const method of current.methods) {
+      if (method.isStatic || method.isConstructor) continue;
+      if (!memberSignatures.has(method.methodName)) {
+        memberSignatures.set(
+          method.methodName,
+          `method:${getNormalizedMethodSignature(method)}`
+        );
+      }
+    }
+    for (const attr of current.attributes) {
+      if (!memberSignatures.has(attr.name)) {
+        memberSignatures.set(
+          attr.name,
+          `attribute:${attr.optional ? '?' : ''}:${mapTsType(attr.type)}`
+        );
+      }
+    }
+    currentName = current.inheritedClass;
+  }
+  return memberSignatures;
+};
+
+/** @type {Map<string, string[]>} */
+const conflictingMembersByInterface = new Map();
+/** @type {Map<string, string[]>} */
+const incompatibleSubclassesByBase = new Map();
+
+for (const iface of parsedInterfaces) {
+  if (!iface.implementationName || !iface.inheritedClass) continue;
+  const inheritedMembers = collectInheritedMemberSignatures(
+    iface.inheritedClass
+  );
+  /** @type {string[]} */
+  const conflictingMembers = [];
+
+  for (const method of iface.methods) {
+    if (method.isStatic || method.isConstructor) continue;
+    const inheritedSignature = inheritedMembers.get(method.methodName);
+    if (!inheritedSignature) continue;
+    const ownSignature = `method:${getNormalizedMethodSignature(method)}`;
+    if (inheritedSignature !== ownSignature) {
+      conflictingMembers.push(method.methodName);
+    }
+  }
+
+  for (const attr of iface.attributes) {
+    const inheritedSignature = inheritedMembers.get(attr.name);
+    if (!inheritedSignature) continue;
+    const ownSignature = `attribute:${attr.optional ? '?' : ''}:${mapTsType(
+      attr.type
+    )}`;
+    if (inheritedSignature !== ownSignature) {
+      conflictingMembers.push(attr.name);
+    }
+  }
+
+  if (conflictingMembers.length > 0) {
+    conflictingMembersByInterface.set(iface.interfaceName, conflictingMembers);
+    let subclasses = incompatibleSubclassesByBase.get(iface.inheritedClass);
+    if (!subclasses) {
+      subclasses = [];
+      incompatibleSubclassesByBase.set(iface.inheritedClass, subclasses);
+    }
+    subclasses.push(iface.interfaceName);
+  }
+}
+
+/** @param {string} type */
+const mapParameterTsType = (type) => {
+  const tsType = mapTsType(type);
+  const incompatibleSubclasses = incompatibleSubclassesByBase.get(tsType);
+  if (!incompatibleSubclasses || incompatibleSubclasses.length === 0) {
+    return tsType;
+  }
+  return [tsType, ...incompatibleSubclasses].join(' | ');
+};
+
+/** @type {string[]} */
+const interfaces = [];
+/** @type {string[]} */
+const freeFunctions = [];
+for (const {
+  interfaceName,
+  inheritedClass,
+  methods: parsedMethods,
+  attributes: parsedAttributes,
+} of parsedInterfaces) {
+  /** @type {Set<string>} */
+  const existingStaticMembers = new Set();
+
+  const methods = parsedMethods.map((method) => {
+    if (method.isStatic) {
+      existingStaticMembers.add(method.methodName);
+    }
+    const formattedMethod = `${method.isStatic ? 'static ' : ''}${
+      method.isConstructor ? 'constructor' : method.methodName
+    }(${method.parameters
+      .map(
+        ({ name, type, optional }) =>
+          `${name}${optional ? '?' : ''}: ${mapParameterTsType(type)}`
+      )
+      .join(', ')})${
+      method.isConstructor ? '' : `: ${mapTsType(method.returnType)}`
+    };`;
+
+    const finalMethod = method.overrideSignature ?? formattedMethod;
+    if (method.isFree) freeFunctions.push(`export function ${finalMethod}`);
+    return finalMethod;
+  });
+
+  const attributes = parsedAttributes.map(
+    ({ name, type, optional }) =>
+      `${name}${optional ? '?' : ''}: ${mapTsType(type)};`
+  );
+
+  const extraAttributes = extraClassAttributes[interfaceName] ?? [];
+  for (const attr of extraAttributes) {
+    const staticMatch = attr.match(/^static\s+(?:readonly\s+)?([a-zA-Z0-9_]+)/);
+    if (staticMatch) {
+      existingStaticMembers.add(staticMatch[1]);
+    }
+  }
+
+  const scopedEnumAttributes = (
+    scopedEnumMembersByClass.get(interfaceName) ?? []
+  )
+    .filter(({ memberName }) => {
+      if (existingStaticMembers.has(memberName)) return false;
+      existingStaticMembers.add(memberName);
+      return true;
+    })
+    .map(
+      ({ memberName, enumName }) =>
+        `static readonly ${memberName}: ${enumName};`
+    );
+
+  const classBodyLines = [
+    ...methods,
+    ...attributes,
+    ...extraAttributes,
+    ...scopedEnumAttributes,
+  ];
+
+  const conflictingMembers = conflictingMembersByInterface.get(interfaceName);
+  let baseDeclaration = '';
+  let extendsClause = inheritedClass || 'EmscriptenObject';
+  if (conflictingMembers && conflictingMembers.length > 0 && inheritedClass) {
+    const baseAliasName = `${interfaceName}Base`;
+    const omittedUnion = conflictingMembers
+      .map((memberName) => `'${memberName}'`)
+      .join(' | ');
+    baseDeclaration = `declare const ${baseAliasName}: {\n  new (): Omit<${inheritedClass}, ${omittedUnion}>;\n};\n\n`;
+    extendsClause = baseAliasName;
+  }
 
   interfaces.push(
-    `export class ${interfaceName} extends ${
-      inheritedClass ? inheritedClass : 'EmscriptenObject'
-    } {${methods.length ? '\n  ' + methods.join('\n  ') : ''}${
-      attributes.length ? '\n  ' + attributes.join('\n  ') : ''
-    }${
-      extraClassAttributes[interfaceName]
-        ? '\n  ' + extraClassAttributes[interfaceName].join('\n  ')
-        : ''
-    }
-}`
+    `${baseDeclaration}export class ${interfaceName} extends ${extendsClause} {${
+      classBodyLines.length ? '\n  ' + classBodyLines.join('\n  ') + '\n' : ''
+    }}`
   );
 }
 
-const dts = `// Automatically generated by GDevelop.js/scripts/generate-dts.js
+const dts = `// Automatically generated by GDevelop.js/scripts/generate-dts.mjs
 type float = number;
 
 declare class EmscriptenObject {
@@ -497,7 +732,7 @@ export const HEAPU8: Uint8Array;
 const exportedTypeNames = Array.from(
   new Set(
     Array.from(dts.matchAll(/^export (?:class|enum|type) (\w+)/gm)).map(
-      m => m[1]
+      (m) => m[1]
     )
   )
 );
@@ -514,7 +749,7 @@ declare global {
 
   // Companion type namespace so type positions like \`gd.Project\` keep resolving globally.
   namespace gd {
-${exportedTypeNames.map(name => `    export type ${name} = _GdModule.${name};`).join('\n')}
+${exportedTypeNames.map((name) => `    export type ${name} = _GdModule.${name};`).join('\n')}
   }
 }
 `;
