@@ -10,6 +10,7 @@
     "@babel/preset-env": "^7.22.14",
     "@babel/preset-react": "^7.22.5",
     "@babel/preset-typescript": "^7.29.7",
+    "@eslint/js": "^9.39.5",
     "@lingui/cli": "^2.7.3",
     "@lingui/macro": "^2.7.3",
     "@storybook/addon-essentials": "7.4.6",
@@ -56,11 +57,16 @@
     "chokidar": "4.0.3",
     "cjs-module-lexer": "^1.4.3",
     "concurrently": "9.2.1",
+    "confusing-browser-globals": "^1.0.11",
     "css-loader": "^6.8.1",
-    "eslint": "^8.57.1",
-    "eslint-config-react-app": "^7.0.1",
+    "eslint": "^9.39.5",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "file-loader": "^6.2.0",
     "folder-hash": "^3.0.0",
+    "globals": "^17.14.0",
     "husky": "^9.1.7",
     "identity-obj-proxy": "^3.0.0",
     "iso-639-1": "^3.1.2",
@@ -80,6 +86,7 @@
     "style-loader": "^3.3.3",
     "sucrase": "^3.35.1",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.74.0",
     "vite": "^7.3.8",
     "vite-plugin-commonjs": "^0.10.4",
     "webpack": "5.88.2",
@@ -189,74 +196,6 @@
     "create-new-theme": "node scripts/create-new-theme.js",
     "import-zipped-external-editors": "cd scripts && node import-zipped-editor.js piskel 5.5.228 b161dc74582e428a6d210cd1b74f052ca4aab301d0d522e0be87bdb4962d0fb7 && node import-zipped-editor.js jfxr 5.0.0-beta55 8ac12b557c2ddba958c6f0d3e0c5df8cf3369a65262dcb90cf5c8a7a7d20bdf6 && node import-zipped-editor.js yarn 5.0.134 ba8558cad00ec9b18cf3c6fd8647f8c1478ca67c894bca94a152a3740af209cc",
     "prepare": "cd ../.. && node newIDE/app/node_modules/husky/bin.js"
-  },
-  "eslintConfig": {
-    "extends": "react-app",
-    "rules": {
-      "no-restricted-imports": [
-        "error",
-        {
-          "paths": [
-            {
-              "name": "@lingui/react",
-              "importNames": [
-                "Trans"
-              ],
-              "message": "Please import Trans from @lingui/macro"
-            },
-            {
-              "name": "prop-types",
-              "message": "Don't import anything from prop-types - use TypeScript types instead."
-            }
-          ]
-        }
-      ],
-      "no-restricted-syntax": [
-        "error",
-        {
-          "selector": "MemberExpression[object.property.name='constructor'][property.name='name']",
-          "message": "'constructor.name' is not reliable (can become 'E', 'P' and etc.) in production build."
-        }
-      ]
-    },
-    "overrides": [
-      {
-        "files": [
-          "src/stories/componentStories/**/*.stories.{js,jsx,ts,tsx}",
-          "src/stories/*.stories.{js,jsx,ts,tsx}"
-        ],
-        "rules": {
-          "import/no-anonymous-default-export": "off"
-        }
-      },
-      {
-        "files": [
-          "src/**/*.{ts,tsx}"
-        ],
-        "excludedFiles": [
-          "src/**/*.spec.{ts,tsx}",
-          "src/**/*.stories.{ts,tsx}",
-          "src/fixtures/**"
-        ],
-        "rules": {
-          "no-restricted-syntax": [
-            "error",
-            {
-              "selector": "MemberExpression[object.property.name='constructor'][property.name='name']",
-              "message": "'constructor.name' is not reliable (can become 'E', 'P' and etc.) in production build."
-            },
-            {
-              "selector": "TSAsExpression > TSAnyKeyword",
-              "message": "Avoid 'as any' in production code — use proper types, narrowing guards, or explicit boundaries."
-            },
-            {
-              "selector": "TSTypeAssertion > TSAnyKeyword",
-              "message": "Avoid '<any>' type assertions in production code — use proper types, narrowing guards, or explicit boundaries."
-            }
-          ]
-        }
-      }
-    ]
   },
   "lint-staged": {
     "src/!(locales)/**/*.{js,jsx,ts,tsx}": [
