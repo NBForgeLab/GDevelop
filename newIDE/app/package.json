@@ -179,7 +179,7 @@
     "preview": "vite preview --port 3000",
     "format": "prettier --cache --config .prettierrc --ignore-path .prettierignore --write \"src/!(locales)/**/*.{js,jsx,ts,tsx}\" \"src/*.{js,jsx,ts,tsx}\"",
     "check-format": "prettier --cache --config .prettierrc --ignore-path .prettierignore --list-different \"src/!(locales)/**/*.{js,jsx,ts,tsx}\" \"src/*.{js,jsx,ts,tsx}\"",
-    "lint": "eslint src/ --max-warnings=0 --cache --cache-location node_modules/.cache/eslint/.eslintcache",
+    "lint": "eslint src/ --max-warnings=0 --concurrency auto --cache --cache-location node_modules/.cache/eslint/.eslintcache",
     "test": "jest --env=node",
     "test:watch": "jest --env=node --watch",
     "check-types": "tsc --noEmit --project tsconfig.json",
