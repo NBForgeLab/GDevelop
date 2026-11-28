@@ -357,54 +357,54 @@ describe('applyEventsChanges', () => {
     expect(result.applied).toBe(2);
     expect(result.errors).toEqual([]);
     expect(serializeToJSObject(sceneEventsList)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "actions": Array [
-            Object {
-              "parameters": Array [
-                "Box_Collider1",
-              ],
-              "type": Object {
-                "value": "Hide",
-              },
-            },
-          ],
-          "conditions": Array [],
-          "type": "BuiltinCommonInstructions::Standard",
+[
+  {
+    "actions": [
+      {
+        "parameters": [
+          "Box_Collider1",
+        ],
+        "type": {
+          "value": "Hide",
         },
-        Object {
-          "actions": Array [
-            Object {
-              "parameters": Array [
-                "Box_Collider3",
-              ],
-              "type": Object {
-                "value": "Hide",
-              },
-            },
-          ],
-          "conditions": Array [],
-          "events": Array [
-            Object {
-              "actions": Array [
-                Object {
-                  "parameters": Array [
-                    "Box_Collider4",
-                  ],
-                  "type": Object {
-                    "value": "Hide",
-                  },
-                },
-              ],
-              "aiGeneratedEventId": "01KG391494T5Y99ZN04G8MNAB3",
-              "conditions": Array [],
-              "type": "BuiltinCommonInstructions::Standard",
-            },
-          ],
-          "type": "BuiltinCommonInstructions::Standard",
+      },
+    ],
+    "conditions": [],
+    "type": "BuiltinCommonInstructions::Standard",
+  },
+  {
+    "actions": [
+      {
+        "parameters": [
+          "Box_Collider3",
+        ],
+        "type": {
+          "value": "Hide",
         },
-      ]
-    `);
+      },
+    ],
+    "conditions": [],
+    "events": [
+      {
+        "actions": [
+          {
+            "parameters": [
+              "Box_Collider4",
+            ],
+            "type": {
+              "value": "Hide",
+            },
+          },
+        ],
+        "aiGeneratedEventId": "01KG391494T5Y99ZN04G8MNAB3",
+        "conditions": [],
+        "type": "BuiltinCommonInstructions::Standard",
+      },
+    ],
+    "type": "BuiltinCommonInstructions::Standard",
+  },
+]
+`);
   });
 
   it('should delete multiple events via comma-separated paths', () => {
@@ -540,38 +540,38 @@ describe('applyEventsChanges', () => {
     );
     expect(sceneEventsList.getEventsCount()).toBe(2);
     expect(serializeToJSObject(sceneEventsList)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "actions": Array [
-            Object {
-              "parameters": Array [
-                "Obj1",
-              ],
-              "type": Object {
-                "value": "Hide",
-              },
-            },
-          ],
-          "conditions": Array [],
-          "type": "BuiltinCommonInstructions::Standard",
+[
+  {
+    "actions": [
+      {
+        "parameters": [
+          "Obj1",
+        ],
+        "type": {
+          "value": "Hide",
         },
-        Object {
-          "actions": Array [
-            Object {
-              "parameters": Array [
-                "Obj2",
-              ],
-              "type": Object {
-                "value": "Hide",
-              },
-            },
-          ],
-          "conditions": Array [],
-          "repeatExpression": "",
-          "type": "BuiltinCommonInstructions::Repeat",
+      },
+    ],
+    "conditions": [],
+    "type": "BuiltinCommonInstructions::Standard",
+  },
+  {
+    "actions": [
+      {
+        "parameters": [
+          "Obj2",
+        ],
+        "type": {
+          "value": "Hide",
         },
-      ]
-    `);
+      },
+    ],
+    "conditions": [],
+    "repeatExpression": "",
+    "type": "BuiltinCommonInstructions::Repeat",
+  },
+]
+`);
     expect(result.applied).toBe(2);
     expect(result.errors).toEqual([]);
   });

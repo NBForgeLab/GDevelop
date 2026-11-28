@@ -79,7 +79,7 @@ describe('editorFunctions', () => {
         });
 
       expect(result.message).toMatchInlineSnapshot(
-        `"Created object \\"MyNewTextObject\\" (type \\"TextObject::Text\\", scene \\"TestScene\\") from scratch. Properties: bold: false, characterSize: 20 (px), color: 0;0;0 (color), isOutlineEnabled: false, isShadowEnabled: false, italic: false, lineHeight: 0 (px), outlineColor: 255;255;255 (color), outlineThickness: 2 (px), shadowAngle: 90 (deg), shadowBlurRadius: 2 (px), shadowColor: 0;0;0 (color), shadowDistance: 4 (px), shadowOpacity: 127 (px), text: Text (multilinestring), textAlignment: left (choice, one of: [\\"left\\", \\"center\\", \\"right\\"]), verticalTextAlignment: top (choice, one of: [\\"top\\", \\"center\\", \\"bottom\\"]). Empty: font (resource — the default font is used)."`
+        `"Created object "MyNewTextObject" (type "TextObject::Text", scene "TestScene") from scratch. Properties: bold: false, characterSize: 20 (px), color: 0;0;0 (color), isOutlineEnabled: false, isShadowEnabled: false, italic: false, lineHeight: 0 (px), outlineColor: 255;255;255 (color), outlineThickness: 2 (px), shadowAngle: 90 (deg), shadowBlurRadius: 2 (px), shadowColor: 0;0;0 (color), shadowDistance: 4 (px), shadowOpacity: 127 (px), text: Text (multilinestring), textAlignment: left (choice, one of: ["left", "center", "right"]), verticalTextAlignment: top (choice, one of: ["top", "center", "bottom"]). Empty: font (resource — the default font is used)."`
       );
       expect(result.success).toBe(true);
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
@@ -104,7 +104,7 @@ describe('editorFunctions', () => {
         });
 
       expect(result.message).toMatchInlineSnapshot(
-        `"Created object \\"MyNewTextObject\\" (type \\"TextObject::Text\\", scene \\"TestScene\\") from asset store. Used asset \\"Dino Doux\\" (6 animation(s)). Properties: bold: false, characterSize: 20 (px), color: 0;0;0 (color), isOutlineEnabled: false, isShadowEnabled: false, italic: false, lineHeight: 0 (px), outlineColor: 255;255;255 (color), outlineThickness: 2 (px), shadowAngle: 90 (deg), shadowBlurRadius: 2 (px), shadowColor: 0;0;0 (color), shadowDistance: 4 (px), shadowOpacity: 127 (px), text: Text (multilinestring), textAlignment: left (choice, one of: [\\"left\\", \\"center\\", \\"right\\"]), verticalTextAlignment: top (choice, one of: [\\"top\\", \\"center\\", \\"bottom\\"]). Empty: font (resource — the default font is used)."`
+        `"Created object "MyNewTextObject" (type "TextObject::Text", scene "TestScene") from asset store. Used asset "Dino Doux" (6 animation(s)). Properties: bold: false, characterSize: 20 (px), color: 0;0;0 (color), isOutlineEnabled: false, isShadowEnabled: false, italic: false, lineHeight: 0 (px), outlineColor: 255;255;255 (color), outlineThickness: 2 (px), shadowAngle: 90 (deg), shadowBlurRadius: 2 (px), shadowColor: 0;0;0 (color), shadowDistance: 4 (px), shadowOpacity: 127 (px), text: Text (multilinestring), textAlignment: left (choice, one of: ["left", "center", "right"]), verticalTextAlignment: top (choice, one of: ["top", "center", "bottom"]). Empty: font (resource — the default font is used)."`
       );
       expect(result.success).toBe(true);
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
@@ -128,7 +128,7 @@ describe('editorFunctions', () => {
         });
 
       expect(result.message).toMatchInlineSnapshot(
-        `"Created object \\"SomeNewObject\\" (type \\"Sprite\\", scene \\"TestScene\\") from asset store. Used asset \\"Dino Doux\\" (6 animation(s)). This object type has no editable object properties: its animations and their images are in its raw JSON (\`inspect_object_properties_effects\` with \`include_raw_json\`, then \`raw_json\` of \`change_object_properties_effects\`)."`
+        `"Created object "SomeNewObject" (type "Sprite", scene "TestScene") from asset store. Used asset "Dino Doux" (6 animation(s)). This object type has no editable object properties: its animations and their images are in its raw JSON (\`inspect_object_properties_effects\` with \`include_raw_json\`, then \`raw_json\` of \`change_object_properties_effects\`)."`
       );
       expect(result.success).toBe(true);
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
@@ -247,7 +247,7 @@ describe('editorFunctions', () => {
         });
 
       expect(result.message).toMatchInlineSnapshot(
-        `"Created object \\"MyNewTextObject\\" (type \\"TextObject::Text\\", scene \\"TestScene\\") from scratch. Properties: bold: false, characterSize: 20 (px), color: 0;0;0 (color), isOutlineEnabled: false, isShadowEnabled: false, italic: false, lineHeight: 0 (px), outlineColor: 255;255;255 (color), outlineThickness: 2 (px), shadowAngle: 90 (deg), shadowBlurRadius: 2 (px), shadowColor: 0;0;0 (color), shadowDistance: 4 (px), shadowOpacity: 127 (px), text: Text (multilinestring), textAlignment: left (choice, one of: [\\"left\\", \\"center\\", \\"right\\"]), verticalTextAlignment: top (choice, one of: [\\"top\\", \\"center\\", \\"bottom\\"]). Empty: font (resource — the default font is used)."`
+        `"Created object "MyNewTextObject" (type "TextObject::Text", scene "TestScene") from scratch. Properties: bold: false, characterSize: 20 (px), color: 0;0;0 (color), isOutlineEnabled: false, isShadowEnabled: false, italic: false, lineHeight: 0 (px), outlineColor: 255;255;255 (color), outlineThickness: 2 (px), shadowAngle: 90 (deg), shadowBlurRadius: 2 (px), shadowColor: 0;0;0 (color), shadowDistance: 4 (px), shadowOpacity: 127 (px), text: Text (multilinestring), textAlignment: left (choice, one of: ["left", "center", "right"]), verticalTextAlignment: top (choice, one of: ["top", "center", "bottom"]). Empty: font (resource — the default font is used)."`
       );
       expect(result.success).toBe(true);
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
@@ -272,7 +272,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Object \\"Player\\" already exists - nothing was changed. Set replace_existing_object to true to replace its assets from the asset store."`
+        `"Object "Player" already exists - nothing was changed. Set replace_existing_object to true to replace its assets from the asset store."`
       );
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
         scene: testScene,
@@ -299,7 +299,7 @@ describe('editorFunctions', () => {
       expect(testScene.getObjects().hasObjectNamed('TheNewPlayer')).toBe(true);
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Duplicated \\"Player\\" (scene \\"TestScene\\") as \\"TheNewPlayer\\" (scene \\"TestScene\\"); same type/behaviors/properties/effects."`
+        `"Duplicated "Player" (scene "TestScene") as "TheNewPlayer" (scene "TestScene"); same type/behaviors/properties/effects."`
       );
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
         scene: testScene,
@@ -327,7 +327,7 @@ describe('editorFunctions', () => {
       expect(testScene.getObjects().hasObjectNamed('TheNewPlayer')).toBe(false);
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Duplicated \\"Player\\" (scene \\"TestScene\\") as \\"TheNewPlayer\\" (global objects); same type/behaviors/properties/effects."`
+        `"Duplicated "Player" (scene "TestScene") as "TheNewPlayer" (global objects); same type/behaviors/properties/effects."`
       );
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
         scene: testScene,
@@ -376,7 +376,7 @@ describe('editorFunctions', () => {
       );
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Duplicated \\"OtherScenePlayer\\" (scene \\"OtherScene\\") as \\"TheNewPlayer\\" (scene \\"TestScene\\"); same type/behaviors/properties/effects."`
+        `"Duplicated "OtherScenePlayer" (scene "OtherScene") as "TheNewPlayer" (scene "TestScene"); same type/behaviors/properties/effects."`
       );
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
         scene: testScene,
@@ -402,7 +402,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(false);
       expect(result.message).toMatchInlineSnapshot(
-        `"Object \\"DoesNotExist\\" not found in scene \\"OtherScene\\" nor globally. Not duplicated."`
+        `"Object "DoesNotExist" not found in scene "OtherScene" nor globally. Not duplicated."`
       );
     });
 
@@ -422,7 +422,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(false);
       expect(result.message).toMatchInlineSnapshot(
-        `"Object \\"DoesNotExist\\" not found in scene \\"TestScene\\" nor globally. Not duplicated."`
+        `"Object "DoesNotExist" not found in scene "TestScene" nor globally. Not duplicated."`
       );
     });
 
@@ -451,7 +451,7 @@ describe('editorFunctions', () => {
       );
       expect(testScene.getObjects().hasObjectNamed('Player')).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Replaced scene \\"TestScene\\" object \\"Player\\" with asset store object (same type \\"Sprite\\"). Used asset \\"Dino Doux\\" (6 animation(s))."`
+        `"Replaced scene "TestScene" object "Player" with asset store object (same type "Sprite"). Used asset "Dino Doux" (6 animation(s))."`
       );
       expect(result.success).toBe(true);
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
@@ -486,7 +486,7 @@ describe('editorFunctions', () => {
       );
       expect(testScene.getObjects().hasObjectNamed('Player')).toBe(false);
       expect(result.message).toMatchInlineSnapshot(
-        `"Moved \\"Player\\" to global objects; type/behaviors/properties/effects unchanged."`
+        `"Moved "Player" to global objects; type/behaviors/properties/effects unchanged."`
       );
       expect(result.success).toBe(true);
       expect(onObjectsModifiedOutsideEditor).toHaveBeenCalledWith({
@@ -520,7 +520,7 @@ describe('editorFunctions', () => {
         });
 
       expect(result.message).toMatchInlineSnapshot(
-        `"Object \\"GlobalObjectPlayer\\" already exists globally. No change."`
+        `"Object "GlobalObjectPlayer" already exists globally. No change."`
       );
       expect(project.getObjects().hasObjectNamed('GlobalObjectPlayer')).toBe(
         true
@@ -548,7 +548,7 @@ describe('editorFunctions', () => {
         });
 
       expect(result.message).toMatchInlineSnapshot(
-        `"\\"GlobalObjectPlayer\\" is global; global objects cannot be moved to scene \\"TestScene\\"."`
+        `""GlobalObjectPlayer" is global; global objects cannot be moved to scene "TestScene"."`
       );
       expect(project.getObjects().hasObjectNamed('GlobalObjectPlayer')).toBe(
         true
@@ -572,7 +572,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(false);
       expect(result.message).toMatchInlineSnapshot(
-        `"Scene not found: \\"NonExistentScene\\". Scenes in this project: \\"TestScene\\"."`
+        `"Scene not found: "NonExistentScene". Scenes in this project: "TestScene"."`
       );
     });
 
@@ -626,7 +626,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(false);
       expect(result.message).toMatchInlineSnapshot(
-        `"No search_terms or asset_id provided for \\"MyAssetObject\\". Not created."`
+        `"No search_terms or asset_id provided for "MyAssetObject". Not created."`
       );
     });
 
@@ -647,7 +647,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Replaced scene \\"TestScene\\" object \\"Player\\" with asset store object (same type \\"Sprite\\"). Used asset \\"Dino Doux\\" (6 animation(s))."`
+        `"Replaced scene "TestScene" object "Player" with asset store object (same type "Sprite"). Used asset "Dino Doux" (6 animation(s))."`
       );
     });
 
@@ -707,7 +707,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(false);
       expect(result.message).toMatchInlineSnapshot(
-        `"Object \\"Player\\" already exists in scene \\"TestScene\\" with type \\"Sprite\\". Cannot (re)create as type \\"TextObject::Text\\"."`
+        `"Object "Player" already exists in scene "TestScene" with type "Sprite". Cannot (re)create as type "TextObject::Text"."`
       );
     });
 
@@ -820,9 +820,9 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Set \\"font\\" on \\"MyTextObject\\" = \\"font2.ttf\\"."
-      `);
+"Done.
+Set "font" on "MyTextObject" = "font2.ttf"."
+`);
 
       // Verify the property was actually changed
       const textObject = testScene.getObjects().getObject('MyTextObject');
@@ -872,10 +872,10 @@ describe('editorFunctions', () => {
       });
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Installed font resource \\"non-existing-font.ttf\\" from the free library.
-        Set \\"font\\" on \\"MyTextObject\\" = \\"non-existing-font.ttf\\"."
-      `);
+"Done.
+Installed font resource "non-existing-font.ttf" from the free library.
+Set "font" on "MyTextObject" = "non-existing-font.ttf"."
+`);
       expect(result.newlyAddedResources).toEqual([
         {
           resourceName: 'non-existing-font.ttf',
@@ -923,9 +923,9 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(false);
       expect(result.message).toMatchInlineSnapshot(`
-        "Nothing changed. Issues:
-        No font matching \\"non-existing-font.ttf\\" found in the free library — the property was NOT changed. An empty \\"font\\" value is valid (the default font is used). Retry with a more descriptive name if needed."
-      `);
+"Nothing changed. Issues:
+No font matching "non-existing-font.ttf" found in the free library — the property was NOT changed. An empty "font" value is valid (the default font is used). Retry with a more descriptive name if needed."
+`);
 
       // Verify the property was NOT changed (still the original value)
       const textObject = testScene.getObjects().getObject('MyTextObject');
@@ -958,9 +958,9 @@ describe('editorFunctions', () => {
       expect(searchAndInstallResources).not.toHaveBeenCalled();
       expect(result.success).toBe(false);
       expect(result.message).toMatchInlineSnapshot(`
-        "Nothing changed. Issues:
-        \\"font\\" on \\"MyTextObject\\" -> \\"assets/font2.ttf\\": resource \\"assets/font2.ttf\\" does not exist. Did you mean: \\"font2.ttf\\"? To install a new font from the free library instead, retry with a more specific name."
-      `);
+"Nothing changed. Issues:
+"font" on "MyTextObject" -> "assets/font2.ttf": resource "assets/font2.ttf" does not exist. Did you mean: "font2.ttf"? To install a new font from the free library instead, retry with a more specific name."
+`);
     });
 
     it('fails when changing a resource property to one with a different type', async () => {
@@ -981,9 +981,9 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(false);
       expect(result.message).toMatchInlineSnapshot(`
-        "Nothing changed. Issues:
-        \\"font\\" on \\"MyTextObject\\" -> \\"audio1.aac\\": resource \\"audio1.aac\\" has kind \\"audio\\" but expected \\"font\\"."
-      `);
+"Nothing changed. Issues:
+"font" on "MyTextObject" -> "audio1.aac": resource "audio1.aac" has kind "audio" but expected "font"."
+`);
 
       // Verify the property was NOT changed (still the original value)
       const textObject = testScene.getObjects().getObject('MyTextObject');
@@ -1086,22 +1086,22 @@ describe('editorFunctions', () => {
       // The operation should succeed overall (some changes were made)
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(`
-        "Done with warnings.
-        Set \\"characterSize\\" on \\"MyTextObject\\" = \\"56\\".
-        Set \\"verticalTextAlignment\\" on \\"MyTextObject\\" = \\"bottom\\".
-        Set \\"bold\\" on \\"MyTextObject\\" = \\"true\\".
-        Set \\"isShadowEnabled\\" on \\"MyTextObject\\" = \\"true\\".
-        Set \\"italic\\" on \\"MyTextObject\\" = \\"false\\".
-        Set \\"shadowAngle\\" on \\"MyTextObject\\" = \\"20\\".
-        Set \\"shadowDistance\\" on \\"MyTextObject\\" = \\"0\\".
-        Set \\"shadowBlurRadius\\" on \\"MyTextObject\\" = \\"20.41\\".
-        Warnings:
-        Could not set \\"textAlignment\\" on \\"MyTextObject\\": invalid value or type.
-        Property \\"nonExistingProperty\\" not found on object \\"MyTextObject\\". Available properties: bold, characterSize, color, font, isOutlineEnabled, isShadowEnabled, italic, lineHeight, outlineColor, outlineThickness, shadowAngle, shadowBlurRadius, shadowColor, shadowDistance, shadowOpacity, text, textAlignment, verticalTextAlignment.
-        \\"shadowAngle\\" on \\"MyTextObject\\" = \\"20\\", but requested \\"20,40 , 50\\" looks multi-dimensional; only a single number is allowed.
-        \\"shadowDistance\\" on \\"MyTextObject\\" = \\"0\\", but requested \\"20X   40 X 50\\" looks multi-dimensional; only a single number is allowed.
-        \\"shadowBlurRadius\\" on \\"MyTextObject\\" = \\"20.41\\", but requested \\"20.41 × 50\\" looks multi-dimensional; only a single number is allowed."
-      `);
+"Done with warnings.
+Set "characterSize" on "MyTextObject" = "56".
+Set "verticalTextAlignment" on "MyTextObject" = "bottom".
+Set "bold" on "MyTextObject" = "true".
+Set "isShadowEnabled" on "MyTextObject" = "true".
+Set "italic" on "MyTextObject" = "false".
+Set "shadowAngle" on "MyTextObject" = "20".
+Set "shadowDistance" on "MyTextObject" = "0".
+Set "shadowBlurRadius" on "MyTextObject" = "20.41".
+Warnings:
+Could not set "textAlignment" on "MyTextObject": invalid value or type.
+Property "nonExistingProperty" not found on object "MyTextObject". Available properties: bold, characterSize, color, font, isOutlineEnabled, isShadowEnabled, italic, lineHeight, outlineColor, outlineThickness, shadowAngle, shadowBlurRadius, shadowColor, shadowDistance, shadowOpacity, text, textAlignment, verticalTextAlignment.
+"shadowAngle" on "MyTextObject" = "20", but requested "20,40 , 50" looks multi-dimensional; only a single number is allowed.
+"shadowDistance" on "MyTextObject" = "0", but requested "20X   40 X 50" looks multi-dimensional; only a single number is allowed.
+"shadowBlurRadius" on "MyTextObject" = "20.41", but requested "20.41 × 50" looks multi-dimensional; only a single number is allowed."
+`);
 
       // Verify the properties were actually changed
       const textObject = testScene.getObjects().getObject('MyTextObject');
@@ -1164,9 +1164,9 @@ describe('editorFunctions', () => {
       expect(result.success).toBe(true);
       // Final name reported is "Foo2", not the requested "Foo".
       expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Renamed object \\"MyTextObject\\" to \\"Foo2\\" (events and references updated)."
-      `);
+"Done.
+Renamed object "MyTextObject" to "Foo2" (events and references updated)."
+`);
       // Original "Foo" still exists; the renamed one is "Foo2".
       expect(testScene.getObjects().hasObjectNamed('Foo')).toBe(true);
       expect(testScene.getObjects().hasObjectNamed('Foo2')).toBe(true);
@@ -1594,16 +1594,16 @@ describe('editorFunctions', () => {
       // The operation should succeed overall (some changes were made)
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(`
-        "Done with warnings.
-        Set \\"Gravity\\" on behavior \\"PlatformerObject\\" = \\"1500\\".
-        Set \\"JumpSpeed\\" on behavior \\"PlatformerObject\\" = \\"800\\".
-        Set \\"MaxSpeed\\" on behavior \\"PlatformerObject\\" = \\"300\\".
-        Set \\"CanGrabPlatforms\\" on behavior \\"PlatformerObject\\" = \\"true\\".
-        Set \\"IgnoreDefaultControls\\" on behavior \\"PlatformerObject\\" = \\"false\\".
-        Warnings:
-        \\"MaxSpeed\\" on behavior \\"PlatformerObject\\" = \\"300\\", but requested \\"300 x 20\\" looks multi-dimensional; only a single number is allowed.
-        Property \\"nonExistingProperty\\" not on behavior \\"PlatformerObject\\" of \\"MySprite\\". Available properties: Acceleration, CanGoDownFromJumpthru, CanGrabPlatforms, CanGrabWithoutMoving, Deceleration, Gravity, IgnoreDefaultControls, JumpSpeed, JumpSustainTime, LadderClimbingSpeed, MaxFallingSpeed, MaxSpeed, SlopeMaxAngle, XGrabTolerance, YGrabOffset."
-      `);
+"Done with warnings.
+Set "Gravity" on behavior "PlatformerObject" = "1500".
+Set "JumpSpeed" on behavior "PlatformerObject" = "800".
+Set "MaxSpeed" on behavior "PlatformerObject" = "300".
+Set "CanGrabPlatforms" on behavior "PlatformerObject" = "true".
+Set "IgnoreDefaultControls" on behavior "PlatformerObject" = "false".
+Warnings:
+"MaxSpeed" on behavior "PlatformerObject" = "300", but requested "300 x 20" looks multi-dimensional; only a single number is allowed.
+Property "nonExistingProperty" not on behavior "PlatformerObject" of "MySprite". Available properties: Acceleration, CanGoDownFromJumpthru, CanGrabPlatforms, CanGrabWithoutMoving, Deceleration, Gravity, IgnoreDefaultControls, JumpSpeed, JumpSustainTime, LadderClimbingSpeed, MaxFallingSpeed, MaxSpeed, SlopeMaxAngle, XGrabTolerance, YGrabOffset."
+`);
 
       // Verify the behavior properties were actually changed
       const spriteObject = testScene.getObjects().getObject('MySprite');
@@ -1759,24 +1759,24 @@ describe('editorFunctions', () => {
       });
 
       expect(result).toMatchInlineSnapshot(`
-        Object {
-          "aiGeneratedEventId": "test-ai-event-id",
-          "message": "Successfully added explosion events.",
-          "newlyAddedResources": Array [
-            Object {
-              "resourceKind": "image",
-              "resourceName": "explosion.png",
-              "status": "resource-installed",
-            },
-            Object {
-              "resourceKind": "audio",
-              "resourceName": "explosion.wav",
-              "status": "resource-installed",
-            },
-          ],
-          "success": true,
-        }
-      `);
+{
+  "aiGeneratedEventId": "test-ai-event-id",
+  "message": "Successfully added explosion events.",
+  "newlyAddedResources": [
+    {
+      "resourceKind": "image",
+      "resourceName": "explosion.png",
+      "status": "resource-installed",
+    },
+    {
+      "resourceKind": "audio",
+      "resourceName": "explosion.wav",
+      "status": "resource-installed",
+    },
+  ],
+  "success": true,
+}
+`);
 
       expect(onSceneEventsModifiedOutsideEditor).toHaveBeenCalledWith({
         scene: testScene,
@@ -1864,10 +1864,10 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(`
-        "Successfully added sound events.
+"Successfully added sound events.
 
-        Warning: no resource matching \\"epic-boss-theme.mp3\\" found in the free library. The action(s) referencing them will do nothing (e.g. no sound will play). Rework the event(s) with a different descriptive file name if needed."
-      `);
+Warning: no resource matching "epic-boss-theme.mp3" found in the free library. The action(s) referencing them will do nothing (e.g. no sound will play). Rework the event(s) with a different descriptive file name if needed."
+`);
       expect(result.newlyAddedResources).toEqual([
         {
           resourceName: 'explosion.wav',
@@ -1908,7 +1908,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Added global variable \\"score\\" (Number) = 42"`
+        `"Added global variable "score" (Number) = 42"`
       );
     });
 
@@ -1925,7 +1925,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Added scene \\"TestScene\\" variable \\"lives\\" (Number) = 3"`
+        `"Added scene "TestScene" variable "lives" (Number) = 3"`
       );
     });
 
@@ -1943,7 +1943,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Added scene \\"TestScene\\" object \\"Player\\" variable \\"health\\" (Number) = 100"`
+        `"Added scene "TestScene" object "Player" variable "health" (Number) = 100"`
       );
     });
 
@@ -1960,7 +1960,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Added global object \\"GlobalEnemy\\" variable \\"speed\\" (Number) = 50"`
+        `"Added global object "GlobalEnemy" variable "speed" (Number) = 50"`
       );
     });
 
@@ -2016,7 +2016,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Edited global variable \\"greeting\\" = hello world"`
+        `"Edited global variable "greeting" = hello world"`
       );
     });
 
@@ -2062,7 +2062,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Edited global variable \\"player.hp\\" = 42"`
+        `"Edited global variable "player.hp" = 42"`
       );
       expect(struct.getChild('hp').getValue()).toBe(42);
     });
@@ -2079,7 +2079,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Added global variable \\"config.audio.volume\\" (Number) = 0.8"`
+        `"Added global variable "config.audio.volume" (Number) = 0.8"`
       );
       const config = project.getVariables().get('config');
       expect(config.getType()).toBe(gd.Variable.Structure);
@@ -2100,7 +2100,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Added global variable \\"inventory[2]\\" (String) = Magic Sword"`
+        `"Added global variable "inventory[2]" (String) = Magic Sword"`
       );
       const inventory = project.getVariables().get('inventory');
       expect(inventory.getType()).toBe(gd.Variable.Array);
@@ -2128,7 +2128,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Edited global variable \\"player.hp\\" = 42"`
+        `"Edited global variable "player.hp" = 42"`
       );
       expect(struct.getType()).toBe(gd.Variable.Structure);
       expect(struct.getChild('hp').getValue()).toBe(42);
@@ -2159,7 +2159,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Edited global variable \\"inventory[1]\\" = Magic Shield"`
+        `"Edited global variable "inventory[1]" = Magic Shield"`
       );
       expect(array.getType()).toBe(gd.Variable.Array);
       // Other elements must still be intact (no data loss from cast).
@@ -2182,7 +2182,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Added scene \\"TestScene\\" variable \\"players[0].name\\" (String) = Alice"`
+        `"Added scene "TestScene" variable "players[0].name" (String) = Alice"`
       );
       const players = testScene.getVariables().get('players');
       expect(players.getType()).toBe(gd.Variable.Array);
@@ -3952,15 +3952,15 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Set scene background color to #ff0080.
-        Set game resolution width to 1920.
-        Set game resolution height to 1080.
-        Set stopSoundsOnStartup to true.
-        Set game orientation to landscape.
-        Set game scale mode to nearest.
-        Set game name to \\"My Game\\"."
-      `);
+"Done.
+Set scene background color to #ff0080.
+Set game resolution width to 1920.
+Set game resolution height to 1080.
+Set stopSoundsOnStartup to true.
+Set game orientation to landscape.
+Set game scale mode to nearest.
+Set game name to "My Game"."
+`);
 
       // The properties are also actually applied to the project.
       expect(project.getGameResolutionWidth()).toBe(1920);
@@ -4071,7 +4071,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(false);
       expect(result.message).toMatchInlineSnapshot(
-        `"Scene not found: \\"NonExistentScene\\". Scenes in this project: \\"TestScene\\"."`
+        `"Scene not found: "NonExistentScene". Scenes in this project: "TestScene"."`
       );
     });
 
@@ -4127,9 +4127,9 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Layer \\"UI\\" did not exist in scene \\"TestScene\\": created it at position 1. Layers are now: \\"\\", \\"UI\\". If you meant to modify an existing layer, check its exact name."
-      `);
+"Done.
+Layer "UI" did not exist in scene "TestScene": created it at position 1. Layers are now: "", "UI". If you meant to modify an existing layer, check its exact name."
+`);
       expect(testScene.hasLayerNamed('UI')).toBe(true);
     });
 
@@ -4149,7 +4149,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(false);
       expect(result.warnings).toMatchInlineSnapshot(
-        `"Layer \\"Ground\\" not found in scene \\"TestScene\\": no layer was renamed. Existing layers are: \\"\\". To create a new layer, pass its name as \\"layer_name\\" and do not set \\"new_layer_name\\"."`
+        `"Layer "Ground" not found in scene "TestScene": no layer was renamed. Existing layers are: "". To create a new layer, pass its name as "layer_name" and do not set "new_layer_name"."`
       );
       expect(testScene.hasLayerNamed('Ground')).toBe(false);
       expect(testScene.hasLayerNamed('Background')).toBe(false);
@@ -4173,9 +4173,9 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Renamed layer \\"UI\\" to \\"Interface\\" for scene \\"TestScene\\" (events and instances updated)."
-      `);
+"Done.
+Renamed layer "UI" to "Interface" for scene "TestScene" (events and instances updated)."
+`);
       expect(testScene.hasLayerNamed('UI')).toBe(false);
       expect(testScene.hasLayerNamed('Interface')).toBe(true);
     });
@@ -4203,10 +4203,10 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Renamed layer \\"UI\\" to \\"Interface\\" for scene \\"TestScene\\" (events and instances updated).
-        Moved layer \\"Interface\\" to position 2 for scene \\"TestScene\\"."
-      `);
+"Done.
+Renamed layer "UI" to "Interface" for scene "TestScene" (events and instances updated).
+Moved layer "Interface" to position 2 for scene "TestScene"."
+`);
       expect(testScene.getLayers().getLayerPosition('Interface')).toBe(2);
     });
 
@@ -4226,9 +4226,9 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Layer \\"UI\\" is already at position 1 for scene \\"TestScene\\"."
-      `);
+"Done.
+Layer "UI" is already at position 1 for scene "TestScene"."
+`);
       expect(testScene.getLayers().getLayerPosition('UI')).toBe(1);
     });
 
@@ -4249,7 +4249,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(false);
       expect(result.warnings).toMatchInlineSnapshot(
-        `"A layer named \\"UI\\" already exists in scene \\"TestScene\\": layer \\"HUD\\" was not renamed. To merge two layers, delete one with \\"delete_this_layer\\" and \\"move_instances_to_layer\\"."`
+        `"A layer named "UI" already exists in scene "TestScene": layer "HUD" was not renamed. To merge two layers, delete one with "delete_this_layer" and "move_instances_to_layer"."`
       );
       expect(testScene.hasLayerNamed('HUD')).toBe(true);
       expect(testScene.hasLayerNamed('UI')).toBe(true);
@@ -4277,9 +4277,9 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Layer \\"HUD\\" did not exist in scene \\"TestScene\\": created it at position 1. Layers are now: \\"\\", \\"HUD\\". If you meant to modify an existing layer, check its exact name."
-      `);
+"Done.
+Layer "HUD" did not exist in scene "TestScene": created it at position 1. Layers are now: "", "HUD". If you meant to modify an existing layer, check its exact name."
+`);
       expect(testScene.hasLayerNamed('HUD')).toBe(true);
     });
 
@@ -4299,7 +4299,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(false);
       expect(result.warnings).toMatchInlineSnapshot(
-        `"Layer \\"Ground\\" not found in scene \\"TestScene\\": nothing was deleted. Existing layers are: \\"\\"."`
+        `"Layer "Ground" not found in scene "TestScene": nothing was deleted. Existing layers are: ""."`
       );
       expect(testScene.hasLayerNamed('Ground')).toBe(false);
     });
@@ -4322,9 +4322,9 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Set layer \\"MobileControls\\" initial visibility to hidden for scene \\"TestScene\\"."
-      `);
+"Done.
+Set layer "MobileControls" initial visibility to hidden for scene "TestScene"."
+`);
       expect(
         testScene.getLayers().getLayer('MobileControls').getVisibility()
       ).toBe(false);
@@ -4346,9 +4346,9 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Layer \\"ShopLayer\\" did not exist in scene \\"TestScene\\": created it at position 1 (initial visibility: hidden). Layers are now: \\"\\", \\"ShopLayer\\". If you meant to modify an existing layer, check its exact name."
-      `);
+"Done.
+Layer "ShopLayer" did not exist in scene "TestScene": created it at position 1 (initial visibility: hidden). Layers are now: "", "ShopLayer". If you meant to modify an existing layer, check its exact name."
+`);
       expect(testScene.getLayers().getLayer('ShopLayer').getVisibility()).toBe(
         false
       );
@@ -4368,7 +4368,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(false);
       expect(result.warnings).toMatchInlineSnapshot(
-        `"The base layer (named \\"\\") cannot be deleted: every scene must keep it. Move or delete its instances instead."`
+        `"The base layer (named "") cannot be deleted: every scene must keep it. Move or delete its instances instead."`
       );
       expect(testScene.hasLayerNamed('')).toBe(true);
     });
@@ -4389,7 +4389,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(false);
       expect(result.warnings).toMatchInlineSnapshot(
-        `"The base layer (named \\"\\") cannot be renamed. Create a new layer and move instances to it instead."`
+        `"The base layer (named "") cannot be renamed. Create a new layer and move instances to it instead."`
       );
       expect(testScene.hasLayerNamed('')).toBe(true);
       expect(testScene.hasLayerNamed('Background')).toBe(false);
@@ -4713,7 +4713,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Added scene \\"TestScene\\" group \\"Enemies\\" variable \\"health\\" (Number) = 100"`
+        `"Added scene "TestScene" group "Enemies" variable "health" (Number) = 100"`
       );
       const sceneObjects = testScene.getObjects();
       for (const objectName of ['Enemy1', 'Enemy2']) {
@@ -4787,10 +4787,10 @@ describe('editorFunctions', () => {
       // The change message explains which behaviors and variables the newly
       // added object inherited from the group, with their names and types.
       expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Group \\"Enemies\\" in scene \\"TestScene\\" now contains 3 object(s): Enemy1, Enemy2, Enemy3.
-        Object(s) \\"Enemy3\\" newly added to group \\"Enemies\\" now have the behavior(s) \\"PlatformerObject\\" (PlatformBehavior::PlatformerObjectBehavior) and variable(s) \\"groupHealth\\" (Number) that the rest of the group has in common (a group is the \\"intersection\\" of its objects), added to them if they did not already have them."
-      `);
+"Done.
+Group "Enemies" in scene "TestScene" now contains 3 object(s): Enemy1, Enemy2, Enemy3.
+Object(s) "Enemy3" newly added to group "Enemies" now have the behavior(s) "PlatformerObject" (PlatformBehavior::PlatformerObjectBehavior) and variable(s) "groupHealth" (Number) that the rest of the group has in common (a group is the "intersection" of its objects), added to them if they did not already have them."
+`);
     });
 
     it('sets a variable on every object of a global group (no scene_name)', async () => {
@@ -4816,7 +4816,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(
-        `"Added global group \\"Globals\\" variable \\"ammo\\" (Number) = 7"`
+        `"Added global group "Globals" variable "ammo" (Number) = 7"`
       );
       for (const objectName of ['GlobalA', 'GlobalB']) {
         expect(
@@ -5361,10 +5361,10 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Created group \\"MobileControls\\" in scene \\"TestScene\\".
-        Group \\"MobileControls\\" in scene \\"TestScene\\" now contains 0 object(s): (none)."
-      `);
+"Done.
+Created group "MobileControls" in scene "TestScene".
+Group "MobileControls" in scene "TestScene" now contains 0 object(s): (none)."
+`);
       const groups = testScene.getObjects().getObjectGroups();
       expect(groups.has('MobileControls')).toBe(true);
       expect(groups.get('MobileControls').getAllObjectsNames().size()).toBe(0);
@@ -5385,9 +5385,9 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatchInlineSnapshot(`
-        "Done.
-        Created group \\"Interactables\\" in scene \\"TestScene\\"."
-      `);
+"Done.
+Created group "Interactables" in scene "TestScene"."
+`);
       const groups = testScene.getObjects().getObjectGroups();
       expect(groups.has('Interactables')).toBe(true);
       expect(groups.get('Interactables').getAllObjectsNames().size()).toBe(0);
@@ -5409,7 +5409,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(false);
       expect(result.warnings).toMatchInlineSnapshot(
-        `"Group \\"Ghosts\\" not found in scene \\"TestScene\\": nothing was deleted. Existing groups are: \\"Enemies\\"."`
+        `"Group "Ghosts" not found in scene "TestScene": nothing was deleted. Existing groups are: "Enemies"."`
       );
       expect(testScene.getObjects().getObjectGroups().has('Ghosts')).toBe(
         false
@@ -5432,7 +5432,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(false);
       expect(result.warnings).toMatchInlineSnapshot(
-        `"Group \\"Ghosts\\" not found in scene \\"TestScene\\": no group was renamed. Existing groups are: \\"Enemies\\"."`
+        `"Group "Ghosts" not found in scene "TestScene": no group was renamed. Existing groups are: "Enemies"."`
       );
       const groups = testScene.getObjects().getObjectGroups();
       expect(groups.has('Ghosts')).toBe(false);
@@ -5455,7 +5455,7 @@ describe('editorFunctions', () => {
 
       expect(result.success).toBe(false);
       expect(result.warnings).toMatchInlineSnapshot(
-        `"Group \\"Ghosts\\" not found in scene \\"TestScene\\": no objects were removed from it. Existing groups are: \\"Enemies\\"."`
+        `"Group "Ghosts" not found in scene "TestScene": no objects were removed from it. Existing groups are: "Enemies"."`
       );
       expect(testScene.getObjects().getObjectGroups().has('Ghosts')).toBe(
         false

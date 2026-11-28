@@ -103,38 +103,38 @@ describe('DownloadFileSaveAsDialog', () => {
       // Local resources are expected to be erroring, as they can't be fetched.
       // We should also get an error for the resource that is set to fail to download.
       expect(result).toMatchInlineSnapshot(`
-        Object {
-          "erroredResources": Array [
-            Object {
-              "error": [Error: Unsupported relative file when downloading a copy.],
-              "resourceName": "MyAlreadyLocalResource",
-            },
-            Object {
-              "error": [Error: Fake download error],
-              "resourceName": "Failing download",
-            },
-          ],
-        }
-      `);
+{
+  "erroredResources": [
+    {
+      "error": [Error: Unsupported relative file when downloading a copy.],
+      "resourceName": "MyAlreadyLocalResource",
+    },
+    {
+      "error": [Error: Fake download error],
+      "resourceName": "Failing download",
+    },
+  ],
+}
+`);
 
       // GDevelop cloud resources have been downloaded as blobs:
       expect(onAddBlobFile).toHaveBeenCalledTimes(2);
       expect(onAddBlobFile.mock.calls[0][0]).toMatchInlineSnapshot(`
-        Object {
-          "blob": Object {
-            "blob": "this-is-a-fake-blob",
-          },
-          "filePath": "assets/image/Pea-Happy.png",
-        }
-      `);
+{
+  "blob": {
+    "blob": "this-is-a-fake-blob",
+  },
+  "filePath": "assets/image/Pea-Happy.png",
+}
+`);
       expect(onAddBlobFile.mock.calls[1][0]).toMatchInlineSnapshot(`
-        Object {
-          "blob": Object {
-            "blob": "this-is-a-fake-blob",
-          },
-          "filePath": "assets/image/Pea-Happy2.png",
-        }
-      `);
+{
+  "blob": {
+    "blob": "this-is-a-fake-blob",
+  },
+  "filePath": "assets/image/Pea-Happy2.png",
+}
+`);
     });
 
     it('writes the files only in memory (a project not saved yet) in the copy', async () => {

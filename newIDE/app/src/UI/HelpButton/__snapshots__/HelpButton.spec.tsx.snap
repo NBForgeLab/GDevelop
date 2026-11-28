@@ -57,7 +57,7 @@ exports[`HelpButton renders the button linking to a GDevelop documentation help 
     </svg>
     <span
       style={
-        Object {
+        {
           "flexShrink": 0,
           "height": 4,
           "width": 4,

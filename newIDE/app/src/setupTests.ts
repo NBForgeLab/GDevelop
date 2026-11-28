@@ -38,27 +38,6 @@ Object.defineProperty(global, 'gd', {
   configurable: true,
 });
 
-// jest-environment-node@28 materializes globalThis accessors (such as Node 19+'s
-// `globalThis.performance`) on first read with `writable: descriptor.writable`
-// (`undefined`), turning `global.performance` read-only and breaking fake timers.
-// Trigger the lazy getter first, then restore `writable: true` when needed.
-void global.performance;
-const performanceDescriptor = Object.getOwnPropertyDescriptor(
-  global,
-  'performance'
-);
-if (
-  performanceDescriptor &&
-  'value' in performanceDescriptor &&
-  !performanceDescriptor.writable &&
-  performanceDescriptor.configurable
-) {
-  Object.defineProperty(global, 'performance', {
-    ...performanceDescriptor,
-    writable: true,
-  });
-}
-
 beforeAll(() =>
   initializeGDevelopJs({ wasmBinary }).then((module: Record<string, any>) => {
     // We're **updating** the global "gd" object here. This is done so that

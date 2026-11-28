@@ -87,23 +87,23 @@ describe('LocalResourceExternalEditors', () => {
         path.resolve('some/local-file.png')
       );
       expect(result).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "dataUrl": "",
-            "name": "NotExisting",
-          },
-          Object {
-            "dataUrl": "data:fake/data-url;base64,0123456789ABCDEF",
-            "localFilePath": undefined,
-            "name": "MyResourceToDownload",
-          },
-          Object {
-            "dataUrl": "data:text/plain;base64,somefakecontent",
-            "localFilePath": "some/local-file.png",
-            "name": "MyLocalFile",
-          },
-        ]
-      `);
+[
+  {
+    "dataUrl": "",
+    "name": "NotExisting",
+  },
+  {
+    "dataUrl": "data:fake/data-url;base64,0123456789ABCDEF",
+    "localFilePath": undefined,
+    "name": "MyResourceToDownload",
+  },
+  {
+    "dataUrl": "data:text/plain;base64,somefakecontent",
+    "localFilePath": "some/local-file.png",
+    "name": "MyLocalFile",
+  },
+]
+`);
     });
   });
 });

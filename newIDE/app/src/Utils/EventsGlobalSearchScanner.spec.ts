@@ -105,33 +105,33 @@ describe('EventsGlobalSearchScanner', () => {
     // Verify context: comment event gets otherText, standard event gets conditionText.
     const commentMatch = layoutGroup.matches.find((m) => m.eventPath[0] === 0);
     expect(commentMatch).toMatchInlineSnapshot(`
-      Object {
-        "context": Object {
-          "actionText": "",
-          "conditionText": "",
-          "otherText": "Needle in a comment",
-        },
-        "eventPath": Array [
-          0,
-        ],
-        "id": "0-0-0",
-        "positionInList": 0,
-      }
-    `);
+{
+  "context": {
+    "actionText": "",
+    "conditionText": "",
+    "otherText": "Needle in a comment",
+  },
+  "eventPath": [
+    0,
+  ],
+  "id": "0-0-0",
+  "positionInList": 0,
+}
+`);
     const stdMatch = layoutGroup.matches.find((m) => m.eventPath[0] === 1);
     expect(stdMatch).toMatchInlineSnapshot(`
-      Object {
-        "context": Object {
-          "actionText": "Delete SomeObject",
-          "conditionText": "Needle key is pressed",
-          "otherText": "",
-        },
-        "eventPath": Array [
-          1,
-        ],
-        "id": "1-1-1",
-        "positionInList": 1,
-      }
-    `);
+{
+  "context": {
+    "actionText": "Delete SomeObject",
+    "conditionText": "Needle key is pressed",
+    "otherText": "",
+  },
+  "eventPath": [
+    1,
+  ],
+  "id": "1-1-1",
+  "positionInList": 1,
+}
+`);
   });
 });

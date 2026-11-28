@@ -51,5 +51,7 @@ module.exports = {
     'jest-watch-typeahead/filename',
     'jest-watch-typeahead/testname',
   ],
+  // Jest 29 inline snapshot updates require disabling Prettier <3 integration when using Prettier 3.
+  prettierPath: null,
   resetMocks: true,
 };

@@ -181,11 +181,11 @@ describe('ResourceUtils', () => {
       resource = new gd.Resource();
       updateResourceJsonMetadata(resource, { test: 123, test2: { '4': '56' } });
       expect(resource.getMetadata()).toMatchInlineSnapshot(
-        `"{\\"test\\":123,\\"test2\\":{\\"4\\":\\"56\\"}}"`
+        `"{"test":123,"test2":{"4":"56"}}"`
       );
       updateResourceJsonMetadata(resource, { test2: 789 });
       expect(resource.getMetadata()).toMatchInlineSnapshot(
-        `"{\\"test\\":123,\\"test2\\":789}"`
+        `"{"test":123,"test2":789}"`
       );
 
       resource.setMetadata('invalid json');
@@ -193,7 +193,7 @@ describe('ResourceUtils', () => {
         test3: 'this overwrote everything',
       });
       expect(resource.getMetadata()).toMatchInlineSnapshot(
-        `"{\\"test3\\":\\"this overwrote everything\\"}"`
+        `"{"test3":"this overwrote everything"}"`
       );
     });
 
@@ -204,11 +204,11 @@ describe('ResourceUtils', () => {
       updateResourceJsonMetadata(resource, { other: 'thing' });
       expect(parseLocalFilePathOrExtensionFromMetadata(resource))
         .toMatchInlineSnapshot(`
-        Object {
-          "extension": null,
-          "localFilePath": null,
-        }
-      `);
+{
+  "extension": null,
+  "localFilePath": null,
+}
+`);
 
       // Just an extension found.
       updateResourceJsonMetadata(resource, {
@@ -217,11 +217,11 @@ describe('ResourceUtils', () => {
       });
       expect(parseLocalFilePathOrExtensionFromMetadata(resource))
         .toMatchInlineSnapshot(`
-        Object {
-          "extension": ".png",
-          "localFilePath": null,
-        }
-      `);
+{
+  "extension": ".png",
+  "localFilePath": null,
+}
+`);
 
       // Both found.
       updateResourceJsonMetadata(resource, {
@@ -231,11 +231,11 @@ describe('ResourceUtils', () => {
       });
       expect(parseLocalFilePathOrExtensionFromMetadata(resource))
         .toMatchInlineSnapshot(`
-        Object {
-          "extension": ".png",
-          "localFilePath": "test",
-        }
-      `);
+{
+  "extension": ".png",
+  "localFilePath": "test",
+}
+`);
 
       // Both found but not the proper type.
       updateResourceJsonMetadata(resource, {
@@ -245,11 +245,11 @@ describe('ResourceUtils', () => {
       });
       expect(parseLocalFilePathOrExtensionFromMetadata(resource))
         .toMatchInlineSnapshot(`
-        Object {
-          "extension": null,
-          "localFilePath": null,
-        }
-      `);
+{
+  "extension": null,
+  "localFilePath": null,
+}
+`);
     });
   });
 

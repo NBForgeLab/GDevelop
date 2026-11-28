@@ -118,10 +118,10 @@ describe('LocalResourceMover', () => {
 
     // Check no error is reported.
     expect(fetchedResources).toMatchInlineSnapshot(`
-      Object {
-        "erroredResources": Array [],
-      }
-    `);
+{
+  "erroredResources": [],
+}
+`);
 
     // Check local resources were updated with the URL they were uploaded to.
     expect(
@@ -209,10 +209,10 @@ describe('LocalResourceMover', () => {
 
     // Check no error is reported.
     expect(fetchedResources).toMatchInlineSnapshot(`
-      Object {
-        "erroredResources": Array [],
-      }
-    `);
+{
+  "erroredResources": [],
+}
+`);
 
     // Check local resources were updated with the URL they were uploaded to.
     expect(
