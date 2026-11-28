@@ -8,7 +8,10 @@ const gd: libGDevelop = global.gd;
 /**
  * Renderer for a Text object.
  */
-export default class RenderedTextInstance extends RenderedInstance<PIXI.Text> {
+export default class RenderedTextInstance extends RenderedInstance<
+  PIXI.Text,
+  gdObjectConfiguration
+> {
   _isItalic: boolean = false;
   _isBold: boolean = false;
   _characterSize: number = 0;
@@ -175,9 +178,7 @@ export default class RenderedTextInstance extends RenderedInstance<PIXI.Text> {
       style.fontSize = Math.max(1, this._characterSize);
       style.fontStyle = this._isItalic ? 'italic' : 'normal';
       style.fontWeight = this._isBold ? 'bold' : 'normal';
-      style.lineHeight = (
-        this._lineHeight !== 0 ? this._lineHeight : undefined
-      ) as any;
+      style.lineHeight = this._lineHeight;
       style.fill = rgbStringToHexNumber(this._color);
       style.wordWrap = this._wrapping;
       style.wordWrapWidth = this._wrappingWidth <= 1 ? 1 : this._wrappingWidth;

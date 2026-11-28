@@ -845,8 +845,9 @@ export const createCustomFunction: EditorFunction = {
         return makeGenericFailure(parsedFunctionType.message);
       functionTypeName = parsedFunctionType.value;
     }
-    const parameterSpecs: Array<ParameterSpec> =
-      (SafeExtractor.extractArrayProperty(args, 'parameters') as any) || [];
+    const parameterSpecs =
+      SafeExtractor.extractArrayProperty<ParameterSpec>(args, 'parameters') ||
+      [];
 
     const functionName = gd.Project.getSafeName(requestedFunctionName);
     // A duplicated function brings the type and declared parameters of its source.
@@ -1375,9 +1376,11 @@ export const changeCustomFunction: EditorFunction = {
       return makeGenericFailure(plannedSettingsResult.message);
     const { finalFunctionTypeName, finalGetterName } = plannedSettingsResult;
 
-    const changedParameters: Array<ParameterChange> =
-      (SafeExtractor.extractArrayProperty(args, 'changed_parameters') as any) ||
-      [];
+    const changedParameters =
+      SafeExtractor.extractArrayProperty<ParameterChange>(
+        args,
+        'changed_parameters'
+      ) || [];
     if (
       changedParameters.length > 0 &&
       finalFunctionTypeName === 'ActionWithOperator'

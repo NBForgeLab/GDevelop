@@ -329,8 +329,7 @@ export default class Window {
   ): YesNoCancelDialogChoice {
     if (!dialog || !electron) {
       // TODO: Find a way to display an alert with 3 buttons (not possible with the 3 native js method confirm, alert and prompt)
-      // eslint-disable-next-line
-      const answer = confirm(message);
+      const answer = window.confirm(message);
       if (answer) return 'yes';
       return 'no';
     }
@@ -360,8 +359,7 @@ export default class Window {
     type?: 'none' | 'info' | 'error' | 'question' | 'warning'
   ): boolean {
     if (!dialog || !electron) {
-      // eslint-disable-next-line
-      return confirm(message);
+      return window.confirm(message);
     }
 
     const browserWindow = remote.getCurrentWindow();

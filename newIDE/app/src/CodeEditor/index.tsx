@@ -1,6 +1,8 @@
 import { Trans } from '@lingui/macro';
 
 import * as React from 'react';
+import type * as monacoEditor from 'monaco-editor';
+import type MonacoEditorComponent from 'react-monaco-editor';
 import PlaceholderLoader from '../UI/PlaceholderLoader';
 import RaisedButton from '../UI/RaisedButton';
 import Text from '../UI/Text';
@@ -15,6 +17,7 @@ import {
   suppressDiagnosticsMessagesForModel,
   unsuppressDiagnosticsMessagesForModel,
   baseEditorOptions,
+  type MonacoApi,
 } from './MonacoSetup';
 
 declare global {
@@ -26,7 +29,7 @@ declare global {
 }
 
 export type State = {
-  MonacoEditor: any | null | undefined;
+  MonacoEditor: typeof MonacoEditorComponent | null | undefined;
   error: Error | null | undefined;
 };
 export type Props = {
@@ -68,31 +71,33 @@ export const CodeEditor = ({
   onBlur,
   suppressedDiagnosticsMessages,
 }: Props): React.ReactNode => {
-  const [MonacoEditor, setMonacoEditor] = React.useState<any>(null);
+  const [MonacoEditor, setMonacoEditor] = React.useState<
+    typeof MonacoEditorComponent | null
+  >(null);
   const [error, setError] = React.useState<Error | null>(null);
 
   const { values: preferences } = React.useContext(PreferencesContext);
   const portalContainer = React.useContext(PortalContainerContext);
 
-  const setupEditorThemes = React.useCallback((monaco: any) => {
+  const setupEditorThemes = React.useCallback((monaco: MonacoApi) => {
     registerThemes(monaco);
   }, []);
 
   const setUpSaveOnEditorBlur = React.useCallback(
-    (editor: any) => {
+    (editor: monacoEditor.editor.IStandaloneCodeEditor) => {
       editor.onDidBlurEditorText(onBlur);
     },
     [onBlur]
   );
   const setUpEditorFocus = React.useCallback(
-    (editor: any) => {
+    (editor: monacoEditor.editor.IStandaloneCodeEditor) => {
       editor.onDidFocusEditorText(onFocus);
     },
     [onFocus]
   );
 
   const setupEditorCompletions = React.useCallback(
-    (editor: any, monaco: any) => {
+    (editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: MonacoApi) => {
       setUpEditorFocus(editor);
       setUpSaveOnEditorBlur(editor);
       initializeCompletions(monaco);
@@ -145,7 +150,7 @@ export const CodeEditor = ({
     };
 
     import(/* webpackChunkName: "react-monaco-editor" */ 'react-monaco-editor')
-      .then((module) => setMonacoEditor((oldValue: any) => module.default))
+      .then((module) => setMonacoEditor(() => module.default))
       .catch(handleLoadError);
   }, [handleLoadError]);
 
@@ -166,7 +171,7 @@ export const CodeEditor = ({
   );
 
   const _saveEditorState = React.useCallback(
-    (editor: any, monaco: any) => {
+    (editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: MonacoApi) => {
       const cursorPosition = editor.getPosition();
       saveEditorState({
         scrollTop: editor.getScrollTop(),

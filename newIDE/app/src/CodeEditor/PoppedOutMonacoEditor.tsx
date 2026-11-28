@@ -1,4 +1,5 @@
 import * as React from 'react';
+import type * as monacoEditor from 'monaco-editor';
 import PlaceholderLoader from '../UI/PlaceholderLoader';
 import {
   registerThemes,
@@ -8,6 +9,7 @@ import {
   suppressDiagnosticsMessagesForModel,
   unsuppressDiagnosticsMessagesForModel,
   baseEditorOptions,
+  type MonacoApi,
 } from './MonacoSetup';
 
 type Props = {
@@ -42,7 +44,24 @@ type State = {
  * resolves with the Monaco instance. The promise is cached on the window so
  * that multiple editors mounting concurrently share the same load.
  */
-const loadMonacoInWindow = (targetWindow: any, doc: Document): Promise<any> => {
+type AmdRequire = {
+  (modules: string[], callback: (monaco: MonacoApi) => void): void;
+  config: (config: { paths: Record<string, string> }) => void;
+};
+
+type PoppedOutMonacoWindow = Window & {
+  __gdMonaco?: MonacoApi;
+  __gdMonacoPromise?: Promise<MonacoApi>;
+  require?: AmdRequire | NodeRequire;
+  module?: unknown;
+  exports?: unknown;
+  process?: unknown;
+};
+
+const loadMonacoInWindow = (
+  targetWindow: PoppedOutMonacoWindow,
+  doc: Document
+): Promise<MonacoApi> => {
   // Already loaded.
   if (targetWindow.__gdMonaco) {
     return Promise.resolve(targetWindow.__gdMonaco);
@@ -76,7 +95,11 @@ const loadMonacoInWindow = (targetWindow: any, doc: Document): Promise<any> => {
     script.src = 'external/monaco-editor-min/vs/loader.js';
     script.onload = () => {
       const amdRequire = targetWindow.require;
-      if (!amdRequire || !amdRequire.config) {
+      if (
+        !amdRequire ||
+        !('config' in amdRequire) ||
+        typeof amdRequire.config !== 'function'
+      ) {
         Object.assign(targetWindow, savedGlobals);
         const err = new Error(
           'PoppedOutMonacoEditor: AMD loader not available after script load.'
@@ -96,7 +119,7 @@ const loadMonacoInWindow = (targetWindow: any, doc: Document): Promise<any> => {
         paths: { vs: 'external/monaco-editor-min/vs' },
       });
 
-      amdRequire(['vs/editor/editor.main'], (monaco: any) => {
+      amdRequire(['vs/editor/editor.main'], (monaco: MonacoApi) => {
         targetWindow.__gdMonaco = monaco;
         resolve(monaco);
       });
@@ -134,8 +157,8 @@ class PoppedOutMonacoEditor extends React.Component<Props, State> {
   _containerRef: {
     current: HTMLDivElement | null;
   } = React.createRef();
-  _editor: any = null;
-  _monaco: any = null;
+  _editor: monacoEditor.editor.IStandaloneCodeEditor | null = null;
+  _monaco: MonacoApi | null = null;
   _isChangingValue: boolean = false;
   _unmounted: boolean = false;
 
@@ -205,7 +228,8 @@ class PoppedOutMonacoEditor extends React.Component<Props, State> {
     const container = this._containerRef.current;
     if (!container) return;
 
-    const targetWindow: any = container.ownerDocument.defaultView;
+    const targetWindow: PoppedOutMonacoWindow | null =
+      container.ownerDocument.defaultView;
     if (!targetWindow) return;
 
     loadMonacoInWindow(targetWindow, container.ownerDocument)
@@ -219,7 +243,7 @@ class PoppedOutMonacoEditor extends React.Component<Props, State> {
       });
   };
 
-  _createEditor = (monaco: any, container: HTMLDivElement) => {
+  _createEditor = (monaco: MonacoApi, container: HTMLDivElement) => {
     this._monaco = monaco;
 
     registerThemes(monaco);

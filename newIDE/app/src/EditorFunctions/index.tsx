@@ -845,7 +845,7 @@ const resolveInstanceAnchor = ({
   size,
 }: {
   args: any;
-  allowedAnchors: ReadonlyArray<string>;
+  allowedAnchors: ReadonlyArray<InstanceAnchor>;
   object: gdObject | null;
   objectName: string | null;
   project: gdProject;
@@ -865,7 +865,10 @@ const resolveInstanceAnchor = ({
     'brush_position_anchor'
   );
   if (!anchorName) return { success: true, anchor: 'origin' };
-  if (!allowedAnchors.includes(anchorName)) {
+  const anchor = allowedAnchors.find(
+    (allowedAnchor) => allowedAnchor === anchorName
+  );
+  if (!anchor) {
     return {
       success: false,
       failure: makeGenericFailure(
@@ -875,7 +878,6 @@ const resolveInstanceAnchor = ({
       ),
     };
   }
-  const anchor = anchorName as any as InstanceAnchor;
   if (anchor === 'origin') return { success: true, anchor };
 
   const isModelRead = !object || isModel3DObjectMeasured(object, project);

@@ -4,24 +4,29 @@ import slugs from 'slugs';
 
 export interface PartialObjectDescription {
   reference: string;
-  object: any;
+  object: Record<string, unknown>;
 }
 
 export interface Reference {
   referenceTo: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface SplitConfiguration {
   pathSeparator: string;
-  getArrayItemReferenceName: (object: any, currentReference: string) => string;
+  getArrayItemReferenceName: (
+    object: Record<string, unknown>,
+    currentReference: string
+  ) => string;
   shouldSplit: (path: string) => boolean;
   isReferenceMagicPropertyName: string;
 }
 
 export interface UnsplitConfiguration {
   isReferenceMagicPropertyName: string;
-  getReferencePartialObject: (referencePath: string) => Promise<any>;
+  getReferencePartialObject: (
+    referencePath: string
+  ) => Promise<Record<string, unknown> | null | undefined>;
   maxUnsplitDepth?: number;
 }
 
@@ -33,7 +38,7 @@ export interface UnsplitConfiguration {
  * @param configuration Configuration to be used to split the object.
  */
 export const split = (
-  object: any,
+  object: Record<string, unknown>,
   {
     pathSeparator,
     getArrayItemReferenceName,
@@ -42,7 +47,10 @@ export const split = (
   }: SplitConfiguration
 ): Array<PartialObjectDescription> => {
   const partialObjects: Array<PartialObjectDescription> = [];
-  const createReference = (reference: string, object: any): Reference => {
+  const createReference = (
+    reference: string,
+    object: Record<string, unknown>
+  ): Reference => {
     partialObjects.push({
       reference,
       object,
@@ -121,7 +129,7 @@ export const split = (
  * @param configuration Configuration to be used to unsplit the object.
  */
 export const unsplit = (
-  object: any,
+  object: Record<string, unknown>,
   {
     isReferenceMagicPropertyName,
     getReferencePartialObject,
@@ -184,8 +192,8 @@ export const splitPaths = (paths: Set<string>): ((path: string) => boolean) => {
  */
 export const getNameFromProperty = (
   propertyName: string
-): ((object: any) => string) => {
-  return (object: any): string => {
+): ((object: Record<string, unknown>) => string) => {
+  return (object: Record<string, unknown>): string => {
     const property = object[propertyName];
     if (typeof property !== 'string') {
       throw new Error(`Property ${propertyName} is not a string`);
@@ -200,10 +208,13 @@ export const getNameFromProperty = (
  */
 export const getSlugifiedUniqueNameFromProperty = (
   propertyName: string
-): ((object: any, currentReference: string) => string) => {
+): ((object: Record<string, unknown>, currentReference: string) => string) => {
   const existingNamesForReference: Record<string, Record<string, boolean>> = {};
 
-  return (object: any, currentReference: string): string => {
+  return (
+    object: Record<string, unknown>,
+    currentReference: string
+  ): string => {
     const property = object[propertyName];
     if (typeof property !== 'string') {
       throw new Error(`Property ${propertyName} is not a string`);

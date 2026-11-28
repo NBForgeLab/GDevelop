@@ -1,3 +1,9 @@
+const isPlainRecord = (value: unknown): value is Record<string, any> =>
+  value !== null &&
+  value !== undefined &&
+  typeof value === 'object' &&
+  !Array.isArray(value);
+
 /**
  * Access to properties and type objects safely (ensuring no crash and no exception
  * in case the expected type is not the one found or totally different than assumed).
@@ -8,13 +14,13 @@
  */
 export class SafeExtractor {
   static extractNumberProperty(
-    anything: any,
+    anything: unknown,
     propertyName: string
   ): number | null {
     const object = this.extractObject(anything);
     if (!object) return null;
 
-    const property = anything[propertyName];
+    const property = object[propertyName];
 
     if (typeof property !== 'number') return null;
 
@@ -22,13 +28,13 @@ export class SafeExtractor {
   }
 
   static extractStringProperty(
-    anything: any,
+    anything: unknown,
     propertyName: string
   ): string | null {
     const object = this.extractObject(anything);
     if (!object) return null;
 
-    const property = anything[propertyName];
+    const property = object[propertyName];
 
     if (typeof property !== 'string') return null;
 
@@ -36,13 +42,13 @@ export class SafeExtractor {
   }
 
   static extractBooleanProperty(
-    anything: any,
+    anything: unknown,
     propertyName: string
   ): boolean | null {
     const object = this.extractObject(anything);
     if (!object) return null;
 
-    const property = anything[propertyName];
+    const property = object[propertyName];
 
     if (typeof property !== 'boolean') return null;
 
@@ -50,31 +56,31 @@ export class SafeExtractor {
   }
 
   static extractObjectProperty(
-    anything: any,
+    anything: unknown,
     propertyName: string
   ): Record<string, any> | null {
     const object = this.extractObject(anything);
     if (!object) return null;
 
-    const property = anything[propertyName];
+    const property = object[propertyName];
 
     return this.extractObject(property);
   }
 
-  static extractArrayProperty(
-    anything: any,
+  static extractArrayProperty<T = any>(
+    anything: unknown,
     propertyName: string
-  ): Array<any> | null {
+  ): Array<T> | null {
     const object = this.extractObject(anything);
     if (!object) return null;
 
-    const property = anything[propertyName];
+    const property = object[propertyName];
 
     return this.extractArray(property);
   }
 
   static extractStringArrayProperty(
-    anything: any,
+    anything: unknown,
     propertyName: string
   ): Array<string> | null {
     const array = this.extractArrayProperty(anything, propertyName);
@@ -83,19 +89,11 @@ export class SafeExtractor {
     return array.filter((item): item is string => typeof item === 'string');
   }
 
-  static extractObject(anything: any): Record<string, any> | null {
-    if (
-      anything === null ||
-      anything === undefined ||
-      typeof anything !== 'object' ||
-      Array.isArray(anything)
-    )
-      return null;
-
-    return anything;
+  static extractObject(anything: unknown): Record<string, any> | null {
+    return isPlainRecord(anything) ? anything : null;
   }
 
-  static extractArray(anything: any): Array<any> | null {
+  static extractArray(anything: unknown): Array<any> | null {
     if (
       anything === null ||
       anything === undefined ||
@@ -108,13 +106,13 @@ export class SafeExtractor {
   }
 
   static extractNumberOrStringOrBooleanProperty(
-    anything: any,
+    anything: unknown,
     propertyName: string
   ): number | string | boolean | null {
     const object = this.extractObject(anything);
     if (!object) return null;
 
-    const property = anything[propertyName];
+    const property = object[propertyName];
 
     if (
       typeof property === 'number' ||
@@ -128,7 +126,7 @@ export class SafeExtractor {
   }
 
   static parseCommaSeparatedTwoFiniteNumbers(
-    anything: any
+    anything: unknown
   ): [number, number] | null {
     if (typeof anything !== 'string') return null;
 
@@ -148,7 +146,7 @@ export class SafeExtractor {
   }
 
   static parseCommaSeparatedThreeFiniteNumbers(
-    anything: any
+    anything: unknown
   ): [number, number, number] | null {
     if (typeof anything !== 'string') return null;
 

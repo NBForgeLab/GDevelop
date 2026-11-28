@@ -7,7 +7,10 @@ const gd: libGDevelop = global.gd;
 /**
  * Renderer for gd.TiledSpriteObject
  */
-export default class RenderedTiledSpriteInstance extends RenderedInstance<PIXI.TilingSprite> {
+export default class RenderedTiledSpriteInstance extends RenderedInstance<
+  PIXI.TilingSprite,
+  gdObjectConfiguration
+> {
   _texture: string;
 
   constructor(

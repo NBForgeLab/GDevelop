@@ -1924,11 +1924,7 @@ const ObjectsList = React.forwardRef<ObjectsListInterface, Props>(
                     <TreeView
                       key={listKey}
                       ref={treeViewRef}
-                      items={
-                        // TreeView typing has issues, so we use any for now.
-                        // Search for "treeview typing issues" in the codebase.
-                        getTreeViewData(i18n) as any
-                      }
+                      items={getTreeViewData(i18n)}
                       height={height}
                       forceAllOpened={!!currentlyRunningInAppTutorial}
                       searchText={searchText}

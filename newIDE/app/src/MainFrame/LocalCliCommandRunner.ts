@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { type I18n as I18nType } from '@lingui/core';
 import { type CommandPaletteInterface } from '../CommandPalette/CommandPalette';
+import commandsList, { type CommandName } from '../CommandPalette/CommandsList';
 import { exportLocalHtml5Headless } from '../ExportAndShare/Headless/ExportLocalHtml5Headless';
 import EventsFunctionsExtensionsContext, {
   type EventsFunctionsExtensionsState,
@@ -726,6 +727,9 @@ type RunCliCommandOptions = {
   onFinished: (exitCode: number) => void;
 };
 
+const isCommandName = (name: string): name is CommandName =>
+  Object.prototype.hasOwnProperty.call(commandsList, name);
+
 const runCliCommand = async ({
   project,
   i18n,
@@ -783,7 +787,12 @@ const runCliCommand = async ({
     }
 
     if (commandPaletteRef.current && commandPaletteRef.current.launchCommand) {
-      commandPaletteRef.current.launchCommand(commandName as any);
+      if (!isCommandName(commandName)) {
+        console.error(`[CLI] Unknown command "${commandName}".`);
+        onFinished(1);
+        return;
+      }
+      commandPaletteRef.current.launchCommand(commandName);
       console.info(
         `[CLI] Command "${commandName}" dispatched (fire-and-forget).`
       );

@@ -5075,7 +5075,7 @@ const MainFrame = (props: Props): React.ReactElement<any> => {
           : t`An error occurred when saving the project. Please try again later.`;
         showErrorBox({
           message: i18n._(errorMessage),
-          rawError: rawError as any,
+          rawError,
           errorId: 'project-save-as-error',
         });
         return undefined;

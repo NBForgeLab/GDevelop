@@ -1,14 +1,47 @@
+import type * as monacoEditor from 'monaco-editor';
 import { setupAutocompletions } from './LocalCodeEditorAutocompletions';
 import { getAllThemes } from './Theme';
+
+type LanguageServiceDefaultsWithGetters =
+  monacoEditor.languages.typescript.LanguageServiceDefaults & {
+    getCompilerOptions?: () => monacoEditor.languages.typescript.CompilerOptions;
+    getDiagnosticsOptions?: () => monacoEditor.languages.typescript.DiagnosticsOptions;
+  };
+
+export type MonacoApi = {
+  Promise: typeof monacoEditor.Promise;
+  editor: {
+    defineTheme: (
+      themeName: string,
+      themeData: monacoEditor.editor.IStandaloneThemeData
+    ) => void;
+    setTheme: (themeName: string) => void;
+    create: typeof monacoEditor.editor.create;
+    setModelMarkers: (
+      model: monacoEditor.editor.ITextModel,
+      owner: string,
+      markers: Array<monacoEditor.editor.IMarkerData>
+    ) => void;
+  };
+  languages: Omit<typeof monacoEditor.languages, 'typescript'> & {
+    typescript: Omit<
+      typeof monacoEditor.languages.typescript,
+      'javascriptDefaults' | 'typescriptDefaults'
+    > & {
+      javascriptDefaults: LanguageServiceDefaultsWithGetters;
+      typescriptDefaults: LanguageServiceDefaultsWithGetters;
+    };
+  };
+};
 
 // Track which Monaco instances have been initialized.
 // A WeakSet works naturally with separate Monaco instances
 // (webpack-bundled in main window vs AMD-loaded in popped-out window)
 // without needing separate boolean flags.
-const initializedMonacoInstances: WeakSet<any> = new WeakSet();
+const initializedMonacoInstances: WeakSet<MonacoApi> = new WeakSet();
 
 /** Register custom themes. Safe to call multiple times per instance. */
-export const registerThemes = (monaco: any) => {
+export const registerThemes = (monaco: MonacoApi) => {
   getAllThemes().forEach((codeEditorTheme) => {
     // Builtin themes don't have themeData, don't redefine them.
     if (codeEditorTheme.themeData) {
@@ -28,13 +61,16 @@ export const registerThemes = (monaco: any) => {
  * Set TypeScript compiler options and load autocompletions.
  * Idempotent per Monaco instance.
  */
-export const initializeCompletions = (monaco: any) => {
+export const initializeCompletions = (monaco: MonacoApi) => {
   if (initializedMonacoInstances.has(monaco)) return;
   initializedMonacoInstances.add(monaco);
 
   // Enable type checking of JavaScript files
-  monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-    ...monaco.languages.typescript.javascriptDefaults.getCompilerOptions(),
+  const { javascriptDefaults } = monaco.languages.typescript;
+  javascriptDefaults.setCompilerOptions({
+    ...(javascriptDefaults.getCompilerOptions
+      ? javascriptDefaults.getCompilerOptions()
+      : {}),
     allowNonTsExtensions: true,
     allowJs: true,
     checkJs: true,
@@ -54,18 +90,22 @@ export const initializeCompletions = (monaco: any) => {
 // async function" in a gameplay test, whose code is actually run inside an
 // async function), `setModelMarkers` is patched to filter the markers of
 // the registered models.
-const patchedMonacoInstances: WeakSet<any> = new WeakSet();
+const patchedMonacoInstances: WeakSet<MonacoApi> = new WeakSet();
 const suppressedMessagesByMonacoInstance: WeakMap<
-  any,
+  MonacoApi,
   Map<string, Array<string>>
 > = new WeakMap();
 
-const patchSetModelMarkersToFilterSuppressedMessages = (monaco: any) => {
+const patchSetModelMarkersToFilterSuppressedMessages = (monaco: MonacoApi) => {
   if (patchedMonacoInstances.has(monaco)) return;
   patchedMonacoInstances.add(monaco);
 
   const originalSetModelMarkers = monaco.editor.setModelMarkers;
-  monaco.editor.setModelMarkers = (model: any, owner: string, markers: any) => {
+  monaco.editor.setModelMarkers = (
+    model: monacoEditor.editor.ITextModel,
+    owner: string,
+    markers: Array<monacoEditor.editor.IMarkerData>
+  ) => {
     const suppressedMessagesByModelUri =
       suppressedMessagesByMonacoInstance.get(monaco);
     const suppressedMessages =
@@ -74,7 +114,7 @@ const patchSetModelMarkersToFilterSuppressedMessages = (monaco: any) => {
         : null;
     const filteredMarkers = suppressedMessages
       ? markers.filter(
-          (marker: any) =>
+          (marker) =>
             !suppressedMessages.some((suppressedMessage) =>
               marker.message.includes(suppressedMessage)
             )
@@ -90,8 +130,8 @@ const patchSetModelMarkersToFilterSuppressedMessages = (monaco: any) => {
  * TypeScript language service can not know about (see `CodeEditor`).
  */
 export const suppressDiagnosticsMessagesForModel = (
-  monaco: any,
-  model: any,
+  monaco: MonacoApi,
+  model: monacoEditor.editor.ITextModel | null,
   suppressedMessages: Array<string>
 ) => {
   if (!model) return;
@@ -114,8 +154,8 @@ export const suppressDiagnosticsMessagesForModel = (
  * asked for it is unmounted).
  */
 export const unsuppressDiagnosticsMessagesForModel = (
-  monaco: any,
-  model: any
+  monaco: MonacoApi,
+  model: monacoEditor.editor.ITextModel | null
 ) => {
   if (!model) return;
   const suppressedMessagesByModelUri =
@@ -130,11 +170,13 @@ export const unsuppressDiagnosticsMessagesForModel = (
  * for some reason. See:
  * https://microsoft.github.io/monaco-editor/playground.html?source=v0.52.0#XQAAAALxBQAAAAAAAABBqQkHQ5NjdMjwa-jY7SIQ9S7DNlzs5W-mwj0fe1ZCDRFc9ws9XQE0SJE1jc2VKxhaLFIw9vEWSxW3yscw90T9lfa8wm3bKzPN7npWhYaA4x4rxLXXBbB2_OnRSToJ21hOUR_hS9pG2m6stSYmFVtipRHVTrIB91DOr8dFz_2f6wKJhg_ghHcsBt-hKnlu-qt2H4NuwdaqfbMd6vqkrLY5fzdHCB8FZIGGUDanilP6QXPTpV0rme8fvINUj2BklEotLylw-HHch53nHQMCabAMh3iNqg8S_rHB5OZg2IxLB-8POziUzSwFrTcfwxftX7gi3ZIWNPyf4vJOFtRKVr3hJLIKUGJew4RN0hYb1SnPUm1x6B8hb8I5-9WqAgbYz6E0ntlpOU4jvw6zty4iIJ4GQFuyQ1ys6LtVNKef1bnBs7fDr3xFb3LOW7E4RMonCTxapW3_DQvpQ_x4psM1GYFKMZZXr0lCRvrFs4PBf0uXMwEeTfC1PurLOeoNNEEZFLutUE1ojQVjkTgxZC_HCheas9sKTtZRsJ0i6qDWJh3PbNocPFIbvPQ5la2NXuQIph1oaGrDjqgoirRoexyKumFnXVLkvKVoTdglfgXLwEaoheNdItwJfWKdPqmHh18GTsk8Df_mr8zt3r-pLUtNvB6220ZAKaswAMPR0yDrfHfz_7vWaBfDy6yykp-ROV0Ckt2qV83DVNrHW9HNm4e0WC1ByFoDOB8AdJzjQye8YD3aCwy8ft4sSOGvSeNo2FOPoqd2TU-Sr58fhP09rWes4Vgrv1MhMlUtZ5zBNSL_Mpb1R32H8hrNShgxxaT0r048_u6-nFbkNKq-VCjTlFuUoTW-3y8b1UrYxSmTkjmp-KCc9ObqKgzbRV5tPIX_sqYqVCJFOZN0Nndp4s6xm7qmVPi8SMcDfCD4zfPWBpanAohwTcIIbXPJqggntHxMUFvH7h85mh3AZoJ5FPz2v387LTrxdqOZZW7kTGqSl-Y8NHsa_znjlaNDOU-qywr5DypPbH3_wOm2XMeQNg0jX1bBtIoh_PG5BWMQNlJmQRlDnmDtueZf_nTzQw
  */
-export const enableJsTypeDiagnostics = (monaco: any) => {
-  monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-    ...monaco.languages.typescript.javascriptDefaults.getDiagnosticsOptions(),
+export const enableJsTypeDiagnostics = (monaco: MonacoApi) => {
+  const { javascriptDefaults } = monaco.languages.typescript;
+  javascriptDefaults.setDiagnosticsOptions({
+    ...(javascriptDefaults.getDiagnosticsOptions
+      ? javascriptDefaults.getDiagnosticsOptions()
+      : {}),
     noSemanticValidation: false,
-    noSuggestionDiagnostics: false,
     noSyntaxValidation: false,
   });
 };
@@ -153,44 +195,56 @@ export const enableJsTypeDiagnostics = (monaco: any) => {
  * Call this once per editor instance after creation.
  * See https://github.com/microsoft/monaco-editor/issues/4855
  */
-export const applyElectronClipboardPatch = (editor: any, monaco: any) => {
+export const applyElectronClipboardPatch = (
+  editor: monacoEditor.editor.IStandaloneCodeEditor,
+  monaco: MonacoApi
+) => {
   const pasteAction = editor.getAction('editor.action.clipboardPasteAction');
   if (!pasteAction) return;
 
   // Replace the run method entirely. The original just does:
   //   editor.focus(); document.execCommand('paste');
   // We add a clipboard fallback when execCommand fails.
-  pasteAction.run = async (accessor: any, ed: any) => {
-    const target = ed || editor;
-    target.focus();
-    const domNode: HTMLElement = target.getDomNode();
-    const doc = domNode ? domNode.ownerDocument : document;
-    const result = doc.execCommand('paste');
-    if (!result && navigator.clipboard) {
-      try {
-        const text = await navigator.clipboard.readText();
-        if (text) {
-          const selection = target.getSelection();
-          target.executeEdits('paste', [
-            {
-              range: selection,
-              text: text,
-              forceMoveMarkers: true,
-            },
-          ]);
+  pasteAction.run = (
+    accessor?: unknown,
+    ed?: monacoEditor.editor.ICodeEditor
+  ) =>
+    monaco.Promise.wrap(
+      (async () => {
+        const target = ed || editor;
+        target.focus();
+        const domNode = target.getDomNode();
+        const doc = domNode ? domNode.ownerDocument : document;
+        const result = doc.execCommand('paste');
+        if (!result && navigator.clipboard) {
+          try {
+            const text = await navigator.clipboard.readText();
+            if (text) {
+              const selection = target.getSelection();
+              if (selection) {
+                target.executeEdits('paste', [
+                  {
+                    range: selection,
+                    text: text,
+                    forceMoveMarkers: true,
+                  },
+                ]);
+              }
+            }
+          } catch (e) {
+            // Clipboard read failed — ignore.
+          }
         }
-      } catch (e) {
-        // Clipboard read failed — ignore.
-      }
-    }
-  };
+      })()
+    );
 };
 
 /** Base editor options shared by all code editors. */
-export const baseEditorOptions = {
-  scrollBeyondLastLine: false,
-  minimap: { enabled: false },
-  // Wrap the code at the viewport width so no need to scroll horizontally
-  // on small code editors.
-  wordWrap: 'on',
-};
+export const baseEditorOptions: monacoEditor.editor.IEditorConstructionOptions =
+  {
+    scrollBeyondLastLine: false,
+    minimap: { enabled: false },
+    // Wrap the code at the viewport width so no need to scroll horizontally
+    // on small code editors.
+    wordWrap: 'on',
+  };

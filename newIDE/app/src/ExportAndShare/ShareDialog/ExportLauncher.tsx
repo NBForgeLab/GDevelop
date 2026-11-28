@@ -128,7 +128,7 @@ export default class ExportLauncher extends Component<Props, State> {
     shouldBumpVersionNumber: true,
     exportState: this.props.exportPipeline.getInitialExportState(
       this.props.project
-    ) as any,
+    ),
   };
   _candidateBumpedVersionNumber = '';
   buildsWatcher: BuildsWatcher = new BuildsWatcher();

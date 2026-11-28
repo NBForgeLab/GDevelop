@@ -807,39 +807,36 @@ export const runGameplayTests = async ({
       try {
         // Export and launch a fresh preview into the gameplay test frame.
         try {
-          await previewLauncher.launchPreview(
-            // the launchers accept partial preview options for gameplay tests.
-            {
-              project,
-              sceneName: project.getFirstLayout(),
-              externalLayoutName: null,
-              eventsBasedObjectType: null,
-              eventsBasedObjectVariantName: null,
-              networkPreview: false,
-              hotReload: false,
-              shouldReloadProjectData: true,
-              shouldReloadLibraries: true,
-              shouldGenerateScenesEventsCode: true,
-              shouldReloadResources: false,
-              shouldHardReload: false,
-              fullLoadingScreen: false,
-              fallbackAuthor: null,
-              authenticatedPlayer: null,
-              isForInGameEdition: false,
-              isForGameplayTest: true,
-              editorId: '',
-              getIsMenuBarHiddenInPreview: () => true,
-              getIsAlwaysOnTopInPreview: () => false,
-              captureOptions: null,
-              onCaptureFinished: async () => {},
-              inAppTutorialMessageInPreview: '',
-              inAppTutorialMessagePositionInPreview: '',
-              editorCameraState3D: null,
-              inGameEditorSettings: null,
-              numberOfWindows: 0,
-              previewWindows: null,
-            } as any
-          );
+          await previewLauncher.launchPreview({
+            project,
+            sceneName: project.getFirstLayout(),
+            externalLayoutName: null,
+            eventsBasedObjectType: null,
+            eventsBasedObjectVariantName: null,
+            networkPreview: false,
+            hotReload: false,
+            shouldReloadProjectData: true,
+            shouldReloadLibraries: true,
+            shouldGenerateScenesEventsCode: true,
+            shouldReloadResources: false,
+            shouldHardReload: false,
+            fullLoadingScreen: false,
+            fallbackAuthor: null,
+            authenticatedPlayer: null,
+            isForInGameEdition: false,
+            isForGameplayTest: true,
+            editorId: '',
+            getIsMenuBarHiddenInPreview: () => true,
+            getIsAlwaysOnTopInPreview: () => false,
+            captureOptions: null,
+            onCaptureFinished: async () => {},
+            inAppTutorialMessageInPreview: '',
+            inAppTutorialMessagePositionInPreview: '',
+            editorCameraState3D: null,
+            inGameEditorSettings: null,
+            numberOfWindows: 0,
+            previewWindows: null,
+          });
         } catch (launchError) {
           // Nothing will boot: say why now, instead of waiting for the boot
           // timeout.

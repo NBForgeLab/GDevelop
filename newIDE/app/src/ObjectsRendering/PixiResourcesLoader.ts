@@ -49,11 +49,15 @@ type ResourcePromise<T> = {
   [resourceName: string]: Promise<T>;
 };
 
+export type Loaded3DModel = Omit<GLTF, 'parser'> & {
+  parser?: GLTF['parser'];
+};
+
 /**
  * Release the GPU memory of a 3D model, and the decoded images of its
  * textures: they would otherwise stay in memory until garbage collected.
  */
-const dispose3DModel = (model: GLTF) => {
+const dispose3DModel = (model: Loaded3DModel) => {
   model.scene.traverse((object: THREE.Object3D) => {
     const mesh = object as THREE.Mesh;
     if (mesh.geometry) mesh.geometry.dispose();
@@ -148,7 +152,7 @@ const loadingTexture = PIXI.Texture.from(
 );
 let loadedOrLoadingThreeTextures: ResourcePromise<THREE.Texture> = {};
 let loadedOrLoadingThreeMaterials: ResourcePromise<THREE.Material> = {};
-let loadedOrLoading3DModelPromises: ResourcePromise<GLTF> = {};
+let loadedOrLoading3DModelPromises: ResourcePromise<Loaded3DModel> = {};
 let spineAtlasPromises: ResourcePromise<SpineTextureAtlasOrLoadingError> = {};
 let spineDataPromises: ResourcePromise<SpineDataOrLoadingError> = {};
 
@@ -175,7 +179,7 @@ const pendingResourceReloadCleanupTimers: {
 } = {};
 const RESOURCE_RELOAD_DEDUP_COOLDOWN_MS = 500;
 
-const createInvalidModel = (): GLTF => {
+const createInvalidModel = (): Loaded3DModel => {
   /**
    * The invalid model is a box with magenta (#ff00ff) faces, to be
    * easily spotted if rendered on screen.
@@ -194,10 +198,9 @@ const createInvalidModel = (): GLTF => {
     scenes: [],
     asset: {},
     userData: {},
-    parser: null as any,
   };
 };
-const invalidModel: GLTF = createInvalidModel();
+const invalidModel: Loaded3DModel = createInvalidModel();
 
 let gltfLoader: GLTFLoader | null = null;
 const getOrCreateGltfLoader = (): GLTFLoader => {
@@ -213,7 +216,7 @@ const getOrCreateGltfLoader = (): GLTFLoader => {
 const load3DModel = (
   project: gdProject,
   resourceName: string
-): Promise<GLTF> => {
+): Promise<Loaded3DModel> => {
   if (
     resourceName.length === 0 ||
     !project.getResourcesManager().hasResource(resourceName)
@@ -1059,7 +1062,10 @@ export default class PixiResourcesLoader {
    * @param options
    * @returns The requested material.
    */
-  static get3DModel(project: gdProject, resourceName: string): Promise<GLTF> {
+  static get3DModel(
+    project: gdProject,
+    resourceName: string
+  ): Promise<Loaded3DModel> {
     const promise = loadedOrLoading3DModelPromises[resourceName];
     if (promise) return promise;
 

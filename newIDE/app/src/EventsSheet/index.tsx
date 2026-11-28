@@ -16,6 +16,7 @@ import { getShortcutDisplayName, useShortcutMap } from '../KeyboardShortcuts';
 import { type ShortcutMap } from '../KeyboardShortcuts/DefaultShortcuts';
 import InlineParameterEditor from './InlineParameterEditor';
 import ContextMenu, { type ContextMenuInterface } from '../UI/Menu/ContextMenu';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import {
   serializeToJSObject,
   unserializeFromJSObject,
@@ -411,7 +412,7 @@ export class EventsSheetComponentWithoutHandle extends React.Component<
     }
   }
 
-  onResourceExternallyChanged = (resourceInfo: any) => {
+  onResourceExternallyChanged = (resourceInfo: { identifier: string }) => {
     if (this._eventsTree) this._eventsTree.forceEventsUpdate();
   };
 
@@ -665,7 +666,7 @@ export class EventsSheetComponentWithoutHandle extends React.Component<
       });
   };
 
-  _selectionCanHaveSubEvents = (): any => {
+  _selectionCanHaveSubEvents = (): boolean => {
     const eventContext =
       getLastSelectedEventContextWhichCanHaveSubEvents(this.state.selection) ||
       getLastSelectedInstructionEventContextWhichCanHaveSubEvents(
@@ -692,7 +693,7 @@ export class EventsSheetComponentWithoutHandle extends React.Component<
     );
   };
 
-  _selectionCanHaveLocalVariables = (): any => {
+  _selectionCanHaveLocalVariables = (): boolean => {
     const eventContext =
       getLastSelectedEventContextWhichCanHaveVariables(this.state.selection) ||
       getLastSelectedInstructionEventContextWhichCanHaveVariables(
@@ -701,7 +702,7 @@ export class EventsSheetComponentWithoutHandle extends React.Component<
     return !!eventContext;
   };
 
-  _selectionCanToggleDisabled = (): any => {
+  _selectionCanToggleDisabled = (): boolean => {
     return getSelectedEvents(this.state.selection).some((event) => {
       return event.isExecutable();
     });
@@ -829,8 +830,8 @@ export class EventsSheetComponentWithoutHandle extends React.Component<
     });
   };
 
-  _buildInstructionContextMenu = (i18n: I18nType): any =>
-    [
+  _buildInstructionContextMenu = (i18n: I18nType): Array<MenuItemTemplate> => {
+    const items: Array<MenuItemTemplate | null> = [
       {
         label: i18n._(t`Copy`),
         click: () => this.copySelection(),
@@ -873,7 +874,9 @@ export class EventsSheetComponentWithoutHandle extends React.Component<
             click: () => this._toggleAwaitingActions(),
           }
         : null,
-    ].filter(Boolean);
+    ];
+    return items.filter((item): item is MenuItemTemplate => Boolean(item));
+  };
 
   openAddInstructionContextMenu = (
     eventContext: EventContext,
@@ -1097,7 +1100,7 @@ export class EventsSheetComponentWithoutHandle extends React.Component<
     if (this._eventsTree) this._eventsTree.unfoldToLevel(level);
   };
 
-  _buildEventContextMenu = (i18n: I18nType): any => [
+  _buildEventContextMenu = (i18n: I18nType): Array<MenuItemTemplate> => [
     {
       label: i18n._(t`Edit`),
       click: () => this.openEventTextDialog(),
@@ -1312,7 +1315,7 @@ export class EventsSheetComponentWithoutHandle extends React.Component<
     },
   ];
 
-  _selectionIsStandardEvent = (): any => {
+  _selectionIsStandardEvent = (): boolean => {
     const eventContext = getLastSelectedEventContext(this.state.selection);
     return (
       !!eventContext &&
@@ -1320,7 +1323,7 @@ export class EventsSheetComponentWithoutHandle extends React.Component<
     );
   };
 
-  _selectionIsElseEvent = (): any => {
+  _selectionIsElseEvent = (): boolean => {
     const eventContext = getLastSelectedEventContext(this.state.selection);
     return (
       !!eventContext &&
@@ -1992,7 +1995,7 @@ export class EventsSheetComponentWithoutHandle extends React.Component<
     });
   };
 
-  _getChangedEventRows = (events: Array<gdBaseEvent>): any => {
+  _getChangedEventRows = (events: Array<gdBaseEvent>): Array<number> => {
     const eventsTree = this._eventsTree;
     if (eventsTree) {
       return events.map((event) => eventsTree.getEventRow(event));
@@ -2457,7 +2460,7 @@ export class EventsSheetComponentWithoutHandle extends React.Component<
     });
   };
 
-  _renderInstructionEditorDialog = (): any => {
+  _renderInstructionEditorDialog = (): React.ReactNode => {
     const {
       project,
       scope,
@@ -2601,7 +2604,7 @@ export class EventsSheetComponentWithoutHandle extends React.Component<
     this._keyboardShortcuts.resetModifiers();
   };
 
-  render(): any {
+  render(): React.ReactNode {
     const {
       isActive,
       project,
@@ -3144,7 +3147,9 @@ const EventsSheet = (
   const updateToolbar = () => {
     if (component.current) component.current.updateToolbar();
   };
-  const onResourceExternallyChanged = (resourceInfo: any) => {
+  const onResourceExternallyChanged = (resourceInfo: {
+    identifier: string;
+  }) => {
     if (component.current)
       component.current.onResourceExternallyChanged(resourceInfo);
   };

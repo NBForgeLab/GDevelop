@@ -66,7 +66,7 @@ export default class BrowserSWFileSystem {
     contentType: string;
   }> = [];
 
-  _pendingDeleteOperations: Array<Promise<any>> = [];
+  _pendingDeleteOperations: Array<Promise<number>> = [];
 
   // Store a set of all external URLs copied so that we can simulate
   // readDir result.
@@ -133,7 +133,7 @@ export default class BrowserSWFileSystem {
     // Assume required directories always exist in a virtual file system.
   };
 
-  dirExists = (path: string): any => {
+  dirExists = (path: string): boolean => {
     // Assume required directories always exist.
     return true;
   };
@@ -152,21 +152,21 @@ export default class BrowserSWFileSystem {
     );
   };
 
-  getTempDir = (): any => {
+  getTempDir = (): string => {
     return '/virtual-unused-tmp-dir';
   };
 
-  fileNameFrom = (fullpath: string): any => {
+  fileNameFrom = (fullpath: string): string => {
     if (isURL(fullpath)) return fullpath;
     return path.basename(fullpath);
   };
 
-  dirNameFrom = (fullpath: string): any => {
+  dirNameFrom = (fullpath: string): string => {
     if (isURL(fullpath)) return '';
     return path.dirname(fullpath);
   };
 
-  makeAbsolute = (filename: string, baseDirectory: string): any => {
+  makeAbsolute = (filename: string, baseDirectory: string): string => {
     if (isURL(filename)) return filename;
 
     if (!this.isAbsolute(baseDirectory))
@@ -179,12 +179,12 @@ export default class BrowserSWFileSystem {
     return path.resolve(baseDirectory, path.normalize(filename));
   };
 
-  makeRelative = (filename: string, baseDirectory: string): any => {
+  makeRelative = (filename: string, baseDirectory: string): string => {
     if (isURL(filename)) return filename;
     return path.relative(baseDirectory, path.normalize(filename));
   };
 
-  isAbsolute = (fullpath: string): any => {
+  isAbsolute = (fullpath: string): boolean => {
     if (isURL(fullpath)) return true;
     if (fullpath.length === 0) return true;
     return (
@@ -193,7 +193,7 @@ export default class BrowserSWFileSystem {
     );
   };
 
-  copyFile = (source: string, dest: string): any => {
+  copyFile = (source: string, dest: string): boolean => {
     // URLs are not copied, just tracked.
     if (isURL(source)) {
       this._allCopiedExternalUrls.add(source);
@@ -209,7 +209,7 @@ export default class BrowserSWFileSystem {
     return true;
   };
 
-  writeToFile = (fullPath: string, contents: string): any => {
+  writeToFile = (fullPath: string, contents: string): boolean => {
     // Remove the base URL to get the relative path
     const relativePath = fullPath.replace(this.rootUrl, '');
     const contentType = getContentType(fullPath);
@@ -224,7 +224,7 @@ export default class BrowserSWFileSystem {
     return true;
   };
 
-  readFile = (file: string): any => {
+  readFile = (file: string): string => {
     if (!!this._indexedFilesContent[file])
       return this._indexedFilesContent[file].text;
 
@@ -234,7 +234,7 @@ export default class BrowserSWFileSystem {
     return '';
   };
 
-  readDir = (path: string, ext: string): any => {
+  readDir = (path: string, ext: string): gdVectorString => {
     ext = ext.toUpperCase();
     var output = new gd.VectorString();
 
@@ -250,7 +250,7 @@ export default class BrowserSWFileSystem {
     return output;
   };
 
-  fileExists = (filename: string): any => {
+  fileExists = (filename: string): boolean => {
     if (isURL(filename)) return true;
 
     // Assume all files asked for exist.

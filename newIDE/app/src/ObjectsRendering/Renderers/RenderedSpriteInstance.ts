@@ -7,7 +7,10 @@ const gd: libGDevelop = global.gd;
 /**
  * Renderer for gd.SpriteObject
  */
-export default class RenderedSpriteInstance extends RenderedInstance<PIXI.Sprite> {
+export default class RenderedSpriteInstance extends RenderedInstance<
+  PIXI.Sprite,
+  gdObjectConfiguration
+> {
   _renderedAnimation: number;
   _renderedDirection: number;
   _centerX: number;

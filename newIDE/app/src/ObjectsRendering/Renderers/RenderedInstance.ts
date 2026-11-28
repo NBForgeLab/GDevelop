@@ -7,10 +7,12 @@ import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
  */
 export default class RenderedInstance<
   TPixiObject extends PIXI.DisplayObject = PIXI.DisplayObject,
+  TObjectConfiguration extends
+    gdObjectConfiguration | null = gdObjectConfiguration | null,
 > {
   _project: gdProject;
   _instance: gdInitialInstance;
-  _associatedObjectConfiguration: gdObjectConfiguration;
+  _associatedObjectConfiguration: TObjectConfiguration;
   _pixiContainer: PIXI.Container;
   _pixiResourcesLoader: typeof PixiResourcesLoader;
   _pixiObject: TPixiObject | null;
@@ -21,7 +23,7 @@ export default class RenderedInstance<
   constructor(
     project: gdProject,
     instance: gdInitialInstance,
-    associatedObjectConfiguration: gdObjectConfiguration,
+    associatedObjectConfiguration: TObjectConfiguration,
     pixiContainer: PIXI.Container,
     pixiResourcesLoader: typeof PixiResourcesLoader,
     getPropertyOverridings: (() => Map<string, string>) | null = null

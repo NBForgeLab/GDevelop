@@ -349,7 +349,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
   }: {
     tutorialId: string;
     userId: string | null | undefined;
-  }): any {
+  }): PreferencesValues['inAppTutorialsProgress'][string][string] | undefined {
     const userIdKey: string = userId || 'anonymous';
     const tutorialProgresses =
       this.state.values.inAppTutorialsProgress[tutorialId];
@@ -545,7 +545,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     );
   }
 
-  _getOpenDiagnosticReportAutomatically(): any {
+  _getOpenDiagnosticReportAutomatically(): boolean {
     return this.state.values.openDiagnosticReportAutomatically;
   }
 
@@ -563,7 +563,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     );
   }
 
-  _getBlockPreviewAndExportOnDiagnosticErrors(): any {
+  _getBlockPreviewAndExportOnDiagnosticErrors(): boolean {
     return this.state.values.blockPreviewAndExportOnDiagnosticErrors;
   }
 
@@ -603,7 +603,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     );
   }
 
-  _getUse3DEditor(): any {
+  _getUse3DEditor(): boolean {
     return this.state.values.use3DEditor;
   }
 
@@ -645,7 +645,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     }
   }
 
-  _verifyIfIsNewVersion(): any {
+  _verifyIfIsNewVersion(): boolean {
     const currentVersion = getIDEVersion();
     const { lastLaunchedVersion } = this.state.values;
     if (lastLaunchedVersion === currentVersion) {
@@ -782,7 +782,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     );
   }
 
-  _persistValuesToLocalStorage(preferences: Preferences): any {
+  _persistValuesToLocalStorage(preferences: Preferences): Preferences {
     try {
       localStorage.setItem(
         localStorageItem,
@@ -795,14 +795,14 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     return preferences;
   }
 
-  _getLastUsedPath(project: gdProject, kind: ResourceKind): any {
+  _getLastUsedPath(project: gdProject, kind: ResourceKind): string {
     const projectPath = project.getProjectFile();
     const { values } = this.state;
     const projectPaths = values.projectLastUsedPaths[projectPath];
     if (projectPaths && projectPaths[kind]) {
-      return projectPaths[kind];
+      return projectPaths[kind] || '';
     }
-    if (!projectPath) return null;
+    return '';
   }
 
   _setLastUsedPath(project: gdProject, kind: ResourceKind, latestPath: string) {
@@ -827,7 +827,9 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     );
   }
 
-  _getDefaultEditorMosaicNode(name: EditorMosaicName): any {
+  _getDefaultEditorMosaicNode(
+    name: EditorMosaicName
+  ): EditorMosaicNode | null | undefined {
     return this.state.values.defaultEditorMosaicNodes[name] || null;
   }
 
@@ -880,7 +882,9 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     if (newRecentFile.storageProviderName === 'Cloud') return;
 
     let recentProjectFiles = this._getRecentProjectFiles();
-    const isNotNewRecentFile = (recentFile: any) =>
+    const isNotNewRecentFile = (
+      recentFile: FileMetadataAndStorageProviderName
+    ) =>
       recentFile.fileMetadata.fileIdentifier !==
       newRecentFile.fileMetadata.fileIdentifier;
     this._setRecentProjectFiles([
@@ -890,7 +894,9 @@ export default class PreferencesProvider extends React.Component<Props, State> {
   }
 
   _removeRecentProjectFile(recentFile: FileMetadataAndStorageProviderName) {
-    const isNotRemovedRecentFile = (recentFileItem: any) =>
+    const isNotRemovedRecentFile = (
+      recentFileItem: FileMetadataAndStorageProviderName
+    ) =>
       recentFileItem.fileMetadata.fileIdentifier !==
       recentFile.fileMetadata.fileIdentifier;
     this._setRecentProjectFiles([
@@ -898,7 +904,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     ]);
   }
 
-  _getAutoOpenMostRecentProject(): any {
+  _getAutoOpenMostRecentProject(): boolean {
     return this.state.values.autoOpenMostRecentProject;
   }
 
@@ -914,7 +920,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     );
   }
 
-  _hadProjectOpenedDuringLastSession(): any {
+  _hadProjectOpenedDuringLastSession(): boolean {
     return this.state.values.hasProjectOpened;
   }
 
@@ -955,7 +961,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     );
   }
 
-  _getNewObjectDialogDefaultTab(): any {
+  _getNewObjectDialogDefaultTab(): 'asset-store' | 'new-object' {
     return this.state.values.newObjectDialogDefaultTab;
   }
 
@@ -970,7 +976,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     );
   }
 
-  _getNewEffectDialogDefaultTab(): any {
+  _getNewEffectDialogDefaultTab(): 'asset-store' | 'from-scratch' {
     return this.state.values.newEffectDialogDefaultTab;
   }
 
@@ -985,7 +991,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     );
   }
 
-  _getShareDialogDefaultTab(): any {
+  _getShareDialogDefaultTab(): 'invite' | 'publish' {
     return this.state.values.shareDialogDefaultTab;
   }
 
@@ -998,7 +1004,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     );
   }
 
-  _getIsMenuBarHiddenInPreview(): any {
+  _getIsMenuBarHiddenInPreview(): boolean {
     return this.state.values.isMenuBarHiddenInPreview;
   }
 
@@ -1036,7 +1042,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     );
   }
 
-  _getIsAlwaysOnTopInPreview(): any {
+  _getIsAlwaysOnTopInPreview(): boolean {
     return this.state.values.isAlwaysOnTopInPreview;
   }
 
@@ -1169,7 +1175,9 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     );
   }
 
-  _getEditorStateForProject(projectId: string): any {
+  _getEditorStateForProject(
+    projectId: string
+  ): EditorStateForProject | null | undefined {
     const editorState = this.state.values.editorStateByProject[projectId];
     if (!editorState) return null;
 
@@ -1346,7 +1354,7 @@ export default class PreferencesProvider extends React.Component<Props, State> {
     );
   }
 
-  render(): any {
+  render(): React.ReactNode {
     return (
       <PreferencesContext.Provider value={this.state}>
         {this.props.children}

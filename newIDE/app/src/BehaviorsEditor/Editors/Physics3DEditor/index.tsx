@@ -27,8 +27,9 @@ import {
 } from '../../../UI/Accordion';
 import { mapFor } from '../../../Utils/MapFor';
 import ResourceSelectorWithThumbnail from '../../../ResourcesList/ResourceSelectorWithThumbnail';
-import PixiResourcesLoader from '../../../ObjectsRendering/PixiResourcesLoader';
-import { type GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
+import PixiResourcesLoader, {
+  type Loaded3DModel,
+} from '../../../ObjectsRendering/PixiResourcesLoader';
 import * as THREE from 'three';
 import AlertMessage from '../../../UI/AlertMessage';
 
@@ -114,7 +115,7 @@ const Physics3DEditor = (props: Props): React.ReactNode => {
   // The property is hidden for the shapes that can't be oriented.
   const canShapeBeOriented = !properties.get('shapeOrientation').isHidden();
 
-  const [gltf, setGltf] = React.useState<GLTF | null>(null);
+  const [gltf, setGltf] = React.useState<Loaded3DModel | null>(null);
   const loadGltf = React.useCallback(
     async (modelResourceName: string) => {
       if (

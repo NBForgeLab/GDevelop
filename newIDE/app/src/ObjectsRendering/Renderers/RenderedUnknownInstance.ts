@@ -6,7 +6,10 @@ import * as PIXI from 'pixi.js-legacy';
 /**
  * Objects with an unknown type are rendered with a placeholder rectangle.
  */
-export default class RenderedUnknownInstance extends RenderedInstance<PIXI.Sprite> {
+export default class RenderedUnknownInstance extends RenderedInstance<
+  PIXI.Sprite,
+  gdObjectConfiguration | null
+> {
   constructor(
     project: gdProject,
     instance: gdInitialInstance,
@@ -18,7 +21,7 @@ export default class RenderedUnknownInstance extends RenderedInstance<PIXI.Sprit
       project,
       instance,
       // RenderedUnknownInstance doesn't use associatedObjectConfiguration.
-      associatedObjectConfiguration as any,
+      associatedObjectConfiguration,
       pixiContainer,
       pixiResourcesLoader
     );

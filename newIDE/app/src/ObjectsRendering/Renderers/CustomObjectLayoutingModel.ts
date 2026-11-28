@@ -139,31 +139,31 @@ export class LayoutedInstance {
     this._customDepth = instance.getCustomWidth();
   }
 
-  getX(): any {
+  getX(): number {
     return this.x;
   }
 
-  getY(): any {
+  getY(): number {
     return this.y;
   }
 
-  getZ(): any {
+  getZ(): number {
     return this.z;
   }
 
-  getAngle(): any {
+  getAngle(): number {
     return this.instance.getAngle();
   }
 
-  getRotationX(): any {
+  getRotationX(): number {
     return this.instance.getRotationX();
   }
 
-  getRotationY(): any {
+  getRotationY(): number {
     return this.instance.getRotationY();
   }
 
-  getObjectName(): any {
+  getObjectName(): string {
     return this.instance.getObjectName();
   }
 
@@ -179,49 +179,49 @@ export class LayoutedInstance {
 
   setRotationY(angle: number) {}
 
-  isLocked(): any {
+  isLocked(): boolean {
     return false;
   }
 
   setLocked(lock: boolean) {}
 
-  isSealed(): any {
+  isSealed(): boolean {
     return false;
   }
 
   setSealed(seal: boolean) {}
 
-  getZOrder(): any {
+  getZOrder(): number {
     return this.instance.getZOrder();
   }
 
   setZOrder(zOrder: number) {}
 
-  getOpacity(): any {
+  getOpacity(): number {
     return this.instance.getOpacity();
   }
 
   setOpacity(opacity: number) {}
 
-  isFlippedX(): any {
+  isFlippedX(): boolean {
     return this.instance.isFlippedX();
   }
 
   setFlippedX(flippedX: boolean) {}
 
-  isFlippedY(): any {
+  isFlippedY(): boolean {
     return this.instance.isFlippedY();
   }
 
   setFlippedY(flippedY: boolean) {}
 
-  isFlippedZ(): any {
+  isFlippedZ(): boolean {
     return this.instance.isFlippedZ();
   }
 
   setFlippedZ(flippedY: boolean) {}
 
-  getLayer(): any {
+  getLayer(): string {
     return this.instance.getLayer();
   }
 
@@ -231,11 +231,11 @@ export class LayoutedInstance {
     this._hasCustomSize = enable;
   }
 
-  hasCustomSize(): any {
+  hasCustomSize(): boolean {
     return this._hasCustomSize;
   }
 
-  hasCustomDepth(): any {
+  hasCustomDepth(): boolean {
     return this._hasCustomDepth;
   }
 
@@ -244,7 +244,7 @@ export class LayoutedInstance {
     this._hasCustomSize = true;
   }
 
-  getCustomWidth(): any {
+  getCustomWidth(): number {
     return this._customWidth;
   }
 
@@ -253,7 +253,7 @@ export class LayoutedInstance {
     this._hasCustomSize = true;
   }
 
-  getCustomHeight(): any {
+  getCustomHeight(): number {
     return this._customHeight;
   }
 
@@ -262,11 +262,11 @@ export class LayoutedInstance {
     this._hasCustomDepth = true;
   }
 
-  getCustomDepth(): any {
+  getCustomDepth(): number {
     return this._customDepth;
   }
 
-  resetPersistentUuid(): any {
+  resetPersistentUuid(): this {
     return this;
   }
 
@@ -280,18 +280,18 @@ export class LayoutedInstance {
   getCustomProperties(
     globalObjectsContainer: gdObjectsContainer,
     objectsContainer: gdObjectsContainer
-  ): any {
+  ): gdMapStringPropertyDescriptor {
     return this.instance.getCustomProperties(
       globalObjectsContainer,
       objectsContainer
     );
   }
 
-  getRawDoubleProperty(name: string): any {
+  getRawDoubleProperty(name: string): number {
     return this.instance.getRawDoubleProperty(name);
   }
 
-  getRawStringProperty(name: string): any {
+  getRawStringProperty(name: string): string {
     return this.instance.getRawStringProperty(name);
   }
 
@@ -299,7 +299,7 @@ export class LayoutedInstance {
 
   setRawStringProperty(name: string, value: string) {}
 
-  getVariables(): any {
+  getVariables(): never[] {
     return [];
   }
 
@@ -368,7 +368,7 @@ export const getLayoutedRenderedInstance = <T extends ChildRenderedInstance>(
 
   const layoutedInstance = parent.getLayoutedInstance(initialInstance);
   const renderedInstance = parent.getRendererOfInstance(
-    layoutedInstance as any as gdInitialInstance
+    layoutedInstance as unknown as gdInitialInstance
   );
 
   const objectAnchor = getObjectAnchor(

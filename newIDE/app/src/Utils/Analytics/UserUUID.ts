@@ -1,9 +1,15 @@
 // See https://gist.github.com/jed/982883
 const generateUUID = (a?: string): string => {
-  return a
-    ? // eslint-disable-next-line
-      (Number(a) ^ ((Math.random() * 16) >> (Number(a) / 4))).toString(16)
-    : `${1e7}${-1e3}${-4e3}${-8e3}${-1e11}`.replace(/[018]/g, generateUUID);
+  if (!a) {
+    return `${1e7}${-1e3}${-4e3}${-8e3}${-1e11}`.replace(
+      /[018]/g,
+      generateUUID
+    );
+  }
+  const digit = Number(a);
+  const scaledRandom = Math.random() * 16;
+  const shift = digit / 4;
+  return (digit ^ (scaledRandom >> shift)).toString(16);
 };
 
 const localStorageKey = 'gd-user-uuid';

@@ -665,14 +665,16 @@ export const changeCustomBehavior: EditorFunction = {
       }
     }
 
-    const changedProperties: Array<PropertyChange> =
-      (SafeExtractor.extractArrayProperty(args, 'changed_properties') as any) ||
-      [];
-    const changedSharedProperties: Array<PropertyChange> =
-      (SafeExtractor.extractArrayProperty(
+    const changedProperties =
+      SafeExtractor.extractArrayProperty<PropertyChange>(
+        args,
+        'changed_properties'
+      ) || [];
+    const changedSharedProperties =
+      SafeExtractor.extractArrayProperty<PropertyChange>(
         args,
         'changed_shared_properties'
-      ) as any) || [];
+      ) || [];
 
     if (changedProperties.length > 0) {
       const propertiesResult = applyPropertyChanges({

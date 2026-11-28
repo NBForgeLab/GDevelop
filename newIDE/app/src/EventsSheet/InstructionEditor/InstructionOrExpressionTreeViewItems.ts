@@ -140,26 +140,26 @@ export class InstructionGroupTreeViewItemContent
     this.props = props;
   }
 
-  getName(): any {
+  getName(): string {
     return this.name;
   }
   getDescription(): string | null {
     return null;
   }
 
-  getId(): any {
+  getId(): string {
     return getInstructionGroupId(this.name, this.props.parentId);
   }
 
-  getHtmlId(): any {
+  getHtmlId(): string | null {
     return null;
   }
-  getDataSet(): any {
+  getDataSet(): HTMLDataset {
     return {
       group: this.name,
     };
   }
-  getThumbnail(): any {
+  getThumbnail(): string | undefined {
     return !this.props.parentId
       ? 'NONE'
       : this.props.getGroupIconSrc(this.name) || this.props.parentGroupIconSrc;
@@ -172,26 +172,26 @@ export class InstructionTreeViewItemContent implements TreeViewItemContent {
   constructor(instructionMetadata: EnumeratedInstructionMetadata) {
     this.instructionMetadata = instructionMetadata;
   }
-  getInstructionMetadata(): any {
+  getInstructionMetadata(): EnumeratedInstructionMetadata {
     return this.instructionMetadata;
   }
-  getName(): any {
+  getName(): string {
     return this.instructionMetadata.displayedName;
   }
   getDescription(): string | null {
     return null;
   }
 
-  getId(): any {
+  getId(): string {
     return `instruction-item-${this.instructionMetadata.type.replace(
       /:/g,
       '-'
     )}`;
   }
-  getHtmlId(): any {
+  getHtmlId(): string {
     return this.getId();
   }
-  getDataSet(): any {
+  getDataSet(): HTMLDataset {
     return {
       instructionType: this.instructionMetadata.type.replace(/:/g, '-'),
       object: this.instructionMetadata.scope.objectMetadata
@@ -202,7 +202,7 @@ export class InstructionTreeViewItemContent implements TreeViewItemContent {
         : undefined,
     };
   }
-  getThumbnail(): any {
+  getThumbnail(): string {
     return this.instructionMetadata.iconFilename;
   }
 }
@@ -217,23 +217,23 @@ export class MoreResultsTreeViewItemContent implements TreeViewItemContent {
     this.onClick = onClick;
   }
 
-  getName(): any {
+  getName(): React.ReactNode {
     return this.name;
   }
   getDescription(): string | null {
     return null;
   }
 
-  getId(): any {
+  getId(): string {
     return `more-instructions`;
   }
-  getHtmlId(): any {
+  getHtmlId(): string | null {
     return null;
   }
-  getDataSet(): any {
+  getDataSet(): HTMLDataset {
     return {};
   }
-  getThumbnail(): any {
+  getThumbnail(): string {
     return 'res/share-external_black.svg';
   }
 }

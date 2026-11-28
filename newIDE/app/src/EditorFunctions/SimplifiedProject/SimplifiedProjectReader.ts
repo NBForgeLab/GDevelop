@@ -1,15 +1,20 @@
 // Keep the semantics and marker strings in sync with the backend reader
 // (update both in the same change).
 
+type JsonObject = Record<string, unknown>;
+
+const isJsonObject = (value: unknown): value is JsonObject =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
 /**
  * Truncate a value to a given depth. Objects beyond the depth are replaced
  * with `"{...}"` and arrays with `"[N items]"` summaries.
  */
 export const truncateToDepth = (
-  value: any,
+  value: unknown,
   maxDepth: number,
   currentDepth: number = 0
-): any => {
+): unknown => {
   if (value === null || value === undefined || typeof value !== 'object') {
     return value;
   }
@@ -27,11 +32,9 @@ export const truncateToDepth = (
     return '{...}';
   }
 
-  const result: {
-    [key: string]: any;
-  } = {};
-  for (const key of Object.keys(value)) {
-    result[key] = truncateToDepth(value[key], maxDepth, currentDepth + 1);
+  const result: JsonObject = {};
+  for (const [key, entryValue] of Object.entries(value)) {
+    result[key] = truncateToDepth(entryValue, maxDepth, currentDepth + 1);
   }
   return result;
 };
@@ -40,7 +43,7 @@ export const truncateToDepth = (
  * Estimate the number of tokens a JSON-serialised value will use.
  * Uses ~4 characters per token (conservative for structured data).
  */
-export const estimateTokens = (value: any): number => {
+export const estimateTokens = (value: unknown): number => {
   if (value === null || value === undefined) return 1;
   if (typeof value === 'string') return Math.ceil((value.length + 2) / 4);
   if (typeof value !== 'object') return Math.ceil(String(value).length / 4);
@@ -56,10 +59,10 @@ export const estimateTokens = (value: any): number => {
  * summary hint for omitted items.
  */
 export const capArrays = (
-  value: any,
+  value: unknown,
   maxItems: number
 ): {
-  value: any;
+  value: unknown;
   capped: number;
 } => {
   if (value === null || value === undefined || typeof value !== 'object') {
@@ -69,7 +72,7 @@ export const capArrays = (
   let totalCapped = 0;
 
   if (Array.isArray(value)) {
-    let items = value;
+    let items: Array<unknown> = value;
     if (items.length > maxItems) {
       totalCapped++;
       items = [
@@ -88,11 +91,9 @@ export const capArrays = (
     return { value: mapped, capped: totalCapped };
   }
 
-  const result: {
-    [key: string]: any;
-  } = {};
-  for (const key of Object.keys(value)) {
-    const sub = capArrays(value[key], maxItems);
+  const result: JsonObject = {};
+  for (const [key, entryValue] of Object.entries(value)) {
+    const sub = capArrays(entryValue, maxItems);
     totalCapped += sub.capped;
     result[key] = sub.value;
   }
@@ -103,10 +104,10 @@ export const capArrays = (
  * Truncate all strings longer than `maxLength`, appending a hint.
  */
 export const truncateStrings = (
-  value: any,
+  value: unknown,
   maxLength: number
 ): {
-  value: any;
+  value: unknown;
   truncatedCount: number;
 } => {
   if (value === null || value === undefined)
@@ -136,11 +137,9 @@ export const truncateStrings = (
     return { value: mapped, truncatedCount: count };
   }
 
-  const result: {
-    [key: string]: any;
-  } = {};
-  for (const key of Object.keys(value)) {
-    const sub = truncateStrings(value[key], maxLength);
+  const result: JsonObject = {};
+  for (const [key, entryValue] of Object.entries(value)) {
+    const sub = truncateStrings(entryValue, maxLength);
     count += sub.truncatedCount;
     result[key] = sub.value;
   }
@@ -158,12 +157,12 @@ export const applyTokenBudget = ({
   maxDepth,
   maxStringLength,
 }: {
-  result: any;
+  result: unknown;
   maxTokens: number;
   maxDepth: number;
   maxStringLength: number;
 }): {
-  result: any;
+  result: unknown;
   truncationWarning?: string;
 } => {
   const originalTokens = estimateTokens(result);
@@ -246,8 +245,11 @@ export type ArrayItemsFilter = {
   startsWith?: string;
 };
 
-export const matchesFilter = (item: any, filter: ArrayItemsFilter): boolean => {
-  if (!item || typeof item !== 'object') return false;
+export const matchesFilter = (
+  item: unknown,
+  filter: ArrayItemsFilter
+): boolean => {
+  if (!isJsonObject(item)) return false;
   const itemValue = String(item[filter.property]);
   if (filter.value !== undefined) return itemValue === String(filter.value);
   if (filter.startsWith !== undefined) {
@@ -349,8 +351,8 @@ export const parsePath = (path: string): Array<PathStep> => {
 const MAX_LISTED_ITEM_NAMES = 20;
 
 /** The key holding the name of the items of a list (`extensionName`, `name`...). */
-const findItemNameKey = (item: any): string | null | undefined =>
-  item && typeof item === 'object' && !Array.isArray(item)
+const findItemNameKey = (item: unknown): string | null | undefined =>
+  isJsonObject(item)
     ? Object.keys(item).find(
         (key) =>
           /^(name|[a-z]+Name)$/.test(key) && typeof item[key] === 'string'
@@ -379,23 +381,24 @@ const describeIndexedItem = ({
   itemIndex,
   listPath,
 }: {
-  items: Array<any>;
+  items: Array<unknown>;
   itemIndex: number;
   listPath: string;
 }): string => {
-  const nameKey = findItemNameKey(items[itemIndex]);
-  if (!nameKey) return '';
+  const targetItem = items[itemIndex];
+  const nameKey = findItemNameKey(targetItem);
+  if (!nameKey || !isJsonObject(targetItem)) return '';
   const listedNames = items
     .slice(0, MAX_LISTED_ITEM_NAMES)
     .map((item, index) =>
-      item && typeof item[nameKey] === 'string'
-        ? `[${index}] "${item[nameKey]}"`
+      isJsonObject(item) && typeof item[nameKey] === 'string'
+        ? `[${index}] "${String(item[nameKey])}"`
         : `[${index}]`
     );
   const notListedCount = items.length - listedNames.length;
-  return ` ${listPath}[${itemIndex}] is the item with ${nameKey} "${
-    items[itemIndex][nameKey]
-  }". The items of ${listPath} are: ${listedNames.join(', ')}${
+  return ` ${listPath}[${itemIndex}] is the item with ${nameKey} "${String(
+    targetItem[nameKey]
+  )}". The items of ${listPath} are: ${listedNames.join(', ')}${
     notListedCount > 0 ? ` (and ${notListedCount} more)` : ''
   }. To read one by its name: { path: "${listPath}", filter: { property: "${nameKey}", value: "..." } }.`;
 };
@@ -411,7 +414,7 @@ const walkSteps = ({
   filter,
   maxDepth,
 }: {
-  current: any;
+  current: unknown;
   steps: Array<PathStep>;
   startIndex: number;
   filter?: ArrayItemsFilter | null;
@@ -419,16 +422,16 @@ const walkSteps = ({
 }):
   | {
       success: true;
-      result: any;
+      result: unknown;
     }
   | {
       success: false;
       message: string;
     } => {
-  let value: any = current;
+  let value: unknown = current;
   // The list the last `[index]` step went into, to say which item a missing
   // key was looked for in.
-  let lastIndexedList: Array<any> | null = null;
+  let lastIndexedList: Array<unknown> | null = null;
 
   for (let i = startIndex; i < steps.length; i++) {
     if (value === null || value === undefined) {
@@ -441,7 +444,7 @@ const walkSteps = ({
     const step = steps[i];
 
     if (step.type === 'key') {
-      if (typeof value !== 'object' || Array.isArray(value)) {
+      if (!isJsonObject(value)) {
         return {
           success: false,
           message: `Cannot access property "${
@@ -553,9 +556,7 @@ export const navigateSimplifiedProjectJson = ({
   maxTokens = 4000,
   maxStringLength = 500,
 }: {
-  project: {
-    [key: string]: any;
-  };
+  project: JsonObject;
   path: string;
   filter?: ArrayItemsFilter | null;
   offset?: number;

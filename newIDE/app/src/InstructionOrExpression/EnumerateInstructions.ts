@@ -604,8 +604,7 @@ export const enumerateObjectAndBehaviorsInstructions = (
       .toJSArray()
       .filter((behaviorType) => objectBehaviorTypes.has(behaviorType));
 
-    // eslint-disable-next-line
-    behaviorTypes.forEach((behaviorType) => {
+    for (const behaviorType of behaviorTypes) {
       const behaviorMetadata = extension.getBehaviorMetadata(behaviorType);
       const scope = {
         extension: { name: extension.getName() },
@@ -618,16 +617,16 @@ export const enumerateObjectAndBehaviorsInstructions = (
       // Free functions can require a behavior even if this behavior is from
       // another extension.
       const freeBehaviorInstructions: Array<EnumeratedInstructionMetadata> = [];
-      for (let i = 0; i < allExtensions.size(); ++i) {
-        const extension = allExtensions.at(i);
-        if (shouldHideExtension(project, extension)) {
+      for (let j = 0; j < allExtensions.size(); ++j) {
+        const otherExtension = allExtensions.at(j);
+        if (shouldHideExtension(project, otherExtension)) {
           continue;
         }
 
         freeBehaviorInstructions.push(
           ...enumerateExtraBehaviorInstructions(
             isCondition,
-            extension,
+            otherExtension,
             behaviorType,
             prefix,
             scope,
@@ -654,7 +653,7 @@ export const enumerateObjectAndBehaviorsInstructions = (
         ...freeBehaviorInstructions,
         ...allInstructions,
       ];
-    });
+    }
   }
 
   // 'CreateByName' action only makes sense for groups.

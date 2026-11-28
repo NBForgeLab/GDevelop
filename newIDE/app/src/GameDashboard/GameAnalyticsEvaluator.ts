@@ -255,7 +255,10 @@ const mergeGameMetricsByWeek = (
 ): MergedGameMetrics[] => {
   const mergedGameMetrics: Array<MergedGameMetrics> = [];
   for (let weekIndex = 0; weekIndex < gameMetrics.length; weekIndex += 7) {
-    let mergedGameMetric = gameMetrics[weekIndex];
+    let mergedGameMetric: MergedGameMetrics = {
+      ...gameMetrics[weekIndex],
+      startDate: null,
+    };
     for (
       let index = weekIndex + 1;
       index < weekIndex + 7 && index < gameMetrics.length;
@@ -263,7 +266,7 @@ const mergeGameMetricsByWeek = (
     ) {
       mergedGameMetric = mergeGameMetrics(mergedGameMetric, gameMetrics[index]);
     }
-    mergedGameMetrics.push(mergedGameMetric as any as MergedGameMetrics);
+    mergedGameMetrics.push(mergedGameMetric);
   }
   return mergedGameMetrics;
 };

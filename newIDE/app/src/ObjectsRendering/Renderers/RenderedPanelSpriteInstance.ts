@@ -11,7 +11,10 @@ type StretchedSprite = PIXI.Sprite | PIXI.TilingSprite;
  *
  * Heavily inspired from the GDJS PIXI renderer for PanelSprite objects.
  */
-export default class RenderedPanelSpriteInstance extends RenderedInstance<PIXI.Container> {
+export default class RenderedPanelSpriteInstance extends RenderedInstance<
+  PIXI.Container,
+  gdObjectConfiguration
+> {
   _centerSprite!: StretchedSprite;
   _borderSprites!: StretchedSprite[];
 

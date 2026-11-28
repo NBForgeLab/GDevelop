@@ -8,7 +8,10 @@ const gd: libGDevelop = global.gd;
 /**
  * Renderer for an ParticleEmitter object.
  */
-export default class RenderedParticleEmitterInstance extends RenderedInstance<PIXI.Graphics> {
+export default class RenderedParticleEmitterInstance extends RenderedInstance<
+  PIXI.Graphics,
+  gdObjectConfiguration
+> {
   constructor(
     project: gdProject,
     instance: gdInitialInstance,

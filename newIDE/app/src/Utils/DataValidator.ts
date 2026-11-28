@@ -1,8 +1,11 @@
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  Boolean(value) && typeof value === 'object';
+
 export const ensureIsObject = ({
   data,
   endpointName,
 }: {
-  data: any;
+  data: unknown;
   endpointName: string;
 }): any => {
   if (!data || typeof data !== 'object') {
@@ -17,7 +20,7 @@ export const ensureIsObjectOrNull = ({
   data,
   endpointName,
 }: {
-  data: any;
+  data: unknown;
   endpointName: string;
 }): any => {
   if (data !== null && (!data || typeof data !== 'object')) {
@@ -33,11 +36,11 @@ export const ensureObjectHasProperty = ({
   propertyName,
   endpointName,
 }: {
-  data: any;
+  data: unknown;
   propertyName: string;
   endpointName: string;
 }): any => {
-  if (!data || typeof data !== 'object') {
+  if (!isRecord(data)) {
     throw new Error(
       `Invalid response from endpoint ${endpointName}, was expecting an object.`
     );
@@ -55,12 +58,12 @@ export const ensureIsNullOrObjectHasProperty = ({
   propertyName,
   endpointName,
 }: {
-  data: any;
+  data: unknown;
   propertyName: string;
   endpointName: string;
 }): any => {
   if (data !== null) {
-    if (!data || typeof data !== 'object') {
+    if (!isRecord(data)) {
       throw new Error(
         `Invalid response from endpoint ${endpointName}, was expecting an object or null.`
       );
@@ -78,7 +81,7 @@ export const ensureIsArray = ({
   data,
   endpointName,
 }: {
-  data: any;
+  data: unknown;
   endpointName: string;
 }): Array<any> => {
   if (!Array.isArray(data)) {
@@ -93,7 +96,7 @@ export const ensureIsArrayOrNull = ({
   data,
   endpointName,
 }: {
-  data: any;
+  data: unknown;
   endpointName: string;
 }): Array<any> | null => {
   if (data !== null && !Array.isArray(data)) {
@@ -108,7 +111,7 @@ export const ensureIsString = ({
   data,
   endpointName,
 }: {
-  data: any;
+  data: unknown;
   endpointName: string;
 }): string => {
   if (typeof data !== 'string') {
@@ -125,12 +128,12 @@ export const ensureIsObjectWithPropertyOfType = ({
   propertyType,
   endpointName,
 }: {
-  data: any;
+  data: unknown;
   propertyName: string;
   propertyType: 'string' | 'number' | 'boolean' | 'object' | 'array';
   endpointName: string;
 }): any => {
-  if (!data || typeof data !== 'object') {
+  if (!isRecord(data)) {
     throw new Error(
       `Invalid response from endpoint ${endpointName}, was expecting an object.`
     );

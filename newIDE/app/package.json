@@ -228,6 +228,33 @@
         "rules": {
           "import/no-anonymous-default-export": "off"
         }
+      },
+      {
+        "files": [
+          "src/**/*.{ts,tsx}"
+        ],
+        "excludedFiles": [
+          "src/**/*.spec.{ts,tsx}",
+          "src/**/*.stories.{ts,tsx}",
+          "src/fixtures/**"
+        ],
+        "rules": {
+          "no-restricted-syntax": [
+            "error",
+            {
+              "selector": "MemberExpression[object.property.name='constructor'][property.name='name']",
+              "message": "'constructor.name' is not reliable (can become 'E', 'P' and etc.) in production build."
+            },
+            {
+              "selector": "TSAsExpression > TSAnyKeyword",
+              "message": "Avoid 'as any' in production code — use proper types, narrowing guards, or explicit boundaries."
+            },
+            {
+              "selector": "TSTypeAssertion > TSAnyKeyword",
+              "message": "Avoid '<any>' type assertions in production code — use proper types, narrowing guards, or explicit boundaries."
+            }
+          ]
+        }
       }
     ]
   },

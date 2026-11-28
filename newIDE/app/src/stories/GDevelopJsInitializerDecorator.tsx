@@ -11,11 +11,18 @@ const GD_STARTUP_TIMES = global.GD_STARTUP_TIMES || [];
 // the source files are using `global.gd` as a "top level" object (after imports).
 // This is a side effect, so this file must be imported before any component.
 // See also setupTests.ts for Jest tests.
-(global as any).gd = {
+const gdGlobal: {
+  I_AM_NOT_YET_INITIALIZED_YOU_MUST_USE_GD_INSIDE_A_STORY_ONLY?: boolean;
+  [key: string]: unknown;
+} = {
   I_AM_NOT_YET_INITIALIZED_YOU_MUST_USE_GD_INSIDE_A_STORY_ONLY: true,
 };
 
-const gdGlobal = global.gd as unknown as Record<string, any>;
+Object.defineProperty(global, 'gd', {
+  value: gdGlobal,
+  writable: true,
+  configurable: true,
+});
 
 // Will contain the result of makeTestProject
 export let testProject: TestProject =
@@ -42,15 +49,13 @@ const GDevelopJsInitializer = ({ children }: GDevelopJsInitializerProps) => {
     );
     if (!initializeGDevelopJs) return;
     GD_STARTUP_TIMES.push(['initializeGDevelopJsCall', performance.now()]);
-    initializeGDevelopJs().then((gd: any) => {
+    initializeGDevelopJs().then((gd) => {
       GD_STARTUP_TIMES.push(['initializeGDevelopJsDone', performance.now()]);
       // We're **updating** the global "gd" object here. This is done so that
       // the source files that are using `global.gd` have the proper reference to the
       // object.
       delete gdGlobal.I_AM_NOT_YET_INITIALIZED_YOU_MUST_USE_GD_INSIDE_A_STORY_ONLY;
-      for (let key in gd) {
-        gdGlobal[key] = gd[key];
-      }
+      Object.assign(gdGlobal, gd);
 
       // Prepare test extensions
       makeTestExtensions(gd);

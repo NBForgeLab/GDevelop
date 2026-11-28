@@ -27,6 +27,7 @@ import Window from '../Utils/Window';
 import { ResponsiveWindowMeasurer } from '../UI/Responsive/ResponsiveWindowMeasurer';
 import DismissableInfoBar from '../UI/Messages/DismissableInfoBar';
 import ContextMenu, { type ContextMenuInterface } from '../UI/Menu/ContextMenu';
+import { type MenuItemTemplate } from '../UI/Menu/Menu';
 import { shortenString } from '../Utils/StringHelpers';
 import getObjectByName from '../Utils/GetObjectByName';
 import UseSceneEditorCommands from './UseSceneEditorCommands';
@@ -161,7 +162,7 @@ interface InstanceData extends InstancePersistentUuidData {
   defaultDepth: number;
   numberProperties: InstanceNumberProperty[];
   stringProperties: InstanceStringProperty[];
-  initialVariables: any[];
+  initialVariables: Array<Record<string, unknown>>;
 }
 
 type InstanceChanges = {
@@ -468,7 +469,7 @@ export default class SceneEditor extends React.Component<Props, State> {
     this._sendSelectedInstances();
   }
 
-  getInstancesEditorSettings(): any {
+  getInstancesEditorSettings(): InstancesEditorSettings {
     return this.state.instancesEditorSettings;
   }
 
@@ -1174,13 +1175,13 @@ export default class SceneEditor extends React.Component<Props, State> {
    * bottleneck. We let the mutations be done and trigger an update only when the user
    * is done.
    */
-  _onInstancesEditorSettingsMutated: any = debounce(
+  _onInstancesEditorSettingsMutated = debounce(
     (instancesEditorSettings: InstancesEditorSettings) => {
       this.setInstancesEditorSettings(instancesEditorSettings);
     },
     1000,
     { leading: false, trailing: true }
-  ) as any;
+  );
 
   undo = () => {
     // /!\ Drop the selection to avoid keeping any references to deleted instances.
@@ -1523,9 +1524,9 @@ export default class SceneEditor extends React.Component<Props, State> {
     this._sendUpdatedInstances(instances);
   };
 
-  _exportDataOnly: any = debounce(() => {
+  _exportDataOnly = debounce(() => {
     this.props.hotReloadPreviewButtonProps.launchProjectDataOnlyPreview();
-  }, 250) as any;
+  }, 250);
 
   _onInstancesModified = (instances: Array<gdInitialInstance>) => {
     this._sendUpdatedInstances(instances);
@@ -2031,7 +2032,7 @@ export default class SceneEditor extends React.Component<Props, State> {
     newName: string,
     global: boolean,
     i18n: I18nType
-  ): any => {
+  ): string => {
     const { project, layout, projectScopedContainersAccessor } = this.props;
 
     const projectScopedContainers = projectScopedContainersAccessor.get();
@@ -2423,7 +2424,7 @@ export default class SceneEditor extends React.Component<Props, State> {
     }
   };
 
-  getContextMenuZoomItems = (i18n: I18nType): any => {
+  getContextMenuZoomItems = (i18n: I18nType): Array<MenuItemTemplate> => {
     return [
       {
         label: i18n._(t`Zoom in`),
@@ -2460,7 +2461,7 @@ export default class SceneEditor extends React.Component<Props, State> {
     ];
   };
 
-  getContextMenuLayoutItems = (i18n: I18nType): any => {
+  getContextMenuLayoutItems = (i18n: I18nType): Array<MenuItemTemplate> => {
     const { layout } = this.props;
 
     return [
@@ -2472,11 +2473,27 @@ export default class SceneEditor extends React.Component<Props, State> {
         label: i18n._(t`Open scene properties`),
         click: () => this.openSceneProperties(true),
       },
-    ].filter(Boolean);
+    ];
   };
 
-  getContextMenuInstancesWiseItems = (i18n: I18nType): any => {
+  getContextMenuInstancesWiseItems = (
+    i18n: I18nType
+  ): Array<MenuItemTemplate> => {
     const hasSelectedInstances = this.instancesSelection.hasSelectedInstances();
+    const extractSubmenuItems: Array<
+      MenuItemTemplate | false | null | undefined
+    > = [
+      {
+        label: i18n._(t`Extract as a custom object`),
+        click: () => this.setState({ extractAsCustomObjectDialogOpen: true }),
+        enabled: hasSelectedInstances,
+      },
+      this.props.layout && {
+        label: i18n._(t`Extract as an external layout`),
+        click: () => this.setState({ extractAsExternalLayoutDialogOpen: true }),
+        enabled: hasSelectedInstances,
+      },
+    ];
     return [
       {
         label: i18n._(t`Copy`),
@@ -2528,20 +2545,9 @@ export default class SceneEditor extends React.Component<Props, State> {
       { type: 'separator' },
       {
         label: i18n._(t`Extract`),
-        submenu: [
-          {
-            label: i18n._(t`Extract as a custom object`),
-            click: () =>
-              this.setState({ extractAsCustomObjectDialogOpen: true }),
-            enabled: hasSelectedInstances,
-          },
-          this.props.layout && {
-            label: i18n._(t`Extract as an external layout`),
-            click: () =>
-              this.setState({ extractAsExternalLayoutDialogOpen: true }),
-            enabled: hasSelectedInstances,
-          },
-        ].filter(Boolean),
+        submenu: extractSubmenuItems.filter((item): item is MenuItemTemplate =>
+          Boolean(item)
+        ),
       },
       { type: 'separator' },
       {
@@ -2549,7 +2555,7 @@ export default class SceneEditor extends React.Component<Props, State> {
         click: () => this.toggleProperties(),
         enabled: hasSelectedInstances,
       },
-    ].filter(Boolean);
+    ];
   };
 
   setZoomFactor = (zoomFactor: number) => {
@@ -2620,7 +2626,7 @@ export default class SceneEditor extends React.Component<Props, State> {
     }
   };
 
-  isInstanceOf3DObject = (instance: gdInitialInstance): any => {
+  isInstanceOf3DObject = (instance: gdInitialInstance): boolean => {
     const { project, globalObjectsContainer, objectsContainer } = this.props;
 
     const object = getObjectByName(
@@ -2637,7 +2643,10 @@ export default class SceneEditor extends React.Component<Props, State> {
     );
   };
 
-  buildContextMenu = (i18n: I18nType, options: any): any => {
+  buildContextMenu = (
+    i18n: I18nType,
+    options: { ignoreSelectedObjectsForContextMenu?: boolean }
+  ): Array<MenuItemTemplate> => {
     if (
       options.ignoreSelectedObjectsForContextMenu ||
       !this.instancesSelection.hasSelectedInstances()
@@ -2758,7 +2767,7 @@ export default class SceneEditor extends React.Component<Props, State> {
           : null,
         { type: 'separator' },
         ...this.getContextMenuLayoutItems(i18n),
-      ].filter(Boolean);
+      ].filter((item): item is MenuItemTemplate => Boolean(item));
     }
     return [
       ...this.getContextMenuInstancesWiseItems(i18n),
@@ -3139,7 +3148,7 @@ export default class SceneEditor extends React.Component<Props, State> {
     });
   };
 
-  render(): any {
+  render(): React.ReactNode {
     const {
       project,
       projectScopedContainersAccessor,

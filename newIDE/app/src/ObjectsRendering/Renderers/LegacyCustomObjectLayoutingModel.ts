@@ -405,33 +405,33 @@ export class ChildInstance {
     this._hasCustomDepth = false;
   }
 
-  getX(): any {
+  getX(): number {
     return this.x;
   }
 
-  getY(): any {
+  getY(): number {
     return this.y;
   }
 
-  getZ(): any {
+  getZ(): number {
     return this.z;
   }
 
-  getAngle(): any {
+  getAngle(): number {
     return 0;
   }
 
-  getRotationX(): any {
+  getRotationX(): number {
     return 0;
   }
 
-  getRotationY(): any {
+  getRotationY(): number {
     return 0;
   }
 
   setObjectName(name: string) {}
 
-  getObjectName(): any {
+  getObjectName(): string {
     return '';
   }
 
@@ -447,49 +447,49 @@ export class ChildInstance {
 
   setRotationY(angle: number) {}
 
-  isLocked(): any {
+  isLocked(): boolean {
     return false;
   }
 
   setLocked(lock: boolean) {}
 
-  isSealed(): any {
+  isSealed(): boolean {
     return false;
   }
 
   setSealed(seal: boolean) {}
 
-  getZOrder(): any {
+  getZOrder(): number {
     return 0;
   }
 
   setZOrder(zOrder: number) {}
 
-  getOpacity(): any {
+  getOpacity(): number {
     return 255;
   }
 
   setOpacity(opacity: number) {}
 
-  isFlippedX(): any {
+  isFlippedX(): boolean {
     return false;
   }
 
   setFlippedX(flippedX: boolean) {}
 
-  isFlippedY(): any {
+  isFlippedY(): boolean {
     return false;
   }
 
   setFlippedY(flippedY: boolean) {}
 
-  isFlippedZ(): any {
+  isFlippedZ(): boolean {
     return false;
   }
 
   setFlippedZ(flippedY: boolean) {}
 
-  getLayer(): any {
+  getLayer(): string {
     return '';
   }
 
@@ -499,11 +499,11 @@ export class ChildInstance {
     this._hasCustomSize = enable;
   }
 
-  hasCustomSize(): any {
+  hasCustomSize(): boolean {
     return this._hasCustomSize;
   }
 
-  hasCustomDepth(): any {
+  hasCustomDepth(): boolean {
     return this._hasCustomDepth;
   }
 
@@ -512,7 +512,7 @@ export class ChildInstance {
     this._hasCustomSize = true;
   }
 
-  getCustomWidth(): any {
+  getCustomWidth(): number {
     return this._customWidth;
   }
 
@@ -521,7 +521,7 @@ export class ChildInstance {
     this._hasCustomSize = true;
   }
 
-  getCustomHeight(): any {
+  getCustomHeight(): number {
     return this._customHeight;
   }
 
@@ -530,11 +530,11 @@ export class ChildInstance {
     this._hasCustomDepth = true;
   }
 
-  getCustomDepth(): any {
+  getCustomDepth(): number {
     return this._customDepth;
   }
 
-  resetPersistentUuid(): any {
+  resetPersistentUuid(): this {
     return this;
   }
 
@@ -548,15 +548,15 @@ export class ChildInstance {
   getCustomProperties(
     globalObjectsContainer: gdObjectsContainer,
     objectsContainer: gdObjectsContainer
-  ): any {
+  ): null {
     return null;
   }
 
-  getRawDoubleProperty(name: string): any {
+  getRawDoubleProperty(name: string): number {
     return 0;
   }
 
-  getRawStringProperty(name: string): any {
+  getRawStringProperty(name: string): string {
     return '';
   }
 
@@ -564,7 +564,7 @@ export class ChildInstance {
 
   setRawStringProperty(name: string, value: string) {}
 
-  getVariables(): any {
+  getVariables(): never[] {
     return [];
   }
 

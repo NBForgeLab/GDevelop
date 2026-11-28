@@ -97,7 +97,7 @@ class LocalFileSystem {
       }));
   };
 
-  mkDir = (path: string): any => {
+  mkDir = (path: string): boolean | void => {
     if (isURL(path)) {
       // URLs are always assumed to exist.
       return;
@@ -111,7 +111,7 @@ class LocalFileSystem {
     }
     return true;
   };
-  dirExists = (path: string): any => {
+  dirExists = (path: string): boolean => {
     if (isURL(path)) {
       // URLs are always assumed to exist.
       return true;
@@ -126,10 +126,10 @@ class LocalFileSystem {
       console.error('clearDir(' + path + ') failed: ' + e);
     }
   };
-  getTempDir = (): any => {
+  getTempDir = (): string => {
     return getLocalTempDir();
   };
-  fileNameFrom = (fullPath: string): any => {
+  fileNameFrom = (fullPath: string): string => {
     // If URLs are not downloaded, then filenames are not changed.
     if (!this._downloadUrlsToLocalFiles && isURL(fullPath)) return fullPath;
 
@@ -144,10 +144,10 @@ class LocalFileSystem {
 
     return path.basename(fullPath);
   };
-  dirNameFrom = (fullPath: string): any => {
+  dirNameFrom = (fullPath: string): string => {
     return path.dirname(fullPath).replace(/\\/g, '/');
   };
-  makeAbsolute = (filename: string, baseDirectory: string): any => {
+  makeAbsolute = (filename: string, baseDirectory: string): string => {
     if (isURL(filename)) return filename;
 
     if (!this.isAbsolute(baseDirectory))
@@ -161,14 +161,14 @@ class LocalFileSystem {
       .resolve(baseDirectory, path.normalize(filename))
       .replace(/\\/g, '/');
   };
-  makeRelative = (filename: string, baseDirectory: string): any => {
+  makeRelative = (filename: string, baseDirectory: string): string => {
     if (isURL(filename)) return filename;
 
     return path
       .relative(baseDirectory, path.normalize(filename))
       .replace(/\\/g, '/');
   };
-  isAbsolute = (fullPath: string): any => {
+  isAbsolute = (fullPath: string): boolean => {
     if (isURL(fullPath)) return true;
 
     if (fullPath.length === 0) return true;
@@ -177,7 +177,7 @@ class LocalFileSystem {
       (fullPath.length > 1 && fullPath.charAt(1) === ':')
     );
   };
-  copyFile = (source: string, dest: string): any => {
+  copyFile = (source: string, dest: string): boolean => {
     if (isURL(source)) {
       // If URLs are not downloaded, then there is nothing to copy.
       if (!this._downloadUrlsToLocalFiles) return true;
@@ -221,7 +221,7 @@ class LocalFileSystem {
     }
     return true;
   };
-  writeToFile = (file: string, contents: string): any => {
+  writeToFile = (file: string, contents: string): boolean => {
     try {
       fs.outputFileSync(file, contents);
     } catch (e) {
@@ -230,7 +230,7 @@ class LocalFileSystem {
     }
     return true;
   };
-  readFile = (file: string): any => {
+  readFile = (file: string): string => {
     try {
       var contents = fs.readFileSync(file);
       return contents.toString();
@@ -239,7 +239,7 @@ class LocalFileSystem {
       return '';
     }
   };
-  readDir = (path: string, ext: string): any => {
+  readDir = (path: string, ext: string): gdVectorString => {
     ext = ext.toUpperCase();
     var output = new gd.VectorString();
     try {
@@ -261,7 +261,7 @@ class LocalFileSystem {
 
     return output;
   };
-  fileExists = (filePath: string): any => {
+  fileExists = (filePath: string): boolean => {
     // Check if a file WILL exists once downloaded.
     const normalizedFilePath = pathPosix.normalize(filePath);
     const shouldTheFileBeDownloaded =

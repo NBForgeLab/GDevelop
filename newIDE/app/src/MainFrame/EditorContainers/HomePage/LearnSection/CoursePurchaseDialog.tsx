@@ -115,7 +115,7 @@ const CoursePurchaseDialog = ({
       onWillPurchase();
     },
     // Launch the start process directly when the dialog is opened, to avoid an extra click.
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 

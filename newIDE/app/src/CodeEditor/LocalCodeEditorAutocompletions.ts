@@ -1,5 +1,6 @@
 import { findGDJS } from '../GameEngineFinder/LocalGDJSFinder';
 import optionalRequire from '../Utils/OptionalRequire';
+import { type MonacoApi } from './MonacoSetup';
 const fs = optionalRequire('fs');
 const path = optionalRequire('path');
 
@@ -13,7 +14,7 @@ const excludedFiles = [
   'three.js',
 ];
 
-export const setupAutocompletions = (monaco: any): Promise<void> => {
+export const setupAutocompletions = (monaco: MonacoApi): Promise<void> => {
   const importAllJsFilesFromFolder = (folderPath: string) =>
     fs.readdir(
       folderPath,

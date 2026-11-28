@@ -22,10 +22,11 @@ import { makeDragSourceAndDropTarget } from '../../UI/DragAndDrop/DragSourceAndD
 import { DragHandleIcon } from '../../UI/DragHandle';
 import DropIndicator from '../../UI/SortableVirtualizedItemList/DropIndicator';
 import GDevelopThemeContext from '../../UI/Theme/GDevelopThemeContext';
-import PixiResourcesLoader from '../../ObjectsRendering/PixiResourcesLoader';
+import PixiResourcesLoader, {
+  type Loaded3DModel,
+} from '../../ObjectsRendering/PixiResourcesLoader';
 import { getModel3DBoundingBox } from '../../ObjectsRendering/Model3DBoundingBox';
 import useAlertDialog from '../../UI/Alert/useAlertDialog';
-import { type GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils';
 import * as THREE from 'three';
 import { PropertyCheckbox, PropertyField } from './PropertyFields';
@@ -151,7 +152,7 @@ const Model3DEditor = ({
     [objectConfiguration, forceUpdate]
   );
 
-  const [gltf, setGltf] = React.useState<GLTF | null>(null);
+  const [gltf, setGltf] = React.useState<Loaded3DModel | null>(null);
   const loadGltf = React.useCallback(
     async (modelResourceName: string) => {
       const newModel3d = await PixiResourcesLoader.get3DModel(

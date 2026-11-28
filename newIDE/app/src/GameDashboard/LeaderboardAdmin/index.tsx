@@ -478,7 +478,7 @@ export const LeaderboardAdmin = ({
   React.useEffect(() => {
     if (currentLeaderboard) onFetchLeaderboardEntries();
     // This has to be executed on component mount to refresh entries on each admin opening
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   React.useEffect(() => {

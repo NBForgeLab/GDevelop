@@ -1,5 +1,5 @@
 import * as React from 'react';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import classNames from 'classnames';
 import Window from '../../Utils/Window';
@@ -11,8 +11,8 @@ import {
   useGetConceptMetadata,
 } from './ConceptLink';
 
-type ChatLinkProps = {
-  node?: { properties?: { href?: any } };
+type ChatLinkProps = React.ComponentPropsWithoutRef<'a'> & {
+  node?: { properties?: { href?: unknown } };
   href?: string;
   children?: React.ReactNode;
 };
@@ -23,9 +23,10 @@ const makeRenderChatLink =
   }: {
     getConceptMetadataFromHref: (href: string) => ConceptMetadata | null;
   }) =>
-  (props: ChatLinkProps): React.ReactNode => {
-    const originalHref =
-      (props.node && props.node.properties && props.node.properties.href) || '';
+  (props: ChatLinkProps): React.ReactElement => {
+    const rawHref =
+      props.node && props.node.properties && props.node.properties.href;
+    const originalHref = typeof rawHref === 'string' ? rawHref : '';
     const propsHref = props.href || '';
     // Try to first recognize a link to a GDevelop concept or item.
     const conceptMetadata = getConceptMetadataFromHref(originalHref);
@@ -54,7 +55,7 @@ const makeRenderChatLink =
         {props.children}
       </a>
     ) : (
-      props.children
+      <>{props.children}</>
     );
   };
 
@@ -98,16 +99,18 @@ function parseMarkdownLinks({
   return elements;
 }
 
-type ChatCodeBlockWithChatLinksProps = {
-  inline?: boolean;
-  children?: React.ReactNode;
-};
+type ChatCodeBlockWithChatLinksProps =
+  React.ComponentPropsWithoutRef<'code'> & {
+    node?: unknown;
+    inline?: boolean;
+    children?: React.ReactNode;
+  };
 
 const makeRenderChatCodeBlockWithChatLinks =
   ({
     renderChatLink,
   }: {
-    renderChatLink: (props: ChatLinkProps) => React.ReactNode;
+    renderChatLink: (props: ChatLinkProps) => React.ReactElement;
   }) =>
   ({ inline, children, ...props }: ChatCodeBlockWithChatLinksProps) => {
     // If inline code (single backticks) – just render normally:
@@ -143,11 +146,11 @@ export const ChatMarkdownText: React.ComponentType<Props> = React.memo<Props>(
       [renderChatLink]
     );
 
-    const markdownCustomComponents = React.useMemo(
+    const markdownCustomComponents: Components = React.useMemo(
       () => ({
-        a: renderChatLink as any,
-        code: renderChatCodeBlockWithChatLinks as any,
-        img: ({ node, ...props }: any) => (
+        a: renderChatLink,
+        code: renderChatCodeBlockWithChatLinks,
+        img: ({ node, ...props }) => (
           // eslint-disable-next-line jsx-a11y/alt-text
           <img style={{ display: 'flex' }} {...props} />
         ),

@@ -25,7 +25,7 @@ export const showWarningBox = (message: string, options?: WarningOptions) => {
 
 type ErrorArgs = {
   message: string;
-  rawError: Error | null | undefined | Record<string, any>;
+  rawError: unknown;
   errorId: string;
   doNotReport?: boolean;
 };

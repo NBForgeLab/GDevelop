@@ -14,6 +14,7 @@ import YouTube from '../../UI/CustomSvgIcons/YouTube';
 import GitHub from '../../UI/CustomSvgIcons/GitHub';
 import { GDevelopUserApi } from './ApiConfigs';
 import { type MessageByLocale } from '../i18n/MessageByLocale';
+import { type MessageDescriptor } from '../i18n/MessageDescriptor';
 
 import { type Badge } from './Badge';
 import { type Profile } from './Authentication';
@@ -786,8 +787,8 @@ export const communityLinksConfig = {
     getMessageFromUpdate: (
       responseCode: string
     ): null | {
-      message: any;
-      title: any;
+      message: MessageDescriptor;
+      title: MessageDescriptor;
     } => {
       if (
         responseCode === 'github-star/badge-given' ||
@@ -810,7 +811,10 @@ export const communityLinksConfig = {
       }
       return null;
     },
-    getRewardMessage: (hasBadge: boolean, rewardValueInCredits: string): any =>
+    getRewardMessage: (
+      hasBadge: boolean,
+      rewardValueInCredits: string
+    ): MessageDescriptor =>
       !hasBadge
         ? t`[Star the GDevelop repository](https://github.com/4ian/GDevelop) and add your GitHub username here to get ${rewardValueInCredits} free credits as a thank you!`
         : t`Thank you for supporting the GDevelop open-source community. Credits were added to your account as a thank you.`,
@@ -822,8 +826,8 @@ export const communityLinksConfig = {
     getMessageFromUpdate: (
       responseCode: string
     ): null | {
-      message: any;
-      title: any;
+      message: MessageDescriptor;
+      title: MessageDescriptor;
     } => {
       if (
         responseCode === 'twitter-follow/badge-given' ||
@@ -847,7 +851,10 @@ export const communityLinksConfig = {
 
       return null;
     },
-    getRewardMessage: (hasBadge: boolean, rewardValueInCredits: string): any =>
+    getRewardMessage: (
+      hasBadge: boolean,
+      rewardValueInCredits: string
+    ): MessageDescriptor =>
       !hasBadge
         ? t`[Follow GDevelop](https://twitter.com/GDevelopApp) and enter your Twitter username here to get ${rewardValueInCredits} free credits as a thank you!`
         : t`Thank you for supporting GDevelop. Credits were added to your account as a thank you.`,
@@ -869,8 +876,8 @@ export const communityLinksConfig = {
     getMessageFromUpdate: (
       responseCode: string
     ): null | {
-      message: any;
-      title: any;
+      message: MessageDescriptor;
+      title: MessageDescriptor;
     } => {
       if (
         responseCode === 'youtube-subscription/badge-given' ||
@@ -896,7 +903,10 @@ export const communityLinksConfig = {
 
       return null;
     },
-    getRewardMessage: (hasBadge: boolean, rewardValueInCredits: string): any =>
+    getRewardMessage: (
+      hasBadge: boolean,
+      rewardValueInCredits: string
+    ): MessageDescriptor =>
       !hasBadge
         ? t`[Subscribe to GDevelop](https://youtube.com/@gdevelopapp) and enter your YouTube username here to get ${rewardValueInCredits} free credits as a thank you!`
         : t`Thank you for supporting GDevelop. Credits were added to your account as a thank you.`,
@@ -912,8 +922,8 @@ export const communityLinksConfig = {
     getMessageFromUpdate: (
       responseCode: string
     ): null | {
-      message: any;
-      title: any;
+      message: MessageDescriptor;
+      title: MessageDescriptor;
     } => {
       if (
         responseCode === 'tiktok-follow/badge-given' ||
@@ -937,7 +947,10 @@ export const communityLinksConfig = {
 
       return null;
     },
-    getRewardMessage: (hasBadge: boolean, rewardValueInCredits: string): any =>
+    getRewardMessage: (
+      hasBadge: boolean,
+      rewardValueInCredits: string
+    ): MessageDescriptor =>
       !hasBadge
         ? t`[Follow GDevelop](https://tiktok.com/@gdevelop) and enter your TikTok username here to get ${rewardValueInCredits} free credits as a thank you!`
         : t`Thank you for supporting GDevelop. Credits were added to your account as a thank you.`,
