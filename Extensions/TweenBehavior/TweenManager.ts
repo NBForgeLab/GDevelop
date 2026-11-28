@@ -823,9 +823,9 @@ namespace gdjs {
        * @ignore
        * @category Other extensions > Tween
        */
-      export abstract class AbstractTweenInstance<T>
-        implements TweenInstance<T>
-      {
+      export abstract class AbstractTweenInstance<
+        T,
+      > implements TweenInstance<T> {
         protected elapsedTime: float;
         protected totalDuration: float;
         protected easing: (progress: float) => float;

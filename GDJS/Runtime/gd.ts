@@ -561,7 +561,7 @@ namespace gdjs {
    */
   export const _unregisterCallback = function (callback: unknown): void {
     const filterArrayInPlace = (array: unknown[]) => {
-      for (let i = 0; i < array.length; ) {
+      for (let i = 0; i < array.length;) {
         if (array[i] === callback) {
           array.splice(i, 1);
         } else {

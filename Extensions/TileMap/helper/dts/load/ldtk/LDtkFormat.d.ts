@@ -37,10 +37,7 @@ export type LDtkTileMap = {
   identifierStyle: 'Capitalize' | 'Uppercase' | 'Lowercase' | 'Free';
   /** \"Image export\" option when saving project. Possible values: `None`, `OneImagePerLayer`, `OneImagePerLevel`, `LayersAndLevels` */
   imageExportMode:
-    | 'None'
-    | 'OneImagePerLayer'
-    | 'OneImagePerLevel'
-    | 'LayersAndLevels';
+    'None' | 'OneImagePerLayer' | 'OneImagePerLevel' | 'LayersAndLevels';
   /** File format version */
   jsonVersion: string;
   /** The default naming convention for level identifiers. */
@@ -65,11 +62,7 @@ export type LDtkTileMap = {
   worldGridWidth: integer | null;
   /** **WARNING**: this field will move to the `worlds` array after the \"multi-worlds\" update. It will then be `null`. You can enable the Multi-worlds advanced project option to enable the change immediately.<br/><br/>  An enum that describes how levels are organized in this project (ie. linearly or in a 2D space). Possible values: &lt;`null`&gt;, `Free`, `GridVania`, `LinearHorizontal`, `LinearVertical` */
   worldLayout:
-    | 'Free'
-    | 'GridVania'
-    | 'LinearHorizontal'
-    | 'LinearVertical'
-    | null;
+    'Free' | 'GridVania' | 'LinearHorizontal' | 'LinearVertical' | null;
 };
 /** Auto-layer rule group */
 type LDtkAutoLayerRuleGroup = {

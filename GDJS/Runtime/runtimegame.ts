@@ -207,12 +207,7 @@ namespace gdjs {
     _originalWidth: float;
     _originalHeight: float;
     _resizeMode:
-      | ''
-      | 'scaleOuter'
-      | 'adaptWidth'
-      | 'adaptHeight'
-      | 'native'
-      | string;
+      '' | 'scaleOuter' | 'adaptWidth' | 'adaptHeight' | 'native' | string;
     _adaptGameResolutionAtRuntime: boolean;
     _scaleMode: 'linear' | 'nearest';
     _pixelsRounding: boolean;

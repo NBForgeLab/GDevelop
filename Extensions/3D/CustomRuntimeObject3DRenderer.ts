@@ -227,9 +227,7 @@ namespace gdjs {
     }
   }
 
-  class ThreeAnimationFrameTextureManager
-    implements gdjs.AnimationFrameTextureManager<THREE.Material>
-  {
+  class ThreeAnimationFrameTextureManager implements gdjs.AnimationFrameTextureManager<THREE.Material> {
     private _imageManager: gdjs.PixiImageManager;
 
     constructor(imageManager: gdjs.PixiImageManager) {

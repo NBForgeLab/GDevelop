@@ -318,9 +318,7 @@ namespace gdjs {
 
       applyEffect(target: EffectsTarget): boolean {
         const rendererObject = target.getRendererObject() as
-          | PIXI.DisplayObject
-          | null
-          | undefined;
+          PIXI.DisplayObject | null | undefined;
         if (!rendererObject) {
           return false;
         }
@@ -332,9 +330,7 @@ namespace gdjs {
 
       removeEffect(target: EffectsTarget): boolean {
         const rendererObject = target.getRendererObject() as
-          | PIXI.DisplayObject
-          | null
-          | undefined;
+          PIXI.DisplayObject | null | undefined;
         if (!rendererObject) {
           return false;
         }

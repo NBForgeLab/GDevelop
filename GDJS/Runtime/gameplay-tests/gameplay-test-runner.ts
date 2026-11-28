@@ -3136,8 +3136,7 @@ namespace gdjs {
 
       private _resolveNavigationTarget(
         target:
-          | { name: string; id?: integer }
-          | { x: float; y: float; z?: float }
+          { name: string; id?: integer } | { x: float; y: float; z?: float }
       ): { x: float; y: float; z: float | undefined } | null {
         if ('name' in target) {
           const instances = this._getInstances(target.name);
@@ -3170,8 +3169,7 @@ namespace gdjs {
       getRelativePosition(
         referenceObjectName: string,
         target:
-          | { name: string; id?: integer }
-          | { x: float; y: float; z?: float },
+          { name: string; id?: integer } | { x: float; y: float; z?: float },
         options?: {
           reachRadius?: float;
           /** Measure from the camera of this layer (position, yaw and
@@ -3404,8 +3402,7 @@ namespace gdjs {
       makeProgressTracker(
         referenceObjectName: string,
         target:
-          | { name: string; id?: integer }
-          | { x: float; y: float; z?: float },
+          { name: string; id?: integer } | { x: float; y: float; z?: float },
         options?: {
           windowFrames?: integer;
           minProgress?: float;
@@ -3484,8 +3481,7 @@ namespace gdjs {
       async lookTowardWithMouseDelta(
         referenceObjectName: string,
         target:
-          | { name: string; id?: integer }
-          | { x: float; y: float; z?: float },
+          { name: string; id?: integer } | { x: float; y: float; z?: float },
         options?: {
           yawOnly?: boolean;
           fromCamera?: string;

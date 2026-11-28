@@ -1,10 +1,6 @@
 declare type EncodingType = 'UTF8' | 'UTF16BE' | 'UTF16LE';
 declare type FormatNoTextType =
-  | 'HEX'
-  | 'B64'
-  | 'BYTES'
-  | 'ARRAYBUFFER'
-  | 'UINT8ARRAY';
+  'HEX' | 'B64' | 'BYTES' | 'ARRAYBUFFER' | 'UINT8ARRAY';
 declare type FormatType = 'TEXT' | FormatNoTextType;
 declare type GenericInputType =
   | {
@@ -84,8 +80,7 @@ declare abstract class jsSHABase<StateT, VariantT> {
   protected abstract readonly stateCloneFunc: (state: StateT) => StateT;
   protected abstract readonly newStateFunc: (variant: VariantT) => StateT;
   protected abstract readonly getMAC:
-    | ((options: { outputLen: number }) => number[])
-    | null;
+    ((options: { outputLen: number }) => number[]) | null;
   protected constructor(
     variant: VariantT,
     inputFormat: 'TEXT',

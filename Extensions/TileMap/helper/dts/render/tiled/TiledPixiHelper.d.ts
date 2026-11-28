@@ -14,9 +14,7 @@ export declare namespace TiledPixiHelper {
     tileMap: TiledTileMap,
     levelIndex: number,
     atlasTexture:
-      | PIXI.BaseTexture<PIXI.Resource>
-      | PIXI.Texture<PIXI.Resource>
-      | null,
+      PIXI.BaseTexture<PIXI.Resource> | PIXI.Texture<PIXI.Resource> | null,
     getTexture: (
       textureName: string
     ) => PIXI.BaseTexture<PIXI.Resource> | PIXI.Texture<PIXI.Resource>

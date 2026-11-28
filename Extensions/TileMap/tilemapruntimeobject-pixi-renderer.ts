@@ -9,8 +9,7 @@ namespace gdjs {
    */
   export class TileMapRuntimeObjectPixiRenderer {
     private _object:
-      | gdjs.TileMapRuntimeObject
-      | gdjs.SimpleTileMapRuntimeObject;
+      gdjs.TileMapRuntimeObject | gdjs.SimpleTileMapRuntimeObject;
 
     private _pixiObject: PIXI.tilemap.CompositeTilemap;
     private _lastCullingLeftBound = 0;
@@ -24,8 +23,7 @@ namespace gdjs {
      */
     constructor(
       runtimeObject:
-        | gdjs.TileMapRuntimeObject
-        | gdjs.SimpleTileMapRuntimeObject,
+        gdjs.TileMapRuntimeObject | gdjs.SimpleTileMapRuntimeObject,
       instanceContainer: gdjs.RuntimeInstanceContainer
     ) {
       this._object = runtimeObject;

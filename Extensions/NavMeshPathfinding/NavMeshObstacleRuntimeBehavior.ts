@@ -1234,24 +1234,22 @@ namespace gdjs {
     // lie within the internal angle)
     return !(
       // TRUE if B is left of or on line A->APlus
-      (
-        isLeftOrCollinear(
-          vertexB.x,
-          vertexB.y,
-          vertexA.x,
-          vertexA.y,
-          vertexAPlus.x,
-          vertexAPlus.y
-        ) &&
-        // TRUE if B is right of or on line A->AMinus
-        isRightOrCollinear(
-          vertexB.x,
-          vertexB.y,
-          vertexA.x,
-          vertexA.y,
-          vertexAMinus.x,
-          vertexAMinus.y
-        )
+      isLeftOrCollinear(
+        vertexB.x,
+        vertexB.y,
+        vertexA.x,
+        vertexA.y,
+        vertexAPlus.x,
+        vertexAPlus.y
+      ) &&
+      // TRUE if B is right of or on line A->AMinus
+      isRightOrCollinear(
+        vertexB.x,
+        vertexB.y,
+        vertexA.x,
+        vertexA.y,
+        vertexAMinus.x,
+        vertexAMinus.y
       )
     );
   }

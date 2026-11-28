@@ -1592,8 +1592,8 @@ const defineCollisionMask = function (extension, _, gd) {
       'useAllLayers',
       new gd.PropertyDescriptor(
         objectContent.useAllLayers ||
-        objectContent.useAllLayers === undefined ||
-        objectContent.useAllLayers === null
+          objectContent.useAllLayers === undefined ||
+          objectContent.useAllLayers === null
           ? 'true'
           : 'false'
       )

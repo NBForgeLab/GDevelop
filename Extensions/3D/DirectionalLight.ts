@@ -120,9 +120,7 @@ namespace gdjs {
           }
           applyEffect(target: EffectsTarget): boolean {
             const scene = target.get3DRendererObject() as
-              | THREE.Scene
-              | null
-              | undefined;
+              THREE.Scene | null | undefined;
             if (!scene) {
               return false;
             }
@@ -137,9 +135,7 @@ namespace gdjs {
           }
           removeEffect(target: EffectsTarget): boolean {
             const scene = target.get3DRendererObject() as
-              | THREE.Scene
-              | null
-              | undefined;
+              THREE.Scene | null | undefined;
             if (!scene) {
               return false;
             }

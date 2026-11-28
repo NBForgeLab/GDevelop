@@ -34,8 +34,7 @@ namespace gdjs {
   }
 
   /** @category Behaviors > Physics 3D */
-  export interface PhysicsCharacter3DNetworkSyncData
-    extends BehaviorNetworkSyncData {
+  export interface PhysicsCharacter3DNetworkSyncData extends BehaviorNetworkSyncData {
     props: PhysicsCharacter3DNetworkSyncDataType;
   }
 

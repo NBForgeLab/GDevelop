@@ -7,11 +7,7 @@ namespace gdjs {
 
   /** @category Other extensions > Player Authentication */
   export type PlayerAuthenticationPlatform =
-    | 'electron'
-    | 'cordova-websocket'
-    | 'web-iframe'
-    | 'web'
-    | 'games-platform';
+    'electron' | 'cordova-websocket' | 'web-iframe' | 'web' | 'games-platform';
 
   // TODO EBO Replace runtimeScene to instanceContainer.
   /** @category Other extensions > Player Authentication */
@@ -37,8 +33,7 @@ namespace gdjs {
 
     // Communication methods.
     let _automaticGamesPlatformAuthenticationCallback:
-      | ((event: MessageEvent) => void)
-      | null = null;
+      ((event: MessageEvent) => void) | null = null;
     let _authenticationMessageCallback: ((event: MessageEvent) => void) | null =
       null;
     let _websocket: WebSocket | null = null;

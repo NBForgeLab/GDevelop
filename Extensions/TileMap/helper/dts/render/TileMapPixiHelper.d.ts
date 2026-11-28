@@ -16,9 +16,7 @@ export declare namespace PixiTileMapHelper {
     tileMap: TileMapFileContent,
     levelIndex: number,
     atlasTexture:
-      | PIXI.BaseTexture<PIXI.Resource>
-      | PIXI.Texture<PIXI.Resource>
-      | null,
+      PIXI.BaseTexture<PIXI.Resource> | PIXI.Texture<PIXI.Resource> | null,
     getTexture: (
       textureName: string
     ) => PIXI.BaseTexture<PIXI.Resource> | PIXI.Texture<PIXI.Resource>

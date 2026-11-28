@@ -2112,7 +2112,7 @@ namespace gdjs {
           if (length != b.length) {
             return false;
           }
-          for (i = length; i-- !== 0; ) {
+          for (i = length; i-- !== 0;) {
             if (!HotReloader.deepEqual(a[i], b[i])) {
               return false;
             }
@@ -2130,12 +2130,12 @@ namespace gdjs {
         if (length !== Object.keys(b).length) {
           return false;
         }
-        for (i = length; i-- !== 0; ) {
+        for (i = length; i-- !== 0;) {
           if (!Object.prototype.hasOwnProperty.call(b, keys[i])) {
             return false;
           }
         }
-        for (i = length; i-- !== 0; ) {
+        for (i = length; i-- !== 0;) {
           const key = keys[i];
           if (!HotReloader.deepEqual(a[key], b[key])) {
             return false;

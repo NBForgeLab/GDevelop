@@ -247,9 +247,7 @@ namespace gdjs {
     private _threeGroup: THREE.Group | null = null;
     private _threeScene: THREE.Scene | null = null;
     private _threeCamera:
-      | THREE.PerspectiveCamera
-      | THREE.OrthographicCamera
-      | null = null;
+      THREE.PerspectiveCamera | THREE.OrthographicCamera | null = null;
     private _threeCameraDirty: boolean = false;
     private _threeEffectComposer: THREE_ADDONS.EffectComposer | null = null;
     private _threeRenderPass: THREE_ADDONS.RenderPass | null = null;
@@ -417,9 +415,7 @@ namespace gdjs {
     }
 
     getThreeCamera():
-      | THREE.PerspectiveCamera
-      | THREE.OrthographicCamera
-      | null {
+      THREE.PerspectiveCamera | THREE.OrthographicCamera | null {
       return this._threeCamera;
     }
 

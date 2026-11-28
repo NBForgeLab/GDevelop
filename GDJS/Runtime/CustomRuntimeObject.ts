@@ -59,8 +59,7 @@ namespace gdjs {
       gdjs.OpacityHandler
   {
     _renderer:
-      | gdjs.CustomRuntimeObject2DRenderer
-      | gdjs.CustomRuntimeObject3DRenderer;
+      gdjs.CustomRuntimeObject2DRenderer | gdjs.CustomRuntimeObject3DRenderer;
     /** It contains the children of this object. */
     _instanceContainer: gdjs.CustomRuntimeObjectInstanceContainer;
     _isUntransformedHitBoxesDirty: boolean = true;
@@ -214,8 +213,7 @@ namespace gdjs {
     }
 
     protected abstract _createRender():
-      | gdjs.CustomRuntimeObject2DRenderer
-      | gdjs.CustomRuntimeObject3DRenderer;
+      gdjs.CustomRuntimeObject2DRenderer | gdjs.CustomRuntimeObject3DRenderer;
     protected abstract _reinitializeRenderer(): void;
 
     override reinitialize(objectData: ObjectData & CustomObjectConfiguration) {
@@ -438,8 +436,7 @@ namespace gdjs {
     }
 
     getRenderer():
-      | gdjs.CustomRuntimeObject2DRenderer
-      | gdjs.CustomRuntimeObject3DRenderer {
+      gdjs.CustomRuntimeObject2DRenderer | gdjs.CustomRuntimeObject3DRenderer {
       return this._renderer;
     }
 

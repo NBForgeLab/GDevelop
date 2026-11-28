@@ -213,9 +213,7 @@ namespace gdjs {
   /**
    * @category Renderers > Sprite
    */
-  class PixiAnimationFrameTextureManager
-    implements gdjs.AnimationFrameTextureManager<PIXI.Texture>
-  {
+  class PixiAnimationFrameTextureManager implements gdjs.AnimationFrameTextureManager<PIXI.Texture> {
     private _imageManager: gdjs.PixiImageManager;
 
     constructor(imageManager: gdjs.PixiImageManager) {

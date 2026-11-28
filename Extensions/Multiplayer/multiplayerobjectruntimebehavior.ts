@@ -55,8 +55,7 @@ namespace gdjs {
     _effectsSyncRate: number = 1;
     // The last data sent to synchronize the effects.
     _lastSentEffectSyncData:
-      | { [effectName: string]: EffectNetworkSyncData }
-      | undefined;
+      { [effectName: string]: EffectNetworkSyncData } | undefined;
     // When we know that the effects have been updated, we can force sending them
     // on the same syncRate as the object update for a number of times
     // to ensure they are received, without the need of an acknowledgment.

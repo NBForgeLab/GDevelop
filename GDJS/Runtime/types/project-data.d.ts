@@ -155,11 +155,7 @@ declare type TimerNetworkSyncData = {
 };
 
 declare type VariableType =
-  | 'string'
-  | 'number'
-  | 'boolean'
-  | 'structure'
-  | 'array';
+  'string' | 'number' | 'boolean' | 'structure' | 'array';
 
 /** Data representation of a GDevelop variable */
 declare type VariableData = Readonly<{
@@ -405,8 +401,7 @@ declare interface SceneAndExtensionsData {
 }
 
 declare interface EventsBasedObjectData
-  extends EventsBasedObjectVariantData,
-    InstanceContainerData {
+  extends EventsBasedObjectVariantData, InstanceContainerData {
   name: string;
   isInnerAreaFollowingParentSize: boolean;
   variants: Array<EventsBasedObjectVariantData>;

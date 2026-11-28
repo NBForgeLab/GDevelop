@@ -213,9 +213,7 @@ namespace gdjs {
               // The background shown by an effect (a skybox), replaced by
               // the forced background color while this layer is drawn.
               let replacedThreeSceneBackground:
-                | THREE.Color
-                | THREE.Texture
-                | null = null;
+                THREE.Color | THREE.Texture | null = null;
               if (isFirstRender) {
                 // Render the background color.
                 threeRenderer.setClearColor(backgroundColor);

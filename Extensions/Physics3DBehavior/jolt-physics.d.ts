@@ -98,15 +98,13 @@ declare namespace Jolt {
   const EMotionQuality_Discrete: number;
   const EMotionQuality_LinearCast: number;
   type EMotionQuality =
-    | typeof EMotionQuality_Discrete
-    | typeof EMotionQuality_LinearCast;
+    typeof EMotionQuality_Discrete | typeof EMotionQuality_LinearCast;
   function _emscripten_enum_EMotionQuality_EMotionQuality_Discrete(): EMotionQuality;
   function _emscripten_enum_EMotionQuality_EMotionQuality_LinearCast(): EMotionQuality;
   const EActivation_Activate: number;
   const EActivation_DontActivate: number;
   type EActivation =
-    | typeof EActivation_Activate
-    | typeof EActivation_DontActivate;
+    typeof EActivation_Activate | typeof EActivation_DontActivate;
   function _emscripten_enum_EActivation_EActivation_Activate(): EActivation;
   function _emscripten_enum_EActivation_EActivation_DontActivate(): EActivation;
   const EShapeType_Convex: number;
@@ -183,8 +181,7 @@ declare namespace Jolt {
   const EConstraintSpace_LocalToBodyCOM: number;
   const EConstraintSpace_WorldSpace: number;
   type EConstraintSpace =
-    | typeof EConstraintSpace_LocalToBodyCOM
-    | typeof EConstraintSpace_WorldSpace;
+    typeof EConstraintSpace_LocalToBodyCOM | typeof EConstraintSpace_WorldSpace;
   function _emscripten_enum_EConstraintSpace_EConstraintSpace_LocalToBodyCOM(): EConstraintSpace;
   function _emscripten_enum_EConstraintSpace_EConstraintSpace_WorldSpace(): EConstraintSpace;
   const ESpringMode_FrequencyAndDamping: number;
@@ -298,8 +295,7 @@ declare namespace Jolt {
   const ECollectFacesMode_CollectFaces: number;
   const ECollectFacesMode_NoFaces: number;
   type ECollectFacesMode =
-    | typeof ECollectFacesMode_CollectFaces
-    | typeof ECollectFacesMode_NoFaces;
+    typeof ECollectFacesMode_CollectFaces | typeof ECollectFacesMode_NoFaces;
   function _emscripten_enum_ECollectFacesMode_ECollectFacesMode_CollectFaces(): ECollectFacesMode;
   function _emscripten_enum_ECollectFacesMode_ECollectFacesMode_NoFaces(): ECollectFacesMode;
   const SixDOFConstraintSettings_EAxis_TranslationX: number;
@@ -381,8 +377,7 @@ declare namespace Jolt {
   const ETransmissionMode_Auto: number;
   const ETransmissionMode_Manual: number;
   type ETransmissionMode =
-    | typeof ETransmissionMode_Auto
-    | typeof ETransmissionMode_Manual;
+    typeof ETransmissionMode_Auto | typeof ETransmissionMode_Manual;
   function _emscripten_enum_ETransmissionMode_ETransmissionMode_Auto(): ETransmissionMode;
   function _emscripten_enum_ETransmissionMode_ETransmissionMode_Manual(): ETransmissionMode;
   const ETireFrictionDirection_Longitudinal: number;

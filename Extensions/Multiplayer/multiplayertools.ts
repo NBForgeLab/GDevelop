@@ -18,11 +18,7 @@ namespace gdjs {
   };
 
   type LobbyStatus =
-    | 'waiting'
-    | 'starting'
-    | 'playing'
-    | 'migrating'
-    | 'migrated';
+    'waiting' | 'starting' | 'playing' | 'migrating' | 'migrated';
   type LobbyConnectionStatus = 'waiting' | 'ready' | 'connected';
   type InGamePlayerStatus = 'playing' | 'left';
   type PlayerStatus = LobbyConnectionStatus | InGamePlayerStatus;
@@ -126,11 +122,8 @@ namespace gdjs {
     let _hasLobbyGameJustEnded = false;
     let _quickJoinLobbyJustFailed = false;
     let _quickJoinLobbyFailureReason:
-      | 'FULL'
-      | 'NOT_ENOUGH_PLAYERS'
-      | 'DOES_NOT_EXIST'
-      | 'UNKNOWN'
-      | null = null;
+      'FULL' | 'NOT_ENOUGH_PLAYERS' | 'DOES_NOT_EXIST' | 'UNKNOWN' | null =
+      null;
     let _lobbyId: string | null = null;
     let _connectionId: string | null = null;
 
@@ -140,10 +133,7 @@ namespace gdjs {
     let _isChangingHost = false;
     let _lobbyNewHostPickedAt: number | null = null;
     let _actionAfterJoiningLobby:
-      | 'OPEN_LOBBY_PAGE'
-      | 'JOIN_GAME'
-      | 'START_GAME'
-      | null = null;
+      'OPEN_LOBBY_PAGE' | 'JOIN_GAME' | 'START_GAME' | null = null;
     let _isQuickJoiningOrStartingAGame = false;
     let _lastQuickJoinRequestDoneAt: number | null = null;
 

@@ -17,10 +17,7 @@ namespace gdjs {
         return new (class implements gdjs.PixiFiltersTools.Filter {
           _cubeTexture: THREE.CubeTexture;
           _oldBackground:
-            | THREE.CubeTexture
-            | THREE.Texture
-            | THREE.Color
-            | null = null;
+            THREE.CubeTexture | THREE.Texture | THREE.Color | null = null;
           _isEnabled: boolean = false;
           _environmentIntensity: float = 1;
           _backgroundIntensity: float = 1;
@@ -71,9 +68,7 @@ namespace gdjs {
           }
           applyEffect(target: EffectsTarget): boolean {
             const scene = target.get3DRendererObject() as
-              | THREE.Scene
-              | null
-              | undefined;
+              THREE.Scene | null | undefined;
             if (!scene) {
               return false;
             }
@@ -100,9 +95,7 @@ namespace gdjs {
               const oldCubeTexture = this._cubeTexture;
               this._cubeTexture = this._getCubeTexture();
               const scene = target.get3DRendererObject() as
-                | THREE.Scene
-                | null
-                | undefined;
+                THREE.Scene | null | undefined;
               if (scene && this._isEnabled) {
                 scene.background = this._cubeTexture;
                 if (scene.environment === oldCubeTexture) {
@@ -114,9 +107,7 @@ namespace gdjs {
           }
           private _updateRotation(): void {
             const scene = target.get3DRendererObject() as
-              | THREE.Scene
-              | null
-              | undefined;
+              THREE.Scene | null | undefined;
             if (!scene || !this._isEnabled) {
               return;
             }
@@ -139,9 +130,7 @@ namespace gdjs {
           }
           private _updateEnvironmentIntensity(): void {
             const scene = target.get3DRendererObject() as
-              | THREE.Scene
-              | null
-              | undefined;
+              THREE.Scene | null | undefined;
             // Another effect may have set the environment of the scene.
             if (!scene || scene.environment !== this._cubeTexture) {
               return;
@@ -150,9 +139,7 @@ namespace gdjs {
           }
           private _updateBackgroundIntensity(): void {
             const scene = target.get3DRendererObject() as
-              | THREE.Scene
-              | null
-              | undefined;
+              THREE.Scene | null | undefined;
             if (!scene || !this._isEnabled) {
               return;
             }
@@ -160,9 +147,7 @@ namespace gdjs {
           }
           removeEffect(target: EffectsTarget): boolean {
             const scene = target.get3DRendererObject() as
-              | THREE.Scene
-              | null
-              | undefined;
+              THREE.Scene | null | undefined;
             if (!scene) {
               return false;
             }

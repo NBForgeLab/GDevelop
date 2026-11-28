@@ -27,9 +27,7 @@ namespace gdjs {
 
           isEnabled(target: EffectsTarget): boolean {
             const scene = target.get3DRendererObject() as
-              | THREE.Scene
-              | null
-              | undefined;
+              THREE.Scene | null | undefined;
             return scene ? scene.fog === this.fog : false;
           }
           setEnabled(target: EffectsTarget, enabled: boolean): boolean {
@@ -41,9 +39,7 @@ namespace gdjs {
           }
           applyEffect(target: EffectsTarget): boolean {
             const scene = target.get3DRendererObject() as
-              | THREE.Scene
-              | null
-              | undefined;
+              THREE.Scene | null | undefined;
             if (!scene || scene.fog === undefined) {
               return false;
             }
@@ -52,9 +48,7 @@ namespace gdjs {
           }
           removeEffect(target: EffectsTarget): boolean {
             const scene = target.get3DRendererObject() as
-              | THREE.Scene
-              | null
-              | undefined;
+              THREE.Scene | null | undefined;
             if (!scene || scene.fog === undefined) {
               return false;
             }

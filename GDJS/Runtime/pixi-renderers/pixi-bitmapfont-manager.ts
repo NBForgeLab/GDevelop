@@ -149,7 +149,7 @@ namespace gdjs {
       };
       this._pixiBitmapFontsInUse[bitmapFontInstallKey].objectsUsingTheFont++;
 
-      for (let i = 0; i < this._pixiBitmapFontsToUninstall.length; ) {
+      for (let i = 0; i < this._pixiBitmapFontsToUninstall.length;) {
         if (this._pixiBitmapFontsToUninstall[i] === bitmapFontInstallKey) {
           // The font is in the cache of fonts to uninstall, because it was previously used and then marked as not used anymore.
           // Remove it from the cache to avoid the font getting uninstalled.

@@ -5,7 +5,8 @@
  */
 namespace gdjs {
   export interface AbstractRuntimeObject3D
-    extends gdjs.RuntimeObject,
+    extends
+      gdjs.RuntimeObject,
       gdjs.Base3DHandler,
       gdjs.Resizable,
       gdjs.Scalable,
@@ -1893,7 +1894,7 @@ namespace gdjs {
      * remove null ones.
      */
     updateForces(elapsedTime: float): void {
-      for (let i = 0; i < this._instantForces.length; ) {
+      for (let i = 0; i < this._instantForces.length;) {
         const force = this._instantForces[i];
         const multiplier = force.getMultiplier();
         if (multiplier === 1) {
