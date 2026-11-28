@@ -82,8 +82,6 @@ const COMMONJS_SOURCE_PATTERNS = [
   /[\\/]src[\\/]GameEngineFinder[\\/]LocalGDJSFinder\.(js|ts|tsx)$/,
   /[\\/]src[\\/]JsExtensionsLoader[\\/](LocalJsExtensionsFinder|LocalJsExtensionsLoader|BrowserJsExtensionsLoader|index)\.(js|ts|tsx)$/,
   /[\\/]src[\\/]Utils[\\/](MapFor|OptionalRequire)\.(js|ts|tsx)$/,
-  /[\\/]src[\\/]GameDashboard[\\/]PublicGameProperties\.(js|ts|tsx)$/,
-  /[\\/]src[\\/]EventsSheet[\\/]EventsTree[\\/]TextRenderer[\\/]EventScriptTestHelpers\.(js|ts|tsx)$/,
 ];
 
 const isExplicitCommonJsModule = id => {
@@ -634,6 +632,7 @@ export default defineConfig(({ command, mode }) => {
       sourcemap: process.env.GENERATE_SOURCEMAP === 'true',
       commonjsOptions: {
         include: [/node_modules/, ...COMMONJS_SOURCE_PATTERNS],
+        extensions: ['.js', '.cjs', '.ts', '.tsx'],
         transformMixedEsModules: true,
       },
       rollupOptions: {

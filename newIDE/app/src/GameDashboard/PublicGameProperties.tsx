@@ -23,13 +23,15 @@ import { GameThumbnail } from './GameThumbnail';
 import { GameThumbnailVideo } from './GameThumbnailVideo';
 import Text from '../UI/Text';
 import Toggle from '../UI/Toggle';
+import cyrillicToLatinMappingJson from './CyrillicToLatin.json';
 
 const GAME_SLUG_MAX_LENGTH = 30;
 const GAME_SLUG_MIN_LENGTH = 6;
 
 const isCyrillic = (text: string) =>
   /[БГДЖЗИЙЛПФЦЧШЩЫЭЮЯбвгджзийклмнптфцчшщыэюя]/.test(text);
-const cyrillicToLatinMapping = require('./CyrillicToLatin.json');
+const cyrillicToLatinMapping: Record<string, string> =
+  cyrillicToLatinMappingJson;
 
 export const cleanUpGameSlug = (gameSlug: string): string => {
   let latinGameSlug = gameSlug;
