@@ -311,7 +311,7 @@ const getTitleRow = ({ i18n }: { i18n: I18nType }): Field => ({
         ) : (
           <Visibility style={styles.icon} />
         ),
-      isHighlighted: (value) => value === 'hidden',
+      isHighlighted: (value: 'hidden' | 'visible') => value === 'hidden',
       getValue: (instance: SchemaInstance) =>
         (instance as gdInitialInstance).isHidden() ? 'hidden' : 'visible',
       setValue: (instance: SchemaInstance, newValue: 'hidden' | 'visible') => {
@@ -341,7 +341,8 @@ const getTitleRow = ({ i18n }: { i18n: I18nType }): Field => ({
         ) : (
           <LockOpen style={styles.icon} />
         ),
-      isHighlighted: (value) => value === 'locked' || value === 'sealed',
+      isHighlighted: (value: 'sealed' | 'locked' | 'free') =>
+        value === 'locked' || value === 'sealed',
       getValue: (instance: SchemaInstance) => {
         const initialInstance = instance as gdInitialInstance;
         return initialInstance.isSealed()

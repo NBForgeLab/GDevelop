@@ -1295,7 +1295,11 @@ export default class InstancesEditor extends Component<Props, State> {
     );
   };
 
-  _onDownBackground = (x: number, y: number, event?: PointerEvent) => {
+  _onDownBackground = (
+    x: number,
+    y: number,
+    event?: PIXI.FederatedPointerEvent
+  ) => {
     this.lastCursorX = x;
     this.lastCursorY = y;
     (this.pixiRenderer.view as HTMLCanvasElement).focus();
@@ -1345,7 +1349,11 @@ export default class InstancesEditor extends Component<Props, State> {
     return layersLocks;
   };
 
-  _onUpBackground = (x: number, y: number, event?: PointerEvent) => {
+  _onUpBackground = (
+    x: number,
+    y: number,
+    event?: PIXI.FederatedPointerEvent
+  ) => {
     if (this.selectionRectangle.hasStartedSelectionRectangle()) {
       this._selectInstanceInsideSelectionRectangle();
     }

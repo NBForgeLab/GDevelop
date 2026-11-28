@@ -73,7 +73,7 @@ export type PrimitiveValueField =
       getValue: (instance: Instance) => boolean | null;
       setValue: (instance: Instance, newValue: boolean) => void;
     })
-  | (ValueFieldCommonProperties & {
+  | (Omit<ValueFieldCommonProperties, 'isHighlighted'> & {
       /** Only supported on compact property editors. */
       valueType: 'enumIcon';
       renderIcon: (value: any) => React.ReactNode;
@@ -161,9 +161,7 @@ export type ToggleButtons = ValueFieldCommonProperties & {
 
 // A value field is a primitive or a resource.
 export type ValueField =
-  | PrimitiveValueField
-  | ResourceField
-  | LeaderboardIdField;
+  PrimitiveValueField | ResourceField | LeaderboardIdField;
 
 // A field can be a primitive, a resource or a list of fields
 export type Field =

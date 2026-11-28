@@ -19,13 +19,10 @@ const readLocalFileToArrayBuffer = async (
     );
   });
 
-  // See https://stackoverflow.com/questions/8609289/convert-a-binary-nodejs-buffer-to-javascript-arraybuffer:
-  // The slice and offset stuff is required because small Buffers (less than 4 kB by default, half the pool size)
-  // can be views on a shared ArrayBuffer. Without slicing, you can end up with an ArrayBuffer containing data from another Buffer.
-  const arrayBuffer = buffer.buffer.slice(
-    buffer.byteOffset,
-    buffer.byteOffset + buffer.byteLength
-  );
+  // Copy into a dedicated ArrayBuffer because small Node Buffers (< 4 kB) share an internal slab
+  // and Buffer.buffer is typed as ArrayBufferLike (ArrayBuffer | SharedArrayBuffer).
+  const arrayBuffer = new ArrayBuffer(buffer.byteLength);
+  new Uint8Array(arrayBuffer).set(buffer);
   return arrayBuffer;
 };
 

@@ -2,6 +2,8 @@
   "//": "TypeScript configuration for Node.js scripts in newIDE/app/scripts and shared CommonJS modules in newIDE/app/src.",
   "compilerOptions": {
     "noEmit": true,
+    "incremental": true,
+    "tsBuildInfoFile": "../node_modules/.cache/typescript/scripts.tsbuildinfo",
     "allowJs": true,
     "checkJs": true,
     "noImplicitReturns": true,
