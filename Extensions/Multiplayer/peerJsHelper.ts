@@ -10,7 +10,7 @@ namespace gdjs {
      */
     type NetworkMessage = {
       messageName: string;
-      data: Uint8Array | string;
+      data: Uint8Array<ArrayBuffer> | string;
     };
 
     type PeerJSInitOptions = {
@@ -132,7 +132,9 @@ namespace gdjs {
     /**
      * Helper function to compress data sent over the network.
      */
-    async function compressData(data: object): Promise<Uint8Array | string> {
+    async function compressData(
+      data: object
+    ): Promise<Uint8Array<ArrayBuffer> | string> {
       if (compressionMethod === 'none') {
         // If no compression is used, we just stringify the data,
         // PeerJS will compress it to binary data.
@@ -174,7 +176,7 @@ namespace gdjs {
      * It returns the parsed JSON object, if valid, or undefined.
      */
     async function decompressData(
-      receivedData: Uint8Array | string
+      receivedData: Uint8Array<ArrayBuffer> | string
     ): Promise<object | undefined> {
       if (compressionMethod === 'none') {
         // If no compression is used, we just parse the data.
@@ -194,6 +196,12 @@ namespace gdjs {
           );
           return;
         }
+      }
+      if (typeof receivedData === 'string') {
+        logger.error(
+          `Error while parsing message using compressionMethod ${compressionMethod}: received data is not binary.`
+        );
+        return;
       }
       const compressionStreamFormat =
         compressionMethod === 'cs:gzip' ? 'gzip' : 'deflate';

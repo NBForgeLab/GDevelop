@@ -4,6 +4,8 @@
   // See `GDJS/scripts/build.js`.
   "compilerOptions": {
     "noEmit": true,
+    "incremental": true,
+    "tsBuildInfoFile": "GDJS/node_modules/.cache/typescript/tsconfig.tsbuildinfo",
     "allowJs": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
@@ -49,8 +51,7 @@
     "GDJS/Runtime/libs/CocoonJS",
     "Extensions/Effects/pixi-filters/filter-alpha.js",
     "SharedLibs/TileMapHelper/**/*",
-    "Extensions/Spine/spine-pixi-v7/spine-pixi-v7-pre.js",
-    "Extensions/Spine/spine-pixi-v7/spine-pixi-v7.js",
+    "Extensions/Spine/spine-pixi-v7/**/*",
     "Extensions/P2P/A_peer.js",
     "Extensions/Multiplayer/peer.js"
   ]
