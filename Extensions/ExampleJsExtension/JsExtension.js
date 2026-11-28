@@ -194,7 +194,6 @@ module.exports = {
         '',
         'CppPlatform/Extensions/topdownmovementicon.png',
         'DummyBehavior',
-        //@ts-ignore The class hierarchy is incorrect leading to a type error, but this is valid.
         dummyBehavior,
         new gd.BehaviorsSharedData()
       )
@@ -272,7 +271,6 @@ module.exports = {
         '',
         'CppPlatform/Extensions/topdownmovementicon.png',
         'DummyBehaviorWithSharedData',
-        //@ts-ignore The class hierarchy is incorrect leading to a type error, but this is valid.
         dummyBehaviorWithSharedData,
         sharedData
       )

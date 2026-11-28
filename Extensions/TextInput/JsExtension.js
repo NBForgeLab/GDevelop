@@ -901,14 +901,22 @@ module.exports = {
           ? object.content.textAlign
           : 'left';
 
+        if (
+          (textAlign === 'left' ||
+            textAlign === 'center' ||
+            textAlign === 'right') &&
+          this._pixiText.style.align !== textAlign
+        ) {
+          this._pixiText.style.align = textAlign;
+          this._pixiText.dirty = true;
+        }
+
         if (textAlign === 'left') this._pixiText.position.x = textOffsetX;
         else if (textAlign === 'right')
           this._pixiText.position.x =
             0 + width - this._pixiText.width - textOffsetX;
-        else if (textAlign === 'center') {
-          this._pixiText.align = 'center';
+        else if (textAlign === 'center')
           this._pixiText.position.x = 0 + width / 2 - this._pixiText.width / 2;
-        }
 
         this._pixiText.position.y = isTextArea
           ? textOffsetY + paddingY

@@ -3145,6 +3145,37 @@ module.exports = {
       }
     }
 
+    /**
+     * @param {THREE.Material | undefined} material
+     * @returns {{ width: number, height: number } | null}
+     */
+    const getMaterialTextureSize = (material) => {
+      if (
+        !material ||
+        !('map' in material) ||
+        !material.map ||
+        typeof material.map !== 'object' ||
+        !('source' in material.map) ||
+        !material.map.source ||
+        typeof material.map.source !== 'object' ||
+        !('data' in material.map.source)
+      ) {
+        return null;
+      }
+      const data = material.map.source.data;
+      if (
+        !data ||
+        typeof data !== 'object' ||
+        !('width' in data) ||
+        !('height' in data) ||
+        typeof data.width !== 'number' ||
+        typeof data.height !== 'number'
+      ) {
+        return null;
+      }
+      return { width: data.width, height: data.height };
+    };
+
     class RenderedCube3DObject3DInstance extends Rendered3DInstance {
       _defaultWidth = 1;
       _defaultHeight = 1;
@@ -3179,6 +3210,7 @@ module.exports = {
         this._pixiContainer.addChild(this._pixiObject);
 
         const geometry = new THREE.BoxGeometry(1, 1, 1);
+        /** @type {THREE.Material[]} */
         const materials = [
           getTransparentMaterial(),
           getTransparentMaterial(),
@@ -3189,7 +3221,9 @@ module.exports = {
         ];
         this._threeObject = new THREE.Mesh(geometry, materials);
         this._threeObject.rotation.order = 'ZYX';
-        this._threeGroup.add(this._threeObject);
+        if (this._threeGroup) {
+          this._threeGroup.add(this._threeObject);
+        }
 
         this.updateThreeObject();
       }
@@ -3433,7 +3467,8 @@ module.exports = {
               4
           );
           const material = this._threeObject.material[materialIndex];
-          if (!material || !material.map) {
+          const textureSize = getMaterialTextureSize(material);
+          if (!textureSize) {
             continue;
           }
 
@@ -3452,25 +3487,17 @@ module.exports = {
               if (shouldRepeatTexture) {
                 if (shouldOrientateFacesTowardsY) {
                   x =
-                    -(
-                      this._threeObject.scale.z / material.map.source.data.width
-                    ) *
+                    -(this._threeObject.scale.z / textureSize.width) *
                     (pos.getZ(vertexIndex) - 0.5);
                   y =
-                    -(
-                      this._threeObject.scale.y /
-                      material.map.source.data.height
-                    ) *
+                    -(this._threeObject.scale.y / textureSize.height) *
                     (pos.getY(vertexIndex) + 0.5);
                 } else {
                   x =
-                    -(
-                      this._threeObject.scale.y / material.map.source.data.width
-                    ) *
+                    -(this._threeObject.scale.y / textureSize.width) *
                     (pos.getY(vertexIndex) - 0.5);
                   y =
-                    (this._threeObject.scale.z /
-                      material.map.source.data.height) *
+                    (this._threeObject.scale.z / textureSize.height) *
                     (pos.getZ(vertexIndex) - 0.5);
                 }
               } else {
@@ -3490,23 +3517,17 @@ module.exports = {
               if (shouldRepeatTexture) {
                 if (shouldOrientateFacesTowardsY) {
                   x =
-                    (this._threeObject.scale.z /
-                      material.map.source.data.width) *
+                    (this._threeObject.scale.z / textureSize.width) *
                     (pos.getZ(vertexIndex) + 0.5);
                   y =
-                    -(
-                      this._threeObject.scale.y /
-                      material.map.source.data.height
-                    ) *
+                    -(this._threeObject.scale.y / textureSize.height) *
                     (pos.getY(vertexIndex) + 0.5);
                 } else {
                   x =
-                    (this._threeObject.scale.y /
-                      material.map.source.data.width) *
+                    (this._threeObject.scale.y / textureSize.width) *
                     (pos.getY(vertexIndex) + 0.5);
                   y =
-                    (this._threeObject.scale.z /
-                      material.map.source.data.height) *
+                    (this._threeObject.scale.z / textureSize.height) *
                     (pos.getZ(vertexIndex) - 0.5);
                 }
               } else {
@@ -3527,11 +3548,10 @@ module.exports = {
               // Bottom face
               if (shouldRepeatTexture) {
                 x =
-                  (this._threeObject.scale.x / material.map.source.data.width) *
+                  (this._threeObject.scale.x / textureSize.width) *
                   (pos.getX(vertexIndex) + 0.5);
                 y =
-                  (this._threeObject.scale.z /
-                    material.map.source.data.height) *
+                  (this._threeObject.scale.z / textureSize.height) *
                   (pos.getZ(vertexIndex) - 0.5);
               } else {
                 [x, y] = noRepeatTextureVertexIndexToUvMapping[vertexIndex % 4];
@@ -3542,24 +3562,17 @@ module.exports = {
               if (shouldRepeatTexture) {
                 if (shouldOrientateFacesTowardsY) {
                   x =
-                    (this._threeObject.scale.x /
-                      material.map.source.data.width) *
+                    (this._threeObject.scale.x / textureSize.width) *
                     (pos.getX(vertexIndex) + 0.5);
                   y =
-                    -(
-                      this._threeObject.scale.z /
-                      material.map.source.data.height
-                    ) *
+                    -(this._threeObject.scale.z / textureSize.height) *
                     (pos.getZ(vertexIndex) + 0.5);
                 } else {
                   x =
-                    -(
-                      this._threeObject.scale.x / material.map.source.data.width
-                    ) *
+                    -(this._threeObject.scale.x / textureSize.width) *
                     (pos.getX(vertexIndex) - 0.5);
                   y =
-                    (this._threeObject.scale.z /
-                      material.map.source.data.height) *
+                    (this._threeObject.scale.z / textureSize.height) *
                     (pos.getZ(vertexIndex) - 0.5);
                 }
               } else {
@@ -3574,12 +3587,10 @@ module.exports = {
               // Front face
               if (shouldRepeatTexture) {
                 x =
-                  (this._threeObject.scale.x / material.map.source.data.width) *
+                  (this._threeObject.scale.x / textureSize.width) *
                   (pos.getX(vertexIndex) + 0.5);
                 y =
-                  -(
-                    this._threeObject.scale.y / material.map.source.data.height
-                  ) *
+                  -(this._threeObject.scale.y / textureSize.height) *
                   (pos.getY(vertexIndex) + 0.5);
               } else {
                 [x, y] = noRepeatTextureVertexIndexToUvMapping[vertexIndex % 4];
@@ -3593,13 +3604,12 @@ module.exports = {
               if (shouldRepeatTexture) {
                 x =
                   (shouldBackFaceBeUpThroughXAxisRotation ? 1 : -1) *
-                  (this._threeObject.scale.x / material.map.source.data.width) *
+                  (this._threeObject.scale.x / textureSize.width) *
                   (pos.getX(vertexIndex) +
                     (shouldBackFaceBeUpThroughXAxisRotation ? 1 : -1) * 0.5);
                 y =
                   (shouldBackFaceBeUpThroughXAxisRotation ? 1 : -1) *
-                  (this._threeObject.scale.y /
-                    material.map.source.data.height) *
+                  (this._threeObject.scale.y / textureSize.height) *
                   (pos.getY(vertexIndex) +
                     (shouldBackFaceBeUpThroughXAxisRotation ? -1 : 1) * 0.5);
               } else {
@@ -4056,7 +4066,9 @@ module.exports = {
         this._threeObject.rotation.order = 'ZYX';
         this._threeObject.castShadow = true;
         this._threeObject.receiveShadow = true;
-        this._threeGroup.add(this._threeObject);
+        if (this._threeGroup) {
+          this._threeGroup.add(this._threeObject);
+        }
       }
 
       getOriginX() {

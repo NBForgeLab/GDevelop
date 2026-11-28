@@ -1932,10 +1932,7 @@ const defineCollisionMask = function (extension, _, gd) {
 
 /** @type {ExtensionModule} */
 module.exports = {
-  createExtension: function (
-    _ /*: (string) => string */,
-    gd /*: libGDevelop */
-  ) {
+  createExtension: function (_, gd) {
     const extension = new gd.PlatformExtension();
 
     extension
@@ -1967,9 +1964,7 @@ module.exports = {
     return extension;
   },
 
-  registerClearCache: function (
-    objectsRenderingService /*: ObjectsRenderingService */
-  ) {
+  registerClearCache: function (objectsRenderingService) {
     const TilemapHelper = objectsRenderingService.requireModule(
       __dirname,
       'helper/TileMapHelper'
@@ -2051,10 +2046,16 @@ module.exports = {
       ref: Tilemap.TileRenderer,
     });
 
+    /** @typedef {PIXI.Container & { containsPoint?: (position: PIXI.IPointData) => boolean }} HitTestableContainer */
+    /** @typedef {PIXI.Graphics & { containsPoint?: (position: PIXI.IPointData) => boolean }} HitTestableGraphics */
+
     /**
      * Renderer for instances of TileMap inside the IDE.
      */
     class RenderedTileMapInstance extends RenderedInstance {
+      /** @type {HitTestableContainer | null} */
+      _pixiObject = null;
+
       constructor(
         project,
         instance,
@@ -2073,34 +2074,40 @@ module.exports = {
         // This setting allows tile maps with more than 16K tiles.
         Tilemap.settings.use32bitIndex = true;
 
-        this.tileMapPixiObject = new Tilemap.CompositeTilemap();
-        this._pixiObject = this.tileMapPixiObject;
+        /** @type {HitTestableContainer} */
+        const tileMapPixiObject = new Tilemap.CompositeTilemap();
+        this.tileMapPixiObject = tileMapPixiObject;
+        this._pixiObject = tileMapPixiObject;
         this._editableTileMap = null;
 
         // Implement `containsPoint` so that we can set `interactive` to true and
         // the Tilemap will properly emit events when hovered/clicked.
         // By default, this is not implemented in pixi-tilemap.
-        this._pixiObject.containsPoint = (position) => {
-          if (!this._pixiObject) {
-            // Ease debugging by throwing now rather than waiting for an exception later.
-            throw new Error(
-              'containsPoint called on a destroyed PIXI object - this object was not properly removed from the PIXI container.'
+        tileMapPixiObject.containsPoint =
+          /** @param {PIXI.IPointData} position */
+          (position) => {
+            if (!this._pixiObject) {
+              // Ease debugging by throwing now rather than waiting for an exception later.
+              throw new Error(
+                'containsPoint called on a destroyed PIXI object - this object was not properly removed from the PIXI container.'
+              );
+            }
+
+            // Turns the world position to the local object coordinates
+            const localPosition = new PIXI.Point();
+            this._pixiObject.worldTransform.applyInverse(
+              position,
+              localPosition
             );
-            return;
-          }
 
-          // Turns the world position to the local object coordinates
-          const localPosition = new PIXI.Point();
-          this._pixiObject.worldTransform.applyInverse(position, localPosition);
-
-          return (
-            localPosition.x >= 0 &&
-            localPosition.x < this.width &&
-            localPosition.y >= 0 &&
-            localPosition.y < this.height
-          );
-        };
-        this._pixiContainer.addChild(this._pixiObject);
+            return (
+              localPosition.x >= 0 &&
+              localPosition.x < this.width &&
+              localPosition.y >= 0 &&
+              localPosition.y < this.height
+            );
+          };
+        this._pixiContainer.addChild(tileMapPixiObject);
         this.width = 48;
         this.height = 48;
         this.update();
@@ -2108,20 +2115,23 @@ module.exports = {
 
       onRemovedFromScene() {
         super.onRemovedFromScene();
-        // Destroy the children too, as each one holds a vertex buffer in the
-        // GPU memory. Keep textures because they are shared by all tile maps.
-        this._pixiObject.destroy({ children: true });
+        if (this._pixiObject) {
+          // Destroy the children too, as each one holds a vertex buffer in the
+          // GPU memory. Keep textures because they are shared by all tile maps.
+          this._pixiObject.destroy({ children: true });
 
-        // Not strictly necessary, but helps finding wrong
-        // handling of this._pixiObject in its container.
-        this._pixiObject = null;
+          // Not strictly necessary, but helps finding wrong
+          // handling of this._pixiObject in its container.
+          this._pixiObject = null;
+        }
       }
 
+      /** @param {HitTestableContainer} newPixiObject */
       _replacePixiObject(newPixiObject) {
         if (this._pixiObject !== null)
           this._pixiContainer.removeChild(this._pixiObject);
         this._pixiObject = newPixiObject;
-        this._pixiContainer.addChild(this._pixiObject);
+        this._pixiContainer.addChild(newPixiObject);
       }
 
       _onLoadingError() {
@@ -2386,6 +2396,8 @@ module.exports = {
           this.updateTileMap();
         }
 
+        if (!this._pixiObject) return;
+
         if (this._instance.hasCustomSize()) {
           this._pixiObject.scale.x = this.getCustomWidth() / this.width;
           this._pixiObject.scale.y = this.getCustomHeight() / this.height;
@@ -2473,6 +2485,8 @@ module.exports = {
      * Renderer for instances of SimpleTileMap inside the IDE.
      */
     class RenderedSimpleTileMapInstance extends RenderedInstance {
+      /** @type {HitTestableContainer | null} */
+      _pixiObject = null;
       _getStartedText = 'Select this instance\nto start painting';
       _noAtlasText = 'Set up an atlas image\nin the tilemap object.';
       _placeholderTextPixiObject = new PIXI.Text(
@@ -2510,43 +2524,46 @@ module.exports = {
         Tilemap.settings.use32bitIndex = true;
 
         this.tileMapPixiObject = new Tilemap.CompositeTilemap();
-        this._pixiObject = new PIXI.Container();
+        /** @type {HitTestableContainer} */
+        const pixiObject = new PIXI.Container();
+        this._pixiObject = pixiObject;
         this._pixiObject.addChild(this.tileMapPixiObject);
         this._editableTileMap = null;
 
         // Implement `containsPoint` so that we can set `interactive` to true and
         // the Tilemap will properly emit events when hovered/clicked.
         // By default, this is not implemented in pixi-tilemap.
-        this._pixiObject.containsPoint = (position) => {
-          if (!this._pixiObject) {
-            // Ease debugging by throwing now rather than waiting for an exception later.
-            throw new Error(
-              'containsPoint called on a destroyed PIXI object - this object was not properly removed from the PIXI container.'
-            );
-            return;
-          }
+        pixiObject.containsPoint =
+          /** @param {PIXI.IPointData} position */
+          (position) => {
+            if (!this._pixiObject) {
+              // Ease debugging by throwing now rather than waiting for an exception later.
+              throw new Error(
+                'containsPoint called on a destroyed PIXI object - this object was not properly removed from the PIXI container.'
+              );
+            }
 
-          // Turns the world position to the local object coordinates
-          const localPosition = new PIXI.Point();
-          if (this.tileMapPixiObject.visible) {
-            this.tileMapPixiObject.worldTransform.applyInverse(
-              position,
-              localPosition
-            );
-          } else {
-            this._placeholderImagePixiObject.worldTransform.applyInverse(
-              position,
-              localPosition
-            );
-          }
+            // Turns the world position to the local object coordinates
+            const localPosition = new PIXI.Point();
+            if (this.tileMapPixiObject.visible) {
+              this.tileMapPixiObject.worldTransform.applyInverse(
+                position,
+                localPosition
+              );
+            } else {
+              this._placeholderImagePixiObject.worldTransform.applyInverse(
+                position,
+                localPosition
+              );
+            }
 
-          return (
-            localPosition.x >= 0 &&
-            localPosition.x < this.width &&
-            localPosition.y >= 0 &&
-            localPosition.y < this.height
-          );
-        };
+            return (
+              localPosition.x >= 0 &&
+              localPosition.x < this.width &&
+              localPosition.y >= 0 &&
+              localPosition.y < this.height
+            );
+          };
         this._placeholderTextPixiObject.eventMode = 'static';
         this._placeholderImagePixiObject.eventMode = 'static';
         this._placeholderTextPixiObject.anchor.x = 0.5;
@@ -2557,7 +2574,7 @@ module.exports = {
         this._placeholderPixiObject.addChild(this._placeholderTextPixiObject);
         this._placeholderPixiObject.addChild(this._placeholderImagePixiObject);
         this._pixiObject.addChild(this._placeholderPixiObject);
-        this._pixiContainer.addChild(this._pixiObject);
+        this._pixiContainer.addChild(pixiObject);
         this.width = 48;
         this.height = 48;
         this._objectName = instance.getObjectName();
@@ -2567,20 +2584,23 @@ module.exports = {
 
       onRemovedFromScene() {
         super.onRemovedFromScene();
-        // Destroy the children too, as each one holds a vertex buffer in the
-        // GPU memory. Keep textures because they are shared by all tile maps.
-        this._pixiObject.destroy({ children: true });
+        if (this._pixiObject) {
+          // Destroy the children too, as each one holds a vertex buffer in the
+          // GPU memory. Keep textures because they are shared by all tile maps.
+          this._pixiObject.destroy({ children: true });
 
-        // Not strictly necessary, but helps finding wrong
-        // handling of this._pixiObject in its container.
-        this._pixiObject = null;
+          // Not strictly necessary, but helps finding wrong
+          // handling of this._pixiObject in its container.
+          this._pixiObject = null;
+        }
       }
 
+      /** @param {HitTestableContainer} newPixiObject */
       _replacePixiObject(newPixiObject) {
         if (this._pixiObject !== null)
           this._pixiContainer.removeChild(this._pixiObject);
         this._pixiObject = newPixiObject;
-        this._pixiContainer.addChild(this._pixiObject);
+        this._pixiContainer.addChild(newPixiObject);
       }
 
       _onLoadingError() {
@@ -2878,6 +2898,8 @@ module.exports = {
      * Renderer for instances of TileMap collision mask inside the IDE.
      */
     class RenderedCollisionMaskInstance extends RenderedInstance {
+      /** @type {HitTestableContainer | null} */
+      _pixiObject = null;
       _tilemapJsonFile = '';
       _tilesetJsonFile = '';
       _collisionMaskTag = '';
@@ -2903,34 +2925,40 @@ module.exports = {
           pixiResourcesLoader
         );
 
-        this.tileMapPixiObject = new PIXI.Graphics();
-        this._pixiObject = this.tileMapPixiObject;
+        /** @type {HitTestableGraphics} */
+        const tileMapPixiObject = new PIXI.Graphics();
+        this.tileMapPixiObject = tileMapPixiObject;
+        this._pixiObject = tileMapPixiObject;
 
         // Implement `containsPoint` so that we can set `interactive` to true and
         // the Tilemap will properly emit events when hovered/clicked.
         // By default, this is not implemented in pixi-tilemap.
-        this._pixiObject.containsPoint = (position) => {
-          if (!this._pixiObject) {
-            // Ease debugging by throwing now rather than waiting for an exception later.
-            throw new Error(
-              'containsPoint called on a destroyed PIXI object - this object was not properly removed from the PIXI container.'
+        tileMapPixiObject.containsPoint =
+          /** @param {PIXI.IPointData} position */
+          (position) => {
+            if (!this._pixiObject) {
+              // Ease debugging by throwing now rather than waiting for an exception later.
+              throw new Error(
+                'containsPoint called on a destroyed PIXI object - this object was not properly removed from the PIXI container.'
+              );
+            }
+
+            // Turns the world position to the local object coordinates
+            const localPosition = new PIXI.Point();
+            this._pixiObject.worldTransform.applyInverse(
+              position,
+              localPosition
             );
-            return;
-          }
 
-          // Turns the world position to the local object coordinates
-          const localPosition = new PIXI.Point();
-          this._pixiObject.worldTransform.applyInverse(position, localPosition);
-
-          // Check if the point is inside the object bounds
-          return (
-            localPosition.x >= 0 &&
-            localPosition.x < this.width &&
-            localPosition.y >= 0 &&
-            localPosition.y < this.height
-          );
-        };
-        this._pixiContainer.addChild(this._pixiObject);
+            // Check if the point is inside the object bounds
+            return (
+              localPosition.x >= 0 &&
+              localPosition.x < this.width &&
+              localPosition.y >= 0 &&
+              localPosition.y < this.height
+            );
+          };
+        this._pixiContainer.addChild(tileMapPixiObject);
         this.width = 48;
         this.height = 48;
         this.update();
@@ -2938,18 +2966,21 @@ module.exports = {
 
       onRemovedFromScene() {
         super.onRemovedFromScene();
-        this._pixiObject.destroy();
+        if (this._pixiObject) {
+          this._pixiObject.destroy();
 
-        // Not strictly necessary, but helps finding wrong
-        // handling of this._pixiObject in its container.
-        this._pixiObject = null;
+          // Not strictly necessary, but helps finding wrong
+          // handling of this._pixiObject in its container.
+          this._pixiObject = null;
+        }
       }
 
+      /** @param {HitTestableContainer} newPixiObject */
       _replacePixiObject(newPixiObject) {
         if (this._pixiObject !== null)
           this._pixiContainer.removeChild(this._pixiObject);
         this._pixiObject = newPixiObject;
-        this._pixiContainer.addChild(this._pixiObject);
+        this._pixiContainer.addChild(newPixiObject);
       }
 
       _onLoadingError() {
@@ -3009,7 +3040,7 @@ module.exports = {
             this.width = tileMap.getWidth();
             this.height = tileMap.getHeight();
             TilemapHelper.PixiTileMapHelper.updatePixiCollisionMask(
-              this._pixiObject,
+              this.tileMapPixiObject,
               tileMap,
               collisionMaskTag,
               layerIndex,
@@ -3104,6 +3135,8 @@ module.exports = {
           this._outlineSize = outlineSize;
           this.updateTileMap();
         }
+
+        if (!this._pixiObject) return;
 
         if (this._instance.hasCustomSize()) {
           this._pixiObject.scale.x = this.getCustomWidth() / this.width;

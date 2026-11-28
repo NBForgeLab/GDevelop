@@ -16,7 +16,7 @@
 /** @type {ExtensionModule} */
 module.exports = {
   createExtension: function (_, gd) {
-    const extension /*: gdPlatformExtension */ = new gd.PlatformExtension();
+    const extension = new gd.PlatformExtension();
     extension
       .setExtensionInformation(
         'P2P',

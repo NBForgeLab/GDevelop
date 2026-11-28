@@ -378,7 +378,6 @@ module.exports = {
           '',
           'JsPlatform/Extensions/nav-mesh-character.svg',
           'NavMeshCharacterBehavior',
-          //@ts-ignore The class hierarchy is incorrect leading to a type error, but this is valid.
           behavior,
           sharedData
         )
@@ -876,7 +875,6 @@ module.exports = {
           '',
           'JsPlatform/Extensions/nav-mesh-obstacle.svg',
           'NavMeshObstacle',
-          //@ts-ignore The class hierarchy is incorrect leading to a type error, but this is valid.
           behavior,
           sharedData
         )

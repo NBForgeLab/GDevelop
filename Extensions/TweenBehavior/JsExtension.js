@@ -646,7 +646,6 @@ module.exports = {
         '',
         'JsPlatform/Extensions/tween_behavior32.png',
         'TweenBehavior',
-        // @ts-ignore - TODO: Fix tweenBehavior being an BehaviorJsImplementation instead of an Behavior
         tweenBehavior,
         new gd.BehaviorsSharedData()
       )

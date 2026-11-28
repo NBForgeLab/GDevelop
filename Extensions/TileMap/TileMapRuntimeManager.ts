@@ -105,7 +105,9 @@ namespace gdjs {
        * @param callback A function called when the tiles textures are split.
        */
       getOrLoadTextureCache(
-        getTexture: (textureName: string) => PIXI.BaseTexture<PIXI.Resource>,
+        getTexture: (
+          textureName: string
+        ) => PIXI.BaseTexture<PIXI.Resource> | PIXI.Texture<PIXI.Resource>,
         atlasImageResourceName: string,
         tileMapJsonResourceName: string,
         tileSetJsonResourceName: string,
@@ -132,7 +134,9 @@ namespace gdjs {
        * @param callback A function called when the tiles textures are split.
        */
       getOrLoadSimpleTileMapTextureCache(
-        getTexture: (textureName: string) => PIXI.BaseTexture<PIXI.Resource>,
+        getTexture: (
+          textureName: string
+        ) => PIXI.BaseTexture<PIXI.Resource> | PIXI.Texture<PIXI.Resource>,
         atlasImageResourceName: string,
         tileSize: number,
         columnCount: number,

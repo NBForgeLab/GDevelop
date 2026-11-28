@@ -511,8 +511,9 @@ module.exports = {
     const getDefaultBitmapFont = () => {
       if (defaultBitmapFont) return defaultBitmapFont;
 
+      const defaultBitmapFontFamily = 'Arial';
       const defaultBitmapFontStyle = new PIXI.TextStyle({
-        fontFamily: 'Arial',
+        fontFamily: defaultBitmapFontFamily,
         fontSize: 20,
         padding: 5,
         align: 'left',
@@ -522,15 +523,11 @@ module.exports = {
       });
 
       defaultBitmapFont = patchBitmapFont(
-        PIXI.BitmapFont.from(
-          defaultBitmapFontStyle.fontFamily,
-          defaultBitmapFontStyle,
-          {
-            chars: [
-              [' ', '~'], // All the printable ASCII characters
-            ],
-          }
-        ),
+        PIXI.BitmapFont.from(defaultBitmapFontFamily, defaultBitmapFontStyle, {
+          chars: [
+            [' ', '~'], // All the printable ASCII characters
+          ],
+        }),
         defaultBitmapFontInstallKey
       );
       return defaultBitmapFont;

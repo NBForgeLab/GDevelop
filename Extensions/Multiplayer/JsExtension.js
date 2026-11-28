@@ -1334,7 +1334,6 @@ module.exports = {
         '',
         'JsPlatform/Extensions/multiplayer.svg',
         'MultiplayerObjectBehavior',
-        // @ts-ignore - TODO: Fix multiplayerBehavior being a BehaviorJsImplementation instead of an Behavior
         multiplayerObjectBehavior,
         sharedData
       )

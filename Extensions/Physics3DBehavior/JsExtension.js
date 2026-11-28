@@ -849,7 +849,6 @@ module.exports = {
           '',
           'JsPlatform/Extensions/physics3d.svg',
           'Physics3DBehavior',
-          //@ts-ignore The class hierarchy is incorrect leading to a type error, but this is valid.
           behavior,
           sharedData
         )
@@ -2252,7 +2251,6 @@ module.exports = {
           '',
           'JsPlatform/Extensions/physics_character3d.svg',
           'PhysicsCharacter3D',
-          //@ts-ignore The class hierarchy is incorrect leading to a type error, but this is valid.
           behavior,
           new gd.BehaviorsSharedData()
         )
@@ -3750,7 +3748,6 @@ module.exports = {
           '',
           'JsPlatform/Extensions/physics_car3d.svg',
           'PhysicsCar3D',
-          //@ts-ignore The class hierarchy is incorrect leading to a type error, but this is valid.
           behavior,
           new gd.BehaviorsSharedData()
         )

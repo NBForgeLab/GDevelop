@@ -15,8 +15,13 @@ export namespace TiledPixiHelper {
   export function parseAtlas(
     tileMap: TiledTileMap,
     levelIndex: number,
-    atlasTexture: PIXI.BaseTexture<PIXI.Resource> | null,
-    getTexture: (textureName: string) => PIXI.BaseTexture<PIXI.Resource>
+    atlasTexture:
+      | PIXI.BaseTexture<PIXI.Resource>
+      | PIXI.Texture<PIXI.Resource>
+      | null,
+    getTexture: (
+      textureName: string
+    ) => PIXI.BaseTexture<PIXI.Resource> | PIXI.Texture<PIXI.Resource>
   ): TileTextureCache | null {
     if (!tileMap.tiledversion) {
       console.warn(
@@ -89,6 +94,10 @@ export namespace TiledPixiHelper {
     // Prepare the textures pointing to the base "Atlas" Texture for each tile.
     // Note that this cache can be augmented later with rotated/flipped
     // versions of the tile textures.
+    const atlasBaseTexture =
+      atlasTexture instanceof PIXI.Texture
+        ? atlasTexture.baseTexture
+        : atlasTexture!;
     const textureCache = new TileTextureCache();
     for (let tileSetIndex = 0; tileSetIndex < tilecount; tileSetIndex++) {
       const columnMultiplier = Math.floor(tileSetIndex % columns);
@@ -99,7 +108,7 @@ export namespace TiledPixiHelper {
 
       try {
         const rect = new PIXI.Rectangle(x, y, tilewidth, tileheight);
-        const texture = new PIXI.Texture(atlasTexture!, rect);
+        const texture = new PIXI.Texture(atlasBaseTexture, rect);
 
         textureCache.setTexture(tileId, texture);
       } catch (error) {

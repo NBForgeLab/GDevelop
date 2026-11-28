@@ -57,7 +57,7 @@ const untransformedPaths = [
   'Extensions/Physics2Behavior/box2d.js',
   'Extensions/PhysicsBehavior/box2djs',
   'Extensions/Shopify/shopify-buy.umd.polyfilled.min.js',
-  'Extensions/JsExtensionTypes.flow.js',
+  'Extensions/JsExtensionTypes.d.ts',
   'Extensions/TileMap/pako/dist/pako.min.js',
   'Extensions/TileMap/pixi-tilemap/dist/pixi-tilemap.umd.js',
   'Extensions/TileMap/helper/TileMapHelper.js',

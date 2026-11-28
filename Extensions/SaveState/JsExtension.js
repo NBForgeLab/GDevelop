@@ -748,7 +748,6 @@ module.exports = {
         '',
         'res/actions/saveUp.svg',
         'SaveConfiguration',
-        // @ts-ignore - TODO: Fix type being a BehaviorJsImplementation instead of an Behavior
         saveConfigurationBehavior,
         sharedData
       )

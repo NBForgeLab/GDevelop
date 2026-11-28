@@ -4,31 +4,72 @@ type GDNamespace = typeof import('../GDevelop.js/types');
 // in this file and merge it with the other namespace declarations.
 declare namespace PIXI {}
 
+declare interface PixiResourcesLoader {
+  burstCache(): Promise<void>;
+  reloadResource(project: gd.Project, resourceName: string): Promise<void>;
+  loadTextures(project: gd.Project, resourceNames: string[]): Promise<void>;
+  getPIXITexture(project: gd.Project, resourceName: string): PIXI.Texture;
+  getThreeTexture(
+    project: gd.Project,
+    resourceName: string
+  ): Promise<THREE.Texture>;
+  getThreeMaterial(
+    project: gd.Project,
+    resourceName: string,
+    options: {
+      useTransparentTexture: boolean;
+      forceBasicMaterial: boolean;
+    }
+  ): Promise<THREE.Material>;
+  get3DModel(
+    project: gd.Project,
+    resourceName: string
+  ): Promise<THREE_ADDONS.GLTF>;
+  createSpine(
+    project: gd.Project,
+    resourceName: string
+  ): Promise<spine.Spine | null>;
+  getPIXIVideoTexture(project: gd.Project, resourceName: string): PIXI.Texture;
+  loadFontFamily(
+    project: gd.Project,
+    fontResourceName: string
+  ): Promise<string>;
+  getFontFamily(project: gd.Project, resourceName: string): string;
+  getBitmapFontData(project: gd.Project, resourceName: string): Promise<any>;
+  getInvalidPIXITexture(): PIXI.Texture;
+  getLoadingPIXITexture(): PIXI.Texture;
+  getResourceJsonData(project: gd.Project, resourceName: string): Promise<any>;
+}
+
 /**
  * RenderedInstance is the base class used for creating 2D renderers of instances,
  * which display on the scene editor, using Pixi.js, the instance of an object (see InstancesEditor).
  */
-class RenderedInstance {
+declare class RenderedInstance<
+  TPixiObject extends PIXI.DisplayObject = PIXI.DisplayObject,
+> {
   _project: gd.Project;
   _instance: gd.InitialInstance;
   _associatedObjectConfiguration: gd.ObjectConfiguration;
   _pixiContainer: PIXI.Container;
-  _pixiResourcesLoader: Class<PixiResourcesLoader>;
-  _pixiObject: PIXI.DisplayObject | null;
-  _propertyOverridings: Map<string, string>;
+  _pixiResourcesLoader: PixiResourcesLoader;
+  _pixiObject: TPixiObject | null;
+  _getPropertyOverridings: (() => Map<string, string>) | null;
   wasUsed: boolean;
 
   /** Set to true when onRemovedFromScene is called. Allows to cancel promises/asynchronous operations (notably: waiting for a resource load). */
   _wasDestroyed: boolean;
 
   constructor(
-    project: gdProject,
-    instance: gdInitialInstance,
-    associatedObjectConfiguration: gdObjectConfiguration,
+    project: gd.Project,
+    instance: gd.InitialInstance,
+    associatedObjectConfiguration: gd.ObjectConfiguration,
     pixiContainer: PIXI.Container,
-    pixiResourcesLoader: Class<PixiResourcesLoader>,
-    getPropertyOverridings: (() => Map<string, string>) | null = null
+    pixiResourcesLoader: PixiResourcesLoader,
+    getPropertyOverridings?: (() => Map<string, string>) | null
   );
+
+  isRenderedIn3D(): boolean;
 
   /**
    * Convert an angle from degrees to radians.
@@ -51,9 +92,13 @@ class RenderedInstance {
    */
   onRemovedFromScene(): void;
 
+  resetInstanceRenderersFor(objectName: string): void;
+
   getOriginX(): number;
 
   getOriginY(): number;
+
+  getOriginZ(): number;
 
   getCenterX(): number;
 
@@ -89,29 +134,35 @@ class RenderedInstance {
  * which display on the scene editor, using Three.js, the instance of an object (see InstancesEditor).
  * It can also display 2D artifacts on Pixi 2D plane (3D object shadow projected on the plane for instance).
  */
-class Rendered3DInstance {
-  _project: gdProject;
-  _instance: gdInitialInstance;
-  _associatedObjectConfiguration: gdObjectConfiguration;
+declare class Rendered3DInstance<
+  TPixiObject extends PIXI.DisplayObject = PIXI.DisplayObject,
+  TThreeObject extends THREE.Object3D = THREE.Object3D,
+> {
+  _project: gd.Project;
+  _instance: gd.InitialInstance;
+  _associatedObjectConfiguration: gd.ObjectConfiguration;
   _pixiContainer: PIXI.Container;
-  _threeGroup: THREE.Group;
-  _pixiResourcesLoader: Class<PixiResourcesLoader>;
-  _pixiObject: PIXI.DisplayObject | null;
-  _threeObject: THREE.Object3D | null;
+  _threeGroup: THREE.Group | null;
+  _pixiResourcesLoader: PixiResourcesLoader;
+  _pixiObject: TPixiObject | null;
+  _threeObject: TThreeObject | null;
+  _getPropertyOverridings: (() => Map<string, string>) | null;
   wasUsed: boolean;
 
   /** Set to true when onRemovedFromScene is called. Allows to cancel promises/asynchronous operations (notably: waiting for a resource load). */
   _wasDestroyed: boolean;
 
   constructor(
-    project: gdProject,
-    instance: gdInitialInstance,
-    associatedObjectConfiguration: gdObjectConfiguration,
+    project: gd.Project,
+    instance: gd.InitialInstance,
+    associatedObjectConfiguration: gd.ObjectConfiguration,
     pixiContainer: PIXI.Container,
-    threeGroup: THREE.Group,
-    pixiResourcesLoader: Class<PixiResourcesLoader>,
-    getPropertyOverridings: (() => Map<string, string>) | null = null
+    threeGroup: THREE.Group | null,
+    pixiResourcesLoader: PixiResourcesLoader,
+    getPropertyOverridings?: (() => Map<string, string>) | null
   );
+
+  isRenderedIn3D(): boolean;
 
   /**
    * Convert an angle from degrees to radians.
@@ -136,9 +187,9 @@ class Rendered3DInstance {
    */
   update(): void;
 
-  getPixiObject(): PIXI.DisplayObject;
+  getPixiObject(): PIXI.DisplayObject | null;
 
-  getThreeObject(): THREE.Object3D;
+  getThreeObject(): THREE.Object3D | null;
 
   getInstance(): gd.InitialInstance;
 
@@ -149,13 +200,25 @@ class Rendered3DInstance {
    */
   onRemovedFromScene(): void;
 
+  resetInstanceRenderersFor(objectName: string): void;
+
   getOriginX(): number;
 
   getOriginY(): number;
 
+  getOriginZ(): number;
+
   getCenterX(): number;
 
   getCenterY(): number;
+
+  getCenterZ(): number;
+
+  getCustomWidth(): number;
+
+  getCustomHeight(): number;
+
+  getCustomDepth(): number;
 
   getWidth(): number;
 
@@ -181,15 +244,59 @@ class Rendered3DInstance {
   getPropertyOverridings(): Map<string, string> | null;
 }
 
+declare type ObjectEditorConfiguration<
+  TObjectConfiguration extends gd.ObjectConfiguration = gd.ObjectConfiguration,
+> = {
+  component: any;
+  createNewObject: (
+    objectConfiguration: gd.ObjectConfiguration
+  ) => gd.ObjectConfiguration;
+  castToObjectType: (
+    objectConfiguration: gd.ObjectConfiguration
+  ) => TObjectConfiguration;
+  helpPagePath: string;
+};
+
+declare type InstanceRendererConstructor = (new (
+  project: gd.Project,
+  instance: gd.InitialInstance,
+  associatedObjectConfiguration: gd.ObjectConfiguration,
+  pixiContainer: PIXI.Container,
+  pixiResourcesLoader: PixiResourcesLoader,
+  getPropertyOverridings?: (() => Map<string, string>) | null
+) => RenderedInstance<any>) & {
+  getThumbnail: (
+    project: gd.Project,
+    resourcesLoader: any,
+    objectConfiguration: gd.ObjectConfiguration
+  ) => string;
+};
+
+declare type Instance3DRendererConstructor = new (
+  project: gd.Project,
+  instance: gd.InitialInstance,
+  associatedObjectConfiguration: gd.ObjectConfiguration,
+  pixiContainer: PIXI.Container,
+  threeGroup: THREE.Group | null,
+  pixiResourcesLoader: PixiResourcesLoader,
+  getPropertyOverridings?: (() => Map<string, string>) | null
+) => Rendered3DInstance<any, any>;
+
 declare type ObjectsRenderingService = {
   gd: GDNamespace;
-  PIXI: PIXI;
-  THREE: typeof import('../newIDE/app/node_modules/three');
-  THREE_ADDONS: { SkeletonUtils: any };
+  PIXI: typeof PIXI;
+  THREE: typeof THREE;
+  THREE_ADDONS: { SkeletonUtils: typeof THREE_ADDONS.SkeletonUtils };
   RenderedInstance: typeof RenderedInstance;
   Rendered3DInstance: typeof Rendered3DInstance;
-  registerInstanceRenderer: (objectType: string, renderer: any) => void;
-  registerInstance3DRenderer: (objectType: string, renderer: any) => void;
+  registerInstanceRenderer: (
+    objectType: string,
+    renderer: InstanceRendererConstructor
+  ) => void;
+  registerInstance3DRenderer: (
+    objectType: string,
+    renderer: Instance3DRendererConstructor
+  ) => void;
   requireModule: (dirname: string, moduleName: string) => any;
   getThumbnail: (
     project: gd.Project,
@@ -197,22 +304,22 @@ declare type ObjectsRenderingService = {
   ) => string;
   rgbOrHexToHexNumber: (value: string) => number;
   hexNumberToRGBArray: (value: number) => [number, number, number];
-  registerClearCache: (clearCache: (_: any) => void) => void;
+  registerClearCache: (clearCache: (project: gd.Project) => void) => void;
 };
 
 declare type ObjectsEditorService = {
   registerEditorConfiguration: (
     objectType: string,
-    editorConfiguration: any
+    editorConfiguration: ObjectEditorConfiguration<any>
   ) => void;
-  getDefaultObjectJsImplementationPropertiesEditor: ({
-    helpPagePath: string,
-  }) => any;
+  getDefaultObjectJsImplementationPropertiesEditor: (options: {
+    helpPagePath: string;
+  }) => ObjectEditorConfiguration<gd.ObjectJsImplementation>;
 };
 
 declare type ExtensionModule = {
   createExtension: (
-    _: (string) => string,
+    _: (text: string) => string,
     gd: GDNamespace
   ) => gd.PlatformExtension;
   /**
@@ -243,6 +350,14 @@ declare type ExtensionModule = {
    * ℹ️ Run `node import-GDJS-Runtime.js` (in newIDE/app/scripts) if you make any change.
    */
   registerInstanceRenderers?: (
+    objectsRenderingService: ObjectsRenderingService
+  ) => void;
+  /**
+   * Register callbacks clearing cached resources when closing or reloading a project.
+   *
+   * ℹ️ Run `node import-GDJS-Runtime.js` (in newIDE/app/scripts) if you make any change.
+   */
+  registerClearCache?: (
     objectsRenderingService: ObjectsRenderingService
   ) => void;
 };

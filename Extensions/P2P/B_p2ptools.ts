@@ -1,4 +1,4 @@
-/// <reference path="peerjs.d.ts" />
+/// <reference path="../../GDJS/Runtime/types/global-peerjs.d.ts" />
 namespace gdjs {
   export namespace evtTools {
     /**

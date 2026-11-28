@@ -612,7 +612,6 @@ module.exports = {
         '',
         'res/physics32.png',
         'Physics2Behavior',
-        //@ts-ignore The class hierarchy is incorrect leading to a type error, but this is valid.
         physics2Behavior,
         sharedData
       )

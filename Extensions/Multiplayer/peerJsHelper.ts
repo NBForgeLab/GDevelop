@@ -1,4 +1,4 @@
-/// <reference path="peerjs.d.ts" />
+/// <reference path="../../GDJS/Runtime/types/global-peerjs.d.ts" />
 namespace gdjs {
   const logger = new gdjs.Logger('Multiplayer');
 

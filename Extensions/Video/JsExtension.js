@@ -107,7 +107,6 @@ module.exports = {
         _('Video'),
         _('Displays a video.'),
         'JsPlatform/Extensions/videoicon32.png',
-        // @ts-ignore - TODO: Fix videoObject being an ObjectJsImplementation instead of an ObjectConfiguration
         videoObject
       )
       .setIncludeFile('Extensions/Video/videoruntimeobject.js')
